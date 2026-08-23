@@ -105,8 +105,10 @@ Puis ouvrir <http://localhost:5599>.
 ## Déploiement
 
 Hébergé sur **Vercel**, en site statique — aucune étape de compilation.
-`vercel.json` définit `demo/` comme racine servie, active les URL sans `.html`
-et met en cache les images un an.
+
+À l'import du dépôt, régler **Root Directory** sur `demo`. Le fichier
+`demo/vercel.json` fait le reste : URL sans `.html`, images en cache un an,
+en-têtes de sécurité. Chaque `git push` sur `main` redéploie automatiquement.
 
 ## À valider avec l'établissement
 
