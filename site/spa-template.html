@@ -245,14 +245,16 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
   <div class="dw-in">
     <nav aria-label="Navigation principale">
       <a href="index.html#chambres"><i>01</i><span data-t="n1">Chambres &amp; Suites</span></a>
-      <a href="carte.html"><i>02</i><span data-t="n2">La table</span></a>
-      <a href="spa.html" class="on"><i>03</i><span data-t="n3">Le spa</span></a>
-      <a href="circuits.html"><i>04</i><span data-t="n4">Circuits &amp; Offres</span></a>
-      <a href="galerie.html"><i>05</i><span data-t="n5">Galerie</span></a>
-      <a href="a-propos.html"><i>06</i><span data-t="n6">À propos</span></a>
-      <a href="informations-utiles.html"><i>07</i><span data-t="n7">Informations utiles</span></a>
-      <a href="contact.html"><i>08</i><span data-t="n8">Contact</span></a>
-      <a href="reserver.html"><i>09</i><span data-t="n9">Réserver</span></a>
+      <a href="experiences.html"><i>02</i><span data-t="n2">Expériences</span></a>
+      <a href="carte.html"><i>03</i><span data-t="n3">La table</span></a>
+      <a href="spa.html" class="on"><i>04</i><span data-t="n4">Le spa</span></a>
+      <a href="circuits.html"><i>05</i><span data-t="n5">Circuits &amp; Offres</span></a>
+      <a href="seminaires.html"><i>06</i><span data-t="n6">Séminaires &amp; groupes</span></a>
+      <a href="galerie.html"><i>07</i><span data-t="n7">Galerie</span></a>
+      <a href="a-propos.html"><i>08</i><span data-t="n8">À propos</span></a>
+      <a href="informations-utiles.html"><i>09</i><span data-t="n9">Informations utiles</span></a>
+      <a href="contact.html"><i>10</i><span data-t="n10">Contact</span></a>
+      <a href="reserver.html"><i>11</i><span data-t="n11">Réserver</span></a>
     </nav>
     <aside class="dw-side">
       <div class="ph"><picture><source srcset="img/opt/sp-produits-t.webp" type="image/webp">
@@ -425,8 +427,8 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
         <p style="font-size:8.5px;letter-spacing:.42em;color:var(--bronze);font-weight:700;margin-bottom:18px">LE RÊVE AFRICAIN</p>
         <p style="max-width:300px">46 chambres et suites face à la lagune Aby, à Assinie. Réservation directe, meilleur tarif garanti, réception ouverte 24 h/24.</p>
       </div>
-      <div><h4>Navigation</h4><a href="index.html#chambres">Chambres</a><a href="circuits.html">Circuits &amp; Offres</a><a href="carte.html">La table</a><a href="spa.html">Spa</a><a href="a-propos.html">À propos</a><a href="contact.html">Contact</a></div>
-      <div><h4>Informations</h4><a href="informations-utiles.html">Informations utiles</a><a href="informations-utiles.html#groupes">Séminaires &amp; groupes</a><a href="informations-utiles.html#reserver">Conditions d'annulation</a><a href="mentions-legales.html">Mentions légales</a></div>
+      <div><h4>Navigation</h4><a href="index.html#chambres">Chambres</a><a href="experiences.html">Expériences</a><a href="carte.html">La table</a><a href="circuits.html">Circuits &amp; Offres</a><a href="spa.html">Spa</a><a href="a-propos.html">À propos</a><a href="contact.html">Contact</a></div>
+      <div><h4>Informations</h4><a href="informations-utiles.html">Informations utiles</a><a href="seminaires.html">Séminaires &amp; groupes</a><a href="informations-utiles.html#reserver">Conditions d'annulation</a><a href="mentions-legales.html">Mentions légales</a></div>
       <div><h4>Contact</h4>
         <a href="tel:+2252721731265">+225 27 21 73 12 65</a>
         <a href="tel:+2250151527575">+225 01 51 52 75 75</a>
@@ -495,8 +497,9 @@ sd.value=iso(new Date(Date.now()+864e5)); sd.min=iso(new Date());
 document.getElementById('sf').addEventListener('submit',function(e){e.preventDefault();
   alert("Démonstration : la demande partirait au spa et à bonjour@evannathhotel.com, avec confirmation du créneau par WhatsApp.")});
 
-var EN={mn:"Menu",n1:"Rooms &amp; Suites",n2:"The table",n3:"The spa",n4:"Packages &amp; Offers",
-n5:"Gallery",n6:"About",n7:"Useful information",n8:"Contact",n9:"Book",dr:"Reservations",tb:"Book",
+var EN={mn:"Menu",n1:"Rooms &amp; Suites",n2:"Experiences",n3:"The table",n4:"The spa",
+n5:"Packages &amp; Offers",n6:"Meetings &amp; groups",n7:"Gallery",n8:"About",
+n9:"Useful information",n10:"Contact",n11:"Book",dr:"Reservations",tb:"Book",
 c1:"Home",c2:"The spa",eb:"Spa &amp; sauna · by appointment",h1e:"of Assinie",
 lede:"Heated stones, black soap, argan oil and the five flowers of Assinie. Twenty minutes or an hour and a half — however much time you care to give us.",
 e1:"Our approach",big:"Salt, oil and a hand. Nothing more complicated.",
