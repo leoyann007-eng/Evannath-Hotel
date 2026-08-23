@@ -40,6 +40,8 @@ Python à partir de gabarits, pour éviter la saisie manuelle.
 | `spa.html` | Le spa — 22 soins, 4 rituels en vedette |
 | `a-propos.html` | « Akwaba », 6 arguments, 5 espaces, 13 équipements |
 | `contact.html` | 4 canaux, formulaire validé, carte d'accès |
+| `experiences.html` | 6 lieux du domaine, 4 activités nautiques, 4 excursions |
+| `seminaires.html` | 5 configurations de salle, 4 formules, demande de devis |
 | `informations-utiles.html` | 17 questions en accordéon |
 | `mentions-legales.html` | Trame juridique à compléter |
 | `404.html` | Page introuvable |
@@ -72,7 +74,7 @@ Bilingue français / anglais sur toutes les pages, sans rechargement.
 
 ```
 site/
-├── *.html                  les 11 pages servies
+├── *.html                  les 23 pages servies
 ├── _chrome.py              briques partagées : nav, tiroir, pied de page
 ├── build-*.py              générateurs de pages
 ├── carte-template.html     gabarit de la carte du restaurant
@@ -149,7 +151,11 @@ Avant toute mise en production :
    déclaration ARTCI, prestataire de paiement.
 4. **Photographies haute définition** — huit visuels proviennent d'Instagram et
    plafonnent à 640 px. Suffisant pour des vignettes, pas pour un plein écran.
-5. **Licence de la police** — le site d'origine utilise
+5. **Capacités de la salle de séminaire** — les cinq configurations de
+   `seminaires.html` (théâtre 60, classe 35, en U 25, cocktail 90, banquet 70)
+   sont des hypothèses : l'établissement ne publie aucun chiffre. À remplacer
+   par les capacités réelles avant mise en production.
+6. **Licence de la police** — le site d'origine utilise
    `MADE-TOMMY-Regular_PERSONAL-USE.otf`, dont la licence n'autorise pas
    l'usage commercial. La maquette n'utilise que des polices libres.
 

@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Page introuvable — Hôtel Evannath, Assinie</title>
-<meta name="description" content="Cette page n'existe pas ou a changé d'adresse. Retrouvez les chambres, la table, les circuits et la galerie de l'Hôtel Evannath à Assinie.">
-<meta property="og:title" content="Page introuvable — Hôtel Evannath, Assinie">
-<meta name="robots" content="noindex, follow">
-<meta property="og:image" content="img/opt/gal-lag-nuit.jpg">
+<title>Expériences — Hôtel Evannath, Assinie</title>
+<meta name="description" content="Balade lagunaire en pirogue, jet ski, l'Embouchure, spa et sauna, piscine et jacuzzi, night-club : tout ce que l'on peut faire à l'Hôtel Evannath, Assinie PK 19.">
+<meta property="og:title" content="Expériences — Hôtel Evannath, Assinie">
+<meta property="og:image" content="img/opt/gal-lag-bateau.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Karla:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="preload" as="image" href="img/opt/gal-lag-bateau.webp" type="image/webp">
 <style>
 :root{
   --night:#100B06; --bark:#17100A; --bark-2:#1E150D; --bark-3:#2A1E13;
@@ -113,45 +113,77 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
 }
 
 
-body{background:var(--night)}
-.err{position:relative;min-height:100svh;display:flex;align-items:center;overflow:hidden}
-.err .bg{position:absolute;inset:0;background:url('img/opt/gal-lag-nuit.jpg') center/cover;animation:kb 24s ease-out forwards}
-@keyframes kb{from{transform:scale(1.03)}to{transform:scale(1.12)}}
-.err::after{content:"";position:absolute;inset:0;background:
-  radial-gradient(ellipse at 50% 46%,rgba(16,11,6,.4),rgba(16,11,6,.9) 74%),
-  linear-gradient(180deg,rgba(16,11,6,.8),transparent 34%,rgba(16,11,6,.97))}
-.err .in{position:relative;z-index:3;width:100%;text-align:center;padding-top:60px}
-.code{font-family:var(--f-display);font-size:clamp(5rem,18vw,13rem);line-height:.86;color:var(--bronze);
-  opacity:.32;letter-spacing:.02em;font-variant-numeric:tabular-nums}
-.err h1{font-size:clamp(2rem,5.4vw,3.6rem);margin:-8px 0 20px}
-.err h1 em{font-style:italic;color:var(--bronze-2)}
-.err .lede{max-width:46ch;margin:0 auto;font-size:1.06rem;color:#E3D9C9}
-.err .cta{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:36px}
-.rule{width:1px;height:44px;background:linear-gradient(var(--bronze),transparent);margin:34px auto 0}
+.hero{position:relative;min-height:76vh;display:flex;align-items:flex-end;overflow:hidden}
+.hero>picture img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(23,16,10,.78),rgba(23,16,10,.36) 44%,rgba(23,16,10,.97))}
+.hero .in{position:relative;z-index:3;width:100%;padding-bottom:56px}
+.hero h1{margin:12px 0 18px;font-size:clamp(2.6rem,6vw,4.2rem)}
+.hero p{max-width:56ch;font-size:1.08rem}
 
-.ways{background:var(--bark);padding:100px 0;border-top:1px solid var(--line)}
-.ways .head{text-align:center;margin-bottom:54px}
-.ways .head p{max-width:50ch;margin:16px auto 0;color:#B4A794}
-.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
-.card{border:1px solid var(--line);background:var(--bark-2);overflow:hidden;transition:.45s;display:block}
-.card:hover{transform:translateY(-6px);border-color:rgba(185,138,80,.55)}
-.card .ph{aspect-ratio:4/3;overflow:hidden}
+section{padding:104px 0}
+.head{text-align:center;margin-bottom:60px}
+.head p{max-width:54ch;margin:18px auto 0;color:#B4A794}
+
+/* sur le domaine */
+.dom{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.card{background:var(--bark-2);border:1px solid var(--line);overflow:hidden;display:flex;flex-direction:column;transition:.5s cubic-bezier(.2,.8,.2,1)}
+.card:hover{transform:translateY(-6px);border-color:rgba(185,138,80,.5)}
+.card .ph{aspect-ratio:16/10;overflow:hidden;position:relative}
 .card .ph img{width:100%;height:100%;object-fit:cover;transition:1s cubic-bezier(.2,.8,.2,1)}
 .card:hover .ph img{transform:scale(1.07)}
-.card .in{padding:22px}
-.card h3{font-size:1.15rem;margin-bottom:8px;font-weight:400}
-.card p{font-size:13.5px;color:#A9997F}
+.card .when{position:absolute;top:13px;left:13px;background:rgba(23,16,10,.88);backdrop-filter:blur(6px);
+  color:var(--bronze);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;padding:7px 12px;font-weight:700}
+.card .in{padding:24px;display:flex;flex-direction:column;flex:1}
+.card h3{margin-bottom:10px;font-weight:400}
+.card p{font-size:14px;flex:1}
+.card a{display:inline-block;margin-top:18px;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--bronze);border:1px solid var(--bronze);padding:13px 18px;font-weight:700;transition:.3s;width:max-content}
+.card a:hover{background:var(--bronze);color:var(--night)}
 
-.helpline{border:1px solid var(--bronze);padding:44px;text-align:center;margin:90px 0 100px}
-.helpline h2{margin-bottom:12px}
-.helpline p{max-width:52ch;margin:0 auto 26px}
-.helpline .g{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+/* sur l'eau */
+.eau-sec{background:var(--bark);border-block:1px solid var(--line)}
+.plate{display:grid;grid-template-columns:88px 1fr auto;gap:34px;align-items:baseline;padding:34px 0;
+  border-top:1px solid var(--line-2);transition:.45s}
+.plate:last-of-type{border-bottom:1px solid var(--line-2)}
+.plate:hover{background:linear-gradient(90deg,rgba(185,138,80,.055),transparent 70%)}
+.plate .n{font-family:var(--f-display);font-size:2.2rem;color:var(--bronze);opacity:.4;line-height:.8;
+  font-variant-numeric:tabular-nums;transition:.45s}
+.plate:hover .n{opacity:1}
+.plate h3{font-size:clamp(1.3rem,2.3vw,1.8rem);margin-bottom:10px;font-weight:400}
+.plate p{font-size:14.5px;color:#B4A794;max-width:56ch}
+.plate .q{font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:700;white-space:nowrap}
 
-@media(max-width:1080px){.cards{grid-template-columns:repeat(2,1fr)}}
+/* autour */
+.autour{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);border:1px solid var(--line)}
+.autour div{background:var(--bark-2);padding:34px 30px;transition:.4s}
+.autour div:hover{background:var(--bark-3)}
+.autour h3{font-size:1.3rem;margin-bottom:10px;font-weight:400}
+.autour p{font-size:14px;color:#A9997F}
+.note{border-left:2px solid var(--bronze);padding:8px 0 8px 22px;margin-top:34px;font-size:14px;
+  color:var(--muted);font-style:italic;max-width:62ch}
+
+.band{position:relative;height:56vh;min-height:340px;overflow:hidden}
+.band img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.band::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(16,11,6,.5) 0%,rgba(16,11,6,.22) 30%,rgba(16,11,6,.72) 62%,rgba(16,11,6,.95) 100%)}
+.band .cap{position:absolute;left:0;right:0;bottom:38px;z-index:3;text-align:center;padding:0 24px}
+.band .cap span{font-size:10px;letter-spacing:.34em;text-transform:uppercase;color:var(--bronze-2);font-weight:700;
+  text-shadow:0 2px 14px rgba(10,6,3,.95)}
+.band .cap p{text-shadow:0 2px 18px rgba(10,6,3,.9);font-family:var(--f-display);
+  font-size:clamp(1.3rem,2.6vw,2rem);color:var(--cream);margin-top:12px;max-width:24ch;margin-inline:auto;line-height:1.25}
+
+.cta{border:1px solid var(--bronze);padding:52px;text-align:center;margin-bottom:100px}
+.cta h2{margin-bottom:14px}
+.cta p{max-width:52ch;margin:0 auto 28px}
+.cta .g{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+
+@media(max-width:1080px){.dom{grid-template-columns:repeat(2,1fr)}.autour{grid-template-columns:1fr}}
 @media(max-width:720px){
-  .ways{padding:70px 0}
-  .cards{grid-template-columns:1fr}
-  .helpline{padding:30px;margin:60px 0 70px}
+  section{padding:72px 0}
+  .dom{grid-template-columns:1fr}
+  .plate{grid-template-columns:1fr;gap:10px;padding:28px 0}
+  .plate .n{font-size:1.5rem;opacity:1}
+  .autour div,.cta{padding:26px}
+  .band{height:44vh}
 }
 
 </style>
@@ -166,7 +198,7 @@ body{background:var(--night)}
     </a>
     <div class="nav-right">
       <div class="lang"><button class="on" data-lang="fr">FR</button><button data-lang="en">EN</button></div>
-      <a href="index.html#reserver" class="btn btn-solid" data-t="cta">Réserver</a>
+      <a href="reserver.html" class="btn btn-solid" data-t="cta">Réserver</a>
       <button class="burger" id="bg" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="dw">
         <span class="lbl" data-t="mn">Menu</span>
         <span class="bars"><span></span><span></span><span></span></span>
@@ -204,61 +236,136 @@ body{background:var(--night)}
   </div>
 </div>
 
-<section class="err">
-  <div class="bg"></div>
-  <div class="in narrow">
-    <div class="code">404</div>
-    <h1 data-t="h1">Cette page a pris<br><em data-t="h1e">le large</em></h1>
-    <p class="lede" data-t="lede">Elle a peut-être changé d'adresse, ou n'a jamais existé. Pendant qu'on la cherche, la lagune est toujours là.</p>
-    <div class="cta">
-      <a href="index.html" class="btn btn-solid" data-t="c1">Retour à l'accueil</a>
-      <a href="contact.html" class="btn" data-t="c2">Nous écrire</a>
-    </div>
-    <div class="rule"></div>
+<section class="hero">
+  <picture><source srcset="img/opt/gal-lag-bateau.webp" type="image/webp">
+  <img src="img/opt/gal-lag-bateau.jpg" width="1400" height="933" alt="Le ponton de l'hôtel et le bateau de balade sur la lagune Aby"></picture>
+  <div class="in wrap">
+    <nav class="crumb" aria-label="Fil d'Ariane">
+      <a href="index.html">Accueil</a> &nbsp;·&nbsp; <span>Expériences</span>
+    </nav>
+    <span class="eyebrow">Sur le domaine, sur l'eau, autour d'Assinie</span>
+    <h1>De quoi remplir<br>une journée entière</h1>
+    <p>Vous pouvez ne rien faire — beaucoup viennent pour ça. Mais si vous voulez sortir de votre chambre, voici tout ce qui vous attend.</p>
   </div>
 </section>
 
-<section class="ways">
+<section class="wrap" id="domaine">
+  <div class="head reveal">
+    <span class="eyebrow">Sur le domaine</span>
+    <h2 style="margin-top:16px">Sans passer le portail</h2>
+    <p>Six lieux, tous à moins de deux minutes de marche de votre chambre.</p>
+  </div>
+  <div class="dom reveal">
+    <article class="card">
+      <div class="ph"><picture><source srcset="img/opt/gal-lag-paillote.webp" type="image/webp">
+        <img loading="lazy" src="img/opt/gal-lag-paillote.jpg" alt="La paillote"></picture>
+        <span class="when">Toute la journée</span></div>
+      <div class="in"><h3>La paillote</h3><p>Le ponton de bois posé sur la lagune Aby. Le cœur du domaine — on y prend un verre au couchant, on y dîne aux lanternes de rotin.</p>
+        <a href="carte.html">Voir la carte</a></div>
+    </article>
+    <article class="card">
+      <div class="ph"><picture><source srcset="img/opt/gal-spa-couchant.webp" type="image/webp">
+        <img loading="lazy" src="img/opt/gal-spa-couchant.jpg" alt="Piscine et jacuzzi"></picture>
+        <span class="when">Accès libre</span></div>
+      <div class="in"><h3>Piscine &amp; jacuzzi</h3><p>Un grand bassin avec jacuzzi intégré, transats et parasols. Ouvert du lever du jour à la nuit tombée.</p>
+        <a href="spa.html">Le spa</a></div>
+    </article>
+    <article class="card">
+      <div class="ph"><picture><source srcset="img/opt/gal-spa-case.webp" type="image/webp">
+        <img loading="lazy" src="img/opt/gal-spa-case.jpg" alt="Spa et sauna"></picture>
+        <span class="when">Sur rendez-vous</span></div>
+      <div class="in"><h3>Spa &amp; sauna</h3><p>Massages aux pierres chauffantes, rituel de l'Orient à l'argan, gommage au savon noir africain. Vingt-deux soins, sur rendez-vous.</p>
+        <a href="spa.html">Les soins</a></div>
+    </article>
+    <article class="card">
+      <div class="ph"><picture><source srcset="img/opt/gal-tab-rotin.webp" type="image/webp">
+        <img loading="lazy" src="img/opt/gal-tab-rotin.jpg" alt="Restaurant et bar"></picture>
+        <span class="when">Midi et soir</span></div>
+      <div class="in"><h3>Restaurant &amp; bar</h3><p>Cuisine ivoirienne et continentale, poisson du jour, quatorze cocktails maison dont deux signatures.</p>
+        <a href="carte.html">La table</a></div>
+    </article>
+    <article class="card">
+      <div class="ph"><picture><source srcset="img/opt/gal-tab-comptoir.webp" type="image/webp">
+        <img loading="lazy" src="img/opt/gal-tab-comptoir.jpg" alt="Night-club"></picture>
+        <span class="when">Week-ends</span></div>
+      <div class="in"><h3>Night-club</h3><p>DJ résident les week-ends, terrasse ouverte tard. Happy hour le samedi après la Méchoui Party.</p>
+        <a href="circuits.html">Méchoui Party</a></div>
+    </article>
+    <article class="card">
+      <div class="ph"><picture><source srcset="img/opt/ig-enfants.webp" type="image/webp">
+        <img loading="lazy" src="img/opt/ig-enfants.jpg" alt="Aire de jeux"></picture>
+        <span class="when">Toute la journée</span></div>
+      <div class="in"><h3>Aire de jeux</h3><p>Pour les enfants : jeux, ateliers cuisine et peinture, maquillage, conte en bordure d'eau le soir.</p>
+        <a href="circuits.html">Découvertes Junior</a></div>
+    </article>
+  </div>
+</section>
+
+<div class="band reveal">
+  <picture><source srcset="img/opt/gal-lag-nuit.webp" type="image/webp">
+  <img src="img/opt/gal-lag-nuit.jpg" width="1400" height="933" alt="La paillote à la tombée du jour" loading="lazy"></picture>
+  <div class="cap"><span>Le service du soir</span><p>Les lanternes s'allument quand la lumière part.</p></div>
+</div>
+
+<section class="eau-sec" id="eau">
   <div class="wrap">
-    <div class="head">
-      <span class="eyebrow" data-t="eb">Vous cherchiez sans doute</span>
-      <h2 style="margin-top:16px" data-t="h2">L'une de ces quatre pages</h2>
-      <p data-t="p2">Ce sont celles que l'on consulte le plus. Si votre réponse n'y est pas, la réception répond 24 h/24.</p>
+    <div class="head reveal">
+      <span class="eyebrow">Sur l'eau</span>
+      <h2 style="margin-top:16px">La lagune commence<br>au bout du ponton</h2>
+      <p>Toutes ces sorties partent de notre propre embarcadère. Réservation à la réception, la veille suffit.</p>
     </div>
-    <div class="cards">
-      <a class="card" href="index.html#chambres">
-        <div class="ph"><picture><source srcset="img/opt/gal-ch-wax-t.webp" type="image/webp">
-          <img loading="lazy" width="620" height="413" src="img/opt/gal-ch-wax-t.jpg" alt="Chambres & Suites"></picture></div>
-        <div class="in"><h3 data-t="w1">Chambres & Suites</h3><p data-t="w1p">Sept catégories, de 67 000 à 280 000 FCFA la nuit.</p></div>
-      </a>
-      <a class="card" href="carte.html">
-        <div class="ph"><picture><source srcset="img/opt/gal-tab-dressee-t.webp" type="image/webp">
-          <img loading="lazy" width="620" height="413" src="img/opt/gal-tab-dressee-t.jpg" alt="La table"></picture></div>
-        <div class="in"><h3 data-t="w2">La table</h3><p data-t="w2p">Cuisine ivoirienne, poisson du jour, cocktails maison.</p></div>
-      </a>
-      <a class="card" href="circuits.html">
-        <div class="ph"><picture><source srcset="img/opt/gal-lag-ponton-t.webp" type="image/webp">
-          <img loading="lazy" width="620" height="413" src="img/opt/gal-lag-ponton-t.jpg" alt="Circuits & Offres"></picture></div>
-        <div class="in"><h3 data-t="w3">Circuits & Offres</h3><p data-t="w3p">Onze formules, du Pack Enfant à la lune de miel.</p></div>
-      </a>
-      <a class="card" href="galerie.html">
-        <div class="ph"><picture><source srcset="img/opt/gal-dom-aerien-t.webp" type="image/webp">
-          <img loading="lazy" width="620" height="413" src="img/opt/gal-dom-aerien-t.jpg" alt="Galerie"></picture></div>
-        <div class="in"><h3 data-t="w4">Galerie</h3><p data-t="w4p">Quarante-sept photographies du domaine.</p></div>
-      </a>
-    </div>
-
-    <div class="helpline">
-      <span class="eyebrow" data-t="eb2">Un lien cassé ?</span>
-      <h2 data-t="h3">Dites-le-nous, on le répare</h2>
-      <p data-t="p3">Si vous êtes arrivé ici depuis un lien, un message ou un moteur de recherche, signalez-le : nous corrigeons dans la journée.</p>
-      <div class="g">
-        <a href="https://wa.me/2250546017377" target="_blank" rel="noopener" class="btn btn-solid" data-t="g1">Écrire sur WhatsApp</a>
-        <a href="mailto:bonjour@evannathhotel.com" class="btn" data-t="g2">bonjour@evannathhotel.com</a>
-      </div>
+    <div class="reveal">
+      <article class="plate">
+        <span class="n">01</span>
+        <div><h3>Balade lagunaire en pirogue</h3><p>Guide local, escale sur l'île, retour au couchant. C'est l'activité dont nos clients reparlent le plus.</p></div>
+        <span class="q">Matin ou fin d'après-midi</span>
+      </article>
+      <article class="plate">
+        <span class="n">02</span>
+        <div><h3>Jet ski</h3><p>Sessions encadrées, matériel fourni. Deux créneaux par jour, au lever du soleil et en fin d'après-midi.</p></div>
+        <span class="q">Sur réservation</span>
+      </article>
+      <article class="plate">
+        <span class="n">03</span>
+        <div><h3>L'Embouchure</h3><p>Là où l'océan Atlantique rencontre la lagune Aby. Quinze minutes de bateau depuis notre ponton.</p></div>
+        <span class="q">Demi-journée</span>
+      </article>
+      <article class="plate">
+        <span class="n">04</span>
+        <div><h3>Arrivée par la lagune</h3><p>Rejoindre l'hôtel en pirogue plutôt qu'en voiture. À organiser avec la réception la veille.</p></div>
+        <span class="q">À la demande</span>
+      </article>
     </div>
   </div>
 </section>
+
+<section class="wrap" id="autour">
+  <div class="head reveal">
+    <span class="eyebrow">Autour d'Assinie</span>
+    <h2 style="margin-top:16px">Quatre sorties<br>que la réception organise</h2>
+    <p>Elles figurent dans le circuit Découvertes Touristiques, à 35 000 FCFA par personne.</p>
+  </div>
+  <div class="autour reveal">
+    <div><h3>L'Île Abandonnée</h3><p>Une presqu'île entre l'océan et la lagune Aby, plages désertes et eaux claires. Peu fréquentée, et c'est ce qui fait sa valeur.</p></div>
+    <div><h3>Le Parc Dipi</h3><p>La première réserve naturelle de la région. Excursion d'une demi-journée, organisée par la conciergerie.</p></div>
+    <div><h3>Le musée Aniaba</h3><p>Collections liées à l'histoire du royaume et de la côte. À combiner avec la visite de la commune.</p></div>
+    <div><h3>La commune d'Assinie</h3><p>Balade guidée, histoire du lieu, marché local. Comprise dans le circuit Découvertes Touristiques.</p></div>
+  </div>
+  <p class="note reveal">Ces quatre lieux n'ont pas de photographie sur cette page : nous préférons
+  ne rien montrer plutôt que de montrer une image qui ne serait pas la nôtre.</p>
+</section>
+
+<div class="wrap">
+  <div class="cta reveal">
+    <span class="eyebrow">Tout est réservable</span>
+    <h2>Composez votre séjour</h2>
+    <p>Onze forfaits réunissent chambre, repas et activités — de la journée Chillday à la lune de miel.</p>
+    <div class="g">
+      <a href="circuits.html" class="btn btn-solid">Voir les circuits</a>
+      <a href="reserver.html" class="btn">Réserver une chambre</a>
+    </div>
+  </div>
+</div>
 
 <footer>
   <div class="wrap">
@@ -309,19 +416,7 @@ else{var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.is
  document.querySelectorAll('.reveal').forEach(function(el){io.observe(el)});
  setTimeout(function(){document.querySelectorAll('.reveal:not(.in)').forEach(function(el){if(el.getBoundingClientRect().top<innerHeight)el.classList.add('in')})},1200)}
 
-var EN={mn:"Menu",n1:"Rooms &amp; Suites",n2:"Experiences",n3:"The table",n4:"The spa",n5:"Packages &amp; Offers",n6:"Meetings &amp; groups",n7:"Gallery",n8:"About",n9:"Useful information",n10:"Contact",n11:"Book",dr:"Reservations",cta:"Book now",
-h1:"This page has<br>drifted off",h1e:"drifted off",
-lede:"It may have moved, or never existed at all. While we look for it, the lagoon is still there.",
-c1:"Back to the homepage",c2:"Write to us",
-eb:"You were probably looking for",h2:"One of these four pages",
-p2:"These are the most visited. If your answer is not there, the front desk answers 24/7.",
-w1:"Rooms &amp; Suites",w1p:"Seven categories, from 67,000 to 280,000 FCFA a night.",
-w2:"The table",w2p:"Ivorian cooking, catch of the day, house cocktails.",
-w3:"Packages &amp; Offers",w3p:"Eleven packages, from the Kids Pack to the honeymoon.",
-w4:"Gallery",w4p:"Forty-seven photographs of the estate.",
-eb2:"A broken link?",h3:"Tell us and we will fix it",
-p3:"If you arrived here from a link, a message or a search engine, let us know: we fix it the same day.",
-g1:"Message on WhatsApp",g2:"bonjour@evannathhotel.com"};
+var EN={mn:"Menu",n1:"Rooms &amp; Suites",n2:"Experiences",n3:"The table",n4:"The spa",n5:"Packages &amp; Offers",n6:"Meetings &amp; groups",n7:"Gallery",n8:"About",n9:"Useful information",n10:"Contact",n11:"Book",dr:"Reservations",cta:"Book"};
 
 var FR={};document.querySelectorAll('[data-t]').forEach(function(e){FR[e.dataset.t]=e.innerHTML});
 document.querySelectorAll('.lang button').forEach(function(b){b.onclick=function(){

@@ -151,7 +151,10 @@ section{padding:106px 0}
 
 .exp-sec{background:var(--bark-2)}
 .exp{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line)}
-.exp-i{background:var(--bark-2);padding:36px 26px;transition:.45s}
+.exp-i{display:block;background:var(--bark-2);padding:36px 26px;transition:.45s;border:1px solid transparent}
+.exp-i:hover{border-color:var(--line)}
+.exp-i h3{transition:.3s}
+.exp-i:hover h3{color:var(--bronze-2)}
 .exp-i:hover{background:var(--bark-3)}
 .exp-i svg{width:26px;height:26px;stroke:var(--bronze);fill:none;stroke-width:1.2;margin-bottom:18px}
 .exp-i h3{font-size:1.14rem;margin-bottom:8px}
@@ -256,14 +259,16 @@ footer{background:#0F0A06;border-top:1px solid var(--line);padding:74px 0 28px}
   <div class="dw-in">
     <nav aria-label="Navigation principale">
       <a href="#chambres"><i>01</i><span data-t="n1">Chambres &amp; Suites</span></a>
-      <a href="carte.html"><i>02</i><span data-t="n2">La table</span></a>
-      <a href="spa.html"><i>03</i><span data-t="n3">Le spa</span></a>
-      <a href="circuits.html"><i>04</i><span data-t="n4">Circuits &amp; Offres</span></a>
-      <a href="galerie.html"><i>05</i><span data-t="n5">Galerie</span></a>
-      <a href="a-propos.html"><i>06</i><span data-t="n6">À propos</span></a>
-      <a href="informations-utiles.html"><i>07</i><span data-t="n7">Informations utiles</span></a>
-      <a href="contact.html"><i>08</i><span data-t="n8">Contact</span></a>
-      <a href="reserver.html"><i>09</i><span data-t="n9">Réserver</span></a>
+      <a href="experiences.html"><i>02</i><span data-t="n2">Expériences</span></a>
+      <a href="carte.html"><i>03</i><span data-t="n3">La table</span></a>
+      <a href="spa.html"><i>04</i><span data-t="n4">Le spa</span></a>
+      <a href="circuits.html"><i>05</i><span data-t="n5">Circuits &amp; Offres</span></a>
+      <a href="seminaires.html"><i>06</i><span data-t="n6">Séminaires &amp; groupes</span></a>
+      <a href="galerie.html"><i>07</i><span data-t="n7">Galerie</span></a>
+      <a href="a-propos.html"><i>08</i><span data-t="n8">À propos</span></a>
+      <a href="informations-utiles.html"><i>09</i><span data-t="n9">Informations utiles</span></a>
+      <a href="contact.html"><i>10</i><span data-t="n10">Contact</span></a>
+      <a href="reserver.html"><i>11</i><span data-t="n11">Réserver</span></a>
     </nav>
     <aside class="dw-side">
       <div class="ph"><picture><source srcset="img/opt/t-lampe.webp" type="image/webp">
@@ -426,16 +431,17 @@ footer{background:#0F0A06;border-top:1px solid var(--line);padding:74px 0 28px}
   <div class="sec-head reveal">
     <span class="eyebrow" data-t="e3">Sur place &amp; alentours</span>
     <h2 data-t="h3">De quoi remplir<br>une journée entière</h2>
+    <a href="experiences.html" class="btn" style="margin-top:26px" data-t="vx">Toutes les expériences</a>
   </div>
   <div class="exp reveal">
-    <div class="exp-i"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 17c2 1 4-1 6 0s4 1 6 0 4-1 6 0M4 13l8-9 8 9M7 13v4M17 13v4"/></svg><h3 data-t="x1">La paillote</h3><p data-t="x1p">Le ponton de bois posé sur la lagune Aby — le cœur du domaine, au couchant.</p></div>
-    <div class="exp-i"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18c2 1 4-1 6 0s4 1 6 0 4-1 6 0M6 14l3-8 6 3-2 5M15 9l4-2"/></svg><h3 data-t="x2">Jet ski &amp; pirogue</h3><p data-t="x2p">Sessions encadrées et balade lagunaire avec guide local, matin ou fin d'après-midi.</p></div>
-    <div class="exp-i"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v6M8 21h8M6 12h12l-2 9H8z M9 9h6"/></svg><h3 data-t="x3">Restaurant &amp; bar</h3><p data-t="x3p">Cuisine ivoirienne et continentale, poisson du jour, cocktails maison en terrasse.</p></div>
-    <div class="exp-i"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17c2 1 4-1 6 0s4 1 6 0 4-1 6 0M3 12c2 1 4-1 6 0s4 1 6 0 4-1 6 0M3 7c2 1 4-1 6 0s4 1 6 0 4-1 6 0"/></svg><h3 data-t="x4">Piscine</h3><p data-t="x4p">Grand bassin, transats et parasols, ouverte du lever du jour à la nuit tombée.</p></div>
-    <div class="exp-i"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20c2-6 6-9 8-9s6 3 8 9M12 11V4M9 6l3-3 3 3"/></svg><h3 data-t="x5">Sauna &amp; massage</h3><p data-t="x5p">Rituels et massages après une journée de plage ou de lagune.</p></div>
-    <div class="exp-i"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14"/><path d="M3 9h18M8 5v14"/></svg><h3 data-t="x6">Séminaires</h3><p data-t="x6p">Salle de conférence équipée, formules journée d'étude et résidentielles.</p></div>
-    <div class="exp-i"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-4.5-7-10a7 7 0 0114 0c0 5.5-7 10-7 10z"/><circle cx="12" cy="11" r="2.4"/></svg><h3 data-t="x7">Art africain</h3><p data-t="x7p">Sculptures et pièces d'artisanat exposées dans le hall et les espaces communs.</p></div>
-    <div class="exp-i"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></svg><h3 data-t="x8">L'Embouchure</h3><p data-t="x8p">La rencontre de l'océan et de la lagune, excursion organisée par la réception.</p></div>
+    <a class="exp-i" href="experiences.html#domaine"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 17c2 1 4-1 6 0s4 1 6 0 4-1 6 0M4 13l8-9 8 9M7 13v4M17 13v4"/></svg><h3 data-t="x1">La paillote</h3><p data-t="x1p">Le ponton de bois posé sur la lagune Aby — le cœur du domaine, au couchant.</p></a>
+    <a class="exp-i" href="experiences.html#eau"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18c2 1 4-1 6 0s4 1 6 0 4-1 6 0M6 14l3-8 6 3-2 5M15 9l4-2"/></svg><h3 data-t="x2">Jet ski &amp; pirogue</h3><p data-t="x2p">Sessions encadrées et balade lagunaire avec guide local, matin ou fin d'après-midi.</p></a>
+    <a class="exp-i" href="carte.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v6M8 21h8M6 12h12l-2 9H8z M9 9h6"/></svg><h3 data-t="x3">Restaurant &amp; bar</h3><p data-t="x3p">Cuisine ivoirienne et continentale, poisson du jour, cocktails maison en terrasse.</p></a>
+    <a class="exp-i" href="experiences.html#domaine"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17c2 1 4-1 6 0s4 1 6 0 4-1 6 0M3 12c2 1 4-1 6 0s4 1 6 0 4-1 6 0M3 7c2 1 4-1 6 0s4 1 6 0 4-1 6 0"/></svg><h3 data-t="x4">Piscine</h3><p data-t="x4p">Grand bassin, transats et parasols, ouverte du lever du jour à la nuit tombée.</p></a>
+    <a class="exp-i" href="spa.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20c2-6 6-9 8-9s6 3 8 9M12 11V4M9 6l3-3 3 3"/></svg><h3 data-t="x5">Sauna &amp; massage</h3><p data-t="x5p">Rituels et massages après une journée de plage ou de lagune.</p></a>
+    <a class="exp-i" href="seminaires.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14"/><path d="M3 9h18M8 5v14"/></svg><h3 data-t="x6">Séminaires</h3><p data-t="x6p">Salle de conférence équipée, formules journée d'étude et résidentielles.</p></a>
+    <a class="exp-i" href="experiences.html#domaine"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-4.5-7-10a7 7 0 0114 0c0 5.5-7 10-7 10z"/><circle cx="12" cy="11" r="2.4"/></svg><h3 data-t="x7">Art africain</h3><p data-t="x7p">Sculptures et pièces d'artisanat exposées dans le hall et les espaces communs.</p></a>
+    <a class="exp-i" href="experiences.html#autour"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></svg><h3 data-t="x8">L'Embouchure</h3><p data-t="x8p">La rencontre de l'océan et de la lagune, excursion organisée par la réception.</p></a>
   </div>
  </div>
 </section>
@@ -508,8 +514,8 @@ footer{background:#0F0A06;border-top:1px solid var(--line);padding:74px 0 28px}
         <p style="font-size:8.5px;letter-spacing:.42em;color:var(--bronze);font-weight:700;margin-bottom:18px">LE RÊVE AFRICAIN</p>
         <p style="max-width:300px">46 chambres et suites face à la lagune Aby, à Assinie. Réservation directe, meilleur tarif garanti, réception ouverte 24 h/24.</p>
       </div>
-      <div><h4>Navigation</h4><a href="#chambres">Chambres</a><a href="galerie.html">Galerie</a><a href="carte.html">La table</a><a href="spa.html">Spa</a><a href="circuits.html">Circuits &amp; Offres</a><a href="a-propos.html">À propos</a><a href="contact.html">Contact</a></div>
-      <div><h4>Informations</h4><a href="informations-utiles.html">Informations utiles</a><a href="informations-utiles.html#groupes">Séminaires &amp; groupes</a><a href="informations-utiles.html#reserver">Conditions d'annulation</a><a href="mentions-legales.html">Mentions légales</a></div>
+      <div><h4>Navigation</h4><a href="#chambres">Chambres</a><a href="experiences.html">Expériences</a><a href="galerie.html">Galerie</a><a href="carte.html">La table</a><a href="spa.html">Spa</a><a href="circuits.html">Circuits &amp; Offres</a><a href="a-propos.html">À propos</a><a href="contact.html">Contact</a></div>
+      <div><h4>Informations</h4><a href="informations-utiles.html">Informations utiles</a><a href="seminaires.html">Séminaires &amp; groupes</a><a href="informations-utiles.html#reserver">Conditions d'annulation</a><a href="mentions-legales.html">Mentions légales</a></div>
       <div><h4>Contact</h4>
         <a href="tel:+2252721731265">+225 27 21 73 12 65</a>
         <a href="tel:+2250151527575">+225 01 51 52 75 75</a>
@@ -623,7 +629,7 @@ go(0);var auto=setInterval(function(){go(ri+1)},6500);
 rt.addEventListener('pointerdown',function(){clearInterval(auto)});
 
 var EN={book:"Book now",mn:"Menu",
-n1:"Rooms &amp; Suites",n2:"The table",n3:"The spa",n4:"Packages &amp; Offers",n5:"Gallery",n6:"About",n7:"Useful information",n8:"Contact",n9:"Book",dr:"Reservations",
+n1:"Rooms &amp; Suites",n2:"Experiences",n3:"The table",n4:"The spa",n5:"Packages &amp; Offers",n6:"Meetings &amp; groups",n7:"Gallery",n8:"About",n9:"Useful information",n10:"Contact",n11:"Book",dr:"Reservations",vx:"All experiences",
 eb:"Assinie · PK 19 · Aby Lagoon",h1e:"African",
 lede:"46 rooms and suites, a wooden deck set out over the lagoon, and the quiet of the Comoé. Book direct — the rate is always best here.",
 cta1:"Book direct",cta2:"See the rooms",sc:"Scroll",

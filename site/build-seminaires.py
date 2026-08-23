@@ -1,0 +1,398 @@
+# -*- coding: utf-8 -*-
+"""Genere seminaires.html.
+
+Le contenu factuel vient de la page Services de l'hotel : salle de conference
+baignee de lumiere naturelle, sonorisation et technicien son disponibles,
+formules journee d'etude et residentielles, Coffret Anniversaire des
+10 personnes a 28 000 FCFA.
+
+⚠️ Les CAPACITES (nombre de participants par configuration) sont des
+hypotheses : l'hotel ne les publie nulle part. A confirmer avant mise en
+production — voir la section « A valider » du README.
+"""
+import io
+from _chrome import page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV
+
+CONFIGS = [
+ ('Théâtre',    '60', 'Chaises en rangées face à l\'écran. Pour une présentation, un lancement, une assemblée.'),
+ ('Classe',     '35', 'Tables et chaises orientées vers l\'avant. Pour une formation où l\'on prend des notes.'),
+ ('En U',       '25', 'Tables disposées en fer à cheval. Pour un comité de direction ou un atelier.'),
+ ('Cocktail',   '90', 'Debout, mange-debout et buffet. Pour un lancement produit ou une réception.'),
+ ('Banquet',    '70', 'Tables rondes de huit. Pour un dîner de gala ou un anniversaire.'),
+]
+
+FORMULES = [
+ ('01', "Journée d'étude",
+  "La salle pour la journée, la pause du matin, le déjeuner au restaurant et la pause de l'après-midi. "
+  "Sonorisation, écran et technicien son compris.",
+  "De 9 h à 18 h · sans hébergement"),
+ ('02', "Séminaire résidentiel",
+  "La journée d'étude, plus les chambres et les dîners. Nos sept catégories accueillent de deux à six "
+  "personnes chacune, et la navette aéroport est offerte pour tout le groupe.",
+  "Une à trois nuits · hébergement compris"),
+ ('03', "Séminaire &amp; lagune",
+  "Le travail le matin, la lagune l'après-midi : balade en pirogue, jet ski, ou simplement la piscine. "
+  "C'est ce qui distingue Assinie d'une salle de réunion à Abidjan.",
+  "Deux jours · activités comprises"),
+ ('04', "Réception privée",
+  "Cocktail, dîner de gala, lancement de produit, anniversaire d'entreprise. Salle privatisée, buffet "
+  "complet, sonorisation et technicien son inclus dès dix personnes.",
+  "Soirée · à partir de 10 personnes"),
+]
+
+EQUIP = [
+ ('Lumière naturelle', "Baies vitrées sur toute la longueur", '<path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/><circle cx="12" cy="12" r="4"/>'),
+ ('Sonorisation', "Micros, enceintes, table de mixage", '<path d="M12 3a3 3 0 013 3v6a3 3 0 01-6 0V6a3 3 0 013-3z"/><path d="M5 11a7 7 0 0014 0M12 18v3M9 21h6"/>'),
+ ('Technicien son', "Présent toute la durée, compris", '<circle cx="9" cy="8" r="3.4"/><path d="M2 20a7 7 0 0114 0M17 11a3 3 0 100-6"/>'),
+ ('Écran &amp; vidéoprojection', "Sur demande, sans supplément", '<rect x="3" y="4" width="18" height="12"/><path d="M12 16v4M8 20h8"/>'),
+ ('Wifi sur tout le domaine', "Gratuit, dans la salle comme en chambre", '<path d="M5 13a10 10 0 0114 0M8.5 16.5a5 5 0 017 0"/><circle cx="12" cy="20" r="1"/>'),
+ ('Restauration sur place', "Pauses, déjeuner, dîner de gala", '<path d="M12 3v6M8 21h8M6 12h12l-2 9H8z"/>'),
+ ('Parking gratuit', "Surveillé, sur le domaine", '<rect x="3" y="3" width="18" height="18"/><path d="M9 17V7h3.5a3 3 0 010 6H9"/>'),
+ ('Navette aéroport', "Offerte, aller et retour, pour le groupe", '<path d="M2 16l20-7-8 12-2-5-5-2z"/><path d="M4 20h7"/>'),
+]
+
+CSS = """
+.hero{position:relative;min-height:74vh;display:flex;align-items:flex-end;overflow:hidden}
+.hero>picture img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(23,16,10,.8),rgba(23,16,10,.4) 44%,rgba(23,16,10,.97))}
+.hero .in{position:relative;z-index:3;width:100%;padding-bottom:56px}
+.hero h1{margin:12px 0 18px;font-size:clamp(2.5rem,5.6vw,4rem)}
+.hero p{max-width:58ch;font-size:1.08rem}
+
+section{padding:104px 0}
+.head{margin-bottom:56px}
+.head.mid{text-align:center}
+.head.mid p{max-width:54ch;margin:18px auto 0;color:#B4A794}
+.head p{color:#B4A794;margin-top:18px;max-width:58ch}
+
+/* argument */
+.pitch{display:grid;grid-template-columns:1fr 1.25fr;gap:70px;align-items:start}
+.pitch .big{font-family:var(--f-display);font-size:clamp(1.5rem,2.7vw,2.15rem);line-height:1.4;color:var(--cream)}
+.pitch p+p{margin-top:18px}
+
+/* configurations */
+.cfg-sec{background:var(--bark);border-block:1px solid var(--line)}
+.cfg{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--line);border:1px solid var(--line)}
+.cfg div{background:var(--bark);padding:32px 22px;text-align:center;transition:.4s}
+.cfg div:hover{background:var(--bark-3)}
+.cfg b{display:block;font-family:var(--f-display);font-size:2.4rem;color:var(--bronze);line-height:1;font-variant-numeric:tabular-nums;font-weight:400}
+.cfg .u{font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-top:7px;display:block}
+.cfg h3{font-size:1.1rem;margin:18px 0 8px;font-weight:400}
+.cfg p{font-size:13px;color:#A9997F}
+
+/* formules */
+.plate{display:grid;grid-template-columns:88px 1fr auto;gap:34px;align-items:baseline;padding:36px 0;
+  border-top:1px solid var(--line-2);transition:.45s}
+.plate:last-of-type{border-bottom:1px solid var(--line-2)}
+.plate:hover{background:linear-gradient(90deg,rgba(185,138,80,.055),transparent 70%)}
+.plate .n{font-family:var(--f-display);font-size:2.2rem;color:var(--bronze);opacity:.4;line-height:.8;
+  font-variant-numeric:tabular-nums;transition:.45s}
+.plate:hover .n{opacity:1}
+.plate h3{font-size:clamp(1.3rem,2.4vw,1.85rem);margin-bottom:10px;font-weight:400}
+.plate p{font-size:14.5px;color:#B4A794;max-width:58ch}
+.plate .q{font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:700;text-align:right;white-space:nowrap}
+
+/* equipements */
+.eq-sec{background:var(--bark)}
+.eq{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line)}
+.eq div{background:var(--bark);padding:28px 24px}
+.eq svg{width:22px;height:22px;stroke:var(--bronze);fill:none;stroke-width:1.3;margin-bottom:16px}
+.eq b{display:block;font-size:14.5px;color:var(--cream);font-weight:600;margin-bottom:5px}
+.eq span{font-size:13px;color:#A9997F}
+
+/* anniversaire */
+.coffret{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--bronze);background:var(--bark-2)}
+.coffret .ph{overflow:hidden;min-height:340px}
+.coffret .ph img{width:100%;height:100%;object-fit:cover}
+.coffret .tx{padding:48px}
+.coffret h2{margin:12px 0 16px}
+.coffret ul{list-style:none;margin:22px 0}
+.coffret li{padding:11px 0;border-bottom:1px solid var(--line);font-size:14.5px;color:#CFC3B2;display:flex;gap:13px}
+.coffret li i{color:var(--palm);font-style:normal}
+.coffret .pr{display:flex;align-items:flex-end;gap:20px;flex-wrap:wrap;margin-top:26px}
+.coffret .pr b{font-family:var(--f-display);font-size:2.5rem;color:var(--bronze);line-height:1;font-variant-numeric:tabular-nums;font-weight:400}
+.coffret .pr span{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:600}
+
+/* devis */
+.devis{background:var(--bark);padding:100px 0;border-top:1px solid var(--line)}
+.devis-grid{display:grid;grid-template-columns:1fr 380px;gap:56px;align-items:start;margin-top:40px}
+.f{display:flex;flex-direction:column;margin-bottom:18px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+label{font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--bronze);margin-bottom:8px;font-weight:700}
+input,select,textarea{min-height:48px;background:transparent;border:1px solid var(--line);color:var(--cream);
+  font:400 15px/1.5 var(--f-body);padding:12px 14px;outline:none;transition:.3s;min-width:0;font-family:var(--f-body)}
+textarea{min-height:110px;resize:vertical}
+input:focus,select:focus,textarea:focus{border-color:var(--bronze)}
+select option{background:var(--bark-2);color:var(--cream)}
+input::placeholder,textarea::placeholder{color:#6E6154}
+.f.bad input,.f.bad select{border-color:var(--err)}
+.msg{display:none;font-size:12.5px;color:var(--err);margin-top:7px}
+.f.bad .msg{display:block}
+.sent{display:none;border:1px solid rgba(143,174,99,.5);background:rgba(143,174,99,.08);padding:24px 26px;margin-top:20px}
+.sent.on{display:block}
+.sent b{display:block;font-family:var(--f-display);font-size:1.3rem;color:var(--palm);margin-bottom:6px}
+.sent p{font-size:14px;margin:0}
+.aside-box{border:1px solid var(--line);background:var(--bark-2);padding:30px;position:sticky;top:110px}
+.aside-box h3{font-size:1.25rem;margin-bottom:18px;font-weight:400}
+.aside-box .r{display:flex;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid var(--line-2);font-size:14px}
+.aside-box .r:last-of-type{border-bottom:0}
+.aside-box .r span:first-child{color:var(--muted);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;font-weight:600}
+.aside-box .r span:last-child{color:#CFC3B2;text-align:right}
+.aside-box .call{margin-top:22px;padding-top:20px;border-top:1px solid var(--line);font-size:13.5px;color:var(--muted)}
+.aside-box .call a{color:var(--bronze);display:block;margin-top:6px;font-size:15px}
+
+@media(max-width:1080px){
+  .pitch,.coffret,.devis-grid{grid-template-columns:1fr;gap:40px}
+  .cfg{grid-template-columns:repeat(2,1fr)}
+  .eq{grid-template-columns:repeat(2,1fr)}
+  .aside-box{position:static}
+  .coffret .ph{min-height:260px}
+}
+@media(max-width:720px){
+  section{padding:72px 0}
+  .cfg,.eq,.two{grid-template-columns:1fr}
+  .plate{grid-template-columns:1fr;gap:10px;padding:28px 0}
+  .plate .n{font-size:1.5rem;opacity:1}
+  .plate .q{text-align:left}
+  .coffret .tx{padding:28px}
+}
+"""
+
+b = [header('#devis', 'Demander un devis', 'cta'), drawer(''), '''
+<section class="hero">
+  <picture><source srcset="img/opt/g-seminaire.webp" type="image/webp">
+  <img src="img/opt/g-seminaire.jpg" width="1200" height="800" alt="La salle de conférence de l'Hôtel Evannath"></picture>
+  <div class="in wrap">
+    <nav class="crumb" aria-label="Fil d'Ariane">
+      <a href="index.html">Accueil</a> &nbsp;·&nbsp; <span>Séminaires &amp; groupes</span>
+    </nav>
+    <span class="eyebrow">Journées d'étude · résidentiels · réceptions</span>
+    <h1>Travailler ailleurs,<br>et que ça se voie</h1>
+    <p>Une salle baignée de lumière naturelle, à une heure quarante-cinq d'Abidjan, avec la lagune Aby derrière. Vos équipes s'en souviendront plus longtemps que d'une salle d'hôtel du Plateau.</p>
+  </div>
+</section>
+
+<section class="wrap">
+  <div class="pitch reveal">
+    <div>
+      <span class="eyebrow">Pourquoi ici</span>
+      <p class="big" style="margin-top:20px">Le trajet fait partie du séminaire.</p>
+    </div>
+    <div>
+      <p>Une heure quarante-cinq de route sépare Abidjan d'Assinie. C'est assez pour que le groupe décroche vraiment, et assez peu pour partir le matin et travailler à dix heures. La navette aéroport est offerte si vos participants arrivent en avion.</p>
+      <p>La salle donne sur l'extérieur par des baies vitrées : on n'y travaille pas en cave. Sonorisation, écran et technicien son sont compris, pas facturés en supplément à la fin.</p>
+      <p>Et à seize heures, quand la session est finie, il y a la piscine, le ponton et la pirogue. C'est ce qui transforme une journée d'étude en quelque chose dont on reparle.</p>
+    </div>
+  </div>
+</section>
+
+<section class="cfg-sec">
+  <div class="wrap">
+    <div class="head mid reveal">
+      <span class="eyebrow">La salle</span>
+      <h2 style="margin-top:16px">Cinq configurations</h2>
+      <p>Le mobilier se remonte selon vos besoins, la veille ou le matin même.</p>
+    </div>
+    <div class="cfg reveal">''']
+
+for nom, cap, desc in CONFIGS:
+    b.append('      <div><b>%s</b><span class="u">personnes</span><h3>%s</h3><p>%s</p></div>' % (cap, nom, desc))
+
+b.append('''    </div>
+    <p style="margin-top:24px;font-size:13px;color:var(--muted);font-style:italic">
+      Capacités indicatives — la réception confirme selon la configuration retenue et le nombre exact de participants.
+    </p>
+  </div>
+</section>
+
+<section class="wrap">
+  <div class="head reveal">
+    <span class="eyebrow">Les formules</span>
+    <h2 style="margin-top:16px">Quatre façons<br>de réunir vos équipes</h2>
+    <p>Chaque formule se chiffre selon l'effectif, la durée et la restauration retenue. Devis sous 24 h.</p>
+  </div>
+  <div class="reveal">''')
+
+for n, titre, desc, quand in FORMULES:
+    b.append('''    <article class="plate">
+      <span class="n">%s</span>
+      <div><h3>%s</h3><p>%s</p></div>
+      <span class="q">%s</span>
+    </article>''' % (n, titre, desc, quand))
+
+b.append('''  </div>
+</section>
+
+<section class="eq-sec">
+  <div class="wrap">
+    <div class="head mid reveal">
+      <span class="eyebrow">Compris</span>
+      <h2 style="margin-top:16px">Ce que vous ne payerez pas en plus</h2>
+    </div>
+    <div class="eq reveal">''')
+
+for titre, desc, ic in EQUIP:
+    b.append('      <div><svg viewBox="0 0 24 24" aria-hidden="true">%s</svg><b>%s</b><span>%s</span></div>' % (ic, titre, desc))
+
+b.append('''    </div>
+  </div>
+</section>
+
+<section class="wrap">
+  <div class="coffret reveal">
+    <div class="ph"><picture><source srcset="img/opt/gal-tab-salle.webp" type="image/webp">
+      <img loading="lazy" src="img/opt/gal-tab-salle.jpg" alt="La salle de restaurant dressée pour un groupe"></picture></div>
+    <div class="tx">
+      <span class="eyebrow">Réception privée</span>
+      <h2>Le Coffret Anniversaire</h2>
+      <p>Notre formule la plus simple à organiser : vous donnez une date et un nombre, nous faisons le reste.</p>
+      <ul>
+        <li><i>✓</i><span>Salle privatisée, offerte</span></li>
+        <li><i>✓</i><span>Buffet complet — entrées, plats chauds, dessert</span></li>
+        <li><i>✓</i><span>Boissons comprises</span></li>
+        <li><i>✓</i><span>Sonorisation et technicien son inclus</span></li>
+      </ul>
+      <div class="pr">
+        <div><b>28 000</b><span>FCFA · par personne</span></div>
+        <span style="font-size:13px;color:var(--muted)">à partir de 10 personnes</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="devis" id="devis">
+  <div class="wrap">
+    <span class="eyebrow">Votre projet</span>
+    <h2 style="margin-top:16px">Demander un devis</h2>
+    <div class="devis-grid">
+      <form id="df" novalidate>
+        <div class="two">
+          <div class="f"><label for="soc">Société ou organisation *</label>
+            <input type="text" id="soc" placeholder="Nom de votre structure">
+            <span class="msg">Merci d'indiquer le nom de votre structure.</span></div>
+          <div class="f"><label for="nom">Votre nom *</label>
+            <input type="text" id="nom" placeholder="Aya Kouassi">
+            <span class="msg">Merci d'indiquer votre nom.</span></div>
+        </div>
+        <div class="two">
+          <div class="f"><label for="em">E-mail *</label>
+            <input type="email" id="em" placeholder="vous@societe.com">
+            <span class="msg">Cette adresse e-mail ne semble pas valide.</span></div>
+          <div class="f"><label for="tel">Téléphone *</label>
+            <input type="tel" id="tel" placeholder="+225 01 02 03 04 05">
+            <span class="msg">Indiquez un numéro d'au moins 8 chiffres.</span></div>
+        </div>
+        <div class="two">
+          <div class="f"><label for="form">Formule</label>
+            <select id="form">
+              <option>Journée d'étude</option>
+              <option>Séminaire résidentiel</option>
+              <option>Séminaire &amp; lagune</option>
+              <option>Réception privée</option>
+              <option>Coffret Anniversaire</option>
+              <option>Je ne sais pas encore</option>
+            </select></div>
+          <div class="f"><label for="cfg">Configuration de salle</label>
+            <select id="cfg">
+              <option>Théâtre</option><option>Classe</option><option>En U</option>
+              <option>Cocktail</option><option>Banquet</option><option>À définir</option>
+            </select></div>
+        </div>
+        <div class="two">
+          <div class="f"><label for="nb">Nombre de participants *</label>
+            <input type="number" id="nb" min="1" max="200" value="25">
+            <span class="msg">Indiquez au moins un participant.</span></div>
+          <div class="f"><label for="dt">Date souhaitée</label><input type="date" id="dt"></div>
+        </div>
+        <div class="f"><label for="msg">Votre projet</label>
+          <textarea id="msg" placeholder="Durée, hébergement souhaité, activités, contraintes particulières…"></textarea></div>
+        <button type="submit" class="btn btn-solid">Envoyer la demande</button>
+        <div class="sent" id="ok" role="status">
+          <b>Demande envoyée</b>
+          <p id="okm">Merci. Le service commercial revient vers vous sous 24 h avec un devis détaillé.</p>
+        </div>
+      </form>
+
+      <aside class="aside-box">
+        <h3>Votre demande</h3>
+        <div class="r"><span>Formule</span><span id="rf">Journée d'étude</span></div>
+        <div class="r"><span>Salle</span><span id="rc">Théâtre</span></div>
+        <div class="r"><span>Participants</span><span id="rn">25</span></div>
+        <div class="r"><span>Date</span><span id="rd">—</span></div>
+        <div class="r"><span>Capacité</span><span id="rk">—</span></div>
+        <div class="call">
+          Pour un projet urgent, appelez directement :
+          <a href="tel:+2250151527575">+225 01 51 52 75 75</a>
+          <a href="mailto:bonjour@evannathhotel.com">bonjour@evannathhotel.com</a>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+''' + FOOTER)
+
+JS = NAV_JS + '''
+
+var CAP={'Théâtre':60,'Classe':35,'En U':25,'Cocktail':90,'Banquet':70};
+var form=document.getElementById('form'),cfg=document.getElementById('cfg'),
+    nb=document.getElementById('nb'),dt=document.getElementById('dt');
+
+function iso(d){return new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10)}
+dt.value=iso(new Date(Date.now()+864e5*21)); dt.min=iso(new Date());
+
+function recap(){
+  document.getElementById('rf').textContent=form.value;
+  document.getElementById('rc').textContent=cfg.value;
+  var n=+nb.value||0;
+  document.getElementById('rn').textContent=n;
+  document.getElementById('rd').textContent=dt.value
+    ? new Date(dt.value).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'}) : '—';
+  var max=CAP[cfg.value];
+  var k=document.getElementById('rk');
+  if(!max){ k.textContent='à définir'; k.style.color='#CFC3B2'; }
+  else if(n>max){ k.textContent='au-delà de '+max+' — à étudier'; k.style.color='var(--bronze-2)'; }
+  else { k.textContent=n+' sur '+max+' places'; k.style.color='var(--palm)'; }
+}
+[form,cfg,nb,dt].forEach(function(e){e.addEventListener('input',recap);e.addEventListener('change',recap)});
+recap();
+
+var champs=[
+  {id:'soc',test:function(v){return v.trim().length>=2}},
+  {id:'nom',test:function(v){return v.trim().length>=2}},
+  {id:'em', test:function(v){return /^[^\\s@]+@[^\\s@]+\\.[a-z]{2,}$/i.test(v.trim())}},
+  {id:'tel',test:function(v){return v.replace(/\\D/g,'').length>=8}},
+  {id:'nb', test:function(v){return +v>=1}}
+];
+function verifier(c,montrer){
+  var el=document.getElementById(c.id),ok=c.test(el.value);
+  if(montrer||el.closest('.f').classList.contains('bad'))el.closest('.f').classList.toggle('bad',!ok);
+  el.setAttribute('aria-invalid',ok?'false':'true');
+  return ok;
+}
+champs.forEach(function(c){
+  var el=document.getElementById(c.id);
+  el.addEventListener('blur',function(){verifier(c,true)});
+  el.addEventListener('input',function(){if(el.closest('.f').classList.contains('bad'))verifier(c,true)});
+});
+document.getElementById('df').addEventListener('submit',function(e){
+  e.preventDefault();
+  var premier=null;
+  champs.forEach(function(c){if(!verifier(c,true)&&!premier)premier=document.getElementById(c.id)});
+  if(premier){premier.focus();premier.scrollIntoView({behavior:'smooth',block:'center'});return}
+  document.getElementById('okm').textContent=
+    'Merci. Votre demande pour '+nb.value+' participants en configuration « '+cfg.value+' »'
+    +' est transmise. Le service commercial revient vers vous sous 24 h avec un devis détaillé.';
+  document.getElementById('ok').classList.add('on');
+  document.getElementById('ok').scrollIntoView({behavior:'smooth',block:'center'});
+});
+
+var EN={''' + EN_NAV + '''cta:"Request a quote"};
+
+''' + LANG_JS
+
+io.open('seminaires.html', 'w', encoding='utf-8').write(page(
+ "Séminaires &amp; groupes — Hôtel Evannath, Assinie",
+ "Séminaires, journées d'étude et réceptions à l'Hôtel Evannath, Assinie PK 19 : salle en lumière naturelle, cinq configurations, sonorisation et technicien inclus, navette aéroport offerte.",
+ "g-seminaire", CSS, '\n'.join(b), JS, preload="g-seminaire"))
+print('seminaires.html       ok')

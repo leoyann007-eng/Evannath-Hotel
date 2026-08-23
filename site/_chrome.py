@@ -111,14 +111,16 @@ HEAD = """<link rel="preconnect" href="https://fonts.googleapis.com">
 
 LINKS = [
  ('01','index.html#chambres','n1','Chambres &amp; Suites'),
- ('02','carte.html','n2','La table'),
- ('03','spa.html','n3','Le spa'),
- ('04','circuits.html','n4','Circuits &amp; Offres'),
- ('05','galerie.html','n5','Galerie'),
- ('06','a-propos.html','n6','À propos'),
- ('07','informations-utiles.html','n7','Informations utiles'),
- ('08','contact.html','n8','Contact'),
- ('09','reserver.html','n9','Réserver'),
+ ('02','experiences.html','n2','Expériences'),
+ ('03','carte.html','n3','La table'),
+ ('04','spa.html','n4','Le spa'),
+ ('05','circuits.html','n5','Circuits &amp; Offres'),
+ ('06','seminaires.html','n6','Séminaires &amp; groupes'),
+ ('07','galerie.html','n7','Galerie'),
+ ('08','a-propos.html','n8','À propos'),
+ ('09','informations-utiles.html','n9','Informations utiles'),
+ ('10','contact.html','n10','Contact'),
+ ('11','reserver.html','n11','Réserver'),
 ]
 
 def header(cta_href, cta_label, cta_key='cta'):
@@ -172,8 +174,8 @@ FOOTER = '''<footer>
         <p style="font-size:8.5px;letter-spacing:.42em;color:var(--bronze);font-weight:700;margin-bottom:18px">LE RÊVE AFRICAIN</p>
         <p style="max-width:300px">46 chambres et suites face à la lagune Aby, à Assinie. Réservation directe, meilleur tarif garanti, réception ouverte 24 h/24.</p>
       </div>
-      <div><h4>Navigation</h4><a href="index.html#chambres">Chambres</a><a href="circuits.html">Circuits &amp; Offres</a><a href="carte.html">La table</a><a href="spa.html">Spa</a><a href="a-propos.html">À propos</a><a href="contact.html">Contact</a></div>
-      <div><h4>Informations</h4><a href="informations-utiles.html">Informations utiles</a><a href="informations-utiles.html#groupes">Séminaires &amp; groupes</a><a href="informations-utiles.html#reserver">Conditions d'annulation</a><a href="mentions-legales.html">Mentions légales</a></div>
+      <div><h4>Navigation</h4><a href="index.html#chambres">Chambres</a><a href="experiences.html">Expériences</a><a href="carte.html">La table</a><a href="circuits.html">Circuits &amp; Offres</a><a href="spa.html">Spa</a><a href="a-propos.html">À propos</a><a href="contact.html">Contact</a></div>
+      <div><h4>Informations</h4><a href="informations-utiles.html">Informations utiles</a><a href="seminaires.html">Séminaires &amp; groupes</a><a href="informations-utiles.html#reserver">Conditions d'annulation</a><a href="mentions-legales.html">Mentions légales</a></div>
       <div><h4>Contact</h4>
         <a href="tel:+2252721731265">+225 27 21 73 12 65</a>
         <a href="tel:+2250151527575">+225 01 51 52 75 75</a>
@@ -221,8 +223,9 @@ document.querySelectorAll('.lang button').forEach(function(b){b.onclick=function
   document.documentElement.lang=lg;
 }});"""
 
-EN_NAV = ('mn:"Menu",n1:"Rooms &amp; Suites",n2:"The table",n3:"The spa",n4:"Packages &amp; Offers",'
-          'n5:"Gallery",n6:"About",n7:"Useful information",n8:"Contact",dr:"Reservations",')
+EN_NAV = ('mn:"Menu",n1:"Rooms &amp; Suites",n2:"Experiences",n3:"The table",n4:"The spa",'
+          'n5:"Packages &amp; Offers",n6:"Meetings &amp; groups",n7:"Gallery",n8:"About",'
+          'n9:"Useful information",n10:"Contact",n11:"Book",dr:"Reservations",')
 
 def page(title, desc, og, css, body, script, preload=None):
     pre = '\n<link rel="preload" as="image" href="img/opt/%s.webp" type="image/webp">' % preload if preload else ''
