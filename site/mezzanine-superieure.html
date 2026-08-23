@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Suite Arabe — Hôtel Evannath, Assinie | 280 000 FCFA la nuit</title>
-<meta name="description" content="La Suite Arabe de l'Hôtel Evannath à Assinie : deux chambres, décor arabo-andalou, salon privatif. 280 000 FCFA la nuit, petit-déjeuner et navette aéroport inclus.">
-<meta property="og:title" content="Suite Arabe — Hôtel Evannath, Assinie | 280 000 FCFA la nuit">
-<meta property="og:image" content="img/opt/sa-main.jpg">
+<title>Mezzanine Supérieure — Hôtel Evannath, Assinie | 142 000 FCFA la nuit</title>
+<meta name="description" content="Mezzanine Supérieure à l'Hôtel Evannath, Assinie PK 19 : 4 personnes · terrasse privative · coin salon. 142 000 FCFA la nuit, petit-déjeuner et navette aéroport inclus.">
+<meta property="og:title" content="Mezzanine Supérieure — Hôtel Evannath, Assinie | 142 000 FCFA la nuit">
+<meta property="og:image" content="img/opt/r-mezzanine.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Karla:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="preload" as="image" href="img/opt/sa-main.webp" type="image/webp">
+<link rel="preload" as="image" href="img/opt/r-mezzanine.webp" type="image/webp">
 <style>
 :root{
   --night:#100B06; --bark:#17100A; --bark-2:#1E150D; --bark-3:#2A1E13;
@@ -119,7 +119,7 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
 .facts{display:flex;gap:26px;flex-wrap:wrap;margin-top:22px;font-size:13.5px;color:var(--muted)}
 .facts b{color:var(--cream);font-weight:500}
 .head-price{text-align:right}
-.head-price b{font-family:var(--f-display);font-size:2.6rem;color:var(--bronze);display:block;line-height:1;font-variant-numeric:tabular-nums}
+.head-price b{font-family:var(--f-display);font-size:2.6rem;color:var(--bronze);display:block;line-height:1;font-variant-numeric:tabular-nums;font-weight:400}
 .head-price span{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:600}
 .mosaic{display:grid;grid-template-columns:2fr 1fr 1fr;grid-auto-rows:172px;gap:10px;margin-bottom:76px}
 .mosaic figure{overflow:hidden;position:relative;cursor:pointer;background:var(--bark-2)}
@@ -138,6 +138,10 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
 .amen{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-top:24px}
 .amen div{background:var(--bark);padding:16px 18px;font-size:14px;display:flex;align-items:center;gap:12px;color:#CFC3B2}
 .amen svg{width:17px;height:17px;stroke:var(--bronze);fill:none;stroke-width:1.4;flex:0 0 auto}
+.amen div.hi{background:var(--bark-2)}
+.amen div.hi svg{stroke:var(--bronze-2)}
+.amen div.hi b{color:var(--cream);font-weight:600;display:block}
+.amen div.hi em{font-style:normal;font-size:12px;color:var(--muted);display:block;margin-top:2px}
 .incl{list-style:none;margin-top:22px}
 .incl li{padding:15px 0;border-bottom:1px solid var(--line);display:flex;gap:16px;align-items:flex-start}
 .incl b{display:block;color:var(--cream);font-weight:600;font-size:14.5px;margin-bottom:3px}
@@ -162,15 +166,15 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
 .calc .row span:last-child{color:#CFC3B2;font-variant-numeric:tabular-nums}
 .calc .total{border-top:1px solid var(--line);margin-top:10px;padding-top:14px;display:flex;justify-content:space-between;align-items:baseline;gap:14px}
 .calc .total span{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:700}
-.calc .total b{font-family:var(--f-display);font-size:1.85rem;color:var(--bronze-2);font-variant-numeric:tabular-nums}
+.calc .total b{font-family:var(--f-display);font-size:1.85rem;color:var(--bronze-2);font-variant-numeric:tabular-nums;font-weight:400}
 .panel .btn{width:100%;margin-top:20px}
 .avail{display:flex;align-items:center;gap:9px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--palm);font-weight:700;margin-top:16px;justify-content:center}
 .avail i{width:7px;height:7px;border-radius:50%;background:var(--palm);display:inline-block}
-.panel .help{font-size:12.5px;color:var(--muted);text-align:center;margin-top:16px;line-height:1.5}
-.panel .help a{color:var(--bronze);border-bottom:1px solid var(--line)}
+.panel .helpt{font-size:12.5px;color:var(--muted);text-align:center;margin-top:16px;line-height:1.5}
+.panel .helpt a{color:var(--bronze);border-bottom:1px solid var(--line)}
 .more{background:var(--bark-2);padding:88px 0}
 .more-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:40px}
-.rcard{background:var(--bark);border:1px solid var(--line);overflow:hidden;transition:.5s cubic-bezier(.2,.8,.2,1)}
+.rcard{background:var(--bark);border:1px solid var(--line);overflow:hidden;transition:.5s cubic-bezier(.2,.8,.2,1);display:block}
 .rcard:hover{transform:translateY(-6px);border-color:rgba(185,138,80,.5)}
 .rcard .ph{aspect-ratio:4/3;overflow:hidden}
 .rcard img{width:100%;height:100%;object-fit:cover;transition:1s cubic-bezier(.2,.8,.2,1)}
@@ -181,7 +185,7 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
 .rcard .p b{font-family:var(--f-display);font-size:1.5rem;color:var(--bronze);font-variant-numeric:tabular-nums;font-weight:400}
 .rcard .p span{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600}
 .mobar{display:none;position:fixed;left:0;right:0;bottom:0;z-index:95;background:rgba(30,21,13,.98);backdrop-filter:blur(14px);border-top:1px solid var(--line);padding:12px 18px;align-items:center;justify-content:space-between;gap:14px}
-.mobar b{font-family:var(--f-display);font-size:1.35rem;color:var(--bronze);display:block;line-height:1;font-variant-numeric:tabular-nums}
+.mobar b{font-family:var(--f-display);font-size:1.35rem;color:var(--bronze);display:block;line-height:1;font-variant-numeric:tabular-nums;font-weight:400}
 .mobar span{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600}
 .mobar .btn{padding:14px 22px}
 #lb{position:fixed;inset:0;background:rgba(10,6,3,.98);z-index:200;display:none;place-items:center;padding:40px}
@@ -241,6 +245,7 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
       <a href="a-propos.html"><i>06</i><span data-t="n6">À propos</span></a>
       <a href="informations-utiles.html"><i>07</i><span data-t="n7">Informations utiles</span></a>
       <a href="contact.html"><i>08</i><span data-t="n8">Contact</span></a>
+      <a href="reserver.html"><i>09</i><span data-t="n9">Réserver</span></a>
     </nav>
     <aside class="dw-side">
       <div class="ph"><picture><source srcset="img/opt/t-lampe.webp" type="image/webp">
@@ -259,149 +264,143 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
 
 <div class="wrap head">
   <nav class="crumb" aria-label="Fil d'Ariane">
-    <a href="index.html" data-t="c1">Accueil</a> &nbsp;·&nbsp;
-    <a href="index.html#chambres" data-t="c2">Chambres &amp; Suites</a> &nbsp;·&nbsp;
-    <span>Suite Arabe</span>
+    <a href="index.html">Accueil</a> &nbsp;·&nbsp;
+    <a href="index.html#chambres">Chambres &amp; Suites</a> &nbsp;·&nbsp;
+    <span>Mezzanine Supérieure</span>
   </nav>
   <div class="head-top">
     <div>
-      <span class="eyebrow" data-t="sig">Catégorie signature</span>
-      <h1>Suite Arabe</h1>
+      <span class="eyebrow">Terrasse privative</span>
+      <h1>Mezzanine Supérieure</h1>
       <div class="facts">
-        <span data-t="f1"><b>2</b> chambres</span>
-        <span data-t="f2"><b>6</b> personnes</span>
-        <span data-t="f3"><b>Salon</b> privatif</span>
-        <span data-t="f4"><b>Décor</b> arabo-andalou</span>
+        <span><b>4</b> personnes</span>
+        <span><b>Duplex</b> volume</span>
+        <span><b>Privative</b> terrasse</span>
+        <span><b>Salon</b> complet</span>
       </div>
     </div>
-    <div class="head-price"><b>280 000</b><span data-t="pn">FCFA / nuit</span></div>
+    <div class="head-price"><b>142 000</b><span>FCFA / nuit</span></div>
   </div>
 </div>
 
 <div class="wrap">
   <div class="mosaic" id="gl">
-    <figure><picture><source srcset="img/opt/sa-main-t.webp" type="image/webp">
-      <img loading="eager" width="560" height="373" src="img/opt/sa-main-t.jpg" data-full="img/opt/sa-main.jpg" alt="La Suite Arabe de l'Hôtel Evannath"></picture>
-      <figcaption data-t="cap1">La suite</figcaption></figure>
-    <figure><picture><source srcset="img/opt/sa-chambre2-t.webp" type="image/webp">
-      <img loading="lazy" width="560" height="373" src="img/opt/sa-chambre2-t.jpg" data-full="img/opt/sa-chambre2.jpg" alt="La seconde chambre de la Suite Arabe, textiles wax et accès balcon"></picture>
-      <figcaption data-t="cap2">La seconde chambre</figcaption></figure>
-    <figure><picture><source srcset="img/opt/sa-bain-t.webp" type="image/webp">
-      <img loading="lazy" width="560" height="373" src="img/opt/sa-bain-t.jpg" data-full="img/opt/sa-bain.jpg" alt="Salle de bain avec miroir soleil"></picture>
-      <figcaption data-t="cap3">La salle de bain</figcaption></figure>
-    <figure><picture><source srcset="img/opt/sa-salon-t.webp" type="image/webp">
-      <img loading="lazy" width="560" height="373" src="img/opt/sa-salon-t.jpg" data-full="img/opt/sa-salon.jpg" alt="Coin salon et espace de repos"></picture>
-      <figcaption data-t="cap4">Le salon</figcaption></figure>
-    <figure><picture><source srcset="img/opt/sa-terrasse-t.webp" type="image/webp">
-      <img loading="lazy" width="560" height="373" src="img/opt/sa-terrasse-t.jpg" data-full="img/opt/sa-terrasse.jpg" alt="Terrasse ombragée de l'hôtel"></picture>
-      <figcaption data-t="cap5">La terrasse</figcaption></figure>
+    <figure><picture><source srcset="img/opt/r-mezzanine.webp" type="image/webp">
+      <img loading="eager" src="img/opt/r-mezzanine.jpg" data-full="img/opt/r-mezzanine.jpg" alt="Mezzanine Supérieure"></picture>
+      <figcaption>La chambre</figcaption></figure>
+    <figure><picture><source srcset="img/opt/gal-ch-mezz.webp" type="image/webp">
+      <img loading="lazy" src="img/opt/gal-ch-mezz.jpg" data-full="img/opt/gal-ch-mezz.jpg" alt="L'escalier et le coin nuit"></picture>
+      <figcaption>La mezzanine</figcaption></figure>
+    <figure><picture><source srcset="img/opt/gal-ch-salon.webp" type="image/webp">
+      <img loading="lazy" src="img/opt/gal-ch-salon.jpg" data-full="img/opt/gal-ch-salon.jpg" alt="Le coin salon"></picture>
+      <figcaption>Le salon</figcaption></figure>
   </div>
 </div>
 
 <div class="wrap body-grid">
  <div>
   <section class="block reveal">
-    <span class="eyebrow" data-t="e1">La suite</span>
-    <h2 data-t="h1x">Deux chambres,<br>un patio, un service dédié</h2>
-    <p data-t="p1">C'est la plus grande de nos sept catégories, et la seule à proposer deux chambres séparées. Le décor arabo-andalou — bois sculpté, arcades, textiles brodés — a été composé pièce par pièce avec des artisans locaux, dans l'esprit qui guide tout l'établissement.</p>
-    <p data-t="p2">Deux couples, une famille avec enfants grands, ou un groupe d'amis : la suite absorbe six personnes sans que personne ne se marche dessus. Le salon privatif sert de pièce de vie commune, et chaque chambre garde sa salle d'eau.</p>
-    <p data-t="p3">C'est aussi la catégorie la plus demandée pour les lunes de miel et les anniversaires. Elle part vite en saison sèche — de décembre à mars, prévoyez de réserver plusieurs semaines à l'avance.</p>
+    <span class="eyebrow">La chambre</span>
+    <h2>La mezzanine,<br>en plus grand</h2>
+    <p>Même principe, plus d'espace : un coin salon complet en bas, des équipements renforcés, et surtout une terrasse privative qui n'existe dans aucune autre catégorie à ce tarif.</p>
+    <p>Quatre personnes y logent confortablement — c'est notre chambre familiale la plus demandée après la Suite Arabe.</p>
+    <p>C'est aussi la chambre du forfait Lune de Miel à 340 000 F : deux nuits, la chambre décorée avant votre arrivée, les petits-déjeuners compris.</p>
   </section>
 
   <section class="block reveal">
-    <span class="eyebrow" data-t="e2">Équipements</span>
-    <h2 data-t="h2">Dans la suite</h2>
+    <span class="eyebrow">Équipements</span>
+    <h2>Dans la chambre</h2>
     <div class="amen">
-      <div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h18M8 8h12M6 16h12"/></svg><span data-t="a1">Air conditionné</span></div>
-      <div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13a10 10 0 0114 0M8.5 16.5a5 5 0 017 0"/><circle cx="12" cy="20" r="1"/></svg><span data-t="a2">Wifi gratuit</span></div>
-      <div><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="12"/><path d="M9 21h6"/></svg><span data-t="a3">Télévision smart</span></div>
-      <div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18v-6a8 8 0 0116 0v6M4 18h16M9 22h6"/></svg><span data-t="a4">Deux lits king</span></div>
-      <div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 21V9l6-5 6 5v12M10 21v-6h4v6"/></svg><span data-t="a5">Salon privatif</span></div>
-      <div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h16v5a3 3 0 01-3 3H7a3 3 0 01-3-3zM7 12V6a2 2 0 014 0"/></svg><span data-t="a6">Deux salles d'eau</span></div>
-      <div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3v6a4 4 0 008 0V3M12 13v8M9 21h6"/></svg><span data-t="a7">Sèche-cheveux</span></div>
-      <div><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16"/><path d="M9 9h6v6H9z"/></svg><span data-t="a8">Coffre-fort</span></div>
-      <div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17c2 1 4-1 6 0s4 1 6 0 4-1 6 0M3 12c2 1 4-1 6 0s4 1 6 0 4-1 6 0"/></svg><span data-t="a9">Accès piscine &amp; jacuzzi</span></div>
-      <div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V8h14v12M9 20v-5h6v5M3 8l9-5 9 5"/></svg><span data-t="a10">Terrasse commune</span></div>
+      <div class="hi"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.4 5.6L20 9.7l-4 4 1 6-5-2.9L7 19.7l1-6-4-4 5.6-1.1z"/></svg><span><b>Terrasse privative</b><em>À vous seuls</em></span></div>
+      <div class="hi"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.4 5.6L20 9.7l-4 4 1 6-5-2.9L7 19.7l1-6-4-4 5.6-1.1z"/></svg><span><b>Coin salon complet</b><em>Séparé de l'espace nuit</em></span></div>
+      <div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h18M8 8h12M6 16h12"/></svg><span>Air conditionné</span></div>
+      <div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13a10 10 0 0114 0M8.5 16.5a5 5 0 017 0"/><circle cx="12" cy="20" r="1"/></svg><span>Wifi gratuit</span></div>
+      <div><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="12"/><path d="M9 21h6"/></svg><span>Télévision smart</span></div>
+      <div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h16v5a3 3 0 01-3 3H7a3 3 0 01-3-3zM7 12V6a2 2 0 014 0"/></svg><span>Salle d'eau privative</span></div>
+      <div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3v6a4 4 0 008 0V3M12 13v8M9 21h6"/></svg><span>Sèche-cheveux</span></div>
+      <div><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16"/><path d="M9 9h6v6H9z"/></svg><span>Coffre-fort</span></div>
+      <div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17c2 1 4-1 6 0s4 1 6 0 4-1 6 0M3 12c2 1 4-1 6 0s4 1 6 0 4-1 6 0"/></svg><span>Accès piscine &amp; jacuzzi</span></div>
+      <div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v6M8 21h8M6 12h12l-2 9H8z"/></svg><span>Petit-déjeuner inclus</span></div>
     </div>
   </section>
 
   <section class="block reveal">
-    <span class="eyebrow" data-t="e3">Inclus</span>
-    <h2 data-t="h3">Compris dans le tarif</h2>
+    <span class="eyebrow">Inclus</span>
+    <h2>Compris dans le tarif</h2>
     <ul class="incl">
-      <li><span class="chk">✓</span><div><b data-t="i1">Petit-déjeuner pour tous les occupants</b><p data-t="i1p">Servi au restaurant ou en terrasse, fruits frais et produits locaux.</p></div></li>
-      <li><span class="chk">✓</span><div><b data-t="i2">Navette aéroport gratuite</b><p data-t="i2p">Prise en charge et dépose à l'aéroport Félix-Houphouët-Boigny, sans frais, à la demande.</p></div></li>
-      <li><span class="chk">✓</span><div><b data-t="i3">Piscine, jacuzzi et salle de sport</b><p data-t="i3p">Accès libre du lever du jour à la nuit tombée.</p></div></li>
-      <li><span class="chk">✓</span><div><b data-t="i4">Wifi et parking</b><p data-t="i4p">Gratuits sur tout le domaine.</p></div></li>
+      <li><span class="chk">✓</span><div><b>Petit-déjeuner</b><p>Servi au restaurant ou en terrasse, fruits frais et produits locaux.</p></div></li>
+      <li><span class="chk">✓</span><div><b>Navette aéroport gratuite</b><p>Prise en charge et dépose à l'aéroport Félix-Houphouët-Boigny, sans frais, à la demande.</p></div></li>
+      <li><span class="chk">✓</span><div><b>Piscine, jacuzzi et salle de sport</b><p>Accès libre du lever du jour à la nuit tombée.</p></div></li>
+      <li><span class="chk">✓</span><div><b>Wifi et parking</b><p>Gratuits sur tout le domaine.</p></div></li>
     </ul>
   </section>
 
   <section class="block reveal">
-    <span class="eyebrow" data-t="e4">Conditions</span>
-    <h2 data-t="h4">Bon à savoir</h2>
+    <span class="eyebrow">Conditions</span>
+    <h2>Bon à savoir</h2>
     <div class="cond">
-      <div><span data-t="k1">Arrivée</span><span>à partir de 14 h 00</span></div>
-      <div><span data-t="k2">Départ</span><span>avant 12 h 00</span></div>
-      <div><span data-t="k3">Annulation</span><span data-t="v3">gratuite jusqu'à 48 h avant</span></div>
-      <div><span data-t="k4">Acompte</span><span data-t="v4">30 % à la réservation</span></div>
-      <div><span data-t="k5">Animaux</span><span data-t="v5">non admis</span></div>
-      <div><span data-t="k6">Paiement</span><span>Wave · Orange Money · MTN · carte</span></div>
+      <div><span>Arrivée</span><span>à partir de 14 h 00</span></div>
+      <div><span>Départ</span><span>avant 12 h 00</span></div>
+      <div><span>Annulation</span><span>gratuite jusqu'à 48 h avant</span></div>
+      <div><span>Acompte</span><span>30 % à la réservation</span></div>
+      <div><span>Animaux</span><span>non admis</span></div>
+      <div><span>Paiement</span><span>Wave · Orange Money · MTN · carte</span></div>
     </div>
+    <p style="margin-top:16px;font-size:13px;color:var(--muted)">
+      Le détail complet figure sur la page <a href="informations-utiles.html#reserver" style="color:var(--bronze)">Informations utiles</a>.
+    </p>
   </section>
  </div>
 
  <aside class="panel" id="reserver">
-  <span class="from" data-t="from">À partir de</span>
-  <div class="rate">280 000 <span style="font-size:1rem">FCFA</span></div>
-  <div class="per" data-t="per">par nuit, petit-déjeuner inclus</div>
+  <span class="from">À partir de</span>
+  <div class="rate">142 000 <span style="font-size:1rem">FCFA</span></div>
+  <div class="per">par nuit, petit-déjeuner inclus</div>
 
   <form id="bkf">
     <div class="two">
-      <div class="pf"><label for="d1" data-t="in">Arrivée</label><input type="date" id="d1"></div>
-      <div class="pf"><label for="d2" data-t="out">Départ</label><input type="date" id="d2"></div>
+      <div class="pf"><label for="d1">Arrivée</label><input type="date" id="d1"></div>
+      <div class="pf"><label for="d2">Départ</label><input type="date" id="d2"></div>
     </div>
-    <div class="pf"><label for="pax" data-t="guests">Voyageurs</label>
-      <select id="pax">
-        <option value="2">2 personnes</option><option value="3">3 personnes</option>
-        <option value="4" selected>4 personnes</option><option value="5">5 personnes</option>
-        <option value="6">6 personnes</option>
-      </select>
-    </div>
+    <div class="pf"><label for="pax">Voyageurs</label><select id="pax"><option value="1">1 personne</option><option value="2" selected>2 personnes</option><option value="3">3 personnes</option><option value="4">4 personnes</option></select></div>
 
     <div class="calc">
-      <div class="row"><span id="l1">280 000 FCFA × 2 nuits</span><span id="v1">560 000</span></div>
-      <div class="row"><span data-t="tax">Taxe de séjour</span><span id="v2">0</span></div>
-      <div class="row"><span data-t="bkf2">Petit-déjeuner</span><span style="color:var(--palm)" data-t="incl">Inclus</span></div>
-      <div class="total"><span data-t="tot">Total séjour</span><b id="tt">560 000</b></div>
+      <div class="row"><span id="l1">142 000 FCFA × 2 nuits</span><span id="v1"></span></div>
+      <div class="row"><span>Taxe de séjour</span><span id="v2"></span></div>
+      <div class="row"><span>Petit-déjeuner</span><span style="color:var(--palm)">Inclus</span></div>
+      <div class="total"><span>Total séjour</span><b id="tt"></b></div>
     </div>
 
-    <button type="submit" class="btn btn-solid" data-t="ctab">Réserver cette suite</button>
-    <div class="avail"><i></i><span data-t="av">Disponible à ces dates</span></div>
-    <p class="help" data-t="helpt">Une question&nbsp;? Écrivez-nous sur <a href="https://wa.me/2250546017377" target="_blank" rel="noopener">WhatsApp</a> ou appelez le +225 01 51 52 75 75.</p>
+    <button type="submit" class="btn btn-solid">Réserver cette chambre</button>
+    <div class="avail"><i></i><span>Disponible à ces dates</span></div>
+    <p class="helpt">Une question&nbsp;? Écrivez-nous sur <a href="https://wa.me/2250546017377" target="_blank" rel="noopener">WhatsApp</a> ou appelez le +225 01 51 52 75 75.</p>
   </form>
  </aside>
 </div>
 
 <section class="more">
   <div class="wrap">
-    <span class="eyebrow" data-t="e5">Autres catégories</span>
-    <h2 data-t="h5">Si la Suite Arabe est prise</h2>
+    <span class="eyebrow">Autres catégories</span>
+    <h2>Si celle-ci est prise</h2>
     <div class="more-grid">
-      <article class="rcard reveal">
-        <div class="ph"><picture><source srcset="img/opt/r-mezzanine.webp" type="image/webp"><img loading="lazy" width="900" height="600" src="img/opt/r-mezzanine.jpg" alt="Mezzanine Supérieure"></picture></div>
-        <div><h3>Mezzanine Supérieure</h3><p style="font-size:14px" data-t="m1">Coin salon, équipements renforcés et terrasse privative. Jusqu'à 4 personnes.</p>
-        <div class="p"><b>142 000</b><span data-t="pn2">FCFA / nuit</span></div></div>
-      </article>
-      <article class="rcard reveal">
-        <div class="ph"><picture><source srcset="img/opt/r-anglaise.webp" type="image/webp"><img loading="lazy" width="900" height="600" src="img/opt/r-anglaise.jpg" alt="Suite Anglaise"></picture></div>
-        <div><h3>Suite Anglaise</h3><p style="font-size:14px" data-t="m2">Vue directe sur la lagune Aby et la piscine. Le meilleur couchant du domaine.</p>
-        <div class="p"><b>107 000</b><span data-t="pn2">FCFA / nuit</span></div></div>
-      </article>
-      <article class="rcard reveal">
-        <div class="ph"><picture><source srcset="img/opt/r-wax.webp" type="image/webp"><img loading="lazy" width="900" height="600" src="img/opt/r-wax.jpg" alt="Deluxe Supérieure"></picture></div>
-        <div><h3>Deluxe Supérieure</h3><p style="font-size:14px" data-t="m3">Textiles wax, lits à baldaquin et salle à manger privative. Jusqu'à 3 personnes.</p>
-        <div class="p"><b>97 000</b><span data-t="pn2">FCFA / nuit</span></div></div>
-      </article>
+      <a class="rcard reveal" href="chambre-mezzanine.html">
+        <div class="ph"><picture><source srcset="img/opt/r-mezz2.webp" type="image/webp">
+          <img loading="lazy" src="img/opt/r-mezz2.jpg" alt="Chambre en Mezzanine"></picture></div>
+        <div><h3>Chambre en Mezzanine</h3><p style="font-size:14px">2 personnes · duplex · sous charpente</p>
+        <div class="p"><b>127 000</b><span>FCFA / nuit</span></div></div>
+      </a>
+      <a class="rcard reveal" href="suite-arabe.html">
+        <div class="ph"><picture><source srcset="img/opt/sa-main.webp" type="image/webp">
+          <img loading="lazy" src="img/opt/sa-main.jpg" alt="Suite Arabe"></picture></div>
+        <div><h3>Suite Arabe</h3><p style="font-size:14px">6 personnes · 2 chambres · décor arabo-andalou</p>
+        <div class="p"><b>280 000</b><span>FCFA / nuit</span></div></div>
+      </a>
+      <a class="rcard reveal" href="suite-anglaise.html">
+        <div class="ph"><picture><source srcset="img/opt/r-anglaise.webp" type="image/webp">
+          <img loading="lazy" src="img/opt/r-anglaise.jpg" alt="Suite Anglaise"></picture></div>
+        <div><h3>Suite Anglaise</h3><p style="font-size:14px">2 personnes · vue lagune · le meilleur couchant</p>
+        <div class="p"><b>107 000</b><span>FCFA / nuit</span></div></div>
+      </a>
     </div>
   </div>
 </section>
@@ -423,7 +422,7 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
         <a href="https://www.facebook.com/evannathhotel" target="_blank" rel="noopener">Facebook — 21 K abonnés</a>
       </div>
     </div>
-    <div class="f-bot"><span>© 2026 Hôtel Evannath — Assinie, Côte d'Ivoire</span><span>Maquette de refonte · démonstration</span></div>
+    <div class="f-bot"><span>© 2026 Hôtel Evannath — Assinie, Côte d'Ivoire</span><span>Assinie · Comoé · Côte d'Ivoire</span></div>
   </div>
 </footer>
 
@@ -432,11 +431,11 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
 </a>
 
 <div class="mobar">
-  <div><b id="mb">560 000</b><span data-t="mbl">FCFA · séjour total</span></div>
-  <a href="#reserver" class="btn btn-solid" data-t="mcta">Réserver</a>
+  <div><b id="mb"></b><span>FCFA · séjour total</span></div>
+  <a href="#reserver" class="btn btn-solid">Réserver</a>
 </div>
 
-<div id="lb" role="dialog" aria-modal="true" aria-label="Galerie photo">
+<div id="lb" role="dialog" aria-modal="true" aria-label="Photos de la chambre">
   <button class="lb-btn close" aria-label="Fermer">×</button>
   <button class="lb-btn prev" aria-label="Photo précédente">‹</button>
   <img id="lbi" alt="">
@@ -468,7 +467,7 @@ else{var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.is
  document.querySelectorAll('.reveal').forEach(function(el){io.observe(el)});
  setTimeout(function(){document.querySelectorAll('.reveal:not(.in)').forEach(function(el){if(el.getBoundingClientRect().top<innerHeight)el.classList.add('in')})},1200)}
 
-var RATE=280000, TAX=1500; // taxe de séjour par personne et par nuit
+var RATE=142000, TAX=1500; // taxe de séjour par personne et par nuit
 var d1=document.getElementById('d1'),d2=document.getElementById('d2'),pax=document.getElementById('pax');
 function iso(d){return new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10)}
 d1.value=iso(new Date(Date.now()+864e5));d2.value=iso(new Date(Date.now()+864e5*3));
@@ -486,7 +485,9 @@ function calc(){
 }
 [d1,d2,pax].forEach(function(e){e.addEventListener('change',calc)});
 document.getElementById('bkf').addEventListener('submit',function(e){e.preventDefault();calc();
-  alert("Démonstration : cette étape mènerait au paiement de l'acompte (Wave, Orange Money, MTN ou carte).")});
+  var q='?chambre=mezzanine-superieure&du='+d1.value+'&au='+d2.value+'&pax='+pax.value;
+  location.href='reserver.html'+q;
+});
 calc();
 
 var figs=[].slice.call(document.querySelectorAll('#gl img')),lb=document.getElementById('lb'),lbi=document.getElementById('lbi'),lbc=document.getElementById('lbc'),gi=0;
@@ -500,31 +501,7 @@ lb.onclick=function(e){if(e.target===lb)hideLb()};
 addEventListener('keydown',function(e){if(!lb.classList.contains('on'))return;
  if(e.key==='Escape')hideLb();if(e.key==='ArrowRight')show(gi+1);if(e.key==='ArrowLeft')show(gi-1)});
 
-var EN={mn:"Menu",n1:"Rooms &amp; Suites",n2:"The table",n3:"The spa",n4:"Packages &amp; Offers",n5:"Gallery",n6:"About",n7:"Useful information",n8:"Contact",dr:"Reservations",cta:"Book",
-c1:"Home",c2:"Rooms &amp; Suites",sig:"Signature category",pn:"FCFA / night",pn2:"FCFA / night",
-f1:"<b>2</b> bedrooms",f2:"<b>6</b> guests",f3:"<b>Private</b> lounge",f4:"<b>Moorish</b> decor",
-cap1:"The suite",cap2:"The second bedroom",cap3:"The bathroom",cap4:"The lounge",cap5:"The terrace",
-e1:"The suite",h1x:"Two bedrooms,<br>a patio, a dedicated service",
-p1:"It is the largest of our seven categories, and the only one with two separate bedrooms. The Moorish decor — carved wood, arches, embroidered textiles — was put together piece by piece with local craftspeople, in the spirit that guides the whole property.",
-p2:"Two couples, a family with older children, or a group of friends: the suite takes six people without anyone getting in anyone's way. The private lounge is the shared living space, and each bedroom keeps its own bathroom.",
-p3:"It is also our most requested category for honeymoons and birthdays. It goes fast in the dry season — from December to March, plan to book several weeks ahead.",
-e2:"Amenities",h2:"In the suite",a1:"Air conditioning",a2:"Free wifi",a3:"Smart TV",a4:"Two king beds",a5:"Private lounge",
-a6:"Two bathrooms",a7:"Hairdryer",a8:"Safe",a9:"Pool &amp; jacuzzi access",a10:"Shared terrace",
-e3:"Included",h3:"Included in the rate",
-i1:"Breakfast for every guest",i1p:"Served in the restaurant or on the terrace, fresh fruit and local produce.",
-i2:"Free airport shuttle",i2p:"Pick-up and drop-off at Félix-Houphouët-Boigny airport, at no extra charge, on request.",
-i3:"Pool, jacuzzi and gym",i3p:"Open from first light until late.",
-i4:"Wifi and parking",i4p:"Free across the whole property.",
-e4:"Conditions",h4:"Good to know",k1:"Check-in",k2:"Check-out",k3:"Cancellation",v3:"free up to 48 h before",
-k4:"Deposit",v4:"30 % on booking",k5:"Pets",v5:"not allowed",k6:"Payment",
-from:"From",per:"per night, breakfast included",in:"Check-in",out:"Check-out",guests:"Guests",
-tax:"Tourist tax",bkf2:"Breakfast",incl:"Included",tot:"Stay total",ctab:"Book this suite",av:"Available on these dates",
-helpt:"A question&nbsp;? Message us on <a href=\"https://wa.me/2250546017377\" target=\"_blank\" rel=\"noopener\">WhatsApp</a> or call +225 01 51 52 75 75.",
-e5:"Other categories",h5:"If the Arabian Suite is taken",
-m1:"Lounge area, upgraded amenities and a private terrace. Up to 4 guests.",
-m2:"Direct view over the Aby lagoon and the pool. The best sunset on the estate.",
-m3:"Wax textiles, four-poster beds and a private dining room. Up to 3 guests.",
-mbl:"FCFA · stay total",mcta:"Book"};
+var EN={mn:"Menu",n1:"Rooms &amp; Suites",n2:"The table",n3:"The spa",n4:"Packages &amp; Offers",n5:"Gallery",n6:"About",n7:"Useful information",n8:"Contact",n9:"Book",dr:"Reservations",cta:"Book"};
 
 var FR={};document.querySelectorAll('[data-t]').forEach(function(e){FR[e.dataset.t]=e.innerHTML});
 document.querySelectorAll('.lang button').forEach(function(b){b.onclick=function(){

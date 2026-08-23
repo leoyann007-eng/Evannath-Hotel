@@ -14,21 +14,44 @@ Python à partir de gabarits, pour éviter la saisie manuelle.
 
 ---
 
-## Les 11 pages
+## Les 19 pages
+
+**Le parcours de réservation**
 
 | Fichier | Page |
 |---|---|
-| `index.html` | Accueil — hero, réservation, 7 catégories, expériences, avis, accès |
-| `galerie.html` | Galerie — 47 photographies, 6 filtres, visionneuse |
-| `suite-arabe.html` | Fiche chambre — Suite Arabe, calcul de séjour en direct |
-| `circuits.html` | Circuits & Offres — 4 Packs Vacances + 6 circuits + Méchoui Party |
-| `carte.html` | La table — 94 articles, recherche instantanée, réservation |
+| `index.html` | Accueil — hero, recherche, 7 catégories, expériences, avis, accès |
+| `chambre-standard.html` | Chambre Standard — 67 000 FCFA |
+| `deluxe-baldaquin.html` | Deluxe · lits à baldaquin — 82 000 FCFA |
+| `deluxe-superieure.html` | Deluxe Supérieure — 97 000 FCFA |
+| `suite-anglaise.html` | Suite Anglaise — 107 000 FCFA |
+| `chambre-mezzanine.html` | Chambre en Mezzanine — 127 000 FCFA |
+| `mezzanine-superieure.html` | Mezzanine Supérieure — 142 000 FCFA |
+| `suite-arabe.html` | Suite Arabe — 280 000 FCFA |
+| `reserver.html` | Tunnel de réservation en trois étapes |
+
+**Les autres pages**
+
+| Fichier | Page |
+|---|---|
+| `galerie.html` | 47 photographies, 6 filtres, visionneuse |
+| `circuits.html` | 4 Packs Vacances + 6 circuits + Méchoui Party |
+| `carte.html` | La table — 94 articles, recherche instantanée |
 | `spa.html` | Le spa — 22 soins, 4 rituels en vedette |
-| `a-propos.html` | À propos — « Akwaba », 6 arguments, 5 espaces, 13 équipements |
-| `contact.html` | Contact — 4 canaux, formulaire validé, carte d'accès |
+| `a-propos.html` | « Akwaba », 6 arguments, 5 espaces, 13 équipements |
+| `contact.html` | 4 canaux, formulaire validé, carte d'accès |
 | `informations-utiles.html` | 17 questions en accordéon |
-| `mentions-legales.html` | Mentions légales — trame à compléter |
+| `mentions-legales.html` | Trame juridique à compléter |
 | `404.html` | Page introuvable |
+
+## Le parcours
+
+Chaque catégorie a sa fiche, avec calcul du séjour en direct. Le bouton
+« Réserver » passe la sélection à `reserver.html` par l'URL
+(`?chambre=&du=&au=&pax=`), qui déroule trois étapes : dates, coordonnées
+validées, acompte de 30 % — puis une confirmation avec numéro de dossier.
+
+Aucun formulaire ne se termine par une impasse.
 
 ## Identité
 
@@ -48,7 +71,7 @@ Bilingue français / anglais sur toutes les pages, sans rechargement.
 ## Structure
 
 ```
-demo/
+site/
 ├── *.html                  les 11 pages servies
 ├── _chrome.py              briques partagées : nav, tiroir, pied de page
 ├── build-*.py              générateurs de pages
@@ -67,7 +90,9 @@ Les pages générées ne se modifient pas à la main : on édite le script ou le
 gabarit, puis on relance.
 
 ```bash
-cd demo
+cd site
+python build-chambres.py   # les 7 fiches chambres
+python build-reserver.py   # reserver.html
 python build-carte.py      # carte.html + spa.html
 python build-galerie.py    # galerie.html (+ optimise les photos manquantes)
 python build-404.py        # 404.html
@@ -75,7 +100,7 @@ python build-pages.py      # a-propos.html
 python build-pages2.py     # contact.html
 python build-pages3.py     # informations-utiles.html
 python build-pages4.py     # mentions-legales.html
-python build-pages5.py     # suite-arabe.html
+python build-pages5.py     # suite-arabe.html (remplacé par build-chambres.py)
 python build-pages6.py     # circuits.html
 ```
 
@@ -86,7 +111,7 @@ images dans `build-galerie.py`.
 
 ## Régénérer les images
 
-Les scripts d'optimisation lisent les originaux dans `demo/img/`. S'ils sont
+Les scripts d'optimisation lisent les originaux dans `site/img/`. S'ils sont
 absents, il faut les retélécharger depuis la médiathèque de l'hôtel
 (`https://evannathhotel.com/wp-json/wp/v2/media?per_page=100&page=1..5`) puis
 relancer `build-galerie.py`, qui ne régénère que les fichiers manquants.
@@ -94,7 +119,7 @@ relancer `build-galerie.py`, qui ne régénère que les fichiers manquants.
 ## Prévisualiser en local
 
 ```bash
-cd demo
+cd site
 python -m http.server 5599
 ```
 
@@ -106,8 +131,8 @@ Puis ouvrir <http://localhost:5599>.
 
 Hébergé sur **Vercel**, en site statique — aucune étape de compilation.
 
-À l'import du dépôt, régler **Root Directory** sur `demo`. Le fichier
-`demo/vercel.json` fait le reste : URL sans `.html`, images en cache un an,
+À l'import du dépôt, régler **Root Directory** sur `site`. Le fichier
+`site/vercel.json` fait le reste : URL sans `.html`, images en cache un an,
 en-têtes de sécurité. Chaque `git push` sur `main` redéploie automatiquement.
 
 ## À valider avec l'établissement

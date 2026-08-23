@@ -1,10 +1,18 @@
-# -*- coding: utf-8 -*-
-"""Blocs partages par toutes les pages : nav unique, tiroir plein ecran, pied de page.
-Utilise par les generateurs de pages. Aucune expression reguliere destructrice ici :
-les pages sont ecrites en entier a partir de ces briques.
-"""
-
-HEAD_CSS = """:root{
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Page introuvable — Hôtel Evannath, Assinie</title>
+<meta name="description" content="Cette page n'existe pas ou a changé d'adresse. Retrouvez les chambres, la table, les circuits et la galerie de l'Hôtel Evannath à Assinie.">
+<meta property="og:title" content="Page introuvable — Hôtel Evannath, Assinie">
+<meta name="robots" content="noindex, follow">
+<meta property="og:image" content="img/opt/gal-lag-nuit.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Karla:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
   --night:#100B06; --bark:#17100A; --bark-2:#1E150D; --bark-3:#2A1E13;
   --bronze:#B98A50; --bronze-2:#DFBB84;
   --cream:#F6EEE2; --muted:#9C8B78; --palm:#8FAE63; --err:#E08A7B;
@@ -103,25 +111,54 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
   .dw-in{padding:110px 24px 50px}
   .f-grid{grid-template-columns:1fr}
 }
-"""
 
-HEAD = """<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Karla:wght@300;400;500;600;700&display=swap" rel="stylesheet">"""
 
-LINKS = [
- ('01','index.html#chambres','n1','Chambres &amp; Suites'),
- ('02','carte.html','n2','La table'),
- ('03','spa.html','n3','Le spa'),
- ('04','circuits.html','n4','Circuits &amp; Offres'),
- ('05','galerie.html','n5','Galerie'),
- ('06','a-propos.html','n6','À propos'),
- ('07','informations-utiles.html','n7','Informations utiles'),
- ('08','contact.html','n8','Contact'),
-]
+body{background:var(--night)}
+.err{position:relative;min-height:100svh;display:flex;align-items:center;overflow:hidden}
+.err .bg{position:absolute;inset:0;background:url('img/opt/gal-lag-nuit.jpg') center/cover;animation:kb 24s ease-out forwards}
+@keyframes kb{from{transform:scale(1.03)}to{transform:scale(1.12)}}
+.err::after{content:"";position:absolute;inset:0;background:
+  radial-gradient(ellipse at 50% 46%,rgba(16,11,6,.4),rgba(16,11,6,.9) 74%),
+  linear-gradient(180deg,rgba(16,11,6,.8),transparent 34%,rgba(16,11,6,.97))}
+.err .in{position:relative;z-index:3;width:100%;text-align:center;padding-top:60px}
+.code{font-family:var(--f-display);font-size:clamp(5rem,18vw,13rem);line-height:.86;color:var(--bronze);
+  opacity:.32;letter-spacing:.02em;font-variant-numeric:tabular-nums}
+.err h1{font-size:clamp(2rem,5.4vw,3.6rem);margin:-8px 0 20px}
+.err h1 em{font-style:italic;color:var(--bronze-2)}
+.err .lede{max-width:46ch;margin:0 auto;font-size:1.06rem;color:#E3D9C9}
+.err .cta{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:36px}
+.rule{width:1px;height:44px;background:linear-gradient(var(--bronze),transparent);margin:34px auto 0}
 
-def header(cta_href, cta_label, cta_key='cta'):
-    return '''<header id="hd">
+.ways{background:var(--bark);padding:100px 0;border-top:1px solid var(--line)}
+.ways .head{text-align:center;margin-bottom:54px}
+.ways .head p{max-width:50ch;margin:16px auto 0;color:#B4A794}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.card{border:1px solid var(--line);background:var(--bark-2);overflow:hidden;transition:.45s;display:block}
+.card:hover{transform:translateY(-6px);border-color:rgba(185,138,80,.55)}
+.card .ph{aspect-ratio:4/3;overflow:hidden}
+.card .ph img{width:100%;height:100%;object-fit:cover;transition:1s cubic-bezier(.2,.8,.2,1)}
+.card:hover .ph img{transform:scale(1.07)}
+.card .in{padding:22px}
+.card h3{font-size:1.15rem;margin-bottom:8px;font-weight:400}
+.card p{font-size:13.5px;color:#A9997F}
+
+.helpline{border:1px solid var(--bronze);padding:44px;text-align:center;margin:90px 0 100px}
+.helpline h2{margin-bottom:12px}
+.helpline p{max-width:52ch;margin:0 auto 26px}
+.helpline .g{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+
+@media(max-width:1080px){.cards{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:720px){
+  .ways{padding:70px 0}
+  .cards{grid-template-columns:1fr}
+  .helpline{padding:30px;margin:60px 0 70px}
+}
+
+</style>
+</head>
+<body>
+
+<header id="hd">
   <div class="wrap nav">
     <a href="index.html" class="brand" aria-label="Hôtel Evannath, accueil">
       <img src="img/opt/logo-blanc.png" alt="Hôtel Evannath" width="729" height="176">
@@ -129,28 +166,30 @@ def header(cta_href, cta_label, cta_key='cta'):
     </a>
     <div class="nav-right">
       <div class="lang"><button class="on" data-lang="fr">FR</button><button data-lang="en">EN</button></div>
-      <a href="%s" class="btn btn-solid" data-t="%s">%s</a>
+      <a href="index.html#reserver" class="btn btn-solid" data-t="cta">Réserver</a>
       <button class="burger" id="bg" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="dw">
         <span class="lbl" data-t="mn">Menu</span>
         <span class="bars"><span></span><span></span><span></span></span>
       </button>
     </div>
   </div>
-</header>''' % (cta_href, cta_key, cta_label)
-
-def drawer(current='', photo='t-lampe', alt='Lanterne de rotin de l\'Hôtel Evannath'):
-    rows = []
-    for num, href, key, label in LINKS:
-        cls = ' class="on"' if href == current else ''
-        rows.append('      <a href="%s"%s><i>%s</i><span data-t="%s">%s</span></a>' % (href, cls, num, key, label))
-    return '''<div class="drawer" id="dw">
+</header>
+<div class="drawer" id="dw">
   <div class="dw-in">
     <nav aria-label="Navigation principale">
-%s
+      <a href="index.html#chambres"><i>01</i><span data-t="n1">Chambres &amp; Suites</span></a>
+      <a href="carte.html"><i>02</i><span data-t="n2">La table</span></a>
+      <a href="spa.html"><i>03</i><span data-t="n3">Le spa</span></a>
+      <a href="circuits.html"><i>04</i><span data-t="n4">Circuits &amp; Offres</span></a>
+      <a href="galerie.html"><i>05</i><span data-t="n5">Galerie</span></a>
+      <a href="a-propos.html"><i>06</i><span data-t="n6">À propos</span></a>
+      <a href="informations-utiles.html"><i>07</i><span data-t="n7">Informations utiles</span></a>
+      <a href="contact.html"><i>08</i><span data-t="n8">Contact</span></a>
+      <a href="reserver.html"><i>09</i><span data-t="n9">Réserver</span></a>
     </nav>
     <aside class="dw-side">
-      <div class="ph"><picture><source srcset="img/opt/%s.webp" type="image/webp">
-        <img src="img/opt/%s.jpg" width="1100" height="733" alt="%s" loading="lazy"></picture></div>
+      <div class="ph"><picture><source srcset="img/opt/t-lampe.webp" type="image/webp">
+        <img src="img/opt/t-lampe.jpg" width="1100" height="733" alt="Lanterne de rotin de l'Hôtel Evannath" loading="lazy"></picture></div>
       <div>
         <b data-t="dr">Réservations</b>
         <a href="tel:+2250151527575">+225 01 51 52 75 75</a>
@@ -161,9 +200,65 @@ def drawer(current='', photo='t-lampe', alt='Lanterne de rotin de l\'Hôtel Evan
       <div class="lang"><button class="on" data-lang="fr">FR</button><button data-lang="en">EN</button></div>
     </aside>
   </div>
-</div>''' % ('\n'.join(rows), photo, photo, alt)
+</div>
 
-FOOTER = '''<footer>
+<section class="err">
+  <div class="bg"></div>
+  <div class="in narrow">
+    <div class="code">404</div>
+    <h1 data-t="h1">Cette page a pris<br><em data-t="h1e">le large</em></h1>
+    <p class="lede" data-t="lede">Elle a peut-être changé d'adresse, ou n'a jamais existé. Pendant qu'on la cherche, la lagune est toujours là.</p>
+    <div class="cta">
+      <a href="index.html" class="btn btn-solid" data-t="c1">Retour à l'accueil</a>
+      <a href="contact.html" class="btn" data-t="c2">Nous écrire</a>
+    </div>
+    <div class="rule"></div>
+  </div>
+</section>
+
+<section class="ways">
+  <div class="wrap">
+    <div class="head">
+      <span class="eyebrow" data-t="eb">Vous cherchiez sans doute</span>
+      <h2 style="margin-top:16px" data-t="h2">L'une de ces quatre pages</h2>
+      <p data-t="p2">Ce sont celles que l'on consulte le plus. Si votre réponse n'y est pas, la réception répond 24 h/24.</p>
+    </div>
+    <div class="cards">
+      <a class="card" href="index.html#chambres">
+        <div class="ph"><picture><source srcset="img/opt/gal-ch-wax-t.webp" type="image/webp">
+          <img loading="lazy" width="620" height="413" src="img/opt/gal-ch-wax-t.jpg" alt="Chambres & Suites"></picture></div>
+        <div class="in"><h3 data-t="w1">Chambres & Suites</h3><p data-t="w1p">Sept catégories, de 67 000 à 280 000 FCFA la nuit.</p></div>
+      </a>
+      <a class="card" href="carte.html">
+        <div class="ph"><picture><source srcset="img/opt/gal-tab-dressee-t.webp" type="image/webp">
+          <img loading="lazy" width="620" height="413" src="img/opt/gal-tab-dressee-t.jpg" alt="La table"></picture></div>
+        <div class="in"><h3 data-t="w2">La table</h3><p data-t="w2p">Cuisine ivoirienne, poisson du jour, cocktails maison.</p></div>
+      </a>
+      <a class="card" href="circuits.html">
+        <div class="ph"><picture><source srcset="img/opt/gal-lag-ponton-t.webp" type="image/webp">
+          <img loading="lazy" width="620" height="413" src="img/opt/gal-lag-ponton-t.jpg" alt="Circuits & Offres"></picture></div>
+        <div class="in"><h3 data-t="w3">Circuits & Offres</h3><p data-t="w3p">Onze formules, du Pack Enfant à la lune de miel.</p></div>
+      </a>
+      <a class="card" href="galerie.html">
+        <div class="ph"><picture><source srcset="img/opt/gal-dom-aerien-t.webp" type="image/webp">
+          <img loading="lazy" width="620" height="413" src="img/opt/gal-dom-aerien-t.jpg" alt="Galerie"></picture></div>
+        <div class="in"><h3 data-t="w4">Galerie</h3><p data-t="w4p">Quarante-sept photographies du domaine.</p></div>
+      </a>
+    </div>
+
+    <div class="helpline">
+      <span class="eyebrow" data-t="eb2">Un lien cassé ?</span>
+      <h2 data-t="h3">Dites-le-nous, on le répare</h2>
+      <p data-t="p3">Si vous êtes arrivé ici depuis un lien, un message ou un moteur de recherche, signalez-le : nous corrigeons dans la journée.</p>
+      <div class="g">
+        <a href="https://wa.me/2250546017377" target="_blank" rel="noopener" class="btn btn-solid" data-t="g1">Écrire sur WhatsApp</a>
+        <a href="mailto:bonjour@evannathhotel.com" class="btn" data-t="g2">bonjour@evannathhotel.com</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
   <div class="wrap">
     <div class="f-grid">
       <div>
@@ -180,15 +275,16 @@ FOOTER = '''<footer>
         <a href="https://www.facebook.com/evannathhotel" target="_blank" rel="noopener">Facebook — 21 K abonnés</a>
       </div>
     </div>
-    <div class="f-bot"><span>© 2026 Hôtel Evannath — Assinie, Côte d'Ivoire</span><span>Maquette de refonte · démonstration</span></div>
+    <div class="f-bot"><span>© 2026 Hôtel Evannath — Assinie, Côte d'Ivoire</span><span>Assinie · Comoé · Côte d'Ivoire</span></div>
   </div>
 </footer>
 
 <a class="wa" href="https://wa.me/2250546017377" target="_blank" rel="noopener" aria-label="Nous écrire sur WhatsApp">
   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.5 14.4c-.3-.1-1.7-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.7 1-.9 1.2-.2.2-.3.2-.6.1-1.7-.9-2.9-1.6-4-3.5-.3-.5.3-.5.9-1.6.1-.2 0-.4 0-.5s-.7-1.6-.9-2.2c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.3 5.2 4.6 1.9.8 2.7.9 3.6.8.6-.1 1.7-.7 2-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.6-.3M12 2a10 10 0 00-8.6 15L2 22l5.2-1.4A10 10 0 1012 2z"/></svg>
-</a>'''
+</a>
 
-NAV_JS = """var hd=document.getElementById('hd');
+<script>
+var hd=document.getElementById('hd');
 addEventListener('scroll',function(){hd.classList.toggle('scrolled',scrollY>60)},{passive:true});
 
 var bg=document.getElementById('bg'),dw=document.getElementById('dw');
@@ -209,44 +305,30 @@ var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 if(!('IntersectionObserver' in window)||reduce){document.querySelectorAll('.reveal').forEach(function(e){e.classList.add('in')})}
 else{var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.1});
  document.querySelectorAll('.reveal').forEach(function(el){io.observe(el)});
- setTimeout(function(){document.querySelectorAll('.reveal:not(.in)').forEach(function(el){if(el.getBoundingClientRect().top<innerHeight)el.classList.add('in')})},1200)}"""
+ setTimeout(function(){document.querySelectorAll('.reveal:not(.in)').forEach(function(el){if(el.getBoundingClientRect().top<innerHeight)el.classList.add('in')})},1200)}
 
-LANG_JS = """var FR={};document.querySelectorAll('[data-t]').forEach(function(e){FR[e.dataset.t]=e.innerHTML});
+var EN={mn:"Menu",n1:"Rooms &amp; Suites",n2:"The table",n3:"The spa",n4:"Packages &amp; Offers",n5:"Gallery",n6:"About",n7:"Useful information",n8:"Contact",n9:"Book",dr:"Reservations",cta:"Book now",
+h1:"This page has<br>drifted off",h1e:"drifted off",
+lede:"It may have moved, or never existed at all. While we look for it, the lagoon is still there.",
+c1:"Back to the homepage",c2:"Write to us",
+eb:"You were probably looking for",h2:"One of these four pages",
+p2:"These are the most visited. If your answer is not there, the front desk answers 24/7.",
+w1:"Rooms &amp; Suites",w1p:"Seven categories, from 67,000 to 280,000 FCFA a night.",
+w2:"The table",w2p:"Ivorian cooking, catch of the day, house cocktails.",
+w3:"Packages &amp; Offers",w3p:"Eleven packages, from the Kids Pack to the honeymoon.",
+w4:"Gallery",w4p:"Forty-seven photographs of the estate.",
+eb2:"A broken link?",h3:"Tell us and we will fix it",
+p3:"If you arrived here from a link, a message or a search engine, let us know: we fix it the same day.",
+g1:"Message on WhatsApp",g2:"bonjour@evannathhotel.com"};
+
+var FR={};document.querySelectorAll('[data-t]').forEach(function(e){FR[e.dataset.t]=e.innerHTML});
 document.querySelectorAll('.lang button').forEach(function(b){b.onclick=function(){
   var lg=b.dataset.lang;
   document.querySelectorAll('.lang button').forEach(function(x){x.classList.toggle('on',x.dataset.lang===lg)});
   var dict=lg==='en'?EN:FR;
   document.querySelectorAll('[data-t]').forEach(function(e){if(dict[e.dataset.t])e.innerHTML=dict[e.dataset.t]});
   document.documentElement.lang=lg;
-}});"""
-
-EN_NAV = ('mn:"Menu",n1:"Rooms &amp; Suites",n2:"The table",n3:"The spa",n4:"Packages &amp; Offers",'
-          'n5:"Gallery",n6:"About",n7:"Useful information",n8:"Contact",dr:"Reservations",')
-
-def page(title, desc, og, css, body, script, preload=None):
-    pre = '\n<link rel="preload" as="image" href="img/opt/%s.webp" type="image/webp">' % preload if preload else ''
-    return '''<!doctype html>
-<html lang="fr">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>%s</title>
-<meta name="description" content="%s">
-<meta property="og:title" content="%s">
-<meta property="og:image" content="img/opt/%s.jpg">
-%s%s
-<style>
-%s
-%s
-</style>
-</head>
-<body>
-
-%s
-
-<script>
-%s
+}});
 </script>
 </body>
 </html>
-''' % (title, desc, title, og, HEAD, pre, HEAD_CSS, css, body, script)

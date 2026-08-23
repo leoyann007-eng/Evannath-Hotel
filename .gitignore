@@ -5,22 +5,22 @@ proposition-commerciale.html
 
 # ── Photos sources ────────────────────────────────────────────
 # Les originaux téléchargés depuis evannathhotel.com (~60 Mo de PNG).
-# Seules les versions optimisées de demo/img/opt/ sont servies et versionnées.
+# Seules les versions optimisées de site/img/opt/ sont servies et versionnées.
 # Pour les régénérer : voir la section « Régénérer les images » du README.
-demo/img/gallery/
-demo/img/rest/
-demo/img/rooms/
-demo/img/brand/
-demo/img/insta/
-demo/img/manquant/
-demo/img/fb/
+site/img/gallery/
+site/img/rest/
+site/img/rooms/
+site/img/brand/
+site/img/insta/
+site/img/manquant/
+site/img/fb/
 
 # ── Relevés d'audit ───────────────────────────────────────────
 .media/
 
 # ── Variante non retenue ──────────────────────────────────────
-demo/index-luxe-variante.html
-demo/*.gardefou
+site/index-luxe-variante.html
+site/*.gardefou
 
 # ── Environnement local ───────────────────────────────────────
 .claude/

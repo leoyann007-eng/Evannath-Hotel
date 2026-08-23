@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Le spa — Hôtel Evannath, Assinie</title>
-<meta name="description" content="Le spa de l'Hôtel Evannath à Assinie : massage aux pierres chauffantes, rituel de l'Orient à l'argan, gommage au savon noir africain, soins aux cinq fleurs d'Assinie. 22 soins, sur rendez-vous.">
+<meta name="description" content="Le spa de l'Hôtel Evannath à Assinie : massage aux pierres chauffantes, rituel de l'Orient à l'argan, gommage au savon noir africain, soins aux cinq fleurs d'Assinie. {{TOTAL}} soins, sur rendez-vous.">
 <meta property="og:title" content="Le spa — Hôtel Evannath, Assinie">
 <meta property="og:image" content="img/opt/sp-hero.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -252,6 +252,7 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
       <a href="a-propos.html"><i>06</i><span data-t="n6">À propos</span></a>
       <a href="informations-utiles.html"><i>07</i><span data-t="n7">Informations utiles</span></a>
       <a href="contact.html"><i>08</i><span data-t="n8">Contact</span></a>
+      <a href="reserver.html"><i>09</i><span data-t="n9">Réserver</span></a>
     </nav>
     <aside class="dw-side">
       <div class="ph"><picture><source srcset="img/opt/sp-produits-t.webp" type="image/webp">
@@ -370,57 +371,11 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
 <section class="carte">
   <div class="wrap head reveal">
     <span class="eyebrow" data-t="e3">La carte des soins</span>
-    <h2 style="margin-top:16px" data-t="h3">22 soins, avec les prix</h2>
+    <h2 style="margin-top:16px" data-t="h3">{{TOTAL}} soins, avec les prix</h2>
     <p data-t="p3">Massages, visage, gommages, onglerie et épilation. Réservation à la réception ou par WhatsApp.</p>
   </div>
   <div class="wrap">
-      <section class="grp" id="s0">
-        <h3>Massages du corps</h3>
-        <ul class="menu-list">
-        <li><div><b>Massage thérapeutique aux pierres chauffantes</b><em>50 min</em></div><span>25 000</span></li>
-        <li><div><b>Grand rituel corps de l'Orient, argan divin</b><em>1 h 30</em></div><span>25 000</span></li>
-        <li><div><b>Massage sublime de Polynésie, lâcher-prise</b><em>50 min</em></div><span>15 000</span></li>
-        <li><div><b>Massage relaxant sur mesure aux eucalyptus</b><em>50 min</em></div><span>15 000</span></li>
-        <li><div><b>Massage détente et bien-être au jasmin</b><em>20 min</em></div><span>10 000</span></li>
-        <li><div><b>Massage relaxant de l'arrière du corps</b><em>20 min</em></div><span>10 000</span></li>
-        <li><div><b>Massage délassant des jambes, fraîcheur et légèreté</b><em>20 min</em></div><span>5 000</span></li>
-        </ul>
-      </section>
-      <section class="grp" id="s1">
-        <h3>Soins du visage</h3>
-        <ul class="menu-list">
-        <li><div><b>Soin massage fleurs d'Assinie, pureté et éclat</b><em>20 min</em></div><span>5 000</span></li>
-        <li><div><b>Soin massage aux 5 fleurs d'Assinie, hydratant et repulpant</b><em>30 min</em></div><span>5 000</span></li>
-        <li><div><b>Soin Ko-Bi-Do, jeunesse et éclat</b><em>20 min</em></div><span>5 000</span></li>
-        </ul>
-      </section>
-      <section class="grp" id="s2">
-        <h3>Gommages &amp; sauna</h3>
-        <ul class="menu-list">
-        <li><div><b>Sauna, fitness et massage</b><em>2 h</em></div><span>50 000</span></li>
-        <li><div><b>Soin massage aux 5 fleurs d'Assinie, hydratant et repulpant</b><em>20 min</em></div><span>15 000</span></li>
-        <li><div><b>Gommage au savon noir africain, peau douce et satinée</b><em>20 min</em></div><span>15 000</span></li>
-        </ul>
-      </section>
-      <section class="grp" id="s3">
-        <h3>Onglerie</h3>
-        <ul class="menu-list">
-        <li><div><b>Soin fortifiant et embellissement des ongles naturels</b></div><span>5 000</span></li>
-        <li><div><b>Renfort d'ongles naturels, gainage transparent</b></div><span>5 000</span></li>
-        <li><div><b>Rallongement, extensions sans capsules</b></div><span>5 000</span></li>
-        <li><div><b>Pose de vernis</b></div><span>2 500</span></li>
-        </ul>
-      </section>
-      <section class="grp" id="s4">
-        <h3>Épilation</h3>
-        <ul class="menu-list">
-        <li><div><b>Création de ligne de sourcil</b></div><span>15 000</span></li>
-        <li><div><b>Sourcil</b></div><span>2 000</span></li>
-        <li><div><b>Lèvre ou menton</b></div><span>2 000</span></li>
-        <li><div><b>Pose de faux cils naturels</b></div><span>2 000</span></li>
-        <li><div><b>Jambe entière</b></div><span>2 000</span></li>
-        </ul>
-      </section>
+{{SPA}}
   </div>
 </section>
 
@@ -479,7 +434,7 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
         <a href="https://www.facebook.com/evannathhotel" target="_blank" rel="noopener">Facebook — 21 K abonnés</a>
       </div>
     </div>
-    <div class="f-bot"><span>© 2026 Hôtel Evannath — Assinie, Côte d'Ivoire</span><span>Maquette de refonte · démonstration</span></div>
+    <div class="f-bot"><span>© 2026 Hôtel Evannath — Assinie, Côte d'Ivoire</span><span>Assinie · Comoé · Côte d'Ivoire</span></div>
   </div>
 </footer>
 
@@ -541,7 +496,7 @@ document.getElementById('sf').addEventListener('submit',function(e){e.preventDef
   alert("Démonstration : la demande partirait au spa et à bonjour@evannathhotel.com, avec confirmation du créneau par WhatsApp.")});
 
 var EN={mn:"Menu",n1:"Rooms &amp; Suites",n2:"The table",n3:"The spa",n4:"Packages &amp; Offers",
-n5:"Gallery",n6:"About",n7:"Useful information",n8:"Contact",dr:"Reservations",tb:"Book",
+n5:"Gallery",n6:"About",n7:"Useful information",n8:"Contact",n9:"Book",dr:"Reservations",tb:"Book",
 c1:"Home",c2:"The spa",eb:"Spa &amp; sauna · by appointment",h1e:"of Assinie",
 lede:"Heated stones, black soap, argan oil and the five flowers of Assinie. Twenty minutes or an hour and a half — however much time you care to give us.",
 e1:"Our approach",big:"Salt, oil and a hand. Nothing more complicated.",
@@ -561,7 +516,7 @@ r3n:"Soft, satin skin. The simplest gesture, and the most effective.",
 r4:"Five flowers of Assinie facial",r4i:"30 min · face · hydrating and plumping",
 r4n:"Five flowers picked here. The treatment named after the town.",
 cb:"On site",cbp:"Sauna, gym and pool, a few steps from the cabins.",
-e3:"The treatment list",h3:"22 treatments, with prices",
+e3:"The treatment list",h3:"{{TOTAL}} treatments, with prices",
 p3:"Massages, facials, scrubs, nails and waxing. Book at the front desk or on WhatsApp.",
 e4:"Make an appointment",h4:"Book a treatment",
 l0:"Treatment",l1:"Date",l2:"Time",l3:"Name",l4:"Phone / WhatsApp",l5:"Request this slot",
