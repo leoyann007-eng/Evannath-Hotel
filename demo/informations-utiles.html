@@ -1,0 +1,573 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Informations utiles — Hôtel Evannath, Assinie</title>
+<meta name="description" content="Tout ce qu'il faut savoir avant de venir à l'Hôtel Evannath, Assinie PK 19 : arrivée et départ, paiement, annulation, navette aéroport gratuite, accès depuis Abidjan, familles et groupes.">
+<meta property="og:title" content="Informations utiles — Hôtel Evannath, Assinie">
+<meta property="og:image" content="img/opt/g-lobby.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Karla:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --night:#100B06; --bark:#17100A; --bark-2:#1E150D; --bark-3:#2A1E13;
+  --bronze:#B98A50; --bronze-2:#DFBB84;
+  --cream:#F6EEE2; --muted:#9C8B78; --palm:#8FAE63; --err:#E08A7B;
+  --line:rgba(185,138,80,.18); --line-2:rgba(185,138,80,.10);
+  --max:1240px;
+  --f-display:"Marcellus",Georgia,"Times New Roman",serif;
+  --f-body:"Karla",system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bark);color:var(--cream);font-family:var(--f-body);font-size:16.5px;line-height:1.7;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+img{max-width:100%;height:auto;display:block}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:2px solid var(--bronze);outline-offset:3px}
+.wrap{max-width:var(--max);margin:0 auto;padding:0 24px}
+.narrow{max-width:900px;margin:0 auto;padding:0 24px}
+.eyebrow{font-size:10.5px;letter-spacing:.36em;text-transform:uppercase;color:var(--bronze);font-weight:700;display:block}
+h1,h2,h3{font-family:var(--f-display);font-weight:400;line-height:1.1;text-wrap:balance}
+h1{font-size:clamp(2.4rem,5.4vw,4rem)}
+h2{font-size:clamp(1.7rem,3.2vw,2.5rem)}
+h3{font-size:1.2rem}
+p{color:#D6CBBB}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:16px 32px;font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;border:1px solid var(--bronze);color:var(--bronze);background:transparent;cursor:pointer;transition:.4s cubic-bezier(.2,.8,.2,1);font-family:var(--f-body)}
+.btn:hover{background:var(--bronze);color:var(--night);transform:translateY(-2px)}
+.btn-solid{background:var(--bronze);color:var(--night)}
+.btn-solid:hover{background:var(--bronze-2);border-color:var(--bronze-2)}
+
+/* NAV : un seul element */
+header{position:fixed;top:0;left:0;right:0;z-index:100;transition:.45s;padding:22px 0;background:rgba(23,16,10,.9);backdrop-filter:blur(14px)}
+header.scrolled{padding:11px 0;background:rgba(23,16,10,.97);border-bottom:1px solid var(--line)}
+.nav{display:flex;align-items:center;justify-content:space-between;gap:20px}
+.brand img{width:168px;transition:.45s}
+header.scrolled .brand img{width:132px}
+.brand small{display:block;font-size:8px;letter-spacing:.42em;color:var(--bronze);margin-top:6px;padding-left:2px;font-weight:700}
+.nav-right{display:flex;align-items:center;gap:18px}
+.lang{display:flex;border:1px solid var(--line)}
+.lang button{background:none;border:0;color:var(--muted);font:700 10.5px/1 var(--f-body);letter-spacing:.12em;padding:9px 11px;cursor:pointer;transition:.3s}
+.lang button.on{background:var(--bronze);color:var(--night)}
+.burger{display:flex;align-items:center;gap:12px;background:none;border:0;cursor:pointer;padding:10px 4px;position:relative;z-index:101}
+.burger .bars{display:block;width:26px}
+.burger .bars span{display:block;height:1.5px;background:var(--cream);margin:6px 0;transition:.35s}
+.burger .lbl{font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;font-weight:700;color:var(--cream)}
+.burger.open .bars span:nth-child(1){transform:translateY(7.5px) rotate(45deg)}
+.burger.open .bars span:nth-child(2){opacity:0}
+.burger.open .bars span:nth-child(3){transform:translateY(-7.5px) rotate(-45deg)}
+.drawer{position:fixed;inset:0;background:var(--night);z-index:99;opacity:0;visibility:hidden;transition:.5s cubic-bezier(.2,.8,.2,1);overflow-y:auto}
+.drawer.open{opacity:1;visibility:visible}
+.dw-in{min-height:100svh;display:grid;grid-template-columns:1.25fr 1fr;align-items:center;gap:60px;max-width:var(--max);margin:0 auto;padding:130px 24px 60px}
+.dw-in nav{display:flex;flex-direction:column}
+.dw-in nav a{
+  display:flex;align-items:baseline;gap:22px;padding:16px 0;border-bottom:1px solid var(--line-2);
+  font-family:var(--f-display);font-size:clamp(1.45rem,3.2vw,2.4rem);color:var(--cream);
+  opacity:0;transform:translateY(18px);transition:color .3s,opacity .6s,transform .6s
+}
+.drawer.open .dw-in nav a{opacity:1;transform:none}
+.dw-in nav a:hover,.dw-in nav a.on{color:var(--bronze-2)}
+.dw-in nav a i{font-style:normal;font-family:var(--f-body);font-size:10px;letter-spacing:.2em;color:var(--bronze);font-weight:700;flex:0 0 auto;opacity:.7}
+.dw-side{display:flex;flex-direction:column;gap:26px}
+.dw-side .ph{aspect-ratio:4/3;overflow:hidden;background:var(--bark-2)}
+.dw-side .ph img{width:100%;height:100%;object-fit:cover}
+.dw-side b{display:block;font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--bronze);font-weight:700;margin-bottom:12px}
+.dw-side a{display:block;font-size:15px;color:#CDBFAE;padding:7px 0;transition:.3s}
+.dw-side a:hover{color:var(--bronze)}
+.dw-side p{font-size:13.5px;color:var(--muted);margin-top:12px}
+.dw-side .lang{margin-top:6px;width:max-content}
+.dw-side .lang button{padding:15px 20px;font-size:11px}
+
+.crumb{font-size:11.5px;letter-spacing:.1em;color:var(--muted);margin-bottom:22px}
+.crumb a{padding:6px 0;display:inline-block}
+.crumb a:hover{color:var(--bronze)}
+.crumb span{color:var(--bronze)}
+
+footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
+.f-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1.2fr;gap:44px}
+.f-grid h4{font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--bronze);margin-bottom:20px;font-weight:700}
+.f-grid p{display:block;font-size:13.5px;color:#9C8B78;margin-bottom:11px}
+.f-grid a{display:block;font-size:13.5px;color:#9C8B78;padding:9px 0;transition:.3s}
+.f-grid a:hover{color:var(--bronze)}
+.f-bot{border-top:1px solid var(--line);margin-top:54px;padding-top:26px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:11.5px;color:#6A5C4C}
+.wa{position:fixed;right:22px;bottom:22px;z-index:90;width:56px;height:56px;border-radius:50%;background:#25D366;display:grid;place-items:center;box-shadow:0 10px 30px rgba(37,211,102,.35);transition:.35s}
+.wa:hover{transform:scale(1.09)}
+.wa svg{width:28px;height:28px;fill:#fff}
+
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .9s cubic-bezier(.2,.8,.2,1),transform .9s cubic-bezier(.2,.8,.2,1)}
+.reveal.in{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition-duration:.01ms!important}.reveal,.dw-in nav a{opacity:1;transform:none}}
+
+@media(max-width:1080px){
+  .dw-in{grid-template-columns:1fr;gap:40px;align-content:start}
+  .dw-side .ph{display:none}
+  .f-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:720px){
+  .burger .lbl{display:none}
+  .nav-right .lang{display:none}
+  .dw-in{padding:110px 24px 50px}
+  .f-grid{grid-template-columns:1fr}
+}
+
+
+.head{padding:150px 0 40px}
+.head h1{margin:10px 0 18px}
+.head p{max-width:60ch;font-size:1.06rem}
+.quick{display:grid;grid-template-columns:repeat(6,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-bottom:72px}
+.quick div{background:var(--bark);padding:24px 18px}
+.quick b{display:block;font-family:var(--f-display);font-size:1.5rem;color:var(--bronze);line-height:1;font-variant-numeric:tabular-nums}
+.quick span{display:block;font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-top:9px;font-weight:600;line-height:1.4}
+.body{display:grid;grid-template-columns:220px 1fr;gap:56px;align-items:start;padding-bottom:100px}
+.side{position:sticky;top:118px}
+.side b{display:block;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--bronze);font-weight:700;margin-bottom:14px}
+.side nav{display:flex;flex-direction:column}
+.side a{font-size:13.5px;color:var(--muted);padding:10px 0;border-bottom:1px solid var(--line);transition:.3s}
+.side a:hover,.side a.on{color:var(--cream)}
+.side .tools{margin-top:26px;display:flex;flex-direction:column;gap:10px}
+.side .tools button{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);background:none;border:1px solid var(--line);padding:14px;cursor:pointer;font-family:var(--f-body);font-weight:700;transition:.3s}
+.side .tools button:hover{border-color:var(--bronze);color:var(--bronze)}
+.sec{margin-bottom:56px;scroll-margin-top:130px}
+.sec>h2{padding-bottom:16px;border-bottom:1px solid var(--line);margin-bottom:4px}
+.acc{border-bottom:1px solid var(--line)}
+.acc h3{margin:0}
+.acc button{width:100%;text-align:left;background:none;border:0;cursor:pointer;color:var(--cream);
+  font:400 1.08rem/1.4 var(--f-display);padding:22px 44px 22px 0;position:relative;transition:.3s}
+.acc button:hover{color:var(--bronze-2)}
+.acc button::after{content:"";position:absolute;right:6px;top:50%;width:11px;height:11px;
+  border-right:1.5px solid var(--bronze);border-bottom:1.5px solid var(--bronze);
+  transform:translateY(-70%) rotate(45deg);transition:.35s}
+.acc.open button::after{transform:translateY(-20%) rotate(-135deg)}
+.acc .in{display:grid;grid-template-rows:0fr;transition:grid-template-rows .4s cubic-bezier(.2,.8,.2,1)}
+.acc.open .in{grid-template-rows:1fr}
+.acc .in>div{overflow:hidden}
+.acc .in p{font-size:14.5px;padding-bottom:8px}
+.acc .in p:last-child{padding-bottom:24px}
+.acc .in ul{list-style:none;padding-bottom:24px}
+.acc .in li{font-size:14.5px;color:#CFC3B2;padding:7px 0 7px 20px;position:relative}
+.acc .in li::before{content:"";position:absolute;left:0;top:15px;width:6px;height:6px;background:var(--bronze);opacity:.7}
+.acc .in .kv{display:flex;justify-content:space-between;gap:18px;padding:11px 0;border-bottom:1px solid rgba(185,138,80,.1);font-size:14.5px}
+.acc .in .kv:last-of-type{border-bottom:0;margin-bottom:18px}
+.acc .in .kv span:first-child{color:var(--muted);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;font-weight:600}
+.acc .in .hi{color:var(--palm)}
+.acc .in a{color:var(--bronze);border-bottom:1px solid var(--line)}
+.help{border:1px solid var(--bronze);padding:44px;text-align:center;margin-bottom:100px}
+.help h2{margin-bottom:12px}
+.help p{max-width:50ch;margin:0 auto 26px}
+.help .g{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+@media(max-width:1080px){.quick{grid-template-columns:repeat(3,1fr)}.body{grid-template-columns:1fr;gap:0}.side{display:none}.route-grid{grid-template-columns:1fr}}
+@media(max-width:720px){.head{padding:126px 0 30px}.quick{grid-template-columns:repeat(2,1fr)}.help{padding:30px}.acc .in .kv{flex-direction:column;gap:4px}}
+
+</style>
+</head>
+<body>
+
+<header id="hd">
+  <div class="wrap nav">
+    <a href="index.html" class="brand" aria-label="Hôtel Evannath, accueil">
+      <img src="img/opt/logo-blanc.png" alt="Hôtel Evannath" width="729" height="176">
+      <small>LE RÊVE AFRICAIN</small>
+    </a>
+    <div class="nav-right">
+      <div class="lang"><button class="on" data-lang="fr">FR</button><button data-lang="en">EN</button></div>
+      <a href="index.html#reserver" class="btn btn-solid" data-t="cta">Réserver</a>
+      <button class="burger" id="bg" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="dw">
+        <span class="lbl" data-t="mn">Menu</span>
+        <span class="bars"><span></span><span></span><span></span></span>
+      </button>
+    </div>
+  </div>
+</header>
+<div class="drawer" id="dw">
+  <div class="dw-in">
+    <nav aria-label="Navigation principale">
+      <a href="index.html#chambres"><i>01</i><span data-t="n1">Chambres &amp; Suites</span></a>
+      <a href="carte.html"><i>02</i><span data-t="n2">La table</span></a>
+      <a href="spa.html"><i>03</i><span data-t="n3">Le spa</span></a>
+      <a href="circuits.html"><i>04</i><span data-t="n4">Circuits &amp; Offres</span></a>
+      <a href="galerie.html"><i>05</i><span data-t="n5">Galerie</span></a>
+      <a href="a-propos.html"><i>06</i><span data-t="n6">À propos</span></a>
+      <a href="informations-utiles.html" class="on"><i>07</i><span data-t="n7">Informations utiles</span></a>
+      <a href="contact.html"><i>08</i><span data-t="n8">Contact</span></a>
+    </nav>
+    <aside class="dw-side">
+      <div class="ph"><picture><source srcset="img/opt/t-lampe.webp" type="image/webp">
+        <img src="img/opt/t-lampe.jpg" width="1100" height="733" alt="Lanterne de rotin de l'Hôtel Evannath" loading="lazy"></picture></div>
+      <div>
+        <b data-t="dr">Réservations</b>
+        <a href="tel:+2250151527575">+225 01 51 52 75 75</a>
+        <a href="mailto:bonjour@evannathhotel.com">bonjour@evannathhotel.com</a>
+        <a href="https://wa.me/2250546017377" target="_blank" rel="noopener">WhatsApp</a>
+        <p>Assinie PK 19 · Comoé · Côte d'Ivoire</p>
+      </div>
+      <div class="lang"><button class="on" data-lang="fr">FR</button><button data-lang="en">EN</button></div>
+    </aside>
+  </div>
+</div>
+
+<div class="wrap head">
+  <nav class="crumb" aria-label="Fil d'Ariane">
+    <a href="index.html" data-t="c1">Accueil</a> &nbsp;·&nbsp; <span data-t="c2">Informations utiles</span>
+  </nav>
+  <span class="eyebrow" data-t="eb">Avant, pendant et après votre séjour</span>
+  <h1 data-t="h1">Informations utiles</h1>
+  <p data-t="lede">Les réponses aux questions qu'on nous pose le plus souvent. Si la vôtre n'y est pas, la réception répond 24 h/24 — et WhatsApp reste le plus rapide.</p>
+</div>
+
+<div class="wrap">
+  <div class="quick">
+    <div><b>14 h</b><span data-t="q1">Arrivée</span></div>
+    <div><b>12 h</b><span data-t="q2">Départ</span></div>
+    <div><b>48 h</b><span data-t="q3">Annulation gratuite</span></div>
+    <div><b>30 %</b><span data-t="q4">Acompte</span></div>
+    <div><b data-t="q5v">Offerte</b><span data-t="q5">Navette aéroport</span></div>
+    <div><b>24 h/24</b><span data-t="q6">Réception</span></div>
+  </div>
+</div>
+
+<div class="wrap body">
+  <aside class="side">
+    <b data-t="sm">Sur cette page</b>
+    <nav id="toc">
+      <a href="#reserver" data-t="i1">Réserver &amp; payer</a>
+      <a href="#venir" data-t="i2">Venir jusqu'à nous</a>
+      <a href="#sejour" data-t="i3">Pendant le séjour</a>
+      <a href="#familles" data-t="i4">Familles &amp; enfants</a>
+      <a href="#groupes" data-t="i5">Groupes &amp; séminaires</a>
+      <a href="#savoir" data-t="i6">Bon à savoir</a>
+    </nav>
+    <div class="tools">
+      <button id="all" data-t="ta">Tout déplier</button>
+      <button onclick="window.print()" data-t="tp">Imprimer la page</button>
+    </div>
+  </aside>
+
+  <div id="content">
+    <section class="sec" id="reserver">
+      <h2 data-t="s1">Réserver &amp; payer</h2>
+      <div class="acc open"><h3><button type="button" aria-expanded="true" data-t="a11">Comment réserver ?</button></h3>
+        <div class="in"><div>
+          <p data-t="b11">Trois moyens, tous équivalents : directement sur ce site, par WhatsApp au +225 05 46 01 73 77, ou par téléphone au +225 01 51 52 75 75. Le tarif affiché ici est notre meilleur tarif — vous ne le trouverez pas moins cher ailleurs.</p>
+          <p data-t="b11b">Pour les circuits, les groupes et les séminaires, passez par le <a href="contact.html">formulaire de contact</a> : nous revenons vers vous avec un devis sous 24 h.</p>
+        </div></div>
+      </div>
+      <div class="acc"><h3><button type="button" aria-expanded="false" data-t="a12">Quels moyens de paiement acceptez-vous ?</button></h3>
+        <div class="in"><div>
+          <p data-t="b12">Nous sommes flexibles, et c'est volontaire.</p>
+          <ul>
+            <li data-t="b12a">Wave</li>
+            <li data-t="b12b">Orange Money et MTN Money</li>
+            <li data-t="b12c">Carte bancaire Visa et Mastercard</li>
+            <li data-t="b12d">Espèces, en francs CFA, à la réception</li>
+            <li data-t="b12e">Virement bancaire, pour les groupes et les entreprises</li>
+          </ul>
+        </div></div>
+      </div>
+      <div class="acc"><h3><button type="button" aria-expanded="false" data-t="a13">Faut-il verser un acompte ?</button></h3>
+        <div class="in"><div>
+          <div class="kv"><span data-t="k1">Acompte à la réservation</span><span>30 %</span></div>
+          <div class="kv"><span data-t="k2">Solde</span><span data-t="k2v">à l'arrivée</span></div>
+          <div class="kv"><span data-t="k3">Groupes dès 10 personnes</span><span data-t="k3v">50 % à la confirmation</span></div>
+          <p data-t="b13">L'acompte confirme définitivement la chambre. Sans acompte, la réservation reste une option, et la chambre peut être attribuée à un autre client.</p>
+        </div></div>
+      </div>
+      <div class="acc"><h3><button type="button" aria-expanded="false" data-t="a14">Puis-je annuler ou modifier ?</button></h3>
+        <div class="in"><div>
+          <div class="kv"><span data-t="k4">Plus de 48 h avant</span><span class="hi" data-t="k4v">gratuit, remboursement intégral</span></div>
+          <div class="kv"><span data-t="k5">Moins de 48 h avant</span><span data-t="k5v">acompte conservé</span></div>
+          <div class="kv"><span data-t="k6">Non-présentation</span><span data-t="k6v">première nuit facturée</span></div>
+          <p data-t="b14">Un décalage de dates est toujours possible sans frais, sous réserve de disponibilité. Appelez-nous, nous trouverons une solution.</p>
+        </div></div>
+      </div>
+    </section>
+    <section class="sec" id="venir">
+      <h2 data-t="s2">Venir jusqu'à nous</h2>
+      <div class="acc"><h3><button type="button" aria-expanded="false" data-t="a21">La navette aéroport est-elle vraiment gratuite ?</button></h3>
+        <div class="in"><div>
+          <p data-t="b21">Oui, à l'aller comme au retour, et sans supplément. Il suffit de nous donner votre numéro de vol et votre heure d'arrivée au moment de la réservation, ou au plus tard 24 h avant.</p>
+          <p data-t="b21b">L'aéroport Félix-Houphouët-Boigny est à environ 80 km. Comptez un peu moins de deux heures de route.</p>
+        </div></div>
+      </div>
+      <div class="acc"><h3><button type="button" aria-expanded="false" data-t="a22">Comment venir en voiture depuis Abidjan ?</button></h3>
+        <div class="in"><div>
+          <div class="kv"><span data-t="k7">Distance</span><span>≈ 85 km</span></div>
+          <div class="kv"><span data-t="k8">Durée</span><span data-t="k8v">1 h 45 environ</span></div>
+          <div class="kv"><span data-t="k9">Adresse</span><span>Assinie, PK 19</span></div>
+          <p data-t="b22">Prenez la route côtière en direction d'Assinie-Mafia. Nous sommes au point kilométrique 19. Le parking est gratuit, sur le domaine, et surveillé.</p>
+          <p data-t="b22b"><a href="https://www.google.com/maps/dir/?api=1&destination=Assinie-Mafia" target="_blank" rel="noopener">Lancer l'itinéraire dans Maps</a></p>
+        </div></div>
+      </div>
+      <div class="acc"><h3><button type="button" aria-expanded="false" data-t="a23">Peut-on arriver par la lagune ?</button></h3>
+        <div class="in"><div>
+          <p data-t="b23">Oui. L'hôtel a son propre ponton sur la lagune Aby, et une arrivée en pirogue prend une quinzaine de minutes depuis l'embarcadère. C'est la plus belle façon d'arriver, surtout en fin de journée — mais elle se prépare : prévenez la réception au moins la veille.</p>
+        </div></div>
+      </div>
+    </section>
+    <section class="sec" id="sejour">
+      <h2 data-t="s3">Pendant le séjour</h2>
+      <div class="acc"><h3><button type="button" aria-expanded="false" data-t="a31">Arrivée, départ, et si mon vol est décalé ?</button></h3>
+        <div class="in"><div>
+          <div class="kv"><span data-t="k10">Arrivée</span><span data-t="k10v">à partir de 14 h 00</span></div>
+          <div class="kv"><span data-t="k11">Départ</span><span data-t="k11v">avant 12 h 00</span></div>
+          <div class="kv"><span data-t="k12">Réception</span><span class="hi" data-t="k12v">ouverte 24 h/24</span></div>
+          <p data-t="b31">Arrivée tardive, départ matinal, vol décalé : la réception ne ferme jamais, quelqu'un vous attendra. Prévenez-nous simplement, et nous gardons vos bagages sans frais avant l'arrivée comme après le départ.</p>
+        </div></div>
+      </div>
+      <div class="acc"><h3><button type="button" aria-expanded="false" data-t="a32">Quels sont les horaires sur le domaine ?</button></h3>
+        <div class="in"><div>
+          <div class="kv"><span data-t="k13">Petit-déjeuner</span><span>6 h 30 — 10 h 30</span></div>
+          <div class="kv"><span data-t="k14">Déjeuner</span><span>12 h 00 — 15 h 00</span></div>
+          <div class="kv"><span data-t="k15">Dîner</span><span>19 h 00 — 22 h 30</span></div>
+          <div class="kv"><span data-t="k16">Piscine &amp; jacuzzi</span><span data-t="k16v">du lever du jour à la nuit</span></div>
+          <div class="kv"><span data-t="k17">Spa &amp; sauna</span><span data-t="k17v">sur rendez-vous</span></div>
+          <div class="kv"><span data-t="k18">Night-club</span><span data-t="k18v">week-ends</span></div>
+          <div class="kv"><span data-t="k19">Méchoui Party</span><span class="hi" data-t="k19v">samedi, dès 15 h</span></div>
+        </div></div>
+      </div>
+      <div class="acc"><h3><button type="button" aria-expanded="false" data-t="a33">Wifi, parking, blanchisserie ?</button></h3>
+        <div class="in"><div>
+          <ul>
+            <li data-t="b33a">Wifi gratuit dans les chambres et les espaces communs</li>
+            <li data-t="b33b">Parking gratuit et surveillé sur le domaine</li>
+            <li data-t="b33c">Pressing et blanchisserie, service payant à la réception</li>
+            <li data-t="b33d">Boutique souvenir, artisanat local</li>
+            <li data-t="b33e">Salle de sport en accès libre</li>
+            <li data-t="b33f">Ascenseurs desservant tous les étages</li>
+          </ul>
+        </div></div>
+      </div>
+    </section>
+    <section class="sec" id="familles">
+      <h2 data-t="s4">Familles &amp; enfants</h2>
+      <div class="acc"><h3><button type="button" aria-expanded="false" data-t="a41">Que faire avec des enfants ?</button></h3>
+        <div class="in"><div>
+          <p data-t="b41">Le Pack Enfant et le circuit Découvertes Junior sont pensés pour eux : maquillage, accès aux jeux, atelier cuisine, atelier peinture, conte en bordure d'eau le soir, et les soins « princes &amp; princesses ».</p>
+          <p data-t="b41b"><a href="circuits.html">Voir les offres familles</a></p>
+        </div></div>
+      </div>
+      <div class="acc"><h3><button type="button" aria-expanded="false" data-t="a42">Quelles chambres pour une famille ?</button></h3>
+        <div class="in"><div>
+          <div class="kv"><span data-t="k20">Deluxe Supérieure</span><span data-t="k20v">jusqu'à 3 personnes</span></div>
+          <div class="kv"><span data-t="k21">Mezzanine Supérieure</span><span data-t="k21v">jusqu'à 4 personnes</span></div>
+          <div class="kv"><span data-t="k22">Suite Arabe</span><span data-t="k22v">2 chambres, jusqu'à 6 personnes</span></div>
+          <p data-t="b42">Lit d'appoint et lit bébé disponibles sur demande, à préciser à la réservation.</p>
+        </div></div>
+      </div>
+    </section>
+    <section class="sec" id="groupes">
+      <h2 data-t="s5">Groupes &amp; séminaires</h2>
+      <div class="acc"><h3><button type="button" aria-expanded="false" data-t="a51">Organiser un séminaire ou un événement</button></h3>
+        <div class="in"><div>
+          <p data-t="b51">Notre salle de conférence, baignée de lumière naturelle, accueille séminaires, cocktails, dîners de gala et lancements de produits. Sonorisation et technicien son sont disponibles.</p>
+          <p data-t="b51b">Formules journée d'étude ou résidentielles, avec hébergement et restauration. Devis sous 24 h.</p>
+          <p data-t="b51c"><a href="contact.html">Demander un devis</a></p>
+        </div></div>
+      </div>
+      <div class="acc"><h3><button type="button" aria-expanded="false" data-t="a52">Anniversaires et réceptions privées</button></h3>
+        <div class="in"><div>
+          <p data-t="b52">Le Coffret Anniversaire s'applique à partir de 10 personnes : salle offerte, buffet complet — entrées, plats chauds, dessert — boissons comprises, sonorisation et technicien son inclus.</p>
+          <p data-t="b52b"><a href="circuits.html">Voir le coffret</a></p>
+        </div></div>
+      </div>
+    </section>
+    <section class="sec" id="savoir">
+      <h2 data-t="s6">Bon à savoir</h2>
+      <div class="acc"><h3><button type="button" aria-expanded="false" data-t="a61">Quand venir à Assinie ?</button></h3>
+        <div class="in"><div>
+          <div class="kv"><span data-t="k23">Décembre — mars</span><span data-t="k23v">saison sèche, la plus demandée</span></div>
+          <div class="kv"><span data-t="k24">Avril — juin</span><span data-t="k24v">saison des pluies, tarifs plus doux</span></div>
+          <div class="kv"><span data-t="k25">Juillet — novembre</span><span data-t="k25v">alternance, très agréable</span></div>
+          <p data-t="b61">De décembre à mars, les suites partent plusieurs semaines à l'avance. Réservez tôt, surtout pour les week-ends et les fêtes.</p>
+        </div></div>
+      </div>
+      <div class="acc"><h3><button type="button" aria-expanded="false" data-t="a62">Que mettre dans sa valise ?</button></h3>
+        <div class="in"><div>
+          <ul>
+            <li data-t="b62a">Maillot de bain — piscine, lagune et plage</li>
+            <li data-t="b62b">Crème solaire et chapeau</li>
+            <li data-t="b62c">Anti-moustiques, surtout en soirée</li>
+            <li data-t="b62d">Une tenue légère pour les dîners</li>
+            <li data-t="b62e">Des espèces en francs CFA pour les excursions</li>
+          </ul>
+          <p data-t="b62">Serviettes de piscine, sèche-cheveux et produits d'accueil sont fournis dans toutes les chambres.</p>
+        </div></div>
+      </div>
+      <div class="acc"><h3><button type="button" aria-expanded="false" data-t="a63">Langues, animaux, fumeurs</button></h3>
+        <div class="in"><div>
+          <div class="kv"><span data-t="k26">Langues parlées</span><span data-t="k26v">français, anglais</span></div>
+          <div class="kv"><span data-t="k27">Animaux</span><span data-t="k27v">non admis</span></div>
+          <div class="kv"><span data-t="k28">Chambres</span><span data-t="k28v">non-fumeur</span></div>
+          <div class="kv"><span data-t="k29">Terrasses et extérieurs</span><span data-t="k29v">fumeurs autorisés</span></div>
+          <div class="kv"><span data-t="k30">Monnaie</span><span data-t="k30v">franc CFA (XOF)</span></div>
+        </div></div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="help">
+    <span class="eyebrow" data-t="e9">Une question sans réponse ici ?</span>
+    <h2 data-t="h9">Écrivez-nous, on répond vite</h2>
+    <p data-t="p9">La réception est ouverte 24 h/24. Pour une réponse immédiate, WhatsApp reste le canal le plus rapide.</p>
+    <div class="g">
+      <a href="https://wa.me/2250546017377" target="_blank" rel="noopener" class="btn btn-solid" data-t="g1">Écrire sur WhatsApp</a>
+      <a href="contact.html" class="btn" data-t="g2">Formulaire de contact</a>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div class="f-grid">
+      <div>
+        <img src="img/opt/logo-blanc.png" alt="Hôtel Evannath" width="729" height="176" style="width:180px;margin-bottom:8px">
+        <p style="font-size:8.5px;letter-spacing:.42em;color:var(--bronze);font-weight:700;margin-bottom:18px">LE RÊVE AFRICAIN</p>
+        <p style="max-width:300px">46 chambres et suites face à la lagune Aby, à Assinie. Réservation directe, meilleur tarif garanti, réception ouverte 24 h/24.</p>
+      </div>
+      <div><h4>Navigation</h4><a href="index.html#chambres">Chambres</a><a href="circuits.html">Circuits &amp; Offres</a><a href="carte.html">La table</a><a href="spa.html">Spa</a><a href="a-propos.html">À propos</a><a href="contact.html">Contact</a></div>
+      <div><h4>Informations</h4><a href="informations-utiles.html">Informations utiles</a><a href="informations-utiles.html#groupes">Séminaires &amp; groupes</a><a href="informations-utiles.html#reserver">Conditions d'annulation</a><a href="mentions-legales.html">Mentions légales</a></div>
+      <div><h4>Contact</h4>
+        <a href="tel:+2252721731265">+225 27 21 73 12 65</a>
+        <a href="tel:+2250151527575">+225 01 51 52 75 75</a>
+        <a href="mailto:bonjour@evannathhotel.com">bonjour@evannathhotel.com</a>
+        <a href="https://www.facebook.com/evannathhotel" target="_blank" rel="noopener">Facebook — 21 K abonnés</a>
+      </div>
+    </div>
+    <div class="f-bot"><span>© 2026 Hôtel Evannath — Assinie, Côte d'Ivoire</span><span>Maquette de refonte · démonstration</span></div>
+  </div>
+</footer>
+
+<a class="wa" href="https://wa.me/2250546017377" target="_blank" rel="noopener" aria-label="Nous écrire sur WhatsApp">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.5 14.4c-.3-.1-1.7-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.7 1-.9 1.2-.2.2-.3.2-.6.1-1.7-.9-2.9-1.6-4-3.5-.3-.5.3-.5.9-1.6.1-.2 0-.4 0-.5s-.7-1.6-.9-2.2c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.3 5.2 4.6 1.9.8 2.7.9 3.6.8.6-.1 1.7-.7 2-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.6-.3M12 2a10 10 0 00-8.6 15L2 22l5.2-1.4A10 10 0 1012 2z"/></svg>
+</a>
+
+<script>
+var hd=document.getElementById('hd');
+addEventListener('scroll',function(){hd.classList.toggle('scrolled',scrollY>60)},{passive:true});
+
+var bg=document.getElementById('bg'),dw=document.getElementById('dw');
+var dwLinks=[].slice.call(dw.querySelectorAll('nav a'));
+function toggleMenu(){
+  var o=dw.classList.toggle('open');
+  bg.classList.toggle('open',o);
+  bg.setAttribute('aria-expanded',o);
+  bg.setAttribute('aria-label',o?'Fermer le menu':'Ouvrir le menu');
+  document.body.style.overflow=o?'hidden':'';
+  dwLinks.forEach(function(a,i){a.style.transitionDelay=o?(60+i*55)+'ms':'0ms'});
+}
+bg.onclick=toggleMenu;
+dwLinks.forEach(function(a){a.onclick=function(){if(dw.classList.contains('open'))toggleMenu()}});
+addEventListener('keydown',function(e){if(e.key==='Escape'&&dw.classList.contains('open'))toggleMenu()});
+
+var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+if(!('IntersectionObserver' in window)||reduce){document.querySelectorAll('.reveal').forEach(function(e){e.classList.add('in')})}
+else{var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.1});
+ document.querySelectorAll('.reveal').forEach(function(el){io.observe(el)});
+ setTimeout(function(){document.querySelectorAll('.reveal:not(.in)').forEach(function(el){if(el.getBoundingClientRect().top<innerHeight)el.classList.add('in')})},1200)}
+
+// accordéons
+var accs=[].slice.call(document.querySelectorAll('.acc'));
+accs.forEach(function(a,i){
+  var btn=a.querySelector('button'), pane=a.querySelector('.in'), id='q'+(i+1);
+  pane.id=id; btn.setAttribute('aria-controls',id); pane.setAttribute('role','region');
+  btn.addEventListener('click',function(){
+    var open=a.classList.toggle('open');
+    btn.setAttribute('aria-expanded',open);
+  });
+});
+function openAll(v){accs.forEach(function(a){a.classList.toggle('open',v);a.querySelector('button').setAttribute('aria-expanded',v)})}
+var allBtn=document.getElementById('all'),allOpen=false;
+allBtn.onclick=function(){allOpen=!allOpen;openAll(allOpen);
+  allBtn.textContent=allOpen?(document.documentElement.lang==='en'?'Collapse all':'Tout replier')
+                            :(document.documentElement.lang==='en'?'Expand all':'Tout déplier')};
+addEventListener('beforeprint',function(){openAll(true)});
+
+// sommaire : la rubrique en cours de lecture est mise en avant
+var secs=[].slice.call(document.querySelectorAll('.sec')),links=[].slice.call(document.querySelectorAll('#toc a'));
+if('IntersectionObserver' in window){
+  var so=new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if(!e.isIntersecting)return;
+      links.forEach(function(l){l.classList.toggle('on',l.getAttribute('href')==='#'+e.target.id)});
+    });
+  },{rootMargin:'-120px 0px -70% 0px'});
+  secs.forEach(function(s){so.observe(s)});
+}
+
+var EN={mn:"Menu",n1:"Rooms &amp; Suites",n2:"The table",n3:"The spa",n4:"Packages &amp; Offers",n5:"Gallery",n6:"About",n7:"Useful information",n8:"Contact",dr:"Reservations",cta:"Book now",
+c1:"Home",c2:"Useful information",eb:"Before, during and after your stay",h1:"Useful information",
+lede:"Answers to the questions we are asked most. If yours is not here, the front desk answers 24/7 — and WhatsApp is fastest.",
+q1:"Check-in",q2:"Check-out",q3:"Free cancellation",q4:"Deposit",q5:"Airport shuttle",q5v:"Free",q6:"Front desk",
+sm:"On this page",i1:"Booking &amp; payment",i2:"Getting here",i3:"During your stay",i4:"Families &amp; children",
+i5:"Groups &amp; seminars",i6:"Good to know",ta:"Expand all",tp:"Print this page",
+s1:"Booking &amp; payment",a11:"How do I book?",
+b11:"Three ways, all equivalent: directly on this site, on WhatsApp at +225 05 46 01 73 77, or by phone at +225 01 51 52 75 75. The rate shown here is our best rate — you will not find it cheaper elsewhere.",
+b11b:"For packages, groups and seminars, use the <a href=\"contact.html\">contact form</a>: we come back to you with a quote within 24 h.",
+a12:"Which payment methods do you accept?",b12:"We are flexible, and that is deliberate.",
+b12a:"Wave",b12b:"Orange Money and MTN Money",b12c:"Visa and Mastercard",b12d:"Cash, in CFA francs, at the front desk",b12e:"Bank transfer, for groups and companies",
+a13:"Is a deposit required?",k1:"Deposit on booking",k2:"Balance",k2v:"on arrival",k3:"Groups from 10 guests",k3v:"50 % on confirmation",
+b13:"The deposit confirms the room for good. Without it, the booking stays an option and the room may go to another guest.",
+a14:"Can I cancel or change my booking?",
+k4:"More than 48 h before",k4v:"free, full refund",k5:"Less than 48 h before",k5v:"deposit retained",k6:"No-show",k6v:"first night charged",
+b14:"Moving your dates is always possible at no charge, subject to availability. Call us and we will find a solution.",
+s2:"Getting here",a21:"Is the airport shuttle really free?",
+b21:"Yes, both ways, with no surcharge. Just give us your flight number and arrival time when booking, or at the latest 24 h before.",
+b21b:"Félix-Houphouët-Boigny airport is around 80 km away. Allow a little under two hours by road.",
+a22:"How do I drive from Abidjan?",k7:"Distance",k8:"Journey",k8v:"about 1 h 45",k9:"Address",
+b22:"Take the coast road towards Assinie-Mafia. We are at kilometre point 19. Parking is free, on site, and guarded.",
+b22b:"<a href=\"https://www.google.com/maps/dir/?api=1&destination=Assinie-Mafia\" target=\"_blank\" rel=\"noopener\">Open directions in Maps</a>",
+a23:"Can I arrive by the lagoon?",
+b23:"Yes. The hotel has its own pontoon on the Aby lagoon, and arriving by pirogue takes about fifteen minutes from the landing. It is the finest way to arrive, especially late in the day — but it needs preparation: tell the front desk at least a day ahead.",
+s3:"During your stay",a31:"Check-in, check-out, and if my flight shifts?",
+k10:"Check-in",k10v:"from 2 pm",k11:"Check-out",k11v:"before noon",k12:"Front desk",k12v:"open 24/7",
+b31:"Late arrival, early departure, delayed flight: the front desk never closes, someone will be waiting. Just let us know, and we store your luggage free of charge before check-in and after check-out.",
+a32:"What are the opening hours on site?",
+k13:"Breakfast",k14:"Lunch",k15:"Dinner",k16:"Pool &amp; jacuzzi",k16v:"first light until dark",
+k17:"Spa &amp; sauna",k17v:"by appointment",k18:"Night club",k18v:"weekends",k19:"Méchoui Party",k19v:"Saturday, from 3 pm",
+a33:"Wifi, parking, laundry?",
+b33a:"Free wifi in the rooms and common areas",b33b:"Free guarded parking on site",b33c:"Dry cleaning and laundry, paid service at the front desk",
+b33d:"Gift shop, local craftwork",b33e:"Gym, open access",b33f:"Lifts to every floor",
+s4:"Families &amp; children",a41:"What is there for children?",
+b41:"The Kids Pack and the Junior Discovery tour are built for them: face painting, play area, cooking workshop, painting workshop, waterside storytelling at dusk, and the little prince &amp; princess treatments.",
+b41b:"<a href=\"circuits.html\">See the family offers</a>",
+a42:"Which rooms suit a family?",k20:"Deluxe Superior",k20v:"up to 3 guests",k21:"Superior Mezzanine",k21v:"up to 4 guests",
+k22:"Arabian Suite",k22v:"2 bedrooms, up to 6 guests",b42:"Extra bed and cot available on request — mention it when booking.",
+s5:"Groups &amp; seminars",a51:"Organising a seminar or an event",
+b51:"Our conference room, bathed in natural light, hosts seminars, cocktails, gala dinners and product launches. PA system and sound engineer available.",
+b51b:"Day-study or residential packages, with accommodation and catering. Quote within 24 h.",
+b51c:"<a href=\"contact.html\">Request a quote</a>",
+a52:"Birthdays and private receptions",
+b52:"The Birthday Box applies from 10 guests: room free of charge, full buffet — starters, mains, dessert — drinks included, PA system and sound engineer included.",
+b52b:"<a href=\"circuits.html\">See the box</a>",
+s6:"Good to know",a61:"When should I come to Assinie?",
+k23:"December — March",k23v:"dry season, most in demand",k24:"April — June",k24v:"rainy season, softer rates",
+k25:"July — November",k25v:"mixed, very pleasant",
+b61:"From December to March the suites go weeks ahead. Book early, especially for weekends and holidays.",
+a62:"What should I pack?",
+b62a:"Swimwear — pool, lagoon and beach",b62b:"Sun cream and a hat",b62c:"Insect repellent, especially in the evening",
+b62d:"Something light for dinner",b62e:"Some cash in CFA francs for excursions",
+b62:"Pool towels, hairdryer and toiletries are provided in every room.",
+a63:"Languages, pets, smoking",k26:"Languages spoken",k26v:"French, English",k27:"Pets",k27v:"not allowed",
+k28:"Rooms",k28v:"non-smoking",k29:"Terraces and outdoors",k29v:"smoking allowed",k30:"Currency",k30v:"CFA franc (XOF)",
+e9:"A question we have not answered?",h9:"Write to us, we reply fast",
+p9:"The front desk is open 24/7. For an immediate answer, WhatsApp is the quickest channel.",
+g1:"Message on WhatsApp",g2:"Contact form"};
+
+var FR={};document.querySelectorAll('[data-t]').forEach(function(e){FR[e.dataset.t]=e.innerHTML});
+document.querySelectorAll('.lang button').forEach(function(b){b.onclick=function(){
+  var lg=b.dataset.lang;
+  document.querySelectorAll('.lang button').forEach(function(x){x.classList.toggle('on',x.dataset.lang===lg)});
+  var dict=lg==='en'?EN:FR;
+  document.querySelectorAll('[data-t]').forEach(function(e){if(dict[e.dataset.t])e.innerHTML=dict[e.dataset.t]});
+  document.documentElement.lang=lg;
+}});
+document.querySelectorAll('.lang button').forEach(function(b){var prev=b.onclick;b.onclick=function(){
+  prev.call(b);
+  allBtn.textContent=allOpen?(document.documentElement.lang==='en'?'Collapse all':'Tout replier')
+                            :(document.documentElement.lang==='en'?'Expand all':'Tout déplier');
+}});
+</script>
+</body>
+</html>

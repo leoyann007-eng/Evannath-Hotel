@@ -1,0 +1,667 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hôtel Evannath — Le Rêve Africain | Assinie, Côte d'Ivoire</title>
+<meta name="description" content="Hôtel Evannath, Assinie PK 19 : 46 chambres et suites, paillote sur la lagune Aby, piscine, séminaires. Réservation directe au meilleur tarif.">
+<meta property="og:title" content="Hôtel Evannath — Le Rêve Africain">
+<meta property="og:description" content="46 chambres et suites face à la lagune Aby, à Assinie.">
+<meta property="og:image" content="img/opt/hero-paillote.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Karla:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="preload" as="image" href="img/opt/hero-paillote.webp" type="image/webp">
+<style>
+:root{
+  /* palette extraite du logo Evannath : bronze, bois, écorce */
+  --night:#100B06;
+  --bark:#17100A; --bark-2:#221810; --bark-3:#2F2218;
+  --bronze:#B98A50; --bronze-2:#D9B37F; --bronze-deep:#84603C;
+  --cream:#F6EEE2; --muted:#A2907C; --palm:#8FAE63;
+  --line:rgba(185,138,80,.20); --line-2:rgba(185,138,80,.10);
+  --max:1240px;
+  --f-display:"Marcellus",Georgia,"Times New Roman",serif;
+  --f-body:"Karla",system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bark);color:var(--cream);font-family:var(--f-body);font-size:16.5px;line-height:1.65;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+img{max-width:100%;height:auto;display:block}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:2px solid var(--bronze);outline-offset:3px}
+.wrap{max-width:var(--max);margin:0 auto;padding:0 24px}
+.eyebrow{font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:var(--bronze);font-weight:700;margin-bottom:18px;display:block}
+h1,h2,h3{font-family:var(--f-display);font-weight:400;line-height:1.1;letter-spacing:.005em;text-wrap:balance}
+h2{font-size:clamp(2rem,4.4vw,3.35rem)}
+h3{font-size:1.42rem}
+p{color:#DCD2C4}
+.btn{display:inline-flex;align-items:center;gap:10px;padding:15px 30px;font-size:11.5px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;border:1px solid var(--bronze);color:var(--bronze);background:transparent;cursor:pointer;transition:.35s cubic-bezier(.2,.8,.2,1);font-family:var(--f-body)}
+.btn:hover{background:var(--bronze);color:var(--bark);transform:translateY(-2px)}
+.btn-solid{background:var(--bronze);color:var(--bark)}
+.btn-solid:hover{background:var(--bronze-2);border-color:var(--bronze-2)}
+
+#pre{position:fixed;inset:0;z-index:999;background:var(--bark);display:grid;place-items:center;transition:opacity .8s .2s,visibility .8s .2s}
+#pre.done{opacity:0;visibility:hidden}
+#pre img{width:190px;animation:breathe 2s ease-in-out infinite}
+@keyframes breathe{0%,100%{opacity:.3}50%{opacity:1}}
+
+/* ══ NAV : un seul élément ══ */
+header{position:fixed;top:0;left:0;right:0;z-index:100;transition:.45s;padding:20px 0}
+header.scrolled{background:rgba(23,16,10,.94);backdrop-filter:blur(14px);padding:11px 0;border-bottom:1px solid var(--line)}
+.nav{display:flex;align-items:center;justify-content:space-between;gap:20px}
+.brand img{width:168px;transition:.45s}
+header.scrolled .brand img{width:132px}
+.brand small{display:block;font-size:8px;letter-spacing:.42em;color:var(--bronze);margin-top:6px;padding-left:2px;font-weight:700}
+.nav-right{display:flex;align-items:center;gap:18px}
+.lang{display:flex;border:1px solid var(--line)}
+.lang button{background:none;border:0;color:var(--muted);font:700 10.5px/1 var(--f-body);letter-spacing:.12em;padding:9px 11px;cursor:pointer;transition:.3s}
+.lang button.on{background:var(--bronze);color:var(--bark)}
+.burger{display:flex;align-items:center;gap:12px;background:none;border:0;cursor:pointer;padding:10px 4px;position:relative;z-index:101}
+.burger .bars{display:block;width:26px}
+.burger .bars span{display:block;height:1.5px;background:var(--cream);margin:6px 0;transition:.35s}
+.burger .lbl{font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;font-weight:700;color:var(--cream)}
+.burger.open .bars span:nth-child(1){transform:translateY(7.5px) rotate(45deg)}
+.burger.open .bars span:nth-child(2){opacity:0}
+.burger.open .bars span:nth-child(3){transform:translateY(-7.5px) rotate(-45deg)}
+
+.drawer{position:fixed;inset:0;background:var(--night);z-index:99;opacity:0;visibility:hidden;transition:.5s cubic-bezier(.2,.8,.2,1);overflow-y:auto}
+.drawer.open{opacity:1;visibility:visible}
+.dw-in{min-height:100svh;display:grid;grid-template-columns:1.25fr 1fr;align-items:center;gap:60px;max-width:var(--max);margin:0 auto;padding:130px 24px 60px}
+.dw-in nav{display:flex;flex-direction:column}
+.dw-in nav a{
+  display:flex;align-items:baseline;gap:22px;padding:16px 0;border-bottom:1px solid var(--line-2);
+  font-family:var(--f-display);font-size:clamp(1.45rem,3.2vw,2.4rem);color:var(--cream);
+  opacity:0;transform:translateY(18px);transition:color .3s,opacity .6s,transform .6s
+}
+.drawer.open .dw-in nav a{opacity:1;transform:none}
+.dw-in nav a:hover{color:var(--bronze-2)}
+.dw-in nav a i{font-style:normal;font-family:var(--f-body);font-size:10px;letter-spacing:.2em;color:var(--bronze);font-weight:700;flex:0 0 auto;opacity:.7}
+.dw-side{display:flex;flex-direction:column;gap:26px}
+.dw-side .ph{aspect-ratio:4/3;overflow:hidden;background:var(--bark-2)}
+.dw-side .ph img{width:100%;height:100%;object-fit:cover}
+.dw-side b{display:block;font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--bronze);font-weight:700;margin-bottom:12px}
+.dw-side a{display:block;font-size:15px;color:#CDBFAE;padding:7px 0;transition:.3s}
+.dw-side a:hover{color:var(--bronze)}
+.dw-side p{font-size:13.5px;color:var(--muted);margin-top:12px}
+.dw-side .lang{margin-top:6px;width:max-content}
+.dw-side .lang button{padding:15px 20px;font-size:11px}
+
+.hero{position:relative;min-height:100svh;display:flex;align-items:center;overflow:hidden}
+.slides{position:absolute;inset:0}
+.slide{position:absolute;inset:0;opacity:0;transition:opacity 1.6s ease;background-size:cover;background-position:center}
+.slide.on{opacity:1;animation:kb 14s ease-out forwards}
+@keyframes kb{from{transform:scale(1.02)}to{transform:scale(1.13)}}
+.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(23,16,10,.74) 0%,rgba(23,16,10,.34) 42%,rgba(23,16,10,.96) 100%)}
+.hero-in{position:relative;z-index:3;width:100%;padding-top:92px}
+.hero h1{font-size:clamp(2.7rem,7.6vw,6.2rem);margin:16px 0 22px;line-height:1.04}
+.hero h1 em{font-style:italic;color:var(--bronze-2)}
+.hero p{font-size:clamp(1rem,1.55vw,1.18rem);max-width:530px;color:#E8DFD1}
+.hero-cta{display:flex;gap:14px;flex-wrap:wrap;margin-top:34px}
+.scroll-hint{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);z-index:3;font-size:9.5px;letter-spacing:.3em;text-transform:uppercase;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:10px}
+.scroll-hint i{width:1px;height:44px;background:linear-gradient(var(--bronze),transparent);animation:drop 2.2s infinite}
+@keyframes drop{0%{opacity:0;transform:scaleY(.2)}50%{opacity:1}100%{opacity:0;transform:scaleY(1)}}
+.reveal{opacity:0;transform:translateY(32px);transition:opacity .9s cubic-bezier(.2,.8,.2,1),transform .9s cubic-bezier(.2,.8,.2,1)}
+.reveal.in{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){
+  *{animation:none!important;transition-duration:.01ms!important}
+  .reveal,.dw-in nav a{opacity:1;transform:none}
+}
+
+.booking{position:relative;z-index:12;margin-top:-58px}
+.book-card{background:rgba(34,24,16,.97);backdrop-filter:blur(18px);border:1px solid var(--line);padding:22px;display:grid;grid-template-columns:repeat(4,1fr) auto;gap:16px;align-items:end;box-shadow:0 30px 70px rgba(0,0,0,.55)}
+.field label{display:block;font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--bronze);margin-bottom:7px;font-weight:700}
+.field input,.field select{width:100%;min-height:44px;background:transparent;border:0;border-bottom:1px solid var(--line);color:var(--cream);font:400 15px/1.4 var(--f-body);padding:8px 0;outline:none;transition:.3s}
+.field input:focus,.field select:focus{border-color:var(--bronze)}
+.field select option{background:var(--bark-2);color:var(--cream)}
+.book-out{grid-column:1/-1;display:none;gap:24px;flex-wrap:wrap;align-items:center;border-top:1px solid var(--line);padding-top:18px;margin-top:4px}
+.book-out.show{display:flex;animation:fade .5s}
+@keyframes fade{from{opacity:0;transform:translateY(-8px)}}
+.book-out b{color:var(--bronze-2);font-weight:700}
+.pill{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;border:1px solid rgba(143,174,99,.45);color:var(--palm);padding:6px 12px;font-weight:700}
+
+section{padding:106px 0}
+.sec-head{max-width:640px;margin-bottom:52px}
+.sec-head p{margin-top:18px;color:#B7A894}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line)}
+.stat{background:var(--bark);padding:36px 22px;text-align:center}
+.stat b{display:block;font-family:var(--f-display);font-size:2.9rem;color:var(--bronze);line-height:1;font-variant-numeric:tabular-nums}
+.stat span{font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);margin-top:11px;display:block;font-weight:600}
+
+.filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:32px}
+.filters button{background:none;border:1px solid var(--line);color:var(--muted);font:700 10.5px/1 var(--f-body);letter-spacing:.16em;text-transform:uppercase;padding:14px 20px;cursor:pointer;transition:.3s}
+.filters button.on,.filters button:hover{border-color:var(--bronze);color:var(--bronze)}
+.rooms{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.room{position:relative;overflow:hidden;background:var(--bark-2);border:1px solid var(--line);transition:.5s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column}
+.room.hide{display:none}
+.room:hover{transform:translateY(-6px);border-color:rgba(185,138,80,.5)}
+.room-img{position:relative;aspect-ratio:4/3;overflow:hidden;background:var(--bark-3)}
+.room-img img{width:100%;height:100%;object-fit:cover;transition:1.1s cubic-bezier(.2,.8,.2,1)}
+.room:hover .room-img img{transform:scale(1.08)}
+.tag{position:absolute;top:14px;left:14px;background:rgba(23,16,10,.88);backdrop-filter:blur(6px);color:var(--bronze);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;padding:7px 12px;font-weight:700}
+.room-body{padding:24px;display:flex;flex-direction:column;flex:1}
+.room-body h3{margin-bottom:8px}
+.room-body>p{font-size:14px;flex:1}
+.room-meta{display:flex;gap:14px;font-size:11.5px;color:var(--muted);margin:14px 0 18px;letter-spacing:.05em}
+.room-foot{display:flex;align-items:flex-end;justify-content:space-between;border-top:1px solid var(--line);padding-top:16px;gap:12px}
+.price b{font-family:var(--f-display);font-size:1.7rem;color:var(--bronze);display:block;line-height:1;font-variant-numeric:tabular-nums}
+.price span{font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.mini{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--bronze);border:1px solid var(--bronze);padding:15px 18px;cursor:pointer;background:none;font-family:var(--f-body);font-weight:700;white-space:nowrap;transition:.3s}
+.mini:hover{background:var(--bronze);color:var(--bark)}
+
+.exp-sec{background:var(--bark-2)}
+.exp{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line)}
+.exp-i{background:var(--bark-2);padding:36px 26px;transition:.45s}
+.exp-i:hover{background:var(--bark-3)}
+.exp-i svg{width:26px;height:26px;stroke:var(--bronze);fill:none;stroke-width:1.2;margin-bottom:18px}
+.exp-i h3{font-size:1.14rem;margin-bottom:8px}
+.exp-i p{font-size:13.5px;color:#AA9B87}
+
+.gal{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:188px;gap:12px}
+.gal figure{overflow:hidden;position:relative;cursor:pointer;background:var(--bark-2)}
+.gal figure:nth-child(1),.gal figure:nth-child(8){grid-column:span 2;grid-row:span 2}
+.gal img{width:100%;height:100%;object-fit:cover;transition:1s cubic-bezier(.2,.8,.2,1)}
+.gal figure:hover img{transform:scale(1.07)}
+.gal figure::after{content:"+";position:absolute;inset:0;display:grid;place-items:center;background:rgba(23,16,10,.6);color:var(--bronze);font-size:2rem;opacity:0;transition:.4s}
+.gal figure:hover::after{opacity:1}
+#lb{position:fixed;inset:0;background:rgba(12,8,5,.97);z-index:200;display:none;place-items:center;padding:40px}
+#lb.on{display:grid}
+#lb img{max-width:92vw;max-height:84vh;object-fit:contain;box-shadow:0 30px 80px rgba(0,0,0,.7)}
+#lbc{position:absolute;bottom:26px;left:0;right:0;text-align:center;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.lb-btn{position:absolute;background:rgba(23,16,10,.7);border:1px solid var(--line);color:var(--cream);width:48px;height:48px;cursor:pointer;font-size:20px;transition:.3s}
+.lb-btn:hover{border-color:var(--bronze);color:var(--bronze)}
+#lb .prev{left:26px;top:50%}#lb .next{right:26px;top:50%}#lb .close{top:26px;right:26px}
+
+.rev-sec{background:var(--bark-2)}
+.rev-track{display:flex;transition:transform .7s cubic-bezier(.2,.8,.2,1)}
+.rev{min-width:100%;padding:0 6%;text-align:center}
+.rev p{font-family:var(--f-display);font-size:clamp(1.25rem,2.4vw,1.85rem);line-height:1.55;color:var(--cream)}
+.rev b{display:block;margin-top:24px;font-family:var(--f-body);font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--bronze);font-weight:700}
+.stars{color:var(--bronze);letter-spacing:5px;margin-bottom:24px;font-size:13px}
+.dots{display:flex;gap:9px;justify-content:center;margin-top:14px}
+.dots button{box-sizing:content-box;width:28px;height:2px;border:0;background:var(--line);background-clip:content-box;cursor:pointer;transition:.4s;padding:21px 0}
+.dots button.on{background:var(--bronze);width:46px}
+
+.loc{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line)}
+.loc-txt{padding:54px}
+.loc-txt ul{list-style:none;margin:24px 0}
+.loc-txt li{padding:13px 0;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:20px;font-size:14px}
+.loc-txt li span:first-child{color:var(--muted);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;font-weight:600}
+.loc-map{min-height:440px;background:var(--bark-2)}
+.loc-map iframe{width:100%;height:100%;border:0;filter:grayscale(.35) sepia(.25) contrast(.95)}
+
+footer{background:#0F0A06;border-top:1px solid var(--line);padding:74px 0 28px}
+.f-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1.2fr;gap:44px}
+.f-grid h4{font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--bronze);margin-bottom:20px;font-weight:700}
+.f-grid p{display:block;font-size:13.5px;color:#AA9B87;margin-bottom:11px}
+.f-grid a{display:block;font-size:13.5px;color:#AA9B87;padding:9px 0;transition:.3s}
+.f-grid a:hover{color:var(--bronze)}
+.f-bot{border-top:1px solid var(--line);margin-top:54px;padding-top:26px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:11.5px;color:#6E6154}
+.wa{position:fixed;right:22px;bottom:22px;z-index:90;width:56px;height:56px;border-radius:50%;background:#25D366;display:grid;place-items:center;box-shadow:0 10px 30px rgba(37,211,102,.35);transition:.35s}
+.wa:hover{transform:scale(1.09)}
+.wa svg{width:28px;height:28px;fill:#fff}
+
+@media(max-width:1080px){
+  .dw-in{grid-template-columns:1fr;gap:40px;align-content:start}
+  .dw-side .ph{display:none}
+}
+@media(max-width:1024px){
+  .rooms,.exp{grid-template-columns:repeat(2,1fr)}
+  .book-card{grid-template-columns:repeat(2,1fr)}
+  .book-card>.btn{grid-column:1/-1;justify-content:center}
+  .loc{grid-template-columns:1fr}
+  .f-grid{grid-template-columns:repeat(2,1fr)}
+  .gal{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:720px){
+  .burger .lbl{display:none}
+  .nav-right .lang{display:none}
+  .dw-in{padding:110px 24px 50px}
+  section{padding:72px 0}
+  .rooms,.exp,.stats,.f-grid{grid-template-columns:1fr}
+  .f-grid{gap:34px}
+  .gal{grid-auto-rows:150px}
+  .room-foot{flex-direction:column;align-items:stretch;gap:14px}
+  .mini{text-align:center}
+  .book-card{grid-template-columns:1fr}
+  .loc-txt{padding:30px}
+  .gal figure:nth-child(1),.gal figure:nth-child(8){grid-column:span 2;grid-row:span 1}
+  .booking{margin-top:-30px}
+  #lb .prev{left:8px}#lb .next{right:8px}
+}
+</style>
+</head>
+<body>
+
+<div id="pre"><img src="img/opt/logo-blanc.png" alt="Hôtel Evannath" width="729" height="176"></div>
+
+<header id="hd">
+  <div class="wrap nav">
+    <a href="index.html" class="brand" aria-label="Hôtel Evannath, accueil">
+      <img src="img/opt/logo-blanc.png" alt="Hôtel Evannath" width="729" height="176">
+      <small>LE RÊVE AFRICAIN</small>
+    </a>
+    <div class="nav-right">
+      <div class="lang"><button class="on" data-lang="fr">FR</button><button data-lang="en">EN</button></div>
+      <a href="#reserver" class="btn btn-solid" data-t="book">Réserver</a>
+      <button class="burger" id="bg" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="dw">
+        <span class="lbl" data-t="mn">Menu</span>
+        <span class="bars"><span></span><span></span><span></span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="drawer" id="dw">
+  <div class="dw-in">
+    <nav aria-label="Navigation principale">
+      <a href="#chambres"><i>01</i><span data-t="n1">Chambres &amp; Suites</span></a>
+      <a href="carte.html"><i>02</i><span data-t="n2">La table</span></a>
+      <a href="spa.html"><i>03</i><span data-t="n3">Le spa</span></a>
+      <a href="circuits.html"><i>04</i><span data-t="n4">Circuits &amp; Offres</span></a>
+      <a href="galerie.html"><i>05</i><span data-t="n5">Galerie</span></a>
+      <a href="a-propos.html"><i>06</i><span data-t="n6">À propos</span></a>
+      <a href="informations-utiles.html"><i>07</i><span data-t="n7">Informations utiles</span></a>
+      <a href="contact.html"><i>08</i><span data-t="n8">Contact</span></a>
+    </nav>
+    <aside class="dw-side">
+      <div class="ph"><picture><source srcset="img/opt/t-lampe.webp" type="image/webp">
+        <img src="img/opt/t-lampe.jpg" width="1100" height="733" alt="Lanterne de rotin de l'Hôtel Evannath" loading="lazy"></picture></div>
+      <div>
+        <b data-t="dr">Réservations</b>
+        <a href="tel:+2250151527575">+225 01 51 52 75 75</a>
+        <a href="mailto:bonjour@evannathhotel.com">bonjour@evannathhotel.com</a>
+        <a href="https://wa.me/2250546017377" target="_blank" rel="noopener">WhatsApp</a>
+        <p>Assinie PK 19 · Comoé · Côte d'Ivoire</p>
+      </div>
+      <div class="lang"><button class="on" data-lang="fr">FR</button><button data-lang="en">EN</button></div>
+    </aside>
+  </div>
+</div>
+
+<section class="hero">
+  <div class="slides" id="sl">
+    <div class="slide on" style="background-image:image-set(url('img/opt/hero-paillote.webp') type('image/webp'),url('img/opt/hero-paillote.jpg') type('image/jpeg'))"></div>
+    <div class="slide" data-bg="hero-piscine"></div>
+    <div class="slide" data-bg="hero-aerien"></div>
+  </div>
+  <div class="hero-in wrap">
+    <span class="eyebrow" data-t="eb">Assinie · PK 19 · Lagune Aby</span>
+    <h1>Le rêve<br><em data-t="h1e">africain</em>, en vrai</h1>
+    <p data-t="lede">46 chambres et suites, une paillote posée sur la lagune, et le silence de la Comoé. Réservez en direct — c'est ici que le tarif est le meilleur.</p>
+    <div class="hero-cta">
+      <a href="#reserver" class="btn btn-solid" data-t="cta1">Réserver en direct</a>
+      <a href="#chambres" class="btn" data-t="cta2">Voir les chambres</a>
+    </div>
+  </div>
+  <div class="scroll-hint"><i></i><span data-t="sc">Scroll</span></div>
+</section>
+
+<div class="booking wrap" id="reserver">
+  <form class="book-card" id="bkf">
+    <div class="field"><label for="d1" data-t="in">Arrivée</label><input type="date" id="d1"></div>
+    <div class="field"><label for="d2" data-t="out">Départ</label><input type="date" id="d2"></div>
+    <div class="field"><label for="pax" data-t="guests">Voyageurs</label>
+      <select id="pax"><option>1 adulte</option><option selected>2 adultes</option><option>2 adultes + 1 enfant</option><option>3 adultes</option><option>4 adultes</option></select>
+    </div>
+    <div class="field"><label for="cat" data-t="cat">Catégorie</label>
+      <select id="cat">
+        <option value="67000">Chambre Standard</option>
+        <option value="82000">Deluxe · lits à baldaquin</option>
+        <option value="97000">Deluxe Supérieure</option>
+        <option value="107000">Suite Anglaise</option>
+        <option value="127000">Chambre en Mezzanine</option>
+        <option value="142000">Mezzanine Supérieure</option>
+        <option value="280000">Suite Arabe</option>
+      </select>
+    </div>
+    <button type="submit" class="btn btn-solid" data-t="check">Vérifier</button>
+    <div class="book-out" id="out">
+      <span class="pill" data-t="avail">Disponible</span>
+      <span><b id="nn">2</b> <span data-t="nights">nuits</span></span>
+      <span data-t="total">Total estimé</span> <b id="tt">134 000 FCFA</b>
+      <span style="color:var(--muted);font-size:12.5px" data-t="note">Petit-déjeuner inclus · Navette aéroport offerte</span>
+      <a href="#" class="btn btn-solid" style="margin-left:auto" data-t="confirm">Confirmer</a>
+    </div>
+  </form>
+</div>
+
+<section class="wrap" style="padding-top:86px">
+  <div class="stats reveal">
+    <div class="stat"><b class="cnt" data-to="46">0</b><span data-t="s1">Chambres</span></div>
+    <div class="stat"><b class="cnt" data-to="7">0</b><span data-t="s2">Catégories</span></div>
+    <div class="stat"><b class="cnt" data-to="21" data-suffix=" K">0</b><span data-t="s3">Abonnés Facebook</span></div>
+    <div class="stat"><b class="cnt" data-to="24" data-suffix="h">0</b><span data-t="s4">Réception</span></div>
+  </div>
+</section>
+
+<section class="wrap" id="chambres">
+  <div class="sec-head reveal">
+    <span class="eyebrow" data-t="e2">Hébergement</span>
+    <h2 data-t="h2">Sept catégories,<br>sept atmosphères</h2>
+    <p data-t="p2">De la chambre standard à la Suite Arabe deux chambres. Chaque catégorie a sa décoration, sa vue et son tarif affiché — aucune surprise à l'arrivée.</p>
+  </div>
+  <div class="filters reveal">
+    <button class="on" data-f="all" data-t="f1">Tout voir</button>
+    <button data-f="ch" data-t="f2">Chambres</button>
+    <button data-f="su" data-t="f3">Suites</button>
+    <button data-f="fam" data-t="f4">Familles</button>
+  </div>
+  <div class="rooms" id="rm">
+
+    <article class="room reveal" data-c="ch">
+      <div class="room-img"><picture>
+        <source srcset="img/opt/r-standard.webp" type="image/webp">
+        <img loading="lazy" width="900" height="600" src="img/opt/r-standard.jpg" alt="Chambre Standard de l'Hôtel Evannath à Assinie"></picture>
+        <span class="tag" data-t="tg1">Best-seller</span></div>
+      <div class="room-body"><h3 data-t="rm1">Chambre Standard</h3><p data-t="rd1">L'essentiel, bien fait : lit double, climatisation, salle d'eau privative et petit-déjeuner inclus.</p>
+        <div class="room-meta"><span>2 pers.</span><span>·</span><span data-t="mt1">Vue jardin</span></div>
+        <div class="room-foot"><div class="price"><b>67 000</b><span data-t="pn">FCFA / nuit</span></div><button class="mini" data-p="67000" data-t="rsv">Réserver</button></div></div>
+    </article>
+
+    <article class="room reveal" data-c="ch">
+      <div class="room-img"><picture>
+        <source srcset="img/opt/ig-baldaquin.webp" type="image/webp">
+        <img loading="lazy" width="900" height="600" src="img/opt/ig-baldaquin.jpg" alt="Chambre Deluxe avec lits à baldaquin"></picture></div>
+      <div class="room-body"><h3 data-t="rm2">Deluxe · lits à baldaquin</h3><p data-t="rd2">Bois sombre, voilages clairs et lumière filtrée. Coin salon et terrasse ouverte sur le jardin.</p>
+        <div class="room-meta"><span>2 pers.</span><span>·</span><span data-t="mt2">Baldaquin</span><span>·</span><span data-t="mt2b">Salon</span></div>
+        <div class="room-foot"><div class="price"><b>82 000</b><span data-t="pn">FCFA / nuit</span></div><button class="mini" data-p="82000" data-t="rsv">Réserver</button></div></div>
+    </article>
+
+    <article class="room reveal" data-c="ch fam">
+      <div class="room-img"><picture>
+        <source srcset="img/opt/r-wax.webp" type="image/webp">
+        <img loading="lazy" width="900" height="600" src="img/opt/r-wax.jpg" alt="Chambre Deluxe Supérieure, textiles wax et salle à manger privative"></picture>
+        <span class="tag" data-t="tg2">Salle à manger privée</span></div>
+      <div class="room-body"><h3 data-t="rm3">Deluxe Supérieure</h3><p data-t="rd3">Textiles wax, lits à baldaquin et salle à manger privative. La plus généreuse des Deluxe.</p>
+        <div class="room-meta"><span>3 pers.</span><span>·</span><span data-t="mt3">Salle à manger</span></div>
+        <div class="room-foot"><div class="price"><b>97 000</b><span data-t="pn">FCFA / nuit</span></div><button class="mini" data-p="97000" data-t="rsv">Réserver</button></div></div>
+    </article>
+
+    <article class="room reveal" data-c="su">
+      <div class="room-img"><picture>
+        <source srcset="img/opt/r-anglaise.webp" type="image/webp">
+        <img loading="lazy" width="900" height="600" src="img/opt/r-anglaise.jpg" alt="Suite Anglaise avec vue sur la lagune et la piscine"></picture>
+        <span class="tag" data-t="tg3">Vue lagune</span></div>
+      <div class="room-body"><h3 data-t="rm4">Suite Anglaise</h3><p data-t="rd4">Élégance feutrée, vue directe sur la lagune Aby et la piscine. Le meilleur couchant du domaine.</p>
+        <div class="room-meta"><span>2 pers.</span><span>·</span><span data-t="mt4">Vue lagune</span></div>
+        <div class="room-foot"><div class="price"><b>107 000</b><span data-t="pn">FCFA / nuit</span></div><button class="mini" data-p="107000" data-t="rsv">Réserver</button></div></div>
+    </article>
+
+    <article class="room reveal" data-c="ch">
+      <div class="room-img"><picture>
+        <source srcset="img/opt/r-mezz2.webp" type="image/webp">
+        <img loading="lazy" width="900" height="600" src="img/opt/r-mezz2.jpg" alt="Chambre en Mezzanine avec escalier et coin nuit surélevé"></picture></div>
+      <div class="room-body"><h3 data-t="rm5">Chambre en Mezzanine</h3><p data-t="rd5">Volume sous charpente, escalier bois et coin nuit surélevé. Idéale pour un jeune couple.</p>
+        <div class="room-meta"><span>2 pers.</span><span>·</span><span data-t="mt5">Duplex</span></div>
+        <div class="room-foot"><div class="price"><b>127 000</b><span data-t="pn">FCFA / nuit</span></div><button class="mini" data-p="127000" data-t="rsv">Réserver</button></div></div>
+    </article>
+
+    <article class="room reveal" data-c="ch fam">
+      <div class="room-img"><picture>
+        <source srcset="img/opt/r-mezzanine.webp" type="image/webp">
+        <img loading="lazy" width="900" height="600" src="img/opt/r-mezzanine.jpg" alt="Mezzanine Supérieure, coin salon et terrasse privative"></picture>
+        <span class="tag" data-t="tg4">Équipements +</span></div>
+      <div class="room-body"><h3 data-t="rm6">Mezzanine Supérieure</h3><p data-t="rd6">La mezzanine en plus grand : coin salon complet, équipements renforcés et terrasse privative.</p>
+        <div class="room-meta"><span>4 pers.</span><span>·</span><span data-t="mt6">Terrasse</span></div>
+        <div class="room-foot"><div class="price"><b>142 000</b><span data-t="pn">FCFA / nuit</span></div><button class="mini" data-p="142000" data-t="rsv">Réserver</button></div></div>
+    </article>
+
+    <article class="room reveal" data-c="su fam">
+      <div class="room-img"><picture>
+        <source srcset="img/opt/r-arabe.webp" type="image/webp">
+        <img loading="lazy" width="900" height="600" src="img/opt/r-arabe.jpg" alt="Suite Arabe, deux chambres, Hôtel Evannath"></picture>
+        <span class="tag" data-t="tg5">Signature</span></div>
+      <div class="room-body"><h3><a href="suite-arabe.html" data-t="rm7">Suite Arabe</a></h3><p data-t="rd7">Deux chambres, décor arabo-andalou et service dédié. La suite signature de l'établissement.</p>
+        <div class="room-meta"><span>6 pers.</span><span>·</span><span data-t="mt7">2 chambres</span></div>
+        <div class="room-foot"><div class="price"><b>280 000</b><span data-t="pn">FCFA / nuit</span></div><a class="mini" href="suite-arabe.html" data-t="see">Voir la fiche</a></div></div>
+    </article>
+
+  </div>
+</section>
+
+<section class="exp-sec" id="experiences">
+ <div class="wrap">
+  <div class="sec-head reveal">
+    <span class="eyebrow" data-t="e3">Sur place &amp; alentours</span>
+    <h2 data-t="h3">De quoi remplir<br>une journée entière</h2>
+  </div>
+  <div class="exp reveal">
+    <div class="exp-i"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 17c2 1 4-1 6 0s4 1 6 0 4-1 6 0M4 13l8-9 8 9M7 13v4M17 13v4"/></svg><h3 data-t="x1">La paillote</h3><p data-t="x1p">Le ponton de bois posé sur la lagune Aby — le cœur du domaine, au couchant.</p></div>
+    <div class="exp-i"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18c2 1 4-1 6 0s4 1 6 0 4-1 6 0M6 14l3-8 6 3-2 5M15 9l4-2"/></svg><h3 data-t="x2">Jet ski &amp; pirogue</h3><p data-t="x2p">Sessions encadrées et balade lagunaire avec guide local, matin ou fin d'après-midi.</p></div>
+    <div class="exp-i"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v6M8 21h8M6 12h12l-2 9H8z M9 9h6"/></svg><h3 data-t="x3">Restaurant &amp; bar</h3><p data-t="x3p">Cuisine ivoirienne et continentale, poisson du jour, cocktails maison en terrasse.</p></div>
+    <div class="exp-i"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17c2 1 4-1 6 0s4 1 6 0 4-1 6 0M3 12c2 1 4-1 6 0s4 1 6 0 4-1 6 0M3 7c2 1 4-1 6 0s4 1 6 0 4-1 6 0"/></svg><h3 data-t="x4">Piscine</h3><p data-t="x4p">Grand bassin, transats et parasols, ouverte du lever du jour à la nuit tombée.</p></div>
+    <div class="exp-i"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20c2-6 6-9 8-9s6 3 8 9M12 11V4M9 6l3-3 3 3"/></svg><h3 data-t="x5">Sauna &amp; massage</h3><p data-t="x5p">Rituels et massages après une journée de plage ou de lagune.</p></div>
+    <div class="exp-i"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14"/><path d="M3 9h18M8 5v14"/></svg><h3 data-t="x6">Séminaires</h3><p data-t="x6p">Salle de conférence équipée, formules journée d'étude et résidentielles.</p></div>
+    <div class="exp-i"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-4.5-7-10a7 7 0 0114 0c0 5.5-7 10-7 10z"/><circle cx="12" cy="11" r="2.4"/></svg><h3 data-t="x7">Art africain</h3><p data-t="x7p">Sculptures et pièces d'artisanat exposées dans le hall et les espaces communs.</p></div>
+    <div class="exp-i"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></svg><h3 data-t="x8">L'Embouchure</h3><p data-t="x8p">La rencontre de l'océan et de la lagune, excursion organisée par la réception.</p></div>
+  </div>
+ </div>
+</section>
+
+<section class="wrap" id="galerie">
+  <div class="sec-head reveal">
+    <span class="eyebrow" data-t="e4">Galerie</span>
+    <h2 data-t="h4">Le domaine,<br>sans filtre</h2>
+    <p data-t="p4">Photographies réelles de l'établissement — aucune image de synthèse, aucune banque d'images.</p>
+    <a href="galerie.html" class="btn" style="margin-top:26px" data-t="voir">Voir les 47 photos</a>
+  </div>
+  <div class="gal reveal" id="gl">
+    <figure><picture><source srcset="img/opt/g-ponton-t.webp" type="image/webp"><img loading="lazy" width="640" height="427" src="img/opt/g-ponton-t.jpg" data-full="img/opt/g-ponton.jpg" alt="La paillote sur pilotis au-dessus de la lagune Aby"></picture></figure>
+    <figure><picture><source srcset="img/opt/g-lagune-t.webp" type="image/webp"><img loading="lazy" width="640" height="427" src="img/opt/g-lagune-t.jpg" data-full="img/opt/g-lagune.jpg" alt="Vue de la lagune depuis le ponton de l'hôtel"></picture></figure>
+    <figure><picture><source srcset="img/opt/g-lobby-t.webp" type="image/webp"><img loading="lazy" width="640" height="427" src="img/opt/g-lobby-t.jpg" data-full="img/opt/g-lobby.jpg" alt="Hall d'accueil et sculptures africaines"></picture></figure>
+    <figure><picture><source srcset="img/opt/g-terrasse-t.webp" type="image/webp"><img loading="lazy" width="640" height="427" src="img/opt/g-terrasse-t.jpg" data-full="img/opt/g-terrasse.jpg" alt="Terrasse ombragée et transats"></picture></figure>
+    <figure><picture><source srcset="img/opt/g-resto-t.webp" type="image/webp"><img loading="lazy" width="640" height="427" src="img/opt/g-resto-t.jpg" data-full="img/opt/g-resto.jpg" alt="Salle de restaurant de l'Hôtel Evannath"></picture></figure>
+    <figure><picture><source srcset="img/opt/g-chambre-t.webp" type="image/webp"><img loading="lazy" width="640" height="427" src="img/opt/g-chambre-t.jpg" data-full="img/opt/g-chambre.jpg" alt="Chambre avec coin bureau et miroir soleil"></picture></figure>
+    <figure><picture><source srcset="img/opt/g-petitdej-t.webp" type="image/webp"><img loading="lazy" width="640" height="427" src="img/opt/g-petitdej-t.jpg" data-full="img/opt/g-petitdej.jpg" alt="Petit-déjeuner, fruits frais et jus"></picture></figure>
+    <figure><picture><source srcset="img/opt/g-entree-t.webp" type="image/webp"><img loading="lazy" width="640" height="427" src="img/opt/g-entree-t.jpg" data-full="img/opt/g-entree.jpg" alt="Entrée et enseigne de l'Hôtel Evannath"></picture></figure>
+    <figure><picture><source srcset="img/opt/g-art-t.webp" type="image/webp"><img loading="lazy" width="640" height="427" src="img/opt/g-art-t.jpg" data-full="img/opt/g-art.jpg" alt="Galerie d'art et artisanat dans les espaces communs"></picture></figure>
+    <figure><picture><source srcset="img/opt/g-seminaire-t.webp" type="image/webp"><img loading="lazy" width="640" height="427" src="img/opt/g-seminaire-t.jpg" data-full="img/opt/g-seminaire.jpg" alt="Salle de séminaire équipée"></picture></figure>
+    <figure><picture><source srcset="img/opt/g-bar-t.webp" type="image/webp"><img loading="lazy" width="640" height="427" src="img/opt/g-bar-t.jpg" data-full="img/opt/g-bar.jpg" alt="Bar et salle en rotin"></picture></figure>
+    <figure><picture><source srcset="img/opt/g-vue-t.webp" type="image/webp"><img loading="lazy" width="640" height="427" src="img/opt/g-vue-t.jpg" data-full="img/opt/g-vue.jpg" alt="Vue sur la lagune et les cocotiers d'Assinie"></picture></figure>
+    <figure><picture><source srcset="img/opt/g-aerien-t.webp" type="image/webp"><img loading="lazy" width="640" height="360" src="img/opt/g-aerien-t.jpg" data-full="img/opt/g-aerien.jpg" alt="Vue aérienne du domaine Evannath entre lagune et cocoteraie"></picture></figure>
+  </div>
+</section>
+
+<section class="rev-sec" id="avis">
+ <div class="wrap">
+  <div class="sec-head reveal" style="text-align:center;margin:0 auto 52px">
+    <span class="eyebrow" data-t="e5">Ils y étaient</span>
+    <h2 data-t="h5">Nos clients nous aiment</h2>
+  </div>
+  <div style="overflow:hidden" class="reveal">
+    <div class="rev-track" id="rt">
+      <div class="rev"><div class="stars" aria-label="5 étoiles sur 5">★★★★★</div><p>« Depuis la réservation jusqu'à mon départ, tout s'est très bien passé. Chambre propre, personnel accueillant et bienveillant. Rien à dire. »</p><b>Mme Diakité</b></div>
+      <div class="rev"><div class="stars" aria-label="5 étoiles sur 5">★★★★★</div><p>« La balade lagunaire est magnifique, le cadre très cosy et le personnel très accueillant. Un coucou spécial à Daniel. Franchement, j'ai adoré. »</p><b>M. Jean-Michel</b></div>
+      <div class="rev"><div class="stars" aria-label="5 étoiles sur 5">★★★★★</div><p>« J'avais lu que vous étiez accueillants et que votre service client était de qualité. Je peux l'affirmer de vive voix. Nous reviendrons pour un long séjour. »</p><b>M. Koné</b></div>
+      <div class="rev"><div class="stars" aria-label="5 étoiles sur 5">★★★★★</div><p>« C'était juste parfait. Avec les images partagées sur mes réseaux, beaucoup me demandent l'adresse — et je sais qu'ils viendront découvrir. »</p><b>Mme Kane</b></div>
+    </div>
+  </div>
+  <div class="dots" id="dt"></div>
+ </div>
+</section>
+
+<section class="wrap" id="acces">
+  <div class="loc reveal">
+    <div class="loc-txt">
+      <span class="eyebrow" data-t="e6">Nous trouver</span>
+      <h2 style="font-size:2.3rem" data-t="h6">Assinie, PK 19</h2>
+      <ul>
+        <li><span data-t="a1">Depuis Abidjan</span><span>≈ 1 h 45 de route</span></li>
+        <li><span data-t="a2">Aéroport FHB</span><span data-t="a2v">≈ 80 km · navette offerte</span></li>
+        <li><span data-t="a3">Réception</span><span>+225 27 21 73 12 65</span></li>
+        <li><span data-t="a4">Réservations</span><span>+225 01 51 52 75 75</span></li>
+        <li><span data-t="a5">E-mail</span><span>bonjour@evannathhotel.com</span></li>
+      </ul>
+      <a href="https://www.google.com/maps/dir/?api=1&destination=Assinie-Mafia" target="_blank" rel="noopener" class="btn" data-t="route">Itinéraire</a>
+    </div>
+    <div class="loc-map"><iframe title="Carte d'accès — Assinie, Côte d'Ivoire" loading="lazy" src="https://www.google.com/maps?q=Assinie-Mafia,%20C%C3%B4te%20d'Ivoire&output=embed"></iframe></div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="f-grid">
+      <div>
+        <img src="img/opt/logo-blanc.png" alt="Hôtel Evannath" width="729" height="176" style="width:180px;margin-bottom:8px">
+        <p style="font-size:8.5px;letter-spacing:.42em;color:var(--bronze);font-weight:700;margin-bottom:18px">LE RÊVE AFRICAIN</p>
+        <p style="max-width:300px">46 chambres et suites face à la lagune Aby, à Assinie. Réservation directe, meilleur tarif garanti, réception ouverte 24 h/24.</p>
+      </div>
+      <div><h4>Navigation</h4><a href="#chambres">Chambres</a><a href="galerie.html">Galerie</a><a href="carte.html">La table</a><a href="spa.html">Spa</a><a href="circuits.html">Circuits &amp; Offres</a><a href="a-propos.html">À propos</a><a href="contact.html">Contact</a></div>
+      <div><h4>Informations</h4><a href="informations-utiles.html">Informations utiles</a><a href="informations-utiles.html#groupes">Séminaires &amp; groupes</a><a href="informations-utiles.html#reserver">Conditions d'annulation</a><a href="mentions-legales.html">Mentions légales</a></div>
+      <div><h4>Contact</h4>
+        <a href="tel:+2252721731265">+225 27 21 73 12 65</a>
+        <a href="tel:+2250151527575">+225 01 51 52 75 75</a>
+        <a href="mailto:bonjour@evannathhotel.com">bonjour@evannathhotel.com</a>
+        <a href="https://www.facebook.com/evannathhotel" target="_blank" rel="noopener">Facebook — 21 K abonnés</a>
+      </div>
+    </div>
+    <div class="f-bot"><span>© 2026 Hôtel Evannath — Assinie, Côte d'Ivoire</span><span>Maquette de refonte · démonstration</span></div>
+  </div>
+</footer>
+
+<a class="wa" href="https://wa.me/2250546017377" target="_blank" rel="noopener" aria-label="Nous écrire sur WhatsApp">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.5 14.4c-.3-.1-1.7-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.7 1-.9 1.2-.2.2-.3.2-.6.1-1.7-.9-2.9-1.6-4-3.5-.3-.5.3-.5.9-1.6.1-.2 0-.4 0-.5s-.7-1.6-.9-2.2c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.3 5.2 4.6 1.9.8 2.7.9 3.6.8.6-.1 1.7-.7 2-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.6-.3M12 2a10 10 0 00-8.6 15L2 22l5.2-1.4A10 10 0 1012 2z"/></svg>
+</a>
+
+<div id="lb" role="dialog" aria-modal="true" aria-label="Galerie photo">
+  <button class="lb-btn close" aria-label="Fermer">×</button>
+  <button class="lb-btn prev" aria-label="Photo précédente">‹</button>
+  <img id="lbi" alt="">
+  <button class="lb-btn next" aria-label="Photo suivante">›</button>
+  <div id="lbc"></div>
+</div>
+
+<script>
+window.addEventListener('load',function(){document.getElementById('pre').classList.add('done')});
+setTimeout(function(){document.getElementById('pre').classList.add('done')},2600);
+
+var hd=document.getElementById('hd');
+addEventListener('scroll',function(){hd.classList.toggle('scrolled',scrollY>60)},{passive:true});
+
+var bg=document.getElementById('bg'),dw=document.getElementById('dw');
+var dwLinks=[].slice.call(dw.querySelectorAll('nav a'));
+function toggleMenu(){
+  var o=dw.classList.toggle('open');
+  bg.classList.toggle('open',o);
+  bg.setAttribute('aria-expanded',o);
+  bg.setAttribute('aria-label',o?'Fermer le menu':'Ouvrir le menu');
+  document.body.style.overflow=o?'hidden':'';
+  dwLinks.forEach(function(a,i){a.style.transitionDelay=o?(60+i*55)+'ms':'0ms'});
+}
+bg.onclick=toggleMenu;
+dwLinks.forEach(function(a){a.onclick=function(){if(dw.classList.contains('open'))toggleMenu()}});
+addEventListener('keydown',function(e){if(e.key==='Escape'&&dw.classList.contains('open'))toggleMenu()});
+
+// Les visuels suivants ne sont chargés qu'une fois la page affichée.
+var sl=[].slice.call(document.querySelectorAll('#sl .slide')),si=0;
+var webp=document.createElement('canvas').toDataURL('image/webp').indexOf('data:image/webp')===0;
+function loadSlides(){
+  sl.forEach(function(s){var n=s.dataset.bg;if(n)s.style.backgroundImage="url('img/opt/"+n+(webp?'.webp':'.jpg')+"')"});
+  setInterval(function(){sl[si].classList.remove('on');si=(si+1)%sl.length;sl[si].classList.add('on')},6500);
+}
+if(document.readyState==='complete')loadSlides();else addEventListener('load',loadSlides);
+
+var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+if(!('IntersectionObserver' in window)||reduce){
+  document.querySelectorAll('.reveal').forEach(function(el){el.classList.add('in')});
+  document.querySelectorAll('.cnt').forEach(function(el){el.textContent=el.dataset.to+(el.dataset.suffix||'')});
+}else{
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.12});
+  document.querySelectorAll('.reveal').forEach(function(el,i){el.style.transitionDelay=(i%3)*90+'ms';io.observe(el)});
+  setTimeout(function(){document.querySelectorAll('.reveal:not(.in)').forEach(function(el){
+    if(el.getBoundingClientRect().top<innerHeight)el.classList.add('in')})},1200);
+  var co=new IntersectionObserver(function(es){es.forEach(function(e){if(!e.isIntersecting)return;
+    var el=e.target,to=+el.dataset.to,sfx=el.dataset.suffix||'',n=0;
+    var t=setInterval(function(){n+=Math.ceil(to/34);if(n>=to){n=to;clearInterval(t)}el.textContent=n+sfx},34);
+    co.unobserve(el)})},{threshold:.5});
+  document.querySelectorAll('.cnt').forEach(function(el){co.observe(el)});
+}
+
+var d1=document.getElementById('d1'),d2=document.getElementById('d2'),cat=document.getElementById('cat'),out=document.getElementById('out');
+function iso(d){return new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10)}
+d1.value=iso(new Date(Date.now()+864e5));d2.value=iso(new Date(Date.now()+864e5*3));
+d1.min=iso(new Date());d2.min=iso(new Date());
+function fmt(n){return n.toLocaleString('fr-FR').replace(/ | |,/g,' ')}
+function calc(){
+  var a=new Date(d1.value),b=new Date(d2.value);
+  var n=Math.round((b-a)/864e5); if(!n||n<1)n=1;
+  document.getElementById('nn').textContent=n;
+  document.getElementById('tt').textContent=fmt(n*+cat.value)+' FCFA';
+}
+[d1,d2,cat].forEach(function(e){e.addEventListener('change',calc)});
+document.getElementById('bkf').addEventListener('submit',function(e){e.preventDefault();calc();out.classList.add('show');out.scrollIntoView({block:'center',behavior:'smooth'})});
+calc();
+
+document.querySelectorAll('button.mini').forEach(function(b){b.onclick=function(){
+  cat.value=b.dataset.p;calc();out.classList.add('show');
+  document.getElementById('reserver').scrollIntoView({behavior:'smooth',block:'center'});
+}});
+
+document.querySelectorAll('.filters button').forEach(function(b){b.onclick=function(){
+  document.querySelectorAll('.filters button').forEach(function(x){x.classList.remove('on')});b.classList.add('on');
+  var f=b.dataset.f;
+  document.querySelectorAll('.room').forEach(function(r){r.classList.toggle('hide',f!=='all'&&r.dataset.c.split(' ').indexOf(f)<0)});
+}});
+
+var figs=[].slice.call(document.querySelectorAll('#gl img')),lb=document.getElementById('lb'),lbi=document.getElementById('lbi'),lbc=document.getElementById('lbc'),gi=0;
+function show(i){gi=(i+figs.length)%figs.length;lbi.src=figs[gi].dataset.full||figs[gi].src;lbi.alt=figs[gi].alt;lbc.textContent=figs[gi].alt+'  ·  '+(gi+1)+' / '+figs.length;lb.classList.add('on');document.body.style.overflow='hidden'}
+function hide(){lb.classList.remove('on');document.body.style.overflow=''}
+figs.forEach(function(im,i){im.closest('figure').onclick=function(){show(i)}});
+lb.querySelector('.next').onclick=function(e){e.stopPropagation();show(gi+1)};
+lb.querySelector('.prev').onclick=function(e){e.stopPropagation();show(gi-1)};
+lb.querySelector('.close').onclick=hide;
+lb.onclick=function(e){if(e.target===lb)hide()};
+addEventListener('keydown',function(e){if(!lb.classList.contains('on'))return;
+  if(e.key==='Escape')hide();if(e.key==='ArrowRight')show(gi+1);if(e.key==='ArrowLeft')show(gi-1)});
+
+var rt=document.getElementById('rt'),dt=document.getElementById('dt'),rn=rt.children.length,ri=0;
+for(var i=0;i<rn;i++){(function(i){var b=document.createElement('button');b.setAttribute('aria-label','Avis '+(i+1));b.onclick=function(){go(i)};dt.appendChild(b)})(i)}
+function go(i){ri=(i+rn)%rn;rt.style.transform='translateX('+(-ri*100)+'%)';[].slice.call(dt.children).forEach(function(d,j){d.classList.toggle('on',j===ri)})}
+go(0);var auto=setInterval(function(){go(ri+1)},6500);
+rt.addEventListener('pointerdown',function(){clearInterval(auto)});
+
+var EN={book:"Book now",mn:"Menu",
+n1:"Rooms &amp; Suites",n2:"The table",n3:"The spa",n4:"Packages &amp; Offers",n5:"Gallery",n6:"About",n7:"Useful information",n8:"Contact",dr:"Reservations",
+eb:"Assinie · PK 19 · Aby Lagoon",h1e:"African",
+lede:"46 rooms and suites, a wooden deck set out over the lagoon, and the quiet of the Comoé. Book direct — the rate is always best here.",
+cta1:"Book direct",cta2:"See the rooms",sc:"Scroll",
+in:"Check-in",out:"Check-out",guests:"Guests",cat:"Category",check:"Check",
+avail:"Available",nights:"nights",total:"Estimated total",note:"Breakfast included · Free airport shuttle",confirm:"Confirm",
+s1:"Rooms",s2:"Categories",s3:"Facebook followers",s4:"Front desk",
+e2:"Accommodation",h2:"Seven categories,<br>seven moods",
+p2:"From the standard room to the two-bedroom Arabian Suite. Every category has its own decor, its own view and a rate shown up front — no surprises on arrival.",
+f1:"View all",f2:"Rooms",f3:"Suites",f4:"Families",
+tg1:"Best-seller",tg2:"Private dining room",tg3:"Lagoon view",tg4:"Upgraded",tg5:"Signature",
+rm1:"Standard Room",rd1:"The essentials, done well: double bed, air conditioning, private bathroom and breakfast included.",mt1:"Garden view",
+rm2:"Deluxe · four-poster beds",rd2:"Dark wood, light drapes and filtered daylight. Lounge area and a terrace opening onto the garden.",mt2:"Four-poster",mt2b:"Lounge",
+rm3:"Deluxe Superior",rd3:"Wax textiles, four-poster beds and a private dining room. The most generous of the Deluxe rooms.",mt3:"Dining room",
+rm4:"English Suite",rd4:"Quiet elegance, a direct view over the Aby lagoon and the pool. The best sunset on the estate.",mt4:"Lagoon view",
+rm5:"Mezzanine Room",rd5:"Volume under the rafters, a wooden stair and a raised sleeping area. Ideal for a young couple.",mt5:"Duplex",
+rm6:"Superior Mezzanine",rd6:"The mezzanine, larger: a full lounge area, upgraded amenities and a private terrace.",mt6:"Terrace",
+rm7:"Arabian Suite",rd7:"Two bedrooms, Moorish decor and a dedicated service. The signature suite of the property.",mt7:"2 bedrooms",
+pn:"FCFA / night",rsv:"Book",see:"View details",
+e3:"On site &amp; nearby",h3:"Enough to fill<br>a whole day",
+x1:"The deck",x1p:"The wooden pontoon on the Aby lagoon — the heart of the estate, at sunset.",
+x2:"Jet ski &amp; pirogue",x2p:"Supervised sessions and a lagoon cruise with a local guide, morning or late afternoon.",
+x3:"Restaurant &amp; bar",x3p:"Ivorian and continental cooking, catch of the day, house cocktails on the terrace.",
+x4:"Pool",x4p:"Large pool, loungers and parasols, open from first light until dark.",
+x5:"Sauna &amp; massage",x5p:"Rituals and massages after a day on the beach or the lagoon.",
+x6:"Seminars",x6p:"Equipped conference room, day-study and residential packages.",
+x7:"African art",x7p:"Sculptures and craftwork on show in the hall and common areas.",
+x8:"The Embouchure",x8p:"Where the ocean meets the lagoon, an excursion arranged by the front desk.",
+e4:"Gallery",h4:"The estate,<br>unfiltered",p4:"Real photographs of the property — no AI images, no stock library.",voir:"See all 47 photos",
+e5:"They stayed here",h5:"Our guests love us",
+e6:"Find us",h6:"Assinie, PK 19",a1:"From Abidjan",a2:"FHB airport",a2v:"≈ 80 km · free shuttle",
+a3:"Front desk",a4:"Reservations",a5:"Email",route:"Directions"};
+var FR={};document.querySelectorAll('[data-t]').forEach(function(e){FR[e.dataset.t]=e.innerHTML});
+document.querySelectorAll('.lang button').forEach(function(b){b.onclick=function(){
+  var lg=b.dataset.lang;
+  document.querySelectorAll('.lang button').forEach(function(x){x.classList.toggle('on',x.dataset.lang===lg)});
+  var dict=lg==='en'?EN:FR;
+  document.querySelectorAll('[data-t]').forEach(function(e){if(dict[e.dataset.t])e.innerHTML=dict[e.dataset.t]});
+  document.documentElement.lang=lg;
+}});
+</script>
+</body>
+</html>

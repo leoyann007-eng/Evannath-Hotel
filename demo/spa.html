@@ -1,0 +1,583 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Le spa — Hôtel Evannath, Assinie</title>
+<meta name="description" content="Le spa de l'Hôtel Evannath à Assinie : massage aux pierres chauffantes, rituel de l'Orient à l'argan, gommage au savon noir africain, soins aux cinq fleurs d'Assinie. 22 soins, sur rendez-vous.">
+<meta property="og:title" content="Le spa — Hôtel Evannath, Assinie">
+<meta property="og:image" content="img/opt/sp-hero.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Karla:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="preload" as="image" href="img/opt/sp-hero.webp" type="image/webp">
+<style>
+:root{
+  --night:#100B06; --bark:#17100A; --bark-2:#1E150D; --bark-3:#2A1E13;
+  --bronze:#B98A50; --bronze-2:#DFBB84;
+  --cream:#F6EEE2; --muted:#9C8B78; --palm:#8FAE63;
+  --line:rgba(185,138,80,.18); --line-2:rgba(185,138,80,.10);
+  --max:1240px;
+  --f-display:"Marcellus",Georgia,"Times New Roman",serif;
+  --f-body:"Karla",system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--night);color:var(--cream);font-family:var(--f-body);font-size:16.5px;line-height:1.7;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+img{max-width:100%;height:auto;display:block}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:2px solid var(--bronze);outline-offset:3px}
+.wrap{max-width:var(--max);margin:0 auto;padding:0 24px}
+.narrow{max-width:900px;margin:0 auto;padding:0 24px}
+.eyebrow{font-size:10.5px;letter-spacing:.36em;text-transform:uppercase;color:var(--bronze);font-weight:700;display:block}
+h1,h2,h3{font-family:var(--f-display);font-weight:400;line-height:1.08;text-wrap:balance}
+h2{font-size:clamp(1.9rem,3.8vw,3rem)}
+p{color:#D6CBBB}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:17px 34px;font-size:11px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;border:1px solid var(--bronze);color:var(--bronze);background:transparent;cursor:pointer;transition:.4s cubic-bezier(.2,.8,.2,1);font-family:var(--f-body)}
+.btn:hover{background:var(--bronze);color:var(--night);transform:translateY(-2px)}
+.btn-solid{background:var(--bronze);color:var(--night)}
+.btn-solid:hover{background:var(--bronze-2);border-color:var(--bronze-2)}
+
+/* ══ NAV : un seul élément ══ */
+header{position:fixed;top:0;left:0;right:0;z-index:100;transition:.45s;padding:22px 0}
+header.scrolled{padding:11px 0;background:rgba(16,11,6,.96);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
+.nav{display:flex;align-items:center;justify-content:space-between;gap:20px}
+.brand img{width:168px;transition:.45s}
+header.scrolled .brand img{width:132px}
+.brand small{display:block;font-size:8px;letter-spacing:.42em;color:var(--bronze);margin-top:6px;padding-left:2px;font-weight:700}
+.nav-right{display:flex;align-items:center;gap:18px}
+.lang{display:flex;border:1px solid var(--line)}
+.lang button{background:none;border:0;color:var(--muted);font:700 10.5px/1 var(--f-body);letter-spacing:.12em;padding:9px 11px;cursor:pointer;transition:.3s}
+.lang button.on{background:var(--bronze);color:var(--night)}
+.burger{display:flex;align-items:center;gap:12px;background:none;border:0;cursor:pointer;padding:10px 4px;position:relative;z-index:101}
+.burger .bars{display:block;width:26px}
+.burger .bars span{display:block;height:1.5px;background:var(--cream);margin:6px 0;transition:.35s}
+.burger .lbl{font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;font-weight:700;color:var(--cream)}
+.burger.open .bars span:nth-child(1){transform:translateY(7.5px) rotate(45deg)}
+.burger.open .bars span:nth-child(2){opacity:0}
+.burger.open .bars span:nth-child(3){transform:translateY(-7.5px) rotate(-45deg)}
+
+.drawer{position:fixed;inset:0;background:var(--night);z-index:99;opacity:0;visibility:hidden;transition:.5s cubic-bezier(.2,.8,.2,1);overflow-y:auto}
+.drawer.open{opacity:1;visibility:visible}
+.dw-in{min-height:100svh;display:grid;grid-template-columns:1.25fr 1fr;align-items:center;gap:60px;max-width:var(--max);margin:0 auto;padding:130px 24px 60px}
+.dw-in nav{display:flex;flex-direction:column}
+.dw-in nav a{
+  display:flex;align-items:baseline;gap:22px;padding:16px 0;border-bottom:1px solid var(--line-2);
+  font-family:var(--f-display);font-size:clamp(1.45rem,3.2vw,2.4rem);color:var(--cream);
+  opacity:0;transform:translateY(18px);transition:color .3s,opacity .6s,transform .6s
+}
+.drawer.open .dw-in nav a{opacity:1;transform:none}
+.dw-in nav a:hover,.dw-in nav a.on{color:var(--bronze-2)}
+.dw-in nav a i{font-style:normal;font-family:var(--f-body);font-size:10px;letter-spacing:.2em;color:var(--bronze);font-weight:700;flex:0 0 auto;opacity:.7}
+.dw-side{display:flex;flex-direction:column;gap:26px}
+.dw-side .ph{aspect-ratio:4/3;overflow:hidden;background:var(--bark-2)}
+.dw-side .ph img{width:100%;height:100%;object-fit:cover}
+.dw-side b{display:block;font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--bronze);font-weight:700;margin-bottom:12px}
+.dw-side a{display:block;font-size:15px;color:#CDBFAE;padding:7px 0;transition:.3s}
+.dw-side a:hover{color:var(--bronze)}
+.dw-side p{font-size:13.5px;color:var(--muted);margin-top:12px}
+.dw-side .lang{margin-top:6px;width:max-content}
+.dw-side .lang button{padding:15px 20px;font-size:11px}
+
+.hero{position:relative;min-height:92svh;display:flex;align-items:center;overflow:hidden}
+.hero .bg{position:absolute;inset:0;background:url('img/opt/sp-hero.jpg') center/cover;animation:kb 24s ease-out forwards}
+@keyframes kb{from{transform:scale(1.03)}to{transform:scale(1.12)}}
+.hero::after{content:"";position:absolute;inset:0;background:
+  radial-gradient(ellipse at 50% 48%,rgba(16,11,6,.3),rgba(16,11,6,.88) 74%),
+  linear-gradient(180deg,rgba(16,11,6,.74),transparent 32%,rgba(16,11,6,.97))}
+.hero .in{position:relative;z-index:3;width:100%;text-align:center}
+.crumb{font-size:11px;letter-spacing:.12em;color:var(--muted);margin-bottom:30px}
+.crumb a{padding:6px 0;display:inline-block}
+.crumb a:hover{color:var(--bronze)}
+.crumb span{color:var(--bronze)}
+.hero h1{font-size:clamp(3rem,10vw,8rem);line-height:.92;margin:20px 0}
+.hero h1 em{display:block;font-style:italic;color:var(--bronze-2);font-size:.5em;margin-top:10px}
+.hero .lede{max-width:46ch;margin:0 auto;font-size:1.06rem;color:#E3D9C9}
+.rule{width:1px;height:56px;background:linear-gradient(var(--bronze),transparent);margin:36px auto 0}
+
+.mani{padding:118px 0}
+.mani .grid{display:grid;grid-template-columns:1fr 1.25fr;gap:70px;align-items:start}
+.mani .big{font-family:var(--f-display);font-size:clamp(1.5rem,2.7vw,2.15rem);line-height:1.4;color:var(--cream)}
+.mani p+p{margin-top:18px}
+
+/* ── le lieu ──────────────────────────── */
+.lieu{padding:0 0 118px}
+.lieu .head{text-align:center;margin-bottom:52px}
+.lieu .head p{max-width:52ch;margin:18px auto 0;color:#B4A794}
+.mosaic{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:200px;gap:12px}
+.mosaic figure{overflow:hidden;position:relative;cursor:pointer;background:var(--bark-2)}
+.mosaic figure:nth-child(1){grid-column:span 2;grid-row:span 2}
+.mosaic figure:nth-child(4){grid-column:span 2}
+.mosaic img{width:100%;height:100%;object-fit:cover;transition:1s cubic-bezier(.2,.8,.2,1)}
+.mosaic figure:hover img{transform:scale(1.07)}
+.mosaic figcaption{
+  position:absolute;left:0;right:0;bottom:0;padding:28px 16px 12px;
+  background:linear-gradient(transparent,rgba(16,11,6,.94));
+  font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--cream);font-weight:700;
+  text-shadow:0 2px 10px rgba(10,6,3,.9)
+}
+.mosaic figure::after{content:"+";position:absolute;inset:0;display:grid;place-items:center;background:rgba(16,11,6,.55);color:var(--bronze-2);font-size:2rem;opacity:0;transition:.4s}
+.mosaic figure:hover::after{opacity:1}
+
+.rituels{background:var(--bark);padding:110px 0;border-block:1px solid var(--line)}
+.rituels .head{text-align:center;margin-bottom:66px}
+.rituels .head p{max-width:52ch;margin:18px auto 0;color:#B4A794}
+.plate{display:grid;grid-template-columns:88px 1fr auto;gap:34px;align-items:baseline;padding:36px 0;border-top:1px solid var(--line-2);transition:.45s}
+.plate:last-of-type{border-bottom:1px solid var(--line-2)}
+.plate:hover{background:linear-gradient(90deg,rgba(185,138,80,.055),transparent 70%)}
+.plate .n{font-family:var(--f-display);font-size:2.4rem;color:var(--bronze);opacity:.4;line-height:.8;font-variant-numeric:tabular-nums;transition:.45s}
+.plate:hover .n{opacity:1}
+.plate h3{font-size:clamp(1.35rem,2.4vw,1.9rem);margin-bottom:12px;font-weight:400}
+.plate .ing{font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);font-weight:600;line-height:2}
+.plate .note{font-size:14.5px;color:#B4A794;margin-top:10px;max-width:52ch;font-style:italic}
+.plate .pr{font-family:var(--f-display);font-size:1.5rem;color:var(--bronze-2);white-space:nowrap;font-variant-numeric:tabular-nums}
+.plate .pr small{display:block;font-family:var(--f-body);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-top:6px;text-align:right}
+
+.band{position:relative;height:56vh;min-height:340px;overflow:hidden}
+.band img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.band::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(16,11,6,.5) 0%,rgba(16,11,6,.22) 30%,rgba(16,11,6,.72) 62%,rgba(16,11,6,.95) 100%)}
+.band .cap{position:absolute;left:0;right:0;bottom:38px;z-index:3;text-align:center;padding:0 24px}
+.band .cap span{font-size:10px;letter-spacing:.34em;text-transform:uppercase;color:var(--bronze-2);font-weight:700;text-shadow:0 2px 14px rgba(10,6,3,.95),0 0 4px rgba(10,6,3,.9)}
+.band .cap p{text-shadow:0 2px 18px rgba(10,6,3,.9);font-family:var(--f-display);font-size:clamp(1.3rem,2.6vw,2rem);color:var(--cream);margin-top:12px;max-width:24ch;margin-inline:auto;line-height:1.25}
+
+.carte{padding:110px 0 0}
+.carte .head{text-align:center;margin-bottom:56px}
+.carte .head p{max-width:52ch;margin:18px auto 0;color:#B4A794}
+.grp{margin-bottom:64px;padding-bottom:24px}
+.grp h3{font-family:var(--f-display);font-size:1.05rem;font-weight:400;letter-spacing:.26em;text-transform:uppercase;color:var(--bronze);text-align:center;margin-bottom:34px;position:relative}
+.grp h3::before,.grp h3::after{content:"";position:absolute;top:50%;width:24%;height:1px;background:var(--line)}
+.grp h3::before{left:0}.grp h3::after{right:0}
+.grp h3 em{font-style:normal;font-family:var(--f-body);font-size:.66em;letter-spacing:.16em;color:var(--muted);font-weight:600}
+.menu-list{list-style:none;column-count:2;column-gap:56px}
+.menu-list li{break-inside:avoid;padding:0 0 26px;display:flex;gap:14px;align-items:baseline}
+.menu-list li>div{flex:1;min-width:0}
+.menu-list b{display:block;font-family:var(--f-display);font-weight:400;font-size:1.12rem;color:var(--cream);line-height:1.3}
+.menu-list em{display:block;font-style:normal;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-top:7px;font-weight:600}
+.menu-list>li>span{font-family:var(--f-display);font-size:1.12rem;color:var(--bronze);white-space:nowrap;font-variant-numeric:tabular-nums;flex:0 0 auto}
+.cur{font-size:.58em;color:var(--muted);letter-spacing:.06em}
+
+#lb{position:fixed;inset:0;background:rgba(10,6,3,.98);z-index:200;display:none;place-items:center;padding:40px}
+#lb.on{display:grid}
+#lb img{max-width:92vw;max-height:84vh;object-fit:contain}
+#lbc{position:absolute;bottom:26px;left:0;right:0;text-align:center;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.lb-btn{position:absolute;background:rgba(16,11,6,.75);border:1px solid var(--line);color:var(--cream);width:48px;height:48px;cursor:pointer;font-size:20px;transition:.3s}
+.lb-btn:hover{border-color:var(--bronze);color:var(--bronze)}
+#lb .prev{left:26px;top:50%}#lb .next{right:26px;top:50%}#lb .close{top:26px;right:26px}
+
+.book{position:relative;padding:118px 0;overflow:hidden;border-top:1px solid var(--line)}
+.book .grid{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center;margin-top:36px}
+.book form{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.book .f{display:flex;flex-direction:column}
+.book .f.full{grid-column:1/-1}
+.book label{font-size:9.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--bronze);margin-bottom:8px;font-weight:700}
+.book input,.book select{min-height:48px;background:transparent;border:0;border-bottom:1px solid var(--line);color:var(--cream);font:400 15px/1.4 var(--f-body);padding:11px 2px;outline:none;transition:.3s}
+.book input:focus,.book select:focus{border-color:var(--bronze)}
+.book select option{background:var(--bark-2);color:var(--cream)}
+.book .btn{grid-column:1/-1;margin-top:12px}
+.hours div{display:flex;justify-content:space-between;gap:18px;padding:16px 0;border-bottom:1px solid var(--line-2);font-size:15px}
+.hours div:last-child{border-bottom:0}
+.hours span:first-child{color:var(--muted);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;font-weight:600}
+.hours .hi{color:var(--palm)}
+
+footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
+.f-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1.2fr;gap:44px}
+.f-grid h4{font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--bronze);margin-bottom:20px;font-weight:700}
+.f-grid p{display:block;font-size:13.5px;color:#9C8B78;margin-bottom:11px}
+.f-grid a{display:block;font-size:13.5px;color:#9C8B78;padding:9px 0;transition:.3s}
+.f-grid a:hover{color:var(--bronze)}
+.f-bot{border-top:1px solid var(--line);margin-top:54px;padding-top:26px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:11.5px;color:#6A5C4C}
+.wa{position:fixed;right:22px;bottom:22px;z-index:90;width:56px;height:56px;border-radius:50%;background:#25D366;display:grid;place-items:center;box-shadow:0 10px 30px rgba(37,211,102,.35);transition:.35s}
+.wa:hover{transform:scale(1.09)}
+.wa svg{width:28px;height:28px;fill:#fff}
+
+.reveal{opacity:0;transform:translateY(30px);transition:opacity 1s cubic-bezier(.2,.8,.2,1),transform 1s cubic-bezier(.2,.8,.2,1)}
+.reveal.in{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition-duration:.01ms!important}.reveal,.dw-in nav a{opacity:1;transform:none}}
+
+@media(max-width:1080px){
+  .dw-in{grid-template-columns:1fr;gap:40px;align-content:start}
+  .dw-side .ph{display:none}
+  .mani .grid,.book .grid{grid-template-columns:1fr;gap:40px}
+  .menu-list{column-count:1}
+  .f-grid{grid-template-columns:repeat(2,1fr)}
+  .mosaic{grid-template-columns:repeat(2,1fr);grid-auto-rows:180px}
+  .mosaic figure:nth-child(1),.mosaic figure:nth-child(4){grid-column:span 2;grid-row:span 1}
+}
+@media(max-width:720px){
+  .burger .lbl{display:none}
+  .nav-right .lang{display:none}
+  .dw-in{padding:110px 24px 50px}
+  .mani,.rituels,.book{padding:76px 0}
+  .lieu{padding-bottom:76px}
+  .carte{padding-top:76px}
+  .plate{grid-template-columns:1fr;gap:10px;padding:30px 0}
+  .plate .n{font-size:1.5rem;opacity:1}
+  .plate .pr small{text-align:left}
+  .grp h3::before,.grp h3::after{width:8%}
+  .book form,.f-grid{grid-template-columns:1fr}
+  .band{height:44vh}
+  .mosaic{grid-template-columns:1fr;grid-auto-rows:210px}
+  .mosaic figure:nth-child(1),.mosaic figure:nth-child(4){grid-column:span 1}
+  #lb .prev{left:8px}#lb .next{right:8px}
+}
+</style>
+</head>
+<body>
+
+<header id="hd">
+  <div class="wrap nav">
+    <a href="index.html" class="brand" aria-label="Hôtel Evannath, accueil">
+      <img src="img/opt/logo-blanc.png" alt="Hôtel Evannath" width="729" height="176">
+      <small>LE RÊVE AFRICAIN</small>
+    </a>
+    <div class="nav-right">
+      <div class="lang"><button class="on" data-lang="fr">FR</button><button data-lang="en">EN</button></div>
+      <a href="#rdv" class="btn btn-solid" data-t="tb">Rendez-vous</a>
+      <button class="burger" id="bg" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="dw">
+        <span class="lbl" data-t="mn">Menu</span>
+        <span class="bars"><span></span><span></span><span></span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="drawer" id="dw">
+  <div class="dw-in">
+    <nav aria-label="Navigation principale">
+      <a href="index.html#chambres"><i>01</i><span data-t="n1">Chambres &amp; Suites</span></a>
+      <a href="carte.html"><i>02</i><span data-t="n2">La table</span></a>
+      <a href="spa.html" class="on"><i>03</i><span data-t="n3">Le spa</span></a>
+      <a href="circuits.html"><i>04</i><span data-t="n4">Circuits &amp; Offres</span></a>
+      <a href="galerie.html"><i>05</i><span data-t="n5">Galerie</span></a>
+      <a href="a-propos.html"><i>06</i><span data-t="n6">À propos</span></a>
+      <a href="informations-utiles.html"><i>07</i><span data-t="n7">Informations utiles</span></a>
+      <a href="contact.html"><i>08</i><span data-t="n8">Contact</span></a>
+    </nav>
+    <aside class="dw-side">
+      <div class="ph"><picture><source srcset="img/opt/sp-produits-t.webp" type="image/webp">
+        <img src="img/opt/sp-produits-t.jpg" width="700" height="467" alt="Serviettes et huiles du spa" loading="lazy"></picture></div>
+      <div>
+        <b data-t="dr">Réservations</b>
+        <a href="tel:+2250151527575">+225 01 51 52 75 75</a>
+        <a href="mailto:bonjour@evannathhotel.com">bonjour@evannathhotel.com</a>
+        <a href="https://wa.me/2250546017377" target="_blank" rel="noopener">WhatsApp</a>
+        <p>Assinie PK 19 · Comoé · Côte d'Ivoire</p>
+      </div>
+      <div class="lang"><button class="on" data-lang="fr">FR</button><button data-lang="en">EN</button></div>
+    </aside>
+  </div>
+</div>
+
+<section class="hero">
+  <div class="bg"></div>
+  <div class="in narrow">
+    <nav class="crumb" aria-label="Fil d'Ariane">
+      <a href="index.html" data-t="c1">Accueil</a> &nbsp;·&nbsp; <span data-t="c2">Le spa</span>
+    </nav>
+    <span class="eyebrow" data-t="eb">Spa &amp; sauna · sur rendez-vous</span>
+    <h1>Le spa<em data-t="h1e">d'Assinie</em></h1>
+    <p class="lede" data-t="lede">Des pierres chauffées, du savon noir, de l'argan et les cinq fleurs d'Assinie. Vingt minutes ou une heure trente — le temps que vous voulez bien nous donner.</p>
+    <div class="rule"></div>
+  </div>
+</section>
+
+<section class="mani">
+  <div class="wrap grid reveal">
+    <div>
+      <span class="eyebrow" data-t="e1">Notre approche</span>
+      <p class="big" style="margin-top:22px" data-t="big">Le sel, l'huile et la main. Rien de plus compliqué.</p>
+    </div>
+    <div>
+      <p data-t="p1">Le savon noir africain gomme, l'argan nourrit, les pierres chauffées défont ce que la route a noué. Nos praticiennes travaillent avec des gestes qui n'ont pas changé depuis longtemps, et des produits qu'on peut nommer.</p>
+      <p data-t="p2">Après une journée de lagune, de jet ski ou de route depuis Abidjan, vingt minutes suffisent souvent. Pour le reste, il y a le grand rituel de l'Orient — une heure et demie, et vous ne pensez plus à rien.</p>
+    </div>
+  </div>
+</section>
+
+<section class="lieu">
+  <div class="wrap">
+    <div class="head reveal">
+      <span class="eyebrow" data-t="e5">Le lieu</span>
+      <h2 style="margin-top:16px" data-t="h5">Une case, un bain,<br>et la piscine juste derrière</h2>
+      <p data-t="p5">Le spa occupe la case ronde en paillote, à l'écart des chambres. On y entre par la terrasse, on en ressort par la piscine.</p>
+    </div>
+    <div class="mosaic reveal" id="gl">
+      <figure><picture><source srcset="img/opt/sp-case-t.webp" type="image/webp">
+        <img loading="lazy" width="700" height="467" src="img/opt/sp-case-t.jpg" data-full="img/opt/sp-case.jpg" alt="La case ronde en paillote qui abrite le spa"></picture>
+        <figcaption data-t="c1">La case</figcaption></figure>
+      <figure><picture><source srcset="img/opt/sp-produits-t.webp" type="image/webp">
+        <img loading="lazy" width="700" height="467" src="img/opt/sp-produits-t.jpg" data-full="img/opt/sp-produits.jpg" alt="Serviettes roulées et huiles de soin sur une étagère de bois"></picture>
+        <figcaption data-t="c2">Les huiles</figcaption></figure>
+      <figure><picture><source srcset="img/opt/ig-sauna.webp" type="image/webp">
+        <img loading="lazy" width="640" height="454" src="img/opt/ig-sauna.jpg" data-full="img/opt/ig-sauna.jpg" alt="Le sauna en bois de l'Hôtel Evannath"></picture>
+        <figcaption data-t="c3">Le sauna</figcaption></figure>
+      <figure><picture><source srcset="img/opt/sp-piscine-t.webp" type="image/webp">
+        <img loading="lazy" width="700" height="467" src="img/opt/sp-piscine-t.jpg" data-full="img/opt/sp-piscine.jpg" alt="La piscine de l'hôtel vue d'en haut"></picture>
+        <figcaption data-t="c4">La piscine</figcaption></figure>
+      <figure><picture><source srcset="img/opt/ig-jacuzzi-t.webp" type="image/webp">
+        <img loading="lazy" width="360" height="610" src="img/opt/ig-jacuzzi-t.jpg" data-full="img/opt/ig-jacuzzi.jpg" alt="Le jacuzzi extérieur de l'hôtel"></picture>
+        <figcaption data-t="c5">Le jacuzzi</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<section class="rituels">
+  <div class="wrap">
+    <div class="head reveal">
+      <span class="eyebrow" data-t="e2">Les rituels</span>
+      <h2 style="margin-top:16px" data-t="h2">Quatre soins<br>à ne pas manquer</h2>
+      <p data-t="p2b">Les plus demandés, et ceux dont on nous reparle. La carte complète est plus bas.</p>
+    </div>
+    <div class="reveal">
+      <article class="plate">
+        <span class="n">01</span>
+        <div><h3 data-t="r1">Grand rituel corps de l'Orient, argan divin</h3>
+          <div class="ing" data-t="r1i">1 h 30 · gommage · enveloppement · massage</div>
+          <p class="note" data-t="r1n">Le soin le plus long de la carte. On entre tendu, on ressort ailleurs.</p></div>
+        <div class="pr">25 000<small>FCFA</small></div>
+      </article>
+      <article class="plate">
+        <span class="n">02</span>
+        <div><h3 data-t="r2">Massage thérapeutique aux pierres chauffantes</h3>
+          <div class="ing" data-t="r2i">50 min · pierres volcaniques · huiles chaudes</div>
+          <p class="note" data-t="r2n">La chaleur descend là où les doigts n'iraient pas seuls. Pour les dos fatigués.</p></div>
+        <div class="pr">25 000<small>FCFA</small></div>
+      </article>
+      <article class="plate">
+        <span class="n">03</span>
+        <div><h3 data-t="r3">Gommage au savon noir africain</h3>
+          <div class="ing" data-t="r3i">20 min · savon noir · gant de kessa</div>
+          <p class="note" data-t="r3n">Peau douce et satinée. Le geste le plus simple, et le plus efficace.</p></div>
+        <div class="pr">15 000<small>FCFA</small></div>
+      </article>
+      <article class="plate">
+        <span class="n">04</span>
+        <div><h3 data-t="r4">Soin aux cinq fleurs d'Assinie</h3>
+          <div class="ing" data-t="r4i">30 min · visage · hydratant et repulpant</div>
+          <p class="note" data-t="r4n">Cinq fleurs cueillies ici. Le soin qui porte le nom de la commune.</p></div>
+        <div class="pr">5 000<small>FCFA</small></div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<div class="band reveal">
+  <picture><source srcset="img/opt/sp-lampe.webp" type="image/webp">
+  <img src="img/opt/sp-lampe.jpg" width="1400" height="933" alt="Lanterne de rotin allumée au-dessus de la terrasse" loading="lazy"></picture>
+  <div class="cap"><span data-t="cb">Sur place</span><p data-t="cbp">Sauna, salle de sport et piscine, à deux pas des cabines.</p></div>
+</div>
+
+<section class="carte">
+  <div class="wrap head reveal">
+    <span class="eyebrow" data-t="e3">La carte des soins</span>
+    <h2 style="margin-top:16px" data-t="h3">22 soins, avec les prix</h2>
+    <p data-t="p3">Massages, visage, gommages, onglerie et épilation. Réservation à la réception ou par WhatsApp.</p>
+  </div>
+  <div class="wrap">
+      <section class="grp" id="s0">
+        <h3>Massages du corps</h3>
+        <ul class="menu-list">
+        <li><div><b>Massage thérapeutique aux pierres chauffantes</b><em>50 min</em></div><span>25 000</span></li>
+        <li><div><b>Grand rituel corps de l'Orient, argan divin</b><em>1 h 30</em></div><span>25 000</span></li>
+        <li><div><b>Massage sublime de Polynésie, lâcher-prise</b><em>50 min</em></div><span>15 000</span></li>
+        <li><div><b>Massage relaxant sur mesure aux eucalyptus</b><em>50 min</em></div><span>15 000</span></li>
+        <li><div><b>Massage détente et bien-être au jasmin</b><em>20 min</em></div><span>10 000</span></li>
+        <li><div><b>Massage relaxant de l'arrière du corps</b><em>20 min</em></div><span>10 000</span></li>
+        <li><div><b>Massage délassant des jambes, fraîcheur et légèreté</b><em>20 min</em></div><span>5 000</span></li>
+        </ul>
+      </section>
+      <section class="grp" id="s1">
+        <h3>Soins du visage</h3>
+        <ul class="menu-list">
+        <li><div><b>Soin massage fleurs d'Assinie, pureté et éclat</b><em>20 min</em></div><span>5 000</span></li>
+        <li><div><b>Soin massage aux 5 fleurs d'Assinie, hydratant et repulpant</b><em>30 min</em></div><span>5 000</span></li>
+        <li><div><b>Soin Ko-Bi-Do, jeunesse et éclat</b><em>20 min</em></div><span>5 000</span></li>
+        </ul>
+      </section>
+      <section class="grp" id="s2">
+        <h3>Gommages &amp; sauna</h3>
+        <ul class="menu-list">
+        <li><div><b>Sauna, fitness et massage</b><em>2 h</em></div><span>50 000</span></li>
+        <li><div><b>Soin massage aux 5 fleurs d'Assinie, hydratant et repulpant</b><em>20 min</em></div><span>15 000</span></li>
+        <li><div><b>Gommage au savon noir africain, peau douce et satinée</b><em>20 min</em></div><span>15 000</span></li>
+        </ul>
+      </section>
+      <section class="grp" id="s3">
+        <h3>Onglerie</h3>
+        <ul class="menu-list">
+        <li><div><b>Soin fortifiant et embellissement des ongles naturels</b></div><span>5 000</span></li>
+        <li><div><b>Renfort d'ongles naturels, gainage transparent</b></div><span>5 000</span></li>
+        <li><div><b>Rallongement, extensions sans capsules</b></div><span>5 000</span></li>
+        <li><div><b>Pose de vernis</b></div><span>2 500</span></li>
+        </ul>
+      </section>
+      <section class="grp" id="s4">
+        <h3>Épilation</h3>
+        <ul class="menu-list">
+        <li><div><b>Création de ligne de sourcil</b></div><span>15 000</span></li>
+        <li><div><b>Sourcil</b></div><span>2 000</span></li>
+        <li><div><b>Lèvre ou menton</b></div><span>2 000</span></li>
+        <li><div><b>Pose de faux cils naturels</b></div><span>2 000</span></li>
+        <li><div><b>Jambe entière</b></div><span>2 000</span></li>
+        </ul>
+      </section>
+  </div>
+</section>
+
+<section class="book" id="rdv">
+  <div class="wrap">
+    <span class="eyebrow" data-t="e4">Prendre rendez-vous</span>
+    <h2 style="margin-top:16px" data-t="h4">Réserver un soin</h2>
+    <div class="grid">
+      <form id="sf">
+        <div class="f full"><label for="so" data-t="l0">Soin souhaité</label>
+          <select id="so">
+            <option data-t="so1">Grand rituel corps de l'Orient — 1 h 30</option>
+            <option data-t="so2">Massage aux pierres chauffantes — 50 min</option>
+            <option data-t="so3">Massage relaxant aux eucalyptus — 50 min</option>
+            <option data-t="so4">Gommage au savon noir africain — 20 min</option>
+            <option data-t="so5">Soin visage aux cinq fleurs — 30 min</option>
+            <option data-t="so6">Sauna, fitness et massage — 2 h</option>
+            <option data-t="so7">Onglerie</option>
+            <option data-t="so8">Épilation</option>
+            <option data-t="so9">Autre — à préciser</option>
+          </select>
+        </div>
+        <div class="f"><label for="sd" data-t="l1">Date</label><input type="date" id="sd"></div>
+        <div class="f"><label for="sh" data-t="l2">Heure</label>
+          <select id="sh"><option>10 h 00</option><option>11 h 00</option><option>14 h 00</option><option selected>15 h 00</option><option>16 h 00</option><option>17 h 00</option><option>18 h 00</option></select>
+        </div>
+        <div class="f"><label for="sn" data-t="l3">Nom</label><input type="text" id="sn" placeholder="Aya Kouassi" required></div>
+        <div class="f"><label for="st" data-t="l4">Téléphone / WhatsApp</label><input type="tel" id="st" placeholder="+225 01 02 03 04 05" required></div>
+        <button type="submit" class="btn btn-solid" data-t="l5">Demander ce créneau</button>
+      </form>
+      <div class="hours">
+        <div><span data-t="k1">Spa</span><span class="hi" data-t="k1v">sur rendez-vous</span></div>
+        <div><span data-t="k2">Sauna</span><span data-t="k2v">inclus dans le forfait 2 h</span></div>
+        <div><span data-t="k3">Salle de sport</span><span data-t="k3v">accès libre</span></div>
+        <div><span data-t="k4">Réservations</span><span>+225 01 51 52 75 75</span></div>
+        <div><span data-t="k5">WhatsApp</span><span>+225 05 46 01 73 77</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="f-grid">
+      <div>
+        <img src="img/opt/logo-blanc.png" alt="Hôtel Evannath" width="729" height="176" style="width:180px;margin-bottom:8px">
+        <p style="font-size:8.5px;letter-spacing:.42em;color:var(--bronze);font-weight:700;margin-bottom:18px">LE RÊVE AFRICAIN</p>
+        <p style="max-width:300px">46 chambres et suites face à la lagune Aby, à Assinie. Réservation directe, meilleur tarif garanti, réception ouverte 24 h/24.</p>
+      </div>
+      <div><h4>Navigation</h4><a href="index.html#chambres">Chambres</a><a href="circuits.html">Circuits &amp; Offres</a><a href="carte.html">La table</a><a href="spa.html">Spa</a><a href="a-propos.html">À propos</a><a href="contact.html">Contact</a></div>
+      <div><h4>Informations</h4><a href="informations-utiles.html">Informations utiles</a><a href="informations-utiles.html#groupes">Séminaires &amp; groupes</a><a href="informations-utiles.html#reserver">Conditions d'annulation</a><a href="mentions-legales.html">Mentions légales</a></div>
+      <div><h4>Contact</h4>
+        <a href="tel:+2252721731265">+225 27 21 73 12 65</a>
+        <a href="tel:+2250151527575">+225 01 51 52 75 75</a>
+        <a href="mailto:bonjour@evannathhotel.com">bonjour@evannathhotel.com</a>
+        <a href="https://www.facebook.com/evannathhotel" target="_blank" rel="noopener">Facebook — 21 K abonnés</a>
+      </div>
+    </div>
+    <div class="f-bot"><span>© 2026 Hôtel Evannath — Assinie, Côte d'Ivoire</span><span>Maquette de refonte · démonstration</span></div>
+  </div>
+</footer>
+
+<a class="wa" href="https://wa.me/2250546017377" target="_blank" rel="noopener" aria-label="Nous écrire sur WhatsApp">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.5 14.4c-.3-.1-1.7-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.7 1-.9 1.2-.2.2-.3.2-.6.1-1.7-.9-2.9-1.6-4-3.5-.3-.5.3-.5.9-1.6.1-.2 0-.4 0-.5s-.7-1.6-.9-2.2c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.3 5.2 4.6 1.9.8 2.7.9 3.6.8.6-.1 1.7-.7 2-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.6-.3M12 2a10 10 0 00-8.6 15L2 22l5.2-1.4A10 10 0 1012 2z"/></svg>
+</a>
+
+<div id="lb" role="dialog" aria-modal="true" aria-label="Photos du spa">
+  <button class="lb-btn close" aria-label="Fermer">×</button>
+  <button class="lb-btn prev" aria-label="Photo précédente">‹</button>
+  <img id="lbi" alt="">
+  <button class="lb-btn next" aria-label="Photo suivante">›</button>
+  <div id="lbc"></div>
+</div>
+
+<script>
+var hd=document.getElementById('hd');
+addEventListener('scroll',function(){hd.classList.toggle('scrolled',scrollY>60)},{passive:true});
+
+var bg=document.getElementById('bg'),dw=document.getElementById('dw');
+var dwLinks=[].slice.call(dw.querySelectorAll('nav a'));
+function toggleMenu(){
+  var o=dw.classList.toggle('open');
+  bg.classList.toggle('open',o);
+  bg.setAttribute('aria-expanded',o);
+  bg.setAttribute('aria-label',o?'Fermer le menu':'Ouvrir le menu');
+  document.body.style.overflow=o?'hidden':'';
+  dwLinks.forEach(function(a,i){a.style.transitionDelay=o?(60+i*55)+'ms':'0ms'});
+}
+bg.onclick=toggleMenu;
+dwLinks.forEach(function(a){a.onclick=function(){if(dw.classList.contains('open'))toggleMenu()}});
+addEventListener('keydown',function(e){if(e.key==='Escape'&&dw.classList.contains('open'))toggleMenu()});
+
+var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+if(!('IntersectionObserver' in window)||reduce){document.querySelectorAll('.reveal').forEach(function(e){e.classList.add('in')})}
+else{var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.1});
+ document.querySelectorAll('.reveal').forEach(function(el){io.observe(el)});
+ setTimeout(function(){document.querySelectorAll('.reveal:not(.in)').forEach(function(el){if(el.getBoundingClientRect().top<innerHeight)el.classList.add('in')})},1200)}
+
+document.querySelectorAll('.menu-list>li>span').forEach(function(s){
+  s.innerHTML=s.textContent.trim()+' <span class="cur">FCFA</span>';
+});
+
+var figs=[].slice.call(document.querySelectorAll('#gl img')),lb=document.getElementById('lb'),lbi=document.getElementById('lbi'),lbc=document.getElementById('lbc'),gi=0;
+function show(i){gi=(i+figs.length)%figs.length;lbi.src=figs[gi].dataset.full||figs[gi].src;lbi.alt=figs[gi].alt;lbc.textContent=figs[gi].alt+'  ·  '+(gi+1)+' / '+figs.length;lb.classList.add('on');document.body.style.overflow='hidden'}
+function hideLb(){lb.classList.remove('on');document.body.style.overflow=''}
+figs.forEach(function(im,i){im.closest('figure').onclick=function(){show(i)}});
+lb.querySelector('.next').onclick=function(e){e.stopPropagation();show(gi+1)};
+lb.querySelector('.prev').onclick=function(e){e.stopPropagation();show(gi-1)};
+lb.querySelector('.close').onclick=hideLb;
+lb.onclick=function(e){if(e.target===lb)hideLb()};
+addEventListener('keydown',function(e){if(!lb.classList.contains('on'))return;
+ if(e.key==='Escape')hideLb();if(e.key==='ArrowRight')show(gi+1);if(e.key==='ArrowLeft')show(gi-1)});
+
+var sd=document.getElementById('sd');
+function iso(d){return new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10)}
+sd.value=iso(new Date(Date.now()+864e5)); sd.min=iso(new Date());
+document.getElementById('sf').addEventListener('submit',function(e){e.preventDefault();
+  alert("Démonstration : la demande partirait au spa et à bonjour@evannathhotel.com, avec confirmation du créneau par WhatsApp.")});
+
+var EN={mn:"Menu",n1:"Rooms &amp; Suites",n2:"The table",n3:"The spa",n4:"Packages &amp; Offers",
+n5:"Gallery",n6:"About",n7:"Useful information",n8:"Contact",dr:"Reservations",tb:"Book",
+c1:"Home",c2:"The spa",eb:"Spa &amp; sauna · by appointment",h1e:"of Assinie",
+lede:"Heated stones, black soap, argan oil and the five flowers of Assinie. Twenty minutes or an hour and a half — however much time you care to give us.",
+e1:"Our approach",big:"Salt, oil and a hand. Nothing more complicated.",
+p1:"African black soap exfoliates, argan nourishes, heated stones undo what the road tied up. Our therapists work with gestures that have not changed in a long time, and products you can name.",
+p2:"After a day on the lagoon, on a jet ski or on the road from Abidjan, twenty minutes is often enough. For everything else there is the great Oriental ritual — an hour and a half, and you stop thinking altogether.",
+e5:"The place",h5:"A hut, a bath,<br>and the pool just behind",
+p5:"The spa sits in the round thatched hut, away from the rooms. You come in from the terrace and leave by the pool.",
+c1x:"",c2:"The oils",c3:"The sauna",c4:"The pool",c5:"The jacuzzi",
+e2:"The rituals",h2:"Four treatments<br>not to miss",
+p2b:"The most requested, and the ones guests write back about. The full list is further down.",
+r1:"Great Oriental body ritual, divine argan",r1i:"1 h 30 · scrub · wrap · massage",
+r1n:"The longest treatment on the list. You come in tense, you leave somewhere else.",
+r2:"Therapeutic hot stone massage",r2i:"50 min · volcanic stones · warm oils",
+r2n:"Heat reaches where fingers alone would not. For tired backs.",
+r3:"African black soap scrub",r3i:"20 min · black soap · kessa glove",
+r3n:"Soft, satin skin. The simplest gesture, and the most effective.",
+r4:"Five flowers of Assinie facial",r4i:"30 min · face · hydrating and plumping",
+r4n:"Five flowers picked here. The treatment named after the town.",
+cb:"On site",cbp:"Sauna, gym and pool, a few steps from the cabins.",
+e3:"The treatment list",h3:"22 treatments, with prices",
+p3:"Massages, facials, scrubs, nails and waxing. Book at the front desk or on WhatsApp.",
+e4:"Make an appointment",h4:"Book a treatment",
+l0:"Treatment",l1:"Date",l2:"Time",l3:"Name",l4:"Phone / WhatsApp",l5:"Request this slot",
+so1:"Great Oriental body ritual — 1 h 30",so2:"Hot stone massage — 50 min",so3:"Relaxing eucalyptus massage — 50 min",
+so4:"African black soap scrub — 20 min",so5:"Five flowers facial — 30 min",so6:"Sauna, fitness and massage — 2 h",
+so7:"Nails",so8:"Waxing",so9:"Something else — please specify",
+k1:"Spa",k1v:"by appointment",k2:"Sauna",k2v:"included in the 2 h package",k3:"Gym",k3v:"open access",k4:"Bookings",k5:"WhatsApp"};
+EN.c1="The hut";
+var FR={};document.querySelectorAll('[data-t]').forEach(function(e){FR[e.dataset.t]=e.innerHTML});
+document.querySelectorAll('.lang button').forEach(function(b){b.onclick=function(){
+  var lg=b.dataset.lang;
+  document.querySelectorAll('.lang button').forEach(function(x){x.classList.toggle('on',x.dataset.lang===lg)});
+  var dict=lg==='en'?EN:FR;
+  document.querySelectorAll('[data-t]').forEach(function(e){if(dict[e.dataset.t])e.innerHTML=dict[e.dataset.t]});
+  document.documentElement.lang=lg;
+}});
+</script>
+</body>
+</html>

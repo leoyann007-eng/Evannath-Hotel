@@ -1,0 +1,31 @@
+# ── Document commercial ───────────────────────────────────────
+# Contient les coordonnées personnelles de l'émetteur et une offre
+# nominative : il n'a rien à faire dans un dépôt, ni sur le web.
+proposition-commerciale.html
+
+# ── Photos sources ────────────────────────────────────────────
+# Les originaux téléchargés depuis evannathhotel.com (~60 Mo de PNG).
+# Seules les versions optimisées de demo/img/opt/ sont servies et versionnées.
+# Pour les régénérer : voir la section « Régénérer les images » du README.
+demo/img/gallery/
+demo/img/rest/
+demo/img/rooms/
+demo/img/brand/
+demo/img/insta/
+demo/img/manquant/
+demo/img/fb/
+
+# ── Relevés d'audit ───────────────────────────────────────────
+.media/
+
+# ── Variante non retenue ──────────────────────────────────────
+demo/index-luxe-variante.html
+demo/*.gardefou
+
+# ── Environnement local ───────────────────────────────────────
+.claude/
+__pycache__/
+*.pyc
+Thumbs.db
+desktop.ini
+.DS_Store
