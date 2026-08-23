@@ -137,6 +137,22 @@ Hébergé sur **Vercel**, en site statique — aucune étape de compilation.
 `site/vercel.json` fait le reste : URL sans `.html`, images en cache un an,
 en-têtes de sécurité. Chaque `git push` sur `main` redéploie automatiquement.
 
+## Référencement et partage
+
+`sitemap.xml`, `robots.txt` et `site.webmanifest` sont générés par
+`build-sitemap.py`. Le favicon est découpé dans le sigle du logo
+(`img/brand/logo.png`) — le « H » stylisé, seul élément du logo lisible à
+32 px.
+
+Les 17 pages indexables portent une `canonical` absolue et une `og:image`
+absolue : sans quoi Facebook et WhatsApp n'affichent aucune vignette au
+partage — ce qui compte pour un établissement dont le premier canal compte
+21 000 abonnés. `reserver`, `mentions-legales` et `404` sont en `noindex`.
+
+**Au passage en production sur evannathhotel.com**, une seule ligne change :
+la constante `SITE` en tête de `site/_chrome.py`. Relancer ensuite tous les
+générateurs puis `build-sitemap.py`.
+
 ## À valider avec l'établissement
 
 Avant toute mise en production :

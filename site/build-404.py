@@ -125,7 +125,7 @@ g1:"Message on WhatsApp",g2:"bonjour@evannathhotel.com"};
 html = page(
  "Page introuvable — Hôtel Evannath, Assinie",
  "Cette page n'existe pas ou a changé d'adresse. Retrouvez les chambres, la table, les circuits et la galerie de l'Hôtel Evannath à Assinie.",
- "gal-lag-nuit", CSS, '\n'.join(b), JS)
+ "gal-lag-nuit", CSS, '\n'.join(b), JS, slug="404")
 html = html.replace('<meta property="og:image"', '<meta name="robots" content="noindex, follow">\n<meta property="og:image"')
 io.open('404.html', 'w', encoding='utf-8').write(html)
 print('404.html              ok')

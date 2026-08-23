@@ -394,5 +394,5 @@ var EN={''' + EN_NAV + '''cta:"Request a quote"};
 io.open('seminaires.html', 'w', encoding='utf-8').write(page(
  "Séminaires &amp; groupes — Hôtel Evannath, Assinie",
  "Séminaires, journées d'étude et réceptions à l'Hôtel Evannath, Assinie PK 19 : salle en lumière naturelle, cinq configurations, sonorisation et technicien inclus, navette aéroport offerte.",
- "g-seminaire", CSS, '\n'.join(b), JS, preload="g-seminaire"))
+ "g-seminaire", CSS, '\n'.join(b), JS, preload="g-seminaire", slug="seminaires"))
 print('seminaires.html       ok')

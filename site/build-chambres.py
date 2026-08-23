@@ -422,7 +422,7 @@ var EN={''' % (c['prix'], c['slug']) + EN_NAV + 'cta:"Book"};\n\n' + LANG_JS
         "%s — Hôtel Evannath, Assinie | %s FCFA la nuit" % (c['nom'], fmt(c['prix'])),
         "%s à l'Hôtel Evannath, Assinie PK 19 : %s. %s FCFA la nuit, petit-déjeuner et navette aéroport inclus."
         % (c['nom'], c['meta'], fmt(c['prix'])),
-        c['photos'][0][0], CSS, '\n'.join(b), JS, preload=c['photos'][0][0]))
+        c['photos'][0][0], CSS, '\n'.join(b), JS, preload=c['photos'][0][0], slug=c['slug']))
     print('  %-26s %s FCFA' % (c['slug'] + '.html', fmt(c['prix'])))
 
 print('%d fiches chambres generees' % len(CHAMBRES))

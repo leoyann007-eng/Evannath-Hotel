@@ -330,5 +330,5 @@ document.querySelectorAll('.lang button').forEach(function(b){var prev=b.onclick
 io.open('informations-utiles.html','w',encoding='utf-8').write(page(
  "Informations utiles — Hôtel Evannath, Assinie",
  "Tout ce qu'il faut savoir avant de venir à l'Hôtel Evannath, Assinie PK 19 : arrivée et départ, paiement, annulation, navette aéroport gratuite, accès depuis Abidjan, familles et groupes.",
- "g-lobby", CSS_INFO, '\n'.join(b), JS_INFO))
+ "g-lobby", CSS_INFO, '\n'.join(b), JS_INFO, slug="informations-utiles"))
 print('informations-utiles.html  ok')

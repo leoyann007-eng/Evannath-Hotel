@@ -1,0 +1,16 @@
+{
+  "name": "Hôtel Evannath — Le Rêve Africain",
+  "short_name": "Evannath",
+  "description": "46 chambres et suites face à la lagune Aby, à Assinie PK 19.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#17100A",
+  "theme_color": "#17100A",
+  "lang": "fr",
+  "icons": [
+    { "src": "/favicon-32.png", "sizes": "32x32", "type": "image/png" },
+    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icon-512-transparent.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

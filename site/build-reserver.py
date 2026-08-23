@@ -379,6 +379,6 @@ var EN={''' + EN_NAV + '''navch:"Our rooms"};
 io.open('reserver.html', 'w', encoding='utf-8').write(page(
  "Réserver votre séjour — Hôtel Evannath, Assinie",
  "Réservez en direct à l'Hôtel Evannath, Assinie PK 19 : sept catégories de 67 000 à 280 000 FCFA la nuit, acompte de 30 % par Wave, Orange Money, MTN ou carte bancaire.",
- "r-standard", CSS, '\n'.join(body), JS).replace(
+ "r-standard", CSS, '\n'.join(body), JS, slug="reserver").replace(
  '<meta property="og:image"', '<meta name="robots" content="noindex, follow">\n<meta property="og:image"'))
 print('reserver.html         ok — tunnel en 3 etapes')

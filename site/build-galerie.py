@@ -234,5 +234,5 @@ ph:"photos",emp:"No photo in this category."};
 io.open('galerie.html', 'w', encoding='utf-8').write(page(
  "Galerie — Hôtel Evannath, Assinie",
  "%d photographies réelles de l'Hôtel Evannath à Assinie : le domaine, la paillote sur la lagune Aby, les chambres, le restaurant, la piscine et le spa." % len(made),
- "gal-lag-paillote", CSS_GAL, '\n'.join(b), JS_GAL))
+ "gal-lag-paillote", CSS_GAL, '\n'.join(b), JS_GAL, slug="galerie"))
 print('galerie.html          ok')

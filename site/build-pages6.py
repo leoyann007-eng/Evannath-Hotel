@@ -354,5 +354,5 @@ r7:"The front desk replies within 24 h. No payment at this stage."};
 io.open('circuits.html','w',encoding='utf-8').write(page(
  "Circuits &amp; Offres — Hôtel Evannath, Assinie",
  "Les forfaits de l'Hôtel Evannath à Assinie : Packs Vacances, lune de miel, évasion romantique, week-end intense, découvertes touristiques et junior, coffret anniversaire.",
- "r-mezzanine", CSS, '\n'.join(b), JS))
+ "r-mezzanine", CSS, '\n'.join(b), JS, slug="circuits"))
 print('circuits.html         ok')

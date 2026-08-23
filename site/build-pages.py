@@ -259,5 +259,5 @@ b1:"Book a room",b2:"Write to us"};
 io.open('a-propos.html','w',encoding='utf-8').write(page(
  "À propos — Hôtel Evannath, le rêve africain à Assinie",
  "Akwaba. L'Hôtel Evannath à Assinie PK 19 : 46 chambres, luxe africain, salles de conférence, restauration avec vue sur piscine, spa et loisirs. Navette aéroport gratuite.",
- "g-entree", CSS_ABOUT, '\n'.join(body), JS_ABOUT, preload="g-entree"))
+ "g-entree", CSS_ABOUT, '\n'.join(body), JS_ABOUT, preload="g-entree", slug="a-propos"))
 print('a-propos.html         ok')

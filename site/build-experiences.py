@@ -204,5 +204,5 @@ JS = NAV_JS + '\n\nvar EN={' + EN_NAV + 'cta:"Book"};\n\n' + LANG_JS
 io.open('experiences.html', 'w', encoding='utf-8').write(page(
  "Expériences — Hôtel Evannath, Assinie",
  "Balade lagunaire en pirogue, jet ski, l'Embouchure, spa et sauna, piscine et jacuzzi, night-club : tout ce que l'on peut faire à l'Hôtel Evannath, Assinie PK 19.",
- "gal-lag-bateau", CSS, '\n'.join(b), JS, preload="gal-lag-bateau"))
+ "gal-lag-bateau", CSS, '\n'.join(b), JS, preload="gal-lag-bateau", slug="experiences"))
 print('experiences.html      ok')

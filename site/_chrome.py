@@ -4,6 +4,16 @@ Utilise par les generateurs de pages. Aucune expression reguliere destructrice i
 les pages sont ecrites en entier a partir de ces briques.
 """
 
+# Domaine de production. Une seule ligne a changer le jour ou le site passe
+# sur evannathhotel.com : og:image, og:url, canonical et sitemap.xml en decoulent.
+SITE = "https://evannathhotel.vercel.app"
+
+ICONS = """<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<meta name="theme-color" content="#17100A">"""
+
 HEAD_CSS = """:root{
   --night:#100B06; --bark:#17100A; --bark-2:#1E150D; --bark-3:#2A1E13;
   --bronze:#B98A50; --bronze-2:#DFBB84;
@@ -227,8 +237,13 @@ EN_NAV = ('mn:"Menu",n1:"Rooms &amp; Suites",n2:"Experiences",n3:"The table",n4:
           'n5:"Packages &amp; Offers",n6:"Meetings &amp; groups",n7:"Gallery",n8:"About",'
           'n9:"Useful information",n10:"Contact",n11:"Book",dr:"Reservations",')
 
-def page(title, desc, og, css, body, script, preload=None):
+def page(title, desc, og, css, body, script, preload=None, slug=None):
     pre = '\n<link rel="preload" as="image" href="img/opt/%s.webp" type="image/webp">' % preload if preload else ''
+    if slug is not None:
+        url = SITE + ('/' if slug in ('index', '') else '/' + slug)
+        can = '\n<link rel="canonical" href="%s">\n<meta property="og:url" content="%s">' % (url, url)
+    else:
+        can = ''
     return '''<!doctype html>
 <html lang="fr">
 <head>
@@ -236,8 +251,14 @@ def page(title, desc, og, css, body, script, preload=None):
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>%s</title>
 <meta name="description" content="%s">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:site_name" content="Hôtel Evannath">
 <meta property="og:title" content="%s">
-<meta property="og:image" content="img/opt/%s.jpg">
+<meta property="og:description" content="%s">
+<meta property="og:image" content="%s/img/opt/%s.jpg">
+<meta name="twitter:card" content="summary_large_image">
+%s%s
 %s%s
 <style>
 %s
@@ -253,4 +274,4 @@ def page(title, desc, og, css, body, script, preload=None):
 </script>
 </body>
 </html>
-''' % (title, desc, title, og, HEAD, pre, HEAD_CSS, css, body, script)
+''' % (title, desc, title, desc, SITE, og, ICONS, can, HEAD, pre, HEAD_CSS, css, body, script)

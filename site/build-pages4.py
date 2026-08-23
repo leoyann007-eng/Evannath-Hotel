@@ -227,5 +227,5 @@ n6:"Booking and payment",n7:"Liability",n8:"Applicable law",n9:"Credits"};
 io.open('mentions-legales.html','w',encoding='utf-8').write(page(
  "Mentions légales — Hôtel Evannath, Assinie",
  "Mentions légales, politique de confidentialité et gestion des cookies du site de l'Hôtel Evannath, Assinie PK 19, Côte d'Ivoire.",
- "g-lobby", CSS, '\n'.join(b), JS).replace('<meta property="og:image"', '<meta name="robots" content="noindex, follow">\n<meta property="og:image"'))
+ "g-lobby", CSS, '\n'.join(b), JS, slug="mentions-legales").replace('<meta property="og:image"', '<meta name="robots" content="noindex, follow">\n<meta property="og:image"'))
 print('mentions-legales.html ok')

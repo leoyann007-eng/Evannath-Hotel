@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+# Pages sans interet pour l'index : formulaire de reservation et pages legales.
+Disallow: /reserver
+Disallow: /mentions-legales
+
+Sitemap: https://evannathhotel.vercel.app/sitemap.xml

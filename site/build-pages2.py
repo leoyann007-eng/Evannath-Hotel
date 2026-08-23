@@ -275,5 +275,5 @@ r3:"By the lagoon",r3p:"Arrive by pirogue at the hotel's pontoon. Arrange with t
 io.open('contact.html','w',encoding='utf-8').write(page(
  "Contact — Hôtel Evannath, Assinie PK 19",
  "Contacter l'Hôtel Evannath à Assinie PK 19 : réception 24 h/24, réservations, WhatsApp, e-mail bonjour@evannathhotel.com. Itinéraire depuis Abidjan et navette aéroport gratuite.",
- "g-entree", CSS_CONTACT, '\n'.join(b), JS_CONTACT))
+ "g-entree", CSS_CONTACT, '\n'.join(b), JS_CONTACT, slug="contact"))
 print('contact.html          ok')
