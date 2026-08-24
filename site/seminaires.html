@@ -93,6 +93,22 @@ header.scrolled .brand img{width:132px}
 .dw-side .lang{margin-top:6px;width:max-content}
 .dw-side .lang button{padding:15px 20px;font-size:11px}
 
+/* Etats d'envoi des formulaires */
+.piege{position:absolute!important;left:-9999px!important;width:1px;height:1px;overflow:hidden}
+button[aria-busy="true"]{opacity:.62;cursor:progress}
+.secours{display:none;border:1px solid var(--bronze);background:rgba(185,138,80,.07);padding:24px 26px;margin-top:20px}
+.secours.on{display:block}
+.secours b{display:block;font-family:var(--f-display);font-size:1.2rem;color:var(--bronze-2);margin-bottom:8px}
+.secours p{font-size:14px;margin-bottom:16px}
+.secours .liens{display:flex;gap:12px;flex-wrap:wrap}
+.secours .liens a{display:inline-flex;align-items:center;gap:9px;border:1px solid var(--line);padding:12px 18px;
+  font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--cream);transition:.3s}
+.secours .liens a:hover{border-color:var(--bronze);color:var(--bronze-2)}
+.secours .liens a.wa{background:var(--palm);border-color:var(--palm);color:#0F1508}
+.secours .liens a.wa:hover{filter:brightness(1.1);color:#0F1508}
+.err-envoi{display:none;color:var(--err);font-size:13.5px;margin-top:14px}
+.err-envoi.on{display:block}
+
 .skip{position:absolute;left:-9999px;top:0;z-index:200;background:var(--bronze);color:var(--night);
   padding:14px 22px;font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase}
 .skip:focus{left:0}
@@ -453,7 +469,17 @@ input::placeholder,textarea::placeholder{color:#6E6154}
         </div>
         <div class="f"><label for="msg">Votre projet</label>
           <textarea id="msg" placeholder="Durée, hébergement souhaité, activités, contraintes particulières…"></textarea></div>
-        <button type="submit" class="btn btn-solid">Envoyer la demande</button>
+        <div class="piege" aria-hidden="true"><label>Ne pas remplir<input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
+        <button type="submit" class="btn btn-solid" id="envoi">Envoyer la demande</button>
+        <p class="err-envoi" id="err" role="alert"></p><div class="secours" id="sec" role="alert">
+  <b>Envoyons-la autrement</b>
+  <p>Nous n'avons pas pu transmettre votre demande automatiquement. Votre message est prêt : il part sur WhatsApp en un clic, et la réception répond 24 h/24.</p>
+  <div class="liens">
+    <a class="wa" href="https://wa.me/2250546017377" target="_blank" rel="noopener">Envoyer sur WhatsApp</a>
+    <a href="tel:+2250151527575">Appeler la réception</a>
+    <a href="mailto:bonjour@evannathhotel.com">Écrire un e-mail</a>
+  </div>
+</div>
         <div class="sent" id="ok" role="status">
           <b>Demande envoyée</b>
           <p id="okm">Merci. Le service commercial revient vers vous sous 24 h avec un devis détaillé.</p>
@@ -527,6 +553,75 @@ if(!('IntersectionObserver' in window)||reduce){document.querySelectorAll('.reve
 else{var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.1});
  document.querySelectorAll('.reveal').forEach(function(el){io.observe(el)});
  setTimeout(function(){document.querySelectorAll('.reveal:not(.in)').forEach(function(el){if(el.getBoundingClientRect().top<innerHeight)el.classList.add('in')})},1200)}
+/* Envoi des formulaires -------------------------------------------------
+   Un seul point d'entree cote serveur : /api/envoyer.
+   Si l'envoi automatique n'est pas configure ou echoue, on ne perd jamais le
+   visiteur : on lui propose WhatsApp avec le message deja redige, plus les
+   numeros de la reception. */
+var EVN = {
+  wa: '2250546017377',
+  tel: '+2250151527575',
+  mail: 'bonjour@evannathhotel.com',
+  ouvert: Date.now(),
+
+  lienWhatsApp: function (texte) {
+    return 'https://wa.me/' + this.wa + '?text=' + encodeURIComponent(texte);
+  },
+
+  /* o : {bouton, secours, erreur, resume} */
+  envoyer: function (type, donnees, o, alors) {
+    var b = o.bouton, libelle = b ? b.textContent : '';
+    if (b) { b.setAttribute('aria-busy', 'true'); b.disabled = true; b.textContent = 'Envoi en cours…'; }
+    if (o.erreur) o.erreur.classList.remove('on');
+    if (o.secours) o.secours.classList.remove('on');
+
+    var charge = Object.assign({}, donnees, {
+      type: type,
+      website: (document.querySelector('[name=website]') || {}).value || '',
+      duree: Date.now() - EVN.ouvert,
+      page: location.pathname
+    });
+
+    var fini = function (etat, reponse) {
+      if (b) { b.removeAttribute('aria-busy'); b.disabled = false; b.textContent = libelle; }
+      if (etat === 'ok') { alors(reponse); return; }
+      if (etat === 'champs') {
+        if (o.erreur) { o.erreur.textContent = reponse.message; o.erreur.classList.add('on'); }
+        if (o.marquer) o.marquer(reponse.champs || []);
+        return;
+      }
+      /* Ni succes ni faute du visiteur : on bascule sur WhatsApp. */
+      if (o.secours) {
+        var lien = o.secours.querySelector('a.wa');
+        if (lien) lien.href = EVN.lienWhatsApp(o.resume ? o.resume() : 'Bonjour, je souhaite vous contacter.');
+        o.secours.classList.add('on');
+        o.secours.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    };
+
+    if (!('fetch' in window)) { fini('secours', {}); return; }
+
+    var minuteur = setTimeout(function () { fini('secours', {}); }, 12000);
+    var repondu = false;
+    fetch('/api/envoyer', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(charge)
+    }).then(function (r) {
+      return r.json().catch(function () { return {}; }).then(function (j) { return { s: r.status, j: j }; });
+    }).then(function (x) {
+      if (repondu) return; repondu = true; clearTimeout(minuteur);
+      if (x.s === 200 && x.j.ok) fini('ok', x.j);
+      else if (x.s === 422) fini('champs', x.j);
+      else fini('secours', x.j);
+    }).catch(function () {
+      if (repondu) return; repondu = true; clearTimeout(minuteur);
+      fini('secours', {});
+    });
+  }
+};
+
+var N='\n';
 
 var CAP={'Théâtre':60,'Classe':35,'En U':25,'Cocktail':90,'Banquet':70};
 var form=document.getElementById('form'),cfg=document.getElementById('cfg'),
@@ -574,11 +669,40 @@ document.getElementById('df').addEventListener('submit',function(e){
   var premier=null;
   champs.forEach(function(c){if(!verifier(c,true)&&!premier)premier=document.getElementById(c.id)});
   if(premier){premier.focus();premier.scrollIntoView({behavior:'smooth',block:'center'});return}
-  document.getElementById('okm').textContent=
-    'Merci. Votre demande pour '+nb.value+' participants en configuration « '+cfg.value+' »'
-    +' est transmise. Le service commercial revient vers vous sous 24 h avec un devis détaillé.';
-  document.getElementById('ok').classList.add('on');
-  document.getElementById('ok').scrollIntoView({behavior:'smooth',block:'center'});
+
+  var d={societe:document.getElementById('soc').value,nom:document.getElementById('nom').value,
+         email:document.getElementById('em').value,tel:document.getElementById('tel').value,
+         formule:form.value,configuration:cfg.value,participants:nb.value,date:dt.value,
+         message:document.getElementById('msg').value};
+
+  function resume(){
+    return "Bonjour, je souhaite un devis pour un séminaire à l'Hôtel Evannath."+N+N
+      +'Société : '+d.societe+N+'Contact : '+d.nom+N+'Téléphone : '+d.tel+N+'E-mail : '+d.email
+      +N+N+'Formule : '+d.formule+N+'Configuration : '+d.configuration
+      +N+'Participants : '+d.participants+N+'Date souhaitée : '+d.date
+      +(d.message?N+N+d.message:'');
+  }
+  var CH={societe:'soc',nom:'nom',email:'em',tel:'tel',participants:'nb'};
+
+  EVN.envoyer('devis',d,{
+    bouton:document.getElementById('envoi'),
+    secours:document.getElementById('sec'),
+    erreur:document.getElementById('err'),
+    resume:resume,
+    marquer:function(champs){
+      champs.forEach(function(c){var el=document.getElementById(CH[c]);
+        if(el){el.closest('.f').classList.add('bad');el.setAttribute('aria-invalid','true')}});
+      var pr=document.getElementById(CH[champs[0]]);
+      if(pr){pr.focus();pr.scrollIntoView({behavior:'smooth',block:'center'})}
+    }
+  },function(rep){
+    document.getElementById('okm').textContent=
+      'Merci. Votre demande pour '+d.participants+' participants en configuration « '+d.configuration+' »'
+      +' est transmise sous la référence '+rep.reference
+      +'. Le service commercial revient vers vous sous 24 h avec un devis détaillé.';
+    document.getElementById('ok').classList.add('on');
+    document.getElementById('ok').scrollIntoView({behavior:'smooth',block:'center'});
+  });
 });
 
 var EN={mn:"Menu",n1:"Rooms &amp; Suites",n2:"Experiences",n3:"The table",n4:"The spa",n5:"Packages &amp; Offers",n6:"Meetings &amp; groups",n7:"Gallery",n8:"About",n9:"Useful information",n10:"Contact",n11:"Book",dr:"Reservations",cta:"Request a quote"};

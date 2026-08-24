@@ -138,6 +138,47 @@ Hébergé sur **Vercel**, en site statique — aucune étape de compilation.
 `site/vercel.json` fait le reste : URL sans `.html`, images en cache un an,
 en-têtes de sécurité. Chaque `git push` sur `main` redéploie automatiquement.
 
+## Formulaires
+
+Les cinq formulaires du site — réservation, devis séminaire, contact, table,
+spa — postent sur `/api/envoyer`, une fonction serverless Vercel sans aucune
+dépendance (`site/api/envoyer.js`).
+
+Elle valide côté serveur, échappe le HTML, tronque les champs, limite le débit
+à cinq envois par minute et par IP, et piège les robots par un champ invisible
+doublé d'un délai minimum de remplissage.
+
+**Activer l'envoi par e-mail** — dans Vercel, *Settings → Environment Variables* :
+
+| Variable | Valeur |
+|---|---|
+| `RESEND_API_KEY` | la clé API Resend, commence par `re_` |
+| `MAIL_DEST` | destinataire, ex. `bonjour@evannathhotel.com` (plusieurs adresses séparées par des virgules) |
+| `MAIL_EXP` | expéditeur **vérifié chez Resend**, ex. `site@evannathhotel.com` |
+
+Le domaine doit être vérifié chez Resend (enregistrements SPF et DKIM) sans
+quoi les envois sont refusés. Redéployer après avoir défini les variables.
+
+**Tant qu'elles ne sont pas définies**, l'endpoint répond 503 et le formulaire
+bascule sur un panneau de repli : WhatsApp avec le message déjà rédigé,
+téléphone de la réception, e-mail. Le visiteur n'est jamais dans le vide, et
+en Côte d'Ivoire WhatsApp est souvent le canal le plus rapide de toute façon.
+
+Le même repli couvre la panne réseau, l'échec du fournisseur et un délai
+dépassant douze secondes.
+
+Tests : `node tests/envoyer.test.mjs` depuis la racine (12 vérifications).
+
+### Ce que le tunnel de réservation promet
+
+Il envoie une **demande**, pas une réservation confirmée : aucune
+disponibilité n'est vérifiée en temps réel et aucun paiement n'est encaissé.
+Les libellés le disent — « Envoyer ma demande », « Demande envoyée », et la
+réception envoie le lien de paiement après avoir confirmé la chambre.
+
+Passer à la réservation ferme et à l'encaissement demande un channel manager
+et un prestataire de paiement : c'est une décision de l'établissement.
+
 ## Données structurées
 
 Chaque page indexable porte un graphe JSON-LD (`_schema.py`) : `Hotel` avec les

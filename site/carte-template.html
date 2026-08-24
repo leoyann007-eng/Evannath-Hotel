@@ -532,7 +532,18 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
         </div>
         <div class="f"><label for="tn" data-t="l4">Nom</label><input type="text" id="tn" placeholder="Aya Kouassi" required></div>
         <div class="f full"><label for="tt" data-t="l5">Téléphone / WhatsApp</label><input type="tel" id="tt" placeholder="+225 01 02 03 04 05" required></div>
-        <button type="submit" class="btn btn-solid" data-t="l6">Confirmer la table</button>
+        <div class="piege" aria-hidden="true"><label>Ne pas remplir<input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
+        <button type="submit" id="envoi" class="btn btn-solid" data-t="l6">Confirmer la table</button>
+        <p class="err-envoi" id="err" role="alert"></p>
+        <div class="secours" id="sec" role="alert">
+  <b>Envoyons-la autrement</b>
+  <p>Nous n'avons pas pu transmettre votre demande automatiquement. Votre message est prêt : il part sur WhatsApp en un clic, et la réception répond 24 h/24.</p>
+  <div class="liens">
+    <a class="wa" href="https://wa.me/2250546017377" target="_blank" rel="noopener">Envoyer sur WhatsApp</a>
+    <a href="tel:+2250151527575">Appeler la réception</a>
+    <a href="mailto:bonjour@evannathhotel.com">Écrire un e-mail</a>
+  </div>
+</div>
       </form>
       <div class="hours">
         <div><span data-t="k3">Déjeuner</span><span>12 h 00 — 15 h 00</span></div>
@@ -573,6 +584,7 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
 </a>
 
 <script>
+{{ENVOI}}
 var hd=document.getElementById('hd');
 addEventListener('scroll',function(){hd.classList.toggle('scrolled',scrollY>60)},{passive:true});
 
@@ -652,8 +664,36 @@ var deb; q.addEventListener('input',function(){clearTimeout(deb);deb=setTimeout(
 var td=document.getElementById('td');
 function iso(d){return new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10)}
 td.value=iso(new Date(Date.now()+864e5)); td.min=iso(new Date());
+var N='\n';
+function frdate(v){return v?new Date(v).toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'}):v}
 document.getElementById('tf').addEventListener('submit',function(e){e.preventDefault();
-  alert("Démonstration : la demande de table partirait au restaurant et à bonjour@evannathhotel.com, avec confirmation automatique par SMS ou WhatsApp.")});
+  var d={nom:document.getElementById('tn').value,tel:document.getElementById('tt').value,
+         date:document.getElementById('td').value,heure:document.getElementById('th').value,
+         couverts:document.getElementById('tp').value};
+  if(d.nom.trim().length<2||d.tel.replace(/\D/g,'').length<8){
+    var err=document.getElementById('err');
+    err.textContent='Merci d\'indiquer votre nom et un num\u00e9ro d\'au moins 8 chiffres.';
+    err.classList.add('on'); return;
+  }
+  function resume(){
+    return 'Bonjour, je souhaite r\u00e9server une table.'+N+N
+      +'Nom : '+d.nom+N+'T\u00e9l\u00e9phone : '+d.tel+N
+      +'Date : '+frdate(d.date)+N+'Heure : '+d.heure+N+'Couverts : '+d.couverts;
+  }
+  EVN.envoyer('table',d,{
+    bouton:document.getElementById('envoi'),
+    secours:document.getElementById('sec'),
+    erreur:document.getElementById('err'),
+    resume:resume
+  },function(rep){
+    var f=document.getElementById('tf');
+    f.innerHTML='<p style="grid-column:1/-1;color:#8FAE63;font-size:15px;line-height:1.6">'
+      +'<strong style="display:block;font-family:var(--f-display);font-size:1.25rem;margin-bottom:8px">Table demand\u00e9e</strong>'
+      +'Merci '+d.nom+'. Votre demande pour '+d.couverts+' couverts le '+frdate(d.date)+' \u00e0 '+d.heure
+      +' est transmise au restaurant sous la r\u00e9f\u00e9rence '+rep.reference
+      +'. Nous confirmons le cr\u00e9neau par WhatsApp.</p>';
+  });
+});
 
 var EN={mn:"Menu",n1:"Rooms &amp; Suites",n2:"Experiences",n3:"The table",n4:"The spa",
 n5:"Packages &amp; Offers",n6:"Meetings &amp; groups",n7:"Gallery",n8:"About",

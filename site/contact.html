@@ -92,6 +92,22 @@ header.scrolled .brand img{width:132px}
 .dw-side .lang{margin-top:6px;width:max-content}
 .dw-side .lang button{padding:15px 20px;font-size:11px}
 
+/* Etats d'envoi des formulaires */
+.piege{position:absolute!important;left:-9999px!important;width:1px;height:1px;overflow:hidden}
+button[aria-busy="true"]{opacity:.62;cursor:progress}
+.secours{display:none;border:1px solid var(--bronze);background:rgba(185,138,80,.07);padding:24px 26px;margin-top:20px}
+.secours.on{display:block}
+.secours b{display:block;font-family:var(--f-display);font-size:1.2rem;color:var(--bronze-2);margin-bottom:8px}
+.secours p{font-size:14px;margin-bottom:16px}
+.secours .liens{display:flex;gap:12px;flex-wrap:wrap}
+.secours .liens a{display:inline-flex;align-items:center;gap:9px;border:1px solid var(--line);padding:12px 18px;
+  font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--cream);transition:.3s}
+.secours .liens a:hover{border-color:var(--bronze);color:var(--bronze-2)}
+.secours .liens a.wa{background:var(--palm);border-color:var(--palm);color:#0F1508}
+.secours .liens a.wa:hover{filter:brightness(1.1);color:#0F1508}
+.err-envoi{display:none;color:var(--err);font-size:13.5px;margin-top:14px}
+.err-envoi.on{display:block}
+
 .skip{position:absolute;left:-9999px;top:0;z-index:200;background:var(--bronze);color:var(--night);
   padding:14px 22px;font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase}
 .skip:focus{left:0}
@@ -314,7 +330,17 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
     <label class="consent" id="cs"><input type="checkbox" id="ck">
       <span data-t="l7">J'accepte que ces informations soient utilisées pour répondre à ma demande. Elles ne seront ni revendues ni transmises à des tiers.</span></label>
     <span class="msg" id="ckmsg" style="grid-column:1/-1;margin-top:-8px" data-t="m7">Merci de cocher cette case pour continuer.</span>
-    <button type="submit" class="btn btn-solid" data-t="l8">Envoyer le message</button>
+    <div class="piege" aria-hidden="true"><label>Ne pas remplir<input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
+    <button type="submit" class="btn btn-solid" id="envoi" data-t="l8">Envoyer le message</button>
+    <p class="err-envoi" id="err" role="alert"></p><div class="secours" id="sec" role="alert">
+  <b>Envoyons-la autrement</b>
+  <p>Nous n'avons pas pu transmettre votre demande automatiquement. Votre message est prêt : il part sur WhatsApp en un clic, et la réception répond 24 h/24.</p>
+  <div class="liens">
+    <a class="wa" href="https://wa.me/2250546017377" target="_blank" rel="noopener">Envoyer sur WhatsApp</a>
+    <a href="tel:+2250151527575">Appeler la réception</a>
+    <a href="mailto:bonjour@evannathhotel.com">Écrire un e-mail</a>
+  </div>
+</div>
     <div class="sent" id="ok" role="status">
       <b data-t="s1">Message envoyé</b>
       <p data-t="s2">Merci. La réception vous répond sous 24 h. Pour une demande urgente, WhatsApp reste le plus rapide.</p>
@@ -422,6 +448,76 @@ if(!('IntersectionObserver' in window)||reduce){document.querySelectorAll('.reve
 else{var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.1});
  document.querySelectorAll('.reveal').forEach(function(el){io.observe(el)});
  setTimeout(function(){document.querySelectorAll('.reveal:not(.in)').forEach(function(el){if(el.getBoundingClientRect().top<innerHeight)el.classList.add('in')})},1200)}
+/* Envoi des formulaires -------------------------------------------------
+   Un seul point d'entree cote serveur : /api/envoyer.
+   Si l'envoi automatique n'est pas configure ou echoue, on ne perd jamais le
+   visiteur : on lui propose WhatsApp avec le message deja redige, plus les
+   numeros de la reception. */
+var EVN = {
+  wa: '2250546017377',
+  tel: '+2250151527575',
+  mail: 'bonjour@evannathhotel.com',
+  ouvert: Date.now(),
+
+  lienWhatsApp: function (texte) {
+    return 'https://wa.me/' + this.wa + '?text=' + encodeURIComponent(texte);
+  },
+
+  /* o : {bouton, secours, erreur, resume} */
+  envoyer: function (type, donnees, o, alors) {
+    var b = o.bouton, libelle = b ? b.textContent : '';
+    if (b) { b.setAttribute('aria-busy', 'true'); b.disabled = true; b.textContent = 'Envoi en cours…'; }
+    if (o.erreur) o.erreur.classList.remove('on');
+    if (o.secours) o.secours.classList.remove('on');
+
+    var charge = Object.assign({}, donnees, {
+      type: type,
+      website: (document.querySelector('[name=website]') || {}).value || '',
+      duree: Date.now() - EVN.ouvert,
+      page: location.pathname
+    });
+
+    var fini = function (etat, reponse) {
+      if (b) { b.removeAttribute('aria-busy'); b.disabled = false; b.textContent = libelle; }
+      if (etat === 'ok') { alors(reponse); return; }
+      if (etat === 'champs') {
+        if (o.erreur) { o.erreur.textContent = reponse.message; o.erreur.classList.add('on'); }
+        if (o.marquer) o.marquer(reponse.champs || []);
+        return;
+      }
+      /* Ni succes ni faute du visiteur : on bascule sur WhatsApp. */
+      if (o.secours) {
+        var lien = o.secours.querySelector('a.wa');
+        if (lien) lien.href = EVN.lienWhatsApp(o.resume ? o.resume() : 'Bonjour, je souhaite vous contacter.');
+        o.secours.classList.add('on');
+        o.secours.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    };
+
+    if (!('fetch' in window)) { fini('secours', {}); return; }
+
+    var minuteur = setTimeout(function () { fini('secours', {}); }, 12000);
+    var repondu = false;
+    fetch('/api/envoyer', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(charge)
+    }).then(function (r) {
+      return r.json().catch(function () { return {}; }).then(function (j) { return { s: r.status, j: j }; });
+    }).then(function (x) {
+      if (repondu) return; repondu = true; clearTimeout(minuteur);
+      if (x.s === 200 && x.j.ok) fini('ok', x.j);
+      else if (x.s === 422) fini('champs', x.j);
+      else fini('secours', x.j);
+    }).catch(function () {
+      if (repondu) return; repondu = true; clearTimeout(minuteur);
+      fini('secours', {});
+    });
+  }
+};
+
+var N='\n';
+
 
 // Validation : le formulaire actuel de l'hôtel n'en a aucune.
 // Ici chaque champ se vérifie à la sortie, et le premier champ fautif reçoit le focus.
@@ -456,8 +552,34 @@ document.getElementById('cf').addEventListener('submit',function(e){
   champs.forEach(function(c){ if(!check(c,true)&&!premier)premier=document.getElementById(c.id) });
   if(!ck.checked){cs.classList.add('bad');ckmsg.style.display='block';if(!premier)premier=ck}
   if(premier){premier.focus();premier.scrollIntoView({behavior:'smooth',block:'center'});return}
-  document.getElementById('ok').classList.add('on');
-  document.getElementById('ok').scrollIntoView({behavior:'smooth',block:'center'});
+
+  var d={nom:document.getElementById('fn').value+' '+document.getElementById('ln').value,
+         email:document.getElementById('em').value,tel:document.getElementById('tl').value,
+         sujet:document.getElementById('ob').value,message:document.getElementById('ms').value};
+
+  function resume(){
+    return "Bonjour, je vous écris depuis votre site."+N+N
+      +'Nom : '+d.nom+N+'Téléphone : '+d.tel+N+'E-mail : '+d.email
+      +N+'Sujet : '+d.sujet+N+N+d.message;
+  }
+  var CH={nom:'fn',email:'em',tel:'tl',message:'ms'};
+
+  EVN.envoyer('contact',d,{
+    bouton:document.getElementById('envoi'),
+    secours:document.getElementById('sec'),
+    erreur:document.getElementById('err'),
+    resume:resume,
+    marquer:function(cs){
+      cs.forEach(function(c){var el=document.getElementById(CH[c]);
+        if(el){el.closest('.f').classList.add('bad')}});
+      var pr=document.getElementById(CH[cs[0]]);
+      if(pr){pr.focus();pr.scrollIntoView({behavior:'smooth',block:'center'})}
+    }
+  },function(rep){
+    var r=document.getElementById('okref'); if(r)r.textContent=rep.reference;
+    document.getElementById('ok').classList.add('on');
+    document.getElementById('ok').scrollIntoView({behavior:'smooth',block:'center'});
+  });
 });
 
 var EN={mn:"Menu",n1:"Rooms &amp; Suites",n2:"Experiences",n3:"The table",n4:"The spa",n5:"Packages &amp; Offers",n6:"Meetings &amp; groups",n7:"Gallery",n8:"About",n9:"Useful information",n10:"Contact",n11:"Book",dr:"Reservations",wr:"Write to us",

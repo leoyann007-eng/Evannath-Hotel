@@ -82,6 +82,22 @@ header.scrolled .brand img{width:132px}
 .dw-side .lang{margin-top:6px;width:max-content}
 .dw-side .lang button{padding:15px 20px;font-size:11px}
 
+/* Etats d'envoi des formulaires */
+.piege{position:absolute!important;left:-9999px!important;width:1px;height:1px;overflow:hidden}
+button[aria-busy="true"]{opacity:.62;cursor:progress}
+.secours{display:none;border:1px solid var(--bronze);background:rgba(185,138,80,.07);padding:24px 26px;margin-top:20px}
+.secours.on{display:block}
+.secours b{display:block;font-family:var(--f-display);font-size:1.2rem;color:var(--bronze-2);margin-bottom:8px}
+.secours p{font-size:14px;margin-bottom:16px}
+.secours .liens{display:flex;gap:12px;flex-wrap:wrap}
+.secours .liens a{display:inline-flex;align-items:center;gap:9px;border:1px solid var(--line);padding:12px 18px;
+  font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--cream);transition:.3s}
+.secours .liens a:hover{border-color:var(--bronze);color:var(--bronze-2)}
+.secours .liens a.wa{background:var(--palm);border-color:var(--palm);color:#0F1508}
+.secours .liens a.wa:hover{filter:brightness(1.1);color:#0F1508}
+.err-envoi{display:none;color:var(--err);font-size:13.5px;margin-top:14px}
+.err-envoi.on{display:block}
+
 .skip{position:absolute;left:-9999px;top:0;z-index:200;background:var(--bronze);color:var(--night);
   padding:14px 22px;font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase}
 .skip:focus{left:0}
@@ -242,6 +258,93 @@ document.querySelectorAll('.lang button').forEach(function(b){b.onclick=function
   document.querySelectorAll('[data-t]').forEach(function(e){if(dict[e.dataset.t])e.innerHTML=dict[e.dataset.t]});
   document.documentElement.lang=lg;
 }});"""
+
+ENVOI_JS = """
+/* Envoi des formulaires -------------------------------------------------
+   Un seul point d'entree cote serveur : /api/envoyer.
+   Si l'envoi automatique n'est pas configure ou echoue, on ne perd jamais le
+   visiteur : on lui propose WhatsApp avec le message deja redige, plus les
+   numeros de la reception. */
+var EVN = {
+  wa: '2250546017377',
+  tel: '+2250151527575',
+  mail: 'bonjour@evannathhotel.com',
+  ouvert: Date.now(),
+
+  lienWhatsApp: function (texte) {
+    return 'https://wa.me/' + this.wa + '?text=' + encodeURIComponent(texte);
+  },
+
+  /* o : {bouton, secours, erreur, resume} */
+  envoyer: function (type, donnees, o, alors) {
+    var b = o.bouton, libelle = b ? b.textContent : '';
+    if (b) { b.setAttribute('aria-busy', 'true'); b.disabled = true; b.textContent = 'Envoi en cours…'; }
+    if (o.erreur) o.erreur.classList.remove('on');
+    if (o.secours) o.secours.classList.remove('on');
+
+    var charge = Object.assign({}, donnees, {
+      type: type,
+      website: (document.querySelector('[name=website]') || {}).value || '',
+      duree: Date.now() - EVN.ouvert,
+      page: location.pathname
+    });
+
+    var fini = function (etat, reponse) {
+      if (b) { b.removeAttribute('aria-busy'); b.disabled = false; b.textContent = libelle; }
+      if (etat === 'ok') { alors(reponse); return; }
+      if (etat === 'champs') {
+        if (o.erreur) { o.erreur.textContent = reponse.message; o.erreur.classList.add('on'); }
+        if (o.marquer) o.marquer(reponse.champs || []);
+        return;
+      }
+      /* Ni succes ni faute du visiteur : on bascule sur WhatsApp. */
+      if (o.secours) {
+        var lien = o.secours.querySelector('a.wa');
+        if (lien) lien.href = EVN.lienWhatsApp(o.resume ? o.resume() : 'Bonjour, je souhaite vous contacter.');
+        o.secours.classList.add('on');
+        o.secours.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    };
+
+    if (!('fetch' in window)) { fini('secours', {}); return; }
+
+    var minuteur = setTimeout(function () { fini('secours', {}); }, 12000);
+    var repondu = false;
+    fetch('/api/envoyer', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(charge)
+    }).then(function (r) {
+      return r.json().catch(function () { return {}; }).then(function (j) { return { s: r.status, j: j }; });
+    }).then(function (x) {
+      if (repondu) return; repondu = true; clearTimeout(minuteur);
+      if (x.s === 200 && x.j.ok) fini('ok', x.j);
+      else if (x.s === 422) fini('champs', x.j);
+      else fini('secours', x.j);
+    }).catch(function () {
+      if (repondu) return; repondu = true; clearTimeout(minuteur);
+      fini('secours', {});
+    });
+  }
+};
+"""
+
+PIEGE = ('<div class="piege" aria-hidden="true">'
+         '<label>Ne pas remplir<input type="text" name="website" tabindex="-1" autocomplete="off"></label>'
+         '</div>')
+
+
+def secours(id_='sec', phrase="Nous n'avons pas pu transmettre votre demande automatiquement."):
+    """Panneau de repli : WhatsApp pre-rempli, telephone, e-mail."""
+    return '''<div class="secours" id="%s" role="alert">
+  <b>Envoyons-la autrement</b>
+  <p>%s Votre message est prêt : il part sur WhatsApp en un clic, et la réception répond 24 h/24.</p>
+  <div class="liens">
+    <a class="wa" href="https://wa.me/2250546017377" target="_blank" rel="noopener">Envoyer sur WhatsApp</a>
+    <a href="tel:+2250151527575">Appeler la réception</a>
+    <a href="mailto:bonjour@evannathhotel.com">Écrire un e-mail</a>
+  </div>
+</div>''' % (id_, phrase)
 
 EN_NAV = ('mn:"Menu",n1:"Rooms &amp; Suites",n2:"Experiences",n3:"The table",n4:"The spa",'
           'n5:"Packages &amp; Offers",n6:"Meetings &amp; groups",n7:"Gallery",n8:"About",'

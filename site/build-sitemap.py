@@ -50,6 +50,7 @@ io.open('robots.txt', 'w', encoding='utf-8').write(
 Allow: /
 
 # Pages sans interet pour l'index : formulaire de reservation et pages legales.
+Disallow: /api/
 Disallow: /reserver
 Disallow: /mentions-legales
 

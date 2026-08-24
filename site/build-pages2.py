@@ -2,6 +2,7 @@
 """Genere contact.html et informations-utiles.html."""
 import io
 import _schema
+from _chrome import ENVOI_JS, PIEGE, secours
 from _chrome import page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV
 
 # ═══════════════════════════════ CONTACT ═══════════════════════════════
@@ -150,7 +151,9 @@ b.append('''  </div>
     <label class="consent" id="cs"><input type="checkbox" id="ck">
       <span data-t="l7">J'accepte que ces informations soient utilisées pour répondre à ma demande. Elles ne seront ni revendues ni transmises à des tiers.</span></label>
     <span class="msg" id="ckmsg" style="grid-column:1/-1;margin-top:-8px" data-t="m7">Merci de cocher cette case pour continuer.</span>
-    <button type="submit" class="btn btn-solid" data-t="l8">Envoyer le message</button>
+    ''' + PIEGE + '''
+    <button type="submit" class="btn btn-solid" id="envoi" data-t="l8">Envoyer le message</button>
+    <p class="err-envoi" id="err" role="alert"></p>''' + secours('sec') + '''
     <div class="sent" id="ok" role="status">
       <b data-t="s1">Message envoyé</b>
       <p data-t="s2">Merci. La réception vous répond sous 24 h. Pour une demande urgente, WhatsApp reste le plus rapide.</p>
@@ -209,7 +212,7 @@ b.append('''      </div>
 
 ''' + FOOTER)
 
-JS_CONTACT = NAV_JS + '''
+JS_CONTACT = NAV_JS + ENVOI_JS + "\nvar N='\\n';\n" + '''
 
 // Validation : le formulaire actuel de l'hôtel n'en a aucune.
 // Ici chaque champ se vérifie à la sortie, et le premier champ fautif reçoit le focus.
@@ -244,8 +247,34 @@ document.getElementById('cf').addEventListener('submit',function(e){
   champs.forEach(function(c){ if(!check(c,true)&&!premier)premier=document.getElementById(c.id) });
   if(!ck.checked){cs.classList.add('bad');ckmsg.style.display='block';if(!premier)premier=ck}
   if(premier){premier.focus();premier.scrollIntoView({behavior:'smooth',block:'center'});return}
-  document.getElementById('ok').classList.add('on');
-  document.getElementById('ok').scrollIntoView({behavior:'smooth',block:'center'});
+
+  var d={nom:document.getElementById('fn').value+' '+document.getElementById('ln').value,
+         email:document.getElementById('em').value,tel:document.getElementById('tl').value,
+         sujet:document.getElementById('ob').value,message:document.getElementById('ms').value};
+
+  function resume(){
+    return "Bonjour, je vous écris depuis votre site."+N+N
+      +'Nom : '+d.nom+N+'Téléphone : '+d.tel+N+'E-mail : '+d.email
+      +N+'Sujet : '+d.sujet+N+N+d.message;
+  }
+  var CH={nom:'fn',email:'em',tel:'tl',message:'ms'};
+
+  EVN.envoyer('contact',d,{
+    bouton:document.getElementById('envoi'),
+    secours:document.getElementById('sec'),
+    erreur:document.getElementById('err'),
+    resume:resume,
+    marquer:function(cs){
+      cs.forEach(function(c){var el=document.getElementById(CH[c]);
+        if(el){el.closest('.f').classList.add('bad')}});
+      var pr=document.getElementById(CH[cs[0]]);
+      if(pr){pr.focus();pr.scrollIntoView({behavior:'smooth',block:'center'})}
+    }
+  },function(rep){
+    var r=document.getElementById('okref'); if(r)r.textContent=rep.reference;
+    document.getElementById('ok').classList.add('on');
+    document.getElementById('ok').scrollIntoView({behavior:'smooth',block:'center'});
+  });
 });
 
 var EN={''' + EN_NAV + '''wr:"Write to us",

@@ -93,6 +93,22 @@ header.scrolled .brand img{width:132px}
 .dw-side .lang{margin-top:6px;width:max-content}
 .dw-side .lang button{padding:15px 20px;font-size:11px}
 
+/* Etats d'envoi des formulaires */
+.piege{position:absolute!important;left:-9999px!important;width:1px;height:1px;overflow:hidden}
+button[aria-busy="true"]{opacity:.62;cursor:progress}
+.secours{display:none;border:1px solid var(--bronze);background:rgba(185,138,80,.07);padding:24px 26px;margin-top:20px}
+.secours.on{display:block}
+.secours b{display:block;font-family:var(--f-display);font-size:1.2rem;color:var(--bronze-2);margin-bottom:8px}
+.secours p{font-size:14px;margin-bottom:16px}
+.secours .liens{display:flex;gap:12px;flex-wrap:wrap}
+.secours .liens a{display:inline-flex;align-items:center;gap:9px;border:1px solid var(--line);padding:12px 18px;
+  font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--cream);transition:.3s}
+.secours .liens a:hover{border-color:var(--bronze);color:var(--bronze-2)}
+.secours .liens a.wa{background:var(--palm);border-color:var(--palm);color:#0F1508}
+.secours .liens a.wa:hover{filter:brightness(1.1);color:#0F1508}
+.err-envoi{display:none;color:var(--err);font-size:13.5px;margin-top:14px}
+.err-envoi.on{display:block}
+
 .skip{position:absolute;left:-9999px;top:0;z-index:200;background:var(--bronze);color:var(--night);
   padding:14px 22px;font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase}
 .skip:focus{left:0}

@@ -7,7 +7,7 @@ remplacés par « Nous consulter » plutôt qu'inventés.
 """
 import io
 import _schema
-from _chrome import responsive
+from _chrome import responsive, ENVOI_JS
 
 CUISINE = [
  ("Nos entrées", [
@@ -202,6 +202,7 @@ HTML = io.open('carte-template.html',encoding='utf-8').read()
 HTML = (HTML
   .replace('{{CUISINE}}',sections(CUISINE,'c'))
   .replace('{{BOISSONS}}',sections(BOISSONS,'b'))
+  .replace('{{ENVOI}}', ENVOI_JS)
   .replace('{{TOTAL}}',str(total))
   .replace('{{LD}}', _schema.bloc(
       _schema.restaurant(nb_plats=total),
@@ -211,7 +212,7 @@ io.open('carte.html','w',encoding='utf-8').write(responsive(HTML, hero='t-hero')
 print('carte.html :', total, 'articles')
 
 SPAH = io.open('spa-template.html',encoding='utf-8').read()
-SPAH = (SPAH.replace('{{SPA}}',sections(SPA,'s')).replace('{{TOTAL}}',str(total_spa))
+SPAH = (SPAH.replace('{{SPA}}',sections(SPA,'s')).replace('{{ENVOI}}', ENVOI_JS).replace('{{TOTAL}}',str(total_spa))
   .replace('{{LD}}', _schema.bloc(
       _schema.service('Spa et soins du corps',
                       "Massages, gommages, soins du visage, sauna et onglerie au spa de l'Hôtel Evannath, "

@@ -12,7 +12,8 @@ production — voir la section « A valider » du README.
 """
 import io
 import _schema
-from _chrome import page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV
+from _chrome import (page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV,
+                     ENVOI_JS, PIEGE, secours)
 
 CONFIGS = [
  ('Théâtre',    '60', 'Chaises en rangées face à l\'écran. Pour une présentation, un lancement, une assemblée.'),
@@ -307,7 +308,9 @@ b.append('''    </div>
         </div>
         <div class="f"><label for="msg">Votre projet</label>
           <textarea id="msg" placeholder="Durée, hébergement souhaité, activités, contraintes particulières…"></textarea></div>
-        <button type="submit" class="btn btn-solid">Envoyer la demande</button>
+        ''' + PIEGE + '''
+        <button type="submit" class="btn btn-solid" id="envoi">Envoyer la demande</button>
+        <p class="err-envoi" id="err" role="alert"></p>''' + secours('sec') + '''
         <div class="sent" id="ok" role="status">
           <b>Demande envoyée</b>
           <p id="okm">Merci. Le service commercial revient vers vous sous 24 h avec un devis détaillé.</p>
@@ -333,7 +336,8 @@ b.append('''    </div>
 
 ''' + FOOTER)
 
-JS = NAV_JS + '''
+JS = NAV_JS + ENVOI_JS + '''
+var N='\\n';
 
 var CAP={'Théâtre':60,'Classe':35,'En U':25,'Cocktail':90,'Banquet':70};
 var form=document.getElementById('form'),cfg=document.getElementById('cfg'),
@@ -381,11 +385,40 @@ document.getElementById('df').addEventListener('submit',function(e){
   var premier=null;
   champs.forEach(function(c){if(!verifier(c,true)&&!premier)premier=document.getElementById(c.id)});
   if(premier){premier.focus();premier.scrollIntoView({behavior:'smooth',block:'center'});return}
-  document.getElementById('okm').textContent=
-    'Merci. Votre demande pour '+nb.value+' participants en configuration « '+cfg.value+' »'
-    +' est transmise. Le service commercial revient vers vous sous 24 h avec un devis détaillé.';
-  document.getElementById('ok').classList.add('on');
-  document.getElementById('ok').scrollIntoView({behavior:'smooth',block:'center'});
+
+  var d={societe:document.getElementById('soc').value,nom:document.getElementById('nom').value,
+         email:document.getElementById('em').value,tel:document.getElementById('tel').value,
+         formule:form.value,configuration:cfg.value,participants:nb.value,date:dt.value,
+         message:document.getElementById('msg').value};
+
+  function resume(){
+    return "Bonjour, je souhaite un devis pour un séminaire à l'Hôtel Evannath."+N+N
+      +'Société : '+d.societe+N+'Contact : '+d.nom+N+'Téléphone : '+d.tel+N+'E-mail : '+d.email
+      +N+N+'Formule : '+d.formule+N+'Configuration : '+d.configuration
+      +N+'Participants : '+d.participants+N+'Date souhaitée : '+d.date
+      +(d.message?N+N+d.message:'');
+  }
+  var CH={societe:'soc',nom:'nom',email:'em',tel:'tel',participants:'nb'};
+
+  EVN.envoyer('devis',d,{
+    bouton:document.getElementById('envoi'),
+    secours:document.getElementById('sec'),
+    erreur:document.getElementById('err'),
+    resume:resume,
+    marquer:function(champs){
+      champs.forEach(function(c){var el=document.getElementById(CH[c]);
+        if(el){el.closest('.f').classList.add('bad');el.setAttribute('aria-invalid','true')}});
+      var pr=document.getElementById(CH[champs[0]]);
+      if(pr){pr.focus();pr.scrollIntoView({behavior:'smooth',block:'center'})}
+    }
+  },function(rep){
+    document.getElementById('okm').textContent=
+      'Merci. Votre demande pour '+d.participants+' participants en configuration « '+d.configuration+' »'
+      +' est transmise sous la référence '+rep.reference
+      +'. Le service commercial revient vers vous sous 24 h avec un devis détaillé.';
+    document.getElementById('ok').classList.add('on');
+    document.getElementById('ok').scrollIntoView({behavior:'smooth',block:'center'});
+  });
 });
 
 var EN={''' + EN_NAV + '''cta:"Request a quote"};

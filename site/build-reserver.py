@@ -6,6 +6,7 @@ parametres passes par les fiches chambres (?chambre=&du=&au=&pax=), calcule
 le sejour, collecte les coordonnees et simule le paiement de l'acompte.
 """
 import io, json
+from _chrome import ENVOI_JS, PIEGE, secours
 from _chrome import page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV
 
 CHAMBRES = {
@@ -183,7 +184,7 @@ body = [header('index.html#chambres', 'Nos chambres', 'navch'), drawer('index.ht
     <!-- 3 ─────────────────────────────────────── -->
     <section class="pane" id="p3">
       <h2>L'acompte</h2>
-      <p class="sub">Trente pour cent à la réservation. Le solde se règle à l'arrivée, sur place.</p>
+      <p class="sub">Trente pour cent pour bloquer la chambre, le solde à l'arrivée. Indiquez le moyen qui vous arrange : la réception vous envoie le lien de paiement une fois la disponibilité confirmée.</p>
 
       <div class="pay">
         <label><input type="radio" name="pay" value="Wave" checked><span>Wave<em>Le plus utilisé en Côte d'Ivoire</em></span></label>
@@ -197,9 +198,11 @@ body = [header('index.html#chambres', 'Nos chambres', 'navch'), drawer('index.ht
         Au-delà, l'acompte reste acquis à l'établissement.
       </p>
 
+      ''' + PIEGE + '''
+      <p class="err-envoi" id="err" role="alert"></p>''' + secours('sec') + '''
       <div class="nav-btn" style="margin-top:26px">
         <button class="btn ghost" id="back2">Retour</button>
-        <button class="btn btn-solid" id="pay">Payer l'acompte</button>
+        <button class="btn btn-solid" id="pay">Envoyer ma demande</button>
       </div>
     </section>
 
@@ -207,14 +210,14 @@ body = [header('index.html#chambres', 'Nos chambres', 'navch'), drawer('index.ht
     <section class="pane" id="p4">
       <div class="done-box">
         <div class="tick">✓</div>
-        <h2>C'est confirmé</h2>
-        <p id="dm">Merci, votre chambre est réservée.</p>
-        <p style="color:var(--muted);font-size:14px">Un e-mail de confirmation part à l'instant, avec votre référence.</p>
-        <div class="ref" id="ref">EVN—000000</div>
+        <h2>Demande envoyée</h2>
+        <p id="dm">Merci, votre demande est partie à la réception.</p>
+        <p style="color:var(--muted);font-size:14px">Notez cette référence : elle identifie votre dossier.</p>
+        <div class="ref" id="ref">EVN-000000</div>
 
         <div class="next-steps">
-          <div><i>1</i><span>Vous recevez la confirmation par e-mail et par WhatsApp.</span></div>
-          <div><i>2</i><span>La réception vous rappelle sous 24 h pour caler l'heure d'arrivée.</span></div>
+          <div><i>1</i><span>La réception vérifie la disponibilité et vous répond sous 24 h, par e-mail et par WhatsApp.</span></div>
+          <div><i>2</i><span>Une fois la chambre confirmée, vous recevez le lien pour régler l'acompte de 30 %.</span></div>
           <div><i>3</i><span id="nv">Le solde se règle à l'arrivée, sur place.</span></div>
         </div>
 
@@ -249,7 +252,7 @@ body = [header('index.html#chambres', 'Nos chambres', 'navch'), drawer('index.ht
 
 ''' + FOOTER]
 
-JS = NAV_JS + '''
+JS = NAV_JS + ENVOI_JS + '''
 
 var CH=''' + json.dumps(CHAMBRES, ensure_ascii=False) + ''';
 var TAX=1500; // taxe de séjour par personne et par nuit
@@ -357,19 +360,56 @@ document.getElementById('go3').onclick=function(){
 };
 
 // ── paiement ──────────────────────────────────
+var N='\\n';
 document.getElementById('pay').onclick=function(){
   var moyen=document.querySelector('input[name=pay]:checked').value;
   var c=CH[cat.value];
-  var ref='EVN—'+String(Date.now()).slice(-6);
-  document.getElementById('ref').textContent=ref;
-  document.getElementById('dm').textContent=
-    'Merci '+document.getElementById('fn').value.trim()+', votre '+c[0]+' est réservée du '
-    +jour(d1.value)+' au '+jour(d2.value)+'. Acompte réglé par '+moyen+'.';
   var nv=document.getElementById('nav').value;
-  document.getElementById('nv').textContent = nv==='non'
-    ? 'Le solde se règle à l\\'arrivée, sur place.'
-    : 'Votre navette aéroport est notée ('+(nv==='ar'?'aller et retour':'aller')+'). Le solde se règle à l\\'arrivée.';
-  etape(4);
+  var navette = nv==='non' ? 'non' : (nv==='ar' ? 'aller et retour' : 'aller simple');
+
+  var d={nom:document.getElementById('fn').value.trim()+' '+document.getElementById('ln').value.trim(),
+         email:document.getElementById('em').value.trim(),
+         tel:document.getElementById('tl').value.trim(),
+         chambre:c[0], arrivee:jour(d1.value), depart:jour(d2.value),
+         nuits:document.getElementById('rn').textContent, personnes:pax.value,
+         total:document.getElementById('rtot').textContent+' FCFA',
+         acompte:document.getElementById('racc').textContent,
+         paiement:moyen,
+         message:'Navette a\u00e9roport : '+navette
+                 +(document.getElementById('note') && document.getElementById('note').value
+                   ? N+document.getElementById('note').value : '')};
+
+  function resume(){
+    return "Bonjour, je souhaite r\u00e9server \u00e0 l\\'H\u00f4tel Evannath."+N+N
+      +'Nom : '+d.nom+N+'T\u00e9l\u00e9phone : '+d.tel+N+'E-mail : '+d.email+N+N
+      +'Chambre : '+d.chambre+N+'Arriv\u00e9e : '+d.arrivee+N+'D\u00e9part : '+d.depart+N
+      +'Nuits : '+d.nuits+N+'Personnes : '+d.personnes+N+N
+      +'Total estim\u00e9 : '+d.total+N+'Acompte (30 %) : '+d.acompte+N
+      +'Paiement souhait\u00e9 : '+d.paiement+N+d.message;
+  }
+  var CHAMP={nom:'fn',email:'em',tel:'tl'};
+
+  EVN.envoyer('reservation',d,{
+    bouton:document.getElementById('pay'),
+    secours:document.getElementById('sec'),
+    erreur:document.getElementById('err'),
+    resume:resume,
+    marquer:function(cs){
+      etape(2);
+      cs.forEach(function(x){var el=document.getElementById(CHAMP[x]);
+        if(el)el.closest('.f').classList.add('bad')});
+      var pr=document.getElementById(CHAMP[cs[0]]); if(pr)pr.focus();
+    }
+  },function(rep){
+    document.getElementById('ref').textContent=rep.reference;
+    document.getElementById('dm').textContent=
+      'Merci '+document.getElementById('fn').value.trim()+'. Votre demande pour la '+c[0]
+      +' du '+jour(d1.value)+' au '+jour(d2.value)+' est partie \u00e0 la r\u00e9ception.';
+    document.getElementById('nv').textContent = nv==='non'
+      ? "Le solde se r\u00e8gle \u00e0 l'arriv\u00e9e, sur place."
+      : "Votre navette a\u00e9roport est not\u00e9e ("+navette+"). Le solde se r\u00e8gle \u00e0 l'arriv\u00e9e.";
+    etape(4);
+  });
 };
 
 var EN={''' + EN_NAV + '''navch:"Our rooms"};

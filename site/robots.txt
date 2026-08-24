@@ -2,6 +2,7 @@ User-agent: *
 Allow: /
 
 # Pages sans interet pour l'index : formulaire de reservation et pages legales.
+Disallow: /api/
 Disallow: /reserver
 Disallow: /mentions-legales
 
