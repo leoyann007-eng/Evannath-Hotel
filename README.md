@@ -165,8 +165,10 @@ Le visiteur qui a le lien voit le site normalement. Seuls les robots sont
 
 1. `PROSPECTION = False` en tête de `site/_chrome.py`
 2. Relancer tous les générateurs, puis `build-sitemap.py`
-3. Dans `site/vercel.json` : supprimer la note `_prospection` et la règle
-   `X-Robots-Tag`
+3. Dans `site/vercel.json` : supprimer la règle `X-Robots-Tag` (la dernière
+   entrée de `headers`). Attention, `vercel.json` **refuse toute propriété
+   inconnue** — ne pas y ajouter de note ou de commentaire, le déploiement
+   échouerait silencieusement.
 4. Redéployer, puis soumettre `sitemap.xml` à la Search Console
 
 ## Formulaires
