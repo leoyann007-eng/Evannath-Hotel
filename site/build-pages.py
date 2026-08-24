@@ -3,6 +3,7 @@
 mentions-legales. Chaque page est ecrite en entier a partir des briques de _chrome.py.
 """
 import io
+import _schema
 from _chrome import page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV
 
 # ═══════════════════════════════ À PROPOS ═══════════════════════════════
@@ -256,8 +257,13 @@ b1:"Book a room",b2:"Write to us"};
 
 ''' + LANG_JS
 
+LD = _schema.bloc(
+    _schema.hotel(complet=True),
+    _schema.site_web(),
+    _schema.fil([('Accueil','index'),('À propos',None)]))
+
 io.open('a-propos.html','w',encoding='utf-8').write(page(
  "À propos — Hôtel Evannath, le rêve africain à Assinie",
  "Akwaba. L'Hôtel Evannath à Assinie PK 19 : 46 chambres, luxe africain, salles de conférence, restauration avec vue sur piscine, spa et loisirs. Navette aéroport gratuite.",
- "g-entree", CSS_ABOUT, '\n'.join(body), JS_ABOUT, preload="g-entree", slug="a-propos"))
+ "g-entree", CSS_ABOUT, '\n'.join(body), JS_ABOUT, preload="g-entree", slug="a-propos", jsonld=LD))
 print('a-propos.html         ok')

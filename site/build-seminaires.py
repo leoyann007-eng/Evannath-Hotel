@@ -11,6 +11,7 @@ hypotheses : l'hotel ne les publie nulle part. A confirmer avant mise en
 production — voir la section « A valider » du README.
 """
 import io
+import _schema
 from _chrome import page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV
 
 CONFIGS = [
@@ -391,8 +392,15 @@ var EN={''' + EN_NAV + '''cta:"Request a quote"};
 
 ''' + LANG_JS
 
+LD = _schema.bloc(
+    _schema.service("Séminaires, journées d'étude et réceptions",
+                    "Salle de conférence en lumière naturelle, cinq configurations jusqu'à 90 personnes, sonorisation et technicien son inclus, à Assinie PK 19.",
+                    'seminaires', image='g-seminaire'),
+    _schema.hotel(),
+    _schema.fil([('Accueil','index'),('Séminaires & groupes',None)]))
+
 io.open('seminaires.html', 'w', encoding='utf-8').write(page(
  "Séminaires &amp; groupes — Hôtel Evannath, Assinie",
  "Séminaires, journées d'étude et réceptions à l'Hôtel Evannath, Assinie PK 19 : salle en lumière naturelle, cinq configurations, sonorisation et technicien inclus, navette aéroport offerte.",
- "g-seminaire", CSS, '\n'.join(b), JS, preload="g-seminaire", slug="seminaires"))
+ "g-seminaire", CSS, '\n'.join(b), JS, preload="g-seminaire", slug="seminaires", jsonld=LD))
 print('seminaires.html       ok')

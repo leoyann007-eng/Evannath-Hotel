@@ -6,6 +6,7 @@ l'hotel. Les quatre excursions des environs n'ont volontairement aucune
 photo : les seuls visuels existants sont des images de synthese.
 """
 import io
+import _schema
 from _chrome import page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV
 
 # ── sur le domaine ────────────────────────────────────────────
@@ -201,8 +202,13 @@ b.append('''  </div>
 
 JS = NAV_JS + '\n\nvar EN={' + EN_NAV + 'cta:"Book"};\n\n' + LANG_JS
 
+LD = _schema.bloc(
+    _schema.service('Expériences et activités', "Balade lagunaire en pirogue, jet ski, spa, piscine et excursions autour d'Assinie depuis l'Hôtel Evannath.", 'experiences', image='gal-lag-bateau'),
+    _schema.hotel(),
+    _schema.fil([('Accueil','index'),('Expériences',None)]))
+
 io.open('experiences.html', 'w', encoding='utf-8').write(page(
  "Expériences — Hôtel Evannath, Assinie",
  "Balade lagunaire en pirogue, jet ski, l'Embouchure, spa et sauna, piscine et jacuzzi, night-club : tout ce que l'on peut faire à l'Hôtel Evannath, Assinie PK 19.",
- "gal-lag-bateau", CSS, '\n'.join(b), JS, preload="gal-lag-bateau", slug="experiences"))
+ "gal-lag-bateau", CSS, '\n'.join(b), JS, preload="gal-lag-bateau", slug="experiences", jsonld=LD))
 print('experiences.html      ok')

@@ -52,6 +52,10 @@ p{color:#D6CBBB}
 .btn-solid:hover{background:var(--bronze-2);border-color:var(--bronze-2)}
 
 /* ══ NAV : un seul élément ══ */
+.skip{position:absolute;left:-9999px;top:0;z-index:200;background:var(--bronze);color:var(--night);
+  padding:14px 22px;font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase}
+.skip:focus{left:0}
+main{display:block}
 header{position:fixed;top:0;left:0;right:0;z-index:100;transition:.45s;padding:22px 0}
 header.scrolled{padding:11px 0;background:rgba(16,11,6,.96);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
 .nav{display:flex;align-items:center;justify-content:space-between;gap:20px}
@@ -277,9 +281,11 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
   .band{height:46vh}
 }
 </style>
+{{LD}}
 </head>
 <body>
 
+<a class="skip" href="#contenu">Aller au contenu</a>
 <header id="hd">
   <div class="wrap nav">
     <a href="index.html" class="brand" aria-label="Hôtel Evannath, accueil">
@@ -300,7 +306,7 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
 <div class="drawer" id="dw">
   <div class="dw-in">
     <nav aria-label="Navigation principale">
-      <a href="index.html#chambres"><i>01</i><span data-t="n1">Chambres &amp; Suites</span></a>
+      <a href="chambres.html"><i>01</i><span data-t="n1">Chambres &amp; Suites</span></a>
       <a href="experiences.html"><i>02</i><span data-t="n2">Expériences</span></a>
       <a href="carte.html" class="on"><i>03</i><span data-t="n3">La table</span></a>
       <a href="spa.html"><i>04</i><span data-t="n4">Le spa</span></a>
@@ -326,6 +332,8 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
     </aside>
   </div>
 </div>
+
+<main id="contenu">
 
 <section class="hero">
   <div class="bg"></div>
@@ -537,6 +545,8 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
   </div>
 </section>
 
+</main>
+
 <footer>
   <div class="wrap">
     <div class="f-grid">
@@ -545,7 +555,7 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
         <p style="font-size:8.5px;letter-spacing:.42em;color:var(--bronze);font-weight:700;margin-bottom:18px">LE RÊVE AFRICAIN</p>
         <p style="max-width:300px">46 chambres et suites face à la lagune Aby, à Assinie. Réservation directe, meilleur tarif garanti, réception ouverte 24 h/24.</p>
       </div>
-      <div><h4>Navigation</h4><a href="index.html#chambres">Chambres</a><a href="experiences.html">Expériences</a><a href="carte.html">La table</a><a href="circuits.html">Circuits &amp; Offres</a><a href="spa.html">Spa</a><a href="a-propos.html">À propos</a><a href="contact.html">Contact</a></div>
+      <div><h4>Navigation</h4><a href="chambres.html">Chambres</a><a href="experiences.html">Expériences</a><a href="carte.html">La table</a><a href="circuits.html">Circuits &amp; Offres</a><a href="spa.html">Spa</a><a href="a-propos.html">À propos</a><a href="contact.html">Contact</a></div>
       <div><h4>Informations</h4><a href="informations-utiles.html">Informations utiles</a><a href="seminaires.html">Séminaires &amp; groupes</a><a href="informations-utiles.html#reserver">Conditions d'annulation</a><a href="mentions-legales.html">Mentions légales</a></div>
       <div><h4>Contact</h4>
         <a href="tel:+2252721731265">+225 27 21 73 12 65</a>

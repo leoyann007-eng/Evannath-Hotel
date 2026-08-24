@@ -82,6 +82,11 @@ header.scrolled .brand img{width:132px}
 .dw-side .lang{margin-top:6px;width:max-content}
 .dw-side .lang button{padding:15px 20px;font-size:11px}
 
+.skip{position:absolute;left:-9999px;top:0;z-index:200;background:var(--bronze);color:var(--night);
+  padding:14px 22px;font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase}
+.skip:focus{left:0}
+main{display:block}
+
 .crumb{font-size:11.5px;letter-spacing:.1em;color:var(--muted);margin-bottom:22px}
 .crumb a{padding:6px 0;display:inline-block}
 .crumb a:hover{color:var(--bronze)}
@@ -93,7 +98,7 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
 .f-grid p{display:block;font-size:13.5px;color:#9C8B78;margin-bottom:11px}
 .f-grid a{display:block;font-size:13.5px;color:#9C8B78;padding:9px 0;transition:.3s}
 .f-grid a:hover{color:var(--bronze)}
-.f-bot{border-top:1px solid var(--line);margin-top:54px;padding-top:26px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:11.5px;color:#6A5C4C}
+.f-bot{border-top:1px solid var(--line);margin-top:54px;padding-top:26px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:11.5px;color:#A2907C}
 .wa{position:fixed;right:22px;bottom:22px;z-index:90;width:56px;height:56px;border-radius:50%;background:#25D366;display:grid;place-items:center;box-shadow:0 10px 30px rgba(37,211,102,.35);transition:.35s}
 .wa:hover{transform:scale(1.09)}
 .wa svg{width:28px;height:28px;fill:#fff}
@@ -120,7 +125,7 @@ HEAD = """<link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Karla:wght@300;400;500;600;700&display=swap" rel="stylesheet">"""
 
 LINKS = [
- ('01','index.html#chambres','n1','Chambres &amp; Suites'),
+ ('01','chambres.html','n1','Chambres &amp; Suites'),
  ('02','experiences.html','n2','Expériences'),
  ('03','carte.html','n3','La table'),
  ('04','spa.html','n4','Le spa'),
@@ -134,7 +139,8 @@ LINKS = [
 ]
 
 def header(cta_href, cta_label, cta_key='cta'):
-    return '''<header id="hd">
+    return '''<a class="skip" href="#contenu">Aller au contenu</a>
+<header id="hd">
   <div class="wrap nav">
     <a href="index.html" class="brand" aria-label="Hôtel Evannath, accueil">
       <img src="img/opt/logo-blanc.png" alt="Hôtel Evannath" width="729" height="176">
@@ -174,9 +180,13 @@ def drawer(current='', photo='t-lampe', alt='Lanterne de rotin de l\'Hôtel Evan
       <div class="lang"><button class="on" data-lang="fr">FR</button><button data-lang="en">EN</button></div>
     </aside>
   </div>
-</div>''' % ('\n'.join(rows), photo, photo, alt)
+</div>
 
-FOOTER = '''<footer>
+<main id="contenu">''' % ('\n'.join(rows), photo, photo, alt)
+
+FOOTER = '''</main>
+
+<footer>
   <div class="wrap">
     <div class="f-grid">
       <div>
@@ -184,7 +194,7 @@ FOOTER = '''<footer>
         <p style="font-size:8.5px;letter-spacing:.42em;color:var(--bronze);font-weight:700;margin-bottom:18px">LE RÊVE AFRICAIN</p>
         <p style="max-width:300px">46 chambres et suites face à la lagune Aby, à Assinie. Réservation directe, meilleur tarif garanti, réception ouverte 24 h/24.</p>
       </div>
-      <div><h4>Navigation</h4><a href="index.html#chambres">Chambres</a><a href="experiences.html">Expériences</a><a href="carte.html">La table</a><a href="circuits.html">Circuits &amp; Offres</a><a href="spa.html">Spa</a><a href="a-propos.html">À propos</a><a href="contact.html">Contact</a></div>
+      <div><h4>Navigation</h4><a href="chambres.html">Chambres</a><a href="experiences.html">Expériences</a><a href="carte.html">La table</a><a href="circuits.html">Circuits &amp; Offres</a><a href="spa.html">Spa</a><a href="a-propos.html">À propos</a><a href="contact.html">Contact</a></div>
       <div><h4>Informations</h4><a href="informations-utiles.html">Informations utiles</a><a href="seminaires.html">Séminaires &amp; groupes</a><a href="informations-utiles.html#reserver">Conditions d'annulation</a><a href="mentions-legales.html">Mentions légales</a></div>
       <div><h4>Contact</h4>
         <a href="tel:+2252721731265">+225 27 21 73 12 65</a>
@@ -237,7 +247,80 @@ EN_NAV = ('mn:"Menu",n1:"Rooms &amp; Suites",n2:"Experiences",n3:"The table",n4:
           'n5:"Packages &amp; Offers",n6:"Meetings &amp; groups",n7:"Gallery",n8:"About",'
           'n9:"Useful information",n10:"Contact",n11:"Book",dr:"Reservations",')
 
-def page(title, desc, og, css, body, script, preload=None, slug=None):
+
+# ---------------------------------------------------------------------------
+# Images responsives
+# ---------------------------------------------------------------------------
+# build-images.py produit les variantes NOM-640, NOM-1024, NOM-1600 en webp et
+# en jpeg. Cette fonction les declare dans les balises deja ecrites.
+#
+# Les motifs sont volontairement etroits : ils ne remplacent qu'une VALEUR
+# d'attribut, ne traversent jamais une balise et ne peuvent donc rien effacer.
+# `data-full`, `href`, `content` et les URL absolues du JSON-LD ne matchent pas.
+import os as _os
+import re as _re
+
+_W = (640, 1024, 1600)
+# Un hero occupe toute la largeur ; le reste ne depasse jamais la colonne.
+SIZES_HERO = '100vw'
+SIZES_DEFAUT = '(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px'
+
+
+_largeur_cache = {}
+
+
+def _largeur(chemin):
+    """Largeur reelle du fichier, lue une seule fois. Sans elle, le dernier
+    candidat du srcset n'aurait pas de descripteur `w` — or on ne peut pas
+    melanger descripteurs `w` et candidats nus dans un meme srcset."""
+    if chemin not in _largeur_cache:
+        try:
+            from PIL import Image
+            _largeur_cache[chemin] = Image.open(chemin).size[0]
+        except Exception:
+            _largeur_cache[chemin] = None
+    return _largeur_cache[chemin]
+
+
+def _variantes(nom, ext):
+    v = [(w, 'img/opt/%s-%d.%s' % (nom, w, ext)) for w in _W]
+    v = [(w, p) for w, p in v if _os.path.exists(p)]
+    plein = 'img/opt/%s.%s' % (nom, ext)
+    w0 = _largeur(plein)
+    if w0:
+        v = [(w, p) for w, p in v if w < w0] + [(w0, plein)]
+    return v
+
+
+def responsive(html, hero=None):
+    """Ajoute srcset + sizes aux <picture>/<img> qui ont des variantes."""
+
+    def sizes_de(nom):
+        return SIZES_HERO if hero and nom == hero else SIZES_DEFAUT
+
+    def source(m):
+        nom = m.group(1)
+        v = _variantes(nom, 'webp')
+        if len(v) < 2:
+            return m.group(0)
+        jeu = ', '.join('%s %dw' % (p, w) for w, p in v)
+        return 'srcset="%s" sizes="%s"' % (jeu, sizes_de(nom))
+
+    def image(m):
+        avant, nom, apres = m.group(1), m.group(2), m.group(3)
+        v = _variantes(nom, 'jpg')
+        if len(v) < 2:
+            return m.group(0)
+        jeu = ', '.join('%s %dw' % (p, w) for w, p in v)
+        return ('<img%ssrc="img/opt/%s.jpg" srcset="%s" sizes="%s"%s'
+                % (avant, nom, jeu, sizes_de(nom), apres))
+
+    html = _re.sub(r'srcset="img/opt/([\w-]+)\.webp"', source, html)
+    html = _re.sub(r'<img([^<>]*?)src="img/opt/([\w-]+)\.jpg"([^<>]*?>)', image, html)
+    return html
+
+
+def page(title, desc, og, css, body, script, preload=None, slug=None, jsonld=''):
     pre = '\n<link rel="preload" as="image" href="img/opt/%s.webp" type="image/webp">' % preload if preload else ''
     if slug is not None:
         url = SITE + ('/' if slug in ('index', '') else '/' + slug)
@@ -260,6 +343,7 @@ def page(title, desc, og, css, body, script, preload=None, slug=None):
 <meta name="twitter:card" content="summary_large_image">
 %s%s
 %s%s
+%s
 <style>
 %s
 %s
@@ -274,4 +358,5 @@ def page(title, desc, og, css, body, script, preload=None, slug=None):
 </script>
 </body>
 </html>
-''' % (title, desc, title, desc, SITE, og, ICONS, can, HEAD, pre, HEAD_CSS, css, body, script)
+''' % (title, desc, title, desc, SITE, og, ICONS, can, HEAD, pre, jsonld, HEAD_CSS, css,
+       responsive(body, hero=preload), script)

@@ -52,6 +52,10 @@ p{color:#D6CBBB}
 .btn-solid:hover{background:var(--bronze-2);border-color:var(--bronze-2)}
 
 /* ══ NAV : un seul élément ══ */
+.skip{position:absolute;left:-9999px;top:0;z-index:200;background:var(--bronze);color:var(--night);
+  padding:14px 22px;font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase}
+.skip:focus{left:0}
+main{display:block}
 header{position:fixed;top:0;left:0;right:0;z-index:100;transition:.45s;padding:22px 0}
 header.scrolled{padding:11px 0;background:rgba(16,11,6,.96);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
 .nav{display:flex;align-items:center;justify-content:space-between;gap:20px}
@@ -277,9 +281,11 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
   .band{height:46vh}
 }
 </style>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Restaurant","@id":"https://evannathhotel.vercel.app/#restaurant","name":"La table de l'Hôtel Evannath","description":"Cuisine ivoirienne et continentale à Assinie PK 19 : poisson du jour, kedjenou, grillades et cocktails, en terrasse face à la piscine. 94 propositions à la carte.","url":"https://evannathhotel.vercel.app/carte","servesCuisine":["Ivoirienne","Africaine","Française","Fruits de mer"],"priceRange":"XOF","currenciesAccepted":"XOF","address":{"@type":"PostalAddress","streetAddress":"Assinie PK 19","addressLocality":"Assinie-Mafia","addressRegion":"Comoé","addressCountry":"CI"},"telephone":"+225 27 21 73 12 65","image":"https://evannathhotel.vercel.app/img/opt/t-hero.jpg","hasMenu":"https://evannathhotel.vercel.app/carte","containedInPlace":{"@id":"https://evannathhotel.vercel.app/#hotel"}},{"@type":"Hotel","@id":"https://evannathhotel.vercel.app/#hotel","name":"Hôtel Evannath"},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Accueil","item":"https://evannathhotel.vercel.app/"},{"@type":"ListItem","position":2,"name":"La table"}]}]}</script>
 </head>
 <body>
 
+<a class="skip" href="#contenu">Aller au contenu</a>
 <header id="hd">
   <div class="wrap nav">
     <a href="index.html" class="brand" aria-label="Hôtel Evannath, accueil">
@@ -300,7 +306,7 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
 <div class="drawer" id="dw">
   <div class="dw-in">
     <nav aria-label="Navigation principale">
-      <a href="index.html#chambres"><i>01</i><span data-t="n1">Chambres &amp; Suites</span></a>
+      <a href="chambres.html"><i>01</i><span data-t="n1">Chambres &amp; Suites</span></a>
       <a href="experiences.html"><i>02</i><span data-t="n2">Expériences</span></a>
       <a href="carte.html" class="on"><i>03</i><span data-t="n3">La table</span></a>
       <a href="spa.html"><i>04</i><span data-t="n4">Le spa</span></a>
@@ -313,8 +319,8 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
       <a href="reserver.html"><i>11</i><span data-t="n11">Réserver</span></a>
     </nav>
     <aside class="dw-side">
-      <div class="ph"><picture><source srcset="img/opt/t-lampe.webp" type="image/webp">
-        <img src="img/opt/t-lampe.jpg" width="1100" height="733" alt="Lanterne de rotin de l'Hôtel Evannath" loading="lazy"></picture></div>
+      <div class="ph"><picture><source srcset="img/opt/t-lampe-640.webp 640w, img/opt/t-lampe-1024.webp 1024w, img/opt/t-lampe.webp 1100w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp">
+        <img src="img/opt/t-lampe.jpg" srcset="img/opt/t-lampe-640.jpg 640w, img/opt/t-lampe-1024.jpg 1024w, img/opt/t-lampe.jpg 1100w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" width="1100" height="733" alt="Lanterne de rotin de l'Hôtel Evannath" loading="lazy"></picture></div>
       <div>
         <b data-t="dr">Réservations</b>
         <a href="tel:+2250151527575">+225 01 51 52 75 75</a>
@@ -326,6 +332,8 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
     </aside>
   </div>
 </div>
+
+<main id="contenu">
 
 <section class="hero">
   <div class="bg"></div>
@@ -356,8 +364,8 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
 </section>
 
 <div class="band reveal">
-  <picture><source srcset="img/opt/t-lampe.webp" type="image/webp">
-  <img src="img/opt/t-lampe.jpg" width="1100" height="733" alt="Lanterne de rotin allumée au-dessus des tables" loading="lazy"></picture>
+  <picture><source srcset="img/opt/t-lampe-640.webp 640w, img/opt/t-lampe-1024.webp 1024w, img/opt/t-lampe.webp 1100w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp">
+  <img src="img/opt/t-lampe.jpg" srcset="img/opt/t-lampe-640.jpg 640w, img/opt/t-lampe-1024.jpg 1024w, img/opt/t-lampe.jpg 1100w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" width="1100" height="733" alt="Lanterne de rotin allumée au-dessus des tables" loading="lazy"></picture>
   <div class="cap"><span data-t="cb1">Le service du soir</span><p data-t="cb1p">Les lanternes de rotin s'allument à la tombée du jour.</p></div>
 </div>
 
@@ -471,8 +479,8 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
 </section>
 
 <div class="band reveal">
-  <picture><source srcset="img/opt/t-enseigne.webp" type="image/webp">
-  <img src="img/opt/t-enseigne.jpg" width="1200" height="800" alt="L'enseigne lumineuse de l'Hôtel Evannath" loading="lazy"></picture>
+  <picture><source srcset="img/opt/t-enseigne-640.webp 640w, img/opt/t-enseigne-1024.webp 1024w, img/opt/t-enseigne.webp 1200w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp">
+  <img src="img/opt/t-enseigne.jpg" srcset="img/opt/t-enseigne-640.jpg 640w, img/opt/t-enseigne-1024.jpg 1024w, img/opt/t-enseigne.jpg 1200w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" width="1200" height="800" alt="L'enseigne lumineuse de l'Hôtel Evannath" loading="lazy"></picture>
   <div class="cap"><span data-t="cb2">Ouvert à tous</span><p data-t="cb2p">On n'a pas besoin de dormir ici pour y dîner.</p></div>
 </div>
 
@@ -704,6 +712,8 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
   </div>
 </section>
 
+</main>
+
 <footer>
   <div class="wrap">
     <div class="f-grid">
@@ -712,7 +722,7 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
         <p style="font-size:8.5px;letter-spacing:.42em;color:var(--bronze);font-weight:700;margin-bottom:18px">LE RÊVE AFRICAIN</p>
         <p style="max-width:300px">46 chambres et suites face à la lagune Aby, à Assinie. Réservation directe, meilleur tarif garanti, réception ouverte 24 h/24.</p>
       </div>
-      <div><h4>Navigation</h4><a href="index.html#chambres">Chambres</a><a href="experiences.html">Expériences</a><a href="carte.html">La table</a><a href="circuits.html">Circuits &amp; Offres</a><a href="spa.html">Spa</a><a href="a-propos.html">À propos</a><a href="contact.html">Contact</a></div>
+      <div><h4>Navigation</h4><a href="chambres.html">Chambres</a><a href="experiences.html">Expériences</a><a href="carte.html">La table</a><a href="circuits.html">Circuits &amp; Offres</a><a href="spa.html">Spa</a><a href="a-propos.html">À propos</a><a href="contact.html">Contact</a></div>
       <div><h4>Informations</h4><a href="informations-utiles.html">Informations utiles</a><a href="seminaires.html">Séminaires &amp; groupes</a><a href="informations-utiles.html#reserver">Conditions d'annulation</a><a href="mentions-legales.html">Mentions légales</a></div>
       <div><h4>Contact</h4>
         <a href="tel:+2252721731265">+225 27 21 73 12 65</a>

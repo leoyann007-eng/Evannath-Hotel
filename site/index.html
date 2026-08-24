@@ -22,7 +22,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Karla:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="preload" as="image" href="img/opt/hero-paillote.webp" type="image/webp">
+<link rel="preload" as="image" href="img/opt/hero-paillote-640.webp" type="image/webp" media="(max-width:640px)">
+<link rel="preload" as="image" href="img/opt/hero-paillote-1024.webp" type="image/webp" media="(min-width:641px) and (max-width:1024px)">
+<link rel="preload" as="image" href="img/opt/hero-paillote.webp" type="image/webp" media="(min-width:1025px)">
 <style>
 :root{
   /* palette extraite du logo Evannath : bronze, bois, écorce */
@@ -58,6 +60,10 @@ p{color:#DCD2C4}
 @keyframes breathe{0%,100%{opacity:.3}50%{opacity:1}}
 
 /* ══ NAV : un seul élément ══ */
+.skip{position:absolute;left:-9999px;top:0;z-index:200;background:var(--bronze);color:var(--night);
+  padding:14px 22px;font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase}
+.skip:focus{left:0}
+main{display:block}
 header{position:fixed;top:0;left:0;right:0;z-index:100;transition:.45s;padding:20px 0}
 header.scrolled{background:rgba(23,16,10,.94);backdrop-filter:blur(14px);padding:11px 0;border-bottom:1px solid var(--line)}
 .nav{display:flex;align-items:center;justify-content:space-between;gap:20px}
@@ -99,6 +105,11 @@ header.scrolled .brand img{width:132px}
 .dw-side .lang button{padding:15px 20px;font-size:11px}
 
 .hero{position:relative;min-height:100svh;display:flex;align-items:center;overflow:hidden}
+/* Premiere diapositive : element LCP, peint avant tout JS. Les media queries
+   evitent d'envoyer une image 1600 px a un telephone. */
+#s0{background-image:image-set(url('img/opt/hero-paillote-640.webp') type('image/webp'),url('img/opt/hero-paillote-640.jpg') type('image/jpeg'))}
+@media (min-width:641px){#s0{background-image:image-set(url('img/opt/hero-paillote-1024.webp') type('image/webp'),url('img/opt/hero-paillote-1024.jpg') type('image/jpeg'))}}
+@media (min-width:1025px){#s0{background-image:image-set(url('img/opt/hero-paillote.webp') type('image/webp'),url('img/opt/hero-paillote.jpg') type('image/jpeg'))}}
 .slides{position:absolute;inset:0}
 .slide{position:absolute;inset:0;opacity:0;transition:opacity 1.6s ease;background-size:cover;background-position:center}
 .slide.on{opacity:1;animation:kb 14s ease-out forwards}
@@ -244,11 +255,13 @@ footer{background:#0F0A06;border-top:1px solid var(--line);padding:74px 0 28px}
   #lb .prev{left:8px}#lb .next{right:8px}
 }
 </style>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":["Hotel","LodgingBusiness"],"@id":"https://evannathhotel.vercel.app/#hotel","name":"Hôtel Evannath","alternateName":"Evannath — Le Rêve Africain","slogan":"Le Rêve Africain","description":"Hôtel de 46 chambres et suites à Assinie PK 19, en Côte d'Ivoire, face à la lagune Aby : paillote sur pilotis, piscine, spa, restaurant et salle de séminaire. Navette aéroport offerte.","url":"https://evannathhotel.vercel.app/","logo":"https://evannathhotel.vercel.app/img/opt/logo-blanc.png","image":["https://evannathhotel.vercel.app/img/opt/hero-paillote.jpg","https://evannathhotel.vercel.app/img/opt/hero-aerien.jpg","https://evannathhotel.vercel.app/img/opt/g-lobby.jpg","https://evannathhotel.vercel.app/img/opt/g-resto.jpg"],"address":{"@type":"PostalAddress","streetAddress":"Assinie PK 19","addressLocality":"Assinie-Mafia","addressRegion":"Comoé","addressCountry":"CI"},"telephone":"+225 27 21 73 12 65","email":"bonjour@evannathhotel.com","sameAs":["https://www.facebook.com/evannathhotel","https://www.instagram.com/evannathhotel"],"priceRange":"67 000 – 280 000 XOF","currenciesAccepted":"XOF","paymentAccepted":"Espèces, Wave, Orange Money, MTN Mobile Money, carte bancaire","numberOfRooms":{"@type":"QuantitativeValue","value":46},"petsAllowed":false,"amenityFeature":[{"@type":"LocationFeatureSpecification","name":"Piscine exterieure","value":true},{"@type":"LocationFeatureSpecification","name":"Spa","value":true},{"@type":"LocationFeatureSpecification","name":"Sauna","value":true},{"@type":"LocationFeatureSpecification","name":"Restaurant","value":true},{"@type":"LocationFeatureSpecification","name":"Bar","value":true},{"@type":"LocationFeatureSpecification","name":"Wifi gratuit","value":true},{"@type":"LocationFeatureSpecification","name":"Parking gratuit","value":true},{"@type":"LocationFeatureSpecification","name":"Navette aeroport gratuite","value":true},{"@type":"LocationFeatureSpecification","name":"Salle de conference","value":true},{"@type":"LocationFeatureSpecification","name":"Climatisation","value":true},{"@type":"LocationFeatureSpecification","name":"Reception 24h/24","value":true},{"@type":"LocationFeatureSpecification","name":"Petit-dejeuner inclus","value":true},{"@type":"LocationFeatureSpecification","name":"Acces lagune","value":true}],"checkinTime":"14:00","checkoutTime":"12:00","contactPoint":[{"@type":"ContactPoint","contactType":"reservations","telephone":"+225 27 21 73 12 65","email":"bonjour@evannathhotel.com","availableLanguage":["fr","en"]},{"@type":"ContactPoint","contactType":"reservations","telephone":"+225 01 51 52 75 75","email":"bonjour@evannathhotel.com","availableLanguage":["fr","en"]}],"hasMap":"https://www.google.com/maps/search/Assinie+PK+19","containsPlace":{"@id":"https://evannathhotel.vercel.app/#restaurant"}},{"@type":"WebSite","@id":"https://evannathhotel.vercel.app/#website","url":"https://evannathhotel.vercel.app/","name":"Hôtel Evannath","inLanguage":"fr-CI","publisher":{"@id":"https://evannathhotel.vercel.app/#hotel"}},{"@type":"Restaurant","@id":"https://evannathhotel.vercel.app/#restaurant","name":"La table de l'Hôtel Evannath","description":"Cuisine ivoirienne et continentale à Assinie PK 19 : poisson du jour, kedjenou, grillades et cocktails, en terrasse face à la piscine.","url":"https://evannathhotel.vercel.app/carte","servesCuisine":["Ivoirienne","Africaine","Française","Fruits de mer"],"priceRange":"XOF","currenciesAccepted":"XOF","address":{"@type":"PostalAddress","streetAddress":"Assinie PK 19","addressLocality":"Assinie-Mafia","addressRegion":"Comoé","addressCountry":"CI"},"telephone":"+225 27 21 73 12 65","image":"https://evannathhotel.vercel.app/img/opt/t-hero.jpg","hasMenu":"https://evannathhotel.vercel.app/carte","containedInPlace":{"@id":"https://evannathhotel.vercel.app/#hotel"}}]}</script>
 </head>
 <body>
 
 <div id="pre"><img src="img/opt/logo-blanc.png" alt="Hôtel Evannath" width="729" height="176"></div>
 
+<a class="skip" href="#contenu">Aller au contenu</a>
 <header id="hd">
   <div class="wrap nav">
     <a href="index.html" class="brand" aria-label="Hôtel Evannath, accueil">
@@ -269,7 +282,7 @@ footer{background:#0F0A06;border-top:1px solid var(--line);padding:74px 0 28px}
 <div class="drawer" id="dw">
   <div class="dw-in">
     <nav aria-label="Navigation principale">
-      <a href="#chambres"><i>01</i><span data-t="n1">Chambres &amp; Suites</span></a>
+      <a href="chambres.html"><i>01</i><span data-t="n1">Chambres &amp; Suites</span></a>
       <a href="experiences.html"><i>02</i><span data-t="n2">Expériences</span></a>
       <a href="carte.html"><i>03</i><span data-t="n3">La table</span></a>
       <a href="spa.html"><i>04</i><span data-t="n4">Le spa</span></a>
@@ -282,8 +295,8 @@ footer{background:#0F0A06;border-top:1px solid var(--line);padding:74px 0 28px}
       <a href="reserver.html"><i>11</i><span data-t="n11">Réserver</span></a>
     </nav>
     <aside class="dw-side">
-      <div class="ph"><picture><source srcset="img/opt/t-lampe.webp" type="image/webp">
-        <img src="img/opt/t-lampe.jpg" width="1100" height="733" alt="Lanterne de rotin de l'Hôtel Evannath" loading="lazy"></picture></div>
+      <div class="ph"><picture><source srcset="img/opt/t-lampe-640.webp 640w, img/opt/t-lampe-1024.webp 1024w, img/opt/t-lampe.webp 1100w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp">
+        <img src="img/opt/t-lampe.jpg" srcset="img/opt/t-lampe-640.jpg 640w, img/opt/t-lampe-1024.jpg 1024w, img/opt/t-lampe.jpg 1100w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" width="1100" height="733" alt="Lanterne de rotin de l'Hôtel Evannath" loading="lazy"></picture></div>
       <div>
         <b data-t="dr">Réservations</b>
         <a href="tel:+2250151527575">+225 01 51 52 75 75</a>
@@ -296,9 +309,11 @@ footer{background:#0F0A06;border-top:1px solid var(--line);padding:74px 0 28px}
   </div>
 </div>
 
+<main id="contenu">
+
 <section class="hero">
   <div class="slides" id="sl">
-    <div class="slide on" style="background-image:image-set(url('img/opt/hero-paillote.webp') type('image/webp'),url('img/opt/hero-paillote.jpg') type('image/jpeg'))"></div>
+    <div class="slide on" id="s0"></div>
     <div class="slide" data-bg="hero-piscine"></div>
     <div class="slide" data-bg="hero-aerien"></div>
   </div>
@@ -357,6 +372,7 @@ footer{background:#0F0A06;border-top:1px solid var(--line);padding:74px 0 28px}
     <span class="eyebrow" data-t="e2">Hébergement</span>
     <h2 data-t="h2">Sept catégories,<br>sept atmosphères</h2>
     <p data-t="p2">De la chambre standard à la Suite Arabe deux chambres. Chaque catégorie a sa décoration, sa vue et son tarif affiché — aucune surprise à l'arrivée.</p>
+    <a href="chambres.html" class="btn" style="margin-top:26px" data-t="vch">Comparer les sept catégories</a>
   </div>
   <div class="filters reveal">
     <button class="on" data-f="all" data-t="f1">Tout voir</button>
@@ -368,8 +384,8 @@ footer{background:#0F0A06;border-top:1px solid var(--line);padding:74px 0 28px}
 
     <article class="room reveal" data-c="ch">
       <div class="room-img"><picture>
-        <source srcset="img/opt/r-standard.webp" type="image/webp">
-        <img loading="lazy" width="900" height="600" src="img/opt/r-standard.jpg" alt="Chambre Standard de l'Hôtel Evannath à Assinie"></picture>
+        <source srcset="img/opt/r-standard-640.webp 640w, img/opt/r-standard.webp 900w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp">
+        <img loading="lazy" width="900" height="600" src="img/opt/r-standard.jpg" srcset="img/opt/r-standard-640.jpg 640w, img/opt/r-standard.jpg 900w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" alt="Chambre Standard de l'Hôtel Evannath à Assinie"></picture>
         <span class="tag" data-t="tg1">Best-seller</span></div>
       <div class="room-body"><h3><a href="chambre-standard.html" data-t="rm1">Chambre Standard</a></h3><p data-t="rd1">L'essentiel, bien fait : lit double, climatisation, salle d'eau privative et petit-déjeuner inclus.</p>
         <div class="room-meta"><span>2 pers.</span><span>·</span><span data-t="mt1">Vue jardin</span></div>
@@ -387,8 +403,8 @@ footer{background:#0F0A06;border-top:1px solid var(--line);padding:74px 0 28px}
 
     <article class="room reveal" data-c="ch fam">
       <div class="room-img"><picture>
-        <source srcset="img/opt/r-wax.webp" type="image/webp">
-        <img loading="lazy" width="900" height="600" src="img/opt/r-wax.jpg" alt="Chambre Deluxe Supérieure, textiles wax et salle à manger privative"></picture>
+        <source srcset="img/opt/r-wax-640.webp 640w, img/opt/r-wax.webp 900w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp">
+        <img loading="lazy" width="900" height="600" src="img/opt/r-wax.jpg" srcset="img/opt/r-wax-640.jpg 640w, img/opt/r-wax.jpg 900w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" alt="Chambre Deluxe Supérieure, textiles wax et salle à manger privative"></picture>
         <span class="tag" data-t="tg2">Salle à manger privée</span></div>
       <div class="room-body"><h3><a href="deluxe-superieure.html" data-t="rm3">Deluxe Supérieure</a></h3><p data-t="rd3">Textiles wax, lits à baldaquin et salle à manger privative. La plus généreuse des Deluxe.</p>
         <div class="room-meta"><span>3 pers.</span><span>·</span><span data-t="mt3">Salle à manger</span></div>
@@ -397,8 +413,8 @@ footer{background:#0F0A06;border-top:1px solid var(--line);padding:74px 0 28px}
 
     <article class="room reveal" data-c="su">
       <div class="room-img"><picture>
-        <source srcset="img/opt/r-anglaise.webp" type="image/webp">
-        <img loading="lazy" width="900" height="600" src="img/opt/r-anglaise.jpg" alt="Suite Anglaise avec vue sur la lagune et la piscine"></picture>
+        <source srcset="img/opt/r-anglaise-640.webp 640w, img/opt/r-anglaise.webp 900w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp">
+        <img loading="lazy" width="900" height="600" src="img/opt/r-anglaise.jpg" srcset="img/opt/r-anglaise-640.jpg 640w, img/opt/r-anglaise.jpg 900w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" alt="Suite Anglaise avec vue sur la lagune et la piscine"></picture>
         <span class="tag" data-t="tg3">Vue lagune</span></div>
       <div class="room-body"><h3><a href="suite-anglaise.html" data-t="rm4">Suite Anglaise</a></h3><p data-t="rd4">Élégance feutrée, vue directe sur la lagune Aby et la piscine. Le meilleur couchant du domaine.</p>
         <div class="room-meta"><span>2 pers.</span><span>·</span><span data-t="mt4">Vue lagune</span></div>
@@ -407,8 +423,8 @@ footer{background:#0F0A06;border-top:1px solid var(--line);padding:74px 0 28px}
 
     <article class="room reveal" data-c="ch">
       <div class="room-img"><picture>
-        <source srcset="img/opt/r-mezz2.webp" type="image/webp">
-        <img loading="lazy" width="900" height="600" src="img/opt/r-mezz2.jpg" alt="Chambre en Mezzanine avec escalier et coin nuit surélevé"></picture></div>
+        <source srcset="img/opt/r-mezz2-640.webp 640w, img/opt/r-mezz2.webp 900w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp">
+        <img loading="lazy" width="900" height="600" src="img/opt/r-mezz2.jpg" srcset="img/opt/r-mezz2-640.jpg 640w, img/opt/r-mezz2.jpg 900w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" alt="Chambre en Mezzanine avec escalier et coin nuit surélevé"></picture></div>
       <div class="room-body"><h3><a href="chambre-mezzanine.html" data-t="rm5">Chambre en Mezzanine</a></h3><p data-t="rd5">Volume sous charpente, escalier bois et coin nuit surélevé. Idéale pour un jeune couple.</p>
         <div class="room-meta"><span>2 pers.</span><span>·</span><span data-t="mt5">Duplex</span></div>
         <div class="room-foot"><div class="price"><b>127 000</b><span data-t="pn">FCFA / nuit</span></div><a class="mini" href="chambre-mezzanine.html" data-t="voirf">Voir la chambre</a></div></div>
@@ -416,8 +432,8 @@ footer{background:#0F0A06;border-top:1px solid var(--line);padding:74px 0 28px}
 
     <article class="room reveal" data-c="ch fam">
       <div class="room-img"><picture>
-        <source srcset="img/opt/r-mezzanine.webp" type="image/webp">
-        <img loading="lazy" width="900" height="600" src="img/opt/r-mezzanine.jpg" alt="Mezzanine Supérieure, coin salon et terrasse privative"></picture>
+        <source srcset="img/opt/r-mezzanine-640.webp 640w, img/opt/r-mezzanine.webp 900w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp">
+        <img loading="lazy" width="900" height="600" src="img/opt/r-mezzanine.jpg" srcset="img/opt/r-mezzanine-640.jpg 640w, img/opt/r-mezzanine.jpg 900w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" alt="Mezzanine Supérieure, coin salon et terrasse privative"></picture>
         <span class="tag" data-t="tg4">Équipements +</span></div>
       <div class="room-body"><h3><a href="mezzanine-superieure.html" data-t="rm6">Mezzanine Supérieure</a></h3><p data-t="rd6">La mezzanine en plus grand : coin salon complet, équipements renforcés et terrasse privative.</p>
         <div class="room-meta"><span>4 pers.</span><span>·</span><span data-t="mt6">Terrasse</span></div>
@@ -426,8 +442,8 @@ footer{background:#0F0A06;border-top:1px solid var(--line);padding:74px 0 28px}
 
     <article class="room reveal" data-c="su fam">
       <div class="room-img"><picture>
-        <source srcset="img/opt/r-arabe.webp" type="image/webp">
-        <img loading="lazy" width="900" height="600" src="img/opt/r-arabe.jpg" alt="Suite Arabe, deux chambres, Hôtel Evannath"></picture>
+        <source srcset="img/opt/r-arabe-640.webp 640w, img/opt/r-arabe.webp 900w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp">
+        <img loading="lazy" width="900" height="600" src="img/opt/r-arabe.jpg" srcset="img/opt/r-arabe-640.jpg 640w, img/opt/r-arabe.jpg 900w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" alt="Suite Arabe, deux chambres, Hôtel Evannath"></picture>
         <span class="tag" data-t="tg5">Signature</span></div>
       <div class="room-body"><h3><a href="suite-arabe.html" data-t="rm7">Suite Arabe</a></h3><p data-t="rd7">Deux chambres, décor arabo-andalou et service dédié. La suite signature de l'établissement.</p>
         <div class="room-meta"><span>6 pers.</span><span>·</span><span data-t="mt7">2 chambres</span></div>
@@ -517,6 +533,8 @@ footer{background:#0F0A06;border-top:1px solid var(--line);padding:74px 0 28px}
   </div>
 </section>
 
+</main>
+
 <footer>
   <div class="wrap">
     <div class="f-grid">
@@ -525,7 +543,7 @@ footer{background:#0F0A06;border-top:1px solid var(--line);padding:74px 0 28px}
         <p style="font-size:8.5px;letter-spacing:.42em;color:var(--bronze);font-weight:700;margin-bottom:18px">LE RÊVE AFRICAIN</p>
         <p style="max-width:300px">46 chambres et suites face à la lagune Aby, à Assinie. Réservation directe, meilleur tarif garanti, réception ouverte 24 h/24.</p>
       </div>
-      <div><h4>Navigation</h4><a href="#chambres">Chambres</a><a href="experiences.html">Expériences</a><a href="galerie.html">Galerie</a><a href="carte.html">La table</a><a href="spa.html">Spa</a><a href="circuits.html">Circuits &amp; Offres</a><a href="a-propos.html">À propos</a><a href="contact.html">Contact</a></div>
+      <div><h4>Navigation</h4><a href="chambres.html">Chambres</a><a href="experiences.html">Expériences</a><a href="galerie.html">Galerie</a><a href="carte.html">La table</a><a href="spa.html">Spa</a><a href="circuits.html">Circuits &amp; Offres</a><a href="a-propos.html">À propos</a><a href="contact.html">Contact</a></div>
       <div><h4>Informations</h4><a href="informations-utiles.html">Informations utiles</a><a href="seminaires.html">Séminaires &amp; groupes</a><a href="informations-utiles.html#reserver">Conditions d'annulation</a><a href="mentions-legales.html">Mentions légales</a></div>
       <div><h4>Contact</h4>
         <a href="tel:+2252721731265">+225 27 21 73 12 65</a>
@@ -575,7 +593,9 @@ addEventListener('keydown',function(e){if(e.key==='Escape'&&dw.classList.contain
 var sl=[].slice.call(document.querySelectorAll('#sl .slide')),si=0;
 var webp=document.createElement('canvas').toDataURL('image/webp').indexOf('data:image/webp')===0;
 function loadSlides(){
-  sl.forEach(function(s){var n=s.dataset.bg;if(n)s.style.backgroundImage="url('img/opt/"+n+(webp?'.webp':'.jpg')+"')"});
+  var dpr=Math.min(devicePixelRatio||1,2), besoin=innerWidth*dpr;
+  var suf=besoin<=640?'-640':besoin<=1024?'-1024':'';
+  sl.forEach(function(s){var n=s.dataset.bg;if(n)s.style.backgroundImage="url('img/opt/"+n+suf+(webp?'.webp':'.jpg')+"')"});
   setInterval(function(){sl[si].classList.remove('on');si=(si+1)%sl.length;sl[si].classList.add('on')},6500);
 }
 if(document.readyState==='complete')loadSlides();else addEventListener('load',loadSlides);
@@ -640,7 +660,7 @@ go(0);var auto=setInterval(function(){go(ri+1)},6500);
 rt.addEventListener('pointerdown',function(){clearInterval(auto)});
 
 var EN={book:"Book now",mn:"Menu",
-n1:"Rooms &amp; Suites",n2:"Experiences",n3:"The table",n4:"The spa",n5:"Packages &amp; Offers",n6:"Meetings &amp; groups",n7:"Gallery",n8:"About",n9:"Useful information",n10:"Contact",n11:"Book",dr:"Reservations",vx:"All experiences",
+n1:"Rooms &amp; Suites",n2:"Experiences",n3:"The table",n4:"The spa",n5:"Packages &amp; Offers",n6:"Meetings &amp; groups",n7:"Gallery",n8:"About",n9:"Useful information",n10:"Contact",n11:"Book",dr:"Reservations",vx:"All experiences",vch:"Compare all seven",
 eb:"Assinie · PK 19 · Aby Lagoon",h1e:"African",
 lede:"46 rooms and suites, a wooden deck set out over the lagoon, and the quiet of the Comoé. Book direct — the rate is always best here.",
 cta1:"Book direct",cta2:"See the rooms",sc:"Scroll",

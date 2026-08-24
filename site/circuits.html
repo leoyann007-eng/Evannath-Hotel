@@ -22,6 +22,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Karla:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Service","name":"Circuits et forfaits","description":"Packs Vacances, lune de miel, week-end intense, circuits touristiques et coffret anniversaire à l'Hôtel Evannath, Assinie.","url":"https://evannathhotel.vercel.app/circuits","provider":{"@id":"https://evannathhotel.vercel.app/#hotel"},"areaServed":{"@type":"Place","name":"Assinie, Côte d'Ivoire"},"image":"https://evannathhotel.vercel.app/img/opt/r-mezzanine.jpg"},{"@type":"Hotel","@id":"https://evannathhotel.vercel.app/#hotel","name":"Hôtel Evannath"},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Accueil","item":"https://evannathhotel.vercel.app/"},{"@type":"ListItem","position":2,"name":"Circuits & Offres"}]}]}</script>
 <style>
 :root{
   --night:#100B06; --bark:#17100A; --bark-2:#1E150D; --bark-3:#2A1E13;
@@ -91,6 +92,11 @@ header.scrolled .brand img{width:132px}
 .dw-side .lang{margin-top:6px;width:max-content}
 .dw-side .lang button{padding:15px 20px;font-size:11px}
 
+.skip{position:absolute;left:-9999px;top:0;z-index:200;background:var(--bronze);color:var(--night);
+  padding:14px 22px;font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase}
+.skip:focus{left:0}
+main{display:block}
+
 .crumb{font-size:11.5px;letter-spacing:.1em;color:var(--muted);margin-bottom:22px}
 .crumb a{padding:6px 0;display:inline-block}
 .crumb a:hover{color:var(--bronze)}
@@ -102,7 +108,7 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
 .f-grid p{display:block;font-size:13.5px;color:#9C8B78;margin-bottom:11px}
 .f-grid a{display:block;font-size:13.5px;color:#9C8B78;padding:9px 0;transition:.3s}
 .f-grid a:hover{color:var(--bronze)}
-.f-bot{border-top:1px solid var(--line);margin-top:54px;padding-top:26px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:11.5px;color:#6A5C4C}
+.f-bot{border-top:1px solid var(--line);margin-top:54px;padding-top:26px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:11.5px;color:#A2907C}
 .wa{position:fixed;right:22px;bottom:22px;z-index:90;width:56px;height:56px;border-radius:50%;background:#25D366;display:grid;place-items:center;box-shadow:0 10px 30px rgba(37,211,102,.35);transition:.35s}
 .wa:hover{transform:scale(1.09)}
 .wa svg{width:28px;height:28px;fill:#fff}
@@ -225,6 +231,7 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
 </head>
 <body>
 
+<a class="skip" href="#contenu">Aller au contenu</a>
 <header id="hd">
   <div class="wrap nav">
     <a href="index.html" class="brand" aria-label="Hôtel Evannath, accueil">
@@ -244,7 +251,7 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
 <div class="drawer" id="dw">
   <div class="dw-in">
     <nav aria-label="Navigation principale">
-      <a href="index.html#chambres"><i>01</i><span data-t="n1">Chambres &amp; Suites</span></a>
+      <a href="chambres.html"><i>01</i><span data-t="n1">Chambres &amp; Suites</span></a>
       <a href="experiences.html"><i>02</i><span data-t="n2">Expériences</span></a>
       <a href="carte.html"><i>03</i><span data-t="n3">La table</span></a>
       <a href="spa.html"><i>04</i><span data-t="n4">Le spa</span></a>
@@ -257,8 +264,8 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
       <a href="reserver.html"><i>11</i><span data-t="n11">Réserver</span></a>
     </nav>
     <aside class="dw-side">
-      <div class="ph"><picture><source srcset="img/opt/t-lampe.webp" type="image/webp">
-        <img src="img/opt/t-lampe.jpg" width="1100" height="733" alt="Lanterne de rotin de l'Hôtel Evannath" loading="lazy"></picture></div>
+      <div class="ph"><picture><source srcset="img/opt/t-lampe-640.webp 640w, img/opt/t-lampe-1024.webp 1024w, img/opt/t-lampe.webp 1100w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp">
+        <img src="img/opt/t-lampe.jpg" srcset="img/opt/t-lampe-640.jpg 640w, img/opt/t-lampe-1024.jpg 1024w, img/opt/t-lampe.jpg 1100w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" width="1100" height="733" alt="Lanterne de rotin de l'Hôtel Evannath" loading="lazy"></picture></div>
       <div>
         <b data-t="dr">Réservations</b>
         <a href="tel:+2250151527575">+225 01 51 52 75 75</a>
@@ -270,6 +277,8 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
     </aside>
   </div>
 </div>
+
+<main id="contenu">
 
 <div class="wrap head">
   <nav class="crumb" aria-label="Fil d'Ariane">
@@ -299,7 +308,7 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
         <button class="pick pickbtn" data-c="Pack Famille" data-p="250000" data-u="forfait" data-t="ch">Choisir</button></div>
       </article>
       <article class="pack">
-        <div class="ph"><picture><source srcset="img/opt/c-ponton.webp" type="image/webp"><img loading="lazy" src="img/opt/c-ponton.jpg" width="700" height="467" alt="Le ponton sur la lagune au couchant"></picture></div>
+        <div class="ph"><picture><source srcset="img/opt/c-ponton-640.webp 640w, img/opt/c-ponton.webp 900w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp"><img loading="lazy" src="img/opt/c-ponton.jpg" srcset="img/opt/c-ponton-640.jpg 640w, img/opt/c-ponton.jpg 900w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" width="700" height="467" alt="Le ponton sur la lagune au couchant"></picture></div>
         <div class="in"><h3 data-t="p2">Pack Couple</h3><b>150 000</b><span data-t="uf">FCFA · le forfait</span>
         <button class="pick pickbtn" data-c="Pack Couple" data-p="150000" data-u="forfait" data-t="ch">Choisir</button></div>
       </article>
@@ -318,8 +327,8 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
 
   <article class="star reveal">
     <div class="ph">
-      <picture><source srcset="img/opt/r-mezzanine.webp" type="image/webp">
-      <img src="img/opt/r-mezzanine.jpg" width="900" height="600" alt="Mezzanine Supérieure décorée pour une lune de miel"></picture>
+      <picture><source srcset="img/opt/r-mezzanine-640.webp 640w, img/opt/r-mezzanine.webp 900w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp">
+      <img src="img/opt/r-mezzanine.jpg" srcset="img/opt/r-mezzanine-640.jpg 640w, img/opt/r-mezzanine.jpg 900w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" width="900" height="600" alt="Mezzanine Supérieure décorée pour une lune de miel"></picture>
       <span class="badge" data-t="bd">Le plus demandé</span>
     </div>
     <div class="txt">
@@ -349,8 +358,8 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
 
   <div class="grid" id="gr">
     <article class="c reveal" data-cat="duo">
-      <div class="ph"><picture><source srcset="img/opt/c-ponton.webp" type="image/webp">
-        <img loading="lazy" src="img/opt/c-ponton.jpg" width="900" height="562" alt="Le ponton de bois sur la lagune, au couchant"></picture>
+      <div class="ph"><picture><source srcset="img/opt/c-ponton-640.webp 640w, img/opt/c-ponton.webp 900w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp">
+        <img loading="lazy" src="img/opt/c-ponton.jpg" srcset="img/opt/c-ponton-640.jpg 640w, img/opt/c-ponton.jpg 900w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" width="900" height="562" alt="Le ponton de bois sur la lagune, au couchant"></picture>
         <span class="tag" data-t="g1">Romantique</span></div>
       <div class="in">
         <h3 data-t="t1">Évasion Romantique</h3>
@@ -365,8 +374,8 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
       </div>
     </article>
     <article class="c reveal" data-cat="duo">
-      <div class="ph"><picture><source srcset="img/opt/r-standard.webp" type="image/webp">
-        <img loading="lazy" src="img/opt/r-standard.jpg" width="900" height="562" alt="Chambre Standard de l'Hôtel Evannath"></picture>
+      <div class="ph"><picture><source srcset="img/opt/r-standard-640.webp 640w, img/opt/r-standard.webp 900w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp">
+        <img loading="lazy" src="img/opt/r-standard.jpg" srcset="img/opt/r-standard-640.jpg 640w, img/opt/r-standard.jpg 900w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" width="900" height="562" alt="Chambre Standard de l'Hôtel Evannath"></picture>
         <span class="tag" data-t="g2">Week-end</span></div>
       <div class="in">
         <h3 data-t="t2">Week-End Intense</h3>
@@ -381,8 +390,8 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
       </div>
     </article>
     <article class="c reveal" data-cat="fam grp">
-      <div class="ph"><picture><source srcset="img/opt/g-lagune.webp" type="image/webp">
-        <img loading="lazy" src="img/opt/g-lagune.jpg" width="900" height="562" alt="La lagune Aby et les îles environnantes"></picture>
+      <div class="ph"><picture><source srcset="img/opt/g-lagune-640.webp 640w, img/opt/g-lagune-1024.webp 1024w, img/opt/g-lagune.webp 1200w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp">
+        <img loading="lazy" src="img/opt/g-lagune.jpg" srcset="img/opt/g-lagune-640.jpg 640w, img/opt/g-lagune-1024.jpg 1024w, img/opt/g-lagune.jpg 1200w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" width="900" height="562" alt="La lagune Aby et les îles environnantes"></picture>
         <span class="tag" data-t="g3">Découverte</span></div>
       <div class="in">
         <h3 data-t="t3">Découvertes Touristiques</h3>
@@ -397,8 +406,8 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
       </div>
     </article>
     <article class="c reveal" data-cat="fam">
-      <div class="ph"><picture><source srcset="img/opt/c-piscine.webp" type="image/webp">
-        <img loading="lazy" src="img/opt/c-piscine.jpg" width="900" height="562" alt="La piscine de l'hôtel en fin de journée"></picture>
+      <div class="ph"><picture><source srcset="img/opt/c-piscine-640.webp 640w, img/opt/c-piscine.webp 900w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp">
+        <img loading="lazy" src="img/opt/c-piscine.jpg" srcset="img/opt/c-piscine-640.jpg 640w, img/opt/c-piscine.jpg 900w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" width="900" height="562" alt="La piscine de l'hôtel en fin de journée"></picture>
         <span class="tag" data-t="g4">Enfants</span></div>
       <div class="in">
         <h3 data-t="t4">Découvertes Junior</h3>
@@ -413,8 +422,8 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
       </div>
     </article>
     <article class="c reveal" data-cat="long fam">
-      <div class="ph"><picture><source srcset="img/opt/g-vue.webp" type="image/webp">
-        <img loading="lazy" src="img/opt/g-vue.jpg" width="900" height="562" alt="Vue sur la lagune et les cocotiers d'Assinie"></picture>
+      <div class="ph"><picture><source srcset="img/opt/g-vue-640.webp 640w, img/opt/g-vue-1024.webp 1024w, img/opt/g-vue.webp 1200w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp">
+        <img loading="lazy" src="img/opt/g-vue.jpg" srcset="img/opt/g-vue-640.jpg 640w, img/opt/g-vue-1024.jpg 1024w, img/opt/g-vue.jpg 1200w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" width="900" height="562" alt="Vue sur la lagune et les cocotiers d'Assinie"></picture>
         <span class="tag" data-t="g5">Long séjour</span></div>
       <div class="in">
         <h3 data-t="t5">Long Holidays</h3>
@@ -429,8 +438,8 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
       </div>
     </article>
     <article class="c reveal" data-cat="grp fam">
-      <div class="ph"><picture><source srcset="img/opt/g-resto.webp" type="image/webp">
-        <img loading="lazy" src="img/opt/g-resto.jpg" width="900" height="562" alt="Salle de restaurant dressée pour un groupe"></picture>
+      <div class="ph"><picture><source srcset="img/opt/g-resto-640.webp 640w, img/opt/g-resto-1024.webp 1024w, img/opt/g-resto.webp 1200w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp">
+        <img loading="lazy" src="img/opt/g-resto.jpg" srcset="img/opt/g-resto-640.jpg 640w, img/opt/g-resto-1024.jpg 1024w, img/opt/g-resto.jpg 1200w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" width="900" height="562" alt="Salle de restaurant dressée pour un groupe"></picture>
         <span class="tag" data-t="g6">Dès 10 personnes</span></div>
       <div class="in">
         <h3 data-t="t6">Coffret Anniversaire</h3>
@@ -447,8 +456,8 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
   </div>
 
   <section class="weekly reveal">
-    <div class="ph"><picture><source srcset="img/opt/c-bar.webp" type="image/webp">
-      <img loading="lazy" src="img/opt/c-bar.jpg" width="900" height="600" alt="Le bar et la salle en rotin de l'Hôtel Evannath"></picture></div>
+    <div class="ph"><picture><source srcset="img/opt/c-bar-640.webp 640w, img/opt/c-bar.webp 900w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp">
+      <img loading="lazy" src="img/opt/c-bar.jpg" srcset="img/opt/c-bar-640.jpg 640w, img/opt/c-bar.jpg 900w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" width="900" height="600" alt="Le bar et la salle en rotin de l'Hôtel Evannath"></picture></div>
     <div class="txt">
       <span class="when"><i></i><span data-t="w0">Chaque samedi, dès 15 h</span></span>
       <h2 data-t="w1">Méchoui Party</h2>
@@ -511,6 +520,8 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
  </div>
 </section>
 
+</main>
+
 <footer>
   <div class="wrap">
     <div class="f-grid">
@@ -519,7 +530,7 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
         <p style="font-size:8.5px;letter-spacing:.42em;color:var(--bronze);font-weight:700;margin-bottom:18px">LE RÊVE AFRICAIN</p>
         <p style="max-width:300px">46 chambres et suites face à la lagune Aby, à Assinie. Réservation directe, meilleur tarif garanti, réception ouverte 24 h/24.</p>
       </div>
-      <div><h4>Navigation</h4><a href="index.html#chambres">Chambres</a><a href="experiences.html">Expériences</a><a href="carte.html">La table</a><a href="circuits.html">Circuits &amp; Offres</a><a href="spa.html">Spa</a><a href="a-propos.html">À propos</a><a href="contact.html">Contact</a></div>
+      <div><h4>Navigation</h4><a href="chambres.html">Chambres</a><a href="experiences.html">Expériences</a><a href="carte.html">La table</a><a href="circuits.html">Circuits &amp; Offres</a><a href="spa.html">Spa</a><a href="a-propos.html">À propos</a><a href="contact.html">Contact</a></div>
       <div><h4>Informations</h4><a href="informations-utiles.html">Informations utiles</a><a href="seminaires.html">Séminaires &amp; groupes</a><a href="informations-utiles.html#reserver">Conditions d'annulation</a><a href="mentions-legales.html">Mentions légales</a></div>
       <div><h4>Contact</h4>
         <a href="tel:+2252721731265">+225 27 21 73 12 65</a>

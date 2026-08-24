@@ -6,6 +6,8 @@ manifestement erronés (Tajine affiché « FREE », Casserole à 95 000) sont
 remplacés par « Nous consulter » plutôt qu'inventés.
 """
 import io
+import _schema
+from _chrome import responsive
 
 CUISINE = [
  ("Nos entrées", [
@@ -200,11 +202,22 @@ HTML = io.open('carte-template.html',encoding='utf-8').read()
 HTML = (HTML
   .replace('{{CUISINE}}',sections(CUISINE,'c'))
   .replace('{{BOISSONS}}',sections(BOISSONS,'b'))
-  .replace('{{TOTAL}}',str(total)))
-io.open('carte.html','w',encoding='utf-8').write(HTML)
+  .replace('{{TOTAL}}',str(total))
+  .replace('{{LD}}', _schema.bloc(
+      _schema.restaurant(nb_plats=total),
+      _schema.hotel(),
+      _schema.fil([('Accueil','index'),('La table',None)]))))
+io.open('carte.html','w',encoding='utf-8').write(responsive(HTML, hero='t-hero'))
 print('carte.html :', total, 'articles')
 
 SPAH = io.open('spa-template.html',encoding='utf-8').read()
-SPAH = SPAH.replace('{{SPA}}',sections(SPA,'s')).replace('{{TOTAL}}',str(total_spa))
-io.open('spa.html','w',encoding='utf-8').write(SPAH)
+SPAH = (SPAH.replace('{{SPA}}',sections(SPA,'s')).replace('{{TOTAL}}',str(total_spa))
+  .replace('{{LD}}', _schema.bloc(
+      _schema.service('Spa et soins du corps',
+                      "Massages, gommages, soins du visage, sauna et onglerie au spa de l'Hôtel Evannath, "
+                      "Assinie PK 19. %d soins, sur rendez-vous." % total_spa,
+                      'spa', image='sp-hero'),
+      _schema.hotel(),
+      _schema.fil([('Accueil','index'),('Le spa',None)]))))
+io.open('spa.html','w',encoding='utf-8').write(responsive(SPAH, hero='sp-hero'))
 print('spa.html   :', total_spa, 'soins')

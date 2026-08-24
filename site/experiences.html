@@ -23,6 +23,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Karla:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="preload" as="image" href="img/opt/gal-lag-bateau.webp" type="image/webp">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Service","name":"Expériences et activités","description":"Balade lagunaire en pirogue, jet ski, spa, piscine et excursions autour d'Assinie depuis l'Hôtel Evannath.","url":"https://evannathhotel.vercel.app/experiences","provider":{"@id":"https://evannathhotel.vercel.app/#hotel"},"areaServed":{"@type":"Place","name":"Assinie, Côte d'Ivoire"},"image":"https://evannathhotel.vercel.app/img/opt/gal-lag-bateau.jpg"},{"@type":"Hotel","@id":"https://evannathhotel.vercel.app/#hotel","name":"Hôtel Evannath"},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Accueil","item":"https://evannathhotel.vercel.app/"},{"@type":"ListItem","position":2,"name":"Expériences"}]}]}</script>
 <style>
 :root{
   --night:#100B06; --bark:#17100A; --bark-2:#1E150D; --bark-3:#2A1E13;
@@ -92,6 +93,11 @@ header.scrolled .brand img{width:132px}
 .dw-side .lang{margin-top:6px;width:max-content}
 .dw-side .lang button{padding:15px 20px;font-size:11px}
 
+.skip{position:absolute;left:-9999px;top:0;z-index:200;background:var(--bronze);color:var(--night);
+  padding:14px 22px;font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase}
+.skip:focus{left:0}
+main{display:block}
+
 .crumb{font-size:11.5px;letter-spacing:.1em;color:var(--muted);margin-bottom:22px}
 .crumb a{padding:6px 0;display:inline-block}
 .crumb a:hover{color:var(--bronze)}
@@ -103,7 +109,7 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
 .f-grid p{display:block;font-size:13.5px;color:#9C8B78;margin-bottom:11px}
 .f-grid a{display:block;font-size:13.5px;color:#9C8B78;padding:9px 0;transition:.3s}
 .f-grid a:hover{color:var(--bronze)}
-.f-bot{border-top:1px solid var(--line);margin-top:54px;padding-top:26px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:11.5px;color:#6A5C4C}
+.f-bot{border-top:1px solid var(--line);margin-top:54px;padding-top:26px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:11.5px;color:#A2907C}
 .wa{position:fixed;right:22px;bottom:22px;z-index:90;width:56px;height:56px;border-radius:50%;background:#25D366;display:grid;place-items:center;box-shadow:0 10px 30px rgba(37,211,102,.35);transition:.35s}
 .wa:hover{transform:scale(1.09)}
 .wa svg{width:28px;height:28px;fill:#fff}
@@ -202,6 +208,7 @@ section{padding:104px 0}
 </head>
 <body>
 
+<a class="skip" href="#contenu">Aller au contenu</a>
 <header id="hd">
   <div class="wrap nav">
     <a href="index.html" class="brand" aria-label="Hôtel Evannath, accueil">
@@ -221,7 +228,7 @@ section{padding:104px 0}
 <div class="drawer" id="dw">
   <div class="dw-in">
     <nav aria-label="Navigation principale">
-      <a href="index.html#chambres"><i>01</i><span data-t="n1">Chambres &amp; Suites</span></a>
+      <a href="chambres.html"><i>01</i><span data-t="n1">Chambres &amp; Suites</span></a>
       <a href="experiences.html"><i>02</i><span data-t="n2">Expériences</span></a>
       <a href="carte.html"><i>03</i><span data-t="n3">La table</span></a>
       <a href="spa.html"><i>04</i><span data-t="n4">Le spa</span></a>
@@ -234,8 +241,8 @@ section{padding:104px 0}
       <a href="reserver.html"><i>11</i><span data-t="n11">Réserver</span></a>
     </nav>
     <aside class="dw-side">
-      <div class="ph"><picture><source srcset="img/opt/t-lampe.webp" type="image/webp">
-        <img src="img/opt/t-lampe.jpg" width="1100" height="733" alt="Lanterne de rotin de l'Hôtel Evannath" loading="lazy"></picture></div>
+      <div class="ph"><picture><source srcset="img/opt/t-lampe-640.webp 640w, img/opt/t-lampe-1024.webp 1024w, img/opt/t-lampe.webp 1100w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp">
+        <img src="img/opt/t-lampe.jpg" srcset="img/opt/t-lampe-640.jpg 640w, img/opt/t-lampe-1024.jpg 1024w, img/opt/t-lampe.jpg 1100w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" width="1100" height="733" alt="Lanterne de rotin de l'Hôtel Evannath" loading="lazy"></picture></div>
       <div>
         <b data-t="dr">Réservations</b>
         <a href="tel:+2250151527575">+225 01 51 52 75 75</a>
@@ -248,9 +255,11 @@ section{padding:104px 0}
   </div>
 </div>
 
+<main id="contenu">
+
 <section class="hero">
-  <picture><source srcset="img/opt/gal-lag-bateau.webp" type="image/webp">
-  <img src="img/opt/gal-lag-bateau.jpg" width="1400" height="933" alt="Le ponton de l'hôtel et le bateau de balade sur la lagune Aby"></picture>
+  <picture><source srcset="img/opt/gal-lag-bateau-640.webp 640w, img/opt/gal-lag-bateau-1024.webp 1024w, img/opt/gal-lag-bateau.webp 1400w" sizes="100vw" type="image/webp">
+  <img src="img/opt/gal-lag-bateau.jpg" srcset="img/opt/gal-lag-bateau-640.jpg 640w, img/opt/gal-lag-bateau-1024.jpg 1024w, img/opt/gal-lag-bateau.jpg 1400w" sizes="100vw" width="1400" height="933" alt="Le ponton de l'hôtel et le bateau de balade sur la lagune Aby"></picture>
   <div class="in wrap">
     <nav class="crumb" aria-label="Fil d'Ariane">
       <a href="index.html">Accueil</a> &nbsp;·&nbsp; <span>Expériences</span>
@@ -269,36 +278,36 @@ section{padding:104px 0}
   </div>
   <div class="dom reveal">
     <article class="card">
-      <div class="ph"><picture><source srcset="img/opt/gal-lag-paillote.webp" type="image/webp">
-        <img loading="lazy" src="img/opt/gal-lag-paillote.jpg" alt="La paillote"></picture>
+      <div class="ph"><picture><source srcset="img/opt/gal-lag-paillote-640.webp 640w, img/opt/gal-lag-paillote-1024.webp 1024w, img/opt/gal-lag-paillote.webp 1400w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp">
+        <img loading="lazy" src="img/opt/gal-lag-paillote.jpg" srcset="img/opt/gal-lag-paillote-640.jpg 640w, img/opt/gal-lag-paillote-1024.jpg 1024w, img/opt/gal-lag-paillote.jpg 1400w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" alt="La paillote"></picture>
         <span class="when">Toute la journée</span></div>
       <div class="in"><h3>La paillote</h3><p>Le ponton de bois posé sur la lagune Aby. Le cœur du domaine — on y prend un verre au couchant, on y dîne aux lanternes de rotin.</p>
         <a href="carte.html">Voir la carte</a></div>
     </article>
     <article class="card">
-      <div class="ph"><picture><source srcset="img/opt/gal-spa-couchant.webp" type="image/webp">
-        <img loading="lazy" src="img/opt/gal-spa-couchant.jpg" alt="Piscine et jacuzzi"></picture>
+      <div class="ph"><picture><source srcset="img/opt/gal-spa-couchant-640.webp 640w, img/opt/gal-spa-couchant-1024.webp 1024w, img/opt/gal-spa-couchant.webp 1400w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp">
+        <img loading="lazy" src="img/opt/gal-spa-couchant.jpg" srcset="img/opt/gal-spa-couchant-640.jpg 640w, img/opt/gal-spa-couchant-1024.jpg 1024w, img/opt/gal-spa-couchant.jpg 1400w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" alt="Piscine et jacuzzi"></picture>
         <span class="when">Accès libre</span></div>
       <div class="in"><h3>Piscine &amp; jacuzzi</h3><p>Un grand bassin avec jacuzzi intégré, transats et parasols. Ouvert du lever du jour à la nuit tombée.</p>
         <a href="spa.html">Le spa</a></div>
     </article>
     <article class="card">
-      <div class="ph"><picture><source srcset="img/opt/gal-spa-case.webp" type="image/webp">
-        <img loading="lazy" src="img/opt/gal-spa-case.jpg" alt="Spa et sauna"></picture>
+      <div class="ph"><picture><source srcset="img/opt/gal-spa-case-640.webp 640w, img/opt/gal-spa-case-1024.webp 1024w, img/opt/gal-spa-case.webp 1400w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp">
+        <img loading="lazy" src="img/opt/gal-spa-case.jpg" srcset="img/opt/gal-spa-case-640.jpg 640w, img/opt/gal-spa-case-1024.jpg 1024w, img/opt/gal-spa-case.jpg 1400w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" alt="Spa et sauna"></picture>
         <span class="when">Sur rendez-vous</span></div>
       <div class="in"><h3>Spa &amp; sauna</h3><p>Massages aux pierres chauffantes, rituel de l'Orient à l'argan, gommage au savon noir africain. Vingt-deux soins, sur rendez-vous.</p>
         <a href="spa.html">Les soins</a></div>
     </article>
     <article class="card">
-      <div class="ph"><picture><source srcset="img/opt/gal-tab-rotin.webp" type="image/webp">
-        <img loading="lazy" src="img/opt/gal-tab-rotin.jpg" alt="Restaurant et bar"></picture>
+      <div class="ph"><picture><source srcset="img/opt/gal-tab-rotin-640.webp 640w, img/opt/gal-tab-rotin-1024.webp 1024w, img/opt/gal-tab-rotin.webp 1400w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp">
+        <img loading="lazy" src="img/opt/gal-tab-rotin.jpg" srcset="img/opt/gal-tab-rotin-640.jpg 640w, img/opt/gal-tab-rotin-1024.jpg 1024w, img/opt/gal-tab-rotin.jpg 1400w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" alt="Restaurant et bar"></picture>
         <span class="when">Midi et soir</span></div>
       <div class="in"><h3>Restaurant &amp; bar</h3><p>Cuisine ivoirienne et continentale, poisson du jour, quatorze cocktails maison dont deux signatures.</p>
         <a href="carte.html">La table</a></div>
     </article>
     <article class="card">
-      <div class="ph"><picture><source srcset="img/opt/gal-tab-comptoir.webp" type="image/webp">
-        <img loading="lazy" src="img/opt/gal-tab-comptoir.jpg" alt="Night-club"></picture>
+      <div class="ph"><picture><source srcset="img/opt/gal-tab-comptoir-640.webp 640w, img/opt/gal-tab-comptoir-1024.webp 1024w, img/opt/gal-tab-comptoir.webp 1400w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp">
+        <img loading="lazy" src="img/opt/gal-tab-comptoir.jpg" srcset="img/opt/gal-tab-comptoir-640.jpg 640w, img/opt/gal-tab-comptoir-1024.jpg 1024w, img/opt/gal-tab-comptoir.jpg 1400w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" alt="Night-club"></picture>
         <span class="when">Week-ends</span></div>
       <div class="in"><h3>Night-club</h3><p>DJ résident les week-ends, terrasse ouverte tard. Happy hour le samedi après la Méchoui Party.</p>
         <a href="circuits.html">Méchoui Party</a></div>
@@ -314,8 +323,8 @@ section{padding:104px 0}
 </section>
 
 <div class="band reveal">
-  <picture><source srcset="img/opt/gal-lag-nuit.webp" type="image/webp">
-  <img src="img/opt/gal-lag-nuit.jpg" width="1400" height="933" alt="La paillote à la tombée du jour" loading="lazy"></picture>
+  <picture><source srcset="img/opt/gal-lag-nuit-640.webp 640w, img/opt/gal-lag-nuit-1024.webp 1024w, img/opt/gal-lag-nuit.webp 1400w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp">
+  <img src="img/opt/gal-lag-nuit.jpg" srcset="img/opt/gal-lag-nuit-640.jpg 640w, img/opt/gal-lag-nuit-1024.jpg 1024w, img/opt/gal-lag-nuit.jpg 1400w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" width="1400" height="933" alt="La paillote à la tombée du jour" loading="lazy"></picture>
   <div class="cap"><span>Le service du soir</span><p>Les lanternes s'allument quand la lumière part.</p></div>
 </div>
 
@@ -379,6 +388,8 @@ section{padding:104px 0}
   </div>
 </div>
 
+</main>
+
 <footer>
   <div class="wrap">
     <div class="f-grid">
@@ -387,7 +398,7 @@ section{padding:104px 0}
         <p style="font-size:8.5px;letter-spacing:.42em;color:var(--bronze);font-weight:700;margin-bottom:18px">LE RÊVE AFRICAIN</p>
         <p style="max-width:300px">46 chambres et suites face à la lagune Aby, à Assinie. Réservation directe, meilleur tarif garanti, réception ouverte 24 h/24.</p>
       </div>
-      <div><h4>Navigation</h4><a href="index.html#chambres">Chambres</a><a href="experiences.html">Expériences</a><a href="carte.html">La table</a><a href="circuits.html">Circuits &amp; Offres</a><a href="spa.html">Spa</a><a href="a-propos.html">À propos</a><a href="contact.html">Contact</a></div>
+      <div><h4>Navigation</h4><a href="chambres.html">Chambres</a><a href="experiences.html">Expériences</a><a href="carte.html">La table</a><a href="circuits.html">Circuits &amp; Offres</a><a href="spa.html">Spa</a><a href="a-propos.html">À propos</a><a href="contact.html">Contact</a></div>
       <div><h4>Informations</h4><a href="informations-utiles.html">Informations utiles</a><a href="seminaires.html">Séminaires &amp; groupes</a><a href="informations-utiles.html#reserver">Conditions d'annulation</a><a href="mentions-legales.html">Mentions légales</a></div>
       <div><h4>Contact</h4>
         <a href="tel:+2252721731265">+225 27 21 73 12 65</a>

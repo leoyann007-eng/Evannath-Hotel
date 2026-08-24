@@ -34,6 +34,7 @@ Python à partir de gabarits, pour éviter la saisie manuelle.
 
 | Fichier | Page |
 |---|---|
+| `chambres.html` | Page mère des 7 catégories : filtres, tri, comparateur |
 | `galerie.html` | 47 photographies, 6 filtres, visionneuse |
 | `circuits.html` | 4 Packs Vacances + 6 circuits + Méchoui Party |
 | `carte.html` | La table — 94 articles, recherche instantanée |
@@ -137,6 +138,39 @@ Hébergé sur **Vercel**, en site statique — aucune étape de compilation.
 `site/vercel.json` fait le reste : URL sans `.html`, images en cache un an,
 en-têtes de sécurité. Chaque `git push` sur `main` redéploie automatiquement.
 
+## Données structurées
+
+Chaque page indexable porte un graphe JSON-LD (`_schema.py`) : `Hotel` avec les
+46 chambres, les 13 équipements, la fourchette 67 000 – 280 000 XOF et les
+horaires ; `HotelRoom` avec tarif et capacité sur les 7 fiches ; `Restaurant`
+sur la carte ; `FAQPage` sur les 17 questions ; `BreadcrumbList` partout.
+
+Toutes les entités pointent vers des `@id` stables, pour que Google comprenne
+qu'il s'agit du même établissement d'une page à l'autre.
+
+**Les coordonnées GPS sont volontairement absentes** : l'établissement ne les
+publie nulle part, et un point mal placé vaut moins que pas de point.
+
+## Images responsives
+
+`build-images.py` produit trois largeurs par photo (640 / 1024 / 1600), en WebP
+et en JPEG progressif, sans jamais agrandir au-delà de l'original. `responsive()`
+dans `_chrome.py` les déclare en `srcset` + `sizes` — par des motifs qui ne
+remplacent qu'une valeur d'attribut, jamais du balisage.
+
+Gain mesuré sur l'ensemble du site :
+
+| Profil | Avant | Après | Gain |
+|---|---|---|---|
+| Téléphone 375 px, écran standard | 11,1 Mo | 6,7 Mo | **40 %** |
+| Téléphone 375 px, écran retina | 11,1 Mo | 10,1 Mo | 9 % |
+| Bureau 1440 px | 11,1 Mo | 10,3 Mo | 8 % |
+
+Le gain faible sur écran retina n'est pas un défaut du dispositif : **les photos
+sources plafonnent à 900 px** pour les chambres. Un écran retina de téléphone en
+réclame 750, donc la variante 640 est écartée. Des photos haute définition
+débloqueraient ce gain-là aussi — c'est le premier point de la liste ci-dessous.
+
 ## Référencement et partage
 
 `sitemap.xml`, `robots.txt` et `site.webmanifest` sont générés par
@@ -167,11 +201,14 @@ Avant toute mise en production :
    déclaration ARTCI, prestataire de paiement.
 4. **Photographies haute définition** — huit visuels proviennent d'Instagram et
    plafonnent à 640 px. Suffisant pour des vignettes, pas pour un plein écran.
-5. **Capacités de la salle de séminaire** — les cinq configurations de
+5. **Coordonnées GPS de l'établissement** — absentes du JSON-LD faute de source
+   fiable. Une fois relevées, les renseigner dans `ADRESSE` / `geo` de
+   `site/_schema.py` : c'est ce qui alimente le point sur Google Maps.
+6. **Capacités de la salle de séminaire** — les cinq configurations de
    `seminaires.html` (théâtre 60, classe 35, en U 25, cocktail 90, banquet 70)
    sont des hypothèses : l'établissement ne publie aucun chiffre. À remplacer
    par les capacités réelles avant mise en production.
-6. **Licence de la police** — le site d'origine utilise
+7. **Licence de la police** — le site d'origine utilise
    `MADE-TOMMY-Regular_PERSONAL-USE.otf`, dont la licence n'autorise pas
    l'usage commercial. La maquette n'utilise que des polices libres.
 

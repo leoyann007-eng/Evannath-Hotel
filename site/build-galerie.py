@@ -2,6 +2,7 @@
 """Optimise les 49 photos du domaine et genere galerie.html + 404.html."""
 import io, os
 from PIL import Image
+import _schema
 from _chrome import page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV
 
 # (fichier source, identifiant, categorie, legende)
@@ -231,8 +232,13 @@ ph:"photos",emp:"No photo in this category."};
 
 ''' % len(made) + LANG_JS
 
+LD = _schema.bloc(
+    _schema.galerie(['gal-' + m[0] for m in made[:20]]),
+    _schema.hotel(),
+    _schema.fil([('Accueil','index'),('Galerie',None)]))
+
 io.open('galerie.html', 'w', encoding='utf-8').write(page(
  "Galerie — Hôtel Evannath, Assinie",
  "%d photographies réelles de l'Hôtel Evannath à Assinie : le domaine, la paillote sur la lagune Aby, les chambres, le restaurant, la piscine et le spa." % len(made),
- "gal-lag-paillote", CSS_GAL, '\n'.join(b), JS_GAL, slug="galerie"))
+ "gal-lag-paillote", CSS_GAL, '\n'.join(b), JS_GAL, slug="galerie", jsonld=LD))
 print('galerie.html          ok')

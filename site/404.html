@@ -23,6 +23,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Karla:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
 <style>
 :root{
   --night:#100B06; --bark:#17100A; --bark-2:#1E150D; --bark-3:#2A1E13;
@@ -92,6 +93,11 @@ header.scrolled .brand img{width:132px}
 .dw-side .lang{margin-top:6px;width:max-content}
 .dw-side .lang button{padding:15px 20px;font-size:11px}
 
+.skip{position:absolute;left:-9999px;top:0;z-index:200;background:var(--bronze);color:var(--night);
+  padding:14px 22px;font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase}
+.skip:focus{left:0}
+main{display:block}
+
 .crumb{font-size:11.5px;letter-spacing:.1em;color:var(--muted);margin-bottom:22px}
 .crumb a{padding:6px 0;display:inline-block}
 .crumb a:hover{color:var(--bronze)}
@@ -103,7 +109,7 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
 .f-grid p{display:block;font-size:13.5px;color:#9C8B78;margin-bottom:11px}
 .f-grid a{display:block;font-size:13.5px;color:#9C8B78;padding:9px 0;transition:.3s}
 .f-grid a:hover{color:var(--bronze)}
-.f-bot{border-top:1px solid var(--line);margin-top:54px;padding-top:26px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:11.5px;color:#6A5C4C}
+.f-bot{border-top:1px solid var(--line);margin-top:54px;padding-top:26px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:11.5px;color:#A2907C}
 .wa{position:fixed;right:22px;bottom:22px;z-index:90;width:56px;height:56px;border-radius:50%;background:#25D366;display:grid;place-items:center;box-shadow:0 10px 30px rgba(37,211,102,.35);transition:.35s}
 .wa:hover{transform:scale(1.09)}
 .wa svg{width:28px;height:28px;fill:#fff}
@@ -170,6 +176,7 @@ body{background:var(--night)}
 </head>
 <body>
 
+<a class="skip" href="#contenu">Aller au contenu</a>
 <header id="hd">
   <div class="wrap nav">
     <a href="index.html" class="brand" aria-label="Hôtel Evannath, accueil">
@@ -189,7 +196,7 @@ body{background:var(--night)}
 <div class="drawer" id="dw">
   <div class="dw-in">
     <nav aria-label="Navigation principale">
-      <a href="index.html#chambres"><i>01</i><span data-t="n1">Chambres &amp; Suites</span></a>
+      <a href="chambres.html"><i>01</i><span data-t="n1">Chambres &amp; Suites</span></a>
       <a href="experiences.html"><i>02</i><span data-t="n2">Expériences</span></a>
       <a href="carte.html"><i>03</i><span data-t="n3">La table</span></a>
       <a href="spa.html"><i>04</i><span data-t="n4">Le spa</span></a>
@@ -202,8 +209,8 @@ body{background:var(--night)}
       <a href="reserver.html"><i>11</i><span data-t="n11">Réserver</span></a>
     </nav>
     <aside class="dw-side">
-      <div class="ph"><picture><source srcset="img/opt/t-lampe.webp" type="image/webp">
-        <img src="img/opt/t-lampe.jpg" width="1100" height="733" alt="Lanterne de rotin de l'Hôtel Evannath" loading="lazy"></picture></div>
+      <div class="ph"><picture><source srcset="img/opt/t-lampe-640.webp 640w, img/opt/t-lampe-1024.webp 1024w, img/opt/t-lampe.webp 1100w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp">
+        <img src="img/opt/t-lampe.jpg" srcset="img/opt/t-lampe-640.jpg 640w, img/opt/t-lampe-1024.jpg 1024w, img/opt/t-lampe.jpg 1100w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" width="1100" height="733" alt="Lanterne de rotin de l'Hôtel Evannath" loading="lazy"></picture></div>
       <div>
         <b data-t="dr">Réservations</b>
         <a href="tel:+2250151527575">+225 01 51 52 75 75</a>
@@ -215,6 +222,8 @@ body{background:var(--night)}
     </aside>
   </div>
 </div>
+
+<main id="contenu">
 
 <section class="err">
   <div class="bg"></div>
@@ -272,6 +281,8 @@ body{background:var(--night)}
   </div>
 </section>
 
+</main>
+
 <footer>
   <div class="wrap">
     <div class="f-grid">
@@ -280,7 +291,7 @@ body{background:var(--night)}
         <p style="font-size:8.5px;letter-spacing:.42em;color:var(--bronze);font-weight:700;margin-bottom:18px">LE RÊVE AFRICAIN</p>
         <p style="max-width:300px">46 chambres et suites face à la lagune Aby, à Assinie. Réservation directe, meilleur tarif garanti, réception ouverte 24 h/24.</p>
       </div>
-      <div><h4>Navigation</h4><a href="index.html#chambres">Chambres</a><a href="experiences.html">Expériences</a><a href="carte.html">La table</a><a href="circuits.html">Circuits &amp; Offres</a><a href="spa.html">Spa</a><a href="a-propos.html">À propos</a><a href="contact.html">Contact</a></div>
+      <div><h4>Navigation</h4><a href="chambres.html">Chambres</a><a href="experiences.html">Expériences</a><a href="carte.html">La table</a><a href="circuits.html">Circuits &amp; Offres</a><a href="spa.html">Spa</a><a href="a-propos.html">À propos</a><a href="contact.html">Contact</a></div>
       <div><h4>Informations</h4><a href="informations-utiles.html">Informations utiles</a><a href="seminaires.html">Séminaires &amp; groupes</a><a href="informations-utiles.html#reserver">Conditions d'annulation</a><a href="mentions-legales.html">Mentions légales</a></div>
       <div><h4>Contact</h4>
         <a href="tel:+2252721731265">+225 27 21 73 12 65</a>

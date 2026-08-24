@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Genere circuits.html : Packs Vacances (campagne Facebook) + circuits + Mechoui Party."""
 import io
+import _schema
 from _chrome import page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV
 
 CSS = """
@@ -351,8 +352,13 @@ r7:"The front desk replies within 24 h. No payment at this stage."};
 
 ''' + LANG_JS
 
+LD = _schema.bloc(
+    _schema.service('Circuits et forfaits', "Packs Vacances, lune de miel, week-end intense, circuits touristiques et coffret anniversaire à l'Hôtel Evannath, Assinie.", 'circuits', image='r-mezzanine'),
+    _schema.hotel(),
+    _schema.fil([('Accueil','index'),('Circuits & Offres',None)]))
+
 io.open('circuits.html','w',encoding='utf-8').write(page(
  "Circuits &amp; Offres — Hôtel Evannath, Assinie",
  "Les forfaits de l'Hôtel Evannath à Assinie : Packs Vacances, lune de miel, évasion romantique, week-end intense, découvertes touristiques et junior, coffret anniversaire.",
- "r-mezzanine", CSS, '\n'.join(b), JS, slug="circuits"))
+ "r-mezzanine", CSS, '\n'.join(b), JS, slug="circuits", jsonld=LD))
 print('circuits.html         ok')

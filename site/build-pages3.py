@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """Genere informations-utiles.html (accordeons) et mentions-legales.html."""
 import io
+import re
+import _schema
 from _chrome import page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV
 
 # ════════════════════════ INFORMATIONS UTILES ════════════════════════
@@ -327,8 +329,27 @@ document.querySelectorAll('.lang button').forEach(function(b){var prev=b.onclick
                             :(document.documentElement.lang==='en'?'Expand all':'Tout déplier');
 }});'''
 
+# FAQPage : on aplatit les accordeons en couples question / reponse en texte brut.
+def _texte(blocs):
+    out = []
+    for bl in blocs:
+        if bl[0] == 'p':
+            out.append(bl[2])
+        elif bl[0] == 'ul':
+            out.append(' ; '.join(x[1] for x in bl[1]))
+    t = ' '.join(out)
+    t = re.sub(r'<[^>]+>', '', t)
+    return re.sub(r'\s+', ' ', t).strip()
+
+QR = [(q, _texte(blocs)) for _, _, _, items in SECS for _, q, _, blocs in items]
+
+LD = _schema.bloc(
+    _schema.faq(QR),
+    _schema.hotel(),
+    _schema.fil([('Accueil', 'index'), ('Informations utiles', None)]))
+
 io.open('informations-utiles.html','w',encoding='utf-8').write(page(
  "Informations utiles — Hôtel Evannath, Assinie",
  "Tout ce qu'il faut savoir avant de venir à l'Hôtel Evannath, Assinie PK 19 : arrivée et départ, paiement, annulation, navette aéroport gratuite, accès depuis Abidjan, familles et groupes.",
- "g-lobby", CSS_INFO, '\n'.join(b), JS_INFO, slug="informations-utiles"))
+ "g-lobby", CSS_INFO, '\n'.join(b), JS_INFO, slug="informations-utiles", jsonld=LD))
 print('informations-utiles.html  ok')

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Genere contact.html et informations-utiles.html."""
 import io
+import _schema
 from _chrome import page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV
 
 # ═══════════════════════════════ CONTACT ═══════════════════════════════
@@ -272,8 +273,13 @@ r3:"By the lagoon",r3p:"Arrive by pirogue at the hotel's pontoon. Arrange with t
 
 ''' + LANG_JS
 
+LD = _schema.bloc(
+    _schema.hotel(complet=True),
+    _schema.site_web(),
+    _schema.fil([('Accueil','index'),('Contact',None)]))
+
 io.open('contact.html','w',encoding='utf-8').write(page(
  "Contact — Hôtel Evannath, Assinie PK 19",
  "Contacter l'Hôtel Evannath à Assinie PK 19 : réception 24 h/24, réservations, WhatsApp, e-mail bonjour@evannathhotel.com. Itinéraire depuis Abidjan et navette aéroport gratuite.",
- "g-entree", CSS_CONTACT, '\n'.join(b), JS_CONTACT, slug="contact"))
+ "g-entree", CSS_CONTACT, '\n'.join(b), JS_CONTACT, slug="contact", jsonld=LD))
 print('contact.html          ok')
