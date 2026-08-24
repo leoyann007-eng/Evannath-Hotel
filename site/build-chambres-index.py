@@ -128,8 +128,8 @@ INCLUS = [
 
 b = [header('reserver.html', 'Réserver', 'cta'), drawer('index.html#chambres'), '''
 <section class="hero">
-  <picture><source srcset="img/opt/r-mezzanine.webp" type="image/webp">
-  <img src="img/opt/r-mezzanine.jpg" width="1400" height="933" alt="Chambre en mezzanine de l'Hôtel Evannath"></picture>
+  <picture><source srcset="img/opt/sa-main.webp" type="image/webp">
+  <img src="img/opt/sa-main.jpg" width="1400" height="933" alt="Le salon d'une suite de l'Hôtel Evannath"></picture>
   <div class="in wrap">
     <nav class="crumb" aria-label="Fil d'Ariane">
       <a href="index.html">Accueil</a> &nbsp;·&nbsp; <span>Chambres &amp; Suites</span>
@@ -295,6 +295,6 @@ io.open('chambres.html', 'w', encoding='utf-8').write(page(
     "Les sept catégories de l'Hôtel Evannath à Assinie PK 19 : de la Chambre Standard "
     "à 67 000 FCFA à la Suite Arabe à 280 000 FCFA. Petit-déjeuner et navette aéroport "
     "compris dans toutes les catégories.",
-    "r-mezzanine", CSS, '\n'.join(b), JS, preload="r-mezzanine",
+    "sa-main", CSS, '\n'.join(b), JS, preload="sa-main",
     slug="chambres", jsonld=LD))
 print('chambres.html         %d categories' % len(CHAMBRES))
