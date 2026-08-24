@@ -8,6 +8,27 @@ les pages sont ecrites en entier a partir de ces briques.
 # sur evannathhotel.com : og:image, og:url, canonical et sitemap.xml en decoulent.
 SITE = "https://evannathhotel.vercel.app"
 
+# ---------------------------------------------------------------------------
+# Mode prospection
+# ---------------------------------------------------------------------------
+# True  : la maquette porte la marque de l'hotel sur une URL qu'il ne controle
+#         pas. Elle ne doit apparaitre dans aucun moteur de recherche, sous
+#         peine de concurrencer leur propre site et d'exploiter publiquement
+#         leur marque sans accord ecrit. Le visiteur qui a le lien voit tout
+#         normalement : seuls les robots sont ecartes.
+# False : le jour de la signature. Repasser a False, relancer tous les
+#         generateurs et build-sitemap.py, puis retirer la regle
+#         X-Robots-Tag de vercel.json (elle est commentee sur place).
+PROSPECTION = True
+
+# On laisse volontairement les robots CRAWLER, tout en leur servant `noindex`.
+# Un simple « Disallow: / » serait un contresens ici : Google ne lirait alors
+# jamais la directive noindex, et pourrait tout de meme indexer l'URL nue en la
+# decouvrant par un lien externe. Pour disparaitre vraiment, il faut etre lu.
+ROBOTS_META = ('<meta name="robots" content="noindex, nofollow">\n'
+               '<meta name="googlebot" content="noindex, nofollow">\n') if PROSPECTION else ''
+
+
 ICONS = """<link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -435,7 +456,7 @@ def page(title, desc, og, css, body, script, preload=None, slug=None, jsonld='')
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>%s</title>
+%s<title>%s</title>
 <meta name="description" content="%s">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="fr_FR">
@@ -461,5 +482,5 @@ def page(title, desc, og, css, body, script, preload=None, slug=None, jsonld='')
 </script>
 </body>
 </html>
-''' % (title, desc, title, desc, SITE, og, ICONS, can, HEAD, pre, jsonld, HEAD_CSS, css,
+''' % (ROBOTS_META, title, desc, title, desc, SITE, og, ICONS, can, HEAD, pre, jsonld, HEAD_CSS, css,
        responsive(body, hero=preload), script)

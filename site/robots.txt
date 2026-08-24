@@ -1,9 +1,6 @@
+# Maquette de demonstration. Ce site ne doit apparaitre dans aucun index :
+# chaque page sert noindex, en balise meta et en en-tete HTTP.
 User-agent: *
 Allow: /
 
-# Pages sans interet pour l'index : formulaire de reservation et pages legales.
 Disallow: /api/
-Disallow: /reserver
-Disallow: /mentions-legales
-
-Sitemap: https://evannathhotel.vercel.app/sitemap.xml

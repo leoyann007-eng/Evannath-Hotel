@@ -138,6 +138,37 @@ Hébergé sur **Vercel**, en site statique — aucune étape de compilation.
 `site/vercel.json` fait le reste : URL sans `.html`, images en cache un an,
 en-têtes de sécurité. Chaque `git push` sur `main` redéploie automatiquement.
 
+## Mode prospection — le site est volontairement invisible des moteurs
+
+La maquette porte la marque, le logo et les photos de l'hôtel sur une URL qu'il
+ne contrôle pas. Tant qu'il n'a rien signé, elle **ne doit apparaître dans aucun
+moteur de recherche** : sans quoi elle concurrencerait son propre site sur son
+propre nom, et exploiterait publiquement sa marque sans accord écrit.
+
+Trois couches, parce qu'aucune ne suffit seule :
+
+| Couche | Où | Portée |
+|---|---|---|
+| `<meta name="robots">` + `googlebot` | les 21 pages | HTML |
+| En-tête `X-Robots-Tag` | `vercel.json`, toutes les routes | images, PDF, manifest — tout |
+| Aucun `sitemap.xml` | supprimé automatiquement | on n'invite pas |
+
+**Le crawl reste autorisé, et c'est volontaire.** Un `Disallow: /` serait ici un
+contresens : Google ne lirait alors jamais la directive `noindex`, et pourrait
+tout de même indexer l'URL nue s'il la découvre par un lien externe. Pour
+disparaître vraiment, il faut d'abord être lu.
+
+Le visiteur qui a le lien voit le site normalement. Seuls les robots sont
+écartés.
+
+### Repasser en production le jour de la signature
+
+1. `PROSPECTION = False` en tête de `site/_chrome.py`
+2. Relancer tous les générateurs, puis `build-sitemap.py`
+3. Dans `site/vercel.json` : supprimer la note `_prospection` et la règle
+   `X-Robots-Tag`
+4. Redéployer, puis soumettre `sitemap.xml` à la Search Console
+
 ## Formulaires
 
 Les cinq formulaires du site — réservation, devis séminaire, contact, table,

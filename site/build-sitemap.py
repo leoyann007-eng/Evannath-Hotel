@@ -7,7 +7,7 @@ exclues du sitemap : elles n'ont rien a faire dans l'index de Google.
 """
 import io, os, glob, datetime, sys
 sys.path.insert(0, '.')
-from _chrome import SITE
+from _chrome import SITE, PROSPECTION
 
 # Priorite editoriale : ce que l'hotel veut voir remonter en premier.
 PRIORITE = {
@@ -43,9 +43,30 @@ for slug, prio, maj in sorted(pages, key=lambda p: (-float(p[1]), p[0])):
     lignes.append('    <priority>%s</priority>' % prio)
     lignes.append('  </url>')
 lignes.append('</urlset>')
-io.open('sitemap.xml', 'w', encoding='utf-8').write('\n'.join(lignes) + '\n')
 
-io.open('robots.txt', 'w', encoding='utf-8').write(
+if PROSPECTION:
+    # Toutes les pages portent noindex : un sitemap n'aurait rien a declarer, et
+    # en publier un reviendrait a inviter les robots. On le retire s'il existe.
+    if os.path.exists('sitemap.xml'):
+        os.remove('sitemap.xml')
+else:
+    io.open('sitemap.xml', 'w', encoding='utf-8').write('\n'.join(lignes) + '\n')
+
+if PROSPECTION:
+    # Maquette de prospection : on laisse crawler pour que la directive noindex
+    # (balise meta + en-tete X-Robots-Tag) soit effectivement LUE. Un
+    # « Disallow: / » empecherait justement les robots de la lire, et l'URL nue
+    # pourrait rester indexee. Aucun sitemap n'est declare : on n'invite pas.
+    io.open('robots.txt', 'w', encoding='utf-8').write(
+"""# Maquette de demonstration. Ce site ne doit apparaitre dans aucun index :
+# chaque page sert noindex, en balise meta et en en-tete HTTP.
+User-agent: *
+Allow: /
+
+Disallow: /api/
+""")
+else:
+    io.open('robots.txt', 'w', encoding='utf-8').write(
 """User-agent: *
 Allow: /
 
@@ -76,6 +97,7 @@ io.open('site.webmanifest', 'w', encoding='utf-8').write(
 }
 """)
 
-print('sitemap.xml           %d pages indexables' % len(pages))
+print('sitemap.xml           ' + ('retire (mode prospection)'
+      if PROSPECTION else '%d pages indexables' % len(pages)))
 print('robots.txt            ok')
 print('site.webmanifest      ok')
