@@ -35,7 +35,7 @@ section{padding:88px 0}
 
 /* barre de tri */
 .bar{display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap;
-  padding:20px 0;border-block:1px solid var(--line);position:sticky;top:74px;z-index:20;
+  padding:20px 0;border-block:1px solid var(--line);position:sticky;top:110px;z-index:20;
   background:rgba(23,16,10,.96);backdrop-filter:blur(12px)}
 .grp{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .grp b{font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-right:6px}
