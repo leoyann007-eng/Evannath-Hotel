@@ -145,7 +145,9 @@ spa — postent sur `/api/envoyer`, une fonction serverless Vercel sans aucune
 dépendance (`site/api/envoyer.js`).
 
 Elle valide côté serveur, échappe le HTML, tronque les champs, limite le débit
-à cinq envois par minute et par IP, et piège les robots par un champ invisible
+à vingt envois par minute et par IP — seuil volontairement haut, une grande
+part du trafic mobile ivoirien partageant une même IP publique derrière du
+NAT opérateur, et piège les robots par un champ invisible
 doublé d'un délai minimum de remplissage.
 
 **Activer l'envoi par e-mail** — dans Vercel, *Settings → Environment Variables* :

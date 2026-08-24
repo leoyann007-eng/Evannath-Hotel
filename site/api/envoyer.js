@@ -46,9 +46,14 @@ const LIMITES = { nom: 120, email: 160, tel: 40, message: 4000, defaut: 200 };
 
 // Limitation de debit, au mieux : une instance serverless est ephemere, donc
 // ce garde-fou arrete les rafales sans pretendre etre une protection complete.
+//
+// Le seuil est volontairement haut. En Cote d'Ivoire, une grande partie du
+// trafic mobile passe par du NAT operateur : des dizaines de visiteurs
+// partagent alors une seule IP publique. Un seuil serre bloquerait des clients
+// legitimes, ce qui coute plus cher que le spam qu'il evite.
 const vus = new Map();
 const FENETRE = 60_000;
-const MAX_PAR_FENETRE = 5;
+const MAX_PAR_FENETRE = 20;
 
 function trop_frequent(ip) {
   const t = Date.now();

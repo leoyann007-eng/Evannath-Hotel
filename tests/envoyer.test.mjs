@@ -72,10 +72,10 @@ t.push(async () => {
 t.push(async () => {
   const ip = '3.3.3.3';
   let dernier;
-  for (let i = 0; i < 7; i++) {
+  for (let i = 0; i < 22; i++) {
     dernier = await faux({ ...base, type: 'contact', nom: 'A', email: 'a@b.co', message: 'x' }, 'POST', ip);
   }
-  verifie('limitation de debit apres 5 envois (429)', dernier.code === 429, dernier);
+  verifie('limitation de debit apres 20 envois (429)', dernier.code === 429, dernier);
 });
 
 t.push(async () => {
