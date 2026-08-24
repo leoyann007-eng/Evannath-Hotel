@@ -6,7 +6,9 @@ from _chrome import page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV
 
 CSS = """
 body{background:var(--night)}
-.err{position:relative;min-height:100svh;display:flex;align-items:center;overflow:hidden}
+/* Padding symetrique : l'en-tete fixe ne peut plus recouvrir le contenu,
+   et le centre optique reste exactement ou il etait sur un ecran normal. */
+.err{position:relative;min-height:100svh;display:flex;align-items:center;overflow:hidden;padding:150px 0}
 .err .bg{position:absolute;inset:0;background:url('img/opt/gal-lag-nuit.jpg') center/cover;animation:kb 24s ease-out forwards}
 @keyframes kb{from{transform:scale(1.03)}to{transform:scale(1.12)}}
 .err::after{content:"";position:absolute;inset:0;background:

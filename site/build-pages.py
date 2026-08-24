@@ -8,7 +8,10 @@ from _chrome import page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV
 
 # ═══════════════════════════════ À PROPOS ═══════════════════════════════
 CSS_ABOUT = """
-.hero{position:relative;min-height:82vh;display:flex;align-items:flex-end;overflow:hidden}
+/* L'en-tete est fixe : le hero doit lui reserver sa hauteur, comme le font
+   les pages sans hero avec leur padding de 150px. Sans cela, sur un ecran
+   court, le contenu aligne en bas remonte et passe sous l'en-tete. */
+.hero{position:relative;min-height:82vh;display:flex;align-items:flex-end;overflow:hidden;padding-top:150px}
 .hero>picture img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(23,16,10,.8),rgba(23,16,10,.4) 45%,rgba(23,16,10,.97))}
 .hero .in{position:relative;z-index:3;width:100%;padding-bottom:60px}
@@ -120,7 +123,7 @@ body = ['''%s
 
 %s
 
-<section class="hero" style="padding:0">
+<section class="hero">
   <picture><source srcset="img/opt/g-entree.webp" type="image/webp">
   <img src="img/opt/g-entree.jpg" width="1200" height="800" alt="L'entrée et l'enseigne de l'Hôtel Evannath à Assinie"></picture>
   <div class="in wrap">

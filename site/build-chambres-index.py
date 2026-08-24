@@ -21,7 +21,10 @@ def fmt(n):
 FAM_NOM = {'chambre': 'Chambre', 'suite': 'Suite', 'famille': 'Famille'}
 
 CSS = """
-.hero{position:relative;min-height:56vh;display:flex;align-items:flex-end;overflow:hidden}
+/* L'en-tete est fixe : le hero doit lui reserver sa hauteur, comme le font
+   les pages sans hero avec leur padding de 150px. Sans cela, sur un ecran
+   court, le contenu aligne en bas remonte et passe sous l'en-tete. */
+.hero{position:relative;min-height:56vh;display:flex;align-items:flex-end;overflow:hidden;padding-top:150px}
 .hero>picture img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(23,16,10,.78),rgba(23,16,10,.42) 46%,rgba(23,16,10,.97))}
 .hero .in{position:relative;z-index:3;width:100%;padding-bottom:48px}

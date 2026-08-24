@@ -99,7 +99,9 @@ header.scrolled .brand img{width:132px}
 .dw-side .lang{margin-top:6px;width:max-content}
 .dw-side .lang button{padding:15px 20px;font-size:11px}
 
-.hero{position:relative;min-height:92svh;display:flex;align-items:center;overflow:hidden}
+/* Padding symetrique : l'en-tete fixe ne peut plus recouvrir le contenu,
+   et le centre optique reste exactement ou il etait sur un ecran normal. */
+.hero{position:relative;min-height:92svh;display:flex;align-items:center;overflow:hidden;padding:150px 0}
 .hero .bg{position:absolute;inset:0;background:url('img/opt/sp-hero.jpg') center/cover;animation:kb 24s ease-out forwards}
 @keyframes kb{from{transform:scale(1.03)}to{transform:scale(1.12)}}
 .hero::after{content:"";position:absolute;inset:0;background:
