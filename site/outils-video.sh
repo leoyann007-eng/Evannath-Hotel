@@ -35,17 +35,25 @@ FILTRE="[0]split[corps][tete];\
 ls -la video/hero-nuit.* img/opt/hero-nuit-affiche.jpg
 
 # ---------------------------------------------------------------------------
-# Le hero de l'accueil : le film entier, sans son, a un debit adapte a un fond.
-# Le son est obligatoirement coupe — aucun navigateur ne lance une lecture
-# automatique avec du son. Pour l'entendre, la page A propos sert le film
-# complet en lecture a la demande.
+# Le hero de l'accueil : le film, sans son, a un debit adapte a un fond.
+#
+# Le film source n'est PAS pris entier. Mesure image par image :
+#   0,0 - 0,5 s     noir
+#   0,0 - 4,9 s     carton « HOTEL Evannath » en surimpression
+#   5,0 s           le carton disparait, une nouvelle scene commence
+#   172,3 s         debut du fondu au noir
+#   173 - 175,4 s   noir
+#   175,5 - 180 s   le meme carton, sur fond noir
+# Le carton se surimprimait au titre de la page — deux logos l'un sur l'autre.
+# On garde donc 5,0 -> 172,3 s, soit 167,3 s.
+#
+# Fondu d'enchainement de 1,2 s entre la fin et le debut : sans lui la boucle
+# saute de la nuit au petit matin. L'offset vaut DUREE - FONDU, la deuxieme
+# entree n'apportant que les premieres secondes.
 #
 # CRF 30 : verifie a 100 %, indiscernable de la source derriere le degrade.
-# 13,2 Mo au lieu de 28, soit 616 kb/s.
-"$FF" -v error -i video/presentation-hotel.mp4 -an       -c:v libx264 -profile:v high -preset medium -crf 30 -maxrate 900k -bufsize 1800k       -pix_fmt yuv420p -movflags +faststart -r 30 video/hero-presentation.mp4 -y
+DEB=5.0; LONG=167.3; FONDU=1.2; OFFSET=166.1
+"$FF" -v error   -ss $DEB -t $LONG  -i video/presentation-hotel.mp4   -ss $DEB -t $FONDU -i video/presentation-hotel.mp4   -filter_complex "[0:v][1:v]xfade=transition=fade:duration=$FONDU:offset=$OFFSET,format=yuv420p"   -an -c:v libx264 -profile:v high -preset medium -crf 30 -maxrate 900k -bufsize 1800k   -movflags +faststart -r 30 video/hero-presentation.mp4 -y
 
-# L'affiche est prise a 2 s : la toute premiere image du film est noire.
-"$FF" -v error -ss 2 -i video/hero-presentation.mp4 -frames:v 1 -vf scale=1280:-1       -q:v 4 img/opt/hero-presentation-affiche.jpg -y
-
-# Si un jour vous voulez retirer le noir du debut et de la fin — 7 s quasi
-# noires de 173 a 180 s, plus la premiere seconde — ajoutez : -ss 0.8 -t 171.7
+# L'affiche est prise a 0,2 s, une fois le carton et le noir ecartes.
+"$FF" -v error -ss 0.2 -i video/hero-presentation.mp4 -frames:v 1 -vf scale=1280:-1       -q:v 4 img/opt/hero-presentation-affiche.jpg -y

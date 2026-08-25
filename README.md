@@ -243,19 +243,36 @@ mezzanine (45 s, 360×640 — trop basse définition pour être utilisable).
 
 ### Le hero animé de l'accueil
 
-`video/hero-presentation.mp4` — **le film entier**, 3 minutes, 1280×720, sans
-son. Ré-encodé pour un usage de fond : **13,2 Mo au lieu de 28**, soit
-616 kb/s. Qualité vérifiée à 100 % sur un plan détaillé, indiscernable de la
-source derrière le dégradé.
+`video/hero-presentation.mp4` — le film de présentation, **2 min 47**,
+1280×720, sans son. Ré-encodé pour un usage de fond : **12,9 Mo au lieu de
+28**, soit 647 kb/s. Qualité vérifiée à 100 % sur un plan détaillé,
+indiscernable de la source derrière le dégradé.
 
 Le son est coupé par obligation : aucun navigateur ne lance une lecture
 automatique avec du son. Pour l'entendre, la page **À propos** sert le film
 complet en lecture à la demande.
 
-⚠️ Le film **ouvre et ferme sur du noir** — mesuré : 7 secondes quasi noires
-de 173 à 180 s, plus la première seconde. En boucle, cela fait environ 8
-secondes de fond noir toutes les trois minutes. Pour les retirer, une ligne
-suffit dans `outils-video.sh`.
+**Le film source est coupé à 5,0 s et 172,3 s.** Il ouvrait et fermait sur un
+carton « Hôtel Evannath » qui venait s'écrire par-dessus le titre de la page —
+deux logos superposés — et sur du noir. Mesure image par image :
+
+| moment | ce qu'on voit |
+|---|---|
+| 0,0 – 0,5 s | noir |
+| 0,0 – 4,9 s | carton « Hôtel Evannath » en surimpression |
+| **5,0 s** | le carton disparaît, une nouvelle scène commence |
+| **172,3 s** | début du fondu au noir |
+| 173 – 175,4 s | noir |
+| 175,5 – 180 s | le même carton, sur fond noir |
+
+Un **fondu d'enchaînement de 1,2 s** relie la fin au début : sans lui la
+boucle sautait de la nuit au petit matin. Contrôlé après encodage : plus une
+seule image sous 9,4 de luminance sur les 167 s, et aucun carton ailleurs
+dans le film.
+
+Le titre reste lisible sur toutes les images : contraste mesuré sous le `<h1>`
+image par image, **9,22:1** au pire pour le titre et **5,41:1** pour l'accent
+doré, contre 3:1 exigés pour du grand texte.
 
 ### Sur téléphone, pas de film
 
