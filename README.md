@@ -492,6 +492,39 @@ qu'il s'agit du même établissement d'une page à l'autre.
 **Les coordonnées GPS sont volontairement absentes** : l'établissement ne les
 publie nulle part, et un point mal placé vaut moins que pas de point.
 
+### L'image de partage
+
+C'est la vignette que WhatsApp, Facebook ou un client mail affichent quand on
+colle le lien. Le prospect la voit **avant** d'ouvrir la page.
+
+L'accueil déclarait la chambre au jeté wax — celle qui s'appelait « paillote »
+avant d'être renommée. Il déclare maintenant **la paillote sur pilotis**, la
+signature de l'établissement.
+
+**`img/opt/og-accueil.jpg` est une image dédiée, en 1200×628.** Les cartes de
+partage recadrent en 1,91:1 ; nos photos sont en 1,41:1, donc laisser faire
+coupait un quart de la hauteur sans qu'on choisisse ce qui saute. Le
+recadrage est fait au centre : il garde le toit de paille, tout le ponton et
+le reflet dans l'eau.
+
+Les balises `og:image:width`, `og:image:height` et `og:image:alt` sont
+déclarées — sans les dimensions, certains clients affichent une vignette
+carrée le temps de télécharger l'image.
+
+Les autres pages gardent chacune leur image de partage, en 1,41:1 : elles
+seront recadrées par les messageries. Seul l'accueil, le plus partagé, a son
+image dédiée.
+
+### La fiche JSON-LD de l'accueil
+
+Elle était **collée en dur** dans `index-template.html` : une copie figée de
+ce que `_schema.py` produit. Toute correction faite dans le module la manquait
+en silence — exactement le défaut que cette page avait déjà pour les jetons de
+couleur et le JS de navigation.
+
+Elle est désormais générée par `build-index.py` via `{{JSONLD}}`. Comparaison
+avant/après sur les 110 valeurs de la fiche : trois écarts, tous voulus.
+
 ### Photos mal nommées
 
 Quatre emplacements montraient autre chose que ce que leur légende annonçait.

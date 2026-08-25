@@ -66,7 +66,7 @@ def hotel(complet=False):
         'url': SITE + '/',
         'logo': SITE + '/img/opt/logo-blanc.png',
         'image': [SITE + '/img/opt/' + n + '.jpg'
-                  for n in ('hero-chambre-wax', 'hero-aerien', 'g-lobby', 'g-resto')],
+                  for n in ('gal-lag-ponton', 'hero-aerien', 'hero-chambre-wax', 'g-resto')],
         'address': ADRESSE,
         'telephone': TEL[0],
         'email': 'bonjour@evannathhotel.com',
