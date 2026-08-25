@@ -117,9 +117,10 @@ header.scrolled .brand img{width:132px}
    l'affiche suffit. */
 .mani .geste{margin-top:32px;max-width:320px;border:1px solid var(--line);
   background:var(--bark-2);aspect-ratio:640/896;overflow:hidden;position:relative}
-.mani .geste video{width:100%;height:100%;object-fit:cover;display:block;
-  opacity:0;transition:opacity 1.2s ease}
-.mani .geste video.on{opacity:1}
+/* Pas d'opacite a 0 ici : sans film — telephone, connexion econome — c'est
+   l'affiche qui doit rester a l'ecran. La masquer laissait un rectangle vide
+   sous la legende. Le film demarre ensuite sur sa propre affiche, sans saut. */
+.mani .geste video{width:100%;height:100%;object-fit:cover;display:block}
 .mani .geste::after{content:"";position:absolute;inset:0;pointer-events:none;
   background:linear-gradient(180deg,transparent 60%,rgba(16,11,6,.5))}
 .mani .legende{margin-top:12px;font-size:12.5px;color:var(--muted);max-width:320px}

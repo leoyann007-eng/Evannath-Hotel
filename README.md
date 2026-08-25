@@ -257,6 +257,23 @@ de 173 à 180 s, plus la première seconde. En boucle, cela fait environ 8
 secondes de fond noir toutes les trois minutes. Pour les retirer, une ligne
 suffit dans `outils-video.sh`.
 
+### Sur téléphone, pas de film
+
+Aucune des deux vidéos ne se charge en dessous de 900 px de large, ni en
+connexion économe, ni en mouvement réduit — décision prise une seule fois,
+dans `filmAmbiance()`.
+
+Sur l'accueil, le **carrousel de photos reste le hero du téléphone**. Le
+`<video>` n'y déclare donc **pas** d'attribut `poster` mais un `data-affiche` :
+l'affiche est posée par `filmAmbiance()` au moment seulement où elle décide de
+charger. Déclarée en HTML, elle partait sur tous les téléphones — 46 Ko — pour
+une image que personne ne voit jamais, le `<video>` restant à `opacity:0`
+tant que la lecture n'a pas commencé.
+
+Sur le spa, c'est l'inverse : l'affiche **doit** rester à l'écran quand le film
+ne se charge pas, puisqu'il n'y a rien derrière elle. Elle garde donc son
+attribut `poster`, et la vidéo n'y est plus masquée par une opacité à 0.
+
 ### Le geste, sur la page Spa
 
 `video/spa-massage.mp4` (840 Ko) — 10 s, muet, vertical 640×896, tiré de la

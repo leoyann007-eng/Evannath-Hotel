@@ -543,6 +543,11 @@ function filmAmbiance(el, sources, alors){
   var maigre=co.saveData===true||/(^|-)2g$/.test(co.effectiveType||'');
   if(!matchMedia('(min-width:900px)').matches || maigre
      || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  /* L'affiche n'est posee qu'ici. Sur un fond superpose a un carrousel elle
+     n'est jamais visible : la declarer dans le HTML ferait partir son poids
+     sur tous les telephones pour rien. Une video dont l'affiche doit rester
+     visible garde son attribut poster — voir le spa. */
+  if(el.dataset.affiche){ el.poster=el.dataset.affiche; }
   var choisi=null;
   for(var i=0;i<sources.length;i++){
     if(el.canPlayType(sources[i].type)){ choisi=sources[i]; break; }

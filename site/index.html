@@ -344,7 +344,7 @@ footer{background:#0F0A06;border-top:1px solid var(--line);padding:74px 0 28px}
     <div class="slide" data-bg="hero-piscine"></div>
     <div class="slide" data-bg="hero-aerien"></div>
     <video id="film" muted loop playsinline preload="none" aria-hidden="true"
-           poster="img/opt/hero-presentation-affiche.jpg"></video>
+           data-affiche="img/opt/hero-presentation-affiche.jpg"></video>
   </div>
   <div class="hero-in wrap">
     <span class="eyebrow" data-t="eb">Assinie · PK 19 · Lagune Aby</span>
@@ -631,6 +631,11 @@ function filmAmbiance(el, sources, alors){
   var maigre=co.saveData===true||/(^|-)2g$/.test(co.effectiveType||'');
   if(!matchMedia('(min-width:900px)').matches || maigre
      || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  /* L'affiche n'est posee qu'ici. Sur un fond superpose a un carrousel elle
+     n'est jamais visible : la declarer dans le HTML ferait partir son poids
+     sur tous les telephones pour rien. Une video dont l'affiche doit rester
+     visible garde son attribut poster — voir le spa. */
+  if(el.dataset.affiche){ el.poster=el.dataset.affiche; }
   var choisi=null;
   for(var i=0;i<sources.length;i++){
     if(el.canPlayType(sources[i].type)){ choisi=sources[i]; break; }
