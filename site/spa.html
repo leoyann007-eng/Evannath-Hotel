@@ -694,15 +694,35 @@ function plein(el){
   return _webp ? u.replace(/\.jpg$/, '.webp') : u;
 }
 
-/* Rideau des barres collantes : on epingle des que la sentinelle sort du haut. */
+/* Rideau des barres collantes.
+   Deux defauts corriges ici, qui se cumulaient pour peindre un aplat opaque
+   sur tout le contenu situe au-dessus de la barre :
+
+   1. la sentinelle etait en `position:absolute; top:0`. Faute d'ancetre
+      positionne, elle se calait sur le bloc conteneur initial — donc en HAUT
+      DU DOCUMENT, et non a hauteur de la barre. Mesure : sentinelle a 0,
+      barre a 540. La barre se croyait epinglee sur toute la page. Elle est
+      desormais dans le flux, juste avant la barre, avec une marge negative
+      qui annule son pixel de hauteur.
+
+   2. `!isIntersecting` est vrai des DEUX cotes : sentinelle sortie par le
+      haut, mais aussi passee sous le bas de la fenetre. En remontant, la
+      barre restait donc epinglee alors qu'elle redescendait dans la page, et
+      son rideau de 100vh recouvrait tout ce qui etait au-dessus d'elle.
+      On n'epingle plus que si la sentinelle est sortie par le HAUT.
+
+   La marge du haut vaut la hauteur de l'en-tete, lue dans --h-nav : c'est la
+   meme valeur que le `top` de la barre, donc les deux ne peuvent pas diverger. */
 document.querySelectorAll('.collante').forEach(function(bar){
   var s=document.createElement('div');
-  s.style.cssText='position:absolute;top:0;height:1px;width:1px';
+  s.style.cssText='height:1px;margin-bottom:-1px;pointer-events:none';
   bar.parentNode.insertBefore(s,bar);
-  if(!('IntersectionObserver' in window)){bar.classList.add('epinglee');return}
+  if(!('IntersectionObserver' in window)){return}
+  var h=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--h-nav'))||0;
   new IntersectionObserver(function(e){
-    bar.classList.toggle('epinglee', !e[0].isIntersecting);
-  },{threshold:0}).observe(s);
+    bar.classList.toggle('epinglee',
+      !e[0].isIntersecting && e[0].boundingClientRect.top < 0);
+  },{threshold:0, rootMargin:(-h)+'px 0px 0px 0px'}).observe(s);
 });
 
 

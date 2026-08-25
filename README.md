@@ -492,6 +492,38 @@ qu'il s'agit du même établissement d'une page à l'autre.
 **Les coordonnées GPS sont volontairement absentes** : l'établissement ne les
 publie nulle part, et un point mal placé vaut moins que pas de point.
 
+### Les barres collantes et leur rideau
+
+Les pages Chambres, Galerie et La table ont une barre de filtres qui se colle
+sous l'en-tête. Comme l'en-tête se compacte sur 0,45 s, sa hauteur varie
+pendant le défilement : viser une valeur laisse passer du contenu entre les
+deux. La barre porte donc un **rideau opaque** qui remonte jusqu'en haut de
+la fenêtre, et l'en-tête, en `z-index` supérieur, se peint par-dessus.
+
+Ce rideau ne doit s'activer **que** lorsque la barre est réellement épinglée
+en haut. Deux défauts l'activaient à tort, et il recouvrait alors tout le
+contenu situé au-dessus d'elle — un aplat brun sur toute la page :
+
+1. **La sentinelle était au mauvais endroit.** Déclarée en
+   `position:absolute; top:0`, sans aucun ancêtre positionné, elle se calait
+   sur le bloc conteneur initial — donc en haut du document. Mesuré :
+   sentinelle à 0, barre à 540. La barre se croyait épinglée sur toute la
+   page. Elle est maintenant dans le flux, juste avant la barre, avec une
+   marge négative qui annule son pixel de hauteur.
+2. **`isIntersecting` est faux des deux côtés.** Sentinelle sortie par le
+   haut, mais aussi passée sous le bas de la fenêtre. En **remontant**, la
+   barre restait donc épinglée alors qu'elle redescendait dans la page. On
+   n'épingle plus que si la sentinelle est sortie **par le haut**.
+
+La marge du haut de l'observateur est lue dans `--h-nav`, la même variable que
+le `top` de la barre : les deux ne peuvent pas diverger.
+
+⚠️ Le volet d'aperçu **ne sait pas faire défiler** une page, ni dans un cadre
+ni au premier plan : le geste ne peut pas être rejoué ici. Ce qui a été
+vérifié : la sentinelle est à la position exacte de la barre sur les trois
+pages (écart de 0 px), et la règle de décision passe les quatre situations,
+dont celle qui échouait avant.
+
 ### Le contenu ne dépend pas du JavaScript pour être visible
 
 `.reveal` masque les blocs et attend qu'un script leur pose la classe `in` :
