@@ -243,19 +243,19 @@ mezzanine (45 s, 360×640 — trop basse définition pour être utilisable).
 
 ### Le hero animé de l'accueil
 
-`video/hero-nuit.mp4` (750 Ko) et `.webm` (580 Ko) — 10 s, muet, 1280×720,
-extraits de 158 à 169 s du film : la vue aérienne de l'hôtel illuminé sur la
-lagune. Le plan est assez sombre pour que le titre reste lisible.
+`video/hero-presentation.mp4` — **le film entier**, 3 minutes, 1280×720, sans
+son. Ré-encodé pour un usage de fond : **13,2 Mo au lieu de 28**, soit
+616 kb/s. Qualité vérifiée à 100 % sur un plan détaillé, indiscernable de la
+source derrière le dégradé.
 
-La boucle est **sans raccord** : la première seconde est fondue par-dessus la
-dernière, calée pour que l'image de fin coïncide avec celle de début.
+Le son est coupé par obligation : aucun navigateur ne lance une lecture
+automatique avec du son. Pour l'entendre, la page **À propos** sert le film
+complet en lecture à la demande.
 
-Il ne se charge que si trois conditions sont réunies — écran d'au moins 900 px,
-connexion qui n'est ni en 2G ni en mode économie de données, et pas de demande
-de mouvement réduit. Sinon le carrousel de photos tourne comme avant, **sans un
-octet de vidéo**. La décision est prise après le chargement de la page, jamais
-au moment où le script est lu : la largeur de la fenêtre n'y est pas toujours
-connue.
+⚠️ Le film **ouvre et ferme sur du noir** — mesuré : 7 secondes quasi noires
+de 173 à 180 s, plus la première seconde. En boucle, cela fait environ 8
+secondes de fond noir toutes les trois minutes. Pour les retirer, une ligne
+suffit dans `outils-video.sh`.
 
 ### Le geste, sur la page Spa
 

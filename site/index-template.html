@@ -331,7 +331,7 @@ footer{background:#0F0A06;border-top:1px solid var(--line);padding:74px 0 28px}
     <div class="slide" data-bg="hero-piscine"></div>
     <div class="slide" data-bg="hero-aerien"></div>
     <video id="film" muted loop playsinline preload="none" aria-hidden="true"
-           poster="img/opt/hero-nuit-affiche.jpg"></video>
+           poster="img/opt/hero-presentation-affiche.jpg"></video>
   </div>
   <div class="hero-in wrap">
     <span class="eyebrow" data-t="eb">Assinie · PK 19 · Lagune Aby</span>
@@ -604,8 +604,7 @@ if(document.readyState==='complete')loadSlides();else addEventListener('load',lo
 /* Le film du hero : meme regle que partout, via filmAmbiance(). */
 function filmDuHero(){
   filmAmbiance(document.getElementById('film'),
-    [{type:'video/webm; codecs="vp9"', src:'video/hero-nuit.webm'},
-     {type:'video/mp4',                src:'video/hero-nuit.mp4'}],
+    [{type:'video/mp4', src:'video/hero-presentation.mp4'}],
     function(){ clearInterval(rotation); });   /* le carrousel cede la place */
 }
 if(document.readyState==='complete')filmDuHero();else addEventListener('load',filmDuHero);

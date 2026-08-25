@@ -33,3 +33,19 @@ FILTRE="[0]split[corps][tete];\
 "$FF" -v error -i video/hero-nuit.mp4 -frames:v 1 -vf scale=1280:-1 -q:v 4 img/opt/hero-nuit-affiche.jpg -y
 
 ls -la video/hero-nuit.* img/opt/hero-nuit-affiche.jpg
+
+# ---------------------------------------------------------------------------
+# Le hero de l'accueil : le film entier, sans son, a un debit adapte a un fond.
+# Le son est obligatoirement coupe — aucun navigateur ne lance une lecture
+# automatique avec du son. Pour l'entendre, la page A propos sert le film
+# complet en lecture a la demande.
+#
+# CRF 30 : verifie a 100 %, indiscernable de la source derriere le degrade.
+# 13,2 Mo au lieu de 28, soit 616 kb/s.
+"$FF" -v error -i video/presentation-hotel.mp4 -an       -c:v libx264 -profile:v high -preset medium -crf 30 -maxrate 900k -bufsize 1800k       -pix_fmt yuv420p -movflags +faststart -r 30 video/hero-presentation.mp4 -y
+
+# L'affiche est prise a 2 s : la toute premiere image du film est noire.
+"$FF" -v error -ss 2 -i video/hero-presentation.mp4 -frames:v 1 -vf scale=1280:-1       -q:v 4 img/opt/hero-presentation-affiche.jpg -y
+
+# Si un jour vous voulez retirer le noir du debut et de la fin — 7 s quasi
+# noires de 173 a 180 s, plus la premiere seconde — ajoutez : -ss 0.8 -t 171.7
