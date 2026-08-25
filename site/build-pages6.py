@@ -352,8 +352,28 @@ r7:"The front desk replies within 24 h. No payment at this stage."};
 
 ''' + LANG_JS
 
+# Les onze offres, declarees a Google avec leur prix et leur unite.
+#
+# Elles etaient affichees mais invisibles des moteurs : le Service n'avait pas
+# de catalogue, donc aucun des onze forfaits n'existait pour une recherche du
+# type « forfait lune de miel Assinie ». Le catalogue se construit ici a
+# partir des memes listes que la page — PACKS et CARDS — pour qu'il ne puisse
+# pas deriver du contenu affiche.
+UNITE = {'forfait': 'le forfait', 'personne': 'par personne', 'enfant': 'par enfant'}
+
+CATALOGUE = [
+    ('Lune de miel inoubliable', '340000',
+     "Deux nuits en Mezzanine Supérieure, décorée pour l'occasion avant votre "
+     "arrivée. Petits-déjeuners inclus, navette aéroport gratuite.",
+     UNITE['forfait']),
+]
+CATALOGUE += [(nom, prix, None, UNITE[unite])
+              for nom, prix, unite, _i, _a, _k, _u, _l, _d in PACKS]
+CATALOGUE += [(titre, prix, ' · '.join(t for _c, t in items), UNITE[unite])
+              for _f, _i, _a, _g, _b, _t, titre, items, _d, prix, unite, _pk, _ul in CARDS]
+
 LD = _schema.bloc(
-    _schema.service('Circuits et forfaits', "Packs Vacances, lune de miel, week-end intense, circuits touristiques et coffret anniversaire à l'Hôtel Evannath, Assinie.", 'circuits', image='r-mezzanine'),
+    _schema.service('Circuits et forfaits', "Packs Vacances, lune de miel, week-end intense, circuits touristiques et coffret anniversaire à l'Hôtel Evannath, Assinie.", 'circuits', image='r-mezzanine', catalogue=CATALOGUE),
     _schema.hotel(),
     _schema.fil([('Accueil','index'),('Circuits & Offres',None)]))
 

@@ -191,13 +191,30 @@ def service(nom, description, url_slug, image=None, catalogue=None):
     if image:
         d['image'] = SITE + '/img/opt/' + image + '.jpg'
     if catalogue:
+        # Une entree vaut (nom, prix, description) ou, pour une offre dont le
+        # prix se compte autrement qu'au forfait, (nom, prix, description,
+        # unite) : « par personne », « par enfant ». Sans cette unite, un
+        # forfait a 25 000 F par enfant et un forfait a 25 000 F tout compris
+        # se ressemblent dans un resultat de recherche.
+        elements = []
+        for entree in catalogue:
+            n, px, desc = entree[0], entree[1], entree[2]
+            unite = entree[3] if len(entree) > 3 else None
+            offre = {'@type': 'Offer', 'name': n}
+            if px:
+                offre['price'] = px
+                offre['priceCurrency'] = DEVISE
+                offre['availability'] = 'https://schema.org/InStock'
+                if unite:
+                    offre['priceSpecification'] = {
+                        '@type': 'UnitPriceSpecification',
+                        'price': px, 'priceCurrency': DEVISE, 'unitText': unite,
+                    }
+            if desc:
+                offre['description'] = desc
+            elements.append(offre)
         d['hasOfferCatalog'] = {
-            '@type': 'OfferCatalog', 'name': nom,
-            'itemListElement': [{
-                '@type': 'Offer', 'name': n,
-                **({'price': p, 'priceCurrency': DEVISE} if p else {}),
-                **({'description': desc} if desc else {}),
-            } for n, p, desc in catalogue],
+            '@type': 'OfferCatalog', 'name': nom, 'itemListElement': elements,
         }
     return d
 

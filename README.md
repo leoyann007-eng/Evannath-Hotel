@@ -492,6 +492,26 @@ qu'il s'agit du même établissement d'une page à l'autre.
 **Les coordonnées GPS sont volontairement absentes** : l'établissement ne les
 publie nulle part, et un point mal placé vaut moins que pas de point.
 
+### Les onze offres de la page Circuits
+
+Elles étaient affichées mais **invisibles des moteurs** : le `Service` de
+`circuits.html` n'avait pas de `hasOfferCatalog`, donc aucun forfait
+n'existait pour une recherche du type « forfait lune de miel Assinie ».
+
+Le catalogue se construit maintenant dans `build-pages6.py` à partir des mêmes
+listes que la page — `PACKS` et `CARDS` — pour qu'il ne puisse pas dériver du
+contenu affiché. Chaque offre porte son prix, sa disponibilité et son **unité**
+(`le forfait`, `par personne`, `par enfant`) via `UnitPriceSpecification` :
+sans elle, un forfait à 25 000 F par enfant et un forfait à 25 000 F tout
+compris se ressemblent dans un résultat de recherche.
+
+`verifier.py` (contrôle 7 quinquies) exige que le catalogue déclaré et le menu
+de réservation listent **exactement** les mêmes offres, aux mêmes prix et aux
+mêmes unités — deux sources écrites séparément finissent toujours par
+diverger, et l'écart ne se voit nulle part : le visiteur ne lit pas le
+JSON-LD, le moteur ne lit pas le menu. Les trois cas — offre non réservable,
+offre non déclarée, prix qui dérive — ont été testés en les provoquant.
+
 ## Images responsives
 
 `build-galerie.py` sort les 47 photos à **1748 px**, la définition réelle des

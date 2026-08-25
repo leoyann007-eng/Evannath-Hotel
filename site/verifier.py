@@ -152,6 +152,38 @@ def controler():
                            % (len(manque), ' '.join(manque[:8])
                               + (' …' if len(manque) > 8 else ''))))
 
+        # 7 quinquies. sur la page des offres, le catalogue declare a Google
+        # et le menu de reservation doivent lister exactement les memes
+        # offres, aux memes prix et aux memes unites. Deux sources ecrites
+        # separement finissent toujours par diverger, et l'ecart ne se voit
+        # nulle part : le visiteur ne lit pas le JSON-LD, le moteur ne lit pas
+        # le menu.
+        if f == 'circuits.html':
+            unites = {'forfait': 'le forfait', 'personne': 'par personne',
+                      'enfant': 'par enfant'}
+            menu = {}
+            for prix, u, lib in re.findall(
+                    r'<option value="(\d+)\|([a-z]+)">([^<]+)</option>', s):
+                menu[lib.split('—')[0].strip()] = (prix, unites.get(u, u))
+            cat = {}
+            for graphe in re.findall(
+                    r'<script type="application/ld\+json">(.*?)</script>', s, re.S):
+                for e in json.loads(graphe).get('@graph', []):
+                    for o in e.get('hasOfferCatalog', {}).get('itemListElement', []):
+                        cat[o['name']] = (
+                            o.get('price', ''),
+                            o.get('priceSpecification', {}).get('unitText', ''))
+            if not cat:
+                pb.append((f, 'les offres ne sont declarees dans aucun catalogue'))
+            for nom in sorted(set(cat) | set(menu)):
+                if nom not in cat:
+                    pb.append((f, 'offre « %s » reservable mais absente du catalogue' % nom))
+                elif nom not in menu:
+                    pb.append((f, 'offre « %s » declaree mais non reservable' % nom))
+                elif cat[nom] != menu[nom]:
+                    pb.append((f, 'offre « %s » : %s dans le catalogue, %s dans le menu'
+                               % (nom, cat[nom], menu[nom])))
+
         # 8. toute image ouvrable en plein ecran doit exister aussi en WebP
         for base in re.findall(r'data-full="(img/opt/[\w-]+)\.jpg"', s):
             if not os.path.exists(base + '.webp'):
