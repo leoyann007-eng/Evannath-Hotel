@@ -78,7 +78,10 @@ refaites = []
 # les plafonner plus bas revenait a jeter de la definition deja payee, visible
 # des qu'une de ces photos sert de hero sur un ecran dense.
 LARGEUR = 1748
-VIGNETTE = 620
+# Deux tailles de vignette. La grille passe de 4 colonnes a 3 puis 2 : sur un
+# telephone, une vignette ne fait que ~176 px de large, soit 352 px reels en
+# densite 2. Servir du 620 revenait a envoyer trois fois les pixels utiles.
+VIGNETTES = (360, 620)
 
 for src, name, cat, cap in PHOTOS:
     full = 'img/opt/gal-%s.jpg' % name
@@ -90,7 +93,9 @@ for src, name, cat, cap in PHOTOS:
     # voulue : le script se remet ainsi de lui-meme a jour quand LARGEUR change,
     # sans qu'il faille supprimer quoi que ce soit a la main.
     vise = min(LARGEUR, Image.open(chemin).width)
-    refaire = not os.path.exists(full) or Image.open(full).width != vise
+    refaire = (not os.path.exists(full)
+               or Image.open(full).width != vise
+               or not os.path.exists('img/opt/gal-%s-t360.webp' % name))
 
     if refaire:
         im = Image.open(chemin).convert('RGB')
@@ -98,9 +103,11 @@ for src, name, cat, cap in PHOTOS:
         big = im.resize((round(im.width * r), round(im.height * r)), Image.LANCZOS)
         big.save(full, 'JPEG', quality=78, optimize=True, progressive=True)
         big.save('img/opt/gal-%s.webp' % name, 'WEBP', quality=76, method=6)
-        th = big.resize((VIGNETTE, round(big.height * VIGNETTE / big.width)), Image.LANCZOS)
-        th.save('img/opt/gal-%s-t.jpg' % name, 'JPEG', quality=74, optimize=True)
-        th.save('img/opt/gal-%s-t.webp' % name, 'WEBP', quality=72, method=6)
+        for v in VIGNETTES:
+            th = big.resize((v, round(big.height * v / big.width)), Image.LANCZOS)
+            suf = '-t' if v == 620 else '-t%d' % v
+            th.save('img/opt/gal-%s%s.jpg' % (name, suf), 'JPEG', quality=74, optimize=True)
+            th.save('img/opt/gal-%s%s.webp' % (name, suf), 'WEBP', quality=72, method=6)
         refaites.append(name)
     made.append((name, cat, cap))
 if refaites:
@@ -124,7 +131,12 @@ CSS_GAL = """
 .grid{columns:4;column-gap:14px;padding-bottom:100px}
 .grid figure{break-inside:avoid;margin:0 0 14px;position:relative;overflow:hidden;cursor:pointer;background:var(--bark-2)}
 .grid figure.hide{display:none}
-.grid img{width:100%;display:block;transition:1s cubic-bezier(.2,.8,.2,1)}
+/* Les deux paliers de vignette n'ont pas exactement le meme rapport une
+   fois arrondis (620x440 contre 360x255). Sans cette regle, la hauteur
+   rendue change selon le palier charge et la grille bouge de quelques
+   pixels. On fige le rapport : la place reservee est alors exacte quel
+   que soit le fichier retenu. */
+.grid img{width:100%;display:block;aspect-ratio:620/440;transition:1s cubic-bezier(.2,.8,.2,1)}
 .grid figure:hover img{transform:scale(1.05)}
 .grid figcaption{position:absolute;left:0;right:0;bottom:0;padding:30px 14px 12px;
   background:linear-gradient(transparent,rgba(16,11,6,.94));
@@ -179,10 +191,23 @@ b.append('''    </div>
 <div class="wrap">
   <div class="grid" id="gl">''' % len(made))
 
+# Largeur reellement occupee par une vignette, seuil par seuil :
+#   <=720 px  2 colonnes, gouttiere 10  -> (100vw-58)/2  ~ 47vw
+#   <=1080    3 colonnes, gouttiere 14  -> (100vw-76)/3  ~ 31vw
+#   <=1240    4 colonnes                -> (100vw-90)/4  ~ 23vw
+#   au-dela   la colonne est figee a 1192 px            -> 288 px
+SIZES = '(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px'
+
+FIGURE = """    <figure data-cat="%(cat)s"><picture>
+      <source srcset="img/opt/gal-%(n)s-t360.webp 360w, img/opt/gal-%(n)s-t.webp 620w"
+        sizes="%(sizes)s" type="image/webp">
+      <img loading="lazy" src="img/opt/gal-%(n)s-t.jpg"
+        srcset="img/opt/gal-%(n)s-t360.jpg 360w, img/opt/gal-%(n)s-t.jpg 620w"
+        sizes="%(sizes)s" data-full="img/opt/gal-%(n)s.jpg" alt="%(cap)s"></picture>
+      <figcaption>%(cap)s</figcaption></figure>"""
+
 for name, cat, cap in made:
-    b.append('''    <figure data-cat="%s"><picture><source srcset="img/opt/gal-%s-t.webp" type="image/webp">
-      <img loading="lazy" src="img/opt/gal-%s-t.jpg" data-full="img/opt/gal-%s.jpg" alt="%s"></picture>
-      <figcaption>%s</figcaption></figure>''' % (cat, name, name, name, cap, cap))
+    b.append(FIGURE % dict(cat=cat, n=name, sizes=SIZES, cap=cap))
 
 b.append('''  </div>
   <p class="empty" id="empty" data-t="emp">Aucune photo dans cette catégorie.</p>

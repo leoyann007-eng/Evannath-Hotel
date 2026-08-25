@@ -182,7 +182,12 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
 .grid{columns:4;column-gap:14px;padding-bottom:100px}
 .grid figure{break-inside:avoid;margin:0 0 14px;position:relative;overflow:hidden;cursor:pointer;background:var(--bark-2)}
 .grid figure.hide{display:none}
-.grid img{width:100%;display:block;transition:1s cubic-bezier(.2,.8,.2,1)}
+/* Les deux paliers de vignette n'ont pas exactement le meme rapport une
+   fois arrondis (620x440 contre 360x255). Sans cette regle, la hauteur
+   rendue change selon le palier charge et la grille bouge de quelques
+   pixels. On fige le rapport : la place reservee est alors exacte quel
+   que soit le fichier retenu. */
+.grid img{width:100%;display:block;aspect-ratio:620/440;transition:1s cubic-bezier(.2,.8,.2,1)}
 .grid figure:hover img{transform:scale(1.05)}
 .grid figcaption{position:absolute;left:0;right:0;bottom:0;padding:30px 14px 12px;
   background:linear-gradient(transparent,rgba(16,11,6,.94));
@@ -289,146 +294,334 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
 
 <div class="wrap">
   <div class="grid" id="gl">
-    <figure data-cat="domaine"><picture><source srcset="img/opt/gal-dom-facade-t.webp" type="image/webp">
-      <img width="620" height="440" loading="lazy" src="img/opt/gal-dom-facade-t.jpg" data-full="img/opt/gal-dom-facade.jpg" alt="Le corps principal et la piscine"></picture>
+    <figure data-cat="domaine"><picture>
+      <source srcset="img/opt/gal-dom-facade-t360.webp 360w, img/opt/gal-dom-facade-t.webp 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" type="image/webp">
+      <img width="620" height="440" loading="lazy" src="img/opt/gal-dom-facade-t.jpg"
+        srcset="img/opt/gal-dom-facade-t360.jpg 360w, img/opt/gal-dom-facade-t.jpg 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" data-full="img/opt/gal-dom-facade.jpg" alt="Le corps principal et la piscine"></picture>
       <figcaption>Le corps principal et la piscine</figcaption></figure>
-    <figure data-cat="domaine"><picture><source srcset="img/opt/gal-dom-piscine-t.webp" type="image/webp">
-      <img width="620" height="440" loading="lazy" src="img/opt/gal-dom-piscine-t.jpg" data-full="img/opt/gal-dom-piscine.jpg" alt="La piscine et ses parasols"></picture>
+    <figure data-cat="domaine"><picture>
+      <source srcset="img/opt/gal-dom-piscine-t360.webp 360w, img/opt/gal-dom-piscine-t.webp 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" type="image/webp">
+      <img width="620" height="440" loading="lazy" src="img/opt/gal-dom-piscine-t.jpg"
+        srcset="img/opt/gal-dom-piscine-t360.jpg 360w, img/opt/gal-dom-piscine-t.jpg 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" data-full="img/opt/gal-dom-piscine.jpg" alt="La piscine et ses parasols"></picture>
       <figcaption>La piscine et ses parasols</figcaption></figure>
-    <figure data-cat="domaine"><picture><source srcset="img/opt/gal-dom-batiment-t.webp" type="image/webp">
-      <img width="620" height="440" loading="lazy" src="img/opt/gal-dom-batiment-t.jpg" data-full="img/opt/gal-dom-batiment.jpg" alt="La façade depuis la cour"></picture>
+    <figure data-cat="domaine"><picture>
+      <source srcset="img/opt/gal-dom-batiment-t360.webp 360w, img/opt/gal-dom-batiment-t.webp 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" type="image/webp">
+      <img width="620" height="440" loading="lazy" src="img/opt/gal-dom-batiment-t.jpg"
+        srcset="img/opt/gal-dom-batiment-t360.jpg 360w, img/opt/gal-dom-batiment-t.jpg 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" data-full="img/opt/gal-dom-batiment.jpg" alt="La façade depuis la cour"></picture>
       <figcaption>La façade depuis la cour</figcaption></figure>
-    <figure data-cat="domaine"><picture><source srcset="img/opt/gal-dom-aerien-t.webp" type="image/webp">
-      <img width="620" height="440" loading="lazy" src="img/opt/gal-dom-aerien-t.jpg" data-full="img/opt/gal-dom-aerien.jpg" alt="Le domaine vu du ciel"></picture>
+    <figure data-cat="domaine"><picture>
+      <source srcset="img/opt/gal-dom-aerien-t360.webp 360w, img/opt/gal-dom-aerien-t.webp 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" type="image/webp">
+      <img width="620" height="440" loading="lazy" src="img/opt/gal-dom-aerien-t.jpg"
+        srcset="img/opt/gal-dom-aerien-t360.jpg 360w, img/opt/gal-dom-aerien-t.jpg 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" data-full="img/opt/gal-dom-aerien.jpg" alt="Le domaine vu du ciel"></picture>
       <figcaption>Le domaine vu du ciel</figcaption></figure>
-    <figure data-cat="domaine"><picture><source srcset="img/opt/gal-dom-mangrove-t.webp" type="image/webp">
-      <img width="620" height="440" loading="lazy" src="img/opt/gal-dom-mangrove-t.jpg" data-full="img/opt/gal-dom-mangrove.jpg" alt="La lagune et la mangrove, vue aérienne"></picture>
+    <figure data-cat="domaine"><picture>
+      <source srcset="img/opt/gal-dom-mangrove-t360.webp 360w, img/opt/gal-dom-mangrove-t.webp 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" type="image/webp">
+      <img width="620" height="440" loading="lazy" src="img/opt/gal-dom-mangrove-t.jpg"
+        srcset="img/opt/gal-dom-mangrove-t360.jpg 360w, img/opt/gal-dom-mangrove-t.jpg 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" data-full="img/opt/gal-dom-mangrove.jpg" alt="La lagune et la mangrove, vue aérienne"></picture>
       <figcaption>La lagune et la mangrove, vue aérienne</figcaption></figure>
-    <figure data-cat="domaine"><picture><source srcset="img/opt/gal-dom-enseigne-t.webp" type="image/webp">
-      <img width="620" height="440" loading="lazy" src="img/opt/gal-dom-enseigne-t.jpg" data-full="img/opt/gal-dom-enseigne.jpg" alt="L'enseigne murale à l'entrée"></picture>
+    <figure data-cat="domaine"><picture>
+      <source srcset="img/opt/gal-dom-enseigne-t360.webp 360w, img/opt/gal-dom-enseigne-t.webp 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" type="image/webp">
+      <img width="620" height="440" loading="lazy" src="img/opt/gal-dom-enseigne-t.jpg"
+        srcset="img/opt/gal-dom-enseigne-t360.jpg 360w, img/opt/gal-dom-enseigne-t.jpg 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" data-full="img/opt/gal-dom-enseigne.jpg" alt="L'enseigne murale à l'entrée"></picture>
       <figcaption>L'enseigne murale à l'entrée</figcaption></figure>
-    <figure data-cat="domaine"><picture><source srcset="img/opt/gal-dom-jardin-t.webp" type="image/webp">
-      <img width="620" height="440" loading="lazy" src="img/opt/gal-dom-jardin-t.jpg" data-full="img/opt/gal-dom-jardin.jpg" alt="L'enseigne du jardin"></picture>
+    <figure data-cat="domaine"><picture>
+      <source srcset="img/opt/gal-dom-jardin-t360.webp 360w, img/opt/gal-dom-jardin-t.webp 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" type="image/webp">
+      <img width="620" height="440" loading="lazy" src="img/opt/gal-dom-jardin-t.jpg"
+        srcset="img/opt/gal-dom-jardin-t360.jpg 360w, img/opt/gal-dom-jardin-t.jpg 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" data-full="img/opt/gal-dom-jardin.jpg" alt="L'enseigne du jardin"></picture>
       <figcaption>L'enseigne du jardin</figcaption></figure>
-    <figure data-cat="domaine"><picture><source srcset="img/opt/gal-dom-reve-t.webp" type="image/webp">
-      <img width="620" height="440" loading="lazy" src="img/opt/gal-dom-reve-t.jpg" data-full="img/opt/gal-dom-reve.jpg" alt="Le panneau peint « Rêve Africain »"></picture>
+    <figure data-cat="domaine"><picture>
+      <source srcset="img/opt/gal-dom-reve-t360.webp 360w, img/opt/gal-dom-reve-t.webp 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" type="image/webp">
+      <img width="620" height="440" loading="lazy" src="img/opt/gal-dom-reve-t.jpg"
+        srcset="img/opt/gal-dom-reve-t360.jpg 360w, img/opt/gal-dom-reve-t.jpg 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" data-full="img/opt/gal-dom-reve.jpg" alt="Le panneau peint « Rêve Africain »"></picture>
       <figcaption>Le panneau peint « Rêve Africain »</figcaption></figure>
-    <figure data-cat="domaine"><picture><source srcset="img/opt/gal-dom-fontaine-t.webp" type="image/webp">
-      <img width="620" height="440" loading="lazy" src="img/opt/gal-dom-fontaine-t.jpg" data-full="img/opt/gal-dom-fontaine.jpg" alt="La fontaine et l'éléphant de bois"></picture>
+    <figure data-cat="domaine"><picture>
+      <source srcset="img/opt/gal-dom-fontaine-t360.webp 360w, img/opt/gal-dom-fontaine-t.webp 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" type="image/webp">
+      <img width="620" height="440" loading="lazy" src="img/opt/gal-dom-fontaine-t.jpg"
+        srcset="img/opt/gal-dom-fontaine-t360.jpg 360w, img/opt/gal-dom-fontaine-t.jpg 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" data-full="img/opt/gal-dom-fontaine.jpg" alt="La fontaine et l'éléphant de bois"></picture>
       <figcaption>La fontaine et l'éléphant de bois</figcaption></figure>
-    <figure data-cat="domaine"><picture><source srcset="img/opt/gal-dom-pirogue-t.webp" type="image/webp">
-      <img width="620" height="440" loading="lazy" src="img/opt/gal-dom-pirogue-t.jpg" data-full="img/opt/gal-dom-pirogue.jpg" alt="Pirogue décorative dans le jardin"></picture>
+    <figure data-cat="domaine"><picture>
+      <source srcset="img/opt/gal-dom-pirogue-t360.webp 360w, img/opt/gal-dom-pirogue-t.webp 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" type="image/webp">
+      <img width="620" height="440" loading="lazy" src="img/opt/gal-dom-pirogue-t.jpg"
+        srcset="img/opt/gal-dom-pirogue-t360.jpg 360w, img/opt/gal-dom-pirogue-t.jpg 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" data-full="img/opt/gal-dom-pirogue.jpg" alt="Pirogue décorative dans le jardin"></picture>
       <figcaption>Pirogue décorative dans le jardin</figcaption></figure>
-    <figure data-cat="domaine"><picture><source srcset="img/opt/gal-dom-couchant-t.webp" type="image/webp">
-      <img width="620" height="440" loading="lazy" src="img/opt/gal-dom-couchant-t.jpg" data-full="img/opt/gal-dom-couchant.jpg" alt="Le couchant sur Assinie"></picture>
+    <figure data-cat="domaine"><picture>
+      <source srcset="img/opt/gal-dom-couchant-t360.webp 360w, img/opt/gal-dom-couchant-t.webp 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" type="image/webp">
+      <img width="620" height="440" loading="lazy" src="img/opt/gal-dom-couchant-t.jpg"
+        srcset="img/opt/gal-dom-couchant-t360.jpg 360w, img/opt/gal-dom-couchant-t.jpg 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" data-full="img/opt/gal-dom-couchant.jpg" alt="Le couchant sur Assinie"></picture>
       <figcaption>Le couchant sur Assinie</figcaption></figure>
-    <figure data-cat="lagune"><picture><source srcset="img/opt/gal-lag-paillote-t.webp" type="image/webp">
-      <img width="620" height="440" loading="lazy" src="img/opt/gal-lag-paillote-t.jpg" data-full="img/opt/gal-lag-paillote.jpg" alt="La paillote sur pilotis"></picture>
+    <figure data-cat="lagune"><picture>
+      <source srcset="img/opt/gal-lag-paillote-t360.webp 360w, img/opt/gal-lag-paillote-t.webp 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" type="image/webp">
+      <img width="620" height="440" loading="lazy" src="img/opt/gal-lag-paillote-t.jpg"
+        srcset="img/opt/gal-lag-paillote-t360.jpg 360w, img/opt/gal-lag-paillote-t.jpg 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" data-full="img/opt/gal-lag-paillote.jpg" alt="La paillote sur pilotis"></picture>
       <figcaption>La paillote sur pilotis</figcaption></figure>
-    <figure data-cat="lagune"><picture><source srcset="img/opt/gal-lag-ponton-t.webp" type="image/webp">
-      <img width="620" height="440" loading="lazy" src="img/opt/gal-lag-ponton-t.jpg" data-full="img/opt/gal-lag-ponton.jpg" alt="Le ponton de bois au-dessus de l'eau"></picture>
+    <figure data-cat="lagune"><picture>
+      <source srcset="img/opt/gal-lag-ponton-t360.webp 360w, img/opt/gal-lag-ponton-t.webp 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" type="image/webp">
+      <img width="620" height="440" loading="lazy" src="img/opt/gal-lag-ponton-t.jpg"
+        srcset="img/opt/gal-lag-ponton-t360.jpg 360w, img/opt/gal-lag-ponton-t.jpg 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" data-full="img/opt/gal-lag-ponton.jpg" alt="Le ponton de bois au-dessus de l'eau"></picture>
       <figcaption>Le ponton de bois au-dessus de l'eau</figcaption></figure>
-    <figure data-cat="lagune"><picture><source srcset="img/opt/gal-lag-bateau-t.webp" type="image/webp">
-      <img width="620" height="440" loading="lazy" src="img/opt/gal-lag-bateau-t.jpg" data-full="img/opt/gal-lag-bateau.jpg" alt="Le ponton et le bateau de balade"></picture>
+    <figure data-cat="lagune"><picture>
+      <source srcset="img/opt/gal-lag-bateau-t360.webp 360w, img/opt/gal-lag-bateau-t.webp 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" type="image/webp">
+      <img width="620" height="440" loading="lazy" src="img/opt/gal-lag-bateau-t.jpg"
+        srcset="img/opt/gal-lag-bateau-t360.jpg 360w, img/opt/gal-lag-bateau-t.jpg 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" data-full="img/opt/gal-lag-bateau.jpg" alt="Le ponton et le bateau de balade"></picture>
       <figcaption>Le ponton et le bateau de balade</figcaption></figure>
-    <figure data-cat="lagune"><picture><source srcset="img/opt/gal-lag-nuit-t.webp" type="image/webp">
-      <img width="620" height="440" loading="lazy" src="img/opt/gal-lag-nuit-t.jpg" data-full="img/opt/gal-lag-nuit.jpg" alt="La paillote à la tombée du jour"></picture>
+    <figure data-cat="lagune"><picture>
+      <source srcset="img/opt/gal-lag-nuit-t360.webp 360w, img/opt/gal-lag-nuit-t.webp 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" type="image/webp">
+      <img width="620" height="440" loading="lazy" src="img/opt/gal-lag-nuit-t.jpg"
+        srcset="img/opt/gal-lag-nuit-t360.jpg 360w, img/opt/gal-lag-nuit-t.jpg 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" data-full="img/opt/gal-lag-nuit.jpg" alt="La paillote à la tombée du jour"></picture>
       <figcaption>La paillote à la tombée du jour</figcaption></figure>
-    <figure data-cat="lagune"><picture><source srcset="img/opt/gal-lag-cocotiers-t.webp" type="image/webp">
-      <img width="620" height="440" loading="lazy" src="img/opt/gal-lag-cocotiers-t.jpg" data-full="img/opt/gal-lag-cocotiers.jpg" alt="La lagune Aby et ses cocotiers"></picture>
+    <figure data-cat="lagune"><picture>
+      <source srcset="img/opt/gal-lag-cocotiers-t360.webp 360w, img/opt/gal-lag-cocotiers-t.webp 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" type="image/webp">
+      <img width="620" height="440" loading="lazy" src="img/opt/gal-lag-cocotiers-t.jpg"
+        srcset="img/opt/gal-lag-cocotiers-t360.jpg 360w, img/opt/gal-lag-cocotiers-t.jpg 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" data-full="img/opt/gal-lag-cocotiers.jpg" alt="La lagune Aby et ses cocotiers"></picture>
       <figcaption>La lagune Aby et ses cocotiers</figcaption></figure>
-    <figure data-cat="lagune"><picture><source srcset="img/opt/gal-lag-large-t.webp" type="image/webp">
-      <img width="620" height="440" loading="lazy" src="img/opt/gal-lag-large-t.jpg" data-full="img/opt/gal-lag-large.jpg" alt="La lagune, vue large"></picture>
+    <figure data-cat="lagune"><picture>
+      <source srcset="img/opt/gal-lag-large-t360.webp 360w, img/opt/gal-lag-large-t.webp 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" type="image/webp">
+      <img width="620" height="440" loading="lazy" src="img/opt/gal-lag-large-t.jpg"
+        srcset="img/opt/gal-lag-large-t360.jpg 360w, img/opt/gal-lag-large-t.jpg 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" data-full="img/opt/gal-lag-large.jpg" alt="La lagune, vue large"></picture>
       <figcaption>La lagune, vue large</figcaption></figure>
-    <figure data-cat="lagune"><picture><source srcset="img/opt/gal-lag-rotin-t.webp" type="image/webp">
-      <img width="620" height="440" loading="lazy" src="img/opt/gal-lag-rotin-t.jpg" data-full="img/opt/gal-lag-rotin.jpg" alt="Mobilier de rotin en terrasse"></picture>
+    <figure data-cat="lagune"><picture>
+      <source srcset="img/opt/gal-lag-rotin-t360.webp 360w, img/opt/gal-lag-rotin-t.webp 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" type="image/webp">
+      <img width="620" height="440" loading="lazy" src="img/opt/gal-lag-rotin-t.jpg"
+        srcset="img/opt/gal-lag-rotin-t360.jpg 360w, img/opt/gal-lag-rotin-t.jpg 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" data-full="img/opt/gal-lag-rotin.jpg" alt="Mobilier de rotin en terrasse"></picture>
       <figcaption>Mobilier de rotin en terrasse</figcaption></figure>
-    <figure data-cat="lagune"><picture><source srcset="img/opt/gal-lag-transat-t.webp" type="image/webp">
-      <img width="620" height="440" loading="lazy" src="img/opt/gal-lag-transat-t.jpg" data-full="img/opt/gal-lag-transat.jpg" alt="Transat et parasol"></picture>
+    <figure data-cat="lagune"><picture>
+      <source srcset="img/opt/gal-lag-transat-t360.webp 360w, img/opt/gal-lag-transat-t.webp 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" type="image/webp">
+      <img width="620" height="440" loading="lazy" src="img/opt/gal-lag-transat-t.jpg"
+        srcset="img/opt/gal-lag-transat-t360.jpg 360w, img/opt/gal-lag-transat-t.jpg 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" data-full="img/opt/gal-lag-transat.jpg" alt="Transat et parasol"></picture>
       <figcaption>Transat et parasol</figcaption></figure>
-    <figure data-cat="chambres"><picture><source srcset="img/opt/gal-ch-wax-t.webp" type="image/webp">
-      <img width="620" height="440" loading="lazy" src="img/opt/gal-ch-wax-t.jpg" data-full="img/opt/gal-ch-wax.jpg" alt="Chambre aux textiles wax"></picture>
+    <figure data-cat="chambres"><picture>
+      <source srcset="img/opt/gal-ch-wax-t360.webp 360w, img/opt/gal-ch-wax-t.webp 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" type="image/webp">
+      <img width="620" height="440" loading="lazy" src="img/opt/gal-ch-wax-t.jpg"
+        srcset="img/opt/gal-ch-wax-t360.jpg 360w, img/opt/gal-ch-wax-t.jpg 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" data-full="img/opt/gal-ch-wax.jpg" alt="Chambre aux textiles wax"></picture>
       <figcaption>Chambre aux textiles wax</figcaption></figure>
-    <figure data-cat="chambres"><picture><source srcset="img/opt/gal-ch-salon-t.webp" type="image/webp">
-      <img width="620" height="440" loading="lazy" src="img/opt/gal-ch-salon-t.jpg" data-full="img/opt/gal-ch-salon.jpg" alt="Coin salon et plantes"></picture>
+    <figure data-cat="chambres"><picture>
+      <source srcset="img/opt/gal-ch-salon-t360.webp 360w, img/opt/gal-ch-salon-t.webp 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" type="image/webp">
+      <img width="620" height="440" loading="lazy" src="img/opt/gal-ch-salon-t.jpg"
+        srcset="img/opt/gal-ch-salon-t360.jpg 360w, img/opt/gal-ch-salon-t.jpg 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" data-full="img/opt/gal-ch-salon.jpg" alt="Coin salon et plantes"></picture>
       <figcaption>Coin salon et plantes</figcaption></figure>
-    <figure data-cat="chambres"><picture><source srcset="img/opt/gal-ch-bureau-t.webp" type="image/webp">
-      <img width="620" height="440" loading="lazy" src="img/opt/gal-ch-bureau-t.jpg" data-full="img/opt/gal-ch-bureau.jpg" alt="Coin bureau et miroir soleil"></picture>
+    <figure data-cat="chambres"><picture>
+      <source srcset="img/opt/gal-ch-bureau-t360.webp 360w, img/opt/gal-ch-bureau-t.webp 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" type="image/webp">
+      <img width="620" height="440" loading="lazy" src="img/opt/gal-ch-bureau-t.jpg"
+        srcset="img/opt/gal-ch-bureau-t360.jpg 360w, img/opt/gal-ch-bureau-t.jpg 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" data-full="img/opt/gal-ch-bureau.jpg" alt="Coin bureau et miroir soleil"></picture>
       <figcaption>Coin bureau et miroir soleil</figcaption></figure>
-    <figure data-cat="chambres"><picture><source srcset="img/opt/gal-ch-mezz-t.webp" type="image/webp">
-      <img width="620" height="440" loading="lazy" src="img/opt/gal-ch-mezz-t.jpg" data-full="img/opt/gal-ch-mezz.jpg" alt="L'escalier de la mezzanine"></picture>
+    <figure data-cat="chambres"><picture>
+      <source srcset="img/opt/gal-ch-mezz-t360.webp 360w, img/opt/gal-ch-mezz-t.webp 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" type="image/webp">
+      <img width="620" height="440" loading="lazy" src="img/opt/gal-ch-mezz-t.jpg"
+        srcset="img/opt/gal-ch-mezz-t360.jpg 360w, img/opt/gal-ch-mezz-t.jpg 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" data-full="img/opt/gal-ch-mezz.jpg" alt="L'escalier de la mezzanine"></picture>
       <figcaption>L'escalier de la mezzanine</figcaption></figure>
-    <figure data-cat="chambres"><picture><source srcset="img/opt/gal-ch-bain-t.webp" type="image/webp">
-      <img width="620" height="440" loading="lazy" src="img/opt/gal-ch-bain-t.jpg" data-full="img/opt/gal-ch-bain.jpg" alt="Salle de bain et baignoire"></picture>
+    <figure data-cat="chambres"><picture>
+      <source srcset="img/opt/gal-ch-bain-t360.webp 360w, img/opt/gal-ch-bain-t.webp 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" type="image/webp">
+      <img width="620" height="440" loading="lazy" src="img/opt/gal-ch-bain-t.jpg"
+        srcset="img/opt/gal-ch-bain-t360.jpg 360w, img/opt/gal-ch-bain-t.jpg 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" data-full="img/opt/gal-ch-bain.jpg" alt="Salle de bain et baignoire"></picture>
       <figcaption>Salle de bain et baignoire</figcaption></figure>
-    <figure data-cat="table"><picture><source srcset="img/opt/gal-tab-salle-t.webp" type="image/webp">
-      <img width="620" height="440" loading="lazy" src="img/opt/gal-tab-salle-t.jpg" data-full="img/opt/gal-tab-salle.jpg" alt="La salle du restaurant"></picture>
+    <figure data-cat="table"><picture>
+      <source srcset="img/opt/gal-tab-salle-t360.webp 360w, img/opt/gal-tab-salle-t.webp 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" type="image/webp">
+      <img width="620" height="440" loading="lazy" src="img/opt/gal-tab-salle-t.jpg"
+        srcset="img/opt/gal-tab-salle-t360.jpg 360w, img/opt/gal-tab-salle-t.jpg 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" data-full="img/opt/gal-tab-salle.jpg" alt="La salle du restaurant"></picture>
       <figcaption>La salle du restaurant</figcaption></figure>
-    <figure data-cat="table"><picture><source srcset="img/opt/gal-tab-rotin-t.webp" type="image/webp">
-      <img width="620" height="440" loading="lazy" src="img/opt/gal-tab-rotin-t.jpg" data-full="img/opt/gal-tab-rotin.jpg" alt="Le bar et ses fauteuils de rotin"></picture>
+    <figure data-cat="table"><picture>
+      <source srcset="img/opt/gal-tab-rotin-t360.webp 360w, img/opt/gal-tab-rotin-t.webp 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" type="image/webp">
+      <img width="620" height="440" loading="lazy" src="img/opt/gal-tab-rotin-t.jpg"
+        srcset="img/opt/gal-tab-rotin-t360.jpg 360w, img/opt/gal-tab-rotin-t.jpg 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" data-full="img/opt/gal-tab-rotin.jpg" alt="Le bar et ses fauteuils de rotin"></picture>
       <figcaption>Le bar et ses fauteuils de rotin</figcaption></figure>
-    <figure data-cat="table"><picture><source srcset="img/opt/gal-tab-dressee-t.webp" type="image/webp">
-      <img width="620" height="440" loading="lazy" src="img/opt/gal-tab-dressee-t.jpg" data-full="img/opt/gal-tab-dressee.jpg" alt="Table dressée face au jardin"></picture>
+    <figure data-cat="table"><picture>
+      <source srcset="img/opt/gal-tab-dressee-t360.webp 360w, img/opt/gal-tab-dressee-t.webp 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" type="image/webp">
+      <img width="620" height="440" loading="lazy" src="img/opt/gal-tab-dressee-t.jpg"
+        srcset="img/opt/gal-tab-dressee-t360.jpg 360w, img/opt/gal-tab-dressee-t.jpg 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" data-full="img/opt/gal-tab-dressee.jpg" alt="Table dressée face au jardin"></picture>
       <figcaption>Table dressée face au jardin</figcaption></figure>
-    <figure data-cat="table"><picture><source srcset="img/opt/gal-tab-comptoir-t.webp" type="image/webp">
-      <img width="620" height="440" loading="lazy" src="img/opt/gal-tab-comptoir-t.jpg" data-full="img/opt/gal-tab-comptoir.jpg" alt="Le comptoir du bar"></picture>
+    <figure data-cat="table"><picture>
+      <source srcset="img/opt/gal-tab-comptoir-t360.webp 360w, img/opt/gal-tab-comptoir-t.webp 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" type="image/webp">
+      <img width="620" height="440" loading="lazy" src="img/opt/gal-tab-comptoir-t.jpg"
+        srcset="img/opt/gal-tab-comptoir-t360.jpg 360w, img/opt/gal-tab-comptoir-t.jpg 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" data-full="img/opt/gal-tab-comptoir.jpg" alt="Le comptoir du bar"></picture>
       <figcaption>Le comptoir du bar</figcaption></figure>
-    <figure data-cat="table"><picture><source srcset="img/opt/gal-tab-vin-t.webp" type="image/webp">
-      <img width="620" height="440" loading="lazy" src="img/opt/gal-tab-vin-t.jpg" data-full="img/opt/gal-tab-vin.jpg" alt="Une bouteille de la cave"></picture>
+    <figure data-cat="table"><picture>
+      <source srcset="img/opt/gal-tab-vin-t360.webp 360w, img/opt/gal-tab-vin-t.webp 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" type="image/webp">
+      <img width="620" height="440" loading="lazy" src="img/opt/gal-tab-vin-t.jpg"
+        srcset="img/opt/gal-tab-vin-t360.jpg 360w, img/opt/gal-tab-vin-t.jpg 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" data-full="img/opt/gal-tab-vin.jpg" alt="Une bouteille de la cave"></picture>
       <figcaption>Une bouteille de la cave</figcaption></figure>
-    <figure data-cat="table"><picture><source srcset="img/opt/gal-tab-cave-t.webp" type="image/webp">
-      <img width="620" height="440" loading="lazy" src="img/opt/gal-tab-cave-t.jpg" data-full="img/opt/gal-tab-cave.jpg" alt="Porte-bouteille de la cave"></picture>
+    <figure data-cat="table"><picture>
+      <source srcset="img/opt/gal-tab-cave-t360.webp 360w, img/opt/gal-tab-cave-t.webp 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" type="image/webp">
+      <img width="620" height="440" loading="lazy" src="img/opt/gal-tab-cave-t.jpg"
+        srcset="img/opt/gal-tab-cave-t360.jpg 360w, img/opt/gal-tab-cave-t.jpg 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" data-full="img/opt/gal-tab-cave.jpg" alt="Porte-bouteille de la cave"></picture>
       <figcaption>Porte-bouteille de la cave</figcaption></figure>
-    <figure data-cat="table"><picture><source srcset="img/opt/gal-tab-cocktails-t.webp" type="image/webp">
-      <img width="620" height="440" loading="lazy" src="img/opt/gal-tab-cocktails-t.jpg" data-full="img/opt/gal-tab-cocktails.jpg" alt="Cocktails en préparation"></picture>
+    <figure data-cat="table"><picture>
+      <source srcset="img/opt/gal-tab-cocktails-t360.webp 360w, img/opt/gal-tab-cocktails-t.webp 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" type="image/webp">
+      <img width="620" height="440" loading="lazy" src="img/opt/gal-tab-cocktails-t.jpg"
+        srcset="img/opt/gal-tab-cocktails-t360.jpg 360w, img/opt/gal-tab-cocktails-t.jpg 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" data-full="img/opt/gal-tab-cocktails.jpg" alt="Cocktails en préparation"></picture>
       <figcaption>Cocktails en préparation</figcaption></figure>
-    <figure data-cat="table"><picture><source srcset="img/opt/gal-tab-cocktail-t.webp" type="image/webp">
-      <img width="620" height="440" loading="lazy" src="img/opt/gal-tab-cocktail-t.jpg" data-full="img/opt/gal-tab-cocktail.jpg" alt="Cocktail au bord de la piscine"></picture>
+    <figure data-cat="table"><picture>
+      <source srcset="img/opt/gal-tab-cocktail-t360.webp 360w, img/opt/gal-tab-cocktail-t.webp 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" type="image/webp">
+      <img width="620" height="440" loading="lazy" src="img/opt/gal-tab-cocktail-t.jpg"
+        srcset="img/opt/gal-tab-cocktail-t360.jpg 360w, img/opt/gal-tab-cocktail-t.jpg 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" data-full="img/opt/gal-tab-cocktail.jpg" alt="Cocktail au bord de la piscine"></picture>
       <figcaption>Cocktail au bord de la piscine</figcaption></figure>
-    <figure data-cat="table"><picture><source srcset="img/opt/gal-tab-dejeuner-t.webp" type="image/webp">
-      <img width="620" height="440" loading="lazy" src="img/opt/gal-tab-dejeuner-t.jpg" data-full="img/opt/gal-tab-dejeuner.jpg" alt="Le petit-déjeuner, fruits et jus"></picture>
+    <figure data-cat="table"><picture>
+      <source srcset="img/opt/gal-tab-dejeuner-t360.webp 360w, img/opt/gal-tab-dejeuner-t.webp 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" type="image/webp">
+      <img width="620" height="440" loading="lazy" src="img/opt/gal-tab-dejeuner-t.jpg"
+        srcset="img/opt/gal-tab-dejeuner-t360.jpg 360w, img/opt/gal-tab-dejeuner-t.jpg 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" data-full="img/opt/gal-tab-dejeuner.jpg" alt="Le petit-déjeuner, fruits et jus"></picture>
       <figcaption>Le petit-déjeuner, fruits et jus</figcaption></figure>
-    <figure data-cat="table"><picture><source srcset="img/opt/gal-tab-fruits-t.webp" type="image/webp">
-      <img width="620" height="440" loading="lazy" src="img/opt/gal-tab-fruits-t.jpg" data-full="img/opt/gal-tab-fruits.jpg" alt="Ananas et jus pressés"></picture>
+    <figure data-cat="table"><picture>
+      <source srcset="img/opt/gal-tab-fruits-t360.webp 360w, img/opt/gal-tab-fruits-t.webp 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" type="image/webp">
+      <img width="620" height="440" loading="lazy" src="img/opt/gal-tab-fruits-t.jpg"
+        srcset="img/opt/gal-tab-fruits-t360.jpg 360w, img/opt/gal-tab-fruits-t.jpg 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" data-full="img/opt/gal-tab-fruits.jpg" alt="Ananas et jus pressés"></picture>
       <figcaption>Ananas et jus pressés</figcaption></figure>
-    <figure data-cat="table"><picture><source srcset="img/opt/gal-tab-corbeille-t.webp" type="image/webp">
-      <img width="620" height="440" loading="lazy" src="img/opt/gal-tab-corbeille-t.jpg" data-full="img/opt/gal-tab-corbeille.jpg" alt="Corbeille de fruits frais"></picture>
+    <figure data-cat="table"><picture>
+      <source srcset="img/opt/gal-tab-corbeille-t360.webp 360w, img/opt/gal-tab-corbeille-t.webp 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" type="image/webp">
+      <img width="620" height="440" loading="lazy" src="img/opt/gal-tab-corbeille-t.jpg"
+        srcset="img/opt/gal-tab-corbeille-t360.jpg 360w, img/opt/gal-tab-corbeille-t.jpg 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" data-full="img/opt/gal-tab-corbeille.jpg" alt="Corbeille de fruits frais"></picture>
       <figcaption>Corbeille de fruits frais</figcaption></figure>
-    <figure data-cat="table"><picture><source srcset="img/opt/gal-tab-terrasse-t.webp" type="image/webp">
-      <img width="620" height="440" loading="lazy" src="img/opt/gal-tab-terrasse-t.jpg" data-full="img/opt/gal-tab-terrasse.jpg" alt="Rafraîchissement en terrasse"></picture>
+    <figure data-cat="table"><picture>
+      <source srcset="img/opt/gal-tab-terrasse-t360.webp 360w, img/opt/gal-tab-terrasse-t.webp 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" type="image/webp">
+      <img width="620" height="440" loading="lazy" src="img/opt/gal-tab-terrasse-t.jpg"
+        srcset="img/opt/gal-tab-terrasse-t360.jpg 360w, img/opt/gal-tab-terrasse-t.jpg 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" data-full="img/opt/gal-tab-terrasse.jpg" alt="Rafraîchissement en terrasse"></picture>
       <figcaption>Rafraîchissement en terrasse</figcaption></figure>
-    <figure data-cat="bienetre"><picture><source srcset="img/opt/gal-spa-bassin-t.webp" type="image/webp">
-      <img width="620" height="440" loading="lazy" src="img/opt/gal-spa-bassin-t.jpg" data-full="img/opt/gal-spa-bassin.jpg" alt="Le grand bassin"></picture>
+    <figure data-cat="bienetre"><picture>
+      <source srcset="img/opt/gal-spa-bassin-t360.webp 360w, img/opt/gal-spa-bassin-t.webp 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" type="image/webp">
+      <img width="620" height="440" loading="lazy" src="img/opt/gal-spa-bassin-t.jpg"
+        srcset="img/opt/gal-spa-bassin-t360.jpg 360w, img/opt/gal-spa-bassin-t.jpg 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" data-full="img/opt/gal-spa-bassin.jpg" alt="Le grand bassin"></picture>
       <figcaption>Le grand bassin</figcaption></figure>
-    <figure data-cat="bienetre"><picture><source srcset="img/opt/gal-spa-couchant-t.webp" type="image/webp">
-      <img width="620" height="440" loading="lazy" src="img/opt/gal-spa-couchant-t.jpg" data-full="img/opt/gal-spa-couchant.jpg" alt="La piscine en fin de journée"></picture>
+    <figure data-cat="bienetre"><picture>
+      <source srcset="img/opt/gal-spa-couchant-t360.webp 360w, img/opt/gal-spa-couchant-t.webp 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" type="image/webp">
+      <img width="620" height="440" loading="lazy" src="img/opt/gal-spa-couchant-t.jpg"
+        srcset="img/opt/gal-spa-couchant-t360.jpg 360w, img/opt/gal-spa-couchant-t.jpg 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" data-full="img/opt/gal-spa-couchant.jpg" alt="La piscine en fin de journée"></picture>
       <figcaption>La piscine en fin de journée</figcaption></figure>
-    <figure data-cat="bienetre"><picture><source srcset="img/opt/gal-spa-case-t.webp" type="image/webp">
-      <img width="620" height="440" loading="lazy" src="img/opt/gal-spa-case-t.jpg" data-full="img/opt/gal-spa-case.jpg" alt="La case ronde du spa"></picture>
+    <figure data-cat="bienetre"><picture>
+      <source srcset="img/opt/gal-spa-case-t360.webp 360w, img/opt/gal-spa-case-t.webp 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" type="image/webp">
+      <img width="620" height="440" loading="lazy" src="img/opt/gal-spa-case-t.jpg"
+        srcset="img/opt/gal-spa-case-t360.jpg 360w, img/opt/gal-spa-case-t.jpg 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" data-full="img/opt/gal-spa-case.jpg" alt="La case ronde du spa"></picture>
       <figcaption>La case ronde du spa</figcaption></figure>
-    <figure data-cat="bienetre"><picture><source srcset="img/opt/gal-spa-huiles-t.webp" type="image/webp">
-      <img width="620" height="440" loading="lazy" src="img/opt/gal-spa-huiles-t.jpg" data-full="img/opt/gal-spa-huiles.jpg" alt="Serviettes et huiles de soin"></picture>
+    <figure data-cat="bienetre"><picture>
+      <source srcset="img/opt/gal-spa-huiles-t360.webp 360w, img/opt/gal-spa-huiles-t.webp 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" type="image/webp">
+      <img width="620" height="440" loading="lazy" src="img/opt/gal-spa-huiles-t.jpg"
+        srcset="img/opt/gal-spa-huiles-t360.jpg 360w, img/opt/gal-spa-huiles-t.jpg 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" data-full="img/opt/gal-spa-huiles.jpg" alt="Serviettes et huiles de soin"></picture>
       <figcaption>Serviettes et huiles de soin</figcaption></figure>
-    <figure data-cat="art"><picture><source srcset="img/opt/gal-art-hall-t.webp" type="image/webp">
-      <img width="620" height="440" loading="lazy" src="img/opt/gal-art-hall-t.jpg" data-full="img/opt/gal-art-hall.jpg" alt="Le hall et ses sculptures"></picture>
+    <figure data-cat="art"><picture>
+      <source srcset="img/opt/gal-art-hall-t360.webp 360w, img/opt/gal-art-hall-t.webp 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" type="image/webp">
+      <img width="620" height="440" loading="lazy" src="img/opt/gal-art-hall-t.jpg"
+        srcset="img/opt/gal-art-hall-t360.jpg 360w, img/opt/gal-art-hall-t.jpg 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" data-full="img/opt/gal-art-hall.jpg" alt="Le hall et ses sculptures"></picture>
       <figcaption>Le hall et ses sculptures</figcaption></figure>
-    <figure data-cat="art"><picture><source srcset="img/opt/gal-art-salon-t.webp" type="image/webp">
-      <img width="620" height="440" loading="lazy" src="img/opt/gal-art-salon-t.jpg" data-full="img/opt/gal-art-salon.jpg" alt="Salon d'accueil et artisanat"></picture>
+    <figure data-cat="art"><picture>
+      <source srcset="img/opt/gal-art-salon-t360.webp 360w, img/opt/gal-art-salon-t.webp 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" type="image/webp">
+      <img width="620" height="440" loading="lazy" src="img/opt/gal-art-salon-t.jpg"
+        srcset="img/opt/gal-art-salon-t360.jpg 360w, img/opt/gal-art-salon-t.jpg 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" data-full="img/opt/gal-art-salon.jpg" alt="Salon d'accueil et artisanat"></picture>
       <figcaption>Salon d'accueil et artisanat</figcaption></figure>
-    <figure data-cat="art"><picture><source srcset="img/opt/gal-art-masques-t.webp" type="image/webp">
-      <img width="620" height="440" loading="lazy" src="img/opt/gal-art-masques-t.jpg" data-full="img/opt/gal-art-masques.jpg" alt="Masques et sculptures"></picture>
+    <figure data-cat="art"><picture>
+      <source srcset="img/opt/gal-art-masques-t360.webp 360w, img/opt/gal-art-masques-t.webp 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" type="image/webp">
+      <img width="620" height="440" loading="lazy" src="img/opt/gal-art-masques-t.jpg"
+        srcset="img/opt/gal-art-masques-t360.jpg 360w, img/opt/gal-art-masques-t.jpg 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" data-full="img/opt/gal-art-masques.jpg" alt="Masques et sculptures"></picture>
       <figcaption>Masques et sculptures</figcaption></figure>
-    <figure data-cat="art"><picture><source srcset="img/opt/gal-art-statue-t.webp" type="image/webp">
-      <img width="620" height="440" loading="lazy" src="img/opt/gal-art-statue-t.jpg" data-full="img/opt/gal-art-statue.jpg" alt="Statue et arbre en fleurs"></picture>
+    <figure data-cat="art"><picture>
+      <source srcset="img/opt/gal-art-statue-t360.webp 360w, img/opt/gal-art-statue-t.webp 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" type="image/webp">
+      <img width="620" height="440" loading="lazy" src="img/opt/gal-art-statue-t.jpg"
+        srcset="img/opt/gal-art-statue-t360.jpg 360w, img/opt/gal-art-statue-t.jpg 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" data-full="img/opt/gal-art-statue.jpg" alt="Statue et arbre en fleurs"></picture>
       <figcaption>Statue et arbre en fleurs</figcaption></figure>
-    <figure data-cat="art"><picture><source srcset="img/opt/gal-art-lanterne-t.webp" type="image/webp">
-      <img width="620" height="440" loading="lazy" src="img/opt/gal-art-lanterne-t.jpg" data-full="img/opt/gal-art-lanterne.jpg" alt="Lanterne de rotin allumée"></picture>
+    <figure data-cat="art"><picture>
+      <source srcset="img/opt/gal-art-lanterne-t360.webp 360w, img/opt/gal-art-lanterne-t.webp 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" type="image/webp">
+      <img width="620" height="440" loading="lazy" src="img/opt/gal-art-lanterne-t.jpg"
+        srcset="img/opt/gal-art-lanterne-t360.jpg 360w, img/opt/gal-art-lanterne-t.jpg 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" data-full="img/opt/gal-art-lanterne.jpg" alt="Lanterne de rotin allumée"></picture>
       <figcaption>Lanterne de rotin allumée</figcaption></figure>
-    <figure data-cat="art"><picture><source srcset="img/opt/gal-art-lumineuse-t.webp" type="image/webp">
-      <img width="620" height="440" loading="lazy" src="img/opt/gal-art-lumineuse-t.jpg" data-full="img/opt/gal-art-lumineuse.jpg" alt="L'enseigne lumineuse"></picture>
+    <figure data-cat="art"><picture>
+      <source srcset="img/opt/gal-art-lumineuse-t360.webp 360w, img/opt/gal-art-lumineuse-t.webp 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" type="image/webp">
+      <img width="620" height="440" loading="lazy" src="img/opt/gal-art-lumineuse-t.jpg"
+        srcset="img/opt/gal-art-lumineuse-t360.jpg 360w, img/opt/gal-art-lumineuse-t.jpg 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" data-full="img/opt/gal-art-lumineuse.jpg" alt="L'enseigne lumineuse"></picture>
       <figcaption>L'enseigne lumineuse</figcaption></figure>
-    <figure data-cat="art"><picture><source srcset="img/opt/gal-art-bois-t.webp" type="image/webp">
-      <img width="620" height="440" loading="lazy" src="img/opt/gal-art-bois-t.jpg" data-full="img/opt/gal-art-bois.jpg" alt="Signalétique sculptée à la main"></picture>
+    <figure data-cat="art"><picture>
+      <source srcset="img/opt/gal-art-bois-t360.webp 360w, img/opt/gal-art-bois-t.webp 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" type="image/webp">
+      <img width="620" height="440" loading="lazy" src="img/opt/gal-art-bois-t.jpg"
+        srcset="img/opt/gal-art-bois-t360.jpg 360w, img/opt/gal-art-bois-t.jpg 620w"
+        sizes="(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, 288px" data-full="img/opt/gal-art-bois.jpg" alt="Signalétique sculptée à la main"></picture>
       <figcaption>Signalétique sculptée à la main</figcaption></figure>
   </div>
   <p class="empty" id="empty" data-t="emp">Aucune photo dans cette catégorie.</p>

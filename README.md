@@ -284,7 +284,11 @@ publie nulle part, et un point mal placé vaut moins que pas de point.
 ## Images responsives
 
 `build-galerie.py` sort les 47 photos à **1748 px**, la définition réelle des
-originaux de `img/gallery/`. Il se régénère de lui-même si `LARGEUR` change :
+originaux de `img/gallery/`, et deux tailles de vignette — **360 et 620 px**.
+La grille passe de 4 colonnes à 3 puis 2 : sur un téléphone une vignette ne
+fait que 151 px de large, servir du 620 revenait à envoyer trois fois les
+pixels utiles. Le rapport des vignettes est figé en CSS (`aspect-ratio`), sinon
+la hauteur rendue changerait selon le palier chargé et la grille bougerait. Il se régénère de lui-même si `LARGEUR` change :
 inutile de supprimer quoi que ce soit à la main.
 
 `build-images.py` produit ensuite les largeurs intermédiaires (640 / 1024 /
