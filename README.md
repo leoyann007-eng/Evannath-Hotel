@@ -626,11 +626,6 @@ Les fichiers devenus orphelins sont dans `site/.quarantaine/`, **non
 supprimés** : une fois déjà, des variantes `hero-*` dont le chemin était
 construit en JavaScript ont failli être effacées.
 
-⚠️ **L'image de partage de l'accueil** (`og:image`) reste cette chambre. Ce
-n'est pas faux — elle ne porte aucune légende — mais un lien partagé sur
-WhatsApp montre une chambre plutôt que la paillote sur la lagune, qui est la
-signature de l'établissement. À trancher avec la direction.
-
 ### Les offres sur l'accueil
 
 Quatre des onze forfaits sont mis en avant, juste **après les chambres** :
