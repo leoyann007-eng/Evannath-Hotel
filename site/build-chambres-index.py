@@ -141,7 +141,7 @@ b = [header('reserver.html', 'Réserver', 'cta'), drawer('index.html#chambres'),
 </section>
 
 <section class="wrap" id="liste">
-  <div class="bar">
+  <div class="bar collante">
     <div class="grp" role="group" aria-label="Filtrer par type">
       <b data-t="ft">Type</b>
       <button class="chip on" data-f="tout" data-t="f0">Tout voir</button>

@@ -146,7 +146,7 @@ b = [header('index.html#reserver', 'Réserver'), drawer('index.html#galerie'), '
   <p data-t="lede">Tout ce que vous voyez ici a été photographié sur place. Pas de banque d'images, pas d'illustration générée — le lieu tel qu'il est.</p>
 </div>
 
-<div class="tools">
+<div class="tools collante">
   <div class="wrap in">
     <div class="filters" role="group" aria-label="Filtrer les photos">''' % len(made)]
 

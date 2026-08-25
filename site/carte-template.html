@@ -187,6 +187,19 @@ header.scrolled .brand img{width:132px}
 .carte{background:var(--bark);padding:110px 0 0;border-top:1px solid var(--line)}
 .carte .head{text-align:center;margin-bottom:44px}
 .carte .head p{max-width:52ch;margin:18px auto 0;color:#B4A794}
+/* Barres collantes : rideau opaque au-dessus ------------------------------
+   Adosser la barre a une hauteur d'en-tete presumee est fragile : l'en-tete
+   se compacte sur 0,45 s, sa hauteur varie donc pendant le defilement, et la
+   moindre difference laisse passer le contenu entre les deux. Plutot que de
+   viser une valeur, la barre porte un rideau opaque qui remonte jusqu'en haut
+   de la fenetre. L'en-tete, en z-index superieur, se peint par-dessus : rien
+   ne peut plus apparaitre dans l'intervalle, quelle que soit sa hauteur.
+   Le rideau ne s'active qu'une fois la barre epinglee. */
+/* left/right plutot que 100vw : 100vw inclut la barre de defilement et
+   creait 8 px de debordement horizontal. */
+.collante::before{content:"";position:absolute;left:0;right:0;
+  bottom:100%;height:0;background:var(--bark);pointer-events:none}
+.collante.epinglee::before{height:100vh}
 .tools{
   position:sticky;top:var(--h-nav);z-index:60;background:rgba(30,21,13,.97);backdrop-filter:blur(16px);
   border-block:1px solid var(--line);margin-bottom:64px
@@ -498,7 +511,7 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
     <p data-t="p5">{{TOTAL}} propositions. Rien n'est caché, rien n'est « sur demande ».</p>
   </div>
 
-  <div class="tools">
+  <div class="tools collante">
     <div class="wrap in">
       <div class="tabset" role="tablist">
         <button class="on" data-p="c" role="tab" aria-selected="true" data-t="tc">Cuisine</button>
@@ -593,6 +606,17 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
 <script>
 {{ENVOI}}
 var hd=document.getElementById('hd');
+
+/* Rideau des barres collantes : on epingle des que la sentinelle sort du haut. */
+document.querySelectorAll('.collante').forEach(function(bar){
+  var s=document.createElement('div');
+  s.style.cssText='position:absolute;top:0;height:1px;width:1px';
+  bar.parentNode.insertBefore(s,bar);
+  if(!('IntersectionObserver' in window)){bar.classList.add('epinglee');return}
+  new IntersectionObserver(function(e){
+    bar.classList.toggle('epinglee', !e[0].isIntersecting);
+  },{threshold:0}).observe(s);
+});
 addEventListener('scroll',function(){hd.classList.toggle('scrolled',scrollY>60)},{passive:true});
 
 var bg=document.getElementById('bg'),dw=document.getElementById('dw');
