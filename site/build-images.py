@@ -52,8 +52,12 @@ def main():
             im = im.convert('RGB')
         w0, h0 = im.size
         for w in LARGEURS:
-            if w >= w0:
-                continue          # jamais d'agrandissement
+            # Un palier trop proche de l'original ne sert a rien : il pese
+            # presque autant pour une difference que l'oeil ne voit pas, et
+            # double le nombre de fichiers. Au-dela de 90 % de la largeur
+            # source, on laisse le navigateur prendre l'original.
+            if w >= w0 * 0.9:
+                continue
             h = round(h0 * w / w0)
             petite = None
             for ext, kw in (('webp', dict(quality=QUAL_WEBP, method=6)),

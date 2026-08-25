@@ -283,8 +283,15 @@ publie nulle part, et un point mal placé vaut moins que pas de point.
 
 ## Images responsives
 
-`build-images.py` produit trois largeurs par photo (640 / 1024 / 1600), en WebP
-et en JPEG progressif, sans jamais agrandir au-delà de l'original. `responsive()`
+`build-galerie.py` sort les 47 photos à **1748 px**, la définition réelle des
+originaux de `img/gallery/`. Il se régénère de lui-même si `LARGEUR` change :
+inutile de supprimer quoi que ce soit à la main.
+
+`build-images.py` produit ensuite les largeurs intermédiaires (640 / 1024 /
+1600), en WebP et en JPEG progressif, sans jamais agrandir au-delà de
+l'original — **ni générer un palier à moins de 10 % de la source** : un
+1600 tiré d'un 1748 pèse presque autant pour une différence invisible, et
+double le nombre de fichiers pour rien. `responsive()`
 dans `_chrome.py` les déclare en `srcset` + `sizes` — par des motifs qui ne
 remplacent qu'une valeur d'attribut, jamais du balisage.
 

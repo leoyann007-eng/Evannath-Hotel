@@ -73,21 +73,38 @@ CATS = [('all','Tout voir'),('domaine','Le domaine'),('lagune','Lagune & paillot
 # ── optimisation ──────────────────────────────────────────────
 os.makedirs('img/opt', exist_ok=True)
 made = []
+refaites = []
+# Largeur de la version pleine. Les originaux de img/gallery/ font 1748 px :
+# les plafonner plus bas revenait a jeter de la definition deja payee, visible
+# des qu'une de ces photos sert de hero sur un ecran dense.
+LARGEUR = 1748
+VIGNETTE = 620
+
 for src, name, cat, cap in PHOTOS:
     full = 'img/opt/gal-%s.jpg' % name
-    if not os.path.exists('img/' + src):
+    chemin = 'img/' + src
+    if not os.path.exists(chemin):
         print('  ABSENT :', src); continue
-    if not os.path.exists(full):
-        im = Image.open('img/' + src).convert('RGB')
-        r = 1400 / im.width if im.width > 1400 else 1
-        big = im.resize((int(im.width * r), int(im.height * r)), Image.LANCZOS)
+
+    # On regenere si le fichier manque, mais aussi s'il n'est pas a la largeur
+    # voulue : le script se remet ainsi de lui-meme a jour quand LARGEUR change,
+    # sans qu'il faille supprimer quoi que ce soit a la main.
+    vise = min(LARGEUR, Image.open(chemin).width)
+    refaire = not os.path.exists(full) or Image.open(full).width != vise
+
+    if refaire:
+        im = Image.open(chemin).convert('RGB')
+        r = LARGEUR / im.width if im.width > LARGEUR else 1
+        big = im.resize((round(im.width * r), round(im.height * r)), Image.LANCZOS)
         big.save(full, 'JPEG', quality=78, optimize=True, progressive=True)
         big.save('img/opt/gal-%s.webp' % name, 'WEBP', quality=76, method=6)
-        r2 = 620 / big.width
-        th = big.resize((620, int(big.height * r2)), Image.LANCZOS)
+        th = big.resize((VIGNETTE, round(big.height * VIGNETTE / big.width)), Image.LANCZOS)
         th.save('img/opt/gal-%s-t.jpg' % name, 'JPEG', quality=74, optimize=True)
         th.save('img/opt/gal-%s-t.webp' % name, 'WEBP', quality=72, method=6)
+        refaites.append(name)
     made.append((name, cat, cap))
+if refaites:
+    print('  %d photos regenerees en %d px' % (len(refaites), LARGEUR))
 print('%d photos pretes pour la galerie' % len(made))
 
 # ── galerie.html ──────────────────────────────────────────────
