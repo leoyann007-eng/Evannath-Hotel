@@ -35,6 +35,8 @@
   --cream:#F6EEE2; --muted:#9C8B78; --palm:#8FAE63;
   --line:rgba(185,138,80,.18); --line-2:rgba(185,138,80,.10);
   --max:1240px;
+  /* Hauteur de l'en-tete fixe une fois compacte, cf. _chrome.py */
+  --h-nav:83px;
   --f-display:"Marcellus",Georgia,"Times New Roman",serif;
   --f-body:"Karla",system-ui,-apple-system,sans-serif;
 }
@@ -186,7 +188,7 @@ header.scrolled .brand img{width:132px}
 .carte .head{text-align:center;margin-bottom:44px}
 .carte .head p{max-width:52ch;margin:18px auto 0;color:#B4A794}
 .tools{
-  position:sticky;top:110px;z-index:60;background:rgba(30,21,13,.97);backdrop-filter:blur(16px);
+  position:sticky;top:var(--h-nav);z-index:60;background:rgba(30,21,13,.97);backdrop-filter:blur(16px);
   border-block:1px solid var(--line);margin-bottom:64px
 }
 .tools .in{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;padding:13px 0}
@@ -279,7 +281,6 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
   .plate .pr{margin-top:6px}
   .plate .pr small{text-align:left}
   .origins{grid-template-columns:1fr}
-  .tools{top:70px}
   .tabset button{padding:15px 16px;font-size:10px;letter-spacing:.14em}
   .search{flex:1 1 100%}
   .grp h3::before,.grp h3::after{width:8%}

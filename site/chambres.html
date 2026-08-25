@@ -33,6 +33,10 @@
   --cream:#F6EEE2; --muted:#9C8B78; --palm:#8FAE63; --err:#E08A7B;
   --line:rgba(185,138,80,.18); --line-2:rgba(185,138,80,.10);
   --max:1240px;
+  /* Hauteur de l'en-tete fixe une fois compacte. Les barres collantes s'y
+     adossent : une valeur devinee laissait soit un interstice ou le contenu
+     defilait a decouvert, soit un chevauchement qui masquait la barre. */
+  --h-nav:83px;
   --f-display:"Marcellus",Georgia,"Times New Roman",serif;
   --f-body:"Karla",system-ui,-apple-system,sans-serif;
 }
@@ -163,7 +167,7 @@ section{padding:88px 0}
 
 /* barre de tri */
 .bar{display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap;
-  padding:20px 0;border-block:1px solid var(--line);position:sticky;top:110px;z-index:20;
+  padding:20px 0;border-block:1px solid var(--line);position:sticky;top:var(--h-nav);z-index:20;
   background:rgba(23,16,10,.96);backdrop-filter:blur(12px)}
 .grp{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .grp b{font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-right:6px}

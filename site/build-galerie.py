@@ -95,7 +95,7 @@ CSS_GAL = """
 .head{padding:150px 0 34px}
 .head h1{margin:10px 0 18px}
 .head p{max-width:58ch;font-size:1.06rem}
-.tools{position:sticky;top:110px;z-index:60;background:rgba(23,16,10,.97);backdrop-filter:blur(16px);
+.tools{position:sticky;top:var(--h-nav);z-index:60;background:rgba(23,16,10,.97);backdrop-filter:blur(16px);
   border-block:1px solid var(--line);margin-bottom:44px}
 .tools .in{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;padding:13px 0}
 .filters{display:flex;gap:6px;flex-wrap:wrap}
@@ -130,7 +130,6 @@ CSS_GAL = """
   .grid{columns:2;column-gap:10px}
   .grid figure{margin-bottom:10px}
   .grid figcaption{opacity:1;font-size:10px;padding:24px 10px 8px}
-  .tools{top:70px}
   .filters button{padding:13px 13px;font-size:10px;letter-spacing:.12em}
   #lb .prev{left:8px}#lb .next{right:8px}
 }
