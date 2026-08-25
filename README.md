@@ -274,6 +274,38 @@ Le titre reste lisible sur toutes les images : contraste mesuré sous le `<h1>`
 image par image, **9,22:1** au pire pour le titre et **5,41:1** pour l'accent
 doré, contre 3:1 exigés pour du grand texte.
 
+### Le cache, et pourquoi les URL des médias portent `?v=`
+
+`vercel.json` sert `/video/` en `immutable, max-age=31536000` : le navigateur
+reçoit l'ordre de garder le fichier **un an** et de ne plus jamais redemander
+cette URL. Cette promesse n'est tenable que si **l'URL change quand le contenu
+change**.
+
+Elle ne l'était pas. Le film du hero a été ré-encodé trois fois sous le même
+nom : tout visiteur ayant vu une version précédente y restait bloqué, sans
+aucun moyen de recevoir la correction — un rechargement ne suffit pas, la
+requête n'est même pas émise.
+
+Les URL des vidéos et de leurs affiches portent donc une **empreinte de leur
+propre contenu**, ajoutée automatiquement par `versionner()` dans `_chrome.py`
+au moment de la génération :
+
+```
+video/hero-presentation.mp4?v=91f5865b
+img/opt/hero-presentation-affiche.jpg?v=896b64f2
+```
+
+Ré-encoder un fichier change son empreinte, donc son URL, donc le navigateur
+le retélécharge. Rien à purger.
+
+`verifier.py` (contrôle 7 bis) refuse une empreinte périmée **et** une vidéo
+citée sans empreinte. Les deux cas ont été testés en les provoquant.
+
+`/img/opt/` n'est pas versionné — les photos y sont trop nombreuses. Sa règle
+est donc passée de `immutable` à
+`max-age=86400, stale-while-revalidate=2592000` : une photo régénérée se
+propage en un jour au lieu d'un an, sans coûter de requête au visiteur.
+
 ### Sur téléphone, pas de film
 
 Aucune des deux vidéos ne se charge en dessous de 900 px de large, ni en

@@ -41,7 +41,7 @@ def pleines_referencees():
         # Une affiche de video designe souvent directement un palier
         # (…-1024.jpg) : on remonte a l'image de base pour que ce palier
         # soit effectivement fabrique.
-        for n in re.findall(r'poster="img/opt/([\w-]+)\.(?:webp|jpg)"', s):
+        for n in re.findall(r'poster="img/opt/([\w-]+)\.(?:webp|jpg)', s):
             noms.add(re.sub(r'-(?:%s)$' % '|'.join(map(str, LARGEURS)), '', n))
         noms |= set(re.findall(r'data-bg="([\w-]+)"', s))
     return sorted(n for n in noms

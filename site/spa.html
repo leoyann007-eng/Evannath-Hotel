@@ -337,7 +337,7 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
       <p class="big" style="margin-top:22px" data-t="big">Le sel, l'huile et la main. Rien de plus compliqué.</p>
       <div class="geste">
         <video muted loop playsinline preload="none" aria-hidden="true"
-               poster="img/opt/spa-massage-affiche.jpg" id="geste"></video>
+               poster="img/opt/spa-massage-affiche.jpg?v=711c69ca" id="geste"></video>
       </div>
       <p class="legende" data-t="lg">Un soin au bord du bassin, filmé sur place.</p>
     </div>
@@ -763,7 +763,7 @@ document.getElementById('sf').addEventListener('submit',function(e){e.preventDef
 
 function filmDuGeste(){
   filmAmbiance(document.getElementById('geste'),
-    [{type:'video/mp4', src:'video/spa-massage.mp4'}]);
+    [{type:'video/mp4', src:'video/spa-massage.mp4?v=099ec142'}]);
 }
 /* Comme sur l'accueil : on n'appelle tout de suite que si la page est deja
    chargee. Un appel premature verrouillerait la decision alors que la

@@ -6,7 +6,7 @@ reellement survenu sur ce projet — ils sont la pour qu'il ne revienne pas.
 """
 import io, os, re, glob, json, sys
 sys.path.insert(0, '.')
-from _chrome import TOKENS, NAV_BASE, LANG_JS
+from _chrome import TOKENS, NAV_BASE, LANG_JS, empreinte
 
 _cache = {}
 
@@ -85,6 +85,22 @@ def controler():
         for src in set(re.findall(r'(img/opt/[\w-]+\.(?:webp|jpg|png))', s)):
             if not os.path.exists(src):
                 pb.append((f, 'fichier absent : ' + src))
+
+        # 7 bis. les medias servis en « immutable » portent une empreinte de
+        # contenu dans leur URL, et cette empreinte doit correspondre au
+        # fichier. Sans ce controle, re-encoder une video sans relancer les
+        # generateurs laisse tous les visiteurs precedents sur l'ancienne
+        # version pendant un an, sans moyen de la remplacer.
+        for chemin, v in re.findall(
+                r'(video/[\w-]+\.(?:mp4|webm)|img/opt/[\w-]+-affiche\.(?:jpg|webp))'
+                r'\?v=([0-9a-f]+)', s):
+            if not os.path.exists(chemin):
+                pb.append((f, 'fichier absent : ' + chemin))
+            elif empreinte(chemin) != v:
+                pb.append((f, '%s : empreinte %s dans l URL, %s dans le fichier '
+                              '— relancer les generateurs' % (chemin, v, empreinte(chemin))))
+        for chemin in set(re.findall(r"""["'(](video/[\w-]+\.(?:mp4|webm))(?![\w.?])""", s)):
+            pb.append((f, 'media sans empreinte : ' + chemin))
 
         # 8. toute image ouvrable en plein ecran doit exister aussi en WebP
         for base in re.findall(r'data-full="(img/opt/[\w-]+)\.jpg"', s):

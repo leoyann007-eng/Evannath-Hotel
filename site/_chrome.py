@@ -576,6 +576,51 @@ def responsive(html, hero=None):
     return html
 
 
+# --- Empreinte de contenu sur les medias re-encodables ------------------------
+#
+# vercel.json sert /video/ en « immutable, un an » : le navigateur a l'ordre
+# de garder le fichier et de ne PLUS JAMAIS redemander cette URL. Cette
+# promesse n'est tenable que si l'URL change quand le contenu change.
+#
+# Elle ne l'etait pas : le film du hero a ete re-encode trois fois sous le
+# meme nom. Tout visiteur ayant vu une version precedente restait dessus,
+# pendant un an, sans aucun moyen de recevoir la correction.
+#
+# Les URL des videos et des affiches portent donc desormais une empreinte de
+# leur propre contenu. Re-encoder un fichier change l'empreinte, donc l'URL,
+# donc le navigateur le retelecharge — sans rien avoir a purger.
+import hashlib as _hashlib
+
+_EMPREINTES = {}
+
+def empreinte(chemin):
+    if chemin not in _EMPREINTES:
+        with open(chemin, 'rb') as f:
+            _EMPREINTES[chemin] = _hashlib.md5(f.read()).hexdigest()[:8]
+    return _EMPREINTES[chemin]
+
+
+# Les affiches sont concernees au meme titre : elles sont refabriquees a
+# chaque re-encodage du film qu'elles illustrent.
+_MEDIA = _re.compile(r'(video/[\w-]+\.(?:mp4|webm)|img/opt/[\w-]+-affiche\.(?:jpg|webp))'
+                    r'(?:\?v=[0-9a-f]+)?')
+
+
+def versionner(html):
+    """Ajoute ?v=<empreinte> aux URL des medias re-encodables.
+
+    Idempotent : une empreinte deja presente est recalculee, jamais empilee.
+    Une URL dont le fichier est absent est laissee telle quelle — c'est a
+    verifier.py de signaler le lien mort, pas a cette fonction de le masquer.
+    """
+    def remplace(m):
+        chemin = m.group(1)
+        if not _os.path.exists(chemin):
+            return m.group(0)
+        return '%s?v=%s' % (chemin, empreinte(chemin))
+    return _MEDIA.sub(remplace, html)
+
+
 def page(title, desc, og, css, body, script, preload=None, slug=None, jsonld=''):
     pre = '\n<link rel="preload" as="image" href="img/opt/%s.webp" type="image/webp">' % preload if preload else ''
     if slug is not None:
@@ -615,4 +660,4 @@ def page(title, desc, og, css, body, script, preload=None, slug=None, jsonld='')
 </body>
 </html>
 ''' % (ROBOTS_META, title, desc, title, desc, SITE, og, ICONS, can, HEAD, pre, jsonld, HEAD_CSS, css,
-       responsive(dimensionner(body), hero=preload), script)
+       versionner(responsive(dimensionner(body), hero=preload)), versionner(script))

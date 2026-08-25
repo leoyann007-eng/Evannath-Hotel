@@ -7,7 +7,7 @@ remplacés par « Nous consulter » plutôt qu'inventés.
 """
 import io
 import _schema
-from _chrome import responsive, dimensionner, ENVOI_JS, NAV_JS, TOKENS, HEAD_CSS, LANG_JS
+from _chrome import responsive, dimensionner, versionner, ENVOI_JS, NAV_JS, TOKENS, HEAD_CSS, LANG_JS
 
 CUISINE = [
  ("Nos entrées", [
@@ -208,7 +208,7 @@ HTML = (HTML
       _schema.restaurant(nb_plats=total),
       _schema.hotel(),
       _schema.fil([('Accueil','index'),('La table',None)]))))
-io.open('carte.html','w',encoding='utf-8').write(responsive(dimensionner(HTML), hero='gal-lag-nuit'))
+io.open('carte.html','w',encoding='utf-8').write(versionner(responsive(dimensionner(HTML), hero='gal-lag-nuit')))
 print('carte.html :', total, 'articles')
 
 SPAH = io.open('spa-template.html',encoding='utf-8').read()
@@ -220,5 +220,5 @@ SPAH = (SPAH.replace('{{SPA}}',sections(SPA,'s')).replace('{{ENVOI}}', ENVOI_JS)
                       'spa', image='gal-spa-couchant'),
       _schema.hotel(),
       _schema.fil([('Accueil','index'),('Le spa',None)]))))
-io.open('spa.html','w',encoding='utf-8').write(responsive(dimensionner(SPAH), hero='gal-spa-couchant'))
+io.open('spa.html','w',encoding='utf-8').write(versionner(responsive(dimensionner(SPAH), hero='gal-spa-couchant')))
 print('spa.html   :', total_spa, 'soins')
