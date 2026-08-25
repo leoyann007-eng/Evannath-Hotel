@@ -45,6 +45,13 @@ CSS = open('chambre-style.css', encoding='utf-8').read() if False else """
 .mosaic{display:grid;grid-template-columns:2fr 1fr 1fr;grid-auto-rows:172px;gap:10px;margin-bottom:76px}
 .mosaic figure{overflow:hidden;position:relative;cursor:pointer;background:var(--bark-2)}
 .mosaic figure:first-child{grid-column:span 1;grid-row:span 2}
+/* La mosaique doit tomber juste, sinon la grille laisse un trou visible.
+   A trois photos, la premiere prenait deux rangees sans que rien ne remplisse
+   la seconde : 27 % de vide sous les deux vignettes, sur six fiches.
+   A huit photos, c'est la grille a deux colonnes qui finissait sur une rangee
+   incomplete ; la derniere image s'y etale alors sur toute la largeur.
+   Les deux classes sont posees par le generateur, qui seul connait le nombre. */
+.mosaic.court figure:first-child{grid-row:span 1}
 .mosaic img{width:100%;height:100%;object-fit:cover;transition:1s cubic-bezier(.2,.8,.2,1)}
 .mosaic figure:hover img{transform:scale(1.07)}
 .mosaic figcaption{position:absolute;left:0;right:0;bottom:0;padding:26px 14px 10px;
@@ -121,6 +128,8 @@ CSS = open('chambre-style.css', encoding='utf-8').read() if False else """
   .panel{position:static;margin-bottom:56px}
   .mosaic{grid-template-columns:1fr 1fr;grid-auto-rows:180px}
   .mosaic figure:first-child{grid-column:span 2}
+  .mosaic.court figure:first-child{grid-row:span 2}
+  .mosaic figure.plein{grid-column:span 2}
   .more-grid{grid-template-columns:repeat(2,1fr)}
 }
 @media(max-width:720px){
@@ -135,6 +144,44 @@ CSS = open('chambre-style.css', encoding='utf-8').read() if False else """
   #lb .prev{left:8px}#lb .next{right:8px}
 }
 """
+
+# Largeurs reelles des vignettes de la mosaique -------------------------------
+#
+# .wrap fait min(1240px, 100vw) - 48. La grille est en 2fr 1fr 1fr avec 10 px
+# de gouttiere au-dela de 1100 px, en deux colonnes entre 721 et 1100, et en
+# une seule colonne en dessous. La premiere figure occupe deux rangees, donc
+# la moitie de la largeur en grand, et toute la largeur en dessous de 1100.
+#
+# Sans ces declarations, une vignette de 293 px se faisait servir le palier
+# 1024 : le navigateur ne voit pas la grille, il croit ce qu'on lui declare.
+#
+# Placement en trois colonnes : la premiere figure prend la colonne large sur
+# deux rangees, donc les quatre suivantes remplissent les deux colonnes
+# etroites. A partir de la sixieme, les rangees repartent sur les trois
+# colonnes — l'image d'indice 5, puis 8, puis 11, retombe dans la colonne
+# large. En dessous de cinq photos la premiere ne prend qu'une rangee.
+_LARGE_3COL = '(max-width:1287px) calc((100vw - 68px) / 2), 586px'
+_ETROIT_3COL = '(max-width:1287px) calc((100vw - 68px) / 4), 293px'
+# Deux colonnes : pleine largeur pour la premiere et pour une derniere etalee,
+# demi-largeur sinon. Une seule colonne en dessous de 721 px.
+_PLEIN = 'calc(100vw - 48px)'
+_DEMI = 'calc((100vw - 58px) / 2)'
+
+
+def _sizes_mosaique(i, n):
+    """Declaration de largeur pour la i-eme photo d'une mosaique de n.
+
+    Composee a partir du placement reel, pas approximee : une vignette de
+    293 px se faisait servir le palier 1024 parce qu'on lui declarait 700 px.
+    """
+    grand = (i == 0) or (n >= 5 and i >= 5 and (i - 5) % 3 == 0)
+    etale = (i == 0) or (i == n - 1 and n % 2 == 0)   # pleine largeur a 2 colonnes
+    trois = _LARGE_3COL if grand else _ETROIT_3COL
+    deux = _PLEIN if etale else _DEMI
+    if i == 0:
+        return '(max-width:1100px) %s, %s' % (_PLEIN, trois)
+    return '(max-width:720px) %s, (max-width:1100px) %s, %s' % (_PLEIN, deux, trois)
+
 
 def fmt(n):
     return format(n, ',').replace(',', ' ')
@@ -167,13 +214,16 @@ for c in CHAMBRES:
 </div>
 
 <div class="wrap">
-  <div class="mosaic" id="gl">''' % fmt(c['prix']))
+  <div class="mosaic%s" id="gl">''' % (fmt(c['prix']), ' court' if len(c['photos']) < 5 else ''))
 
     for i, (img, alt, cap) in enumerate(c['photos']):
         ld = 'eager' if i == 0 else 'lazy'
-        b.append('''    <figure><picture><source srcset="img/opt/%s.webp" type="image/webp">
+        # Rangee incomplete a deux colonnes quand le nombre est pair : la
+        # derniere image s'etale plutot que de laisser une case vide.
+        cl = ' class="plein"' if (i == len(c['photos']) - 1 and len(c['photos']) % 2 == 0) else ''
+        b.append('''    <figure%s><picture><source srcset="img/opt/%s.webp" type="image/webp">
       <img loading="%s" src="img/opt/%s.jpg" data-full="img/opt/%s.jpg" alt="%s"></picture>
-      <figcaption>%s</figcaption></figure>''' % (img, ld, img, img, alt, cap))
+      <figcaption>%s</figcaption></figure>''' % (cl, img, ld, img, img, alt, cap))
 
     b.append('''  </div>
 </div>
@@ -341,11 +391,13 @@ var EN={''' % (c['prix'], c['slug']) + EN_NAV + 'cta:"Book"};\n\n' + LANG_JS
         _schema.fil([('Accueil', 'index'), ('Chambres &amp; Suites', 'chambres'),
                      (c['nom'].replace('&amp;', '&'), None)]))
 
+    mosa = {ph[0]: _sizes_mosaique(i, len(c['photos'])) for i, ph in enumerate(c['photos'])}
+
     io.open(c['slug'] + '.html', 'w', encoding='utf-8').write(page(
         "%s — Hôtel Evannath, Assinie | %s FCFA la nuit" % (c['nom'], fmt(c['prix'])),
         "%s à l'Hôtel Evannath, Assinie PK 19 : %s. %s FCFA la nuit, petit-déjeuner et navette aéroport inclus."
         % (c['nom'], c['meta'], fmt(c['prix'])),
-        c['photos'][0][0], CSS, '\n'.join(b), JS, preload=c['photos'][0][0], slug=c['slug'], jsonld=LD))
+        c['photos'][0][0], CSS, '\n'.join(b), JS, preload=c['photos'][0][0], slug=c['slug'], jsonld=LD, sizes=mosa))
     print('  %-26s %s FCFA' % (c['slug'] + '.html', fmt(c['prix'])))
 
 print('%d fiches chambres generees' % len(CHAMBRES))

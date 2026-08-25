@@ -274,6 +274,38 @@ Le titre reste lisible sur toutes les images : contraste mesuré sous le `<h1>`
 image par image, **9,22:1** au pire pour le titre et **5,41:1** pour l'accent
 doré, contre 3:1 exigés pour du grand texte.
 
+### La mosaïque des fiches chambres
+
+La grille fait trois colonnes `2fr 1fr 1fr`, et la première image occupe deux
+rangées. Elle ne tombe juste que pour certains nombres de photos — sinon elle
+laisse un trou, et le trou se voit :
+
+- **moins de 5 photos** : la seconde rangée reste vide sous la grande image.
+  Mesuré à 3 photos : **27 % de la grille**, sur six fiches. La classe `court`
+  retire l'étalement sur deux rangées.
+- **nombre pair** : la grille à deux colonnes finit sur une rangée incomplète.
+  La classe `plein` étale la dernière image sur toute la largeur.
+
+Les deux classes sont posées par `build-chambres.py`, qui seul connaît le
+nombre. `verifier.py` (contrôle 7 ter) refuse une classe manquante ou de trop —
+les quatre cas ont été testés en les provoquant.
+
+Remplissage mesuré après correction, à 1280 / 900 / 375 px :
+
+| fiche | photos | 1280 px | 900 px | 375 px |
+|---|---|---|---|---|
+| chambre-standard | 3 | 98,3 % | 97,8 % | 97,7 % |
+| suite-arabe | 5 | 96,9 % | 96,8 % | 96,9 % |
+| suite-anglaise | 8 | 95,6 % | 95,9 % | 93,9 % |
+
+Le reste, ce sont les gouttières de 10 px.
+
+**Les largeurs déclarées suivent le placement réel.** Une vignette de 293 px se
+faisait servir le palier 1024 parce que `sizes` annonçait 700 px — le
+navigateur ne voit pas la grille, il croit ce qu'on lui déclare.
+`_sizes_mosaique()` compose la déclaration à partir de la position de l'image :
+colonne large ou étroite, pleine largeur ou moitié selon le nombre de colonnes.
+
 ### Le cache, et pourquoi les URL des médias portent `?v=`
 
 `vercel.json` sert `/video/` en `immutable, max-age=31536000` : le navigateur

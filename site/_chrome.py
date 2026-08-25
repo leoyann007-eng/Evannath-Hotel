@@ -548,10 +548,20 @@ def dimensionner(html):
     return _re.sub(r'<img[^<>]*?src="img/opt/([\w-]+)\.(jpg|png|webp)"[^<>]*?>', f, html)
 
 
-def responsive(html, hero=None):
-    """Ajoute srcset + sizes aux <picture>/<img> qui ont des variantes."""
+def responsive(html, hero=None, sizes=None):
+    """Ajoute srcset + sizes aux <picture>/<img> qui ont des variantes.
+
+    `sizes` : dictionnaire {nom d'image: declaration}, pour les mises en page
+    dont la largeur d'affichage ne ressemble pas a SIZES_DEFAUT. Sans lui, une
+    vignette de mosaique de 293 px se faisait servir le palier 1024 — le
+    navigateur ne peut pas deviner la geometrie d'une grille, il croit ce
+    qu'on lui declare.
+    """
+    sizes = sizes or {}
 
     def sizes_de(nom):
+        if nom in sizes:
+            return sizes[nom]
         return SIZES_HERO if hero and nom == hero else SIZES_DEFAUT
 
     def source(m):
@@ -621,7 +631,7 @@ def versionner(html):
     return _MEDIA.sub(remplace, html)
 
 
-def page(title, desc, og, css, body, script, preload=None, slug=None, jsonld=''):
+def page(title, desc, og, css, body, script, preload=None, slug=None, jsonld='', sizes=None):
     pre = '\n<link rel="preload" as="image" href="img/opt/%s.webp" type="image/webp">' % preload if preload else ''
     if slug is not None:
         url = SITE + ('/' if slug in ('index', '') else '/' + slug)
@@ -660,4 +670,4 @@ def page(title, desc, og, css, body, script, preload=None, slug=None, jsonld='')
 </body>
 </html>
 ''' % (ROBOTS_META, title, desc, title, desc, SITE, og, ICONS, can, HEAD, pre, jsonld, HEAD_CSS, css,
-       versionner(responsive(dimensionner(body), hero=preload)), versionner(script))
+       versionner(responsive(dimensionner(body), hero=preload, sizes=sizes)), versionner(script))

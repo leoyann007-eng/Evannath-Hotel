@@ -102,6 +102,28 @@ def controler():
         for chemin in set(re.findall(r"""["'(](video/[\w-]+\.(?:mp4|webm))(?![\w.?])""", s)):
             pb.append((f, 'media sans empreinte : ' + chemin))
 
+        # 7 ter. la mosaique des fiches chambres doit se remplir exactement.
+        # La grille a trois colonnes place la premiere image sur deux rangees ;
+        # a trois photos, la seconde rangee restait vide — 27 % de trou sur six
+        # fiches. A deux colonnes, un nombre pair laisse une case vide en fin
+        # de grille. Les deux cas se corrigent par une classe, encore faut-il
+        # qu'elle soit la.
+        mo = re.search(r'<div class="mosaic([^"]*)" id="gl">(.*?)</div>\s*</div>', s, re.S)
+        if mo:
+            classes, corps = mo.group(1), mo.group(2)
+            n = corps.count('<figure')
+            if n < 5 and 'court' not in classes:
+                pb.append((f, 'mosaique : %d photos sans la classe « court » '
+                              '— trou sous la premiere image' % n))
+            if n >= 5 and 'court' in classes:
+                pb.append((f, 'mosaique : %d photos avec la classe « court »' % n))
+            etale = 'class="plein"' in corps
+            if n % 2 == 0 and not etale:
+                pb.append((f, 'mosaique : %d photos, derniere case vide a deux '
+                              'colonnes — classe « plein » manquante' % n))
+            if n % 2 and etale:
+                pb.append((f, 'mosaique : %d photos, la classe « plein » est de trop' % n))
+
         # 8. toute image ouvrable en plein ecran doit exister aussi en WebP
         for base in re.findall(r'data-full="(img/opt/[\w-]+)\.jpg"', s):
             if not os.path.exists(base + '.webp'):
