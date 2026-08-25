@@ -95,7 +95,7 @@ SPACES = [
  ('03 · Professionnels','Rencontres &amp; Événements','g-seminaire','Salle de conférence équipée',
   'Un espace baigné de lumière naturelle, au design contemporain, qui se prête à tout : séminaires, cocktails, dîners de gala, lancements de produits. Sonorisation et technicien disponibles.',
   'contact.html','Demander un devis'),
- ('04 · Bien-être','Spa &amp; Sauna','sp-case','La case ronde qui abrite le spa',
+ ('04 · Bien-être','Spa &amp; Sauna','gal-spa-case','La case ronde qui abrite le spa',
   'Massages aux pierres chauffantes, rituel de l\'Orient à l\'argan, gommage au savon noir africain, soins du visage aux cinq fleurs d\'Assinie. Et un sauna pour finir la journée.',
   'spa.html','Voir les soins'),
  ('05 · Loisirs','Piscine &amp; Jacuzzi','c-piscine','La piscine de l\'hôtel en fin de journée',

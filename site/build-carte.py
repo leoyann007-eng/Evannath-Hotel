@@ -217,8 +217,8 @@ SPAH = (SPAH.replace('{{SPA}}',sections(SPA,'s')).replace('{{ENVOI}}', ENVOI_JS)
       _schema.service('Spa et soins du corps',
                       "Massages, gommages, soins du visage, sauna et onglerie au spa de l'Hôtel Evannath, "
                       "Assinie PK 19. %d soins, sur rendez-vous." % total_spa,
-                      'spa', image='sp-hero'),
+                      'spa', image='gal-spa-couchant'),
       _schema.hotel(),
       _schema.fil([('Accueil','index'),('Le spa',None)]))))
-io.open('spa.html','w',encoding='utf-8').write(responsive(dimensionner(SPAH), hero='sp-hero'))
+io.open('spa.html','w',encoding='utf-8').write(responsive(dimensionner(SPAH), hero='gal-spa-couchant'))
 print('spa.html   :', total_spa, 'soins')
