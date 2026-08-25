@@ -312,20 +312,20 @@ input::placeholder,textarea::placeholder{color:#6E6154}
 
 <div class="wrap head">
   <nav class="crumb" aria-label="Fil d'Ariane">
-    <a href="index.html">Accueil</a> &nbsp;·&nbsp;
-    <a href="index.html#chambres">Chambres &amp; Suites</a> &nbsp;·&nbsp;
-    <span>Réservation</span>
+    <a href="index.html" data-t="c1">Accueil</a> &nbsp;·&nbsp;
+    <a href="index.html#chambres" data-t="c2">Chambres &amp; Suites</a> &nbsp;·&nbsp;
+    <span data-t="c3">Réservation</span>
   </nav>
-  <span class="eyebrow">Réservation directe · meilleur tarif garanti</span>
-  <h1>Votre séjour</h1>
-  <p>Trois étapes, deux minutes. L'acompte confirme la chambre ; le solde se règle à l'arrivée.</p>
+  <span class="eyebrow" data-t="eb">Réservation directe · meilleur tarif garanti</span>
+  <h1 data-t="h1">Votre séjour</h1>
+  <p data-t="lede">Trois étapes, deux minutes. L'acompte confirme la chambre ; le solde se règle à l'arrivée.</p>
 </div>
 
 <div class="wrap">
   <div class="steps" id="steps">
-    <div class="on" data-s="1"><i>1</i><b>Votre séjour</b></div>
-    <div data-s="2"><i>2</i><b>Vos coordonnées</b></div>
-    <div data-s="3"><i>3</i><b>Acompte</b></div>
+    <div class="on" data-s="1"><i>1</i><b data-t="st1">Votre séjour</b></div>
+    <div data-s="2"><i>2</i><b data-t="st2">Vos coordonnées</b></div>
+    <div data-s="3"><i>3</i><b data-t="st3">Acompte</b></div>
   </div>
 </div>
 
@@ -334,66 +334,66 @@ input::placeholder,textarea::placeholder{color:#6E6154}
 
     <!-- 1 ─────────────────────────────────────── -->
     <section class="pane on" id="p1">
-      <h2>Vos dates</h2>
-      <p class="sub">Modifiez si besoin — le total se met à jour immédiatement.</p>
+      <h2 data-t="h2a">Vos dates</h2>
+      <p class="sub" data-t="sub1">Modifiez si besoin — le total se met à jour immédiatement.</p>
 
-      <div class="f"><label for="cat">Catégorie</label><select id="cat"></select></div>
+      <div class="f"><label for="cat" data-t="lcat">Catégorie</label><select id="cat"></select></div>
       <div class="two">
-        <div class="f"><label for="d1">Arrivée</label><input type="date" id="d1"></div>
-        <div class="f"><label for="d2">Départ</label><input type="date" id="d2"></div>
+        <div class="f"><label for="d1" data-t="ld1">Arrivée</label><input type="date" id="d1"></div>
+        <div class="f"><label for="d2" data-t="ld2">Départ</label><input type="date" id="d2"></div>
       </div>
-      <div class="f"><label for="pax">Voyageurs</label><select id="pax"></select></div>
-      <div class="f"><label for="note">Une demande particulière&nbsp;? (facultatif)</label>
+      <div class="f"><label for="pax" data-t="lpax">Voyageurs</label><select id="pax"></select></div>
+      <div class="f"><label for="note" data-t="lnote">Une demande particulière&nbsp;? (facultatif)</label>
         <textarea id="note" placeholder="Heure d'arrivée tardive, lit d'appoint, occasion à fêter…"></textarea></div>
 
-      <div class="nav-btn"><button class="btn btn-solid" id="go2">Continuer</button></div>
+      <div class="nav-btn"><button class="btn btn-solid" id="go2" data-t="suiv">Continuer</button></div>
     </section>
 
     <!-- 2 ─────────────────────────────────────── -->
     <section class="pane" id="p2">
-      <h2>Vos coordonnées</h2>
-      <p class="sub">Pour vous envoyer la confirmation et vous accueillir à l'arrivée.</p>
+      <h2 data-t="h2b">Vos coordonnées</h2>
+      <p class="sub" data-t="sub2">Pour vous envoyer la confirmation et vous accueillir à l'arrivée.</p>
 
       <div class="two">
-        <div class="f"><label for="fn">Prénom *</label><input type="text" id="fn" autocomplete="given-name" placeholder="Aya">
-          <span class="msg">Merci d'indiquer votre prénom.</span></div>
-        <div class="f"><label for="ln">Nom *</label><input type="text" id="ln" autocomplete="family-name" placeholder="Kouassi">
-          <span class="msg">Merci d'indiquer votre nom.</span></div>
+        <div class="f"><label for="fn" data-t="lfn">Prénom *</label><input type="text" id="fn" autocomplete="given-name" placeholder="Aya">
+          <span class="msg" data-t="mfn">Merci d'indiquer votre prénom.</span></div>
+        <div class="f"><label for="ln" data-t="lln">Nom *</label><input type="text" id="ln" autocomplete="family-name" placeholder="Kouassi">
+          <span class="msg" data-t="mln">Merci d'indiquer votre nom.</span></div>
       </div>
       <div class="two">
-        <div class="f"><label for="em">E-mail *</label><input type="email" id="em" autocomplete="email" placeholder="vous@exemple.com">
-          <span class="msg">Cette adresse e-mail ne semble pas valide.</span></div>
-        <div class="f"><label for="tl">Téléphone / WhatsApp *</label><input type="tel" id="tl" autocomplete="tel" placeholder="+225 01 02 03 04 05">
-          <span class="msg">Indiquez un numéro d'au moins 8 chiffres.</span></div>
+        <div class="f"><label for="em" data-t="lem">E-mail *</label><input type="email" id="em" autocomplete="email" placeholder="vous@exemple.com">
+          <span class="msg" data-t="mem">Cette adresse e-mail ne semble pas valide.</span></div>
+        <div class="f"><label for="tl" data-t="ltl">Téléphone / WhatsApp *</label><input type="tel" id="tl" autocomplete="tel" placeholder="+225 01 02 03 04 05">
+          <span class="msg" data-t="mtl">Indiquez un numéro d'au moins 8 chiffres.</span></div>
       </div>
-      <div class="f"><label for="nav">Navette aéroport gratuite</label>
+      <div class="f"><label for="nav" data-t="lnav">Navette aéroport gratuite</label>
         <select id="nav">
-          <option value="non">Je viens par mes propres moyens</option>
-          <option value="aller">Aller — venez me chercher à l'aéroport</option>
-          <option value="ar">Aller et retour</option>
+          <option value="non" data-t="nv0">Je viens par mes propres moyens</option>
+          <option value="aller" data-t="nv1">Aller — venez me chercher à l'aéroport</option>
+          <option value="ar" data-t="nv2">Aller et retour</option>
         </select></div>
 
       <div class="nav-btn">
-        <button class="btn ghost" id="back1">Retour</button>
-        <button class="btn btn-solid" id="go3">Continuer</button>
+        <button class="btn ghost" id="back1" data-t="retr">Retour</button>
+        <button class="btn btn-solid" id="go3" data-t="suiv2">Continuer</button>
       </div>
     </section>
 
     <!-- 3 ─────────────────────────────────────── -->
     <section class="pane" id="p3">
-      <h2>L'acompte</h2>
-      <p class="sub">Trente pour cent pour bloquer la chambre, le solde à l'arrivée. Indiquez le moyen qui vous arrange : la réception vous envoie le lien de paiement une fois la disponibilité confirmée.</p>
+      <h2 data-t="h2c">L'acompte</h2>
+      <p class="sub" data-t="sub3">Trente pour cent pour bloquer la chambre, le solde à l'arrivée. Indiquez le moyen qui vous arrange : la réception vous envoie le lien de paiement une fois la disponibilité confirmée.</p>
 
       <div class="pay">
-        <label><input type="radio" name="pay" value="Wave" checked><span>Wave<em>Le plus utilisé en Côte d'Ivoire</em></span></label>
-        <label><input type="radio" name="pay" value="Orange Money"><span>Orange Money<em>Paiement par téléphone</em></span></label>
-        <label><input type="radio" name="pay" value="MTN Money"><span>MTN Money<em>Paiement par téléphone</em></span></label>
-        <label><input type="radio" name="pay" value="Carte bancaire"><span>Carte bancaire<em>Visa · Mastercard</em></span></label>
+        <label><input type="radio" name="pay" value="Wave" checked><span>Wave<em data-t="py0">Le plus utilisé en Côte d'Ivoire</em></span></label>
+        <label><input type="radio" name="pay" value="Orange Money"><span>Orange Money<em data-t="py1">Paiement par téléphone</em></span></label>
+        <label><input type="radio" name="pay" value="MTN Money"><span>MTN Money<em data-t="py2">Paiement par téléphone</em></span></label>
+        <label><input type="radio" name="pay" value="Carte bancaire"><span data-t="py3n">Carte bancaire<em>Visa · Mastercard</em></span></label>
       </div>
 
       <p style="font-size:13.5px;color:var(--muted);border-left:2px solid var(--bronze);padding:6px 0 6px 20px">
-        Annulation gratuite jusqu'à 48 h avant l'arrivée, acompte intégralement remboursé.
-        Au-delà, l'acompte reste acquis à l'établissement.
+        <span data-t="annul">Annulation gratuite jusqu'à 48 h avant l'arrivée, acompte intégralement remboursé.
+        Au-delà, l'acompte reste acquis à l'établissement.</span>
       </p>
 
       <div class="piege" aria-hidden="true"><label>Ne pas remplir<input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
@@ -407,8 +407,8 @@ input::placeholder,textarea::placeholder{color:#6E6154}
   </div>
 </div>
       <div class="nav-btn" style="margin-top:26px">
-        <button class="btn ghost" id="back2">Retour</button>
-        <button class="btn btn-solid" id="pay">Envoyer ma demande</button>
+        <button class="btn ghost" id="back2" data-t="retr2">Retour</button>
+        <button class="btn btn-solid" id="pay" data-t="env">Envoyer ma demande</button>
       </div>
     </section>
 
@@ -416,20 +416,20 @@ input::placeholder,textarea::placeholder{color:#6E6154}
     <section class="pane" id="p4">
       <div class="done-box">
         <div class="tick">✓</div>
-        <h2>Demande envoyée</h2>
+        <h2 data-t="h2d">Demande envoyée</h2>
         <p id="dm">Merci, votre demande est partie à la réception.</p>
-        <p style="color:var(--muted);font-size:14px">Notez cette référence : elle identifie votre dossier.</p>
+        <p style="color:var(--muted);font-size:14px" data-t="refn">Notez cette référence : elle identifie votre dossier.</p>
         <div class="ref" id="ref">EVN-000000</div>
 
         <div class="next-steps">
-          <div><i>1</i><span>La réception vérifie la disponibilité et vous répond sous 24 h, par e-mail et par WhatsApp.</span></div>
-          <div><i>2</i><span>Une fois la chambre confirmée, vous recevez le lien pour régler l'acompte de 30 %.</span></div>
+          <div><i>1</i><span data-t="ns1">La réception vérifie la disponibilité et vous répond sous 24 h, par e-mail et par WhatsApp.</span></div>
+          <div><i>2</i><span data-t="ns2">Une fois la chambre confirmée, vous recevez le lien pour régler l'acompte de 30 %.</span></div>
           <div><i>3</i><span id="nv">Le solde se règle à l'arrivée, sur place.</span></div>
         </div>
 
         <div class="g">
-          <a href="index.html" class="btn btn-solid">Retour à l'accueil</a>
-          <a href="circuits.html" class="btn">Ajouter une expérience</a>
+          <a href="index.html" class="btn btn-solid" data-t="fb1">Retour à l'accueil</a>
+          <a href="circuits.html" class="btn" data-t="fb2">Ajouter une expérience</a>
         </div>
       </div>
     </section>
@@ -440,18 +440,18 @@ input::placeholder,textarea::placeholder{color:#6E6154}
   <aside class="recap">
     <div class="ph"><img width="900" height="600" id="rimg" src="img/opt/r-standard.jpg" srcset="img/opt/r-standard-640.jpg 640w, img/opt/r-standard.jpg 900w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" alt=""></div>
     <div class="in">
-      <div class="cat">Votre chambre</div>
+      <div class="cat" data-t="rcat">Votre chambre</div>
       <h3 id="rnom">Chambre Standard</h3>
-      <div class="row"><span>Arrivée</span><span id="rd1">—</span></div>
-      <div class="row"><span>Départ</span><span id="rd2">—</span></div>
+      <div class="row"><span data-t="rr1">Arrivée</span><span id="rd1">—</span></div>
+      <div class="row"><span data-t="rr2">Départ</span><span id="rd2">—</span></div>
       <div class="row"><span id="rnl">Nuits</span><span id="rn">—</span></div>
-      <div class="row"><span>Voyageurs</span><span id="rp">—</span></div>
+      <div class="row"><span data-t="rr3">Voyageurs</span><span id="rp">—</span></div>
       <div class="row"><span id="rul">Tarif</span><span id="ru">—</span></div>
-      <div class="row"><span>Taxe de séjour</span><span id="rt">—</span></div>
-      <div class="row"><span>Petit-déjeuner</span><span style="color:var(--palm)">Inclus</span></div>
-      <div class="tot"><span>Total séjour</span><b id="rtot">—</b></div>
-      <div class="acompte">Acompte à régler aujourd'hui : <b id="racc">—</b><br>
-        <span style="font-size:12px">Solde à l'arrivée : <b id="rsolde" style="color:#CFC3B2;font-weight:600">—</b></span></div>
+      <div class="row"><span data-t="rr4">Taxe de séjour</span><span id="rt">—</span></div>
+      <div class="row"><span data-t="rr5">Petit-déjeuner</span><span style="color:var(--palm)" data-t="rr5v">Inclus</span></div>
+      <div class="tot"><span data-t="rr6">Total séjour</span><b id="rtot">—</b></div>
+      <div class="acompte"><span data-t="rac">Acompte à régler aujourd'hui :</span> <b id="racc">—</b><br>
+        <span style="font-size:12px"><span data-t="rso">Solde à l'arrivée :</span> <b id="rsolde" style="color:#CFC3B2;font-weight:600">—</b></span></div>
     </div>
   </aside>
 </div>
@@ -646,7 +646,23 @@ Object.keys(CH).forEach(function(k){
 
 function fmt(n){return n.toLocaleString('fr-FR').replace(/ | |,/g,' ')}
 function iso(d){return new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10)}
-function jour(v){return v?new Date(v).toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'}):'—'}
+/* Tout ce que ce script ecrit lui-meme est hors de portee de [data-t] :
+   les options de menus, le recapitulatif, la date en toutes lettres et le
+   message de confirmation. LANG_JS appelle EVN_LANG a chaque bascule — c'est
+   le point d'extension prevu pour ce cas. */
+var LG='fr';
+var T={fr:{loc:'fr-FR',p1:' personne',pp:' personnes',n1:'Nuit',nn:'Nuits',tarif:'Tarif',
+           merci:'Merci ',dem:'. Votre demande pour la ',du:' du ',au:' au ',
+           part:" est partie à la réception.",
+           solde:"Le solde se règle à l'arrivée, sur place.",
+           nav1:'Votre navette aéroport est notée (',nav2:"). Le solde se règle à l'arrivée."},
+     en:{loc:'en-GB',p1:' guest',pp:' guests',n1:'Night',nn:'Nights',tarif:'Rate',
+           merci:'Thank you ',dem:'. Your request for the ',du:' from ',au:' to ',
+           part:' has gone to the front desk.',
+           solde:'The balance is settled on arrival, at the hotel.',
+           nav1:'Your airport shuttle is noted (',nav2:'). The balance is settled on arrival.'}};
+function jour(v){return v?new Date(v).toLocaleDateString(T[LG].loc,{weekday:'long',day:'numeric',month:'long'}):'—'}
+function EVN_LANG(lg){ LG=T[lg]?lg:'fr'; remplirPax(); calc(); }
 
 // on reprend ce qui a été choisi sur la fiche chambre
 var q=new URLSearchParams(location.search);
@@ -661,7 +677,7 @@ function remplirPax(){
   pax.innerHTML='';
   for(var i=1;i<=max;i++){
     var o=document.createElement('option');
-    o.value=i; o.textContent=i+' personne'+(i>1?'s':'');
+    o.value=i; o.textContent=i+(i>1?T[LG].pp:T[LG].p1);
     pax.appendChild(o);
   }
   pax.value=Math.min(ancien,max);
@@ -681,9 +697,9 @@ function calc(){
   document.getElementById('rnom').textContent=c[0];
   document.getElementById('rd1').textContent=jour(d1.value);
   document.getElementById('rd2').textContent=jour(d2.value);
-  document.getElementById('rnl').textContent=n>1?'Nuits':'Nuit';
+  document.getElementById('rnl').textContent=n>1?T[LG].nn:T[LG].n1;
   document.getElementById('rn').textContent=n;
-  document.getElementById('rp').textContent=p+' personne'+(p>1?'s':'');
+  document.getElementById('rp').textContent=p+(p>1?T[LG].pp:T[LG].p1);
   document.getElementById('rul').textContent=fmt(c[1])+' × '+n;
   document.getElementById('ru').textContent=fmt(sejour);
   document.getElementById('rt').textContent=fmt(taxe);
@@ -781,16 +797,44 @@ document.getElementById('pay').onclick=function(){
   },function(rep){
     document.getElementById('ref').textContent=rep.reference;
     document.getElementById('dm').textContent=
-      'Merci '+document.getElementById('fn').value.trim()+'. Votre demande pour la '+c[0]
-      +' du '+jour(d1.value)+' au '+jour(d2.value)+' est partie à la réception.';
+      T[LG].merci+document.getElementById('fn').value.trim()+T[LG].dem+c[0]
+      +T[LG].du+jour(d1.value)+T[LG].au+jour(d2.value)+T[LG].part;
     document.getElementById('nv').textContent = nv==='non'
-      ? "Le solde se règle à l'arrivée, sur place."
-      : "Votre navette aéroport est notée ("+navette+"). Le solde se règle à l'arrivée.";
+      ? T[LG].solde
+      : T[LG].nav1+navette+T[LG].nav2;
     etape(4);
   });
 };
 
-var EN={mn:"Menu",n1:"Rooms &amp; Suites",n2:"Experiences",n3:"The table",n4:"The spa",n5:"Packages &amp; Offers",n6:"Meetings &amp; groups",n7:"Gallery",n8:"About",n9:"Useful information",n10:"Contact",n11:"Book",dr:"Reservations",navch:"Our rooms"};
+var EN={mn:"Menu",n1:"Rooms &amp; Suites",n2:"Experiences",n3:"The table",n4:"The spa",n5:"Packages &amp; Offers",n6:"Meetings &amp; groups",n7:"Gallery",n8:"About",n9:"Useful information",n10:"Contact",n11:"Book",dr:"Reservations",navch:"Our rooms",
+c1:"Home",c2:"Rooms &amp; Suites",c3:"Booking",
+eb:"Direct booking · best rate guaranteed",h1:"Your stay",
+lede:"Three steps, two minutes. The deposit confirms the room; the balance is settled on arrival.",
+st1:"Your stay",st2:"Your details",st3:"Deposit",
+h2a:"Your dates",sub1:"Change them if you need to — the total updates immediately.",
+lcat:"Category",ld1:"Check-in",ld2:"Check-out",lpax:"Guests",
+lnote:"Any particular request? (optional)",suiv:"Continue",
+h2b:"Your details",sub2:"So we can send your confirmation and welcome you on arrival.",
+lfn:"First name *",mfn:"Please give your first name.",
+lln:"Surname *",mln:"Please give your surname.",
+lem:"E-mail *",mem:"This e-mail address does not look valid.",
+ltl:"Phone / WhatsApp *",mtl:"Please give a number of at least 8 digits.",
+lnav:"Free airport shuttle",
+nv0:"I am making my own way",nv1:"One way — collect me at the airport",nv2:"Both ways",
+retr:"Back",suiv2:"Continue",
+h2c:"The deposit",
+sub3:"Thirty per cent to hold the room, the balance on arrival. Tell us which method suits you: the front desk sends the payment link once availability is confirmed.",
+py0:"The most used in Côte d’Ivoire",py1:"Payment by phone",py2:"Payment by phone",
+py3n:"Bank card<em>Visa · Mastercard</em>",
+annul:"Free cancellation up to 48 h before arrival, deposit refunded in full. After that, the deposit is retained by the property.",
+retr2:"Back",env:"Send my request",
+h2d:"Request sent",refn:"Note this reference: it identifies your file.",
+ns1:"The front desk checks availability and replies within 24 h, by e-mail and by WhatsApp.",
+ns2:"Once the room is confirmed, you receive the link to pay the 30 % deposit.",
+fb1:"Back to home",fb2:"Add an experience",
+rcat:"Your room",rr1:"Check-in",rr2:"Check-out",rr3:"Guests",rr4:"Tourist tax",
+rr5:"Breakfast",rr5v:"Included",rr6:"Total stay",
+rac:"Deposit to pay today:",rso:"Balance on arrival:"};
 
 var FR={};document.querySelectorAll('[data-t]').forEach(function(e){FR[e.dataset.t]=e.innerHTML});
 document.querySelectorAll('.lang button').forEach(function(b){b.onclick=function(){

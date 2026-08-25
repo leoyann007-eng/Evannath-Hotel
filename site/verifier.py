@@ -124,6 +124,34 @@ def controler():
             if n % 2 and etale:
                 pb.append((f, 'mosaique : %d photos, la classe « plein » est de trop' % n))
 
+        # 7 quater. le bouton EN doit tout traduire, pas seulement le menu.
+        # Dix pages ne portaient de data-t que sur la navigation : cliquer EN
+        # faisait basculer le menu et laissait la page en francais. Pire que
+        # pas de bouton du tout. On exige donc qu'aucune cle declaree ne soit
+        # absente du dictionnaire — et qu'aucune cle du dictionnaire ne soit
+        # redefinie, un sommaire ayant deja ecrase les libelles du menu.
+        i = s.find('var EN={')
+        if i < 0:
+            pb.append((f, 'aucun dictionnaire de traduction'))
+        else:
+            bloc = s[i + 8:]
+            bloc = bloc[:bloc.find('};')]
+            declarees = re.findall(r'(?:^|,)\s*([\w-]+)\s*:', bloc)
+            traduites = set(declarees)
+            doublons = sorted({k for k in declarees if declarees.count(k) > 1})
+            if doublons:
+                pb.append((f, 'cles de traduction redefinies : ' + ' '.join(doublons)))
+            # Une page peut declarer que son corps reste en francais — un
+            # document juridique, dont la version francaise fait foi. La
+            # decision doit etre ecrite dans le generateur, pas subie ici.
+            manque = sorted(set(re.findall(r'data-t="([\w-]+)"', s)) - traduites)
+            if 'EVN_FR_FAIT_FOI' in s:
+                manque = []
+            if manque:
+                pb.append((f, '%d segment(s) sans traduction anglaise : %s'
+                           % (len(manque), ' '.join(manque[:8])
+                              + (' …' if len(manque) > 8 else ''))))
+
         # 8. toute image ouvrable en plein ecran doit exister aussi en WebP
         for base in re.findall(r'data-full="(img/opt/[\w-]+)\.jpg"', s):
             if not os.path.exists(base + '.webp'):

@@ -47,10 +47,15 @@ article a:hover{border-color:var(--bronze)}
  .cook div{grid-template-columns:1fr;gap:6px}.cook span:last-child{text-align:left}.cook div.h{display:none}}
 """
 
-NAV_ITEMS = [('editeur','n1','Éditeur du site'),('hebergeur','n2','Hébergement'),
- ('propriete','n3','Propriété intellectuelle'),('donnees','n4','Données personnelles'),
- ('cookies','n5','Cookies'),('reservation','n6','Réservation et paiement'),
- ('responsabilite','n7','Responsabilité'),('droit','n8','Droit applicable'),('credits','n9','Crédits')]
+# Les cles du sommaire etaient n1..n9 — exactement celles du menu principal,
+# definies par EN_NAV. Le dictionnaire anglais les redefinissait juste apres :
+# en anglais, le menu affichait donc « Site publisher », « Hosting »,
+# « Cookies » a la place des chambres, du spa et de la galerie.
+# Prefixees sm*, plus de collision possible.
+NAV_ITEMS = [('editeur','sm1','Éditeur du site'),('hebergeur','sm2','Hébergement'),
+ ('propriete','sm3','Propriété intellectuelle'),('donnees','sm4','Données personnelles'),
+ ('cookies','sm5','Cookies'),('reservation','sm6','Réservation et paiement'),
+ ('responsabilite','sm7','Responsabilité'),('droit','sm8','Droit applicable'),('credits','sm9','Crédits')]
 
 def kv(k, lab, val, todo=False):
     v = '<span class="todo">%s</span>' % val if todo else val
@@ -217,11 +222,15 @@ if('IntersectionObserver' in window){
 }
 
 // La navigation est bilingue ; le corps juridique reste en français, qui fait foi.
+// Traduire un document juridique cree un second texte non relu par un conseil,
+// et une ambiguite sur celui qui prevaut. Le bandeau « maj » le dit au lecteur.
+// Marqueur lu par verifier.py, qui n'exige alors pas de traduction du corps :
+// EVN_FR_FAIT_FOI
 var EN={''' + EN_NAV + '''cta:"Book now",
 c1:"Home",c2:"Legal notice",eb:"Legal information",h1:"Legal notice &amp;<br>data protection",
 maj:"Last updated: <b>21 August 2026</b> · The French version of this document is the authoritative one.",
-sm:"Contents",n1:"Site publisher",n2:"Hosting",n3:"Intellectual property",n4:"Personal data",n5:"Cookies",
-n6:"Booking and payment",n7:"Liability",n8:"Applicable law",n9:"Credits"};
+sm:"Contents",sm1:"Site publisher",sm2:"Hosting",sm3:"Intellectual property",sm4:"Personal data",sm5:"Cookies",
+sm6:"Booking and payment",sm7:"Liability",sm8:"Applicable law",sm9:"Credits"};
 
 ''' + LANG_JS
 

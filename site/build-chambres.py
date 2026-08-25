@@ -11,6 +11,8 @@ from _chrome import page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV
 
 # slug, nom, prix, capacite, resume, accroche, 3 paragraphes, equipements+, photos
 from _chambres import CHAMBRES
+import _chambres_en
+import json
 
 PAR_SLUG = {c['slug']: c for c in CHAMBRES}
 
@@ -186,6 +188,36 @@ def _sizes_mosaique(i, n):
 def fmt(n):
     return format(n, ',').replace(',', ' ')
 
+
+def _en_dict(c):
+    """Assemble le dictionnaire anglais de la fiche, cle par cle.
+
+    Les cles sont celles des data-t poses dans le balisage. Si une traduction
+    manque, LANG_JS laisse le francais en place plutot que d'afficher un trou
+    — et verifier.py signale le manque.
+    """
+    e = _chambres_en.EN[c['slug']]
+    d = dict(_chambres_en.CHASSIS)
+    d['mbb'] = d['cta']
+    d['eb0'] = e['tag'] or _chambres_en.CHASSIS['eb0']
+    d['ttl'] = e['titre']
+    d['pa1'], d['pa2'], d['pa3'] = e['p1'], e['p2'], e['p3']
+    for i, (val, lab) in enumerate(e['facts']):
+        d['fv%d' % i], d['fl%d' % i] = val, lab
+    for i, cap in enumerate(e['caps']):
+        d['cap%d' % i] = cap
+    for i, (t, dd) in enumerate(e['plus']):
+        d['pt%d' % i], d['pd%d' % i] = t, dd
+    for i, t in enumerate(_chambres_en.AMEN_EN):
+        d['am%d' % i] = t
+    for i, (t, dd) in enumerate(_chambres_en.INCL_EN):
+        d['it%d' % i], d['id%d' % i] = t, dd
+    for i, slug in enumerate(c['autres']):
+        d['om%d' % i] = _chambres_en.EN[slug]['meta']
+        d['on%d' % i] = _chambres_en.CHASSIS['pnuit']
+    return ','.join('%s:%s' % (k, json.dumps(v, ensure_ascii=False))
+                    for k, v in sorted(d.items()))
+
 for c in CHAMBRES:
     pax_opts = ''.join(
         '<option value="%d"%s>%d personne%s</option>' % (i, ' selected' if i == min(2, c['pax']) else '', i, 's' if i > 1 else '')
@@ -194,22 +226,23 @@ for c in CHAMBRES:
     b = [header('#reserver', 'Réserver'), drawer('index.html#chambres'), '''
 <div class="wrap head">
   <nav class="crumb" aria-label="Fil d'Ariane">
-    <a href="index.html">Accueil</a> &nbsp;·&nbsp;
-    <a href="index.html#chambres">Chambres &amp; Suites</a> &nbsp;·&nbsp;
+    <a href="index.html" data-t="c1">Accueil</a> &nbsp;·&nbsp;
+    <a href="index.html#chambres" data-t="c2">Chambres &amp; Suites</a> &nbsp;·&nbsp;
     <span>%s</span>
   </nav>
   <div class="head-top">
     <div>
-      <span class="eyebrow">%s</span>
+      <span class="eyebrow" data-t="eb0">%s</span>
       <h1>%s</h1>
       <div class="facts">''' % (c['nom'], c['tag'] or 'Chambre', c['nom'])]
 
-    for val, lab in c['facts']:
-        b.append('        <span><b>%s</b> %s</span>' % (val, lab))
+    for i, (val, lab) in enumerate(c['facts']):
+        b.append('        <span><b data-t="fv%d">%s</b> <span data-t="fl%d">%s</span></span>'
+                 % (i, val, i, lab))
 
     b.append('''      </div>
     </div>
-    <div class="head-price"><b>%s</b><span>FCFA / nuit</span></div>
+    <div class="head-price"><b>%s</b><span data-t="pnuit">FCFA / nuit</span></div>
   </div>
 </div>
 
@@ -223,7 +256,7 @@ for c in CHAMBRES:
         cl = ' class="plein"' if (i == len(c['photos']) - 1 and len(c['photos']) % 2 == 0) else ''
         b.append('''    <figure%s><picture><source srcset="img/opt/%s.webp" type="image/webp">
       <img loading="%s" src="img/opt/%s.jpg" data-full="img/opt/%s.jpg" alt="%s"></picture>
-      <figcaption>%s</figcaption></figure>''' % (cl, img, ld, img, img, alt, cap))
+      <figcaption data-t="cap%d">%s</figcaption></figure>''' % (cl, img, ld, img, img, alt, i, cap))
 
     b.append('''  </div>
 </div>
@@ -231,94 +264,98 @@ for c in CHAMBRES:
 <div class="wrap body-grid">
  <div>
   <section class="block reveal">
-    <span class="eyebrow">La chambre</span>
-    <h2>%s</h2>
-    <p>%s</p>
-    <p>%s</p>
-    <p>%s</p>
+    <span class="eyebrow" data-t="ebr">La chambre</span>
+    <h2 data-t="ttl">%s</h2>
+    <p data-t="pa1">%s</p>
+    <p data-t="pa2">%s</p>
+    <p data-t="pa3">%s</p>
   </section>
 
   <section class="block reveal">
-    <span class="eyebrow">Équipements</span>
-    <h2>Dans la chambre</h2>
+    <span class="eyebrow" data-t="ebe">Équipements</span>
+    <h2 data-t="hae">Dans la chambre</h2>
     <div class="amen">''' % (c['titre'], c['p1'], c['p2'], c['p3']))
 
-    for t, d in c['plus']:
-        b.append('      <div class="hi"><svg viewBox="0 0 24 24" aria-hidden="true">%s</svg><span><b>%s</b><em>%s</em></span></div>' % (ICONE_PLUS, t, d))
-    for t, d in AMEN_BASE:
-        b.append('      <div><svg viewBox="0 0 24 24" aria-hidden="true">%s</svg><span>%s</span></div>' % (d, t))
+    for i, (t, d) in enumerate(c['plus']):
+        b.append('      <div class="hi"><svg viewBox="0 0 24 24" aria-hidden="true">%s</svg>'
+                 '<span><b data-t="pt%d">%s</b><em data-t="pd%d">%s</em></span></div>'
+                 % (ICONE_PLUS, i, t, i, d))
+    for i, (t, d) in enumerate(AMEN_BASE):
+        b.append('      <div><svg viewBox="0 0 24 24" aria-hidden="true">%s</svg>'
+                 '<span data-t="am%d">%s</span></div>' % (d, i, t))
 
     b.append('''    </div>
   </section>
 
   <section class="block reveal">
-    <span class="eyebrow">Inclus</span>
-    <h2>Compris dans le tarif</h2>
+    <span class="eyebrow" data-t="ebi">Inclus</span>
+    <h2 data-t="hai">Compris dans le tarif</h2>
     <ul class="incl">''')
-    for t, d in INCL:
-        b.append('      <li><span class="chk">✓</span><div><b>%s</b><p>%s</p></div></li>' % (t, d))
+    for i, (t, d) in enumerate(INCL):
+        b.append('      <li><span class="chk">✓</span><div><b data-t="it%d">%s</b>'
+                 '<p data-t="id%d">%s</p></div></li>' % (i, t, i, d))
 
     b.append('''    </ul>
   </section>
 
   <section class="block reveal">
-    <span class="eyebrow">Conditions</span>
-    <h2>Bon à savoir</h2>
+    <span class="eyebrow" data-t="ebc">Conditions</span>
+    <h2 data-t="hac">Bon à savoir</h2>
     <div class="cond">
-      <div><span>Arrivée</span><span>à partir de 14 h 00</span></div>
-      <div><span>Départ</span><span>avant 12 h 00</span></div>
-      <div><span>Annulation</span><span>gratuite jusqu'à 48 h avant</span></div>
-      <div><span>Acompte</span><span>30 %% à la réservation</span></div>
-      <div><span>Animaux</span><span>non admis</span></div>
-      <div><span>Paiement</span><span>Wave · Orange Money · MTN · carte</span></div>
+      <div><span data-t="cd1">Arrivée</span><span data-t="cd1v">à partir de 14 h 00</span></div>
+      <div><span data-t="cd2">Départ</span><span data-t="cd2v">avant 12 h 00</span></div>
+      <div><span data-t="cd3">Annulation</span><span data-t="cd3v">gratuite jusqu'à 48 h avant</span></div>
+      <div><span data-t="cd4">Acompte</span><span data-t="cd4v">30 %% à la réservation</span></div>
+      <div><span data-t="cd5">Animaux</span><span data-t="cd5v">non admis</span></div>
+      <div><span data-t="cd6">Paiement</span><span data-t="cd6v">Wave · Orange Money · MTN · carte</span></div>
     </div>
-    <p style="margin-top:16px;font-size:13px;color:var(--muted)">
+    <p style="margin-top:16px;font-size:13px;color:var(--muted)" data-t="cdn">
       Le détail complet figure sur la page <a href="informations-utiles.html#reserver" style="color:var(--bronze)">Informations utiles</a>.
     </p>
   </section>
  </div>
 
  <aside class="panel" id="reserver">
-  <span class="from">À partir de</span>
+  <span class="from" data-t="apd">À partir de</span>
   <div class="rate">%s <span style="font-size:1rem">FCFA</span></div>
-  <div class="per">par nuit, petit-déjeuner inclus</div>
+  <div class="per" data-t="pern">par nuit, petit-déjeuner inclus</div>
 
   <form id="bkf">
     <div class="two">
-      <div class="pf"><label for="d1">Arrivée</label><input type="date" id="d1"></div>
-      <div class="pf"><label for="d2">Départ</label><input type="date" id="d2"></div>
+      <div class="pf"><label for="d1" data-t="la1">Arrivée</label><input type="date" id="d1"></div>
+      <div class="pf"><label for="d2" data-t="la2">Départ</label><input type="date" id="d2"></div>
     </div>
-    <div class="pf"><label for="pax">Voyageurs</label><select id="pax">%s</select></div>
+    <div class="pf"><label for="pax" data-t="lax">Voyageurs</label><select id="pax">%s</select></div>
 
     <div class="calc">
       <div class="row"><span id="l1">%s FCFA × 2 nuits</span><span id="v1"></span></div>
-      <div class="row"><span>Taxe de séjour</span><span id="v2"></span></div>
-      <div class="row"><span>Petit-déjeuner</span><span style="color:var(--palm)">Inclus</span></div>
-      <div class="total"><span>Total séjour</span><b id="tt"></b></div>
+      <div class="row"><span data-t="rtx">Taxe de séjour</span><span id="v2"></span></div>
+      <div class="row"><span data-t="rpd">Petit-déjeuner</span><span style="color:var(--palm)" data-t="rin">Inclus</span></div>
+      <div class="total"><span data-t="rtt">Total séjour</span><b id="tt"></b></div>
     </div>
 
-    <button type="submit" class="btn btn-solid">Réserver cette chambre</button>
-    <div class="avail"><i></i><span>Disponible à ces dates</span></div>
-    <p class="helpt">Une question&nbsp;? Écrivez-nous sur <a href="https://wa.me/2250546017377" target="_blank" rel="noopener">WhatsApp</a> ou appelez le +225 01 51 52 75 75.</p>
+    <button type="submit" class="btn btn-solid" data-t="bkb">Réserver cette chambre</button>
+    <div class="avail"><i></i><span data-t="avl">Disponible à ces dates</span></div>
+    <p class="helpt" data-t="hlp">Une question&nbsp;? Écrivez-nous sur <a href="https://wa.me/2250546017377" target="_blank" rel="noopener">WhatsApp</a> ou appelez le +225 01 51 52 75 75.</p>
   </form>
  </aside>
 </div>
 
 <section class="more">
   <div class="wrap">
-    <span class="eyebrow">Autres catégories</span>
-    <h2>Si celle-ci est prise</h2>
+    <span class="eyebrow" data-t="ebo">Autres catégories</span>
+    <h2 data-t="hao">Si celle-ci est prise</h2>
     <div class="more-grid">''' % (fmt(c['prix']), pax_opts, fmt(c['prix'])))
 
-    for slug in c['autres']:
+    for i, slug in enumerate(c['autres']):
         o = PAR_SLUG[slug]
         img = o['photos'][0][0]
         b.append('''      <a class="rcard reveal" href="%s.html">
         <div class="ph"><picture><source srcset="img/opt/%s.webp" type="image/webp">
           <img loading="lazy" src="img/opt/%s.jpg" alt="%s"></picture></div>
-        <div><h3>%s</h3><p style="font-size:14px">%s</p>
-        <div class="p"><b>%s</b><span>FCFA / nuit</span></div></div>
-      </a>''' % (slug, img, img, o['nom'], o['nom'], o['meta'], fmt(o['prix'])))
+        <div><h3>%s</h3><p style="font-size:14px" data-t="om%d">%s</p>
+        <div class="p"><b>%s</b><span data-t="on%d">FCFA / nuit</span></div></div>
+      </a>''' % (slug, img, img, o['nom'], o['nom'], i, o['meta'], fmt(o['prix']), i))
 
     b.append('''    </div>
   </div>
@@ -327,8 +364,8 @@ for c in CHAMBRES:
 ''' + FOOTER + '''
 
 <div class="mobar">
-  <div><b id="mb"></b><span>FCFA · séjour total</span></div>
-  <a href="#reserver" class="btn btn-solid">Réserver</a>
+  <div><b id="mb"></b><span data-t="mbs">FCFA · séjour total</span></div>
+  <a href="#reserver" class="btn btn-solid" data-t="mbb">Réserver</a>
 </div>
 
 <div id="lb" role="dialog" aria-modal="true" aria-label="Photos de la chambre">
@@ -347,11 +384,24 @@ function iso(d){return new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOStri
 d1.value=iso(new Date(Date.now()+864e5));d2.value=iso(new Date(Date.now()+864e5*3));
 d1.min=iso(new Date());d2.min=iso(new Date());
 function fmt(n){return n.toLocaleString('fr-FR').replace(/ | |,/g,' ')}
+/* Le recapitulatif et le selecteur de voyageurs sont ecrits par ce script,
+   donc hors de portee de [data-t]. LANG_JS appelle EVN_LANG a chaque
+   bascule : c'est le point d'extension prevu pour ce cas. */
+var MOTS={fr:{n1:' nuit',nn:' nuits',p1:' personne',pp:' personnes'},
+          en:{n1:' night',nn:' nights',p1:' guest',pp:' guests'}};
+var LG='fr';
+function EVN_LANG(lg){
+  LG=MOTS[lg]?lg:'fr';
+  [].forEach.call(pax.options,function(o){
+    var n=+o.value; o.textContent=n+(n>1?MOTS[LG].pp:MOTS[LG].p1);
+  });
+  calc();
+}
 function calc(){
   var a=new Date(d1.value),b=new Date(d2.value);
   var n=Math.round((b-a)/864e5); if(!n||n<1){n=1;d2.value=iso(new Date(a.getTime()+864e5))}
   var p=+pax.value, sejour=RATE*n, taxe=TAX*p*n, total=sejour+taxe;
-  document.getElementById('l1').textContent=fmt(RATE)+' FCFA × '+n+(n>1?' nuits':' nuit');
+  document.getElementById('l1').textContent=fmt(RATE)+' FCFA × '+n+(n>1?MOTS[LG].nn:MOTS[LG].n1);
   document.getElementById('v1').textContent=fmt(sejour);
   document.getElementById('v2').textContent=fmt(taxe);
   document.getElementById('tt').textContent=fmt(total);
@@ -375,7 +425,7 @@ lb.onclick=function(e){if(e.target===lb)hideLb()};
 addEventListener('keydown',function(e){if(!lb.classList.contains('on'))return;
  if(e.key==='Escape')hideLb();if(e.key==='ArrowRight')show(gi+1);if(e.key==='ArrowLeft')show(gi-1)});
 
-var EN={''' % (c['prix'], c['slug']) + EN_NAV + 'cta:"Book"};\n\n' + LANG_JS
+var EN={''' % (c['prix'], c['slug']) + EN_NAV + _en_dict(c) + '};\n\n' + LANG_JS
 
     LD = _schema.bloc(
         _schema.chambre(

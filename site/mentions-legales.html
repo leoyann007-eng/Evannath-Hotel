@@ -274,15 +274,15 @@ article a:hover{border-color:var(--bronze)}
   <aside class="side">
     <b data-t="sm">Sommaire</b>
     <nav id="toc">
-      <a href="#editeur" data-t="n1">Éditeur du site</a>
-      <a href="#hebergeur" data-t="n2">Hébergement</a>
-      <a href="#propriete" data-t="n3">Propriété intellectuelle</a>
-      <a href="#donnees" data-t="n4">Données personnelles</a>
-      <a href="#cookies" data-t="n5">Cookies</a>
-      <a href="#reservation" data-t="n6">Réservation et paiement</a>
-      <a href="#responsabilite" data-t="n7">Responsabilité</a>
-      <a href="#droit" data-t="n8">Droit applicable</a>
-      <a href="#credits" data-t="n9">Crédits</a>
+      <a href="#editeur" data-t="sm1">Éditeur du site</a>
+      <a href="#hebergeur" data-t="sm2">Hébergement</a>
+      <a href="#propriete" data-t="sm3">Propriété intellectuelle</a>
+      <a href="#donnees" data-t="sm4">Données personnelles</a>
+      <a href="#cookies" data-t="sm5">Cookies</a>
+      <a href="#reservation" data-t="sm6">Réservation et paiement</a>
+      <a href="#responsabilite" data-t="sm7">Responsabilité</a>
+      <a href="#droit" data-t="sm8">Droit applicable</a>
+      <a href="#credits" data-t="sm9">Crédits</a>
     </nav>
   </aside>
 
@@ -511,11 +511,15 @@ if('IntersectionObserver' in window){
 }
 
 // La navigation est bilingue ; le corps juridique reste en français, qui fait foi.
+// Traduire un document juridique cree un second texte non relu par un conseil,
+// et une ambiguite sur celui qui prevaut. Le bandeau « maj » le dit au lecteur.
+// Marqueur lu par verifier.py, qui n'exige alors pas de traduction du corps :
+// EVN_FR_FAIT_FOI
 var EN={mn:"Menu",n1:"Rooms &amp; Suites",n2:"Experiences",n3:"The table",n4:"The spa",n5:"Packages &amp; Offers",n6:"Meetings &amp; groups",n7:"Gallery",n8:"About",n9:"Useful information",n10:"Contact",n11:"Book",dr:"Reservations",cta:"Book now",
 c1:"Home",c2:"Legal notice",eb:"Legal information",h1:"Legal notice &amp;<br>data protection",
 maj:"Last updated: <b>21 August 2026</b> · The French version of this document is the authoritative one.",
-sm:"Contents",n1:"Site publisher",n2:"Hosting",n3:"Intellectual property",n4:"Personal data",n5:"Cookies",
-n6:"Booking and payment",n7:"Liability",n8:"Applicable law",n9:"Credits"};
+sm:"Contents",sm1:"Site publisher",sm2:"Hosting",sm3:"Intellectual property",sm4:"Personal data",sm5:"Cookies",
+sm6:"Booking and payment",sm7:"Liability",sm8:"Applicable law",sm9:"Credits"};
 
 var FR={};document.querySelectorAll('[data-t]').forEach(function(e){FR[e.dataset.t]=e.innerHTML});
 document.querySelectorAll('.lang button').forEach(function(b){b.onclick=function(){

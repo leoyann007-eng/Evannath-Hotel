@@ -35,6 +35,38 @@ AUTOUR = [
  ("La commune d'Assinie", "Balade guidée, histoire du lieu, marché local. Comprise dans le circuit Découvertes Touristiques."),
 ]
 
+EN_PAGE = """cta:"Book",
+c1:"Home",c2:"Experiences",
+eb1:"On the estate, on the water, around Assinie",
+h1:"Enough to fill<br>a whole day",
+lede:"You may do nothing at all — many come for exactly that. But if you want to leave your room, here is everything waiting for you.",
+eb2:"On the estate",h2:"Without going through the gate",
+p2:"Six places, all less than a two-minute walk from your room.",
+dt0:"The paillote",dd0:"The wooden pontoon set on the Aby lagoon. The heart of the estate — a drink at sunset, dinner under rattan lanterns.",dw0:"All day",dl0:"See the menu",
+dt1:"Pool &amp; jacuzzi",dd1:"A large pool with built-in jacuzzi, loungers and parasols. Open from first light until dark.",dw1:"Open access",dl1:"The spa",
+dt2:"Spa &amp; sauna",dd2:"Hot-stone massages, an argan ritual of the Orient, African black soap scrub. Twenty-two treatments, by appointment.",dw2:"By appointment",dl2:"The treatments",
+dt3:"Restaurant &amp; bar",dd3:"Ivorian and continental cooking, catch of the day, fourteen house cocktails including two signatures.",dw3:"Lunch and dinner",dl3:"The table",
+dt4:"Night club",dd4:"Resident DJ at weekends, terrace open late. Happy hour on Saturday after the Méchoui Party.",dw4:"Weekends",dl4:"Méchoui Party",
+dt5:"Play area",dd5:"For children: games, cooking and painting workshops, face painting, waterside storytelling in the evening.",dw5:"All day",dl5:"Junior Discovery",
+bt:"Evening service",bp:"The lanterns come on as the light goes.",
+eb3:"On the water",h3:"The lagoon begins<br>at the end of the pontoon",
+p3:"Every outing leaves from our own landing. Book at the front desk — the day before is enough.",
+et0:"Lagoon cruise by pirogue",ed0:"Local guide, a stop on the island, back at sunset. It is the outing our guests mention most.",eq0:"Morning or late afternoon",
+et1:"Jet ski",ed1:"Supervised sessions, equipment provided. Two slots a day, at sunrise and in late afternoon.",eq1:"By reservation",
+et2:"The Embouchure",ed2:"Where the Atlantic meets the Aby lagoon. Fifteen minutes by boat from our pontoon.",eq2:"Half a day",
+et3:"Arriving by the lagoon",ed3:"Reach the hotel by pirogue rather than by car. To arrange with the front desk the day before.",eq3:"On request",
+eb4:"Around Assinie",h4:"Four outings<br>the front desk arranges",
+p4:"They are part of the Découvertes Touristiques tour, at 35,000 FCFA per person.",
+at0:"The Abandoned Island",ad0:"A peninsula between the ocean and the Aby lagoon, empty beaches and clear water. Little visited, and that is what makes it worth it.",
+at1:"Dipi Park",ad1:"The region\u2019s first nature reserve. A half-day excursion, arranged by the concierge desk.",
+at2:"The Aniaba museum",ad2:"Collections tied to the history of the kingdom and the coast. To combine with a visit to the town.",
+at3:"The town of Assinie",ad3:"Guided walk, the history of the place, local market. Included in the Découvertes Touristiques tour.",
+note:"These four places have no photograph on this page: we would rather show nothing than show an image that is not ours.",
+eb5:"Everything is bookable",h5:"Build your own stay",
+p5:"Eleven packages bring together room, meals and activities — from the Chillday to the honeymoon.",
+cb1:"See the packages",cb2:"Book a room"
+"""
+
 CSS = """
 /* L'en-tete est fixe : le hero doit lui reserver sa hauteur, comme le font
    les pages sans hero avec leur padding de 150px. Sans cela, sur un ecran
@@ -119,30 +151,30 @@ b = [header('reserver.html', 'Réserver'), drawer(''), '''
   <img src="img/opt/gal-lag-bateau.jpg" width="1400" height="933" alt="Le ponton de l'hôtel et le bateau de balade sur la lagune Aby"></picture>
   <div class="in wrap">
     <nav class="crumb" aria-label="Fil d'Ariane">
-      <a href="index.html">Accueil</a> &nbsp;·&nbsp; <span>Expériences</span>
+      <a href="index.html" data-t="c1">Accueil</a> &nbsp;·&nbsp; <span data-t="c2">Expériences</span>
     </nav>
-    <span class="eyebrow">Sur le domaine, sur l'eau, autour d'Assinie</span>
-    <h1>De quoi remplir<br>une journée entière</h1>
-    <p>Vous pouvez ne rien faire — beaucoup viennent pour ça. Mais si vous voulez sortir de votre chambre, voici tout ce qui vous attend.</p>
+    <span class="eyebrow" data-t="eb1">Sur le domaine, sur l'eau, autour d'Assinie</span>
+    <h1 data-t="h1">De quoi remplir<br>une journée entière</h1>
+    <p data-t="lede">Vous pouvez ne rien faire — beaucoup viennent pour ça. Mais si vous voulez sortir de votre chambre, voici tout ce qui vous attend.</p>
   </div>
 </section>
 
 <section class="wrap" id="domaine">
   <div class="head reveal">
-    <span class="eyebrow">Sur le domaine</span>
-    <h2 style="margin-top:16px">Sans passer le portail</h2>
-    <p>Six lieux, tous à moins de deux minutes de marche de votre chambre.</p>
+    <span class="eyebrow" data-t="eb2">Sur le domaine</span>
+    <h2 style="margin-top:16px" data-t="h2">Sans passer le portail</h2>
+    <p data-t="p2">Six lieux, tous à moins de deux minutes de marche de votre chambre.</p>
   </div>
   <div class="dom reveal">''']
 
-for img, titre, desc, quand, href, lien in DOMAINE:
+for i, (img, titre, desc, quand, href, lien) in enumerate(DOMAINE):
     b.append('''    <article class="card">
       <div class="ph"><picture><source srcset="img/opt/%s.webp" type="image/webp">
         <img loading="lazy" src="img/opt/%s.jpg" alt="%s"></picture>
-        <span class="when">%s</span></div>
-      <div class="in"><h3>%s</h3><p>%s</p>
-        <a href="%s">%s</a></div>
-    </article>''' % (img, img, titre.replace('&amp;', 'et'), quand, titre, desc, href, lien))
+        <span class="when" data-t="dw%d">%s</span></div>
+      <div class="in"><h3 data-t="dt%d">%s</h3><p data-t="dd%d">%s</p>
+        <a href="%s" data-t="dl%d">%s</a></div>
+    </article>''' % (img, img, titre.replace('&amp;', 'et'), i, quand, i, titre, i, desc, href, i, lien))
 
 b.append('''  </div>
 </section>
@@ -150,24 +182,24 @@ b.append('''  </div>
 <div class="band reveal">
   <picture><source srcset="img/opt/gal-lag-nuit.webp" type="image/webp">
   <img src="img/opt/gal-lag-nuit.jpg" width="1400" height="933" alt="La paillote à la tombée du jour" loading="lazy"></picture>
-  <div class="cap"><span>Le service du soir</span><p>Les lanternes s'allument quand la lumière part.</p></div>
+  <div class="cap"><span data-t="bt">Le service du soir</span><p data-t="bp">Les lanternes s'allument quand la lumière part.</p></div>
 </div>
 
 <section class="eau-sec" id="eau">
   <div class="wrap">
     <div class="head reveal">
-      <span class="eyebrow">Sur l'eau</span>
-      <h2 style="margin-top:16px">La lagune commence<br>au bout du ponton</h2>
-      <p>Toutes ces sorties partent de notre propre embarcadère. Réservation à la réception, la veille suffit.</p>
+      <span class="eyebrow" data-t="eb3">Sur l'eau</span>
+      <h2 style="margin-top:16px" data-t="h3">La lagune commence<br>au bout du ponton</h2>
+      <p data-t="p3">Toutes ces sorties partent de notre propre embarcadère. Réservation à la réception, la veille suffit.</p>
     </div>
     <div class="reveal">''')
 
-for n, titre, desc, quand in EAU:
+for i, (n, titre, desc, quand) in enumerate(EAU):
     b.append('''      <article class="plate">
         <span class="n">%s</span>
-        <div><h3>%s</h3><p>%s</p></div>
-        <span class="q">%s</span>
-      </article>''' % (n, titre, desc, quand))
+        <div><h3 data-t="et%d">%s</h3><p data-t="ed%d">%s</p></div>
+        <span class="q" data-t="eq%d">%s</span>
+      </article>''' % (n, i, titre, i, desc, i, quand))
 
 b.append('''    </div>
   </div>
@@ -175,35 +207,35 @@ b.append('''    </div>
 
 <section class="wrap" id="autour">
   <div class="head reveal">
-    <span class="eyebrow">Autour d'Assinie</span>
-    <h2 style="margin-top:16px">Quatre sorties<br>que la réception organise</h2>
-    <p>Elles figurent dans le circuit Découvertes Touristiques, à 35 000 FCFA par personne.</p>
+    <span class="eyebrow" data-t="eb4">Autour d'Assinie</span>
+    <h2 style="margin-top:16px" data-t="h4">Quatre sorties<br>que la réception organise</h2>
+    <p data-t="p4">Elles figurent dans le circuit Découvertes Touristiques, à 35 000 FCFA par personne.</p>
   </div>
   <div class="autour reveal">''')
 
-for titre, desc in AUTOUR:
-    b.append('    <div><h3>%s</h3><p>%s</p></div>' % (titre, desc))
+for i, (titre, desc) in enumerate(AUTOUR):
+    b.append('    <div><h3 data-t="at%d">%s</h3><p data-t="ad%d">%s</p></div>' % (i, titre, i, desc))
 
 b.append('''  </div>
-  <p class="note reveal">Ces quatre lieux n'ont pas de photographie sur cette page : nous préférons
+  <p class="note reveal" data-t="note">Ces quatre lieux n'ont pas de photographie sur cette page : nous préférons
   ne rien montrer plutôt que de montrer une image qui ne serait pas la nôtre.</p>
 </section>
 
 <div class="wrap">
   <div class="cta reveal">
-    <span class="eyebrow">Tout est réservable</span>
-    <h2>Composez votre séjour</h2>
-    <p>Onze forfaits réunissent chambre, repas et activités — de la journée Chillday à la lune de miel.</p>
+    <span class="eyebrow" data-t="eb5">Tout est réservable</span>
+    <h2 data-t="h5">Composez votre séjour</h2>
+    <p data-t="p5">Onze forfaits réunissent chambre, repas et activités — de la journée Chillday à la lune de miel.</p>
     <div class="g">
-      <a href="circuits.html" class="btn btn-solid">Voir les circuits</a>
-      <a href="reserver.html" class="btn">Réserver une chambre</a>
+      <a href="circuits.html" class="btn btn-solid" data-t="cb1">Voir les circuits</a>
+      <a href="reserver.html" class="btn" data-t="cb2">Réserver une chambre</a>
     </div>
   </div>
 </div>
 
 ''' + FOOTER)
 
-JS = NAV_JS + '\n\nvar EN={' + EN_NAV + 'cta:"Book"};\n\n' + LANG_JS
+JS = NAV_JS + '\n\nvar EN={' + EN_NAV + EN_PAGE + '};\n\n' + LANG_JS
 
 LD = _schema.bloc(
     _schema.service('Expériences et activités', "Balade lagunaire en pirogue, jet ski, spa, piscine et excursions autour d'Assinie depuis l'Hôtel Evannath.", 'experiences', image='gal-lag-bateau'),

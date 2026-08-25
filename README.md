@@ -382,6 +382,60 @@ fenêtre n'est pas encore connue.
 
 Pour refaire les extraits avec d'autres bornes, tout est dans `outils-video.sh`.
 
+## Version anglaise
+
+Le bouton FR/EN capture le français depuis le DOM au chargement, puis
+remplace chaque `[data-t]` par la valeur du dictionnaire `EN` de la page.
+Une clé absente laisse le français en place — jamais un trou.
+
+**Dix pages ne portaient de `data-t` que sur la navigation** : les sept fiches
+chambres, `reserver`, `seminaires` et `experiences`. Cliquer EN faisait
+basculer le menu et laissait toute la page en français. Elles sont
+maintenant traduites intégralement.
+
+Le français reste la source de vérité. Les traductions des chambres vivent
+dans `_chambres_en.py`, à part de `_chambres.py`, pour qu'une correction de
+traduction ne touche jamais le texte français et qu'un anglophone puisse
+relire le fichier sans traverser du code.
+
+### Ce que le script écrit lui-même
+
+Le compteur de nuits, le sélecteur de voyageurs, le récapitulatif du tunnel,
+la date en toutes lettres et les messages de confirmation sont écrits en
+JavaScript, donc hors de portée de `[data-t]`. `LANG_JS` appelle `EVN_LANG(lg)`
+à chaque bascule : c'est le point d'extension prévu pour ces cas, utilisé par
+les fiches chambres, `reserver` et `seminaires`.
+
+**Les valeurs restent françaises.** Les `<select>` du devis portent désormais
+un `value` explicite : l'affichage bascule, mais ce qui part à la réception —
+et ce qui indexe la table des capacités — reste `Théâtre`, `En U`,
+`Journée d'étude`. Le récapitulatif affiche le libellé, pas la valeur.
+
+### Collisions de clés
+
+Une clé réutilisée par deux textes de la même page fait que le dernier gagne.
+Quand la clé appartient au menu (`n1`…`n11`, définies par `EN_NAV`), c'est le
+menu qui est écrasé. Quatre pages étaient touchées :
+
+| page | clés | effet en anglais |
+|---|---|---|
+| `a-propos` | `n1`–`n5`, `d1`–`d3` | le menu affichait « 01 · Accommodation » |
+| `mentions-legales` | `n1`–`n9` | le menu affichait « Site publisher » |
+| `contact` | `h3` | « Check-in » à la place du titre de section |
+| `spa` | `c2` | « The oils » dans le fil d'Ariane |
+
+`verifier.py` (contrôle 7 quater) refuse désormais une clé redéfinie **et** un
+segment sans traduction. Les deux cas ont été testés en les provoquant.
+
+### La page mentions légales
+
+Son corps juridique reste **volontairement en français**, qui fait foi —
+traduire un document juridique crée un second texte non relu par un conseil,
+et une ambiguïté sur celui qui prévaut. Le bandeau de mise à jour le dit au
+lecteur. La décision est écrite dans `build-pages4.py` sous la forme du
+marqueur `EVN_FR_FAIT_FOI`, que `verifier.py` lit : elle est donc explicite,
+pas subie.
+
 ## Formulaires
 
 Les cinq formulaires du site — réservation, devis séminaire, contact, table,

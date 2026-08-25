@@ -192,8 +192,8 @@ body.append('''  </div>
 for i, (nm, t, img, alt, d, href, cta) in enumerate(SPACES, 1):
     body.append('''  <article class="space reveal">
     <div class="ph"><picture><source srcset="img/opt/%s.webp" type="image/webp"><img loading="lazy" src="img/opt/%s.jpg" width="1200" height="800" alt="%s"></picture></div>
-    <div class="tx"><span class="eyebrow" data-t="n%d">%s</span><h3 data-t="t%d">%s</h3>
-      <p data-t="d%d">%s</p>
+    <div class="tx"><span class="eyebrow" data-t="es%d">%s</span><h3 data-t="t%d">%s</h3>
+      <p data-t="ed%d">%s</p>
       <a href="%s" data-t="a%d">%s</a></div>
   </article>''' % (img, img, alt, i, nm, i, t, i, d, href, i, cta))
 
@@ -276,16 +276,16 @@ w4:"The best location",w4p:"At PK 19, between the Atlantic Ocean and the Aby lag
 w5:"Special offers",w5p:"Holiday Packs, tours, birthday boxes: packages built to enjoy Assinie differently.",
 w6:"Staff who answer",w6p:"Helpful, present, and glad to answer every question. It is the first thing our guests mention.",
 e3:"Our spaces",h3:"Five places, one same care",
-n1:"01 · Accommodation",t1:"Rooms &amp; Suites",
-d1:"Fine materials, harmonious colours and careful decoration create a space where relaxation and wellbeing come first. Seven categories, from the standard room to the two-bedroom Arabian Suite.",a1:"See the categories",
-n2:"02 · Table",t2:"Restaurant",
-d2:"The authentic flavours of Côte d'Ivoire, in a warm, bright room opening onto the pool. Kedjenou, thiéboudiène, capitaine en papillote — and a list of house cocktails.",a2:"See the menu",
-n3:"03 · Business",t3:"Meetings &amp; Events",
-d3:"A space bathed in natural light, contemporary in design, that suits anything: seminars, cocktails, gala dinners, product launches. PA system and sound engineer available.",a3:"Request a quote",
-n4:"04 · Wellbeing",t4:"Spa &amp; Sauna",
-d4:"Hot stone massages, an Oriental argan ritual, African black soap scrub, facials with the five flowers of Assinie. And a sauna to close the day.",a4:"See the treatments",
-n5:"05 · Leisure",t5:"Pool &amp; Jacuzzi",
-d5:"A large pool with built-in jacuzzi, sun loungers and parasols, open from first light until dark. Children's play area and gym a few steps away.",a5:"See the offers",
+es1:"01 · Accommodation",t1:"Rooms &amp; Suites",
+ed1:"Fine materials, harmonious colours and careful decoration create a space where relaxation and wellbeing come first. Seven categories, from the standard room to the two-bedroom Arabian Suite.",a1:"See the categories",
+es2:"02 · Table",t2:"Restaurant",
+ed2:"The authentic flavours of Côte d'Ivoire, in a warm, bright room opening onto the pool. Kedjenou, thiéboudiène, capitaine en papillote — and a list of house cocktails.",a2:"See the menu",
+es3:"03 · Business",t3:"Meetings &amp; Events",
+ed3:"A space bathed in natural light, contemporary in design, that suits anything: seminars, cocktails, gala dinners, product launches. PA system and sound engineer available.",a3:"Request a quote",
+es4:"04 · Wellbeing",t4:"Spa &amp; Sauna",
+ed4:"Hot stone massages, an Oriental argan ritual, African black soap scrub, facials with the five flowers of Assinie. And a sauna to close the day.",a4:"See the treatments",
+es5:"05 · Leisure",t5:"Pool &amp; Jacuzzi",
+ed5:"A large pool with built-in jacuzzi, sun loungers and parasols, open from first light until dark. Children's play area and gym a few steps away.",a5:"See the offers",
 e4:"On the estate",h4:"Thirteen amenities,<br>all included",
 q1:"Air conditioning",q2:"Free wifi",q3:"Pool &amp; jacuzzi",q4:"Spa &amp; sauna",q5:"Gym",q6:"Smart TV",q7:"Play area",
 q8:"Lifts",q9:"Shuttles",q10:"Free parking",q11:"Gift shop",q12:"Laundry",q13:"Hairdryer",
