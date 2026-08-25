@@ -225,6 +225,25 @@ présents, JS de navigation non divergent, images dimensionnées, fichiers
 existants, liens valides, navigation complète, JSON-LD valide, rideau présent.
 Chacun correspond à un défaut réellement survenu.
 
+## Vidéo
+
+`site/video/presentation-hotel.mp4` — 3 minutes, 1280×720, 28 Mo, avec son.
+Elle est intégrée à la page **À propos**, en lecture à la demande :
+`preload="none"`, donc **rien ne part tant que le visiteur n'a pas cliqué**.
+Le fichier est en *fast-start* (index en tête), la lecture démarre donc sans
+attendre les 28 Mo.
+
+L'affiche est une photo du domaine et non une image du film : **ffmpeg n'est
+pas installé sur ce poste**, il est donc impossible d'extraire une image, de
+découper, de couper le son ou de ré-encoder.
+
+Trois autres vidéos dorment dans `site/img/gallery/` (dossier non versionné) :
+Réveillon (3 min 21, 1280×720), Massage (13 s, vertical 720×1280) et Suite
+mezzanine (45 s, 360×640 — trop basse définition pour être utilisable).
+
+Le hero animé recommandé dans la proposition demande un extrait de 10 s, muet
+et léger : il faudra **ffmpeg** pour le produire.
+
 ## Formulaires
 
 Les cinq formulaires du site — réservation, devis séminaire, contact, table,

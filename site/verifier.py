@@ -79,8 +79,10 @@ def controler():
                 pb.append((f, '%s declare %sx%s, le fichier fait %dx%d'
                            % (src.group(1), w.group(1), h.group(1), reel[0], reel[1])))
 
-        # 7. fichiers reellement presents
-        for src in set(re.findall(r'(?:src|srcset)="(img/[^" ]+)', s)):
+        # 7. fichiers reellement presents, quel que soit l'attribut
+        # (src, srcset, poster, data-full, href, url(...) : une affiche de video
+        # manquante etait passee inapercue parce que seul src etait regarde)
+        for src in set(re.findall(r'(img/opt/[\w-]+\.(?:webp|jpg|png))', s)):
             if not os.path.exists(src):
                 pb.append((f, 'fichier absent : ' + src))
 

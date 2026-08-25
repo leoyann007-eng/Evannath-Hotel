@@ -38,6 +38,11 @@ def pleines_referencees():
         noms |= set(re.findall(r'(?:src|srcset)="img/opt/([\w-]+)\.(?:webp|jpg)', s))
         noms |= set(re.findall(r'[\s,]img/opt/([\w-]+)\.(?:webp|jpg) \d+w', s))
         noms |= set(re.findall(r"url\('img/opt/([\w-]+)\.(?:webp|jpg)'\)", s))
+        # Une affiche de video designe souvent directement un palier
+        # (…-1024.jpg) : on remonte a l'image de base pour que ce palier
+        # soit effectivement fabrique.
+        for n in re.findall(r'poster="img/opt/([\w-]+)\.(?:webp|jpg)"', s):
+            noms.add(re.sub(r'-(?:%s)$' % '|'.join(map(str, LARGEURS)), '', n))
         noms |= set(re.findall(r'data-bg="([\w-]+)"', s))
     return sorted(n for n in noms
                   if not n.endswith('-t')

@@ -205,6 +205,19 @@ section{padding:100px 0}
 .space .tx p{font-size:14.5px}
 .space .tx a{display:inline-block;margin-top:16px;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--bronze);border:1px solid var(--bronze);padding:14px 20px;font-weight:700;transition:.3s}
 .space .tx a:hover{background:var(--bronze);color:var(--night)}
+/* Video de presentation ---------------------------------------------------
+   preload="none" : rien ne part tant que le visiteur n'a pas clique. Le
+   fichier est en fast-start (index en tete), donc la lecture demarre sans
+   attendre les 28 Mo. L'affiche est une photo du domaine : sans ffmpeg on
+   ne peut pas extraire une image du film lui-meme. */
+.film-sec{background:var(--bark);border-block:1px solid var(--line);padding:88px 0}
+.film{position:relative;margin-top:34px;border:1px solid var(--line);background:#000;
+  aspect-ratio:16/9;overflow:hidden}
+.film video{width:100%;height:100%;object-fit:cover;display:block;background:#000}
+.film-note{display:flex;gap:22px;flex-wrap:wrap;margin-top:16px;font-size:12.5px;color:var(--muted)}
+.film-note span{display:inline-flex;align-items:center;gap:7px}
+.film-note svg{width:14px;height:14px;stroke:var(--bronze);fill:none;stroke-width:1.5}
+
 .eq-sec{background:var(--bark-2)}
 .eq{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-top:40px}
 .eq div{background:var(--bark-2);padding:22px 20px;display:flex;align-items:center;gap:13px;font-size:14px;color:#CFC3B2}
@@ -366,6 +379,28 @@ section{padding:100px 0}
   </article>
 </section>
 
+<section class="film-sec">
+  <div class="wrap">
+    <span class="eyebrow" data-t="ef">En trois minutes</span>
+    <h2 style="margin-top:14px" data-t="hf">Le film de la maison</h2>
+    <p style="max-width:56ch;margin-top:16px;color:#B4A794" data-t="pf">Le domaine, la lagune, les chambres et la table, filmés sur place. La lecture ne démarre qu'à votre demande.</p>
+    <div class="film">
+      <video controls preload="none" playsinline
+             poster="img/opt/gal-dom-aerien-1024.jpg"
+             width="1280" height="720">
+        <source src="video/presentation-hotel.mp4" type="video/mp4">
+        <p data-t="vf">Votre navigateur ne peut pas lire cette vidéo.
+          <a href="video/presentation-hotel.mp4">La télécharger</a> (28 Mo).</p>
+      </video>
+    </div>
+    <div class="film-note">
+      <span><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span data-t="d1">3 minutes</span></span>
+      <span><svg viewBox="0 0 24 24"><path d="M12 3a3 3 0 013 3v6a3 3 0 01-6 0V6a3 3 0 013-3z"/><path d="M5 11a7 7 0 0014 0M12 18v3"/></svg><span data-t="d2">Avec son</span></span>
+      <span><svg viewBox="0 0 24 24"><path d="M3 17c2 1 4-1 6 0s4 1 6 0 4-1 6 0M5 13l7-8 7 8"/></svg><span data-t="d3">28 Mo, lecture progressive</span></span>
+    </div>
+  </div>
+</section>
+
 <section class="eq-sec">
  <div class="wrap">
   <span class="eyebrow" data-t="e4">Sur le domaine</span>
@@ -487,7 +522,7 @@ if(!('IntersectionObserver' in window)||reduce){
 var EN={mn:"Menu",n1:"Rooms &amp; Suites",n2:"Experiences",n3:"The table",n4:"The spa",n5:"Packages &amp; Offers",n6:"Meetings &amp; groups",n7:"Gallery",n8:"About",n9:"Useful information",n10:"Contact",n11:"Book",dr:"Reservations",cta:"Book now",
 c1:"Home",c2:"About",eb:"Assinie · PK 19 · Always",sub:"Welcome to the African dream",
 lede:"Akwaba means “welcome” in Akan. It is the first word you hear as you come through the gate, and the only one that really sums up what we do here.",
-e1:"Our house",big:"A haven of peace combining excellence and comfort, built to become a benchmark for Ivorian hospitality.",
+ef:"Three minutes",hf:"The film of the house",pf:"The grounds, the lagoon, the rooms and the table, filmed on site. Playback starts only when you ask for it.",vf:"Your browser cannot play this video.",d1:"3 minutes",d2:"With sound",d3:"28 MB, progressive playback",e1:"Our house",big:"A haven of peace combining excellence and comfort, built to become a benchmark for Ivorian hospitality.",
 p1:"The Evannath Hôtel grew from a simple idea: to give Assinie a place where luxury would not be imported, but African. The fittings come from local brands and craftspeople. The sculptures in the hall were chosen one by one. The kitchen celebrates the country's produce.",
 p2:"Every detail is worked out for our visitors' wellbeing — from the shuttle waiting at the airport to the last cocktail on the pontoon. Our range of services grows with what our guests need, and our front desk never closes.",
 pos1:"African luxury.",pos2:" Accommodation, conference rooms, refined dining overlooking the pool, wellbeing and leisure.",
