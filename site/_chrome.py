@@ -218,7 +218,7 @@ def header(cta_href, cta_label, cta_key='cta'):
   </div>
 </header>''' % (cta_href, cta_key, cta_label)
 
-def drawer(current='', photo='t-lampe', alt='Lanterne de rotin de l\'Hôtel Evannath'):
+def drawer(current='', photo='gal-art-lanterne', alt='Lanterne de rotin de l\'Hôtel Evannath'):
     rows = []
     for num, href, key, label in LINKS:
         cls = ' class="on"' if href == current else ''
@@ -490,11 +490,13 @@ def dimensionner(html):
     """
     def f(m):
         balise = m.group(0)
-        if ' width=' in balise and ' height=' in balise:
-            return balise
         d = _taille(m.group(1), m.group(2))
         if not d:
             return balise
+        # Une dimension fausse est pire qu'absente : le navigateur reserve la
+        # mauvaise hauteur, puis corrige quand l'image arrive. On remplace donc
+        # ce qui est declare au lieu de se contenter de completer.
+        balise = _re.sub(r'\s(?:width|height)="\d+"', '', balise)
         return '<img width="%d" height="%d"' % d + balise[4:]
 
     return _re.sub(r'<img[^<>]*?src="img/opt/([\w-]+)\.(jpg|png|webp)"[^<>]*?>', f, html)

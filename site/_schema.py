@@ -158,7 +158,7 @@ def restaurant(nb_plats=None):
         'currenciesAccepted': DEVISE,
         'address': ADRESSE,
         'telephone': TEL[0],
-        'image': SITE + '/img/opt/t-hero.jpg',
+        'image': SITE + '/img/opt/gal-lag-nuit.jpg',
         'hasMenu': SITE + '/carte',
         'containedInPlace': {'@id': ID_HOTEL},
     }

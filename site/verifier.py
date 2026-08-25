@@ -8,6 +8,20 @@ import io, os, re, glob, json, sys
 sys.path.insert(0, '.')
 from _chrome import TOKENS, NAV_BASE, LANG_JS
 
+_cache = {}
+
+
+def _taille_de(chemin):
+    if chemin not in _cache:
+        from PIL import Image
+        _cache[chemin] = Image.open(chemin).size
+    return _cache[chemin]
+
+
+def _largeur_de(chemin):
+    return _taille_de(chemin)[0]
+
+
 IGNORE = {'index-luxe-variante.html', 'carte-template.html',
           'spa-template.html', 'index-template.html'}
 SANS_JSONLD = {'404.html', 'mentions-legales.html', 'reserver.html'}
@@ -42,12 +56,35 @@ def controler():
             if 'src=' in i and not ('width=' in i and 'height=' in i):
                 pb.append((f, 'image sans dimensions : ' + i[:60]))
 
-        # 5. fichiers reellement presents
+        # 5. les descripteurs w d'un srcset doivent correspondre aux fichiers
+        for jeu in re.findall(r'srcset="([^"]+)"', s):
+            for c in jeu.split(','):
+                bout = c.strip().split()
+                if len(bout) != 2 or not bout[1].endswith('w'):
+                    continue
+                if not os.path.exists(bout[0]):
+                    continue
+                if _largeur_de(bout[0]) != int(bout[1][:-1]):
+                    pb.append((f, 'descripteur faux : %s annonce %s' % (bout[0], bout[1])))
+
+        # 6. les dimensions declarees doivent correspondre au fichier
+        for balise in re.findall(r'<img[^>]*>', s):
+            w = re.search(r'width="(\d+)"', balise)
+            h = re.search(r'height="(\d+)"', balise)
+            src = re.search(r'src="(img/opt/[\w-]+\.(?:jpg|png|webp))"', balise)
+            if not (w and h and src) or not os.path.exists(src.group(1)):
+                continue
+            reel = _taille_de(src.group(1))
+            if reel != (int(w.group(1)), int(h.group(1))):
+                pb.append((f, '%s declare %sx%s, le fichier fait %dx%d'
+                           % (src.group(1), w.group(1), h.group(1), reel[0], reel[1])))
+
+        # 7. fichiers reellement presents
         for src in set(re.findall(r'(?:src|srcset)="(img/[^" ]+)', s)):
             if not os.path.exists(src):
                 pb.append((f, 'fichier absent : ' + src))
 
-        # 6. liens internes
+        # 8. liens internes
         for h in set(re.findall(r'href="([^"]+)"', s)):
             if h.startswith(('http', 'mailto:', 'tel:', '#', '/api')):
                 continue
@@ -55,13 +92,13 @@ def controler():
             if p and not os.path.exists(p):
                 pb.append((f, 'lien mort : ' + h))
 
-        # 7. navigation complete et repere principal
+        # 9. navigation complete et repere principal
         if len(re.findall(r'<a href="[^"]+"[^>]*><i>\d+</i><span data-t="n\d+"', s)) != 11:
             pb.append((f, 'navigation incomplete'))
         if s.count('<main id="contenu">') != 1:
             pb.append((f, 'balise <main> absente ou en double'))
 
-        # 8. donnees structurees valides
+        # 10. donnees structurees valides
         m = re.search(r'<script type="application/ld\+json">(.*?)</script>', s, re.S)
         if m:
             try:
@@ -71,7 +108,7 @@ def controler():
         elif f not in SANS_JSONLD:
             pb.append((f, 'JSON-LD absent'))
 
-        # 9. une barre collante doit avoir son rideau
+        # 11. une barre collante doit avoir son rideau
         if 'collante"' in s:
             if 'collante::before' not in s:
                 pb.append((f, 'rideau CSS absent'))

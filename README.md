@@ -291,6 +291,13 @@ pixels utiles. Le rapport des vignettes est figé en CSS (`aspect-ratio`), sinon
 la hauteur rendue changerait selon le palier chargé et la grille bougerait. Il se régénère de lui-même si `LARGEUR` change :
 inutile de supprimer quoi que ce soit à la main.
 
+Les images de **La table** ne sont plus des fichiers à part : c'étaient des
+copies bit à bit de photos de la galerie, sous d'autres noms. La page pointe
+désormais sur les originaux en 1748 px.
+
+`build-images.py` ne fabrique de paliers que pour les images réellement
+affichées — pas pour celles que seule la visionneuse charge en plein écran.
+
 `build-images.py` produit ensuite les largeurs intermédiaires (640 / 1024 /
 1600), en WebP et en JPEG progressif, sans jamais agrandir au-delà de
 l'original — **ni générer un palier à moins de 10 % de la source** : un

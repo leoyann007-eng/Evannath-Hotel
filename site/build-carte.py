@@ -208,7 +208,7 @@ HTML = (HTML
       _schema.restaurant(nb_plats=total),
       _schema.hotel(),
       _schema.fil([('Accueil','index'),('La table',None)]))))
-io.open('carte.html','w',encoding='utf-8').write(responsive(dimensionner(HTML), hero='t-hero'))
+io.open('carte.html','w',encoding='utf-8').write(responsive(dimensionner(HTML), hero='gal-lag-nuit'))
 print('carte.html :', total, 'articles')
 
 SPAH = io.open('spa-template.html',encoding='utf-8').read()

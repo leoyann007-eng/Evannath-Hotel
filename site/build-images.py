@@ -23,12 +23,22 @@ DOSSIER = 'img/opt'
 # On ne touche pas aux vignettes -t : elles sont deja dimensionnees pour la
 # galerie et servies telles quelles.
 def pleines_referencees():
+    """Images qui peuvent reellement tirer parti de plusieurs largeurs.
+
+    On ne retient que celles affichees par un <img>, un srcset ou un fond CSS.
+    Une image citee uniquement par `data-full` sert a la visionneuse, qui la
+    charge en pleine definition : lui fabriquer des paliers ne produit que des
+    fichiers que personne ne demande — 160 d'entre eux dormaient dans le depot.
+    """
     noms = set()
     for f in glob.glob('*.html'):
         if f == 'index-luxe-variante.html':
             continue
         s = io.open(f, encoding='utf-8').read()
-        noms |= set(re.findall(r'img/opt/([\w-]+)\.(?:webp|jpg)', s))
+        noms |= set(re.findall(r'(?:src|srcset)="img/opt/([\w-]+)\.(?:webp|jpg)', s))
+        noms |= set(re.findall(r'[\s,]img/opt/([\w-]+)\.(?:webp|jpg) \d+w', s))
+        noms |= set(re.findall(r"url\('img/opt/([\w-]+)\.(?:webp|jpg)'\)", s))
+        noms |= set(re.findall(r'data-bg="([\w-]+)"', s))
     return sorted(n for n in noms
                   if not n.endswith('-t')
                   and not re.search(r'-(?:%s)$' % '|'.join(map(str, LARGEURS)), n))
