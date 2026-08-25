@@ -241,8 +241,23 @@ Trois autres vidéos dorment dans `site/img/gallery/` (dossier non versionné) :
 Réveillon (3 min 21, 1280×720), Massage (13 s, vertical 720×1280) et Suite
 mezzanine (45 s, 360×640 — trop basse définition pour être utilisable).
 
-Le hero animé recommandé dans la proposition demande un extrait de 10 s, muet
-et léger : il faudra **ffmpeg** pour le produire.
+### Le hero animé de l'accueil
+
+`video/hero-nuit.mp4` (750 Ko) et `.webm` (580 Ko) — 10 s, muet, 1280×720,
+extraits de 158 à 169 s du film : la vue aérienne de l'hôtel illuminé sur la
+lagune. Le plan est assez sombre pour que le titre reste lisible.
+
+La boucle est **sans raccord** : la première seconde est fondue par-dessus la
+dernière, calée pour que l'image de fin coïncide avec celle de début.
+
+Il ne se charge que si trois conditions sont réunies — écran d'au moins 900 px,
+connexion qui n'est ni en 2G ni en mode économie de données, et pas de demande
+de mouvement réduit. Sinon le carrousel de photos tourne comme avant, **sans un
+octet de vidéo**. La décision est prise après le chargement de la page, jamais
+au moment où le script est lu : la largeur de la fenêtre n'y est pas toujours
+connue.
+
+Pour refaire l'extrait avec d'autres bornes, tout est dans `outils-video.sh`.
 
 ## Formulaires
 

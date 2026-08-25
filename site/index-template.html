@@ -115,6 +115,15 @@ header.scrolled .brand img{width:132px}
 #s0{background-image:image-set(url('img/opt/hero-paillote-640.webp') type('image/webp'),url('img/opt/hero-paillote-640.jpg') type('image/jpeg'))}
 @media (min-width:641px){#s0{background-image:image-set(url('img/opt/hero-paillote-1024.webp') type('image/webp'),url('img/opt/hero-paillote-1024.jpg') type('image/jpeg'))}}
 @media (min-width:1025px){#s0{background-image:image-set(url('img/opt/hero-paillote.webp') type('image/webp'),url('img/opt/hero-paillote.jpg') type('image/jpeg'))}}
+/* Hero anime ---------------------------------------------------------------
+   Le film ne se charge que si trois conditions sont reunies : ecran large,
+   connexion correcte, et pas de demande de mouvement reduit. Sinon le
+   carrousel de photos tourne comme avant, sans un octet de video.
+   Il se pose au-dessus des photos et sous le degrade, qui garde le titre
+   lisible. 10 s, sans son, boucle sans raccord. */
+#film{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+  opacity:0;transition:opacity 1.4s ease;z-index:2;pointer-events:none}
+#film.on{opacity:1}
 .slides{position:absolute;inset:0}
 .slide{position:absolute;inset:0;opacity:0;transition:opacity 1.6s ease;background-size:cover;background-position:center}
 .slide.on{opacity:1;animation:kb 14s ease-out forwards}
@@ -321,6 +330,8 @@ footer{background:#0F0A06;border-top:1px solid var(--line);padding:74px 0 28px}
     <div class="slide on" id="s0"></div>
     <div class="slide" data-bg="hero-piscine"></div>
     <div class="slide" data-bg="hero-aerien"></div>
+    <video id="film" muted loop playsinline preload="none" aria-hidden="true"
+           poster="img/opt/hero-nuit-affiche.jpg"></video>
   </div>
   <div class="hero-in wrap">
     <span class="eyebrow" data-t="eb">Assinie · PK 19 · Lagune Aby</span>
@@ -580,15 +591,42 @@ setTimeout(function(){document.getElementById('pre').classList.add('done')},2600
 {{NAV_BASE}}
 
 // Les visuels suivants ne sont chargés qu'une fois la page affichée.
-var sl=[].slice.call(document.querySelectorAll('#sl .slide')),si=0;
+var sl=[].slice.call(document.querySelectorAll('#sl .slide')),si=0,rotation=0;
 var webp=document.createElement('canvas').toDataURL('image/webp').indexOf('data:image/webp')===0;
 function loadSlides(){
   var dpr=Math.min(devicePixelRatio||1,2), besoin=innerWidth*dpr;
   var suf=besoin<=640?'-640':besoin<=1024?'-1024':'';
   sl.forEach(function(s){var n=s.dataset.bg;if(n)s.style.backgroundImage="url('img/opt/"+n+suf+(webp?'.webp':'.jpg')+"')"});
-  setInterval(function(){sl[si].classList.remove('on');si=(si+1)%sl.length;sl[si].classList.add('on')},6500);
+  rotation=setInterval(function(){sl[si].classList.remove('on');si=(si+1)%sl.length;sl[si].classList.add('on')},6500);
 }
 if(document.readyState==='complete')loadSlides();else addEventListener('load',loadSlides);
+
+/* Le film du hero : on ne le charge que si cela a du sens.
+   La decision est prise apres le chargement, pas au moment ou le script est
+   lu : la largeur de la fenetre n'est pas toujours connue a cet instant, et
+   une valeur provisoire ecarterait le film a tort. On interroge aussi
+   matchMedia plutot que innerWidth, plus fiable. */
+function filmDuHero(){
+  var f=document.getElementById('film');
+  if(!f || f.dataset.decide) return;
+  f.dataset.decide='1';
+  var co=navigator.connection||{};
+  var maigre=co.saveData===true||/(^|-)2g$/.test(co.effectiveType||'');
+  if(!matchMedia('(min-width:900px)').matches || maigre
+     || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var src=document.createElement('source');
+  src.type=f.canPlayType('video/webm; codecs="vp9"') ? 'video/webm' : 'video/mp4';
+  src.src=src.type==='video/webm' ? 'video/hero-nuit.webm' : 'video/hero-nuit.mp4';
+  f.appendChild(src);
+  f.addEventListener('playing',function(){
+    f.classList.add('on');
+    clearInterval(rotation);        // le carrousel s'arrete, le film prend la main
+  },{once:true});
+  f.load();
+  var p=f.play();
+  if(p&&p.catch)p.catch(function(){});   /* lecture refusee : les photos restent */
+}
+if(document.readyState==='complete')filmDuHero();else addEventListener('load',filmDuHero);
 
 var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 if(!('IntersectionObserver' in window)||reduce){
