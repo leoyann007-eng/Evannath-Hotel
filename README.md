@@ -492,6 +492,36 @@ qu'il s'agit du même établissement d'une page à l'autre.
 **Les coordonnées GPS sont volontairement absentes** : l'établissement ne les
 publie nulle part, et un point mal placé vaut moins que pas de point.
 
+### Le contenu ne dépend pas du JavaScript pour être visible
+
+`.reveal` masque les blocs et attend qu'un script leur pose la classe `in` :
+c'est l'apparition au défilement. **Vingt-deux blocs sur l'accueil.** Si ce
+script ne s'exécute pas — JavaScript désactivé, extension qui le bloque, ou
+erreur survenue plus haut dans le même `<script>` — la page gardait ses
+8 121 px de hauteur et restait **vide sous l'en-tête**.
+
+Deux garde-fous, indépendants l'un de l'autre :
+
+1. Le masquage n'est appliqué que si `<html>` porte la classe `js`, posée par
+   un script minuscule placé dans le `<head>`. Sans JavaScript, la règle ne
+   s'applique pas du tout et tout est visible immédiatement.
+2. Ce même script révèle tout au bout de **3 secondes** si le script principal
+   n'a jamais posé `window.__reveal`. Comme il s'agit d'un `<script>` séparé,
+   une erreur dans l'autre ne l'empêche pas de tourner.
+
+Les trois cas ont été vérifiés, en comptant la **classe** et non l'opacité —
+le volet d'aperçu n'exécute pas les transitions CSS, donc une opacité mesurée
+y reste figée à 0 :
+
+| situation | classe `js` | blocs révélés |
+|---|---|---|
+| aucun script | absente | 22/22 visibles d'emblée |
+| script principal en panne | posée | 22/22 après 3 s |
+| fonctionnement normal | posée | 22/22 |
+
+`verifier.py` (contrôle 7 septies) refuse un masquage `.reveal` non
+conditionné et un secours manquant.
+
 ### L'image de partage
 
 C'est la vignette que WhatsApp, Facebook ou un client mail affichent quand on

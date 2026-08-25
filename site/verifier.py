@@ -214,6 +214,29 @@ def controler():
                     pb.append((f, 'offre « %s » : %s sur l accueil, %s sur les circuits'
                                % (nom, prix, ref[nom])))
 
+        # 7 septies. le contenu ne doit pas dependre du JavaScript pour etre
+        # visible. .reveal masque les blocs en attendant qu'un script leur
+        # pose .in ; si ce script ne s'execute pas, la page garde sa hauteur
+        # et reste vide sous l'en-tete. Le masquage est donc conditionne a la
+        # classe « js », et un secours revele tout au bout de 3 s si le script
+        # principal n'a jamais signale son passage.
+        if '.reveal' in s:
+            # On lit les regles une par une : un selecteur qui masque .reveal
+            # doit etre porte par la classe « js ». Chercher le motif brut
+            # attrapait aussi « .js .reveal », donc ne detectait rien.
+            for regle in re.finditer(r'([^{}]+)\{([^}]*)\}', s):
+                sel, decl = regle.group(1), regle.group(2)
+                if '.reveal' not in sel or 'opacity' not in decl:
+                    continue
+                if not re.search(r'opacity\s*:\s*0(?![.\d])', decl):
+                    continue
+                if '.js' not in sel:
+                    pb.append((f, 'masquage .reveal non conditionne a la classe js '
+                                  '— page vide si le script ne tourne pas : '
+                                  + sel.strip()[:50]))
+            if '__reveal' not in s:
+                pb.append((f, 'secours de revelation absent du <head>'))
+
         # 8. toute image ouvrable en plein ecran doit exister aussi en WebP
         for base in re.findall(r'data-full="(img/opt/[\w-]+)\.jpg"', s):
             if not os.path.exists(base + '.webp'):
