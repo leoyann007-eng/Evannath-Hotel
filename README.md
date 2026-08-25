@@ -257,7 +257,32 @@ octet de vidéo**. La décision est prise après le chargement de la page, jamai
 au moment où le script est lu : la largeur de la fenêtre n'y est pas toujours
 connue.
 
-Pour refaire l'extrait avec d'autres bornes, tout est dans `outils-video.sh`.
+### Le geste, sur la page Spa
+
+`video/spa-massage.mp4` (840 Ko) — 10 s, muet, vertical 640×896, tiré de la
+vidéo Massage. Placé dans la section « Le sel, l'huile et la main », qu'il
+illustre littéralement.
+
+La source était une **publicité pour les réseaux sociaux** : logo incrusté en
+haut, numéro de téléphone et icônes réseaux en bas, et un carton d'appel à
+l'action sur les 2,3 dernières secondes. Le clip est recadré pour retirer les
+deux bandeaux — sur son propre site, l'adresse du site n'a rien à faire dans
+l'image — et coupé avant le carton.
+
+Pas de WebM ici : mesuré à la même taille que le MP4, il n'apportait rien.
+Sur le hero il fait 23 % de moins, d'où la différence de traitement.
+
+### La règle commune
+
+`filmAmbiance()` dans `NAV_BASE` porte la décision pour les deux films :
+écran d'au moins 900 px, connexion ni 2G ni économie de données, pas de
+mouvement réduit. Sinon l'affiche reste et **pas un octet ne part**.
+
+L'appel se fait après le chargement de la page, jamais au moment où le script
+est lu — un appel prématuré verrouille la décision alors que la largeur de la
+fenêtre n'est pas encore connue.
+
+Pour refaire les extraits avec d'autres bornes, tout est dans `outils-video.sh`.
 
 ## Formulaires
 

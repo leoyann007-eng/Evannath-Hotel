@@ -122,6 +122,20 @@ header.scrolled .brand img{width:132px}
 .hero .lede{max-width:46ch;margin:0 auto;font-size:1.06rem;color:#E3D9C9}
 .rule{width:1px;height:56px;background:linear-gradient(var(--bronze),transparent);margin:36px auto 0}
 
+/* Le geste, en mouvement --------------------------------------------------
+   Un plan vertical de 10 s, muet, en boucle sans raccord, tire du film de
+   l'hotel. Recadre pour retirer le logo et le bandeau de liens incrustes :
+   sur son propre site, l'adresse du site n'a rien a faire dans l'image.
+   Il ne se charge que sur ecran large et connexion correcte ; ailleurs
+   l'affiche suffit. */
+.mani .geste{margin-top:32px;max-width:320px;border:1px solid var(--line);
+  background:var(--bark-2);aspect-ratio:640/896;overflow:hidden;position:relative}
+.mani .geste video{width:100%;height:100%;object-fit:cover;display:block;
+  opacity:0;transition:opacity 1.2s ease}
+.mani .geste video.on{opacity:1}
+.mani .geste::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(180deg,transparent 60%,rgba(16,11,6,.5))}
+.mani .legende{margin-top:12px;font-size:12.5px;color:var(--muted);max-width:320px}
 .mani{padding:118px 0}
 .mani .grid{display:grid;grid-template-columns:1fr 1.25fr;gap:70px;align-items:start}
 .mani .big{font-family:var(--f-display);font-size:clamp(1.5rem,2.7vw,2.15rem);line-height:1.4;color:var(--cream)}
@@ -320,6 +334,11 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
     <div>
       <span class="eyebrow" data-t="e1">Notre approche</span>
       <p class="big" style="margin-top:22px" data-t="big">Le sel, l'huile et la main. Rien de plus compliqué.</p>
+      <div class="geste">
+        <video muted loop playsinline preload="none" aria-hidden="true"
+               poster="img/opt/spa-massage-affiche.jpg" id="geste"></video>
+      </div>
+      <p class="legende" data-t="lg">Un soin au bord du bassin, filmé sur place.</p>
     </div>
     <div>
       <p data-t="p1">Le savon noir africain gomme, l'argan nourrit, les pierres chauffées défont ce que la route a noué. Nos praticiennes travaillent avec des gestes qui n'ont pas changé depuis longtemps, et des produits qu'on peut nommer.</p>
@@ -629,6 +648,35 @@ bg.onclick=toggleMenu;
 dwLinks.forEach(function(a){a.onclick=function(){if(dw.classList.contains('open'))toggleMenu()}});
 addEventListener('keydown',function(e){if(e.key==='Escape'&&dw.classList.contains('open'))toggleMenu()});
 
+/* Films d'ambiance -------------------------------------------------------
+   On ne charge un film que si cela a du sens : ecran large, connexion qui
+   n'est ni en 2G ni en economie de donnees, et pas de demande de mouvement
+   reduit. Sinon l'affiche du <video> reste affichee et pas un octet ne part.
+   L'appel se fait apres le chargement de la page : au moment ou le script
+   est lu, la largeur de la fenetre n'est pas toujours connue. */
+function filmAmbiance(el, sources, alors){
+  if(!el || el.dataset.decide) return;
+  el.dataset.decide='1';
+  var co=navigator.connection||{};
+  var maigre=co.saveData===true||/(^|-)2g$/.test(co.effectiveType||'');
+  if(!matchMedia('(min-width:900px)').matches || maigre
+     || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var choisi=null;
+  for(var i=0;i<sources.length;i++){
+    if(el.canPlayType(sources[i].type)){ choisi=sources[i]; break; }
+  }
+  if(!choisi) return;
+  var s=document.createElement('source');
+  s.type=choisi.type.split(';')[0]; s.src=choisi.src;
+  el.appendChild(s);
+  el.addEventListener('playing', function(){
+    el.classList.add('on'); if(alors) alors();
+  }, {once:true});
+  el.load();
+  var p=el.play();
+  if(p && p.catch) p.catch(function(){});   /* lecture refusee : l'affiche reste */
+}
+
 /* Visionneuse : servir le WebP quand le navigateur le gere. Sur les photos
    ouvertes en plein ecran, cela represente environ 30 % de moins a
    telecharger. build-images.py garantit qu'un .webp existe pour chaque
@@ -707,11 +755,20 @@ document.getElementById('sf').addEventListener('submit',function(e){e.preventDef
   });
 });
 
+function filmDuGeste(){
+  filmAmbiance(document.getElementById('geste'),
+    [{type:'video/mp4', src:'video/spa-massage.mp4'}]);
+}
+/* Comme sur l'accueil : on n'appelle tout de suite que si la page est deja
+   chargee. Un appel premature verrouillerait la decision alors que la
+   largeur de la fenetre n'est pas encore connue. */
+if(document.readyState==='complete')filmDuGeste();else addEventListener('load',filmDuGeste);
+
 var EN={mn:"Menu",n1:"Rooms &amp; Suites",n2:"Experiences",n3:"The table",n4:"The spa",
 n5:"Packages &amp; Offers",n6:"Meetings &amp; groups",n7:"Gallery",n8:"About",
 n9:"Useful information",n10:"Contact",n11:"Book",dr:"Reservations",tb:"Book",
 c1:"Home",c2:"The spa",eb:"Spa &amp; sauna · by appointment",h1e:"of Assinie",
-lede:"Heated stones, black soap, argan oil and the five flowers of Assinie. Twenty minutes or an hour and a half — however much time you care to give us.",
+lg:"A treatment by the pool, filmed on site.",lede:"Heated stones, black soap, argan oil and the five flowers of Assinie. Twenty minutes or an hour and a half — however much time you care to give us.",
 e1:"Our approach",big:"Salt, oil and a hand. Nothing more complicated.",
 p1:"African black soap exfoliates, argan nourishes, heated stones undo what the road tied up. Our therapists work with gestures that have not changed in a long time, and products you can name.",
 p2:"After a day on the lagoon, on a jet ski or on the road from Abidjan, twenty minutes is often enough. For everything else there is the great Oriental ritual — an hour and a half, and you stop thinking altogether.",

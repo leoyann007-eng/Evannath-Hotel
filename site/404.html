@@ -364,6 +364,35 @@ bg.onclick=toggleMenu;
 dwLinks.forEach(function(a){a.onclick=function(){if(dw.classList.contains('open'))toggleMenu()}});
 addEventListener('keydown',function(e){if(e.key==='Escape'&&dw.classList.contains('open'))toggleMenu()});
 
+/* Films d'ambiance -------------------------------------------------------
+   On ne charge un film que si cela a du sens : ecran large, connexion qui
+   n'est ni en 2G ni en economie de donnees, et pas de demande de mouvement
+   reduit. Sinon l'affiche du <video> reste affichee et pas un octet ne part.
+   L'appel se fait apres le chargement de la page : au moment ou le script
+   est lu, la largeur de la fenetre n'est pas toujours connue. */
+function filmAmbiance(el, sources, alors){
+  if(!el || el.dataset.decide) return;
+  el.dataset.decide='1';
+  var co=navigator.connection||{};
+  var maigre=co.saveData===true||/(^|-)2g$/.test(co.effectiveType||'');
+  if(!matchMedia('(min-width:900px)').matches || maigre
+     || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var choisi=null;
+  for(var i=0;i<sources.length;i++){
+    if(el.canPlayType(sources[i].type)){ choisi=sources[i]; break; }
+  }
+  if(!choisi) return;
+  var s=document.createElement('source');
+  s.type=choisi.type.split(';')[0]; s.src=choisi.src;
+  el.appendChild(s);
+  el.addEventListener('playing', function(){
+    el.classList.add('on'); if(alors) alors();
+  }, {once:true});
+  el.load();
+  var p=el.play();
+  if(p && p.catch) p.catch(function(){});   /* lecture refusee : l'affiche reste */
+}
+
 /* Visionneuse : servir le WebP quand le navigateur le gere. Sur les photos
    ouvertes en plein ecran, cela represente environ 30 % de moins a
    telecharger. build-images.py garantit qu'un .webp existe pour chaque
