@@ -500,6 +500,15 @@ pendant le défilement : viser une valeur laisse passer du contenu entre les
 deux. La barre porte donc un **rideau opaque** qui remonte jusqu'en haut de
 la fenêtre, et l'en-tête, en `z-index` supérieur, se peint par-dessus.
 
+**La hauteur de l'en-tête n'est plus devinée.** `--h-nav` valait 83 px en dur,
+alors que l'en-tête compacté mesure **75 px sur Chambres et Galerie, 77 px sur
+La table** — celle-ci ayant une bordure basse en plus. La barre se collait
+donc 6 à 8 px trop bas, et le contenu défilait à découvert dans cet
+interstice : c'est la bande de bouts d'images visible entre l'en-tête et la
+barre. `NAV_BASE` mesure désormais la hauteur réelle au chargement, la
+remesure après le chargement des polices et à chaque redimensionnement, et
+l'écrit dans `--h-nav`. Vérifié : écart de 0 px sur les trois pages.
+
 Ce rideau ne doit s'activer **que** lorsque la barre est réellement épinglée
 en haut. Deux défauts l'activaient à tort, et il recouvrait alors tout le
 contenu situé au-dessus d'elle — un aplat brun sur toute la page :

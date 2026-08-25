@@ -34,9 +34,11 @@
   --line:rgba(185,138,80,.18); --line-2:rgba(185,138,80,.10);
   --max:1240px;
   /* Hauteur de l'en-tete fixe une fois compacte. Les barres collantes s'y
-     adossent : une valeur devinee laissait soit un interstice ou le contenu
-     defilait a decouvert, soit un chevauchement qui masquait la barre. */
-  --h-nav:83px;
+     adossent. Cette valeur n'est qu'un REPLI : devinee a 83 px alors que
+     l'en-tete en fait 107, elle faisait disparaitre 24 px des 76 px de la
+     barre sous l'en-tete. NAV_BASE la remplace au chargement par la hauteur
+     reellement mesuree, et la remesure au redimensionnement. */
+  --h-nav:107px;
   --f-display:"Marcellus",Georgia,"Times New Roman",serif;
   --f-body:"Karla",system-ui,-apple-system,sans-serif;
 }
@@ -647,6 +649,30 @@ function plein(el){
   var u = el.dataset.full || el.src;
   return _webp ? u.replace(/\.jpg$/, '.webp') : u;
 }
+
+/* Hauteur reelle de l'en-tete compacte -> --h-nav.
+   Une valeur ecrite a la main derive des qu'on touche au rembourrage ou a la
+   taille du logo : celle-ci avait 24 px de retard, et les barres collantes
+   s'y adossent. On la mesure en posant brievement la classe « scrolled »,
+   transition coupee pour ne rien faire clignoter, puis on remesure au
+   redimensionnement et une fois les polices chargees. */
+(function(){
+  var h = document.querySelector('header');
+  if (!h) return;
+  function mesurer(){
+    var etait = h.classList.contains('scrolled');
+    h.style.transition = 'none';
+    h.classList.add('scrolled');
+    var v = Math.round(h.getBoundingClientRect().height);
+    if (!etait) h.classList.remove('scrolled');
+    void h.offsetHeight;
+    h.style.transition = '';
+    if (v > 0) document.documentElement.style.setProperty('--h-nav', v + 'px');
+  }
+  mesurer();
+  addEventListener('resize', mesurer);
+  addEventListener('load', mesurer);
+})();
 
 /* Rideau des barres collantes.
    Deux defauts corriges ici, qui se cumulaient pour peindre un aplat opaque
