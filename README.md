@@ -492,6 +492,30 @@ qu'il s'agit du même établissement d'une page à l'autre.
 **Les coordonnées GPS sont volontairement absentes** : l'établissement ne les
 publie nulle part, et un point mal placé vaut moins que pas de point.
 
+### Les offres sur l'accueil
+
+Quatre des onze forfaits sont mis en avant, juste **après les chambres** :
+c'est le moment où le visiteur vient de voir un tarif à la nuit et se demande
+s'il existe mieux. Les quatre couvrent quatre intentions distinctes — un
+couple, un week-end, une famille, une journée sans nuitée — et le lien mène
+aux onze.
+
+La section reste sur le fond de base, séparée des chambres par un filet ; la
+bande sombre des expériences suit, donc le rythme des fonds n'est pas cassé.
+
+**Les tarifs y sont écrits en dur.** `verifier.py` (contrôle 7 sexies) les
+compare à ceux du catalogue de `circuits.html`, seule source de vérité : une
+remise saisonnière appliquée d'un côté et pas de l'autre donnerait deux prix
+pour la même offre. Les deux cas — tarif qui dérive, offre inexistante — ont
+été testés en les provoquant.
+
+**Largeurs déclarées.** Les cartes des deux grilles de l'accueil font 279 à
+405 px selon la largeur d'écran, mais `sizes` annonçait 700 px : le navigateur
+téléchargeait l'image pleine. `build-index.py` déclare maintenant la géométrie
+réelle — trois colonnes pour les chambres, quatre pour les offres, deux puis
+une en dessous. On déclare la plus large des deux, les grilles partageant des
+images. **779 Ko d'images de cartes ramenés à 342 Ko, soit 56 % de moins.**
+
 ### Les onze offres de la page Circuits
 
 Elles étaient affichées mais **invisibles des moteurs** : le `Service` de

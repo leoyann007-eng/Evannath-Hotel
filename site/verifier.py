@@ -184,6 +184,36 @@ def controler():
                     pb.append((f, 'offre « %s » : %s dans le catalogue, %s dans le menu'
                                % (nom, cat[nom], menu[nom])))
 
+        # 7 sexies. les quatre offres mises en avant sur l'accueil affichent
+        # un tarif ecrit en dur. Il doit correspondre a celui de la page des
+        # circuits, seule source de verite. Une remise saisonniere appliquee
+        # d'un cote et pas de l'autre donnerait deux prix pour la meme offre.
+        if f == 'index.html' and 'id="offres"' in s:
+            bloc = s[s.find('id="offres"'):]
+            bloc = bloc[:bloc.find('</section>')]
+            accueil = {}
+            for m in re.finditer(r'data-t="ot\d+">([^<]+)</h3>.*?'
+                                 r'<b>([\d\s ]+)</b>', bloc, re.S):
+                accueil[m.group(1).strip()] = m.group(2).replace(' ', '').replace(' ', '')
+            ref = {}
+            try:
+                c = io.open('circuits.html', encoding='utf-8').read()
+                for graphe in re.findall(
+                        r'<script type="application/ld\+json">(.*?)</script>', c, re.S):
+                    for e in json.loads(graphe).get('@graph', []):
+                        for o in e.get('hasOfferCatalog', {}).get('itemListElement', []):
+                            ref[o['name']] = o.get('price', '')
+            except OSError:
+                pb.append((f, 'circuits.html introuvable, tarifs non verifiables'))
+            if not accueil:
+                pb.append((f, 'section offres presente mais aucun tarif lisible'))
+            for nom, prix in sorted(accueil.items()):
+                if nom not in ref:
+                    pb.append((f, 'offre « %s » mise en avant mais absente des circuits' % nom))
+                elif prix != ref[nom]:
+                    pb.append((f, 'offre « %s » : %s sur l accueil, %s sur les circuits'
+                               % (nom, prix, ref[nom])))
+
         # 8. toute image ouvrable en plein ecran doit exister aussi en WebP
         for base in re.findall(r'data-full="(img/opt/[\w-]+)\.jpg"', s):
             if not os.path.exists(base + '.webp'):
