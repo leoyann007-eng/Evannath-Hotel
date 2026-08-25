@@ -420,6 +420,42 @@ def _variantes(nom, ext):
     return v
 
 
+_taille_cache = {}
+
+
+def _taille(nom, ext):
+    """Dimensions reelles du fichier, lues une seule fois."""
+    cle = (nom, ext)
+    if cle not in _taille_cache:
+        try:
+            from PIL import Image
+            _taille_cache[cle] = Image.open('img/opt/%s.%s' % (nom, ext)).size
+        except Exception:
+            _taille_cache[cle] = None
+    return _taille_cache[cle]
+
+
+def dimensionner(html):
+    """Donne a chaque <img> ses dimensions intrinseques.
+
+    Sans width/height, une image ne reserve aucune place tant qu'elle n'est pas
+    chargee. Combine au chargement differe et a une grille en colonnes, cela
+    fait sauter la mise en page sous les yeux du visiteur pendant qu'il defile :
+    chaque photo qui arrive rebat les colonnes. Les attributs donnent au
+    navigateur le rapport largeur/hauteur avant tout telechargement.
+    """
+    def f(m):
+        balise = m.group(0)
+        if ' width=' in balise and ' height=' in balise:
+            return balise
+        d = _taille(m.group(1), m.group(2))
+        if not d:
+            return balise
+        return '<img width="%d" height="%d"' % d + balise[4:]
+
+    return _re.sub(r'<img[^<>]*?src="img/opt/([\w-]+)\.(jpg|png|webp)"[^<>]*?>', f, html)
+
+
 def responsive(html, hero=None):
     """Ajoute srcset + sizes aux <picture>/<img> qui ont des variantes."""
 
@@ -487,4 +523,4 @@ def page(title, desc, og, css, body, script, preload=None, slug=None, jsonld='')
 </body>
 </html>
 ''' % (ROBOTS_META, title, desc, title, desc, SITE, og, ICONS, can, HEAD, pre, jsonld, HEAD_CSS, css,
-       responsive(body, hero=preload), script)
+       responsive(dimensionner(body), hero=preload), script)
