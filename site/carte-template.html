@@ -28,18 +28,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Karla:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="preload" as="image" href="img/opt/t-hero.webp" type="image/webp">
 <style>
-:root{
-  /* la table se joue de nuit : fond plus profond que le reste du site */
-  --night:#100B06; --bark:#17100A; --bark-2:#1E150D; --bark-3:#2A1E13;
-  --bronze:#B98A50; --bronze-2:#DFBB84;
-  --cream:#F6EEE2; --muted:#9C8B78; --palm:#8FAE63;
-  --line:rgba(185,138,80,.18); --line-2:rgba(185,138,80,.10);
-  --max:1240px;
-  /* Hauteur de l'en-tete fixe une fois compacte, cf. _chrome.py */
-  --h-nav:83px;
-  --f-display:"Marcellus",Georgia,"Times New Roman",serif;
-  --f-body:"Karla",system-ui,-apple-system,sans-serif;
-}
+{{TOKENS}}
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
 body{background:var(--night);color:var(--cream);font-family:var(--f-body);font-size:16.5px;line-height:1.7;overflow-x:hidden;-webkit-font-smoothing:antialiased}
@@ -605,39 +594,7 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
 
 <script>
 {{ENVOI}}
-var hd=document.getElementById('hd');
-
-/* Rideau des barres collantes : on epingle des que la sentinelle sort du haut. */
-document.querySelectorAll('.collante').forEach(function(bar){
-  var s=document.createElement('div');
-  s.style.cssText='position:absolute;top:0;height:1px;width:1px';
-  bar.parentNode.insertBefore(s,bar);
-  if(!('IntersectionObserver' in window)){bar.classList.add('epinglee');return}
-  new IntersectionObserver(function(e){
-    bar.classList.toggle('epinglee', !e[0].isIntersecting);
-  },{threshold:0}).observe(s);
-});
-addEventListener('scroll',function(){hd.classList.toggle('scrolled',scrollY>60)},{passive:true});
-
-var bg=document.getElementById('bg'),dw=document.getElementById('dw');
-var dwLinks=[].slice.call(dw.querySelectorAll('nav a'));
-function toggleMenu(){
-  var o=dw.classList.toggle('open');
-  bg.classList.toggle('open',o);
-  bg.setAttribute('aria-expanded',o);
-  bg.setAttribute('aria-label',o?'Fermer le menu':'Ouvrir le menu');
-  document.body.style.overflow=o?'hidden':'';
-  dwLinks.forEach(function(a,i){a.style.transitionDelay=o?(60+i*55)+'ms':'0ms'});
-}
-bg.onclick=toggleMenu;
-dwLinks.forEach(function(a){a.onclick=function(){if(dw.classList.contains('open'))toggleMenu()}});
-addEventListener('keydown',function(e){if(e.key==='Escape'&&dw.classList.contains('open'))toggleMenu()});
-
-var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
-if(!('IntersectionObserver' in window)||reduce){document.querySelectorAll('.reveal').forEach(function(e){e.classList.add('in')})}
-else{var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.1});
- document.querySelectorAll('.reveal').forEach(function(el){io.observe(el)});
- setTimeout(function(){document.querySelectorAll('.reveal:not(.in)').forEach(function(el){if(el.getBoundingClientRect().top<innerHeight)el.classList.add('in')})},1200)}
+{{NAV_JS}}
 
 // tous les montants sont en FCFA : mention discrète, une fois par ligne
 document.querySelectorAll('.menu-list>li>span').forEach(function(s){
@@ -760,15 +717,11 @@ e5:"The menu",h5:"Everything, with prices",p5:"{{TOTAL}} items. Nothing hidden, 
 tc:"Food",tbo:"Bar &amp; cellar",nr:"No results. Try “poulet”, “mojito” or “chocolat”.",
 e6:"Tonight",h6:"Book a table",l1:"Date",l2:"Time",l3:"Covers",l4:"Name",l5:"Phone / WhatsApp",l6:"Confirm the table",
 k3:"Lunch",k4:"Dinner",k5:"Bar &amp; terrace",k5v:"until closing",k6:"Méchoui Party",k6v:"Saturday, from 3 pm",k7:"Bookings"};
-var FR={};document.querySelectorAll('[data-t]').forEach(function(e){FR[e.dataset.t]=e.innerHTML});
-document.querySelectorAll('.lang button').forEach(function(b){b.onclick=function(){
-  var lg=b.dataset.lang;
-  document.querySelectorAll('.lang button').forEach(function(x){x.classList.toggle('on',x.dataset.lang===lg)});
-  var dict=lg==='en'?EN:FR;
-  document.querySelectorAll('[data-t]').forEach(function(e){if(dict[e.dataset.t])e.innerHTML=dict[e.dataset.t]});
-  q.placeholder=(lg==='en')?"Search a dish, a cocktail…":q.dataset.ph;
-  document.documentElement.lang=lg;
-}});
+{{LANG_JS}}
+
+/* La barre de recherche a un texte d aide hors [data-t] : on le traduit
+   par le point d extension de LANG_JS. */
+function EVN_LANG(lg){ q.placeholder=(lg==='en')?"Search a dish, a cocktail…":q.dataset.ph; }
 </script>
 </body>
 </html>

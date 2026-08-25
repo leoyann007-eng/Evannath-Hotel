@@ -40,6 +40,7 @@
   --f-display:"Marcellus",Georgia,"Times New Roman",serif;
   --f-body:"Karla",system-ui,-apple-system,sans-serif;
 }
+
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
 body{background:var(--bark);color:var(--cream);font-family:var(--f-body);font-size:16.5px;line-height:1.7;overflow-x:hidden;-webkit-font-smoothing:antialiased}
@@ -600,6 +601,9 @@ document.querySelectorAll('.lang button').forEach(function(b){b.onclick=function
   var dict=lg==='en'?EN:FR;
   document.querySelectorAll('[data-t]').forEach(function(e){if(dict[e.dataset.t])e.innerHTML=dict[e.dataset.t]});
   document.documentElement.lang=lg;
+  /* Point d'extension : une page qui a du texte hors [data-t] — un
+     placeholder de champ, par exemple — declare window.EVN_LANG. */
+  if(typeof EVN_LANG==='function')EVN_LANG(lg);
 }});
 </script>
 </body>

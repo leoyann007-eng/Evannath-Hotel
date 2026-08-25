@@ -40,6 +40,7 @@
   --f-display:"Marcellus",Georgia,"Times New Roman",serif;
   --f-body:"Karla",system-ui,-apple-system,sans-serif;
 }
+
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
 body{background:var(--bark);color:var(--cream);font-family:var(--f-body);font-size:16.5px;line-height:1.7;overflow-x:hidden;-webkit-font-smoothing:antialiased}
@@ -123,8 +124,10 @@ button[aria-busy="true"]{opacity:.62;cursor:progress}
    de la fenetre. L'en-tete, en z-index superieur, se peint par-dessus : rien
    ne peut plus apparaitre dans l'intervalle, quelle que soit sa hauteur.
    Le rideau ne s'active qu'une fois la barre epinglee. */
-.collante::before{content:"";position:absolute;left:50%;transform:translateX(-50%);
-  width:100vw;bottom:100%;height:0;background:var(--bark);pointer-events:none}
+/* left/right plutot que 100vw : 100vw inclut la barre de defilement et
+   creait 8 px de debordement horizontal. */
+.collante::before{content:"";position:absolute;left:0;right:0;
+  bottom:100%;height:0;background:var(--bark);pointer-events:none}
 .collante.epinglee::before{height:100vh}
 
 .skip{position:absolute;left:-9999px;top:0;z-index:200;background:var(--bronze);color:var(--night);
@@ -509,6 +512,9 @@ document.querySelectorAll('.lang button').forEach(function(b){b.onclick=function
   var dict=lg==='en'?EN:FR;
   document.querySelectorAll('[data-t]').forEach(function(e){if(dict[e.dataset.t])e.innerHTML=dict[e.dataset.t]});
   document.documentElement.lang=lg;
+  /* Point d'extension : une page qui a du texte hors [data-t] — un
+     placeholder de champ, par exemple — declare window.EVN_LANG. */
+  if(typeof EVN_LANG==='function')EVN_LANG(lg);
 }});
 </script>
 </body>

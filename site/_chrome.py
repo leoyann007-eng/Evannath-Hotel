@@ -35,7 +35,10 @@ ICONS = """<link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="manifest" href="/site.webmanifest">
 <meta name="theme-color" content="#17100A">"""
 
-HEAD_CSS = """:root{
+# Les jetons de couleur et de typographie. Extraits pour que les pages
+# ecrites a la main (la table, le spa) les partagent au lieu de les
+# recopier : une variable ajoutee ici arrive partout.
+TOKENS = """:root{
   --night:#100B06; --bark:#17100A; --bark-2:#1E150D; --bark-3:#2A1E13;
   --bronze:#B98A50; --bronze-2:#DFBB84;
   --cream:#F6EEE2; --muted:#9C8B78; --palm:#8FAE63; --err:#E08A7B;
@@ -48,6 +51,9 @@ HEAD_CSS = """:root{
   --f-display:"Marcellus",Georgia,"Times New Roman",serif;
   --f-body:"Karla",system-ui,-apple-system,sans-serif;
 }
+"""
+
+HEAD_CSS = TOKENS + """
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
 body{background:var(--bark);color:var(--cream);font-family:var(--f-body);font-size:16.5px;line-height:1.7;overflow-x:hidden;-webkit-font-smoothing:antialiased}
@@ -266,7 +272,14 @@ FOOTER = '''</main>
   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.5 14.4c-.3-.1-1.7-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.7 1-.9 1.2-.2.2-.3.2-.6.1-1.7-.9-2.9-1.6-4-3.5-.3-.5.3-.5.9-1.6.1-.2 0-.4 0-.5s-.7-1.6-.9-2.2c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.3 5.2 4.6 1.9.8 2.7.9 3.6.8.6-.1 1.7-.7 2-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.6-.3M12 2a10 10 0 00-8.6 15L2 22l5.2-1.4A10 10 0 1012 2z"/></svg>
 </a>'''
 
-NAV_JS = """var hd=document.getElementById('hd');
+# Le JS de navigation est decoupe pour que chaque page ne prenne que ce dont
+# elle a besoin, sans qu aucune n ait a en recopier une ligne.
+#   NAV_BASE     en-tete qui se compacte, tiroir plein ecran, touche Echap
+#   COLLANTE_JS  rideau des barres collantes (inerte s il n y a pas de barre)
+#   REVEAL_JS    apparition au defilement, version standard
+# NAV_JS reste la somme des trois : les generateurs existants ne changent pas.
+
+NAV_BASE = """var hd=document.getElementById('hd');
 addEventListener('scroll',function(){hd.classList.toggle('scrolled',scrollY>60)},{passive:true});
 
 var bg=document.getElementById('bg'),dw=document.getElementById('dw');
@@ -281,9 +294,9 @@ function toggleMenu(){
 }
 bg.onclick=toggleMenu;
 dwLinks.forEach(function(a){a.onclick=function(){if(dw.classList.contains('open'))toggleMenu()}});
-addEventListener('keydown',function(e){if(e.key==='Escape'&&dw.classList.contains('open'))toggleMenu()});
+addEventListener('keydown',function(e){if(e.key==='Escape'&&dw.classList.contains('open'))toggleMenu()});"""
 
-/* Rideau des barres collantes : on epingle des que la sentinelle sort du haut. */
+COLLANTE_JS = """/* Rideau des barres collantes : on epingle des que la sentinelle sort du haut. */
 document.querySelectorAll('.collante').forEach(function(bar){
   var s=document.createElement('div');
   s.style.cssText='position:absolute;top:0;height:1px;width:1px';
@@ -292,13 +305,16 @@ document.querySelectorAll('.collante').forEach(function(bar){
   new IntersectionObserver(function(e){
     bar.classList.toggle('epinglee', !e[0].isIntersecting);
   },{threshold:0}).observe(s);
-});
+});"""
 
-var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+REVEAL_JS = """var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 if(!('IntersectionObserver' in window)||reduce){document.querySelectorAll('.reveal').forEach(function(e){e.classList.add('in')})}
 else{var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.1});
  document.querySelectorAll('.reveal').forEach(function(el){io.observe(el)});
  setTimeout(function(){document.querySelectorAll('.reveal:not(.in)').forEach(function(el){if(el.getBoundingClientRect().top<innerHeight)el.classList.add('in')})},1200)}"""
+
+NAV_JS = NAV_BASE + '\n\n' + COLLANTE_JS + '\n\n' + REVEAL_JS
+
 
 LANG_JS = """var FR={};document.querySelectorAll('[data-t]').forEach(function(e){FR[e.dataset.t]=e.innerHTML});
 document.querySelectorAll('.lang button').forEach(function(b){b.onclick=function(){
@@ -307,6 +323,9 @@ document.querySelectorAll('.lang button').forEach(function(b){b.onclick=function
   var dict=lg==='en'?EN:FR;
   document.querySelectorAll('[data-t]').forEach(function(e){if(dict[e.dataset.t])e.innerHTML=dict[e.dataset.t]});
   document.documentElement.lang=lg;
+  /* Point d'extension : une page qui a du texte hors [data-t] — un
+     placeholder de champ, par exemple — declare window.EVN_LANG. */
+  if(typeof EVN_LANG==='function')EVN_LANG(lg);
 }});"""
 
 ENVOI_JS = """

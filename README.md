@@ -171,6 +171,60 @@ Le visiteur qui a le lien voit le site normalement. Seuls les robots sont
    échouerait silencieusement.
 4. Redéployer, puis soumettre `sitemap.xml` à la Search Console
 
+## Une seule source pour le châssis
+
+`site/_chrome.py` porte les briques partagées par toutes les pages :
+
+| Brique | Contenu |
+|---|---|
+| `TOKENS` | les jetons de couleur, de typographie et `--h-nav` |
+| `HEAD_CSS` | `TOKENS` + la feuille de base (reset, en-tête, tiroir, pied) |
+| `NAV_BASE` | en-tête qui se compacte, tiroir plein écran, touche Échap |
+| `COLLANTE_JS` | rideau des barres collantes |
+| `REVEAL_JS` | apparition au défilement |
+| `NAV_JS` | la somme des trois précédents |
+| `LANG_JS` | bascule français / anglais |
+
+**Les trois pages écrites à la main les consomment aussi.** L'accueil, La table
+et Le spa recopiaient auparavant le bloc `:root` et le JS de navigation : toute
+correction centrale les manquait en silence — c'est arrivé trois fois de suite
+avec `--h-nav`, puis le rideau CSS, puis le rideau JS.
+
+Elles passent désormais par des gabarits à substitution :
+
+```
+index-template.html   -> build-index.py  -> index.html
+carte-template.html   -> build-carte.py  -> carte.html
+spa-template.html     -> build-carte.py  -> spa.html
+```
+
+Marqueurs disponibles : `{{TOKENS}}`, `{{HEAD_CSS}}`, `{{NAV_JS}}`,
+`{{NAV_BASE}}`, `{{LANG_JS}}`, `{{ENVOI}}`.
+
+⚠️ **Ne pas modifier `index.html`, `carte.html` ni `spa.html` directement** :
+ils sont regénérés depuis leur gabarit.
+
+Ce qui reste propre à chaque page est conservé tel quel : l'accueil redéclare
+six couleurs plus chaudes, La table garde son en-tête transparent au repos et
+son `.btn` à elle. **Le reste de leur CSS n'a délibérément pas été fusionné** —
+ces pages surchargent des règles de base, et l'ordre de cascade doit être
+préservé. Une tentative de fusion complète a été mesurée puis abandonnée : elle
+neutralisait `.btn-solid` et rendait l'en-tête de La table opaque.
+
+Quand une page a du texte hors `[data-t]` — un `placeholder` de champ, par
+exemple — elle déclare `EVN_LANG(lg)`, que `LANG_JS` appelle à chaque bascule.
+
+### Contrôler
+
+```bash
+cd site && python verifier.py
+```
+
+Neuf contrôles sur les 21 pages : variables CSS déclarées, jetons partagés
+présents, JS de navigation non divergent, images dimensionnées, fichiers
+existants, liens valides, navigation complète, JSON-LD valide, rideau présent.
+Chacun correspond à un défaut réellement survenu.
+
 ## Formulaires
 
 Les cinq formulaires du site — réservation, devis séminaire, contact, table,

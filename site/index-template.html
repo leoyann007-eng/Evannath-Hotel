@@ -30,20 +30,7 @@
 <link rel="preload" as="image" href="img/opt/hero-paillote-1024.webp" type="image/webp" media="(min-width:641px) and (max-width:1024px)">
 <link rel="preload" as="image" href="img/opt/hero-paillote.webp" type="image/webp" media="(min-width:1025px)">
 <style>
-:root{
-  --night:#100B06; --bark:#17100A; --bark-2:#1E150D; --bark-3:#2A1E13;
-  --bronze:#B98A50; --bronze-2:#DFBB84;
-  --cream:#F6EEE2; --muted:#9C8B78; --palm:#8FAE63; --err:#E08A7B;
-  --line:rgba(185,138,80,.18); --line-2:rgba(185,138,80,.10);
-  --max:1240px;
-  /* Hauteur de l'en-tete fixe une fois compacte. Les barres collantes s'y
-     adossent : une valeur devinee laissait soit un interstice ou le contenu
-     defilait a decouvert, soit un chevauchement qui masquait la barre. */
-  --h-nav:83px;
-  --f-display:"Marcellus",Georgia,"Times New Roman",serif;
-  --f-body:"Karla",system-ui,-apple-system,sans-serif;
-}
-
+{{TOKENS}}
 :root{
   /* L'accueil assume une teinte un peu plus chaude et profonde que le reste
      du site. Seules les valeurs qui different sont redeclarees ici ; tout le
@@ -590,22 +577,7 @@ footer{background:#0F0A06;border-top:1px solid var(--line);padding:74px 0 28px}
 window.addEventListener('load',function(){document.getElementById('pre').classList.add('done')});
 setTimeout(function(){document.getElementById('pre').classList.add('done')},2600);
 
-var hd=document.getElementById('hd');
-addEventListener('scroll',function(){hd.classList.toggle('scrolled',scrollY>60)},{passive:true});
-
-var bg=document.getElementById('bg'),dw=document.getElementById('dw');
-var dwLinks=[].slice.call(dw.querySelectorAll('nav a'));
-function toggleMenu(){
-  var o=dw.classList.toggle('open');
-  bg.classList.toggle('open',o);
-  bg.setAttribute('aria-expanded',o);
-  bg.setAttribute('aria-label',o?'Fermer le menu':'Ouvrir le menu');
-  document.body.style.overflow=o?'hidden':'';
-  dwLinks.forEach(function(a,i){a.style.transitionDelay=o?(60+i*55)+'ms':'0ms'});
-}
-bg.onclick=toggleMenu;
-dwLinks.forEach(function(a){a.onclick=function(){if(dw.classList.contains('open'))toggleMenu()}});
-addEventListener('keydown',function(e){if(e.key==='Escape'&&dw.classList.contains('open'))toggleMenu()});
+{{NAV_BASE}}
 
 // Les visuels suivants ne sont chargés qu'une fois la page affichée.
 var sl=[].slice.call(document.querySelectorAll('#sl .slide')),si=0;
@@ -710,17 +682,7 @@ e4:"Gallery",h4:"The estate,<br>unfiltered",p4:"Real photographs of the property
 e5:"They stayed here",h5:"Our guests love us",
 e6:"Find us",h6:"Assinie, PK 19",a1:"From Abidjan",a2:"FHB airport",a2v:"≈ 80 km · free shuttle",
 a3:"Front desk",a4:"Reservations",a5:"Email",route:"Directions"};
-var FR={};document.querySelectorAll('[data-t]').forEach(function(e){FR[e.dataset.t]=e.innerHTML});
-document.querySelectorAll('.lang button').forEach(function(b){b.onclick=function(){
-  var lg=b.dataset.lang;
-  document.querySelectorAll('.lang button').forEach(function(x){x.classList.toggle('on',x.dataset.lang===lg)});
-  var dict=lg==='en'?EN:FR;
-  document.querySelectorAll('[data-t]').forEach(function(e){if(dict[e.dataset.t])e.innerHTML=dict[e.dataset.t]});
-  document.documentElement.lang=lg;
-  /* Point d'extension : une page qui a du texte hors [data-t] — un
-     placeholder de champ, par exemple — declare window.EVN_LANG. */
-  if(typeof EVN_LANG==='function')EVN_LANG(lg);
-}});
+{{LANG_JS}}
 </script>
 </body>
 </html>

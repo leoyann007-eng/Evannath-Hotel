@@ -29,17 +29,19 @@
 <link rel="preload" as="image" href="img/opt/t-hero.webp" type="image/webp">
 <style>
 :root{
-  /* la table se joue de nuit : fond plus profond que le reste du site */
   --night:#100B06; --bark:#17100A; --bark-2:#1E150D; --bark-3:#2A1E13;
   --bronze:#B98A50; --bronze-2:#DFBB84;
-  --cream:#F6EEE2; --muted:#9C8B78; --palm:#8FAE63;
+  --cream:#F6EEE2; --muted:#9C8B78; --palm:#8FAE63; --err:#E08A7B;
   --line:rgba(185,138,80,.18); --line-2:rgba(185,138,80,.10);
   --max:1240px;
-  /* Hauteur de l'en-tete fixe une fois compacte, cf. _chrome.py */
+  /* Hauteur de l'en-tete fixe une fois compacte. Les barres collantes s'y
+     adossent : une valeur devinee laissait soit un interstice ou le contenu
+     defilait a decouvert, soit un chevauchement qui masquait la barre. */
   --h-nav:83px;
   --f-display:"Marcellus",Georgia,"Times New Roman",serif;
   --f-body:"Karla",system-ui,-apple-system,sans-serif;
 }
+
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
 body{background:var(--night);color:var(--cream);font-family:var(--f-body);font-size:16.5px;line-height:1.7;overflow-x:hidden;-webkit-font-smoothing:antialiased}
@@ -841,17 +843,6 @@ var EVN = {
 };
 
 var hd=document.getElementById('hd');
-
-/* Rideau des barres collantes : on epingle des que la sentinelle sort du haut. */
-document.querySelectorAll('.collante').forEach(function(bar){
-  var s=document.createElement('div');
-  s.style.cssText='position:absolute;top:0;height:1px;width:1px';
-  bar.parentNode.insertBefore(s,bar);
-  if(!('IntersectionObserver' in window)){bar.classList.add('epinglee');return}
-  new IntersectionObserver(function(e){
-    bar.classList.toggle('epinglee', !e[0].isIntersecting);
-  },{threshold:0}).observe(s);
-});
 addEventListener('scroll',function(){hd.classList.toggle('scrolled',scrollY>60)},{passive:true});
 
 var bg=document.getElementById('bg'),dw=document.getElementById('dw');
@@ -867,6 +858,17 @@ function toggleMenu(){
 bg.onclick=toggleMenu;
 dwLinks.forEach(function(a){a.onclick=function(){if(dw.classList.contains('open'))toggleMenu()}});
 addEventListener('keydown',function(e){if(e.key==='Escape'&&dw.classList.contains('open'))toggleMenu()});
+
+/* Rideau des barres collantes : on epingle des que la sentinelle sort du haut. */
+document.querySelectorAll('.collante').forEach(function(bar){
+  var s=document.createElement('div');
+  s.style.cssText='position:absolute;top:0;height:1px;width:1px';
+  bar.parentNode.insertBefore(s,bar);
+  if(!('IntersectionObserver' in window)){bar.classList.add('epinglee');return}
+  new IntersectionObserver(function(e){
+    bar.classList.toggle('epinglee', !e[0].isIntersecting);
+  },{threshold:0}).observe(s);
+});
 
 var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 if(!('IntersectionObserver' in window)||reduce){document.querySelectorAll('.reveal').forEach(function(e){e.classList.add('in')})}
@@ -1001,9 +1003,15 @@ document.querySelectorAll('.lang button').forEach(function(b){b.onclick=function
   document.querySelectorAll('.lang button').forEach(function(x){x.classList.toggle('on',x.dataset.lang===lg)});
   var dict=lg==='en'?EN:FR;
   document.querySelectorAll('[data-t]').forEach(function(e){if(dict[e.dataset.t])e.innerHTML=dict[e.dataset.t]});
-  q.placeholder=(lg==='en')?"Search a dish, a cocktail…":q.dataset.ph;
   document.documentElement.lang=lg;
+  /* Point d'extension : une page qui a du texte hors [data-t] — un
+     placeholder de champ, par exemple — declare window.EVN_LANG. */
+  if(typeof EVN_LANG==='function')EVN_LANG(lg);
 }});
+
+/* La barre de recherche a un texte d aide hors [data-t] : on le traduit
+   par le point d extension de LANG_JS. */
+function EVN_LANG(lg){ q.placeholder=(lg==='en')?"Search a dish, a cocktail…":q.dataset.ph; }
 </script>
 </body>
 </html>
