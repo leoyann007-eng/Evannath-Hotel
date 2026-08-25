@@ -297,6 +297,14 @@ désormais sur les originaux en 1748 px.
 
 `build-images.py` ne fabrique de paliers que pour les images réellement
 affichées — pas pour celles que seule la visionneuse charge en plein écran.
+Il garantit en revanche qu'un WebP existe pour chacune d'elles : la
+visionneuse le sert quand le navigateur le gère, soit **24 % de moins**, environ
+61 Ko par photo ouverte. Le JPEG reste en secours pour les rares navigateurs
+sans WebP, d'où les deux formats sur le disque.
+
+La construction de l'URL est centralisée dans `plein()` (`NAV_BASE`) : les
+quatre visionneuses du site l'utilisent au lieu de recomposer le chemin
+chacune de leur côté.
 
 `build-images.py` produit ensuite les largeurs intermédiaires (640 / 1024 /
 1600), en WebP et en JPEG progressif, sans jamais agrandir au-delà de

@@ -248,7 +248,7 @@ function show(i){
   var v=visibles(); if(!v.length)return;
   gi=(i+v.length)%v.length;
   var im=v[gi].querySelector('img');
-  lbi.src=im.dataset.full||im.src; lbi.alt=im.alt;
+  lbi.src=plein(im); lbi.alt=im.alt;
   lbc.textContent=im.alt+'  ·  '+(gi+1)+' / '+v.length;
   lb.classList.add('on'); document.body.style.overflow='hidden';
 }

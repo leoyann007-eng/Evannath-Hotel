@@ -315,7 +315,7 @@ document.getElementById('bkf').addEventListener('submit',function(e){e.preventDe
 calc();
 
 var figs=[].slice.call(document.querySelectorAll('#gl img')),lb=document.getElementById('lb'),lbi=document.getElementById('lbi'),lbc=document.getElementById('lbc'),gi=0;
-function show(i){gi=(i+figs.length)%%figs.length;lbi.src=figs[gi].dataset.full||figs[gi].src;lbi.alt=figs[gi].alt;lbc.textContent=figs[gi].alt+'  ·  '+(gi+1)+' / '+figs.length;lb.classList.add('on');document.body.style.overflow='hidden'}
+function show(i){gi=(i+figs.length)%%figs.length;lbi.src=plein(figs[gi]);lbi.alt=figs[gi].alt;lbc.textContent=figs[gi].alt+'  ·  '+(gi+1)+' / '+figs.length;lb.classList.add('on');document.body.style.overflow='hidden'}
 function hideLb(){lb.classList.remove('on');document.body.style.overflow=''}
 figs.forEach(function(im,i){im.closest('figure').onclick=function(){show(i)}});
 lb.querySelector('.next').onclick=function(e){e.stopPropagation();show(gi+1)};

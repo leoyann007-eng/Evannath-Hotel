@@ -84,7 +84,14 @@ def controler():
             if not os.path.exists(src):
                 pb.append((f, 'fichier absent : ' + src))
 
-        # 8. liens internes
+        # 8. toute image ouvrable en plein ecran doit exister aussi en WebP
+        for base in re.findall(r'data-full="(img/opt/[\w-]+)\.jpg"', s):
+            if not os.path.exists(base + '.webp'):
+                pb.append((f, 'visionneuse : %s.webp manquant' % base))
+        if 'dataset.full||' in s:
+            pb.append((f, 'visionneuse : URL construite a la main, utiliser plein()'))
+
+        # 9. liens internes
         for h in set(re.findall(r'href="([^"]+)"', s)):
             if h.startswith(('http', 'mailto:', 'tel:', '#', '/api')):
                 continue
@@ -92,13 +99,13 @@ def controler():
             if p and not os.path.exists(p):
                 pb.append((f, 'lien mort : ' + h))
 
-        # 9. navigation complete et repere principal
+        # 10. navigation complete et repere principal
         if len(re.findall(r'<a href="[^"]+"[^>]*><i>\d+</i><span data-t="n\d+"', s)) != 11:
             pb.append((f, 'navigation incomplete'))
         if s.count('<main id="contenu">') != 1:
             pb.append((f, 'balise <main> absente ou en double'))
 
-        # 10. donnees structurees valides
+        # 11. donnees structurees valides
         m = re.search(r'<script type="application/ld\+json">(.*?)</script>', s, re.S)
         if m:
             try:
@@ -108,7 +115,7 @@ def controler():
         elif f not in SANS_JSONLD:
             pb.append((f, 'JSON-LD absent'))
 
-        # 11. une barre collante doit avoir son rideau
+        # 12. une barre collante doit avoir son rideau
         if 'collante"' in s:
             if 'collante::before' not in s:
                 pb.append((f, 'rideau CSS absent'))

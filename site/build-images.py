@@ -82,6 +82,27 @@ def main():
                 petite.save(dst, **kw)
                 faits += 1
                 octets += os.path.getsize(dst)
+    # Les images ouvrables en plein ecran doivent exister en WebP : la
+    # visionneuse le sert quand le navigateur le gere, soit 30 % de moins.
+    plein = set()
+    for f in glob.glob('*.html'):
+        if f == 'index-luxe-variante.html':
+            continue
+        t = io.open(f, encoding='utf-8').read()
+        plein |= set(re.findall(r'data-full="(img/opt/[\w-]+)\.jpg"', t))
+    ajoutes = 0
+    for base in sorted(plein):
+        jpg, webp = base + '.jpg', base + '.webp'
+        if not os.path.exists(jpg) or a_jour(jpg, webp):
+            continue
+        im = Image.open(jpg)
+        if im.mode not in ('RGB', 'L'):
+            im = im.convert('RGB')
+        im.save(webp, 'WEBP', quality=QUAL_WEBP, method=6)
+        ajoutes += 1
+    if ajoutes:
+        print('%d versions WebP ajoutees pour la visionneuse' % ajoutes)
+
     print('%d photos sources' % len(noms))
     print('%d variantes creees, %d deja a jour' % (faits, sautes))
     print('%.1f Mo de variantes au total' % (octets / 1048576))

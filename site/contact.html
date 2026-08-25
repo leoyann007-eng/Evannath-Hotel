@@ -464,6 +464,17 @@ bg.onclick=toggleMenu;
 dwLinks.forEach(function(a){a.onclick=function(){if(dw.classList.contains('open'))toggleMenu()}});
 addEventListener('keydown',function(e){if(e.key==='Escape'&&dw.classList.contains('open'))toggleMenu()});
 
+/* Visionneuse : servir le WebP quand le navigateur le gere. Sur les photos
+   ouvertes en plein ecran, cela represente environ 30 % de moins a
+   telecharger. build-images.py garantit qu'un .webp existe pour chaque
+   image ouvrable, et verifier.py le controle. */
+var _webp = document.createElement('canvas')
+              .toDataURL('image/webp').indexOf('data:image/webp') === 0;
+function plein(el){
+  var u = el.dataset.full || el.src;
+  return _webp ? u.replace(/\.jpg$/, '.webp') : u;
+}
+
 /* Rideau des barres collantes : on epingle des que la sentinelle sort du haut. */
 document.querySelectorAll('.collante').forEach(function(bar){
   var s=document.createElement('div');
@@ -474,6 +485,7 @@ document.querySelectorAll('.collante').forEach(function(bar){
     bar.classList.toggle('epinglee', !e[0].isIntersecting);
   },{threshold:0}).observe(s);
 });
+
 
 var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 if(!('IntersectionObserver' in window)||reduce){document.querySelectorAll('.reveal').forEach(function(e){e.classList.add('in')})}

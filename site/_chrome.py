@@ -279,7 +279,7 @@ FOOTER = '''</main>
 #   REVEAL_JS    apparition au defilement, version standard
 # NAV_JS reste la somme des trois : les generateurs existants ne changent pas.
 
-NAV_BASE = """var hd=document.getElementById('hd');
+NAV_BASE = r"""var hd=document.getElementById('hd');
 addEventListener('scroll',function(){hd.classList.toggle('scrolled',scrollY>60)},{passive:true});
 
 var bg=document.getElementById('bg'),dw=document.getElementById('dw');
@@ -294,7 +294,18 @@ function toggleMenu(){
 }
 bg.onclick=toggleMenu;
 dwLinks.forEach(function(a){a.onclick=function(){if(dw.classList.contains('open'))toggleMenu()}});
-addEventListener('keydown',function(e){if(e.key==='Escape'&&dw.classList.contains('open'))toggleMenu()});"""
+addEventListener('keydown',function(e){if(e.key==='Escape'&&dw.classList.contains('open'))toggleMenu()});
+
+/* Visionneuse : servir le WebP quand le navigateur le gere. Sur les photos
+   ouvertes en plein ecran, cela represente environ 30 % de moins a
+   telecharger. build-images.py garantit qu'un .webp existe pour chaque
+   image ouvrable, et verifier.py le controle. */
+var _webp = document.createElement('canvas')
+              .toDataURL('image/webp').indexOf('data:image/webp') === 0;
+function plein(el){
+  var u = el.dataset.full || el.src;
+  return _webp ? u.replace(/\.jpg$/, '.webp') : u;
+}"""
 
 COLLANTE_JS = """/* Rideau des barres collantes : on epingle des que la sentinelle sort du haut. */
 document.querySelectorAll('.collante').forEach(function(bar){
@@ -307,7 +318,8 @@ document.querySelectorAll('.collante').forEach(function(bar){
   },{threshold:0}).observe(s);
 });"""
 
-REVEAL_JS = """var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+REVEAL_JS = """
+var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 if(!('IntersectionObserver' in window)||reduce){document.querySelectorAll('.reveal').forEach(function(e){e.classList.add('in')})}
 else{var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.1});
  document.querySelectorAll('.reveal').forEach(function(el){io.observe(el)});
