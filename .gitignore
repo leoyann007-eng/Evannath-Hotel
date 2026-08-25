@@ -29,3 +29,9 @@ __pycache__/
 Thumbs.db
 desktop.ini
 .DS_Store
+
+# ── Images écartées ───────────────────────────────────────────
+# Fichiers devenus orphelins, déplacés plutôt que supprimés : une fois déjà,
+# des variantes dont le chemin était construit en JavaScript ont failli être
+# effacées. Voir « Photos mal nommées » dans le README.
+site/.quarantaine/

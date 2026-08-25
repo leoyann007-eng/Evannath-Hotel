@@ -11,7 +11,7 @@ from _chrome import page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV
 
 # ── sur le domaine ────────────────────────────────────────────
 DOMAINE = [
- ('gal-lag-paillote', "La paillote", 'Le ponton de bois posé sur la lagune Aby. Le cœur du domaine — on y prend un verre au couchant, on y dîne aux lanternes de rotin.', 'Toute la journée', 'carte.html', 'Voir la carte'),
+ ('gal-lag-ponton', "La paillote", 'Le ponton de bois posé sur la lagune Aby. Le cœur du domaine — on y prend un verre au couchant, on y dîne aux lanternes de rotin.', 'Toute la journée', 'carte.html', 'Voir la carte'),
  ('gal-spa-couchant', "Piscine &amp; jacuzzi", 'Un grand bassin avec jacuzzi intégré, transats et parasols. Ouvert du lever du jour à la nuit tombée.', 'Accès libre', 'spa.html', 'Le spa'),
  ('gal-spa-case', "Spa &amp; sauna", 'Massages aux pierres chauffantes, rituel de l\'Orient à l\'argan, gommage au savon noir africain. Vingt-deux soins, sur rendez-vous.', 'Sur rendez-vous', 'spa.html', 'Les soins'),
  ('gal-tab-rotin', "Restaurant &amp; bar", 'Cuisine ivoirienne et continentale, poisson du jour, quatorze cocktails maison dont deux signatures.', 'Midi et soir', 'carte.html', 'La table'),

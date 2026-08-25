@@ -21,7 +21,9 @@ PHOTOS = [
  ('rest/44.png',    'dom-couchant', 'domaine', "Le couchant sur Assinie"),
 
  # ── Lagune & paillote ─────────────────────────────────────────
- ('gallery/8.png',  'lag-paillote', 'lagune',  "La paillote sur pilotis"),
+ # gallery/8.png etait etiquetee « La paillote sur pilotis » a l'import :
+ # c'est une chambre. Verifie par signature — meme photo que hero-chambre-wax.
+ ('gallery/8.png',  'ch-wax2',      'chambres',"Lit et jeté aux motifs wax"),
  ('gallery/6.png',  'lag-ponton',   'lagune',  "Le ponton de bois au-dessus de l'eau"),
  ('gallery/21.png', 'lag-bateau',   'lagune',  "Le ponton et le bateau de balade"),
  ('rest/16.png',    'lag-nuit',     'lagune',  "La paillote à la tombée du jour"),
@@ -281,5 +283,5 @@ LD = _schema.bloc(
 io.open('galerie.html', 'w', encoding='utf-8').write(page(
  "Galerie — Hôtel Evannath, Assinie",
  "%d photographies réelles de l'Hôtel Evannath à Assinie : le domaine, la paillote sur la lagune Aby, les chambres, le restaurant, la piscine et le spa." % len(made),
- "gal-lag-paillote", CSS_GAL, '\n'.join(b), JS_GAL, slug="galerie", jsonld=LD))
+ "gal-lag-ponton", CSS_GAL, '\n'.join(b), JS_GAL, slug="galerie", jsonld=LD))
 print('galerie.html          ok')

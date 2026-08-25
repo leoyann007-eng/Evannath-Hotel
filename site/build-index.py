@@ -30,7 +30,7 @@ SIZES_CARTES = ('(max-width:720px) calc(100vw - 48px), '
 CARTES = ('r-standard', 'ig-baldaquin', 'r-wax', 'r-anglaise', 'r-mezz2',
           'r-mezzanine', 'r-arabe', 'g-aerien', 'g-terrasse')
 
-html = versionner(responsive(dimensionner(html), hero='hero-paillote',
+html = versionner(responsive(dimensionner(html), hero='hero-chambre-wax',
                              sizes={n: SIZES_CARTES for n in CARTES}))
 assert '{{' not in html, 'un placeholder n a pas ete remplace'
 io.open('index.html', 'w', encoding='utf-8').write(html)

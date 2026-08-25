@@ -105,13 +105,13 @@ CSS = """
 
 PACKS = [
  ('Pack Famille','250000','forfait','g-aerien-t','Vue aérienne du domaine Evannath','p1','uf','FCFA · le forfait','250 000'),
- ('Pack Couple','150000','forfait','c-ponton','Le ponton sur la lagune au couchant','p2','uf','FCFA · le forfait','150 000'),
+ ('Pack Couple','150000','forfait','gal-lag-nuit','La paillote éclairée à la tombée du jour','p2','uf','FCFA · le forfait','150 000'),
  ('Pack Chillday','50000','personne','g-terrasse-t','Terrasse et transats de l\'hôtel','p3','up','FCFA · par personne','50 000'),
  ('Pack Enfant','15000','enfant','ig-enfants',"Des enfants dans la piscine de l'hôtel",'p4','ue','FCFA · par enfant','15 000'),
 ]
 
 CARDS = [
- ('duo','c-ponton','Le ponton de bois sur la lagune, au couchant','g1','Romantique','t1','Évasion Romantique',
+ ('duo','gal-lag-bateau','Le ponton et le bateau de balade sur la lagune Aby','g1','Romantique','t1','Évasion Romantique',
   [('s11','Cocktails de charme'),('s12','Balade dînatoire aux chandelles'),('s13','Petit-déjeuner au lit'),('s14','Duo de massages')],
   '100 000','100000','forfait','pf','FCFA · le forfait'),
  ('duo','r-standard','Chambre Standard de l\'Hôtel Evannath','g2','Week-end','t2','Week-End Intense',

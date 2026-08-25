@@ -492,6 +492,41 @@ qu'il s'agit du même établissement d'une page à l'autre.
 **Les coordonnées GPS sont volontairement absentes** : l'établissement ne les
 publie nulle part, et un point mal placé vaut moins que pas de point.
 
+### Photos mal nommées
+
+Quatre emplacements montraient autre chose que ce que leur légende annonçait.
+Vérifié par signature d'image, pas à l'œil :
+
+| fichier | ce qu'il montre | ce qu'on en disait |
+|---|---|---|
+| `gal-lag-paillote` | une chambre | « La paillote sur pilotis » |
+| `hero-paillote` | la même chambre | hero de l'accueil, nommé « paillote » |
+| `c-ponton` | des fauteuils de rotin | « Le ponton de bois sur la lagune » |
+| `g-ponton` | les mêmes fauteuils | « La paillote sur pilotis » |
+
+Trois de ces fichiers sont **la même photo sous trois noms** (`gal-lag-rotin`,
+`c-ponton`, `g-ponton`), et deux autres également (`gal-lag-paillote`,
+`hero-paillote`). La vraie paillote sur pilotis est **`gal-lag-ponton`**, qui
+ne servait qu'à la galerie.
+
+L'erreur vient de l'import : `gallery/8.png` a été étiquetée « La paillote sur
+pilotis » alors que c'est une chambre. Elle est reclassée en `gal-ch-wax2`,
+catégorie Chambres.
+
+`hero-paillote` est **renommé `hero-chambre-wax`**. L'image reste le hero de
+l'accueil — elle est bonne — mais son nom dit désormais ce qu'elle est. C'est
+ce nom qui avait produit l'erreur : on cherche « la paillote » dans la
+photothèque, on tombe sur une chambre.
+
+Les fichiers devenus orphelins sont dans `site/.quarantaine/`, **non
+supprimés** : une fois déjà, des variantes `hero-*` dont le chemin était
+construit en JavaScript ont failli être effacées.
+
+⚠️ **L'image de partage de l'accueil** (`og:image`) reste cette chambre. Ce
+n'est pas faux — elle ne porte aucune légende — mais un lien partagé sur
+WhatsApp montre une chambre plutôt que la paillote sur la lagune, qui est la
+signature de l'établissement. À trancher avec la direction.
+
 ### Les offres sur l'accueil
 
 Quatre des onze forfaits sont mis en avant, juste **après les chambres** :
