@@ -480,6 +480,31 @@ chez Resend, donc un domaine que l'on ne possède pas tant que rien n'est signé
 Et en Côte d'Ivoire, WhatsApp est de toute façon le canal le plus rapide vers
 une réception.
 
+#### Le numéro qui reçoit n'est pas celui qui s'affiche
+
+Deux constantes, en tête de `_chrome.py` :
+
+| Constante | Rôle |
+|---|---|
+| `WA_HOTEL` | le numéro **public** de l'établissement. Affiché partout : bouton flottant, pied de page, page Contact, fiches chambres |
+| `WA_DEMANDES` | le numéro qui **reçoit** ce que les cinq formulaires envoient |
+
+Pendant la prospection, `WA_DEMANDES` est celui du prestataire. Une demande de
+test n'a pas à tomber dans la réception d'un établissement qui n'a rien signé,
+et il faut bien voir ce que les formulaires produisent — même logique que
+`MAIL_DEST` pointé sur sa propre adresse.
+
+Le visiteur, lui, ne voit que les contacts de l'hôtel : le bouton flottant, le
+pied de page et « Appeler la réception » restent inchangés.
+
+Le jour de la signature : `WA_DEMANDES = WA_HOTEL`, relancer les générateurs.
+Rien d'autre à toucher.
+
+`verifier.py` (contrôle 11 ter) exige les deux occurrences du numéro de
+destination sur chaque page à formulaire, et **aucune** ailleurs — un numéro
+personnel qui fuite sur une page publique ne se voit nulle part. Les deux cas
+ont été testés en les provoquant.
+
 Le drapeau est **indépendant de `PROSPECTION`** : on peut signer et rester sur
 WhatsApp le temps que le domaine soit vérifié.
 

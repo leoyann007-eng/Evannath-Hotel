@@ -37,6 +37,24 @@ PROSPECTION = True
 # que le domaine soit verifie.
 ENVOI_WHATSAPP = True
 
+# ---------------------------------------------------------------------------
+# Qui recoit les demandes
+# ---------------------------------------------------------------------------
+# WA_HOTEL est le numero PUBLIC de l'etablissement. Il reste affiche partout :
+# bouton flottant, pied de page, page Contact, fiches chambres. C'est celui que
+# le visiteur voit et compose de lui-meme.
+#
+# WA_DEMANDES est le numero qui RECOIT ce que les cinq formulaires envoient.
+# Pendant la prospection c'est celui du prestataire : une demande de test n'a
+# pas a tomber dans la reception d'un etablissement qui n'a rien signe, et il
+# faut bien voir ce que les formulaires produisent. Meme logique que MAIL_DEST
+# pointe sur sa propre adresse.
+#
+# Le jour de la signature : WA_DEMANDES = WA_HOTEL, et relancer les
+# generateurs. Rien d'autre a toucher.
+WA_HOTEL    = '2250546017377'   # la reception de l'hotel
+WA_DEMANDES = '2250758408079'   # Leonardo HOUANSOU, pendant la prospection
+
 # En mode WhatsApp, la demande n'est transmise QUE si le visiteur appuie sur
 # envoyer dans l'application. Les ecrans de confirmation doivent donc le dire :
 # annoncer « Demande envoyee » des l'ouverture de WhatsApp ferait repartir en
@@ -480,7 +498,7 @@ ENVOI_JS = """
 var SAUT = String.fromCharCode(10);
 
 var EVN = {
-  wa: '2250546017377',
+  wa: '{{WA_DEMANDES}}',
   tel: '+2250151527575',
   mail: 'bonjour@evannathhotel.com',
   ouvert: Date.now(),
@@ -586,6 +604,7 @@ var EVN = {
 };
 """
 
+ENVOI_JS = ENVOI_JS.replace('{{WA_DEMANDES}}', WA_DEMANDES)
 ENVOI_JS = ENVOI_JS.replace('{{PAR_WHATSAPP}}',
                             'true' if ENVOI_WHATSAPP else 'false')
 
@@ -610,11 +629,11 @@ def secours(id_='sec', phrase="Votre demande est prête — il ne reste qu'à l'
   <b data-t="sc1">Terminons sur WhatsApp</b>
   <p data-t="sc2">%s Un clic, et elle arrive à la réception, qui répond 24 h/24. Vous pouvez aussi appeler ou écrire.</p>
   <div class="liens">
-    <a class="wa-envoi" data-t="sc3" href="https://wa.me/2250546017377" target="_blank" rel="noopener">Envoyer sur WhatsApp</a>
+    <a class="wa-envoi" data-t="sc3" href="https://wa.me/%s" target="_blank" rel="noopener">Envoyer sur WhatsApp</a>
     <a data-t="sc4" href="tel:+2250151527575">Appeler la réception</a>
     <a data-t="sc5" href="mailto:bonjour@evannathhotel.com">Écrire un e-mail</a>
   </div>
-</div>''' % (id_, phrase)
+</div>''' % (id_, phrase, WA_DEMANDES)
 
 EN_NAV = ('mn:"Menu",n1:"Rooms &amp; Suites",n2:"Experiences",n3:"The table",n4:"The spa",'
           'n5:"Packages &amp; Offers",n6:"Meetings &amp; groups",n7:"Gallery",n8:"About",'
