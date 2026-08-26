@@ -810,27 +810,36 @@ var EVN = {
     if (o.erreur) o.erreur.classList.remove('on');
     if (o.secours) o.secours.classList.remove('on');
 
-    /* La demande part sur WhatsApp, et la page affiche exactement la meme
-       confirmation qu'un envoi serveur : le visiteur ne voit pas la
-       difference, et la reception recoit le recapitulatif complet.
-       window.open est appele dans le geste de l'utilisateur, donc autorise ;
-       s'il est tout de meme bloque, on retombe sur le panneau, dont le lien
-       est cliquable a la main. */
+    /* La demande part sur WhatsApp.
+
+       On n'appelle PAS window.open : les navigateurs le bloquent largement,
+       et il ne se passait alors plus rien du tout au clic. On ne peut pas
+       parier la seule voie d'envoi sur une API que le visiteur peut refuser.
+
+       Le panneau s'ouvre donc avec le lien deja rempli, et c'est le visiteur
+       qui le touche : un vrai clic sur un vrai lien, qu'aucun bloqueur
+       n'arrete, sur telephone comme sur ordinateur.
+
+       La confirmation s'affiche juste apres ce clic — pas avant. Elle est
+       donc derriere lui quand il revient de WhatsApp, avec sa reference. */
     if (EVN.parWhatsApp) {
       var ref = EVN.reference();
       var texte = (o.resume ? o.resume() : 'Bonjour, je souhaite vous contacter.')
                 + SAUT + SAUT + 'Référence : ' + ref;
       var url = EVN.lienWhatsApp(texte);
-      if (!window.open(url, '_blank')) {
-        if (o.secours) {
-          var a = o.secours.querySelector('a.wa-envoi');
-          if (a) a.href = url;
-          o.secours.classList.add('on');
-          o.secours.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
+      var a = o.secours ? o.secours.querySelector('a.wa-envoi') : null;
+
+      if (!a) {                       /* pas de panneau : on n'a que ce recours */
+        location.href = url;
         return;
       }
-      alors({ ok: true, reference: ref });
+      a.href = url;
+      a.addEventListener('click', function () {
+        /* Le temps que l'onglet ou l'application prenne la main. */
+        setTimeout(function () { alors({ ok: true, reference: ref }); }, 500);
+      }, { once: true });
+      o.secours.classList.add('on');
+      o.secours.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
 

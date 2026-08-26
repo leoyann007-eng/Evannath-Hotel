@@ -462,9 +462,18 @@ quoi les envois sont refusés. Redéployer après avoir défini les variables.
 ### Pendant la prospection, la demande part sur WhatsApp
 
 `ENVOI_WHATSAPP = True` en tête de `_chrome.py`. Le formulaire n'appelle plus
-`/api/envoyer` du tout : il ouvre WhatsApp avec le récapitulatif déjà rédigé
-et une référence, exactement comme le faisait le panneau de repli. Aucune clé,
-aucun domaine, rien à configurer.
+`/api/envoyer` du tout : il présente WhatsApp avec le récapitulatif déjà
+rédigé et une référence. Aucune clé, aucun domaine, rien à configurer.
+
+**Le visiteur touche lui-même le lien — on n'ouvre rien à sa place.** La
+première version appelait `window.open`. Les navigateurs le bloquent
+largement : au clic, il ne se passait plus rien du tout. On ne peut pas parier
+la seule voie d'envoi sur une API que le visiteur peut refuser.
+
+Le panneau s'ouvre donc avec le lien déjà rempli, et c'est un vrai clic sur un
+vrai lien qui part — ce qu'aucun bloqueur n'arrête, sur téléphone comme sur
+ordinateur. La confirmation s'affiche **juste après ce clic**, pas avant :
+elle est donc derrière lui, avec sa référence, quand il revient de WhatsApp.
 
 C'est ce qui lève le blocage réel : `MAIL_EXP` doit être un expéditeur vérifié
 chez Resend, donc un domaine que l'on ne possède pas tant que rien n'est signé.
