@@ -3,7 +3,7 @@
 import io
 import _schema
 from _chrome import ENVOI_JS, PIEGE, secours
-from _chrome import page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV
+from _chrome import page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV, EN_SECOURS
 
 # ═══════════════════════════════ CONTACT ═══════════════════════════════
 CSS_CONTACT = """
@@ -277,7 +277,7 @@ document.getElementById('cf').addEventListener('submit',function(e){
   });
 });
 
-var EN={''' + EN_NAV + '''wr:"Write to us",
+var EN={''' + EN_NAV + EN_SECOURS + '''wr:"Write to us",
 c1:"Home",c2:"Contact",eb:"Front desk open 24/7",h1:"Get in touch",
 lede:"By phone, WhatsApp, email or the form — whichever suits you. We reply within 24 h, and usually well before.",
 k1:"Front desk · 24/7",v1:"For anything on site",k2:"Reservations",v2:"Rooms, packages and groups",

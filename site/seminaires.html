@@ -501,12 +501,12 @@ input::placeholder,textarea::placeholder{color:#6E6154}
         <div class="piege" aria-hidden="true"><label>Ne pas remplir<input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
         <button type="submit" class="btn btn-solid" id="envoi" data-t="env">Envoyer la demande</button>
         <p class="err-envoi" id="err" role="alert"></p><div class="secours" id="sec" role="alert">
-  <b>Envoyons-la autrement</b>
-  <p>Nous n'avons pas pu transmettre votre demande automatiquement. Votre message est prêt : il part sur WhatsApp en un clic, et la réception répond 24 h/24.</p>
+  <b data-t="sc1">Terminons sur WhatsApp</b>
+  <p data-t="sc2">Votre demande est prête — il ne reste qu'à l'envoyer. Un clic, et elle arrive à la réception, qui répond 24 h/24. Vous pouvez aussi appeler ou écrire.</p>
   <div class="liens">
-    <a class="wa" href="https://wa.me/2250546017377" target="_blank" rel="noopener">Envoyer sur WhatsApp</a>
-    <a href="tel:+2250151527575">Appeler la réception</a>
-    <a href="mailto:bonjour@evannathhotel.com">Écrire un e-mail</a>
+    <a class="wa" data-t="sc3" href="https://wa.me/2250546017377" target="_blank" rel="noopener">Envoyer sur WhatsApp</a>
+    <a data-t="sc4" href="tel:+2250151527575">Appeler la réception</a>
+    <a data-t="sc5" href="mailto:bonjour@evannathhotel.com">Écrire un e-mail</a>
   </div>
 </div>
         <div class="sent" id="ok" role="status">
@@ -855,7 +855,7 @@ document.getElementById('df').addEventListener('submit',function(e){
   });
 });
 
-var EN={mn:"Menu",n1:"Rooms &amp; Suites",n2:"Experiences",n3:"The table",n4:"The spa",n5:"Packages &amp; Offers",n6:"Meetings &amp; groups",n7:"Gallery",n8:"About",n9:"Useful information",n10:"Contact",n11:"Book",dr:"Reservations",cta:"Request a quote",
+var EN={mn:"Menu",n1:"Rooms &amp; Suites",n2:"Experiences",n3:"The table",n4:"The spa",n5:"Packages &amp; Offers",n6:"Meetings &amp; groups",n7:"Gallery",n8:"About",n9:"Useful information",n10:"Contact",n11:"Book",dr:"Reservations",sc1:"Finish on WhatsApp",sc2:"Your request is ready — it just needs sending. One tap and it reaches reception, who answer 24/7. You can also call or write.",sc3:"Send on WhatsApp",sc4:"Call reception",sc5:"Write an email",cta:"Request a quote",
 c1:"Home",c2:"Meetings &amp; groups",
 eb1:"Study days · residential · receptions",
 h1:"Working elsewhere,<br>and having it show",

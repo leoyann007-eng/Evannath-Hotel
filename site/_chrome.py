@@ -500,21 +500,40 @@ PIEGE = ('<div class="piege" aria-hidden="true">'
          '</div>')
 
 
-def secours(id_='sec', phrase="Nous n'avons pas pu transmettre votre demande automatiquement."):
-    """Panneau de repli : WhatsApp pre-rempli, telephone, e-mail."""
+def secours(id_='sec', phrase="Votre demande est prête — il ne reste qu'à l'envoyer."):
+    """Panneau de repli : WhatsApp pre-rempli, telephone, e-mail.
+
+    Le texte ne s'excuse pas. Il annoncait l'echec avant de proposer la suite
+    (« Nous n'avons pas pu transmettre votre demande automatiquement »), et se
+    lisait comme une panne du formulaire alors que le visiteur a, juste sous
+    les yeux, le canal le plus rapide du pays. On mene donc par l'action.
+
+    Il reste explicite sur un point : la demande n'est PAS partie. « il ne
+    reste qu'a l'envoyer » le dit sans detour — sans quoi le visiteur
+    fermerait la page en croyant avoir reserve.
+    """
     return '''<div class="secours" id="%s" role="alert">
-  <b>Envoyons-la autrement</b>
-  <p>%s Votre message est prêt : il part sur WhatsApp en un clic, et la réception répond 24 h/24.</p>
+  <b data-t="sc1">Terminons sur WhatsApp</b>
+  <p data-t="sc2">%s Un clic, et elle arrive à la réception, qui répond 24 h/24. Vous pouvez aussi appeler ou écrire.</p>
   <div class="liens">
-    <a class="wa" href="https://wa.me/2250546017377" target="_blank" rel="noopener">Envoyer sur WhatsApp</a>
-    <a href="tel:+2250151527575">Appeler la réception</a>
-    <a href="mailto:bonjour@evannathhotel.com">Écrire un e-mail</a>
+    <a class="wa" data-t="sc3" href="https://wa.me/2250546017377" target="_blank" rel="noopener">Envoyer sur WhatsApp</a>
+    <a data-t="sc4" href="tel:+2250151527575">Appeler la réception</a>
+    <a data-t="sc5" href="mailto:bonjour@evannathhotel.com">Écrire un e-mail</a>
   </div>
 </div>''' % (id_, phrase)
 
 EN_NAV = ('mn:"Menu",n1:"Rooms &amp; Suites",n2:"Experiences",n3:"The table",n4:"The spa",'
           'n5:"Packages &amp; Offers",n6:"Meetings &amp; groups",n7:"Gallery",n8:"About",'
           'n9:"Useful information",n10:"Contact",n11:"Book",dr:"Reservations",')
+
+# Le panneau de repli des cinq formulaires. Il vit ici, et non dans chaque
+# page, pour la meme raison que le panneau lui-meme : une seule source.
+# Les cles sc1-sc5 ont ete choisies libres sur les cinq pages concernees —
+# une cle reutilisee ecraserait l'autre texte, cf. controle 7 quater.
+EN_SECOURS = ('sc1:"Finish on WhatsApp",'
+              'sc2:"Your request is ready — it just needs sending. One tap and it '
+              'reaches reception, who answer 24/7. You can also call or write.",'
+              'sc3:"Send on WhatsApp",sc4:"Call reception",sc5:"Write an email",')
 
 
 # ---------------------------------------------------------------------------

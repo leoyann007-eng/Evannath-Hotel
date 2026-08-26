@@ -199,7 +199,7 @@ spa-template.html     -> build-carte.py  -> spa.html
 ```
 
 Marqueurs disponibles : `{{TOKENS}}`, `{{HEAD_CSS}}`, `{{NAV_JS}}`,
-`{{NAV_BASE}}`, `{{LANG_JS}}`, `{{ENVOI}}`.
+`{{NAV_BASE}}`, `{{LANG_JS}}`, `{{ENVOI}}`, `{{SECOURS}}`, `{{EN_SECOURS}}`.
 
 ⚠️ **Ne pas modifier `index.html`, `carte.html` ni `spa.html` directement** :
 ils sont regénérés depuis leur gabarit.
@@ -459,6 +459,16 @@ doublé d'un délai minimum de remplissage.
 Le domaine doit être vérifié chez Resend (enregistrements SPF et DKIM) sans
 quoi les envois sont refusés. Redéployer après avoir défini les variables.
 
+**Pendant la prospection, le domaine de l'hôtel n'est pas encore le vôtre.**
+`MAIL_EXP` doit être un expéditeur vérifié chez Resend : `site@evannathhotel.com`
+est donc hors de portée tant que rien n'est signé. Resend fournit pour cela
+l'expéditeur de test `onboarding@resend.dev`, qui ne demande aucune
+vérification de domaine et ne délivre qu'à l'adresse du titulaire du compte —
+ce qui tombe bien, les demandes de test devant arriver chez le prestataire et
+non dans la boîte de l'hôtel. On pose donc `MAIL_EXP=onboarding@resend.dev` et
+`MAIL_DEST` sur sa propre adresse ; le jour de la signature, ces deux lignes
+seules changent.
+
 **Tant qu'elles ne sont pas définies**, l'endpoint répond 503 et le formulaire
 bascule sur un panneau de repli : WhatsApp avec le message déjà rédigé,
 téléphone de la réception, e-mail. Le visiteur n'est jamais dans le vide, et
@@ -466,6 +476,37 @@ en Côte d'Ivoire WhatsApp est souvent le canal le plus rapide de toute façon.
 
 Le même repli couvre la panne réseau, l'échec du fournisseur et un délai
 dépassant douze secondes.
+
+### Le panneau de repli ne s'excuse pas
+
+Il ouvrait sur l'aveu de la panne — « Nous n'avons pas pu transmettre votre
+demande automatiquement » — avant de proposer la suite. Lu froidement, sans
+personne pour l'accompagner, ce n'est plus un filet de sécurité : c'est un
+formulaire qui ne marche pas. Or le visiteur a sous les yeux le canal le plus
+rapide du pays.
+
+Il mène donc par l'action : **« Terminons sur WhatsApp »**, puis « Votre
+demande est prête — il ne reste qu'à l'envoyer ».
+
+**Un point reste explicite, et doit le rester** : la demande n'est pas partie.
+« Il ne reste qu'à l'envoyer » le dit sans détour. Les formulations plus
+lisses ont été écartées — un visiteur qui ferme la page en croyant avoir
+réservé coûte plus cher que le message d'excuse qu'on remplace.
+
+Le texte vit dans `secours()` (`_chrome.py`), **une seule fois**. Les gabarits
+de La table et du Spa en portaient une copie figée : cette reformulation les
+aurait manqués en silence, comme `--h-nav` et le rideau CSS avant elle. Ils
+passent désormais par le marqueur `{{SECOURS}}`, et leur dictionnaire anglais
+par `{{EN_SECOURS}}`.
+
+Le panneau est traduit sur les cinq formulaires (clés `sc1`–`sc5`, vérifiées
+libres pour ne rien écraser, cf. « Collisions de clés »). Vérifié dans le
+navigateur : bascule FR → EN → FR sans perte, `href` du lien WhatsApp intact,
+et le message pré-rempli s'y accroche toujours après traduction.
+
+**Ce message pré-rempli reste en français**, y compris en anglais : il part
+vers une réception ivoirienne qui travaille en français. Le libellé du bouton
+bascule, pas le contenu du message.
 
 Tests : `node tests/envoyer.test.mjs` depuis la racine (12 vérifications).
 

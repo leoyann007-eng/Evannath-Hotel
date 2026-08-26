@@ -12,7 +12,7 @@ production — voir la section « A valider » du README.
 """
 import io
 import _schema
-from _chrome import (page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV,
+from _chrome import (page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV, EN_SECOURS,
                      ENVOI_JS, PIEGE, secours)
 
 CONFIGS = [
@@ -445,7 +445,7 @@ document.getElementById('df').addEventListener('submit',function(e){
   });
 });
 
-var EN={''' + EN_NAV + '''cta:"Request a quote",
+var EN={''' + EN_NAV + EN_SECOURS + '''cta:"Request a quote",
 c1:"Home",c2:"Meetings &amp; groups",
 eb1:"Study days · residential · receptions",
 h1:"Working elsewhere,<br>and having it show",

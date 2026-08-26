@@ -8,7 +8,7 @@ le sejour, collecte les coordonnees et simule le paiement de l'acompte.
 import io, json
 from _chrome import PROSPECTION
 from _chrome import ENVOI_JS, PIEGE, secours
-from _chrome import page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV
+from _chrome import page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV, EN_SECOURS
 
 CHAMBRES = {
  'chambre-standard':     ('Chambre Standard', 67000, 2, 'r-standard'),
@@ -429,7 +429,7 @@ document.getElementById('pay').onclick=function(){
   });
 };
 
-var EN={''' + EN_NAV + '''navch:"Our rooms",
+var EN={''' + EN_NAV + EN_SECOURS + '''navch:"Our rooms",
 c1:"Home",c2:"Rooms &amp; Suites",c3:"Booking",
 eb:"Direct booking · best rate guaranteed",h1:"Your stay",
 lede:"Three steps, two minutes. The deposit confirms the room; the balance is settled on arrival.",
