@@ -1,7 +1,11 @@
-# ── Document commercial ───────────────────────────────────────
-# Contient les coordonnées personnelles de l'émetteur et une offre
-# nominative : il n'a rien à faire dans un dépôt, ni sur le web.
+# ── Documents de prospection ──────────────────────────────────
+# La proposition (source HTML et PDF envoyé au prospect) et le brouillon
+# du mail d'approche. Ils portent les coordonnées personnelles de
+# l'émetteur et une offre nominative : ils n'ont rien à faire dans un
+# dépôt, ni sur le web.
 proposition-commerciale.html
+Proposition-Evannath.pdf
+mail-prospection.md
 
 # ── Photos sources ────────────────────────────────────────────
 # Les originaux téléchargés depuis evannathhotel.com (~60 Mo de PNG).
