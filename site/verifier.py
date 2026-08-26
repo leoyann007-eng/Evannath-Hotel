@@ -268,6 +268,15 @@ def controler():
         elif f not in SANS_JSONLD:
             pb.append((f, 'JSON-LD absent'))
 
+        # 11 bis. la classe .wa est celle du bouton flottant, et rien d'autre.
+        # Elle impose position:fixed et 56x56 en rond : le lien du panneau de
+        # repli la portait, se retrouvait arrache du panneau en pastille au
+        # coin de l'ecran, et le bouton le plus utile du repli etait invisible.
+        if s.count('class="wa"') != 1:
+            pb.append((f, 'class="wa" doit servir au seul bouton flottant'))
+        if 'class="secours"' in s and s.count('class="wa-envoi"') != 1:
+            pb.append((f, 'lien WhatsApp du panneau de repli absent ou en double'))
+
         # 12. une barre collante doit avoir son rideau
         if 'collante"' in s:
             if 'collante::before' not in s:

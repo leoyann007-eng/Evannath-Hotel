@@ -494,6 +494,21 @@ La référence est calculée côté client au même format que le serveur
 (`EVN-XXXXXX`), et **figure dans le message WhatsApp** : celle que lit la
 réception est celle affichée à l'écran.
 
+#### La classe `.wa` appartient au bouton flottant, et à lui seul
+
+Le lien « Envoyer sur WhatsApp » du panneau de repli portait `class="wa"` —
+la même que le bouton flottant du coin de l'écran, dont la règle impose
+`position:fixed`, 56 × 56 et un rond. Le lien était donc **arraché du panneau**
+et rendu en pastille par-dessus le bouton existant : le repli n'affichait plus
+que « Appeler la réception » et « Écrire un e-mail », et son bouton le plus
+utile était invisible.
+
+Mesuré avant correction : 56 × 56 px au lieu de 205 × 44, `min-width` à 0 au
+lieu de `auto`. Il porte maintenant `.wa-envoi`.
+
+`verifier.py` (contrôle 11 bis) refuse un `class="wa"` en double **et** un
+panneau de repli sans son lien. Les deux cas ont été testés en les provoquant.
+
 Si un bloqueur de fenêtres empêche l'ouverture, le panneau de repli s'affiche
 avec le lien cliquable à la main — le visiteur n'est jamais dans le vide.
 

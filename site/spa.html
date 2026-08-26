@@ -514,7 +514,7 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
   <b data-t="sc1">Terminons sur WhatsApp</b>
   <p data-t="sc2">Votre demande est prête — il ne reste qu'à l'envoyer. Un clic, et elle arrive à la réception, qui répond 24 h/24. Vous pouvez aussi appeler ou écrire.</p>
   <div class="liens">
-    <a class="wa" data-t="sc3" href="https://wa.me/2250546017377" target="_blank" rel="noopener">Envoyer sur WhatsApp</a>
+    <a class="wa-envoi" data-t="sc3" href="https://wa.me/2250546017377" target="_blank" rel="noopener">Envoyer sur WhatsApp</a>
     <a data-t="sc4" href="tel:+2250151527575">Appeler la réception</a>
     <a data-t="sc5" href="mailto:bonjour@evannathhotel.com">Écrire un e-mail</a>
   </div>
@@ -613,7 +613,7 @@ var EVN = {
       var url = EVN.lienWhatsApp(texte);
       if (!window.open(url, '_blank')) {
         if (o.secours) {
-          var a = o.secours.querySelector('a.wa');
+          var a = o.secours.querySelector('a.wa-envoi');
           if (a) a.href = url;
           o.secours.classList.add('on');
           o.secours.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -643,7 +643,7 @@ var EVN = {
       }
       /* Ni succes ni faute du visiteur : on bascule sur WhatsApp. */
       if (o.secours) {
-        var lien = o.secours.querySelector('a.wa');
+        var lien = o.secours.querySelector('a.wa-envoi');
         if (lien) lien.href = EVN.lienWhatsApp(o.resume ? o.resume() : 'Bonjour, je souhaite vous contacter.');
         o.secours.classList.add('on');
         o.secours.scrollIntoView({ behavior: 'smooth', block: 'center' });

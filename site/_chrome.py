@@ -170,8 +170,8 @@ button[aria-busy="true"]{opacity:.62;cursor:progress}
 .secours .liens a{display:inline-flex;align-items:center;gap:9px;border:1px solid var(--line);padding:12px 18px;
   font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--cream);transition:.3s}
 .secours .liens a:hover{border-color:var(--bronze);color:var(--bronze-2)}
-.secours .liens a.wa{background:var(--palm);border-color:var(--palm);color:#0F1508}
-.secours .liens a.wa:hover{filter:brightness(1.1);color:#0F1508}
+.secours .liens a.wa-envoi{background:var(--palm);border-color:var(--palm);color:#0F1508}
+.secours .liens a.wa-envoi:hover{filter:brightness(1.1);color:#0F1508}
 .err-envoi{display:none;color:var(--err);font-size:13.5px;margin-top:14px}
 .err-envoi.on{display:block}
 
@@ -206,6 +206,10 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
 .f-grid a{display:block;font-size:13.5px;color:#9C8B78;padding:9px 0;transition:.3s}
 .f-grid a:hover{color:var(--bronze)}
 .f-bot{border-top:1px solid var(--line);margin-top:54px;padding-top:26px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:11.5px;color:#A2907C}
+/* Bouton flottant. NE PAS reutiliser la classe .wa ailleurs : elle impose
+   position:fixed et 56x56 en rond. Le lien du panneau de repli la portait,
+   et se retrouvait donc arrache du panneau, en pastille au coin de l'ecran —
+   le bouton le plus utile du repli etait invisible. Il porte .wa-envoi. */
 .wa{position:fixed;right:22px;bottom:22px;z-index:90;width:56px;height:56px;border-radius:50%;background:#25D366;display:grid;place-items:center;box-shadow:0 10px 30px rgba(37,211,102,.35);transition:.35s}
 .wa:hover{transform:scale(1.09)}
 .wa svg{width:28px;height:28px;fill:#fff}
@@ -513,7 +517,7 @@ var EVN = {
       var url = EVN.lienWhatsApp(texte);
       if (!window.open(url, '_blank')) {
         if (o.secours) {
-          var a = o.secours.querySelector('a.wa');
+          var a = o.secours.querySelector('a.wa-envoi');
           if (a) a.href = url;
           o.secours.classList.add('on');
           o.secours.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -543,7 +547,7 @@ var EVN = {
       }
       /* Ni succes ni faute du visiteur : on bascule sur WhatsApp. */
       if (o.secours) {
-        var lien = o.secours.querySelector('a.wa');
+        var lien = o.secours.querySelector('a.wa-envoi');
         if (lien) lien.href = EVN.lienWhatsApp(o.resume ? o.resume() : 'Bonjour, je souhaite vous contacter.');
         o.secours.classList.add('on');
         o.secours.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -597,7 +601,7 @@ def secours(id_='sec', phrase="Votre demande est prête — il ne reste qu'à l'
   <b data-t="sc1">Terminons sur WhatsApp</b>
   <p data-t="sc2">%s Un clic, et elle arrive à la réception, qui répond 24 h/24. Vous pouvez aussi appeler ou écrire.</p>
   <div class="liens">
-    <a class="wa" data-t="sc3" href="https://wa.me/2250546017377" target="_blank" rel="noopener">Envoyer sur WhatsApp</a>
+    <a class="wa-envoi" data-t="sc3" href="https://wa.me/2250546017377" target="_blank" rel="noopener">Envoyer sur WhatsApp</a>
     <a data-t="sc4" href="tel:+2250151527575">Appeler la réception</a>
     <a data-t="sc5" href="mailto:bonjour@evannathhotel.com">Écrire un e-mail</a>
   </div>
