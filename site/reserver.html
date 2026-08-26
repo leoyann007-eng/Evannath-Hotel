@@ -421,8 +421,8 @@ input::placeholder,textarea::placeholder{color:#6E6154}
     <section class="pane" id="p4">
       <div class="done-box">
         <div class="tick">✓</div>
-        <h2 data-t="h2d">Demande envoyée</h2>
-        <p id="dm">Merci, votre demande est partie à la réception.</p>
+        <h2 data-t="h2d">Votre demande vous attend dans WhatsApp</h2>
+        <p id="dm">Appuyez sur envoyer dans WhatsApp : ce geste transmet votre demande à la réception. </p>
         <p style="color:var(--muted);font-size:14px" data-t="refn">Notez cette référence : elle identifie votre dossier.</p>
         <div class="ref" id="ref">EVN-000000</div>
 
@@ -618,6 +618,8 @@ else{var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.is
    Si l'envoi automatique n'est pas configure ou echoue, on ne perd jamais le
    visiteur : on lui propose WhatsApp avec le message deja redige, plus les
    numeros de la reception. */
+var SAUT = String.fromCharCode(10);
+
 var EVN = {
   wa: '2250546017377',
   tel: '+2250151527575',
@@ -628,12 +630,46 @@ var EVN = {
     return 'https://wa.me/' + this.wa + '?text=' + encodeURIComponent(texte);
   },
 
+  /* Voir ENVOI_WHATSAPP dans _chrome.py. */
+  parWhatsApp: true,
+
+  /* Meme format que le serveur (api/envoyer.js), pour que la reference lue
+     au telephone soit la meme que celle affichee a l'ecran. */
+  reference: function () {
+    return 'EVN-' + Date.now().toString(36).slice(-6).toUpperCase();
+  },
+
   /* o : {bouton, secours, erreur, resume} */
   envoyer: function (type, donnees, o, alors) {
     var b = o.bouton, libelle = b ? b.textContent : '';
-    if (b) { b.setAttribute('aria-busy', 'true'); b.disabled = true; b.textContent = 'Envoi en cours…'; }
     if (o.erreur) o.erreur.classList.remove('on');
     if (o.secours) o.secours.classList.remove('on');
+
+    /* La demande part sur WhatsApp, et la page affiche exactement la meme
+       confirmation qu'un envoi serveur : le visiteur ne voit pas la
+       difference, et la reception recoit le recapitulatif complet.
+       window.open est appele dans le geste de l'utilisateur, donc autorise ;
+       s'il est tout de meme bloque, on retombe sur le panneau, dont le lien
+       est cliquable a la main. */
+    if (EVN.parWhatsApp) {
+      var ref = EVN.reference();
+      var texte = (o.resume ? o.resume() : 'Bonjour, je souhaite vous contacter.')
+                + SAUT + SAUT + 'Référence : ' + ref;
+      var url = EVN.lienWhatsApp(texte);
+      if (!window.open(url, '_blank')) {
+        if (o.secours) {
+          var a = o.secours.querySelector('a.wa');
+          if (a) a.href = url;
+          o.secours.classList.add('on');
+          o.secours.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        return;
+      }
+      alors({ ok: true, reference: ref });
+      return;
+    }
+
+    if (b) { b.setAttribute('aria-busy', 'true'); b.disabled = true; b.textContent = 'Envoi en cours…'; }
 
     var charge = Object.assign({}, donnees, {
       type: type,
@@ -702,13 +738,13 @@ function iso(d){return new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOStri
    le point d'extension prevu pour ce cas. */
 var LG='fr';
 var T={fr:{loc:'fr-FR',p1:' personne',pp:' personnes',n1:'Nuit',nn:'Nuits',tarif:'Tarif',
-           merci:'Merci ',dem:'. Votre demande pour la ',du:' du ',au:' au ',
-           part:" est partie à la réception.",
+           merci:'Appuyez sur envoyer dans WhatsApp : ce geste transmet votre demande à la réception. Merci ',dem:'. Votre demande pour la ',du:' du ',au:' au ',
+           part:" part sur WhatsApp.",
            solde:"Le solde se règle à l'arrivée, sur place.",
            nav1:'Votre navette aéroport est notée (',nav2:"). Le solde se règle à l'arrivée."},
      en:{loc:'en-GB',p1:' guest',pp:' guests',n1:'Night',nn:'Nights',tarif:'Rate',
-           merci:'Thank you ',dem:'. Your request for the ',du:' from ',au:' to ',
-           part:' has gone to the front desk.',
+           merci:'Tap send in the app — that is what delivers it to reception. Thank you ',dem:'. Your request for the ',du:' from ',au:' to ',
+           part:' goes out on WhatsApp.',
            solde:'The balance is settled on arrival, at the hotel.',
            nav1:'Your airport shuttle is noted (',nav2:'). The balance is settled on arrival.'}};
 function jour(v){return v?new Date(v).toLocaleDateString(T[LG].loc,{weekday:'long',day:'numeric',month:'long'}):'—'}
@@ -878,7 +914,7 @@ py0:"The most used in Côte d’Ivoire",py1:"Payment by phone",py2:"Payment by p
 py3n:"Bank card<em>Visa · Mastercard</em>",
 annul:"Free cancellation up to 48 h before arrival, deposit refunded in full. After that, the deposit is retained by the property.",
 retr2:"Back",env:"Send my request",
-h2d:"Request sent",refn:"Note this reference: it identifies your file.",
+h2d:"Your request is waiting in WhatsApp",refn:"Note this reference: it identifies your file.",
 ns1:"The front desk checks availability and replies within 24 h, by e-mail and by WhatsApp.",
 ns2:"Once the room is confirmed, you receive the link to pay the 30 % deposit.",
 fb1:"Back to home",fb2:"Add an experience",

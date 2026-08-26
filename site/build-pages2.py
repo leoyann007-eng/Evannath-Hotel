@@ -3,7 +3,8 @@
 import io
 import _schema
 from _chrome import ENVOI_JS, PIEGE, secours
-from _chrome import page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV, EN_SECOURS
+from _chrome import (page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV, EN_SECOURS,
+                     CONF_TITRE, CONF_TITRE_EN, CONF_GESTE, CONF_GESTE_EN)
 
 # ═══════════════════════════════ CONTACT ═══════════════════════════════
 CSS_CONTACT = """
@@ -155,8 +156,8 @@ b.append('''  </div>
     <button type="submit" class="btn btn-solid" id="envoi" data-t="l8">Envoyer le message</button>
     <p class="err-envoi" id="err" role="alert"></p>''' + secours('sec') + '''
     <div class="sent" id="ok" role="status">
-      <b data-t="s1">Message envoyé</b>
-      <p data-t="s2">Merci. La réception vous répond sous 24 h. Pour une demande urgente, WhatsApp reste le plus rapide.</p>
+      <b data-t="s1">''' + (CONF_TITRE or 'Message envoyé') + '''</b>
+      <p data-t="s2">''' + (CONF_GESTE or 'Merci. ') + '''La réception vous répond sous 24 h. Pour une demande urgente, WhatsApp reste le plus rapide.</p>
     </div>
   </form>
 
@@ -291,7 +292,7 @@ m4:"Enter a number with at least 8 digits.",m5:"Please choose a subject.",m6:"Yo
 m7:"Please tick this box to continue.",
 o0:"— Choose a subject —",o1:"Book a room",o2:"Book a package or offer",o3:"Book a table at the restaurant",
 o4:"Seminar, group or event",o5:"Spa and wellbeing",o6:"Airport shuttle",o7:"Something else",
-s1:"Message sent",s2:"Thank you. The front desk replies within 24 h. For anything urgent, WhatsApp is fastest.",
+s1:"''' + (CONF_TITRE_EN or 'Message sent') + '''",s2:"''' + (CONF_GESTE_EN or 'Thank you. ') + '''The front desk replies within 24 h. For anything urgent, WhatsApp is fastest.",
 b1:"Opening hours",h2:"Front desk",hv:"24/7",h3:"Check-in",h4:"Check-out",h5:"Lunch",h6:"Dinner",h7:"Spa",h7v:"by appointment",
 b2:"Address",b2c:"Open in Maps",b3:"Follow us",b3p:"21,000 people follow us on Facebook.",
 mp1:"Assinie, PK 19",mp2:"On the Assinie-Mafia road, between the Atlantic Ocean and the Aby lagoon.",mp3:"Get directions",

@@ -8,7 +8,9 @@ le sejour, collecte les coordonnees et simule le paiement de l'acompte.
 import io, json
 from _chrome import PROSPECTION
 from _chrome import ENVOI_JS, PIEGE, secours
-from _chrome import page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV, EN_SECOURS
+from _chrome import (page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV, EN_SECOURS,
+                     CONF_TITRE, CONF_TITRE_EN, CONF_GESTE, CONF_GESTE_EN,
+                     ENVOI_WHATSAPP)
 
 CHAMBRES = {
  'chambre-standard':     ('Chambre Standard', 67000, 2, 'r-standard'),
@@ -211,8 +213,8 @@ body = [header('index.html#chambres', 'Nos chambres', 'navch'), drawer('index.ht
     <section class="pane" id="p4">
       <div class="done-box">
         <div class="tick">✓</div>
-        <h2 data-t="h2d">Demande envoyée</h2>
-        <p id="dm">Merci, votre demande est partie à la réception.</p>
+        <h2 data-t="h2d">{{CT}}</h2>
+        <p id="dm">{{CG}}</p>
         <p style="color:var(--muted);font-size:14px" data-t="refn">Notez cette référence : elle identifie votre dossier.</p>
         <div class="ref" id="ref">EVN-000000</div>
 
@@ -275,13 +277,13 @@ function iso(d){return new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOStri
    le point d'extension prevu pour ce cas. */
 var LG='fr';
 var T={fr:{loc:'fr-FR',p1:' personne',pp:' personnes',n1:'Nuit',nn:'Nuits',tarif:'Tarif',
-           merci:'Merci ',dem:'. Votre demande pour la ',du:' du ',au:' au ',
-           part:" est partie à la réception.",
+           merci:'{{CG}}Merci ',dem:'. Votre demande pour la ',du:' du ',au:' au ',
+           part:"{{PART}}",
            solde:"Le solde se règle à l'arrivée, sur place.",
            nav1:'Votre navette aéroport est notée (',nav2:"). Le solde se règle à l'arrivée."},
      en:{loc:'en-GB',p1:' guest',pp:' guests',n1:'Night',nn:'Nights',tarif:'Rate',
-           merci:'Thank you ',dem:'. Your request for the ',du:' from ',au:' to ',
-           part:' has gone to the front desk.',
+           merci:'{{CG_EN}}Thank you ',dem:'. Your request for the ',du:' from ',au:' to ',
+           part:'{{PART_EN}}',
            solde:'The balance is settled on arrival, at the hotel.',
            nav1:'Your airport shuttle is noted (',nav2:'). The balance is settled on arrival.'}};
 function jour(v){return v?new Date(v).toLocaleDateString(T[LG].loc,{weekday:'long',day:'numeric',month:'long'}):'—'}
@@ -451,7 +453,7 @@ py0:"The most used in Côte d\u2019Ivoire",py1:"Payment by phone",py2:"Payment b
 py3n:"Bank card<em>Visa · Mastercard</em>",
 annul:"Free cancellation up to 48 h before arrival, deposit refunded in full. After that, the deposit is retained by the property.",
 retr2:"Back",env:"Send my request",
-h2d:"Request sent",refn:"Note this reference: it identifies your file.",
+h2d:"{{CT_EN}}",refn:"Note this reference: it identifies your file.",
 ns1:"The front desk checks availability and replies within 24 h, by e-mail and by WhatsApp.",
 ns2:"Once the room is confirmed, you receive the link to pay the 30 % deposit.",
 fb1:"Back to home",fb2:"Add an experience",
@@ -461,9 +463,23 @@ rac:"Deposit to pay today:",rso:"Balance on arrival:"};
 
 ''' + LANG_JS
 
-io.open('reserver.html', 'w', encoding='utf-8').write(page(
+HTML = (page(
  "Réserver votre séjour — Hôtel Evannath, Assinie",
  "Réservez en direct à l'Hôtel Evannath, Assinie PK 19 : sept catégories de 67 000 à 280 000 FCFA la nuit, acompte de 30 % par Wave, Orange Money, MTN ou carte bancaire.",
  "r-standard", CSS, '\n'.join(body), JS, slug="reserver").replace(
  '<meta property="og:image"', (('' if PROSPECTION else '<meta name="robots" content="noindex, follow">\n') + '<meta property="og:image"')))
 print('reserver.html         ok — tunnel en 3 etapes')
+
+# Les textes de confirmation suivent ENVOI_WHATSAPP : voir _chrome.py.
+# L'echappement couvre les dictionnaires JS, delimites par des apostrophes.
+for _m, _v in (('{{CT}}',    CONF_TITRE    or 'Demande envoyée'),
+               ('{{CT_EN}}', CONF_TITRE_EN or 'Request sent'),
+               ('{{CG}}',    CONF_GESTE    or 'Merci, votre demande est partie à la réception.'),
+               ('{{CG_EN}}', CONF_GESTE_EN or ''),
+               ('{{PART}}',    ' part sur WhatsApp.' if ENVOI_WHATSAPP
+                               else ' est partie à la réception.'),
+               ('{{PART_EN}}', ' goes out on WhatsApp.' if ENVOI_WHATSAPP
+                               else ' has gone to the front desk.')):
+    HTML = HTML.replace(_m, _v.replace("'", "\'"))
+
+io.open('reserver.html', 'w', encoding='utf-8').write(HTML)

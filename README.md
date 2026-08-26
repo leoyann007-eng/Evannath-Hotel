@@ -459,7 +459,47 @@ doublé d'un délai minimum de remplissage.
 Le domaine doit être vérifié chez Resend (enregistrements SPF et DKIM) sans
 quoi les envois sont refusés. Redéployer après avoir défini les variables.
 
-**Pendant la prospection, le domaine de l'hôtel n'est pas encore le vôtre.**
+### Pendant la prospection, la demande part sur WhatsApp
+
+`ENVOI_WHATSAPP = True` en tête de `_chrome.py`. Le formulaire n'appelle plus
+`/api/envoyer` du tout : il ouvre WhatsApp avec le récapitulatif déjà rédigé
+et une référence, exactement comme le faisait le panneau de repli. Aucune clé,
+aucun domaine, rien à configurer.
+
+C'est ce qui lève le blocage réel : `MAIL_EXP` doit être un expéditeur vérifié
+chez Resend, donc un domaine que l'on ne possède pas tant que rien n'est signé.
+Et en Côte d'Ivoire, WhatsApp est de toute façon le canal le plus rapide vers
+une réception.
+
+Le drapeau est **indépendant de `PROSPECTION`** : on peut signer et rester sur
+WhatsApp le temps que le domaine soit vérifié.
+
+**Les écrans de confirmation suivent le drapeau.** Ils disaient « Demande
+envoyée », « est transmise au restaurant », « est partie à la réception ». En
+mode WhatsApp c'est faux : rien ne part tant que le visiteur n'a pas appuyé sur
+envoyer dans l'application, et celui qui referme sans le faire repartirait en
+croyant avoir réservé.
+
+Les cinq écrans annoncent donc **« Votre demande vous attend dans WhatsApp »**,
+suivi de « Appuyez sur envoyer dans WhatsApp : ce geste transmet votre demande
+à la réception », et les récapitulatifs passent au futur. L'écran final du
+tunnel de réservation reste affiché, avec sa référence : c'est lui qu'on montre
+en démonstration.
+
+Les textes vivent dans `_chrome.py` (`CONF_TITRE`, `CONF_GESTE`, `CONF_VERBE`
+et leurs variantes anglaises), pas dans les pages : repasser le drapeau à
+`False` restaure seul les formulations d'origine.
+
+La référence est calculée côté client au même format que le serveur
+(`EVN-XXXXXX`), et **figure dans le message WhatsApp** : celle que lit la
+réception est celle affichée à l'écran.
+
+Si un bloqueur de fenêtres empêche l'ouverture, le panneau de repli s'affiche
+avec le lien cliquable à la main — le visiteur n'est jamais dans le vide.
+
+### Activer l'envoi par e-mail à la place
+
+**Le domaine de l'hôtel n'est pas encore le vôtre.**
 `MAIL_EXP` doit être un expéditeur vérifié chez Resend : `site@evannathhotel.com`
 est donc hors de portée tant que rien n'est signé. Resend fournit pour cela
 l'expéditeur de test `onboarding@resend.dev`, qui ne demande aucune

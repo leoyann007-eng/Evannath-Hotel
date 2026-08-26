@@ -12,7 +12,7 @@ production — voir la section « A valider » du README.
 """
 import io
 import _schema
-from _chrome import (page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV, EN_SECOURS,
+from _chrome import (page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV, EN_SECOURS, CONF_TITRE, CONF_TITRE_EN, CONF_GESTE, CONF_GESTE_EN, CONF_VERBE, CONF_VERBE_EN,
                      ENVOI_JS, PIEGE, secours)
 
 CONFIGS = [
@@ -317,7 +317,7 @@ b.append('''    </div>
         <button type="submit" class="btn btn-solid" id="envoi" data-t="env">Envoyer la demande</button>
         <p class="err-envoi" id="err" role="alert"></p>''' + secours('sec') + '''
         <div class="sent" id="ok" role="status">
-          <b data-t="okt">Demande envoyée</b>
+          <b data-t="okt">{{CT}}</b>
           <p id="okm">Merci. Le service commercial revient vers vous sous 24 h avec un devis détaillé.</p>
         </div>
       </form>
@@ -352,13 +352,13 @@ var CAP={'Théâtre':60,'Classe':35,'En U':25,'Cocktail':90,'Banquet':70};
 var LG='fr';
 var S={fr:{loc:'fr-FR',adef:'à définir',audela:'au-delà de ',etud:' — à étudier',
            sur:' sur ',places:' places',
-           ok1:'Merci. Votre demande pour ',ok2:' participants en configuration « ',
-           ok3:' » est transmise sous la référence ',
+           ok1:'{{CG}}Votre demande pour ',ok2:' participants en configuration « ',
+           ok3:' » {{CV}} sous la référence ',
            ok4:". Le service commercial revient vers vous sous 24 h avec un devis détaillé."},
      en:{loc:'en-GB',adef:'to be defined',audela:'beyond ',etud:' — to be studied',
            sur:' of ',places:' seats',
-           ok1:'Thank you. Your request for ',ok2:' participants in « ',
-           ok3:' » layout has been sent under reference ',
+           ok1:'{{CG_EN}}Your request for ',ok2:' participants in « ',
+           ok3:' » layout {{CV_EN}} under reference ',
            ok4:'. The sales desk will come back to you within 24 h with a detailed quote.'}};
 function EVN_LANG(lg){ LG=S[lg]?lg:'fr'; recap(); }
 var form=document.getElementById('form'),cfg=document.getElementById('cfg'),
@@ -496,7 +496,7 @@ lcfg:"Room layout",
 co0:"Theatre",co1:"Classroom",co2:"U-shape",co3:"Cocktail",co4:"Banquet",co5:"To be defined",
 lnb:"Number of participants *",mnb:"Please give at least one participant.",
 ldt:"Preferred date",lmsg:"Your project",
-env:"Send the request",okt:"Request sent",
+env:"Send the request",okt:"{{CT_EN}}",
 ah3:"Your request",ar1:"Package",ar2:"Room",ar3:"Participants",ar4:"Date",ar5:"Capacity",
 acall:"For an urgent project, call us directly:"};
 
@@ -509,8 +509,19 @@ LD = _schema.bloc(
     _schema.hotel(),
     _schema.fil([('Accueil','index'),('Séminaires & groupes',None)]))
 
-io.open('seminaires.html', 'w', encoding='utf-8').write(page(
+HTML = page(
  "Séminaires &amp; groupes — Hôtel Evannath, Assinie",
  "Séminaires, journées d'étude et réceptions à l'Hôtel Evannath, Assinie PK 19 : salle en lumière naturelle, cinq configurations, sonorisation et technicien inclus, navette aéroport offerte.",
- "g-seminaire", CSS, '\n'.join(b), JS, preload="g-seminaire", slug="seminaires", jsonld=LD))
+ "g-seminaire", CSS, '\n'.join(b), JS, preload="g-seminaire", slug="seminaires", jsonld=LD)
+
+# Les quatre textes de confirmation suivent ENVOI_WHATSAPP : voir _chrome.py.
+for _m, _v in (('{{CT}}',    CONF_TITRE    or 'Demande envoyée'),
+               ('{{CT_EN}}', CONF_TITRE_EN or 'Request sent'),
+               ('{{CG}}',    CONF_GESTE    or 'Merci. '),
+               ('{{CG_EN}}', CONF_GESTE_EN or 'Thank you. '),
+               ('{{CV}}',    CONF_VERBE),
+               ('{{CV_EN}}', CONF_VERBE_EN)):
+    HTML = HTML.replace(_m, _v.replace("'", "\'"))   # contexte JS entre apostrophes
+
+io.open('seminaires.html', 'w', encoding='utf-8').write(HTML)
 print('seminaires.html       ok')

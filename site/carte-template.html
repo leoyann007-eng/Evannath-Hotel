@@ -668,9 +668,9 @@ document.getElementById('tf').addEventListener('submit',function(e){e.preventDef
   },function(rep){
     var f=document.getElementById('tf');
     f.innerHTML='<p style="grid-column:1/-1;color:#8FAE63;font-size:15px;line-height:1.6">'
-      +'<strong style="display:block;font-family:var(--f-display);font-size:1.25rem;margin-bottom:8px">Table demand\u00e9e</strong>'
-      +'Merci '+d.nom+'. Votre demande pour '+d.couverts+' couverts le '+frdate(d.date)+' \u00e0 '+d.heure
-      +' est transmise au restaurant sous la r\u00e9f\u00e9rence '+rep.reference
+      +'<strong style="display:block;font-family:var(--f-display);font-size:1.25rem;margin-bottom:8px">{{CT}}</strong>'
+      +'{{CG}}Merci '+d.nom+'. Votre demande pour '+d.couverts+' couverts le '+frdate(d.date)+' \u00e0 '+d.heure
+      +' {{CV}} au restaurant sous la r\u00e9f\u00e9rence '+rep.reference
       +'. Nous confirmons le cr\u00e9neau par WhatsApp.</p>';
   });
 });

@@ -573,6 +573,8 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
    Si l'envoi automatique n'est pas configure ou echoue, on ne perd jamais le
    visiteur : on lui propose WhatsApp avec le message deja redige, plus les
    numeros de la reception. */
+var SAUT = String.fromCharCode(10);
+
 var EVN = {
   wa: '2250546017377',
   tel: '+2250151527575',
@@ -583,12 +585,46 @@ var EVN = {
     return 'https://wa.me/' + this.wa + '?text=' + encodeURIComponent(texte);
   },
 
+  /* Voir ENVOI_WHATSAPP dans _chrome.py. */
+  parWhatsApp: true,
+
+  /* Meme format que le serveur (api/envoyer.js), pour que la reference lue
+     au telephone soit la meme que celle affichee a l'ecran. */
+  reference: function () {
+    return 'EVN-' + Date.now().toString(36).slice(-6).toUpperCase();
+  },
+
   /* o : {bouton, secours, erreur, resume} */
   envoyer: function (type, donnees, o, alors) {
     var b = o.bouton, libelle = b ? b.textContent : '';
-    if (b) { b.setAttribute('aria-busy', 'true'); b.disabled = true; b.textContent = 'Envoi en cours…'; }
     if (o.erreur) o.erreur.classList.remove('on');
     if (o.secours) o.secours.classList.remove('on');
+
+    /* La demande part sur WhatsApp, et la page affiche exactement la meme
+       confirmation qu'un envoi serveur : le visiteur ne voit pas la
+       difference, et la reception recoit le recapitulatif complet.
+       window.open est appele dans le geste de l'utilisateur, donc autorise ;
+       s'il est tout de meme bloque, on retombe sur le panneau, dont le lien
+       est cliquable a la main. */
+    if (EVN.parWhatsApp) {
+      var ref = EVN.reference();
+      var texte = (o.resume ? o.resume() : 'Bonjour, je souhaite vous contacter.')
+                + SAUT + SAUT + 'Référence : ' + ref;
+      var url = EVN.lienWhatsApp(texte);
+      if (!window.open(url, '_blank')) {
+        if (o.secours) {
+          var a = o.secours.querySelector('a.wa');
+          if (a) a.href = url;
+          o.secours.classList.add('on');
+          o.secours.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        return;
+      }
+      alors({ ok: true, reference: ref });
+      return;
+    }
+
+    if (b) { b.setAttribute('aria-busy', 'true'); b.disabled = true; b.textContent = 'Envoi en cours…'; }
 
     var charge = Object.assign({}, donnees, {
       type: type,
@@ -803,9 +839,9 @@ document.getElementById('sf').addEventListener('submit',function(e){e.preventDef
   },function(rep){
     var f=document.getElementById('sf');
     f.innerHTML='<p style="grid-column:1/-1;color:#8FAE63;font-size:15px;line-height:1.6">'
-      +'<strong style="display:block;font-family:var(--f-display);font-size:1.25rem;margin-bottom:8px">Cr\u00e9neau demand\u00e9</strong>'
-      +'Merci '+d.nom+'. Votre demande du '+frdate(d.date)+' \u00e0 '+d.heure
-      +' est transmise au spa sous la r\u00e9f\u00e9rence '+rep.reference
+      +'<strong style="display:block;font-family:var(--f-display);font-size:1.25rem;margin-bottom:8px">Votre demande vous attend dans WhatsApp</strong>'
+      +'Appuyez sur envoyer dans WhatsApp : ce geste transmet votre demande à la réception. Merci '+d.nom+'. Votre demande du '+frdate(d.date)+' \u00e0 '+d.heure
+      +' sera transmise au spa sous la r\u00e9f\u00e9rence '+rep.reference
       +'. Nous confirmons par WhatsApp.</p>';
   });
 });

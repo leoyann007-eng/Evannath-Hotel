@@ -21,6 +21,48 @@ SITE = "https://evannathhotel.vercel.app"
 #         X-Robots-Tag de vercel.json (elle est commentee sur place).
 PROSPECTION = True
 
+# ---------------------------------------------------------------------------
+# Ou partent les demandes des formulaires
+# ---------------------------------------------------------------------------
+# True  : elles partent directement sur WhatsApp, avec le recapitulatif deja
+#         redige et une reference. Aucune API, aucune cle, rien a configurer —
+#         ce qui tombe bien : MAIL_EXP doit etre un expediteur verifie chez
+#         Resend, donc un domaine que l'on ne possede pas tant que rien n'est
+#         signe. Et en Cote d'Ivoire WhatsApp est de toute facon le canal le
+#         plus rapide vers une reception.
+# False : elles passent par /api/envoyer, qui les met en e-mail via Resend.
+#         Le panneau WhatsApp redevient alors le repli, pas la voie normale.
+#
+# Independant de PROSPECTION : on peut signer et rester sur WhatsApp le temps
+# que le domaine soit verifie.
+ENVOI_WHATSAPP = True
+
+# En mode WhatsApp, la demande n'est transmise QUE si le visiteur appuie sur
+# envoyer dans l'application. Les ecrans de confirmation doivent donc le dire :
+# annoncer « Demande envoyee » des l'ouverture de WhatsApp ferait repartir en
+# croyant avoir reserve celui qui n'est pas alle au bout.
+# Le jour ou ENVOI_WHATSAPP repasse a False, les textes d'origine reviennent
+# seuls — ils sont choisis ici, pas recopies dans les pages.
+if ENVOI_WHATSAPP:
+    CONF_TITRE    = "Votre demande vous attend dans WhatsApp"
+    CONF_TITRE_EN = "Your request is waiting in WhatsApp"
+    # Sans apostrophe : ces textes sont injectes tels quels dans des chaines
+    # JavaScript delimitees par des apostrophes (le dictionnaire de seminaires).
+    # Le point d'insertion echappe aussi, mais autant ne pas dependre des deux.
+    CONF_GESTE    = ("Appuyez sur envoyer dans WhatsApp : ce geste transmet "
+                     "votre demande à la réception. ")
+    CONF_GESTE_EN = ("Tap send in the app — that is what delivers it to "
+                     "reception. ")
+    # Les recapitulatifs disent « est transmise ». Tant que le visiteur n'a
+    # pas appuye sur envoyer, c'est un futur.
+    CONF_VERBE    = 'sera transmise'
+    CONF_VERBE_EN = 'will be sent'
+else:
+    CONF_TITRE = CONF_TITRE_EN = None   # chaque page garde son propre titre
+    CONF_GESTE = CONF_GESTE_EN = ''
+    CONF_VERBE    = 'est transmise'
+    CONF_VERBE_EN = 'has been sent'
+
 # On laisse volontairement les robots CRAWLER, tout en leur servant `noindex`.
 # Un simple « Disallow: / » serait un contresens ici : Google ne lirait alors
 # jamais la directive noindex, et pourrait tout de meme indexer l'URL nue en la
@@ -431,6 +473,8 @@ ENVOI_JS = """
    Si l'envoi automatique n'est pas configure ou echoue, on ne perd jamais le
    visiteur : on lui propose WhatsApp avec le message deja redige, plus les
    numeros de la reception. */
+var SAUT = String.fromCharCode(10);
+
 var EVN = {
   wa: '2250546017377',
   tel: '+2250151527575',
@@ -441,12 +485,46 @@ var EVN = {
     return 'https://wa.me/' + this.wa + '?text=' + encodeURIComponent(texte);
   },
 
+  /* Voir ENVOI_WHATSAPP dans _chrome.py. */
+  parWhatsApp: {{PAR_WHATSAPP}},
+
+  /* Meme format que le serveur (api/envoyer.js), pour que la reference lue
+     au telephone soit la meme que celle affichee a l'ecran. */
+  reference: function () {
+    return 'EVN-' + Date.now().toString(36).slice(-6).toUpperCase();
+  },
+
   /* o : {bouton, secours, erreur, resume} */
   envoyer: function (type, donnees, o, alors) {
     var b = o.bouton, libelle = b ? b.textContent : '';
-    if (b) { b.setAttribute('aria-busy', 'true'); b.disabled = true; b.textContent = 'Envoi en cours…'; }
     if (o.erreur) o.erreur.classList.remove('on');
     if (o.secours) o.secours.classList.remove('on');
+
+    /* La demande part sur WhatsApp, et la page affiche exactement la meme
+       confirmation qu'un envoi serveur : le visiteur ne voit pas la
+       difference, et la reception recoit le recapitulatif complet.
+       window.open est appele dans le geste de l'utilisateur, donc autorise ;
+       s'il est tout de meme bloque, on retombe sur le panneau, dont le lien
+       est cliquable a la main. */
+    if (EVN.parWhatsApp) {
+      var ref = EVN.reference();
+      var texte = (o.resume ? o.resume() : 'Bonjour, je souhaite vous contacter.')
+                + SAUT + SAUT + 'Référence : ' + ref;
+      var url = EVN.lienWhatsApp(texte);
+      if (!window.open(url, '_blank')) {
+        if (o.secours) {
+          var a = o.secours.querySelector('a.wa');
+          if (a) a.href = url;
+          o.secours.classList.add('on');
+          o.secours.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        return;
+      }
+      alors({ ok: true, reference: ref });
+      return;
+    }
+
+    if (b) { b.setAttribute('aria-busy', 'true'); b.disabled = true; b.textContent = 'Envoi en cours…'; }
 
     var charge = Object.assign({}, donnees, {
       type: type,
@@ -494,6 +572,9 @@ var EVN = {
   }
 };
 """
+
+ENVOI_JS = ENVOI_JS.replace('{{PAR_WHATSAPP}}',
+                            'true' if ENVOI_WHATSAPP else 'false')
 
 PIEGE = ('<div class="piege" aria-hidden="true">'
          '<label>Ne pas remplir<input type="text" name="website" tabindex="-1" autocomplete="off"></label>'

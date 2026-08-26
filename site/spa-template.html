@@ -541,9 +541,9 @@ document.getElementById('sf').addEventListener('submit',function(e){e.preventDef
   },function(rep){
     var f=document.getElementById('sf');
     f.innerHTML='<p style="grid-column:1/-1;color:#8FAE63;font-size:15px;line-height:1.6">'
-      +'<strong style="display:block;font-family:var(--f-display);font-size:1.25rem;margin-bottom:8px">Cr\u00e9neau demand\u00e9</strong>'
-      +'Merci '+d.nom+'. Votre demande du '+frdate(d.date)+' \u00e0 '+d.heure
-      +' est transmise au spa sous la r\u00e9f\u00e9rence '+rep.reference
+      +'<strong style="display:block;font-family:var(--f-display);font-size:1.25rem;margin-bottom:8px">{{CT}}</strong>'
+      +'{{CG}}Merci '+d.nom+'. Votre demande du '+frdate(d.date)+' \u00e0 '+d.heure
+      +' {{CV}} au spa sous la r\u00e9f\u00e9rence '+rep.reference
       +'. Nous confirmons par WhatsApp.</p>';
   });
 });
