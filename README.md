@@ -480,30 +480,32 @@ chez Resend, donc un domaine que l'on ne possède pas tant que rien n'est signé
 Et en Côte d'Ivoire, WhatsApp est de toute façon le canal le plus rapide vers
 une réception.
 
-#### Le numéro qui reçoit n'est pas celui qui s'affiche
+#### Pendant les tests, un seul numéro : le vôtre
 
-Deux constantes, en tête de `_chrome.py` :
+`WA_EN_TEST = True` en tête de `_chrome.py`. **Tous** les liens WhatsApp du
+site pointent alors sur `WA_TEST` : la destination des cinq formulaires, mais
+aussi le bouton flottant, le tiroir de navigation, le pied de page, la page
+Contact, les fiches chambres et les informations utiles. Le numéro affiché en
+clair suit également.
 
-| Constante | Rôle |
+| Constante | Valeur |
 |---|---|
-| `WA_HOTEL` | le numéro **public** de l'établissement. Affiché partout : bouton flottant, pied de page, page Contact, fiches chambres |
-| `WA_DEMANDES` | le numéro qui **reçoit** ce que les cinq formulaires envoient |
+| `WA_HOTEL` / `WA_HOTEL_TEXTE` | `2250546017377` · `+225 05 46 01 73 77` |
+| `WA_TEST` / `WA_TEST_TEXTE` | `2250758408079` · `+225 07 58 40 80 79` |
+| `WA` / `WA_TEXTE` | **les deux seules valeurs que le reste du code emploie** |
 
-Pendant la prospection, `WA_DEMANDES` est celui du prestataire. Une demande de
-test n'a pas à tomber dans la réception d'un établissement qui n'a rien signé,
-et il faut bien voir ce que les formulaires produisent — même logique que
-`MAIL_DEST` pointé sur sa propre adresse.
+Rien ne doit atteindre la réception d'un établissement qui n'a rien signé —
+ni une demande de réservation, ni un visiteur curieux qui clique sur le bouton
+flottant.
 
-Le visiteur, lui, ne voit que les contacts de l'hôtel : le bouton flottant, le
-pied de page et « Appeler la réception » restent inchangés.
+Le jour de la signature : `WA_EN_TEST = False`, relancer les générateurs. Le
+numéro de l'hôtel revient partout, il n'a jamais quitté le fichier.
 
-Le jour de la signature : `WA_DEMANDES = WA_HOTEL`, relancer les générateurs.
-Rien d'autre à toucher.
-
-`verifier.py` (contrôle 11 ter) exige les deux occurrences du numéro de
-destination sur chaque page à formulaire, et **aucune** ailleurs — un numéro
-personnel qui fuite sur une page publique ne se voit nulle part. Les deux cas
-ont été testés en les provoquant.
+`verifier.py` (contrôle 11 ter) refuse, tant que `WA_EN_TEST` vaut `True`,
+**toute** trace du numéro de l'hôtel — lien comme libellé affiché — et tout
+lien `wa.me` vers un autre numéro que celui du moment. Personne ne relit
+21 pages à la main, et une demande qui part au mauvais endroit ne se rattrape
+pas. Les deux cas ont été testés en les provoquant.
 
 Le drapeau est **indépendant de `PROSPECTION`** : on peut signer et rester sur
 WhatsApp le temps que le domaine soit vérifié.

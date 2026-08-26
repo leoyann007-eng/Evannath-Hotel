@@ -3,7 +3,7 @@
 import io
 import _schema
 from _chrome import ENVOI_JS, PIEGE, secours
-from _chrome import (page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV, EN_SECOURS,
+from _chrome import (page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV, EN_SECOURS, WA, WA_TEXTE,
                      CONF_TITRE, CONF_TITRE_EN, CONF_GESTE, CONF_GESTE_EN)
 
 # ═══════════════════════════════ CONTACT ═══════════════════════════════
@@ -83,7 +83,7 @@ CHAN = [
   '<path d="M5 3h4l2 5-3 2a12 12 0 006 6l2-3 5 2v4a2 2 0 01-2 2A17 17 0 013 5a2 2 0 012-2z"/>'),
  ('tel:+2250151527575','k2','Réservations','+225 01 51 52 75 75','v2','Chambres, circuits et groupes',
   '<path d="M4 7h16v13H4zM4 7l8 6 8-6M8 3v4M16 3v4"/>'),
- ('https://wa.me/2250546017377','k3','WhatsApp','+225 05 46 01 73 77','v3','Réponse la plus rapide',
+ ('https://wa.me/' + WA,'k3','WhatsApp',WA_TEXTE,'v3','Réponse la plus rapide',
   '<path d="M12 3a9 9 0 00-7.7 13.6L3 21l4.6-1.2A9 9 0 1012 3z"/><path d="M9 9.5c0 3 2.5 5.5 5.5 5.5"/>'),
  ('mailto:bonjour@evannathhotel.com','k4','E-mail','bonjour@<br>evannathhotel.com','v4','Devis, séminaires, presse',
   '<rect x="3" y="5" width="18" height="14"/><path d="M3 7l9 6 9-6"/>'),

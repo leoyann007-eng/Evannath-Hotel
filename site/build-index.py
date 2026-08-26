@@ -7,11 +7,13 @@ Elle consomme desormais les memes briques que les autres, et ne garde en
 propre que les six valeurs de couleur qui lui sont specifiques.
 """
 import io
-from _chrome import TOKENS, NAV_BASE, LANG_JS, dimensionner, responsive, versionner
+from _chrome import TOKENS, NAV_BASE, LANG_JS, dimensionner, responsive, versionner, WA, WA_TEXTE
 import _schema
 
 html = io.open('index-template.html', encoding='utf-8').read()
 html = (html
+        .replace('{{WA}}', WA)
+        .replace('{{WA_TEXTE}}', WA_TEXTE)
         .replace('{{TOKENS}}', TOKENS)
         .replace('{{NAV_BASE}}', NAV_BASE)
         .replace('{{LANG_JS}}', LANG_JS)

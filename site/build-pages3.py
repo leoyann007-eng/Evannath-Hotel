@@ -3,7 +3,7 @@
 import io
 import re
 import _schema
-from _chrome import page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV
+from _chrome import page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV, WA, WA_TEXTE
 
 # ════════════════════════ INFORMATIONS UTILES ════════════════════════
 CSS_INFO = """
@@ -63,7 +63,7 @@ def kv(k, klab, v, vlab='', hi=False):
 SECS = [
  ('reserver','s1','Réserver &amp; payer', [
   ('a11','Comment réserver ?', True, [
-   ('p','b11','Trois moyens, tous équivalents : directement sur ce site, par WhatsApp au +225 05 46 01 73 77, ou par téléphone au +225 01 51 52 75 75. Le tarif affiché ici est notre meilleur tarif — vous ne le trouverez pas moins cher ailleurs.'),
+   ('p','b11','Trois moyens, tous équivalents : directement sur ce site, par WhatsApp au {{WA_TEXTE}}, ou par téléphone au +225 01 51 52 75 75. Le tarif affiché ici est notre meilleur tarif — vous ne le trouverez pas moins cher ailleurs.'),
    ('p','b11b','Pour les circuits, les groupes et les séminaires, passez par le <a href="contact.html">formulaire de contact</a> : nous revenons vers vous avec un devis sous 24 h.')]),
   ('a12','Quels moyens de paiement acceptez-vous ?', False, [
    ('p','b12','Nous sommes flexibles, et c\'est volontaire.'),
@@ -224,7 +224,7 @@ b.append('''  </div>
     <h2 data-t="h9">Écrivez-nous, on répond vite</h2>
     <p data-t="p9">La réception est ouverte 24 h/24. Pour une réponse immédiate, WhatsApp reste le canal le plus rapide.</p>
     <div class="g">
-      <a href="https://wa.me/2250546017377" target="_blank" rel="noopener" class="btn btn-solid" data-t="g1">Écrire sur WhatsApp</a>
+      <a href="https://wa.me/{{WA}}" target="_blank" rel="noopener" class="btn btn-solid" data-t="g1">Écrire sur WhatsApp</a>
       <a href="contact.html" class="btn" data-t="g2">Formulaire de contact</a>
     </div>
   </div>
@@ -270,7 +270,7 @@ q1:"Check-in",q2:"Check-out",q3:"Free cancellation",q4:"Deposit",q5:"Airport shu
 sm:"On this page",i1:"Booking &amp; payment",i2:"Getting here",i3:"During your stay",i4:"Families &amp; children",
 i5:"Groups &amp; seminars",i6:"Good to know",ta:"Expand all",tp:"Print this page",
 s1:"Booking &amp; payment",a11:"How do I book?",
-b11:"Three ways, all equivalent: directly on this site, on WhatsApp at +225 05 46 01 73 77, or by phone at +225 01 51 52 75 75. The rate shown here is our best rate — you will not find it cheaper elsewhere.",
+b11:"Three ways, all equivalent: directly on this site, on WhatsApp at {{WA_TEXTE}}, or by phone at +225 01 51 52 75 75. The rate shown here is our best rate — you will not find it cheaper elsewhere.",
 b11b:"For packages, groups and seminars, use the <a href=\\"contact.html\\">contact form</a>: we come back to you with a quote within 24 h.",
 a12:"Which payment methods do you accept?",b12:"We are flexible, and that is deliberate.",
 b12a:"Wave",b12b:"Orange Money and MTN Money",b12c:"Visa and Mastercard",b12d:"Cash, in CFA francs, at the front desk",b12e:"Bank transfer, for groups and companies",
@@ -348,8 +348,12 @@ LD = _schema.bloc(
     _schema.hotel(),
     _schema.fil([('Accueil', 'index'), ('Informations utiles', None)]))
 
-io.open('informations-utiles.html','w',encoding='utf-8').write(page(
+HTML = page(
  "Informations utiles — Hôtel Evannath, Assinie",
  "Tout ce qu'il faut savoir avant de venir à l'Hôtel Evannath, Assinie PK 19 : arrivée et départ, paiement, annulation, navette aéroport gratuite, accès depuis Abidjan, familles et groupes.",
- "g-lobby", CSS_INFO, '\n'.join(b), JS_INFO, slug="informations-utiles", jsonld=LD))
+ "g-lobby", CSS_INFO, '\n'.join(b), JS_INFO, slug="informations-utiles", jsonld=LD)
+
+# Le numero WhatsApp du moment : voir WA_EN_TEST dans _chrome.py.
+HTML = HTML.replace('{{WA}}', WA).replace('{{WA_TEXTE}}', WA_TEXTE)
+io.open('informations-utiles.html','w',encoding='utf-8').write(HTML)
 print('informations-utiles.html  ok')

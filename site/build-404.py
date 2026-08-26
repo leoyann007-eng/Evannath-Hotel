@@ -2,7 +2,7 @@
 """Genere 404.html : une page d'erreur qui rattrape le visiteur au lieu de le perdre."""
 import io
 from _chrome import PROSPECTION
-from _chrome import page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV
+from _chrome import page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV, WA
 
 CSS = """
 body{background:var(--night)}
@@ -98,7 +98,7 @@ b.append('''    </div>
       <h2 data-t="h3">Dites-le-nous, on le répare</h2>
       <p data-t="p3">Si vous êtes arrivé ici depuis un lien, un message ou un moteur de recherche, signalez-le : nous corrigeons dans la journée.</p>
       <div class="g">
-        <a href="https://wa.me/2250546017377" target="_blank" rel="noopener" class="btn btn-solid" data-t="g1">Écrire sur WhatsApp</a>
+        <a href="https://wa.me/''' + WA + '''" target="_blank" rel="noopener" class="btn btn-solid" data-t="g1">Écrire sur WhatsApp</a>
         <a href="mailto:bonjour@evannathhotel.com" class="btn" data-t="g2">bonjour@evannathhotel.com</a>
       </div>
     </div>

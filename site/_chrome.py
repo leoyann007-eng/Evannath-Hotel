@@ -38,22 +38,28 @@ PROSPECTION = True
 ENVOI_WHATSAPP = True
 
 # ---------------------------------------------------------------------------
-# Qui recoit les demandes
+# Le numero WhatsApp
 # ---------------------------------------------------------------------------
-# WA_HOTEL est le numero PUBLIC de l'etablissement. Il reste affiche partout :
-# bouton flottant, pied de page, page Contact, fiches chambres. C'est celui que
-# le visiteur voit et compose de lui-meme.
+# Tant que WA_EN_TEST vaut True, TOUS les liens WhatsApp du site pointent sur
+# WA_TEST : la destination des cinq formulaires, mais aussi le bouton flottant,
+# le pied de page, la page Contact et les fiches chambres.
 #
-# WA_DEMANDES est le numero qui RECOIT ce que les cinq formulaires envoient.
-# Pendant la prospection c'est celui du prestataire : une demande de test n'a
-# pas a tomber dans la reception d'un etablissement qui n'a rien signe, et il
-# faut bien voir ce que les formulaires produisent. Meme logique que MAIL_DEST
-# pointe sur sa propre adresse.
+# C'est voulu. Pendant les tests, rien ne doit atteindre la reception d'un
+# etablissement qui n'a rien signe — ni une demande de reservation, ni un
+# visiteur curieux qui clique sur le bouton flottant.
 #
-# Le jour de la signature : WA_DEMANDES = WA_HOTEL, et relancer les
-# generateurs. Rien d'autre a toucher.
-WA_HOTEL    = '2250546017377'   # la reception de l'hotel
-WA_DEMANDES = '2250758408079'   # Leonardo HOUANSOU, pendant la prospection
+# Le jour de la signature : WA_EN_TEST = False, relancer les generateurs. Le
+# numero de l'hotel revient partout, il n'a jamais quitte le fichier.
+WA_EN_TEST = True
+
+WA_HOTEL       = '2250546017377'        # la reception de l'hotel
+WA_HOTEL_TEXTE = '+225 05 46 01 73 77'
+WA_TEST        = '2250758408079'        # Leonardo HOUANSOU, pendant les tests
+WA_TEST_TEXTE  = '+225 07 58 40 80 79'
+
+# Les deux seules valeurs que le reste du code doit employer.
+WA       = WA_TEST       if WA_EN_TEST else WA_HOTEL
+WA_TEXTE = WA_TEST_TEXTE if WA_EN_TEST else WA_HOTEL_TEXTE
 
 # En mode WhatsApp, la demande n'est transmise QUE si le visiteur appuie sur
 # envoyer dans l'application. Les ecrans de confirmation doivent donc le dire :
@@ -305,7 +311,7 @@ def drawer(current='', photo='gal-art-lanterne', alt='Lanterne de rotin de l\'H�
         <b data-t="dr">Réservations</b>
         <a href="tel:+2250151527575">+225 01 51 52 75 75</a>
         <a href="mailto:bonjour@evannathhotel.com">bonjour@evannathhotel.com</a>
-        <a href="https://wa.me/2250546017377" target="_blank" rel="noopener">WhatsApp</a>
+        <a href="https://wa.me/{{WA}}" target="_blank" rel="noopener">WhatsApp</a>
         <p>Assinie PK 19 · Comoé · Côte d'Ivoire</p>
       </div>
       <div class="lang"><button class="on" data-lang="fr">FR</button><button data-lang="en">EN</button></div>
@@ -313,7 +319,7 @@ def drawer(current='', photo='gal-art-lanterne', alt='Lanterne de rotin de l\'H�
   </div>
 </div>
 
-<main id="contenu">''' % ('\n'.join(rows), photo, photo, alt)
+<main id="contenu">'''.replace('{{WA}}', WA) % ('\n'.join(rows), photo, photo, alt)
 
 FOOTER = '''</main>
 
@@ -338,7 +344,7 @@ FOOTER = '''</main>
   </div>
 </footer>
 
-<a class="wa" href="https://wa.me/2250546017377" target="_blank" rel="noopener" aria-label="Nous écrire sur WhatsApp">
+<a class="wa" href="https://wa.me/{{WA}}" target="_blank" rel="noopener" aria-label="Nous écrire sur WhatsApp">
   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.5 14.4c-.3-.1-1.7-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.7 1-.9 1.2-.2.2-.3.2-.6.1-1.7-.9-2.9-1.6-4-3.5-.3-.5.3-.5.9-1.6.1-.2 0-.4 0-.5s-.7-1.6-.9-2.2c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.3 5.2 4.6 1.9.8 2.7.9 3.6.8.6-.1 1.7-.7 2-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.6-.3M12 2a10 10 0 00-8.6 15L2 22l5.2-1.4A10 10 0 1012 2z"/></svg>
 </a>'''
 
@@ -348,6 +354,9 @@ FOOTER = '''</main>
 #   COLLANTE_JS  rideau des barres collantes (inerte s il n y a pas de barre)
 #   REVEAL_JS    apparition au defilement, version standard
 # NAV_JS reste la somme des trois : les generateurs existants ne changent pas.
+
+# Le pied de page et le bouton flottant portent le numero du moment.
+FOOTER = FOOTER.replace('{{WA}}', WA)
 
 NAV_BASE = r"""var hd=document.getElementById('hd');
 addEventListener('scroll',function(){hd.classList.toggle('scrolled',scrollY>60)},{passive:true});
@@ -498,7 +507,7 @@ ENVOI_JS = """
 var SAUT = String.fromCharCode(10);
 
 var EVN = {
-  wa: '{{WA_DEMANDES}}',
+  wa: '{{WA}}',
   tel: '+2250151527575',
   mail: 'bonjour@evannathhotel.com',
   ouvert: Date.now(),
@@ -604,7 +613,7 @@ var EVN = {
 };
 """
 
-ENVOI_JS = ENVOI_JS.replace('{{WA_DEMANDES}}', WA_DEMANDES)
+ENVOI_JS = ENVOI_JS.replace('{{WA}}', WA)
 ENVOI_JS = ENVOI_JS.replace('{{PAR_WHATSAPP}}',
                             'true' if ENVOI_WHATSAPP else 'false')
 
@@ -625,15 +634,15 @@ def secours(id_='sec', phrase="Votre demande est prête — il ne reste qu'à l'
     reste qu'a l'envoyer » le dit sans detour — sans quoi le visiteur
     fermerait la page en croyant avoir reserve.
     """
-    return '''<div class="secours" id="%s" role="alert">
+    return ('''<div class="secours" id="%s" role="alert">
   <b data-t="sc1">Terminons sur WhatsApp</b>
   <p data-t="sc2">%s Un clic, et elle arrive à la réception, qui répond 24 h/24. Vous pouvez aussi appeler ou écrire.</p>
   <div class="liens">
-    <a class="wa-envoi" data-t="sc3" href="https://wa.me/%s" target="_blank" rel="noopener">Envoyer sur WhatsApp</a>
+    <a class="wa-envoi" data-t="sc3" href="https://wa.me/{{WA}}" target="_blank" rel="noopener">Envoyer sur WhatsApp</a>
     <a data-t="sc4" href="tel:+2250151527575">Appeler la réception</a>
     <a data-t="sc5" href="mailto:bonjour@evannathhotel.com">Écrire un e-mail</a>
   </div>
-</div>''' % (id_, phrase, WA_DEMANDES)
+</div>''' % (id_, phrase)).replace('{{WA}}', WA)
 
 EN_NAV = ('mn:"Menu",n1:"Rooms &amp; Suites",n2:"Experiences",n3:"The table",n4:"The spa",'
           'n5:"Packages &amp; Offers",n6:"Meetings &amp; groups",n7:"Gallery",n8:"About",'

@@ -7,7 +7,7 @@ des hypotheses a faire confirmer — voir README.
 """
 import io
 import _schema
-from _chrome import page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV
+from _chrome import page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV, WA
 
 # slug, nom, prix, capacite, resume, accroche, 3 paragraphes, equipements+, photos
 from _chambres import CHAMBRES
@@ -336,7 +336,7 @@ for c in CHAMBRES:
 
     <button type="submit" class="btn btn-solid" data-t="bkb">Réserver cette chambre</button>
     <div class="avail"><i></i><span data-t="avl">Disponible à ces dates</span></div>
-    <p class="helpt" data-t="hlp">Une question&nbsp;? Écrivez-nous sur <a href="https://wa.me/2250546017377" target="_blank" rel="noopener">WhatsApp</a> ou appelez le +225 01 51 52 75 75.</p>
+    <p class="helpt" data-t="hlp">Une question&nbsp;? Écrivez-nous sur <a href="https://wa.me/{{WA}}" target="_blank" rel="noopener">WhatsApp</a> ou appelez le +225 01 51 52 75 75.</p>
   </form>
  </aside>
 </div>
@@ -443,11 +443,13 @@ var EN={''' % (c['prix'], c['slug']) + EN_NAV + _en_dict(c) + '};\n\n' + LANG_JS
 
     mosa = {ph[0]: _sizes_mosaique(i, len(c['photos'])) for i, ph in enumerate(c['photos'])}
 
-    io.open(c['slug'] + '.html', 'w', encoding='utf-8').write(page(
+    HTML = page(
         "%s — Hôtel Evannath, Assinie | %s FCFA la nuit" % (c['nom'], fmt(c['prix'])),
         "%s à l'Hôtel Evannath, Assinie PK 19 : %s. %s FCFA la nuit, petit-déjeuner et navette aéroport inclus."
         % (c['nom'], c['meta'], fmt(c['prix'])),
-        c['photos'][0][0], CSS, '\n'.join(b), JS, preload=c['photos'][0][0], slug=c['slug'], jsonld=LD, sizes=mosa))
+        c['photos'][0][0], CSS, '\n'.join(b), JS, preload=c['photos'][0][0], slug=c['slug'], jsonld=LD, sizes=mosa)
+    # Le numero WhatsApp du moment : voir WA_EN_TEST dans _chrome.py.
+    io.open(c['slug'] + '.html', 'w', encoding='utf-8').write(HTML.replace('{{WA}}', WA))
     print('  %-26s %s FCFA' % (c['slug'] + '.html', fmt(c['prix'])))
 
 print('%d fiches chambres generees' % len(CHAMBRES))

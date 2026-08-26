@@ -6,7 +6,7 @@ reellement survenu sur ce projet — ils sont la pour qu'il ne revienne pas.
 """
 import io, os, re, glob, json, sys
 sys.path.insert(0, '.')
-from _chrome import TOKENS, NAV_BASE, LANG_JS, empreinte, WA_DEMANDES
+from _chrome import TOKENS, NAV_BASE, LANG_JS, empreinte, WA, WA_HOTEL, WA_EN_TEST
 
 _cache = {}
 
@@ -277,16 +277,17 @@ def controler():
         if 'class="secours"' in s and s.count('class="wa-envoi"') != 1:
             pb.append((f, 'lien WhatsApp du panneau de repli absent ou en double'))
 
-        # 11 ter. le numero qui RECOIT les demandes n'est pas celui affiche.
-        # Pendant la prospection les formulaires ecrivent au prestataire, pas
-        # a la reception d'un etablissement qui n'a rien signe. Une page a
-        # formulaire porte donc les deux ; une page sans formulaire, un seul.
-        if 'class="secours"' in s:
-            if s.count(WA_DEMANDES) != 2:
-                pb.append((f, 'destination des demandes absente ou en double'))
-        elif WA_DEMANDES in s:
-            pb.append((f, 'numero de destination sur une page sans formulaire'))
-
+        # 11 ter. un seul numero WhatsApp sur tout le site, celui du moment.
+        # Pendant les tests il ne doit RIEN rester du numero de l'hotel : ni
+        # un lien oublie, ni un libelle affiche. Une demande de test qui tombe
+        # dans la reception d'un etablissement qui n'a rien signe ne se
+        # rattrape pas, et personne ne relit 21 pages a la main.
+        if WA_EN_TEST and (WA_HOTEL in s or '05 46 01 73 77' in s):
+            pb.append((f, "numero de l'hotel present alors qu'on est en test"))
+        if 'wa.me/' in s:
+            autres = set(re.findall(r'wa\.me/(\d+)', s)) - {WA}
+            if autres:
+                pb.append((f, 'lien WhatsApp vers %s' % ', '.join(sorted(autres))))
         # 12. une barre collante doit avoir son rideau
         if 'collante"' in s:
             if 'collante::before' not in s:
