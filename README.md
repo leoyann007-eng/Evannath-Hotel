@@ -888,6 +888,22 @@ Avant toute mise en production :
 7. **Licence de la police** — le site d'origine utilise
    `MADE-TOMMY-Regular_PERSONAL-USE.otf`, dont la licence n'autorise pas
    l'usage commercial. La maquette n'utilise que des polices libres.
+8. **Quelle adresse e-mail afficher** — deux existent :
+   `bonjour@evannathhotel.com`, publiée sur leur Facebook et alignée sur la
+   marque, et `receptionhotelevannath@gmail.com`, celle que la réception
+   relève réellement. La première fait plus professionnelle sur un site
+   d'hôtel ; la seconde a le mérite d'être lue. `MAIL_HOTEL` porte la
+   seconde en attendant leur réponse.
+
+   Le numéro WhatsApp, lui, est tranché : **+225 01 51 52 75 75**, confirmé
+   par la direction. Ni l'un ni l'autre ne se déduisent du site d'origine,
+   qui n'affiche ni lien WhatsApp ni adresse e-mail — points 15 et 17 de
+   l'audit.
+
+   **Pendant la démonstration, les deux pointent sur le prestataire** :
+   `WA_EN_TEST = True`. Rien n'atteint la réception d'un établissement qui
+   n'a rien signé, et l'adresse personnelle affichée sur la page Contact est
+   assumée le temps des tests.
 
 ---
 

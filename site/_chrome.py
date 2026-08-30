@@ -64,6 +64,11 @@ WA_TEST        = '2250758408079'        # Leonardo HOUANSOU, pendant les tests
 # site d'origine : « votre adresse e-mail n'est pas sur votre site » est un
 # des constats de l'audit. {{MAIL}} etait prise sur leur
 # page Facebook ; l'adresse que la reception releve reellement est celle-ci.
+#
+# Laquelle afficher en production reste a trancher avec l'etablissement :
+# bonjour@evannathhotel.com porte la marque, celle-ci est relevee. Voir le
+# point 8 de « A valider » dans le README. En attendant, on garde celle qui
+# est lue.
 MAIL_HOTEL = 'receptionhotelevannath@gmail.com'
 MAIL_TEST  = 'houansouyannaxel@gmail.com'
 WA_TEST_TEXTE  = '+225 07 58 40 80 79'
