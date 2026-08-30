@@ -52,8 +52,12 @@ ENVOI_WHATSAPP = True
 # numero de l'hotel revient partout, il n'a jamais quitte le fichier.
 WA_EN_TEST = True
 
-WA_HOTEL       = '2250546017377'        # la reception de l'hotel
-WA_HOTEL_TEXTE = '+225 05 46 01 73 77'
+# Le numero WhatsApp de l'etablissement, confirme par la direction. Il ne se
+# deduit PAS du site d'origine : celui-ci n'a aucun lien WhatsApp — c'est un
+# des constats de l'audit. Sa page Contact liste trois numeros sans dire
+# lequel porte WhatsApp ; le 05 46 01 73 77 avait ete suppose ici, a tort.
+WA_HOTEL       = '2250151527575'        # la reception de l'hotel
+WA_HOTEL_TEXTE = '+225 01 51 52 75 75'
 WA_TEST        = '2250758408079'        # Leonardo HOUANSOU, pendant les tests
 WA_TEST_TEXTE  = '+225 07 58 40 80 79'
 

@@ -6,7 +6,7 @@ reellement survenu sur ce projet — ils sont la pour qu'il ne revienne pas.
 """
 import io, os, re, glob, json, sys
 sys.path.insert(0, '.')
-from _chrome import TOKENS, NAV_BASE, LANG_JS, empreinte, WA, WA_HOTEL, WA_EN_TEST
+from _chrome import TOKENS, NAV_BASE, LANG_JS, empreinte, WA
 
 _cache = {}
 
@@ -277,17 +277,18 @@ def controler():
         if 'class="secours"' in s and s.count('class="wa-envoi"') != 1:
             pb.append((f, 'lien WhatsApp du panneau de repli absent ou en double'))
 
-        # 11 ter. un seul numero WhatsApp sur tout le site, celui du moment.
-        # Pendant les tests il ne doit RIEN rester du numero de l'hotel : ni
-        # un lien oublie, ni un libelle affiche. Une demande de test qui tombe
-        # dans la reception d'un etablissement qui n'a rien signe ne se
-        # rattrape pas, et personne ne relit 21 pages a la main.
-        if WA_EN_TEST and (WA_HOTEL in s or '05 46 01 73 77' in s):
-            pb.append((f, "numero de l'hotel present alors qu'on est en test"))
-        if 'wa.me/' in s:
-            autres = set(re.findall(r'wa\.me/(\d+)', s)) - {WA}
-            if autres:
-                pb.append((f, 'lien WhatsApp vers %s' % ', '.join(sorted(autres))))
+        # 11 ter. tous les liens WhatsApp du site vont au meme numero,
+        # celui du moment. Pendant les tests c'est le prestataire ; a la mise
+        # en ligne, l'etablissement. Une demande partie au mauvais endroit ne
+        # se rattrape pas, et personne ne relit 21 pages a la main.
+        #
+        # On ne controle QUE les liens wa.me. Le numero de la reception
+        # apparait aussi en tel: sur chaque page — c'est « Appeler la
+        # reception », et c'est normal. Une version anterieure de ce controle
+        # confondait les deux et signalait les 21 pages.
+        autres = set(re.findall(r'wa\.me/(\d+)', s)) - {WA}
+        if autres:
+            pb.append((f, 'lien WhatsApp vers %s' % ', '.join(sorted(autres))))
         # 12. une barre collante doit avoir son rideau
         if 'collante"' in s:
             if 'collante::before' not in s:
