@@ -6,7 +6,7 @@ reellement survenu sur ce projet — ils sont la pour qu'il ne revienne pas.
 """
 import io, os, re, glob, json, sys
 sys.path.insert(0, '.')
-from _chrome import TOKENS, NAV_BASE, LANG_JS, empreinte, WA
+from _chrome import TOKENS, NAV_BASE, LANG_JS, empreinte, WA, MAIL
 
 _cache = {}
 
@@ -289,6 +289,14 @@ def controler():
         autres = set(re.findall(r'wa\.me/(\d+)', s)) - {WA}
         if autres:
             pb.append((f, 'lien WhatsApp vers %s' % ', '.join(sorted(autres))))
+        # 11 quater. meme regle pour l'adresse e-mail : une seule sur tout
+        # le site, celle du moment. Elle etait ecrite en dur a 139 endroits
+        # dans douze fichiers ; il en suffit d'un oublie pour qu'une demande
+        # parte au mauvais endroit, et cela ne se voit sur aucune page.
+        adresses = set(re.findall(r'mailto:([\w.+-]+@[\w.-]+\.\w+)', s)) - {MAIL}
+        if adresses:
+            pb.append((f, 'mailto vers %s' % ', '.join(sorted(adresses))))
+
         # 12. une barre collante doit avoir son rideau
         if 'collante"' in s:
             if 'collante::before' not in s:

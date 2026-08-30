@@ -99,7 +99,7 @@ b.append('''    </div>
       <p data-t="p3">Si vous êtes arrivé ici depuis un lien, un message ou un moteur de recherche, signalez-le : nous corrigeons dans la journée.</p>
       <div class="g">
         <a href="https://wa.me/''' + WA + '''" target="_blank" rel="noopener" class="btn btn-solid" data-t="g1">Écrire sur WhatsApp</a>
-        <a href="mailto:bonjour@evannathhotel.com" class="btn" data-t="g2">bonjour@evannathhotel.com</a>
+        <a href="mailto:{{MAIL}}" class="btn" data-t="g2">{{MAIL}}</a>
       </div>
     </div>
   </div>
@@ -121,7 +121,7 @@ w3:"Packages &amp; Offers",w3p:"Eleven packages, from the Kids Pack to the honey
 w4:"Gallery",w4p:"Forty-seven photographs of the estate.",
 eb2:"A broken link?",h3:"Tell us and we will fix it",
 p3:"If you arrived here from a link, a message or a search engine, let us know: we fix it the same day.",
-g1:"Message on WhatsApp",g2:"bonjour@evannathhotel.com"};
+g1:"Message on WhatsApp",g2:"{{MAIL}}"};
 
 ''' + LANG_JS
 

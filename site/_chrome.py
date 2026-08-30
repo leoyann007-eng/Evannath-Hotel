@@ -59,11 +59,19 @@ WA_EN_TEST = True
 WA_HOTEL       = '2250151527575'        # la reception de l'hotel
 WA_HOTEL_TEXTE = '+225 01 51 52 75 75'
 WA_TEST        = '2250758408079'        # Leonardo HOUANSOU, pendant les tests
+
+# L'adresse e-mail suit la meme logique. Elle non plus ne se deduit pas du
+# site d'origine : « votre adresse e-mail n'est pas sur votre site » est un
+# des constats de l'audit. {{MAIL}} etait prise sur leur
+# page Facebook ; l'adresse que la reception releve reellement est celle-ci.
+MAIL_HOTEL = 'receptionhotelevannath@gmail.com'
+MAIL_TEST  = 'houansouyannaxel@gmail.com'
 WA_TEST_TEXTE  = '+225 07 58 40 80 79'
 
 # Les deux seules valeurs que le reste du code doit employer.
 WA       = WA_TEST       if WA_EN_TEST else WA_HOTEL
 WA_TEXTE = WA_TEST_TEXTE if WA_EN_TEST else WA_HOTEL_TEXTE
+MAIL     = MAIL_TEST     if WA_EN_TEST else MAIL_HOTEL
 
 # En mode WhatsApp, la demande n'est transmise QUE si le visiteur appuie sur
 # envoyer dans l'application. Les ecrans de confirmation doivent donc le dire :
@@ -314,7 +322,7 @@ def drawer(current='', photo='gal-art-lanterne', alt='Lanterne de rotin de l\'H�
       <div>
         <b data-t="dr">Réservations</b>
         <a href="tel:+2250151527575">+225 01 51 52 75 75</a>
-        <a href="mailto:bonjour@evannathhotel.com">bonjour@evannathhotel.com</a>
+        <a href="mailto:{{MAIL}}">{{MAIL}}</a>
         <a href="https://wa.me/{{WA}}" target="_blank" rel="noopener">WhatsApp</a>
         <p>Assinie PK 19 · Comoé · Côte d'Ivoire</p>
       </div>
@@ -323,7 +331,7 @@ def drawer(current='', photo='gal-art-lanterne', alt='Lanterne de rotin de l\'H�
   </div>
 </div>
 
-<main id="contenu">'''.replace('{{WA}}', WA) % ('\n'.join(rows), photo, photo, alt)
+<main id="contenu">'''.replace('{{WA}}', WA).replace('{{MAIL}}', MAIL) % ('\n'.join(rows), photo, photo, alt)
 
 FOOTER = '''</main>
 
@@ -340,7 +348,7 @@ FOOTER = '''</main>
       <div><h4>Contact</h4>
         <a href="tel:+2252721731265">+225 27 21 73 12 65</a>
         <a href="tel:+2250151527575">+225 01 51 52 75 75</a>
-        <a href="mailto:bonjour@evannathhotel.com">bonjour@evannathhotel.com</a>
+        <a href="mailto:{{MAIL}}">{{MAIL}}</a>
         <a href="https://www.facebook.com/evannathhotel" target="_blank" rel="noopener">Facebook — 21 K abonnés</a>
       </div>
     </div>
@@ -360,7 +368,7 @@ FOOTER = '''</main>
 # NAV_JS reste la somme des trois : les generateurs existants ne changent pas.
 
 # Le pied de page et le bouton flottant portent le numero du moment.
-FOOTER = FOOTER.replace('{{WA}}', WA)
+FOOTER = FOOTER.replace('{{WA}}', WA).replace('{{MAIL}}', MAIL)
 
 NAV_BASE = r"""var hd=document.getElementById('hd');
 addEventListener('scroll',function(){hd.classList.toggle('scrolled',scrollY>60)},{passive:true});
@@ -513,7 +521,7 @@ var SAUT = String.fromCharCode(10);
 var EVN = {
   wa: '{{WA}}',
   tel: '+2250151527575',
-  mail: 'bonjour@evannathhotel.com',
+  mail: '{{MAIL}}',
   ouvert: Date.now(),
 
   lienWhatsApp: function (texte) {
@@ -617,7 +625,7 @@ var EVN = {
 };
 """
 
-ENVOI_JS = ENVOI_JS.replace('{{WA}}', WA)
+ENVOI_JS = ENVOI_JS.replace('{{WA}}', WA).replace('{{MAIL}}', MAIL)
 ENVOI_JS = ENVOI_JS.replace('{{PAR_WHATSAPP}}',
                             'true' if ENVOI_WHATSAPP else 'false')
 
@@ -644,9 +652,9 @@ def secours(id_='sec', phrase="Votre demande est prête — il ne reste qu'à l'
   <div class="liens">
     <a class="wa-envoi" data-t="sc3" href="https://wa.me/{{WA}}" target="_blank" rel="noopener">Envoyer sur WhatsApp</a>
     <a data-t="sc4" href="tel:+2250151527575">Appeler la réception</a>
-    <a data-t="sc5" href="mailto:bonjour@evannathhotel.com">Écrire un e-mail</a>
+    <a data-t="sc5" href="mailto:{{MAIL}}">Écrire un e-mail</a>
   </div>
-</div>''' % (id_, phrase)).replace('{{WA}}', WA)
+</div>''' % (id_, phrase)).replace('{{WA}}', WA).replace('{{MAIL}}', MAIL)
 
 EN_NAV = ('mn:"Menu",n1:"Rooms &amp; Suites",n2:"Experiences",n3:"The table",n4:"The spa",'
           'n5:"Packages &amp; Offers",n6:"Meetings &amp; groups",n7:"Gallery",n8:"About",'
@@ -834,7 +842,7 @@ def page(title, desc, og, css, body, script, preload=None, slug=None, jsonld='',
         can = '\n<link rel="canonical" href="%s">\n<meta property="og:url" content="%s">' % (url, url)
     else:
         can = ''
-    return '''<!doctype html>
+    return ('''<!doctype html>
 <html lang="fr">
 <head>
 <meta charset="utf-8">
@@ -866,4 +874,4 @@ def page(title, desc, og, css, body, script, preload=None, slug=None, jsonld='',
 </body>
 </html>
 ''' % (ROBOTS_META, title, desc, title, desc, SITE, og, ICONS, can, HEAD, pre, jsonld, HEAD_CSS, css,
-       versionner(responsive(dimensionner(body), hero=preload, sizes=sizes)), versionner(script))
+       versionner(responsive(dimensionner(body), hero=preload, sizes=sizes)), versionner(script))).replace('{{MAIL}}', MAIL)

@@ -7,7 +7,7 @@ remplacés par « Nous consulter » plutôt qu'inventés.
 """
 import io
 import _schema
-from _chrome import responsive, dimensionner, versionner, secours, EN_SECOURS, CONF_TITRE, CONF_GESTE, CONF_VERBE, WA, WA_TEXTE, ENVOI_JS, NAV_JS, TOKENS, HEAD_CSS, LANG_JS
+from _chrome import responsive, dimensionner, versionner, secours, EN_SECOURS, CONF_TITRE, CONF_GESTE, CONF_VERBE, WA, WA_TEXTE, MAIL, ENVOI_JS, NAV_JS, TOKENS, HEAD_CSS, LANG_JS
 
 CUISINE = [
  ("Nos entrées", [
@@ -208,7 +208,9 @@ HTML = (HTML
       _schema.restaurant(nb_plats=total),
       _schema.hotel(),
       _schema.fil([('Accueil','index'),('La table',None)]))))
-io.open('carte.html','w',encoding='utf-8').write(versionner(responsive(dimensionner(HTML), hero='gal-lag-nuit')))
+# En dernier : le JSON-LD injecte plus haut porte lui aussi l'adresse.
+io.open('carte.html','w',encoding='utf-8').write(
+    versionner(responsive(dimensionner(HTML), hero='gal-lag-nuit')).replace('{{MAIL}}', MAIL))
 print('carte.html :', total, 'articles')
 
 SPAH = io.open('spa-template.html',encoding='utf-8').read()
@@ -220,5 +222,6 @@ SPAH = (SPAH.replace('{{SPA}}',sections(SPA,'s')).replace('{{WA}}', WA).replace(
                       'spa', image='gal-spa-couchant'),
       _schema.hotel(),
       _schema.fil([('Accueil','index'),('Le spa',None)]))))
-io.open('spa.html','w',encoding='utf-8').write(versionner(responsive(dimensionner(SPAH), hero='gal-spa-couchant')))
+io.open('spa.html','w',encoding='utf-8').write(
+    versionner(responsive(dimensionner(SPAH), hero='gal-spa-couchant')).replace('{{MAIL}}', MAIL))
 print('spa.html   :', total_spa, 'soins')

@@ -332,7 +332,7 @@ b.append('''    </div>
         <div class="call">
           <span data-t="acall">Pour un projet urgent, appelez directement :</span>
           <a href="tel:+2250151527575">+225 01 51 52 75 75</a>
-          <a href="mailto:bonjour@evannathhotel.com">bonjour@evannathhotel.com</a>
+          <a href="mailto:{{MAIL}}">{{MAIL}}</a>
         </div>
       </aside>
     </div>

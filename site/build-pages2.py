@@ -85,7 +85,7 @@ CHAN = [
   '<path d="M4 7h16v13H4zM4 7l8 6 8-6M8 3v4M16 3v4"/>'),
  ('https://wa.me/' + WA,'k3','WhatsApp',WA_TEXTE,'v3','Réponse la plus rapide',
   '<path d="M12 3a9 9 0 00-7.7 13.6L3 21l4.6-1.2A9 9 0 1012 3z"/><path d="M9 9.5c0 3 2.5 5.5 5.5 5.5"/>'),
- ('mailto:bonjour@evannathhotel.com','k4','E-mail','bonjour@<br>evannathhotel.com','v4','Devis, séminaires, presse',
+ ('mailto:{{MAIL}}','k4','E-mail','bonjour@<br>evannathhotel.com','v4','Devis, séminaires, presse',
   '<rect x="3" y="5" width="18" height="14"/><path d="M3 7l9 6 9-6"/>'),
 ]
 
@@ -310,6 +310,6 @@ LD = _schema.bloc(
 
 io.open('contact.html','w',encoding='utf-8').write(page(
  "Contact — Hôtel Evannath, Assinie PK 19",
- "Contacter l'Hôtel Evannath à Assinie PK 19 : réception 24 h/24, réservations, WhatsApp, e-mail bonjour@evannathhotel.com. Itinéraire depuis Abidjan et navette aéroport gratuite.",
+ "Contacter l'Hôtel Evannath à Assinie PK 19 : réception 24 h/24, réservations, WhatsApp, e-mail {{MAIL}}. Itinéraire depuis Abidjan et navette aéroport gratuite.",
  "g-entree", CSS_CONTACT, '\n'.join(b), JS_CONTACT, slug="contact", jsonld=LD))
 print('contact.html          ok')

@@ -323,7 +323,7 @@ document.querySelectorAll('.pickbtn').forEach(function(b){b.onclick=function(){
 }});
 
 document.getElementById('rf').addEventListener('submit',function(e){e.preventDefault();
-  alert("Démonstration : la demande partirait à la réception et à bonjour@evannathhotel.com, avec une confirmation automatique au client.")});
+  alert("Démonstration : la demande partirait à la réception et à {{MAIL}}, avec une confirmation automatique au client.")});
 
 var EN={''' + EN_NAV + '''cta:"Book this package",
 c1:"Home",c2:"Packages &amp; Offers",eb:"Eleven offers &amp; one weekly gathering",h1:"Packages &amp; Offers",

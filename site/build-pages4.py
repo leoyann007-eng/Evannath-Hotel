@@ -101,7 +101,7 @@ b += [
  kv('e5','Compte contribuable','Numéro',True),
  kv('e6','Siège social','Assinie PK 19, Comoé, Côte d\'Ivoire'),
  kv('e7','Téléphone','+225 27 21 73 12 65'),
- kv('e8','E-mail','<a href="mailto:bonjour@evannathhotel.com">bonjour@evannathhotel.com</a>'),
+ kv('e8','E-mail','<a href="mailto:{{MAIL}}">{{MAIL}}</a>'),
  kv('e9','Directeur de la publication','Nom et qualité',True),
  '    </section>',
  '',
@@ -120,7 +120,7 @@ b.append('''
       <h2 data-t="t3">Propriété intellectuelle</h2>
       <p data-t="p3a">L'ensemble des éléments composant ce site — textes, photographies, illustrations, logo, charte graphique, arborescence et code source — est la propriété exclusive de l'Hôtel Evannath ou de ses ayants droit, et est protégé par les dispositions relatives au droit d'auteur.</p>
       <p data-t="p3b">Toute reproduction, représentation, adaptation ou exploitation, totale ou partielle, sur quelque support que ce soit, est interdite sans autorisation écrite préalable. Le nom « Evannath », le logo et la signature « Le Rêve Africain » sont des signes distinctifs de l'établissement.</p>
-      <p data-t="p3c">Les demandes d'utilisation à des fins de presse ou de partenariat peuvent être adressées à <a href="mailto:bonjour@evannathhotel.com">bonjour@evannathhotel.com</a>.</p>
+      <p data-t="p3c">Les demandes d'utilisation à des fins de presse ou de partenariat peuvent être adressées à <a href="mailto:{{MAIL}}">{{MAIL}}</a>.</p>
     </section>
 
     <section id="donnees">
@@ -141,7 +141,7 @@ b += [
 
 b.append('''      <h3 data-t="d9">Vos droits</h3>
       <p data-t="p4b">Conformément à la loi ivoirienne n° 2013-450 du 19 juin 2013 relative à la protection des données à caractère personnel, vous disposez d'un droit d'accès, de rectification, d'opposition et de suppression des données vous concernant.</p>
-      <p data-t="p4c">Pour l'exercer, écrivez à <a href="mailto:bonjour@evannathhotel.com">bonjour@evannathhotel.com</a> en précisant votre demande. Une réponse vous sera apportée dans un délai de trente jours.</p>
+      <p data-t="p4c">Pour l'exercer, écrivez à <a href="mailto:{{MAIL}}">{{MAIL}}</a> en précisant votre demande. Une réponse vous sera apportée dans un délai de trente jours.</p>
       <p data-t="p4d">Si vous estimez que vos droits ne sont pas respectés, vous pouvez saisir l'Autorité de Régulation des Télécommunications de Côte d'Ivoire (ARTCI), autorité compétente en matière de protection des données personnelles.</p>''')
 
 b += [
@@ -199,7 +199,7 @@ b += [
  kv('cr1','Photographies','Nom du ou des photographes',True),
  kv('cr2','Conception et développement','Prestataire',True),
  kv('cr3','Typographies','Marcellus, Karla — SIL Open Font License'),
- '      <p style="margin-top:20px" data-t="p9">Toute remarque sur le contenu de cette page peut être adressée à <a href="mailto:bonjour@evannathhotel.com">bonjour@evannathhotel.com</a>.</p>',
+ '      <p style="margin-top:20px" data-t="p9">Toute remarque sur le contenu de cette page peut être adressée à <a href="mailto:{{MAIL}}">{{MAIL}}</a>.</p>',
  '    </section>',
  '',
  '  </article>',

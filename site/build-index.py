@@ -7,7 +7,7 @@ Elle consomme desormais les memes briques que les autres, et ne garde en
 propre que les six valeurs de couleur qui lui sont specifiques.
 """
 import io
-from _chrome import TOKENS, NAV_BASE, LANG_JS, dimensionner, responsive, versionner, WA, WA_TEXTE
+from _chrome import TOKENS, NAV_BASE, LANG_JS, dimensionner, responsive, versionner, WA, WA_TEXTE, MAIL
 import _schema
 
 html = io.open('index-template.html', encoding='utf-8').read()
@@ -38,6 +38,9 @@ CARTES = ('r-standard', 'ig-baldaquin', 'r-wax', 'r-anglaise', 'r-mezz2',
 
 html = versionner(responsive(dimensionner(html), hero='hero-chambre-wax',
                              sizes={n: SIZES_CARTES for n in CARTES}))
+# En dernier : le JSON-LD injecte plus haut porte lui aussi l'adresse.
+html = html.replace('{{MAIL}}', MAIL)
+
 assert '{{' not in html, 'un placeholder n a pas ete remplace'
 io.open('index.html', 'w', encoding='utf-8').write(html)
 print('index.html            ok')
