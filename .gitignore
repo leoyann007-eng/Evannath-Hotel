@@ -11,15 +11,19 @@ message-whatsapp.md
 Mesure-performance.pdf
 .mesures/
 
-# ── Préparation du rendez-vous du 7 septembre ─────────────────
-# Support client, script oral, déroulé, et la tarification — celle-ci ne se
-# transmet jamais : elle porte les fourchettes et le prix plancher.
+# ── Rendez-vous du 7 septembre, et sa suite ───────────────────
+# Support client, script oral, déroulé, tarification et modèle de devis.
+# La tarification ne se transmet jamais : elle porte les fourchettes, la
+# marge de négociation et le prix plancher. Le devis, lui, part signé — mais
+# rempli, il porte un montant nominatif.
 Presentation-Evannath.pptx
 script-oral.md
 preparation-presentation.md
 tarification-interne.md
 tarification-interne.html
 Tarification-interne.pdf
+devis-modele.html
+Devis-modele.pdf
 
 # Sources du support : script pptxgenjs, images redimensionnées, contrôle
 # géométrique. Reconstructibles à volonté par « node .deck/deck.js ».
