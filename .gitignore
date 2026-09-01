@@ -1,13 +1,35 @@
 # ── Documents de prospection ──────────────────────────────────
-# La proposition (source HTML et PDF envoyé au prospect) et le brouillon
-# du mail d'approche. Ils portent les coordonnées personnelles de
-# l'émetteur et une offre nominative : ils n'ont rien à faire dans un
-# dépôt, ni sur le web.
+# La proposition (source HTML et PDF envoyé au prospect), les brouillons de
+# messages et le relevé de performance. Ils portent les coordonnées
+# personnelles de l'émetteur et une offre nominative : ils n'ont rien à faire
+# dans un dépôt, ni sur le web.
 proposition-commerciale.html
 Proposition-Evannath.pdf
 mail-prospection.md
 mail-relance.md
 message-whatsapp.md
+Mesure-performance.pdf
+.mesures/
+
+# ── Préparation du rendez-vous du 7 septembre ─────────────────
+# Support client, script oral, déroulé, et la tarification — celle-ci ne se
+# transmet jamais : elle porte les fourchettes et le prix plancher.
+Presentation-Evannath.pptx
+script-oral.md
+preparation-presentation.md
+tarification-interne.md
+tarification-interne.html
+Tarification-interne.pdf
+
+# Sources du support : script pptxgenjs, images redimensionnées, contrôle
+# géométrique. Reconstructibles à volonté par « node .deck/deck.js ».
+.deck/
+
+# pptxgenjs, installé uniquement pour fabriquer le support. Le site, lui,
+# n'a aucune dépendance npm — seuls les tests tournent, sur node nu.
+node_modules/
+package.json
+package-lock.json
 
 # Captures du site d'origine, prises pour illustrer l'audit. Ce sont des
 # copies d'ecran du site d'un tiers : elles servent la proposition, elles
