@@ -16,7 +16,7 @@ CSS = """
    Le carrousel reste dans la largeur du contenu. Un debordement plein ecran
    demanderait 100vw, qui inclut la barre de defilement et decale la page de
    8 px — le defaut est deja documente ailleurs dans ce projet. */
-.agenda{position:relative;margin-top:26px;border:1px solid var(--line);overflow:hidden}
+.agenda{position:relative;margin-top:26px;border:1px solid var(--line);overflow:hidden;transition:opacity .25s ease}
 .diapos{position:relative}
 .diapo{position:absolute;inset:0;opacity:0;visibility:hidden;transition:opacity .7s ease}
 .diapo.on{opacity:1;visibility:visible;position:relative}
@@ -696,6 +696,21 @@ JS += """
     if (ev.key === 'ArrowRight') { montrer(n + 1); relancer(); }
   });
 
+  /* La page est livree avec les evenements figes dans le code. Les montrer
+     tout de suite, puis les remplacer par ceux du back-office, donnait un
+     clignotement : on voyait l'ancienne affiche avant la bonne. Le carrousel
+     reste donc invisible jusqu'a ce qu'on sache quoi montrer.
+     Le delai de garde evite l'inverse — une page vide si l'API tarde ou ne
+     repond pas : passe ce delai, on montre ce qu'on a. */
+  var devoile = false;
+  function devoiler(){
+    if (devoile) return;
+    devoile = true;
+    ag.style.opacity = '';
+  }
+  ag.style.opacity = '0';
+  setTimeout(devoiler, 1200);
+
   demarrer(false);
 
   /* Le verdict tombe dans tous les cas — reponse vide, page hors ligne,
@@ -703,11 +718,12 @@ JS += """
   function conclure(j){
     if (j && j.evenements && j.evenements.length) refaire(j.evenements);
     demarrer(true);
+    devoiler();
   }
   fetch('/api/admin?a=public', { cache: 'no-store' })
     .then(function(r){ return r.ok ? r.json() : null; })
     .then(conclure)
-    .catch(function(){ demarrer(true); });
+    .catch(function(){ demarrer(true); devoiler(); });
 })();
 """
 LD = _schema.bloc(
