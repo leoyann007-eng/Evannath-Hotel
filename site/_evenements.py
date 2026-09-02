@@ -22,35 +22,16 @@ Chaque entree :
   cta      le libelle du bouton
 """
 
+# Cette liste ne contient QUE ce qui a une date ou revient a date fixe.
+# Les Packs Vacances et le Coffret Anniversaire n'y sont pas : ce sont des
+# offres permanentes, elles vivent dans la section « Nos offres & forfaits »
+# de la meme page. Une chose, un endroit.
+#
 # ATTENTION — les dates ci-dessous sont des HYPOTHESES sauf mention contraire.
 # L'etablissement ne publie aucun calendrier. A confirmer avant mise en ligne,
 # comme les autres valeurs provisoires du projet (voir « A valider » au README).
 
 EVENEMENTS = [
-
- dict(slug='packs-vacances',
-      titre='Packs Vacances',
-      affiche='ev-packs',
-      format='carre',
-      quand='Saison en cours',
-      fin=None,
-      texte="Quatre formules pensées pour la saison : famille, couple, enfant, "
-            "et la journée Chillday sans nuitée. C'est la campagne que vous "
-            "diffusez déjà sur vos réseaux — elle a désormais sa page.",
-      href='circuits.html#packs',
-      cta='Voir les quatre formules'),
-
- dict(slug='mechoui-party',
-      titre='La Méchoui Party',
-      affiche='gal-tab-terrasse',
-      format='large',
-      quand='Chaque samedi, en soirée',
-      fin=None,
-      texte="Le rendez-vous du week-end : méchoui en terrasse, puis happy hour "
-            "et DJ résident au night-club. Ouvert aux clients de l'hôtel comme "
-            "aux visiteurs de passage.",
-      href='circuits.html#mechoui',
-      cta='En savoir plus'),
 
  dict(slug='reveillon',
       titre='Le Réveillon à Assinie',
@@ -64,16 +45,18 @@ EVENEMENTS = [
       href='reserver.html',
       cta='Demander une chambre'),
 
- dict(slug='coffret-anniversaire',
-      titre='Coffret Anniversaire',
-      affiche='gal-tab-dressee',
+
+ dict(slug='mechoui-party',
+      titre='La Méchoui Party',
+      affiche='gal-tab-terrasse',
       format='large',
-      quand='Toute l\'année, sur demande',
+      quand='Chaque samedi, en soirée',
       fin=None,
-      texte="Table dressée, gâteau et décoration de la chambre. À organiser "
-            "avec la réception, quelques jours à l'avance.",
-      href='circuits.html#coffret',
-      cta='Organiser un anniversaire'),
+      texte="Le rendez-vous du week-end : méchoui en terrasse, puis happy hour "
+            "et DJ résident au night-club. Ouvert aux clients de l'hôtel comme "
+            "aux visiteurs de passage.",
+      href='#demande',
+      cta='En savoir plus'),
 
  dict(slug='independance',
       titre='Fête de l\'Indépendance',
@@ -90,11 +73,6 @@ EVENEMENTS = [
 
 # Traductions. Une cle absente laisse le francais en place.
 EN = {
- 'packs-vacances':      ('Holiday Packages', 'Current season',
-                         'Four packages for the season: family, couple, child, and the '
-                         'Chillday with no overnight stay. The campaign you already run '
-                         'on social media now has a page of its own.',
-                         'See all four'),
  'mechoui-party':       ('Méchoui Party', 'Every Saturday evening',
                          'The weekend gathering: méchoui on the terrace, then happy hour '
                          'and our resident DJ at the night club. Open to hotel guests and '
@@ -103,9 +81,6 @@ EN = {
                          'A year-end dinner by the lagoon, then the night club. Rooms go '
                          'early for this date — requests start coming in the autumn.',
                          'Request a room'),
- 'coffret-anniversaire':('Birthday Package', 'All year, on request',
-                         'A dressed table, cake and a decorated room. Arranged with the '
-                         'front desk a few days ahead.', 'Plan a birthday'),
  'independance':        ('Independence Day', '7 August',
                          'The hotel marks the national holiday each year. This is the '
                          'artwork you published in August — it shows how a post from your '

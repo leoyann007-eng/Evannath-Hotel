@@ -12,7 +12,7 @@ from _chrome import SITE, PROSPECTION
 # Priorite editoriale : ce que l'hotel veut voir remonter en premier.
 PRIORITE = {
  'index': '1.0',
- 'seminaires': '0.9', 'circuits': '0.9', 'carte': '0.9', 'evenements': '0.9',
+ 'seminaires': '0.9', 'circuits': '0.9', 'carte': '0.9',
  'experiences': '0.8', 'spa': '0.8', 'galerie': '0.8', 'contact': '0.8',
  'suite-arabe': '0.7', 'mezzanine-superieure': '0.7', 'chambre-mezzanine': '0.7',
  'suite-anglaise': '0.7', 'deluxe-superieure': '0.7', 'deluxe-baldaquin': '0.7',

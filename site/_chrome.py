@@ -285,16 +285,16 @@ LINKS = [
  ('02','experiences.html','n2','Expériences'),
  ('03','carte.html','n3','La table'),
  ('04','spa.html','n4','Le spa'),
- ('05','circuits.html','n5','Circuits &amp; Offres'),
- # Evenements suit les offres : le visiteur qui cherche une formule tombe
- # d'abord sur les permanentes, puis sur ce qui a une date.
- ('06','evenements.html','n6','Événements'),
- ('07','seminaires.html','n7','Séminaires &amp; groupes'),
- ('08','galerie.html','n8','Galerie'),
- ('09','a-propos.html','n9','À propos'),
- ('10','informations-utiles.html','n10','Informations utiles'),
- ('11','contact.html','n11','Contact'),
- ('12','reserver.html','n12','Réserver'),
+ # Une seule entree pour tout ce qui est offre. Une page « Evenements »
+ # separee a ete essayee puis retiree : trois de ses cinq entrees etaient
+ # deja ici, et deux libelles de menu disaient « offres ».
+ ('05','circuits.html','n5','Offres &amp; Événements'),
+ ('06','seminaires.html','n6','Séminaires &amp; groupes'),
+ ('07','galerie.html','n7','Galerie'),
+ ('08','a-propos.html','n8','À propos'),
+ ('09','informations-utiles.html','n9','Informations utiles'),
+ ('10','contact.html','n10','Contact'),
+ ('11','reserver.html','n11','Réserver'),
 ]
 
 def header(cta_href, cta_label, cta_key='cta'):
@@ -681,8 +681,8 @@ def secours(id_='sec', phrase="Votre demande est prête — il ne reste qu'à l'
 </div>''' % (id_, phrase)).replace('{{WA}}', WA).replace('{{MAIL}}', MAIL)
 
 EN_NAV = ('mn:"Menu",n1:"Rooms &amp; Suites",n2:"Experiences",n3:"The table",n4:"The spa",'
-          'n5:"Packages &amp; Offers",n6:"Events",n7:"Meetings &amp; groups",n8:"Gallery",'
-          'n9:"About",n10:"Useful information",n11:"Contact",n12:"Book",dr:"Reservations",')
+          'n5:"Offers &amp; Events",n6:"Meetings &amp; groups",n7:"Gallery",n8:"About",'
+          'n9:"Useful information",n10:"Contact",n11:"Book",dr:"Reservations",')
 
 # Le panneau de repli des cinq formulaires. Il vit ici, et non dans chaque
 # page, pour la meme raison que le panneau lui-meme : une seule source.

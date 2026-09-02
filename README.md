@@ -36,14 +36,13 @@ Python à partir de gabarits, pour éviter la saisie manuelle.
 |---|---|
 | `chambres.html` | Page mère des 7 catégories : filtres, tri, comparateur |
 | `galerie.html` | 47 photographies, 6 filtres, visionneuse |
-| `circuits.html` | 4 Packs Vacances + 6 circuits + Méchoui Party |
+| `circuits.html` | Offres &amp; Événements — à la une, événements datés, forfaits, découvertes |
 | `carte.html` | La table — 94 articles, recherche instantanée |
 | `spa.html` | Le spa — 22 soins, 4 rituels en vedette |
 | `a-propos.html` | « Akwaba », 6 arguments, 5 espaces, 13 équipements |
 | `contact.html` | 4 canaux, formulaire validé, carte d'accès |
 | `experiences.html` | 6 lieux du domaine, 4 activités nautiques, 4 excursions |
 | `seminaires.html` | 5 configurations de salle, 4 formules, demande de devis |
-| `evenements.html` | Événements &amp; offres du moment — les affiches datées |
 | `informations-utiles.html` | 17 questions en accordéon |
 | `mentions-legales.html` | Trame juridique à compléter |
 | `404.html` | Page introuvable |
@@ -383,67 +382,74 @@ fenêtre n'est pas encore connue.
 
 Pour refaire les extraits avec d'autres bornes, tout est dans `outils-video.sh`.
 
-## Les événements
+## Offres & Événements
 
 L'établissement produit des affiches — Packs Vacances, Réveillon, fête de
 l'Indépendance — et les publie sur ses réseaux. Son site n'avait aucun endroit
-pour les recevoir : c'est d'ailleurs l'un des constats de l'audit, « votre
-campagne en cours n'est pas sur votre site ».
+pour les recevoir : c'est l'un des constats de l'audit.
 
-`evenements.html` est cet endroit. Elle se génère depuis `_evenements.py`,
-**le seul fichier à modifier pour publier une affiche**.
+**Une page séparée a d'abord été construite, puis retirée.** Trois de ses cinq
+entrées existaient déjà sur `circuits.html`, et deux libellés de menu disaient
+« offres ». C'était un doublon, pas un complément.
 
-**La page ne répète aucun tarif.** Les formules permanentes restent sur
-`circuits.html` ; l'événement y renvoie. Deux prix pour la même offre finissent
-toujours par diverger, et l'écart ne se voit nulle part — c'est ce que le
-contrôle 7 sexies traque déjà entre l'accueil et les circuits.
+`circuits.html` s'appelle désormais **Offres & Événements** et se lit du plus
+urgent au plus permanent :
+
+| Section | Contenu |
+|---|---|
+| **À la une** | ce qui a une date proche — aujourd'hui le Réveillon |
+| **Événements** | les rendez-vous datés, affiche à l'appui |
+| **Nos offres & forfaits** | Packs Vacances, lune de miel, séjours composés |
+| **Circuits & découvertes** | ce qui emmène hors du domaine |
+
+Les événements vivent dans `_evenements.py`, **le seul fichier à modifier pour
+publier une affiche**. Il ne contient que ce qui a une date : les Packs Vacances
+et le Coffret Anniversaire n'y sont pas, ce sont des offres permanentes de la
+section du dessous. Une chose, un endroit.
+
+Le bloc Méchoui Party qui vivait à part a été retiré pour la même raison :
+l'événement a maintenant son entrée, il n'a plus besoin de sa section.
 
 ### Une affiche périmée disparaît toute seule
 
 Chaque entrée porte une `fin`. Passée cette date, **le navigateur retire
-l'entrée** au chargement : le site est statique, et personne ne le reconstruit
-le 2 janvier au matin pour décrocher l'affiche du réveillon.
+l'entrée** au chargement — et la section entière si elle se vide. Le site est
+statique, et personne ne le reconstruit le 2 janvier au matin pour décrocher
+l'affiche du réveillon. Vérifié : l'affiche du 7 août ne s'affiche plus.
 
-Le même mécanisme tient le bandeau de l'accueil, qui met en avant la première
-entrée de la liste. Ce bandeau ne porte pas la classe `reveal` : il annonce ce
-qui se passe maintenant, il n'a pas à attendre le défilement — ni à disparaître
-si le script échoue.
-
-Il est placé **sous** la carte de réservation, et non au-dessus : `.booking`
-remonte de 58 px avec un `z-index` supérieur pour chevaucher le hero, et
-recouvrait le bandeau entièrement.
+Le bandeau de l'accueil suit le même mécanisme et pointe vers `#a-la-une`. Il
+ne porte pas la classe `reveal` — il annonce ce qui se passe maintenant, il n'a
+pas à attendre le défilement. Il est placé **sous** la carte de réservation :
+`.booking` remonte de 58 px avec un `z-index` supérieur, et le recouvrait.
 
 ### Ce que Google en voit
 
 `_schema.evenements()` ne déclare en `Event` que les entrées **qui portent une
 date de fin**. Un Event sans date n'en est pas un pour Google, qui exige
 `startDate` ; déclarer la Méchoui Party du samedi avec une date inventée
-reviendrait à mentir au moteur, lequel affiche ces dates telles quelles dans
-ses résultats.
+reviendrait à mentir au moteur, qui affiche ces dates telles quelles.
 
-### La navigation passe à douze entrées
+### La navigation ne se recopie plus
 
-Ajouter « Événements » a révélé une recopie que le projet combat partout
-ailleurs : **les trois pages à gabarit portaient leur navigation en dur**,
-ainsi que le dictionnaire anglais du menu. Une entrée ajoutée les manquait donc
-en silence — le contrôle 10 ne l'a vu qu'après coup.
+Ajouter une entrée a révélé que **les trois pages à gabarit portaient leur
+navigation en dur**, ainsi que le dictionnaire anglais du menu. `liens_nav()`
+rend désormais le bloc depuis `LINKS`, et les gabarits le consomment par
+`{{NAV_LINKS}}` et `{{EN_NAV}}`.
 
-`liens_nav()` rend désormais le bloc depuis `LINKS`, et les gabarits le
-consomment par `{{NAV_LINKS}}` et `{{EN_NAV}}`. Il n'y a plus qu'une source.
+### Deux contrôles de plus
 
-### Le contrôle qui manquait
-
-En écrivant cette page, une clé de traduction portant un tiret —
-`q-packs-vacances:` — a suffi à **casser tout le JavaScript de la page** :
+**Contrôle 13 — le JavaScript doit se parser.** Une clé de traduction portant un
+tiret, `q-packs-vacances:`, a suffi à casser tout le script d'une page :
 JavaScript refuse un tiret dans une clé non quotée. La page s'affichait
-normalement ; seuls la bascule de langue, le tiroir, l'apparition au défilement
-et l'expiration des affiches avaient disparu.
+normalement ; seuls la bascule de langue, le tiroir et l'expiration avaient
+disparu. Chaque script passe maintenant à `node --check`.
 
-Rien ne le détectait. `verifier.py` (contrôle 13) passe maintenant chaque script
-de chaque page à `node --check`. Les deux cas — clé à tiret non quotée, virgule
-parasite — ont été testés en les provoquant. Le contrôle 7 quater accepte
-désormais les clés quotées, qui sont légitimes.
-
+**Une clé posée sur deux textes différents** est refusée à son tour. Le contrôle
+7 quater ne voyait que les doublons du *dictionnaire*, pas ceux du HTML. Il a
+immédiatement trouvé deux défauts qui dormaient : sur `circuits`, le bouton de
+l'en-tête et celui du circuit partageaient `cta` — en anglais l'en-tête affichait
+« Book this package » ; sur `spa`, « Accueil » et « La case » partageaient `c1`,
+et le fil d'Ariane devenait « La case » après un aller-retour de langue.
 ## Version anglaise
 
 Le bouton FR/EN capture le français depuis le DOM au chargement, puis

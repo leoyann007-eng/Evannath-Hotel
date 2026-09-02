@@ -2,9 +2,48 @@
 """Genere circuits.html : Packs Vacances (campagne Facebook) + circuits + Mechoui Party."""
 import io
 import _schema
+from _evenements import EVENEMENTS, EN as EV_EN
+NL_ = chr(10)
+NL_ = chr(10)
 from _chrome import page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV
 
 CSS = """
+/* Les intertitres qui separent les quatre parties de la page. */
+.sect{margin:86px 0 34px;max-width:70ch}
+.sect h2{font-size:clamp(1.9rem,3.4vw,2.6rem);margin:10px 0 12px}
+.sect p{color:#B4A794}
+
+/* A la une : l'evenement ou la promotion du moment, en grand. */
+.une{display:grid;grid-template-columns:400px 1fr;gap:0;background:var(--bark-2);
+  border:1px solid rgba(185,138,80,.42);overflow:hidden;margin-top:26px;min-width:0}
+.une .ph{position:relative;aspect-ratio:1/1;overflow:hidden;min-width:0;background:var(--bark-3)}
+.une .ph img{width:100%;height:100%;object-fit:cover}
+.une .tx{padding:40px 44px;display:flex;flex-direction:column;justify-content:center}
+.une .quand{font-size:10.5px;letter-spacing:.28em;text-transform:uppercase;
+  color:var(--bronze);font-weight:700}
+.une h2{font-size:clamp(1.9rem,3.2vw,2.5rem);margin:10px 0 14px}
+.une p{max-width:58ch;margin-bottom:24px}
+.une .btn{align-self:flex-start}
+
+/* Les evenements dates, en bandes. */
+.evs{display:flex;flex-direction:column;gap:22px;margin-top:26px}
+.ev{display:grid;grid-template-columns:240px 1fr;background:var(--bark-2);
+  border:1px solid var(--line);overflow:hidden;min-width:0;transition:.5s cubic-bezier(.2,.8,.2,1)}
+.ev:hover{border-color:rgba(185,138,80,.5)}
+.ev .ph{aspect-ratio:1/1;overflow:hidden;min-width:0;background:var(--bark-3)}
+.ev .ph img{width:100%;height:100%;object-fit:cover}
+.ev .tx{padding:26px 30px;display:flex;flex-direction:column;justify-content:center}
+.ev .quand{font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:var(--bronze);font-weight:700}
+.ev h3{font-size:1.35rem;margin:8px 0 10px}
+.ev p{margin-bottom:16px}
+.ev .btn{align-self:flex-start;padding:12px 22px}
+
+@media(max-width:900px){
+  .une,.ev{grid-template-columns:1fr}
+  .une .ph,.ev .ph{aspect-ratio:16/10}
+  .une .tx{padding:28px 24px}
+  .ev .tx{padding:24px 22px}
+}
 .head{padding:150px 0 46px}
 .head h1{margin:10px 0 20px}
 .head .lede{font-size:1.1rem;max-width:60ch}
@@ -110,6 +149,10 @@ PACKS = [
  ('Pack Enfant','15000','enfant','ig-enfants',"Des enfants dans la piscine de l'hôtel",'p4','ue','FCFA · par enfant','15 000'),
 ]
 
+# Les decouvertes se distinguent des forfaits de sejour : elles emmenent
+# ailleurs qu'a l'hotel. La page les presente separement.
+DECOUVERTES = {'Découvertes Touristiques', 'Découvertes Junior'}
+
 CARDS = [
  ('duo','gal-lag-bateau','Le ponton et le bateau de balade sur la lagune Aby','g1','Romantique','t1','Évasion Romantique',
   [('s11','Cocktails de charme'),('s12','Balade dînatoire aux chandelles'),('s13','Petit-déjeuner au lit'),('s14','Duo de massages')],
@@ -131,17 +174,48 @@ CARDS = [
   '28 000','28000','personne','pp','FCFA · par personne'),
 ]
 
+def rendre_cartes(liste):
+    """Rend un groupe de cartes.
+
+    Les cartes se rendent en deux groupes — les forfaits, puis les
+    decouvertes. Le catalogue JSON-LD, lui, continue de se batir sur CARDS
+    entier : il ne doit rien perdre au decoupage.
+    """
+    for cat, img, alt, gkey, glab, tkey, tlab, items, disp, price, unit, ukey, ulab in liste:
+        b.append('''    <article class="c reveal" data-cat="%s">
+          <div class="ph"><picture><source srcset="img/opt/%s.webp" type="image/webp">
+            <img loading="lazy" src="img/opt/%s.jpg" width="900" height="562" alt="%s"></picture>
+            <span class="tag" data-t="%s">%s</span></div>
+          <div class="in">
+            <h3 data-t="%s">%s</h3>
+            <ul>''' % (cat, img, img, alt, gkey, glab, tkey, tlab))
+        for k, t in items:
+            b.append('          <li data-t="%s">%s</li>' % (k, t))
+        b.append('''        </ul>
+            <div class="foot"><div class="pr"><b>%s</b><span data-t="%s">%s</span></div>
+            <button class="pick pickbtn" data-c="%s" data-p="%s" data-u="%s" data-t="ch">Choisir</button></div>
+          </div>
+        </article>''' % (disp, ukey, ulab, tlab, price, unit))
+
+
 b = [header('#demande','Réserver'), drawer('circuits.html'), '''
 <div class="wrap head">
   <nav class="crumb" aria-label="Fil d'Ariane">
     <a href="index.html" data-t="c1">Accueil</a> &nbsp;·&nbsp; <span data-t="c2">Circuits &amp; Offres</span>
   </nav>
   <span class="eyebrow" data-t="eb">Onze offres &amp; un rendez-vous hebdomadaire</span>
-  <h1 data-t="h1">Circuits &amp; Offres</h1>
-  <p class="lede" data-t="lede">Des séjours déjà composés — chambre, repas, activités et attentions comprises. Choisissez, indiquez vos dates, et la réception s'occupe du reste.</p>
+  <h1 data-t="h1">Offres &amp; Événements</h1>
+  <p class="lede" data-t="lede">Ce qui se passe en ce moment, et les séjours déjà composés — chambre, repas, activités et attentions comprises. Choisissez, indiquez vos dates, et la réception s'occupe du reste.</p>
 </div>
 
 <div class="wrap">
+{{ALAUNE}}{{EVENEMENTS}}
+  <div class="sect reveal" id="forfaits">
+    <span class="eyebrow" data-t="f0">Séjours composés</span>
+    <h2 data-t="f1">Nos offres &amp; forfaits</h2>
+    <p data-t="f2">Tout est compris et le tarif est ferme : vous savez ce que
+    vous payez avant d'arriver.</p>
+  </div>
 
   <!-- Campagne relevée sur la page Facebook (21 000 abonnés) : absente du site actuel -->
   <section class="camp reveal">
@@ -183,7 +257,7 @@ b.append('''    </div>
       </ul>
       <div class="foot">
         <div class="pr"><b>340 000</b><span data-t="pf">FCFA · le forfait</span></div>
-        <button class="btn btn-solid pickbtn" data-c="Lune de miel inoubliable" data-p="340000" data-u="forfait" data-t="cta">Réserver ce circuit</button>
+        <button class="btn btn-solid pickbtn" data-c="Lune de miel inoubliable" data-p="340000" data-u="forfait" data-t="ctc">Réserver ce circuit</button>
       </div>
     </div>
   </article>
@@ -198,39 +272,29 @@ b.append('''    </div>
 
   <div class="grid" id="gr">''')
 
-for cat, img, alt, gkey, glab, tkey, tlab, items, disp, price, unit, ukey, ulab in CARDS:
-    b.append('''    <article class="c reveal" data-cat="%s">
-      <div class="ph"><picture><source srcset="img/opt/%s.webp" type="image/webp">
-        <img loading="lazy" src="img/opt/%s.jpg" width="900" height="562" alt="%s"></picture>
-        <span class="tag" data-t="%s">%s</span></div>
-      <div class="in">
-        <h3 data-t="%s">%s</h3>
-        <ul>''' % (cat, img, img, alt, gkey, glab, tkey, tlab))
-    for k, t in items:
-        b.append('          <li data-t="%s">%s</li>' % (k, t))
-    b.append('''        </ul>
-        <div class="foot"><div class="pr"><b>%s</b><span data-t="%s">%s</span></div>
-        <button class="pick pickbtn" data-c="%s" data-p="%s" data-u="%s" data-t="ch">Choisir</button></div>
-      </div>
-    </article>''' % (disp, ukey, ulab, tlab, price, unit))
+rendre_cartes([c for c in CARDS if c[6] not in DECOUVERTES])
 
 b.append('''  </div>
 
-  <section class="weekly reveal">
-    <div class="ph"><picture><source srcset="img/opt/c-bar.webp" type="image/webp">
-      <img loading="lazy" src="img/opt/c-bar.jpg" width="900" height="600" alt="Le bar et la salle en rotin de l'Hôtel Evannath"></picture></div>
-    <div class="txt">
-      <span class="when"><i></i><span data-t="w0">Chaque samedi, dès 15 h</span></span>
-      <h2 data-t="w1">Méchoui Party</h2>
-      <p data-t="w2">Ce n'est pas un forfait : c'est le rendez-vous du samedi après-midi, ouvert à tous — clients de l'hôtel comme visiteurs de passage. Méchoui au bord de l'eau, puis la soirée continue au night-club.</p>
-      <div class="perks">
-        <span><em>✓</em><span data-t="w3">Un cocktail offert</span></span>
-        <span><em>✓</em><span data-t="w4">Happy hour au night-club</span></span>
-        <span><em>✓</em><span data-t="w5">−10 % sur toutes les boissons</span></span>
-      </div>
-      <div style="margin-top:28px"><a href="#demande" class="btn" data-t="w6">Réserver une table</a></div>
-    </div>
-  </section>
+  <div class="sect reveal" id="decouvertes">
+    <span class="eyebrow" data-t="dc0">Autour d'Assinie</span>
+    <h2 data-t="dc1">Circuits &amp; découvertes</h2>
+    <p data-t="dc2">Sortir du domaine : les îles de la lagune, l'embouchure, et
+    ce que les enfants retiennent d'un séjour ici.</p>
+  </div>
+
+  <div class="grid">''')
+
+rendre_cartes([c for c in CARDS if c[6] in DECOUVERTES])
+
+b.append('''  </div>
+
+  <div class="sect reveal">
+    <p style="color:var(--muted)"><a href="experiences.html" style="color:var(--bronze)"
+    data-t="dc3">Voir aussi toutes les activités du domaine et de la lagune →</a></p>
+  </div>
+
+
 
 </div>
 
@@ -283,6 +347,24 @@ b.append('''  </div>
 
 ''' + FOOTER)
 
+# Les titres des quatre sections, et les evenements. Les cles des evenements
+# portent un tiret : elles DOIVENT etre quotees, sinon le dictionnaire n'est
+# pas un objet JavaScript valide et tout le script de la page meurt.
+EN_SECTIONS = ('u0:"On now",u1:"What is happening right now",'
+               'v0:"With a date",v1:"Events",'
+               'v2:"The season&rsquo;s gatherings. Posters disappear on their own '
+               'once the date has passed.",'
+               'f0:"Composed stays",f1:"Our offers &amp; packages",'
+               'f2:"Everything is included and the rate is firm: you know what you '
+               'pay before you arrive.",'
+               'dc0:"Around Assinie",dc1:"Tours &amp; discoveries",'
+               'dc2:"Beyond the grounds: the lagoon islands, the river mouth, and '
+               'what children remember from a stay here.",'
+               'dc3:"See also every activity on the grounds and the lagoon &rarr;",')
+for _s, (_t, _q, _x, _c) in EV_EN.items():
+    EN_SECTIONS += '"q-%s":"%s","t-%s":"%s","x-%s":"%s","c-%s":"%s",' % (
+        _s, _q, _s, _t, _s, _x, _s, _c)
+
 JS = NAV_JS + '''
 
 document.querySelectorAll('.filters button').forEach(function(b){b.onclick=function(){
@@ -325,8 +407,8 @@ document.querySelectorAll('.pickbtn').forEach(function(b){b.onclick=function(){
 document.getElementById('rf').addEventListener('submit',function(e){e.preventDefault();
   alert("Démonstration : la demande partirait à la réception et à {{MAIL}}, avec une confirmation automatique au client.")});
 
-var EN={''' + EN_NAV + '''cta:"Book this package",
-c1:"Home",c2:"Packages &amp; Offers",eb:"Eleven offers &amp; one weekly gathering",h1:"Packages &amp; Offers",
+var EN={''' + EN_NAV + EN_SECTIONS + '''cta:"Book",ctc:"Book this package",
+c1:"Home",c2:"Offers &amp; Events",eb:"Eleven offers &amp; one weekly gathering",h1:"Offers &amp; Events",
 lede:"Stays already put together — room, meals, activities and small touches included. Pick one, give us your dates, and the front desk handles the rest.",
 cl:"Live campaign",ct:"Holiday Packs",cs:"Announced on our Facebook page · +225 01 51 52 75 75",
 cp:"“Holidays that look like you.” Four seasonal packages, bookable right here.",
@@ -372,13 +454,99 @@ CATALOGUE += [(nom, prix, None, UNITE[unite])
 CATALOGUE += [(titre, prix, ' · '.join(t for _c, t in items), UNITE[unite])
               for _f, _i, _a, _g, _b, _t, titre, items, _d, prix, unite, _pk, _ul in CARDS]
 
+# ── A la une, et les evenements dates ────────────────────────
+# La premiere entree de _evenements.py fait la une ; les suivantes forment
+# la bande des evenements. Une affiche perimee reste dans le fichier mais
+# le navigateur la retire au chargement : le site est statique, et personne
+# ne le reconstruit le 2 janvier pour decrocher l'affiche du reveillon.
+def _fin(e):
+    return ' data-fin="%s"' % e['fin'] if e['fin'] else ''
+
+ALAUNE = ''
+if EVENEMENTS:
+    e = EVENEMENTS[0]
+    ALAUNE = '''
+  <div class="sect reveal" id="a-la-une">
+    <span class="eyebrow" data-t="u0">À la une</span>
+    <h2 data-t="u1">Ce qui se passe en ce moment</h2>
+  </div>
+  <article class="une reveal" id="une"%s>
+    <div class="ph"><picture><source srcset="img/opt/%s.webp" type="image/webp">
+      <img src="img/opt/%s.jpg" alt="%s" loading="lazy"></picture></div>
+    <div class="tx">
+      <span class="quand" data-t="q-%s">%s</span>
+      <h2 data-t="t-%s">%s</h2>
+      <p data-t="x-%s">%s</p>
+      <a class="btn btn-solid" href="%s" data-t="c-%s">%s</a>
+    </div>
+  </article>''' % (_fin(e), e['affiche'], e['affiche'], e['titre'],
+                   e['slug'], e['quand'], e['slug'], e['titre'],
+                   e['slug'], e['texte'], e['href'], e['slug'], e['cta'])
+
+SUITE = EVENEMENTS[1:]
+EVBLOC = ''
+if SUITE:
+    EVBLOC = ('''
+  <div class="sect reveal" id="evenements">
+    <span class="eyebrow" data-t="v0">Avec une date</span>
+    <h2 data-t="v1">Événements</h2>
+    <p data-t="v2">Les rendez-vous de la saison. Les affiches disparaissent
+    d'elles-mêmes une fois la date passée.</p>
+  </div>
+  <div class="evs" id="evs">''')
+    for e in SUITE:
+        EVBLOC += '''
+    <article class="ev reveal" id="%s"%s>
+      <div class="ph"><picture><source srcset="img/opt/%s.webp" type="image/webp">
+        <img src="img/opt/%s.jpg" alt="%s" loading="lazy"></picture></div>
+      <div class="tx">
+        <span class="quand" data-t="q-%s">%s</span>
+        <h3 data-t="t-%s">%s</h3>
+        <p data-t="x-%s">%s</p>
+        <a class="btn" href="%s" data-t="c-%s">%s</a>
+      </div>
+    </article>''' % (e['slug'], _fin(e), e['affiche'], e['affiche'], e['titre'],
+                     e['slug'], e['quand'], e['slug'], e['titre'],
+                     e['slug'], e['texte'], e['href'], e['slug'], e['cta'])
+    EVBLOC += NL_ + '  </div>'
+
+
+# L'expiration se decide dans le navigateur, jamais a la generation : le site
+# est statique et personne ne le reconstruit le 2 janvier au matin pour
+# decrocher l'affiche du reveillon.
+JS += """
+(function(){
+  var auj = new Date(); auj.setHours(0,0,0,0);
+  var perime = function(el){
+    var f = el.getAttribute('data-fin');
+    return f && new Date(f + 'T23:59:59') < auj;
+  };
+  var une = document.getElementById('une');
+  if (une && perime(une)) {
+    une.remove();
+    var t = document.getElementById('a-la-une'); if (t) t.remove();
+  }
+  var restants = 0;
+  document.querySelectorAll('.ev').forEach(function(el){
+    if (perime(el)) { el.remove(); return; }
+    restants++;
+  });
+  if (!restants) {
+    var s = document.getElementById('evenements'); if (s) s.remove();
+    var g = document.getElementById('evs'); if (g) g.remove();
+  }
+})();
+"""
+
 LD = _schema.bloc(
     _schema.service('Circuits et forfaits', "Packs Vacances, lune de miel, week-end intense, circuits touristiques et coffret anniversaire à l'Hôtel Evannath, Assinie.", 'circuits', image='r-mezzanine', catalogue=CATALOGUE),
     _schema.hotel(),
     _schema.fil([('Accueil','index'),('Circuits & Offres',None)]))
 
+CORPS = NL_.join(b).replace('{{ALAUNE}}', ALAUNE).replace('{{EVENEMENTS}}', EVBLOC)
+
 io.open('circuits.html','w',encoding='utf-8').write(page(
- "Circuits &amp; Offres — Hôtel Evannath, Assinie",
- "Les forfaits de l'Hôtel Evannath à Assinie : Packs Vacances, lune de miel, évasion romantique, week-end intense, découvertes touristiques et junior, coffret anniversaire.",
- "r-mezzanine", CSS, '\n'.join(b), JS, slug="circuits", jsonld=LD))
+ "Offres &amp; Événements — Hôtel Evannath, Assinie",
+ "Les offres et événements de l'Hôtel Evannath à Assinie : Packs Vacances, réveillon, Méchoui Party du samedi, lune de miel, week-end intense, découvertes touristiques et coffret anniversaire.",
+ "r-mezzanine", CSS, CORPS, JS, slug="circuits", jsonld=LD))
 print('circuits.html         ok')

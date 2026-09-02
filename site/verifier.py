@@ -149,6 +149,18 @@ def controler():
             doublons = sorted({k for k in declarees if declarees.count(k) > 1})
             if doublons:
                 pb.append((f, 'cles de traduction redefinies : ' + ' '.join(doublons)))
+            # Deux elements qui partagent une cle mais portent des textes
+            # francais differents : en anglais, le second ecrase le premier.
+            # Le controle 7 quater ne voyait que les doublons du DICTIONNAIRE,
+            # pas ceux du HTML. C'est arrive en renommant une cle de section
+            # qui servait deja a la description de la lune de miel.
+            textes = {}
+            for cle, txt in re.findall(r'data-t="([\w-]+)"[^>]*>([^<]{3,})', s):
+                t = ' '.join(txt.split())
+                if cle in textes and textes[cle] != t:
+                    pb.append((f, 'cle « %s » posee sur deux textes differents' % cle))
+                textes[cle] = t
+
             # Une page peut declarer que son corps reste en francais — un
             # document juridique, dont la version francaise fait foi. La
             # decision doit etre ecrite dans le generateur, pas subie ici.
@@ -261,7 +273,7 @@ def controler():
                 pb.append((f, 'lien mort : ' + h))
 
         # 10. navigation complete et repere principal
-        if len(re.findall(r'<a href="[^"]+"[^>]*><i>\d+</i><span data-t="n\d+"', s)) != 12:
+        if len(re.findall(r'<a href="[^"]+"[^>]*><i>\d+</i><span data-t="n\d+"', s)) != 11:
             pb.append((f, 'navigation incomplete'))
         if s.count('<main id="contenu">') != 1:
             pb.append((f, 'balise <main> absente ou en double'))

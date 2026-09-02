@@ -5,13 +5,13 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
 <meta name="googlebot" content="noindex, nofollow">
-<title>Circuits &amp; Offres — Hôtel Evannath, Assinie</title>
-<meta name="description" content="Les forfaits de l'Hôtel Evannath à Assinie : Packs Vacances, lune de miel, évasion romantique, week-end intense, découvertes touristiques et junior, coffret anniversaire.">
+<title>Offres &amp; Événements — Hôtel Evannath, Assinie</title>
+<meta name="description" content="Les offres et événements de l'Hôtel Evannath à Assinie : Packs Vacances, réveillon, Méchoui Party du samedi, lune de miel, week-end intense, découvertes touristiques et coffret anniversaire.">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="fr_FR">
 <meta property="og:site_name" content="Hôtel Evannath">
-<meta property="og:title" content="Circuits &amp; Offres — Hôtel Evannath, Assinie">
-<meta property="og:description" content="Les forfaits de l'Hôtel Evannath à Assinie : Packs Vacances, lune de miel, évasion romantique, week-end intense, découvertes touristiques et junior, coffret anniversaire.">
+<meta property="og:title" content="Offres &amp; Événements — Hôtel Evannath, Assinie">
+<meta property="og:description" content="Les offres et événements de l'Hôtel Evannath à Assinie : Packs Vacances, réveillon, Méchoui Party du samedi, lune de miel, week-end intense, découvertes touristiques et coffret anniversaire.">
 <meta property="og:image" content="https://evannathhotel.vercel.app/img/opt/r-mezzanine.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/favicon.ico" sizes="any">
@@ -176,6 +176,42 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
 }
 
 
+/* Les intertitres qui separent les quatre parties de la page. */
+.sect{margin:86px 0 34px;max-width:70ch}
+.sect h2{font-size:clamp(1.9rem,3.4vw,2.6rem);margin:10px 0 12px}
+.sect p{color:#B4A794}
+
+/* A la une : l'evenement ou la promotion du moment, en grand. */
+.une{display:grid;grid-template-columns:400px 1fr;gap:0;background:var(--bark-2);
+  border:1px solid rgba(185,138,80,.42);overflow:hidden;margin-top:26px;min-width:0}
+.une .ph{position:relative;aspect-ratio:1/1;overflow:hidden;min-width:0;background:var(--bark-3)}
+.une .ph img{width:100%;height:100%;object-fit:cover}
+.une .tx{padding:40px 44px;display:flex;flex-direction:column;justify-content:center}
+.une .quand{font-size:10.5px;letter-spacing:.28em;text-transform:uppercase;
+  color:var(--bronze);font-weight:700}
+.une h2{font-size:clamp(1.9rem,3.2vw,2.5rem);margin:10px 0 14px}
+.une p{max-width:58ch;margin-bottom:24px}
+.une .btn{align-self:flex-start}
+
+/* Les evenements dates, en bandes. */
+.evs{display:flex;flex-direction:column;gap:22px;margin-top:26px}
+.ev{display:grid;grid-template-columns:240px 1fr;background:var(--bark-2);
+  border:1px solid var(--line);overflow:hidden;min-width:0;transition:.5s cubic-bezier(.2,.8,.2,1)}
+.ev:hover{border-color:rgba(185,138,80,.5)}
+.ev .ph{aspect-ratio:1/1;overflow:hidden;min-width:0;background:var(--bark-3)}
+.ev .ph img{width:100%;height:100%;object-fit:cover}
+.ev .tx{padding:26px 30px;display:flex;flex-direction:column;justify-content:center}
+.ev .quand{font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:var(--bronze);font-weight:700}
+.ev h3{font-size:1.35rem;margin:8px 0 10px}
+.ev p{margin-bottom:16px}
+.ev .btn{align-self:flex-start;padding:12px 22px}
+
+@media(max-width:900px){
+  .une,.ev{grid-template-columns:1fr}
+  .une .ph,.ev .ph{aspect-ratio:16/10}
+  .une .tx{padding:28px 24px}
+  .ev .tx{padding:24px 22px}
+}
 .head{padding:150px 0 46px}
 .head h1{margin:10px 0 20px}
 .head .lede{font-size:1.1rem;max-width:60ch}
@@ -301,14 +337,13 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
       <a href="experiences.html"><i>02</i><span data-t="n2">Expériences</span></a>
       <a href="carte.html"><i>03</i><span data-t="n3">La table</span></a>
       <a href="spa.html"><i>04</i><span data-t="n4">Le spa</span></a>
-      <a href="circuits.html" class="on"><i>05</i><span data-t="n5">Circuits &amp; Offres</span></a>
-      <a href="evenements.html"><i>06</i><span data-t="n6">Événements</span></a>
-      <a href="seminaires.html"><i>07</i><span data-t="n7">Séminaires &amp; groupes</span></a>
-      <a href="galerie.html"><i>08</i><span data-t="n8">Galerie</span></a>
-      <a href="a-propos.html"><i>09</i><span data-t="n9">À propos</span></a>
-      <a href="informations-utiles.html"><i>10</i><span data-t="n10">Informations utiles</span></a>
-      <a href="contact.html"><i>11</i><span data-t="n11">Contact</span></a>
-      <a href="reserver.html"><i>12</i><span data-t="n12">Réserver</span></a>
+      <a href="circuits.html" class="on"><i>05</i><span data-t="n5">Offres &amp; Événements</span></a>
+      <a href="seminaires.html"><i>06</i><span data-t="n6">Séminaires &amp; groupes</span></a>
+      <a href="galerie.html"><i>07</i><span data-t="n7">Galerie</span></a>
+      <a href="a-propos.html"><i>08</i><span data-t="n8">À propos</span></a>
+      <a href="informations-utiles.html"><i>09</i><span data-t="n9">Informations utiles</span></a>
+      <a href="contact.html"><i>10</i><span data-t="n10">Contact</span></a>
+      <a href="reserver.html"><i>11</i><span data-t="n11">Réserver</span></a>
     </nav>
     <aside class="dw-side">
       <div class="ph"><picture><source srcset="img/opt/gal-art-lanterne-640.webp 640w, img/opt/gal-art-lanterne-1024.webp 1024w, img/opt/gal-art-lanterne.webp 1748w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp">
@@ -332,11 +367,60 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
     <a href="index.html" data-t="c1">Accueil</a> &nbsp;·&nbsp; <span data-t="c2">Circuits &amp; Offres</span>
   </nav>
   <span class="eyebrow" data-t="eb">Onze offres &amp; un rendez-vous hebdomadaire</span>
-  <h1 data-t="h1">Circuits &amp; Offres</h1>
-  <p class="lede" data-t="lede">Des séjours déjà composés — chambre, repas, activités et attentions comprises. Choisissez, indiquez vos dates, et la réception s'occupe du reste.</p>
+  <h1 data-t="h1">Offres &amp; Événements</h1>
+  <p class="lede" data-t="lede">Ce qui se passe en ce moment, et les séjours déjà composés — chambre, repas, activités et attentions comprises. Choisissez, indiquez vos dates, et la réception s'occupe du reste.</p>
 </div>
 
 <div class="wrap">
+
+  <div class="sect reveal" id="a-la-une">
+    <span class="eyebrow" data-t="u0">À la une</span>
+    <h2 data-t="u1">Ce qui se passe en ce moment</h2>
+  </div>
+  <article class="une reveal" id="une" data-fin="2027-01-02">
+    <div class="ph"><picture><source srcset="img/opt/gal-lag-nuit-640.webp 640w, img/opt/gal-lag-nuit-1024.webp 1024w, img/opt/gal-lag-nuit.webp 1748w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp">
+      <img width="1748" height="1240" src="img/opt/gal-lag-nuit.jpg" srcset="img/opt/gal-lag-nuit-640.jpg 640w, img/opt/gal-lag-nuit-1024.jpg 1024w, img/opt/gal-lag-nuit.jpg 1748w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" alt="Le Réveillon à Assinie" loading="lazy"></picture></div>
+    <div class="tx">
+      <span class="quand" data-t="q-reveillon">31 décembre</span>
+      <h2 data-t="t-reveillon">Le Réveillon à Assinie</h2>
+      <p data-t="x-reveillon">Dîner de fin d'année au bord de la lagune, puis la nuit au night-club. Les chambres partent tôt sur cette date : la demande se fait dès l'automne.</p>
+      <a class="btn btn-solid" href="reserver.html" data-t="c-reveillon">Demander une chambre</a>
+    </div>
+  </article>
+  <div class="sect reveal" id="evenements">
+    <span class="eyebrow" data-t="v0">Avec une date</span>
+    <h2 data-t="v1">Événements</h2>
+    <p data-t="v2">Les rendez-vous de la saison. Les affiches disparaissent
+    d'elles-mêmes une fois la date passée.</p>
+  </div>
+  <div class="evs" id="evs">
+    <article class="ev reveal" id="mechoui-party">
+      <div class="ph"><picture><source srcset="img/opt/gal-tab-terrasse.webp" type="image/webp">
+        <img width="1748" height="1240" src="img/opt/gal-tab-terrasse.jpg" alt="La Méchoui Party" loading="lazy"></picture></div>
+      <div class="tx">
+        <span class="quand" data-t="q-mechoui-party">Chaque samedi, en soirée</span>
+        <h3 data-t="t-mechoui-party">La Méchoui Party</h3>
+        <p data-t="x-mechoui-party">Le rendez-vous du week-end : méchoui en terrasse, puis happy hour et DJ résident au night-club. Ouvert aux clients de l'hôtel comme aux visiteurs de passage.</p>
+        <a class="btn" href="#demande" data-t="c-mechoui-party">En savoir plus</a>
+      </div>
+    </article>
+    <article class="ev reveal" id="independance" data-fin="2026-08-09">
+      <div class="ph"><picture><source srcset="img/opt/ev-independance.webp" type="image/webp">
+        <img width="526" height="526" src="img/opt/ev-independance.jpg" alt="Fête de l'Indépendance" loading="lazy"></picture></div>
+      <div class="tx">
+        <span class="quand" data-t="q-independance">7 août</span>
+        <h3 data-t="t-independance">Fête de l'Indépendance</h3>
+        <p data-t="x-independance">L'hôtel salue chaque année la fête nationale. Cette affiche est celle que vous avez diffusée en août — elle montre comment une publication de vos réseaux prend place ici.</p>
+        <a class="btn" href="contact.html" data-t="c-independance">Nous écrire</a>
+      </div>
+    </article>
+  </div>
+  <div class="sect reveal" id="forfaits">
+    <span class="eyebrow" data-t="f0">Séjours composés</span>
+    <h2 data-t="f1">Nos offres &amp; forfaits</h2>
+    <p data-t="f2">Tout est compris et le tarif est ferme : vous savez ce que
+    vous payez avant d'arriver.</p>
+  </div>
 
   <!-- Campagne relevée sur la page Facebook (21 000 abonnés) : absente du site actuel -->
   <section class="camp reveal">
@@ -390,7 +474,7 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
       </ul>
       <div class="foot">
         <div class="pr"><b>340 000</b><span data-t="pf">FCFA · le forfait</span></div>
-        <button class="btn btn-solid pickbtn" data-c="Lune de miel inoubliable" data-p="340000" data-u="forfait" data-t="cta">Réserver ce circuit</button>
+        <button class="btn btn-solid pickbtn" data-c="Lune de miel inoubliable" data-p="340000" data-u="forfait" data-t="ctc">Réserver ce circuit</button>
       </div>
     </div>
   </article>
@@ -405,118 +489,119 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
 
   <div class="grid" id="gr">
     <article class="c reveal" data-cat="duo">
-      <div class="ph"><picture><source srcset="img/opt/gal-lag-bateau-640.webp 640w, img/opt/gal-lag-bateau-1024.webp 1024w, img/opt/gal-lag-bateau.webp 1748w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp">
-        <img width="1748" height="1240" loading="lazy" src="img/opt/gal-lag-bateau.jpg" srcset="img/opt/gal-lag-bateau-640.jpg 640w, img/opt/gal-lag-bateau-1024.jpg 1024w, img/opt/gal-lag-bateau.jpg 1748w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" alt="Le ponton et le bateau de balade sur la lagune Aby"></picture>
-        <span class="tag" data-t="g1">Romantique</span></div>
-      <div class="in">
-        <h3 data-t="t1">Évasion Romantique</h3>
-        <ul>
+          <div class="ph"><picture><source srcset="img/opt/gal-lag-bateau-640.webp 640w, img/opt/gal-lag-bateau-1024.webp 1024w, img/opt/gal-lag-bateau.webp 1748w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp">
+            <img width="1748" height="1240" loading="lazy" src="img/opt/gal-lag-bateau.jpg" srcset="img/opt/gal-lag-bateau-640.jpg 640w, img/opt/gal-lag-bateau-1024.jpg 1024w, img/opt/gal-lag-bateau.jpg 1748w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" alt="Le ponton et le bateau de balade sur la lagune Aby"></picture>
+            <span class="tag" data-t="g1">Romantique</span></div>
+          <div class="in">
+            <h3 data-t="t1">Évasion Romantique</h3>
+            <ul>
           <li data-t="s11">Cocktails de charme</li>
           <li data-t="s12">Balade dînatoire aux chandelles</li>
           <li data-t="s13">Petit-déjeuner au lit</li>
           <li data-t="s14">Duo de massages</li>
         </ul>
-        <div class="foot"><div class="pr"><b>100 000</b><span data-t="pf">FCFA · le forfait</span></div>
-        <button class="pick pickbtn" data-c="Évasion Romantique" data-p="100000" data-u="forfait" data-t="ch">Choisir</button></div>
-      </div>
-    </article>
+            <div class="foot"><div class="pr"><b>100 000</b><span data-t="pf">FCFA · le forfait</span></div>
+            <button class="pick pickbtn" data-c="Évasion Romantique" data-p="100000" data-u="forfait" data-t="ch">Choisir</button></div>
+          </div>
+        </article>
     <article class="c reveal" data-cat="duo">
-      <div class="ph"><picture><source srcset="img/opt/r-standard-640.webp 640w, img/opt/r-standard.webp 900w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp">
-        <img width="900" height="600" loading="lazy" src="img/opt/r-standard.jpg" srcset="img/opt/r-standard-640.jpg 640w, img/opt/r-standard.jpg 900w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" alt="Chambre Standard de l'Hôtel Evannath"></picture>
-        <span class="tag" data-t="g2">Week-end</span></div>
-      <div class="in">
-        <h3 data-t="t2">Week-End Intense</h3>
-        <ul>
+          <div class="ph"><picture><source srcset="img/opt/r-standard-640.webp 640w, img/opt/r-standard.webp 900w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp">
+            <img width="900" height="600" loading="lazy" src="img/opt/r-standard.jpg" srcset="img/opt/r-standard-640.jpg 640w, img/opt/r-standard.jpg 900w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" alt="Chambre Standard de l'Hôtel Evannath"></picture>
+            <span class="tag" data-t="g2">Week-end</span></div>
+          <div class="in">
+            <h3 data-t="t2">Week-End Intense</h3>
+            <ul>
           <li data-t="s21">Chambre Standard + 2 petits-déjeuners</li>
           <li data-t="s22">Apéro, puis dîner ou déjeuner</li>
           <li data-t="s23">Balade lagunaire ou jet ski</li>
           <li data-t="s24">Baignade, fitness et massage</li>
         </ul>
-        <div class="foot"><div class="pr"><b>155 000</b><span data-t="pf">FCFA · le forfait</span></div>
-        <button class="pick pickbtn" data-c="Week-End Intense" data-p="155000" data-u="forfait" data-t="ch">Choisir</button></div>
-      </div>
-    </article>
-    <article class="c reveal" data-cat="fam grp">
-      <div class="ph"><picture><source srcset="img/opt/g-lagune-640.webp 640w, img/opt/g-lagune-1024.webp 1024w, img/opt/g-lagune.webp 1200w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp">
-        <img width="1200" height="851" loading="lazy" src="img/opt/g-lagune.jpg" srcset="img/opt/g-lagune-640.jpg 640w, img/opt/g-lagune-1024.jpg 1024w, img/opt/g-lagune.jpg 1200w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" alt="La lagune Aby et les îles environnantes"></picture>
-        <span class="tag" data-t="g3">Découverte</span></div>
-      <div class="in">
-        <h3 data-t="t3">Découvertes Touristiques</h3>
-        <ul>
-          <li data-t="s31">Découverte des îles environnantes</li>
-          <li data-t="s32">Balade touristique guidée</li>
-          <li data-t="s33">Histoire de la commune d'Assinie</li>
-          <li data-t="s34">En-cas à emporter</li>
-        </ul>
-        <div class="foot"><div class="pr"><b>35 000</b><span data-t="pp">FCFA · par personne</span></div>
-        <button class="pick pickbtn" data-c="Découvertes Touristiques" data-p="35000" data-u="personne" data-t="ch">Choisir</button></div>
-      </div>
-    </article>
-    <article class="c reveal" data-cat="fam">
-      <div class="ph"><picture><source srcset="img/opt/c-piscine-640.webp 640w, img/opt/c-piscine.webp 900w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp">
-        <img width="900" height="638" loading="lazy" src="img/opt/c-piscine.jpg" srcset="img/opt/c-piscine-640.jpg 640w, img/opt/c-piscine.jpg 900w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" alt="La piscine de l'hôtel en fin de journée"></picture>
-        <span class="tag" data-t="g4">Enfants</span></div>
-      <div class="in">
-        <h3 data-t="t4">Découvertes Junior</h3>
-        <ul>
-          <li data-t="s41">Maquillage enfant et accès aux jeux</li>
-          <li data-t="s42">Atelier cuisine et atelier peinture</li>
-          <li data-t="s43">Conte en bordure d'eau, le soir</li>
-          <li data-t="s44">Soins princes &amp; princesses</li>
-        </ul>
-        <div class="foot"><div class="pr"><b>25 000</b><span data-t="pe">FCFA · par enfant</span></div>
-        <button class="pick pickbtn" data-c="Découvertes Junior" data-p="25000" data-u="enfant" data-t="ch">Choisir</button></div>
-      </div>
-    </article>
+            <div class="foot"><div class="pr"><b>155 000</b><span data-t="pf">FCFA · le forfait</span></div>
+            <button class="pick pickbtn" data-c="Week-End Intense" data-p="155000" data-u="forfait" data-t="ch">Choisir</button></div>
+          </div>
+        </article>
     <article class="c reveal" data-cat="long fam">
-      <div class="ph"><picture><source srcset="img/opt/g-vue-640.webp 640w, img/opt/g-vue-1024.webp 1024w, img/opt/g-vue.webp 1200w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp">
-        <img width="1200" height="851" loading="lazy" src="img/opt/g-vue.jpg" srcset="img/opt/g-vue-640.jpg 640w, img/opt/g-vue-1024.jpg 1024w, img/opt/g-vue.jpg 1200w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" alt="Vue sur la lagune et les cocotiers d'Assinie"></picture>
-        <span class="tag" data-t="g5">Long séjour</span></div>
-      <div class="in">
-        <h3 data-t="t5">Long Holidays</h3>
-        <ul>
+          <div class="ph"><picture><source srcset="img/opt/g-vue-640.webp 640w, img/opt/g-vue-1024.webp 1024w, img/opt/g-vue.webp 1200w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp">
+            <img width="1200" height="851" loading="lazy" src="img/opt/g-vue.jpg" srcset="img/opt/g-vue-640.jpg 640w, img/opt/g-vue-1024.jpg 1024w, img/opt/g-vue.jpg 1200w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" alt="Vue sur la lagune et les cocotiers d'Assinie"></picture>
+            <span class="tag" data-t="g5">Long séjour</span></div>
+          <div class="in">
+            <h3 data-t="t5">Long Holidays</h3>
+            <ul>
           <li data-t="s51">−10 % sur chaque nuitée supplémentaire</li>
           <li data-t="s52">Balade lagunaire offerte dès 3 jours</li>
           <li data-t="s53">Applicable à toutes les catégories</li>
           <li data-t="s54">Cumulable avec la navette aéroport</li>
         </ul>
-        <div class="foot"><div class="pr"><b>25 000</b><span data-t="pf">FCFA · le forfait</span></div>
-        <button class="pick pickbtn" data-c="Long Holidays" data-p="25000" data-u="forfait" data-t="ch">Choisir</button></div>
-      </div>
-    </article>
+            <div class="foot"><div class="pr"><b>25 000</b><span data-t="pf">FCFA · le forfait</span></div>
+            <button class="pick pickbtn" data-c="Long Holidays" data-p="25000" data-u="forfait" data-t="ch">Choisir</button></div>
+          </div>
+        </article>
     <article class="c reveal" data-cat="grp fam">
-      <div class="ph"><picture><source srcset="img/opt/g-resto-640.webp 640w, img/opt/g-resto-1024.webp 1024w, img/opt/g-resto.webp 1200w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp">
-        <img width="1200" height="851" loading="lazy" src="img/opt/g-resto.jpg" srcset="img/opt/g-resto-640.jpg 640w, img/opt/g-resto-1024.jpg 1024w, img/opt/g-resto.jpg 1200w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" alt="Salle de restaurant dressée pour un groupe"></picture>
-        <span class="tag" data-t="g6">Dès 10 personnes</span></div>
-      <div class="in">
-        <h3 data-t="t6">Coffret Anniversaire</h3>
-        <ul>
+          <div class="ph"><picture><source srcset="img/opt/g-resto-640.webp 640w, img/opt/g-resto-1024.webp 1024w, img/opt/g-resto.webp 1200w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp">
+            <img width="1200" height="851" loading="lazy" src="img/opt/g-resto.jpg" srcset="img/opt/g-resto-640.jpg 640w, img/opt/g-resto-1024.jpg 1024w, img/opt/g-resto.jpg 1200w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" alt="Salle de restaurant dressée pour un groupe"></picture>
+            <span class="tag" data-t="g6">Dès 10 personnes</span></div>
+          <div class="in">
+            <h3 data-t="t6">Coffret Anniversaire</h3>
+            <ul>
           <li data-t="s61">Salle privatisée, offerte</li>
           <li data-t="s62">Buffet : entrées, plats chauds, dessert</li>
           <li data-t="s63">Boissons comprises</li>
           <li data-t="s64">Sonorisation et technicien son offerts</li>
         </ul>
-        <div class="foot"><div class="pr"><b>28 000</b><span data-t="pp">FCFA · par personne</span></div>
-        <button class="pick pickbtn" data-c="Coffret Anniversaire" data-p="28000" data-u="personne" data-t="ch">Choisir</button></div>
-      </div>
-    </article>
+            <div class="foot"><div class="pr"><b>28 000</b><span data-t="pp">FCFA · par personne</span></div>
+            <button class="pick pickbtn" data-c="Coffret Anniversaire" data-p="28000" data-u="personne" data-t="ch">Choisir</button></div>
+          </div>
+        </article>
   </div>
 
-  <section class="weekly reveal">
-    <div class="ph"><picture><source srcset="img/opt/c-bar-640.webp 640w, img/opt/c-bar.webp 900w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp">
-      <img width="900" height="638" loading="lazy" src="img/opt/c-bar.jpg" srcset="img/opt/c-bar-640.jpg 640w, img/opt/c-bar.jpg 900w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" alt="Le bar et la salle en rotin de l'Hôtel Evannath"></picture></div>
-    <div class="txt">
-      <span class="when"><i></i><span data-t="w0">Chaque samedi, dès 15 h</span></span>
-      <h2 data-t="w1">Méchoui Party</h2>
-      <p data-t="w2">Ce n'est pas un forfait : c'est le rendez-vous du samedi après-midi, ouvert à tous — clients de l'hôtel comme visiteurs de passage. Méchoui au bord de l'eau, puis la soirée continue au night-club.</p>
-      <div class="perks">
-        <span><em>✓</em><span data-t="w3">Un cocktail offert</span></span>
-        <span><em>✓</em><span data-t="w4">Happy hour au night-club</span></span>
-        <span><em>✓</em><span data-t="w5">−10 % sur toutes les boissons</span></span>
-      </div>
-      <div style="margin-top:28px"><a href="#demande" class="btn" data-t="w6">Réserver une table</a></div>
-    </div>
-  </section>
+  <div class="sect reveal" id="decouvertes">
+    <span class="eyebrow" data-t="dc0">Autour d'Assinie</span>
+    <h2 data-t="dc1">Circuits &amp; découvertes</h2>
+    <p data-t="dc2">Sortir du domaine : les îles de la lagune, l'embouchure, et
+    ce que les enfants retiennent d'un séjour ici.</p>
+  </div>
+
+  <div class="grid">
+    <article class="c reveal" data-cat="fam grp">
+          <div class="ph"><picture><source srcset="img/opt/g-lagune-640.webp 640w, img/opt/g-lagune-1024.webp 1024w, img/opt/g-lagune.webp 1200w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp">
+            <img width="1200" height="851" loading="lazy" src="img/opt/g-lagune.jpg" srcset="img/opt/g-lagune-640.jpg 640w, img/opt/g-lagune-1024.jpg 1024w, img/opt/g-lagune.jpg 1200w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" alt="La lagune Aby et les îles environnantes"></picture>
+            <span class="tag" data-t="g3">Découverte</span></div>
+          <div class="in">
+            <h3 data-t="t3">Découvertes Touristiques</h3>
+            <ul>
+          <li data-t="s31">Découverte des îles environnantes</li>
+          <li data-t="s32">Balade touristique guidée</li>
+          <li data-t="s33">Histoire de la commune d'Assinie</li>
+          <li data-t="s34">En-cas à emporter</li>
+        </ul>
+            <div class="foot"><div class="pr"><b>35 000</b><span data-t="pp">FCFA · par personne</span></div>
+            <button class="pick pickbtn" data-c="Découvertes Touristiques" data-p="35000" data-u="personne" data-t="ch">Choisir</button></div>
+          </div>
+        </article>
+    <article class="c reveal" data-cat="fam">
+          <div class="ph"><picture><source srcset="img/opt/c-piscine-640.webp 640w, img/opt/c-piscine.webp 900w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp">
+            <img width="900" height="638" loading="lazy" src="img/opt/c-piscine.jpg" srcset="img/opt/c-piscine-640.jpg 640w, img/opt/c-piscine.jpg 900w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" alt="La piscine de l'hôtel en fin de journée"></picture>
+            <span class="tag" data-t="g4">Enfants</span></div>
+          <div class="in">
+            <h3 data-t="t4">Découvertes Junior</h3>
+            <ul>
+          <li data-t="s41">Maquillage enfant et accès aux jeux</li>
+          <li data-t="s42">Atelier cuisine et atelier peinture</li>
+          <li data-t="s43">Conte en bordure d'eau, le soir</li>
+          <li data-t="s44">Soins princes &amp; princesses</li>
+        </ul>
+            <div class="foot"><div class="pr"><b>25 000</b><span data-t="pe">FCFA · par enfant</span></div>
+            <button class="pick pickbtn" data-c="Découvertes Junior" data-p="25000" data-u="enfant" data-t="ch">Choisir</button></div>
+          </div>
+        </article>
+  </div>
+
+  <div class="sect reveal">
+    <p style="color:var(--muted)"><a href="experiences.html" style="color:var(--bronze)"
+    data-t="dc3">Voir aussi toutes les activités du domaine et de la lagune →</a></p>
+  </div>
+
+
 
 </div>
 
@@ -760,8 +845,8 @@ document.querySelectorAll('.pickbtn').forEach(function(b){b.onclick=function(){
 document.getElementById('rf').addEventListener('submit',function(e){e.preventDefault();
   alert("Démonstration : la demande partirait à la réception et à houansouyannaxel@gmail.com, avec une confirmation automatique au client.")});
 
-var EN={mn:"Menu",n1:"Rooms &amp; Suites",n2:"Experiences",n3:"The table",n4:"The spa",n5:"Packages &amp; Offers",n6:"Events",n7:"Meetings &amp; groups",n8:"Gallery",n9:"About",n10:"Useful information",n11:"Contact",n12:"Book",dr:"Reservations",cta:"Book this package",
-c1:"Home",c2:"Packages &amp; Offers",eb:"Eleven offers &amp; one weekly gathering",h1:"Packages &amp; Offers",
+var EN={mn:"Menu",n1:"Rooms &amp; Suites",n2:"Experiences",n3:"The table",n4:"The spa",n5:"Offers &amp; Events",n6:"Meetings &amp; groups",n7:"Gallery",n8:"About",n9:"Useful information",n10:"Contact",n11:"Book",dr:"Reservations",u0:"On now",u1:"What is happening right now",v0:"With a date",v1:"Events",v2:"The season&rsquo;s gatherings. Posters disappear on their own once the date has passed.",f0:"Composed stays",f1:"Our offers &amp; packages",f2:"Everything is included and the rate is firm: you know what you pay before you arrive.",dc0:"Around Assinie",dc1:"Tours &amp; discoveries",dc2:"Beyond the grounds: the lagoon islands, the river mouth, and what children remember from a stay here.",dc3:"See also every activity on the grounds and the lagoon &rarr;","q-mechoui-party":"Every Saturday evening","t-mechoui-party":"Méchoui Party","x-mechoui-party":"The weekend gathering: méchoui on the terrace, then happy hour and our resident DJ at the night club. Open to hotel guests and visitors alike.","c-mechoui-party":"Find out more","q-reveillon":"31 December","t-reveillon":"New Year's Eve in Assinie","x-reveillon":"A year-end dinner by the lagoon, then the night club. Rooms go early for this date — requests start coming in the autumn.","c-reveillon":"Request a room","q-independance":"7 August","t-independance":"Independence Day","x-independance":"The hotel marks the national holiday each year. This is the artwork you published in August — it shows how a post from your social media finds its place here.","c-independance":"Write to us",cta:"Book",ctc:"Book this package",
+c1:"Home",c2:"Offers &amp; Events",eb:"Eleven offers &amp; one weekly gathering",h1:"Offers &amp; Events",
 lede:"Stays already put together — room, meals, activities and small touches included. Pick one, give us your dates, and the front desk handles the rest.",
 cl:"Live campaign",ct:"Holiday Packs",cs:"Announced on our Facebook page · +225 01 51 52 75 75",
 cp:"“Holidays that look like you.” Four seasonal packages, bookable right here.",
@@ -796,6 +881,28 @@ document.querySelectorAll('.lang button').forEach(function(b){b.onclick=function
      placeholder de champ, par exemple — declare window.EVN_LANG. */
   if(typeof EVN_LANG==='function')EVN_LANG(lg);
 }});
+(function(){
+  var auj = new Date(); auj.setHours(0,0,0,0);
+  var perime = function(el){
+    var f = el.getAttribute('data-fin');
+    return f && new Date(f + 'T23:59:59') < auj;
+  };
+  var une = document.getElementById('une');
+  if (une && perime(une)) {
+    une.remove();
+    var t = document.getElementById('a-la-une'); if (t) t.remove();
+  }
+  var restants = 0;
+  document.querySelectorAll('.ev').forEach(function(el){
+    if (perime(el)) { el.remove(); return; }
+    restants++;
+  });
+  if (!restants) {
+    var s = document.getElementById('evenements'); if (s) s.remove();
+    var g = document.getElementById('evs'); if (g) g.remove();
+  }
+})();
+
 </script>
 </body>
 </html>

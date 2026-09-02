@@ -23,12 +23,12 @@ if _e:
     # L'attendre au defilement le rendrait invisible tant que le script n'a
     # pas tourne, et invisible tout court si le script echoue.
     BANDEAU = ('<div class="bandeau" id="bandeau"%s>'
-               '<a href="evenements.html#%s">'
+               '<a href="circuits.html#a-la-une">'
                '<span class="quand" data-t="bq">%s</span>'
                '<b data-t="bt">%s</b>'
                '<span class="t" data-t="bx">%s</span>'
                '<span class="fl" data-t="bf">Voir tout</span>'
-               '</a></div>') % (_fin, _e['slug'], _e['quand'], _e['titre'],
+               '</a></div>') % (_fin, _e['quand'], _e['titre'],
                                 "Et tout ce qui se passe à l'hôtel en ce moment.")
     _en = EV_EN.get(_e['slug'])
     EN_BANDEAU = ('bq:"%s",bt:"%s",bx:"On now at the hotel.",bf:"See all",'
