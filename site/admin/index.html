@@ -442,11 +442,13 @@ function resumePromo(p) {
 function liste(type) {
   const src = type === 'promotions' ? ETAT.promotions
     : type === 'campagnes' ? ETAT.campagnes : ETAT.evenements;
-  const nom = type === 'promotions' ? 'promotion'
-    : type === 'campagnes' ? 'campagne' : 'événement';
+  // « Aucun promotion » trainait depuis le debut : deux des trois noms sont
+  // feminins.
+  const [art, nom] = type === 'promotions' ? ['Aucune', 'promotion']
+    : type === 'campagnes' ? ['Aucune', 'campagne'] : ['Aucun', 'événement'];
   if (!src.length) {
     return `<div class="carte" style="text-align:center;padding:44px">
-      <p style="color:var(--muted)">Aucun ${nom} pour le moment.</p>
+      <p style="color:var(--muted)">${art} ${nom} pour le moment.</p>
       <button class="btn plein" style="margin-top:18px" data-neuf="${type}">Créer le premier</button>
     </div>`;
   }
