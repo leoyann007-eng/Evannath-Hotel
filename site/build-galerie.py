@@ -121,7 +121,7 @@ CSS_GAL = """
 .head{padding:150px 0 34px}
 .head h1{margin:10px 0 18px}
 .head p{max-width:58ch;font-size:1.06rem}
-.tools{position:sticky;top:var(--h-nav);z-index:60;background:rgba(23,16,10,.97);backdrop-filter:blur(16px);
+.tools{background:var(--bark);
   border-block:1px solid var(--line);margin-bottom:44px}
 .tools .in{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;padding:13px 0}
 .filters{display:flex;gap:6px;flex-wrap:wrap}
@@ -177,7 +177,7 @@ b = [header('index.html#reserver', 'Réserver'), drawer('index.html#galerie'), '
   <p data-t="lede">Tout ce que vous voyez ici a été photographié sur place. Pas de banque d'images, pas d'illustration générée — le lieu tel qu'il est.</p>
 </div>
 
-<div class="tools collante">
+<div class="tools">
   <div class="wrap in">
     <div class="filters" role="group" aria-label="Filtrer les photos">''' % len(made)]
 

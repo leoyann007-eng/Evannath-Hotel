@@ -340,12 +340,8 @@ def controler():
                     pb.append((f, 'script %d invalide : %s'
                                % (i + 1, (detail or ['?'])[0].strip()[:70])))
 
-        # 12. une barre collante doit avoir son rideau
-        if 'collante"' in s:
-            if 'collante::before' not in s:
-                pb.append((f, 'rideau CSS absent'))
-            if 'epinglee' not in s:
-                pb.append((f, 'rideau JS absent'))
+        # Le controle 12 — rideau des barres collantes — a disparu avec le
+        # mecanisme lui-meme : les barres de filtres ne sont plus collantes.
 
     print('%d pages controlees' % len(pages))
     if pb:

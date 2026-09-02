@@ -35,7 +35,7 @@ section{padding:88px 0}
 
 /* barre de tri */
 .bar{display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap;
-  padding:20px 0;border-block:1px solid var(--line);position:sticky;top:var(--h-nav);z-index:20;
+  padding:20px 0;border-block:1px solid var(--line);
   background:rgba(23,16,10,.96);backdrop-filter:blur(12px)}
 .grp{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .grp b{font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-right:6px}
@@ -141,7 +141,7 @@ b = [header('reserver.html', 'Réserver', 'cta'), drawer('index.html#chambres'),
 </section>
 
 <section class="wrap" id="liste">
-  <div class="bar collante">
+  <div class="bar">
     <div class="grp" role="group" aria-label="Filtrer par type">
       <b data-t="ft">Type</b>
       <button class="chip on" data-f="tout" data-t="f0">Tout voir</button>
