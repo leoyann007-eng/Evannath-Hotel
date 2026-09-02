@@ -425,6 +425,14 @@ menu. C'est ce qu'on veut savoir avant de se déplacer, et c'est ce qui manquait
 Le compteur `01 / 02` et les deux flèches se tiennent en bas à droite. Les
 flèches du clavier fonctionnent aussi.
 
+**Il défile tout seul, toutes les sept secondes** — mais il s'arrête dès qu'on
+le survole, qu'on y met le clavier, ou que l'onglet passe en arrière-plan : un
+carrousel qui tourne pendant qu'on lit une pastille est plus agaçant qu'utile.
+Toute action manuelle relance le compte à zéro, pour ne pas enchaîner juste
+après un clic. Et rien ne bouge si le visiteur a demandé moins de mouvement
+(`prefers-reduced-motion`).
+
+
 **Le carrousel reste dans la largeur du contenu.** Un débordement plein écran
 demanderait `100vw`, qui inclut la barre de défilement et décale la page de
 8 px — le défaut est déjà documenté ailleurs dans ce projet.

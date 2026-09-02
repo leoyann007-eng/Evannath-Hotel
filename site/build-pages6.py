@@ -4,7 +4,6 @@ import io
 import _schema
 from _evenements import EVENEMENTS, EN as EV_EN
 NL_ = chr(10)
-NL_ = chr(10)
 from _chrome import page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV
 
 CSS = """
@@ -62,12 +61,6 @@ CSS = """
   .pilote{right:20px;bottom:20px}
 }
 
-@media(max-width:900px){
-  .une,.ev{grid-template-columns:1fr}
-  .une .ph,.ev .ph{aspect-ratio:16/10}
-  .une .tx{padding:28px 24px}
-  .ev .tx{padding:24px 22px}
-}
 .head{padding:150px 0 46px}
 .head h1{margin:10px 0 20px}
 .head .lede{font-size:1.1rem;max-width:60ch}
@@ -589,13 +582,40 @@ JS += """
   /* Un seul evenement : les fleches n'ont plus d'objet. */
   if (diapos.length < 2) { if (pilote) pilote.remove(); return; }
 
-  ag.querySelector('.prec').addEventListener('click', function(){ montrer(n - 1); });
-  ag.querySelector('.suiv').addEventListener('click', function(){ montrer(n + 1); });
+  /* Defilement automatique.
+     Il s'arrete des qu'on survole, qu'on met le clavier dans le carrousel, ou
+     que l'onglet passe en arriere-plan : un carrousel qui tourne pendant qu'on
+     lit une pastille est plus agacant qu'utile. Toute action manuelle relance
+     le compte a zero, pour ne pas enchainer juste apres un clic.
+     Et rien ne bouge si le visiteur a demande moins de mouvement. */
+  var DELAI = 7000;
+  var minuteur = null;
+  var calme = matchMedia('(prefers-reduced-motion: reduce)');
+
+  function relancer(){
+    clearInterval(minuteur);
+    if (calme.matches) return;
+    minuteur = setInterval(function(){ montrer(n + 1); }, DELAI);
+  }
+  function suspendre(){ clearInterval(minuteur); }
+
+  ag.addEventListener('mouseenter', suspendre);
+  ag.addEventListener('mouseleave', relancer);
+  ag.addEventListener('focusin', suspendre);
+  ag.addEventListener('focusout', relancer);
+  document.addEventListener('visibilitychange', function(){
+    document.hidden ? suspendre() : relancer();
+  });
+  calme.addEventListener('change', relancer);
+
+  ag.querySelector('.prec').addEventListener('click', function(){ montrer(n - 1); relancer(); });
+  ag.querySelector('.suiv').addEventListener('click', function(){ montrer(n + 1); relancer(); });
+  relancer();
 
   addEventListener('keydown', function(ev){
     if (!ag.getBoundingClientRect().height) return;
-    if (ev.key === 'ArrowLeft')  montrer(n - 1);
-    if (ev.key === 'ArrowRight') montrer(n + 1);
+    if (ev.key === 'ArrowLeft')  { montrer(n - 1); relancer(); }
+    if (ev.key === 'ArrowRight') { montrer(n + 1); relancer(); }
   });
 })();
 """
