@@ -85,6 +85,46 @@ h1.t{font-family:var(--f-t);font-size:30px;font-weight:400}
 /* ── Formulaire des promotions ──────────────────────────────────────── */
 /* Les quatre temps sont numerotes : on sait ou on en est sans compter. */
 .etape{position:relative}
+
+/* Le fil des etapes : ou l on en est, ce qui reste, et le retour en
+   arriere sur ce qui est deja franchi. */
+.fil{display:flex;align-items:center;gap:0;list-style:none;margin:0 0 22px;
+  padding:0;flex-wrap:wrap}
+.fil li{display:flex;align-items:center;gap:8px;font-size:11.5px;
+  color:var(--muted);padding-right:14px}
+.fil li+li{padding-left:14px;border-left:1px solid var(--line)}
+.fil li i{display:inline-flex;align-items:center;justify-content:center;
+  width:22px;height:22px;font-style:normal;font-size:11px;font-weight:700;
+  border-radius:50%;background:var(--bark-3);color:var(--muted);
+  border:1px solid var(--line);flex:none}
+.fil li.ici{color:var(--sand);font-weight:600}
+.fil li.ici i{background:var(--bronze-2);color:var(--night);
+  border-color:var(--bronze-2)}
+.fil li.fait{color:var(--bronze-2);cursor:pointer}
+.fil li.fait i{color:var(--bronze-2);border-color:rgba(185,138,80,.5)}
+.fil li.fait:hover{color:var(--sand)}
+
+/* Le recapitulatif : a gauche ce qui a ete decide, a droite ce que verra
+   le client. */
+.recap{display:grid;grid-template-columns:1fr minmax(0,280px);gap:26px}
+.recap-l{display:flex;gap:14px;padding:11px 0;border-bottom:1px solid var(--line)}
+.recap-l:last-child{border-bottom:0}
+.recap-l span{flex:none;width:112px;font-size:10.5px;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--muted);font-weight:700;padding-top:2px}
+.recap-l b{font-weight:400;font-size:13.5px}
+.apercu-client{position:relative;background:var(--night);
+  border:1px solid var(--line);min-height:230px;overflow:hidden}
+.apercu-client img{width:100%;height:100%;object-fit:cover;position:absolute;
+  inset:0;opacity:.55}
+.apercu-client .vide{position:absolute;inset:0;background:var(--bark-3)}
+.apercu-client .dessus{position:relative;padding:22px;display:flex;
+  flex-direction:column;align-items:flex-start;gap:10px;min-height:230px;
+  justify-content:flex-end}
+.apercu-client .taux{padding:4px 10px;font-size:13px;font-weight:700;
+  background:var(--bronze-2);color:var(--night)}
+.apercu-client b{font-family:var(--f-display);font-size:20px;font-weight:400;
+  color:var(--cream);line-height:1.2}
+@media (max-width:820px){ .recap{grid-template-columns:1fr} }
 .bloc-t i{display:inline-flex;align-items:center;justify-content:center;
   width:22px;height:22px;margin-right:9px;font-style:normal;font-size:11px;
   font-weight:700;background:var(--bronze-2);color:var(--night);
@@ -440,28 +480,47 @@ function instantSaisi(quoi) {
 }
 
 /** Ce que verront les clients, recalcule a chaque frappe. */
+/* Chaque etape n affiche qu une partie des champs. L apercu lit donc l ecran
+   quand le champ y est, et EDITE sinon : autrement il tombait des l etape 3,
+   ou le champ de la remise n existe plus, et la page perdait son apercu. */
 function rafraichirPromo() {
-  const vit = document.getElementById('apercu-remise');
-  if (!vit) return;
-  const pct = !!document.querySelector('[data-remise="pourcentage"].on');
+  const e = EDITE || {};
+  const r = e.remise || {};
+
+  const btn = document.querySelector('[data-remise].on');
+  const type = btn ? btn.dataset.remise : (r.type || 'pourcentage');
+  const pct = type !== 'montant';
+
+  const champ = document.getElementById('f-valeur');
+  const brut = champ ? champ.value : String(r.valeur || '');
   const v = Math.abs(Math.round(Number(
-    (document.getElementById('f-valeur').value || '').replace(/[^\d.]/g, '')))) || 0;
-  const t = chambreTemoin(cibleSaisie());
-  if (!t || !v) {
-    vit.innerHTML = '<span class="aide">Indiquez une valeur pour voir le prix'
-      + ' remisé.</span>';
-  } else {
-    const remise = pct ? Math.round(t.prix * Math.min(v, 100) / 100)
-                       : Math.min(v, t.prix);
-    vit.innerHTML = 'Sur la <b>' + ech(t.nom) + '</b> : <s>' + FCFA(t.prix)
-      + '</s> <b class="prix">' + FCFA(t.prix - remise) + '</b> '
-      + '<span class="etiq">−'
-      + (pct ? Math.min(v, 100) + ' %' : FCFA(Math.min(v, t.prix))) + '</span>';
+    (brut || '').replace(/[^\d.]/g, '')))) || 0;
+
+  const cible = document.querySelector('input[name="cible"]')
+    ? cibleSaisie() : (e.cible || { toutes: true });
+
+  const vit = document.getElementById('apercu-remise');
+  if (vit) {
+    const t = chambreTemoin(cible);
+    if (!t || !v) {
+      vit.innerHTML = '<span class="aide">Indiquez une valeur pour voir le prix'
+        + ' remisé.</span>';
+    } else {
+      const remise = pct ? Math.round(t.prix * Math.min(v, 100) / 100)
+                         : Math.min(v, t.prix);
+      vit.innerHTML = 'Sur la <b>' + ech(t.nom) + '</b> : <s>' + FCFA(t.prix)
+        + '</s> <b class="prix">' + FCFA(t.prix - remise) + '</b> '
+        + '<span class="etiq">−'
+        + (pct ? Math.min(v, 100) + ' %' : FCFA(Math.min(v, t.prix))) + '</span>';
+    }
   }
+
   const per = document.getElementById('apercu-periode');
   if (per) {
-    const d = instantSaisi('d'), f = instantSaisi('f');
-    const st = statutPromo({ publie: document.getElementById('f-publie').checked,
+    const d = document.getElementById('f-d-date') ? instantSaisi('d') : e.debut;
+    const f = document.getElementById('f-f-date') ? instantSaisi('f') : e.fin;
+    const pub = document.getElementById('f-publie');
+    const st = statutPromo({ publie: pub ? pub.checked : e.publie !== false,
                              debut: d, fin: f });
     per.innerHTML = (!d && !f)
       ? '<span class="aide">Sans période, la promotion reste affichée tant '
@@ -473,18 +532,25 @@ function rafraichirPromo() {
 /* Les trois reglages qui se repondent — type de remise, perimetre,
    periode — doivent se voir immediatement. Sinon on publie une remise
    de 200 % ou une promotion deja terminee sans le savoir. */
+let ECOUTE_PROMO = false;
 function brancherPromo() {
   const f = $('#vue');
   if (!f) return;
-  f.addEventListener('input', rafraichirPromo);
-  f.addEventListener('change', (ev) => {
-    const rad = ev.target.closest('input[name="cible"]');
-    if (rad) {
-      const l = $('#les-chambres');
-      if (l) l.hidden = rad.value !== 'certaines';
-    }
-    rafraichirPromo();
-  });
+  /* Le conteneur survit aux changements d etape : poser les ecouteurs a chaque
+     rendu les empilait, et l apercu se recalculait autant de fois qu on avait
+     franchi d etapes. On les pose une seule fois. */
+  if (!ECOUTE_PROMO) {
+    ECOUTE_PROMO = true;
+    f.addEventListener('input', rafraichirPromo);
+    f.addEventListener('change', (ev) => {
+      const rad = ev.target.closest('input[name="cible"]');
+      if (rad) {
+        const l = $('#les-chambres');
+        if (l) l.hidden = rad.value !== 'certaines';
+      }
+      rafraichirPromo();
+    });
+  }
   rafraichirPromo();
 }
 
@@ -499,24 +565,30 @@ function choisirRemise(bouton) {
   rafraichirPromo();
 }
 
-async function enregistrerPromo(val) {
+/* On publie depuis EDITE, pas depuis l ecran. Au recapitulatif, les champs
+   des etapes precedentes n existent plus : les lire faisait echouer la
+   publication sur un « classList of null », juste au moment ou l on croyait
+   avoir fini. EDITE est la seule source qui traverse les cinq etapes. */
+async function enregistrerPromo() {
+  lireEtape();
+  const e = EDITE || {};
+  const r0 = e.remise || {};
   const entree = {
-    id: EDITE && EDITE.id,
-    titre: val('f-titre'),
-    message: val('f-message'),
-    fond: (EDITE && EDITE.fond) || '',
-    format: (EDITE && EDITE.format) || 'fond',
+    id: e.id,
+    titre: e.titre || '',
+    message: e.message || '',
+    fond: e.fond || '',
+    format: e.format || 'fond',
     remise: {
-      type: $('[data-remise="montant"]').classList.contains('on')
-        ? 'montant' : 'pourcentage',
-      valeur: (val('f-valeur') || '').replace(/[^\d.]/g, ''),
+      type: r0.type === 'montant' ? 'montant' : 'pourcentage',
+      valeur: r0.valeur || 0,
     },
-    cible: cibleSaisie(),
-    debut: instantSaisi('d'),
-    fin: instantSaisi('f'),
-    publie: $('#f-publie').checked,
-    avant: $('#f-avant').checked,
-    pastille: $('#f-pastille').checked,
+    cible: e.cible || { toutes: true },
+    debut: e.debut || null,
+    fin: e.fin || null,
+    publie: e.publie !== false,
+    avant: e.avant === true,
+    pastille: e.pastille !== false,
   };
   const msg = $('#msgf');
   const r = await appel('enregistrer', { type: 'promotion', entree });
@@ -526,29 +598,93 @@ async function enregistrerPromo(val) {
   setTimeout(charger, 400);
 }
 
+const ETAPES = ['Informations générales', 'Réduction', "S'applique à",
+                'Période & affichage', 'Récapitulatif'];
+let ETAPE = 1;
+
+/* Le fil des etapes. Il ne sert pas a decorer : il dit ou l on en est, ce qui
+   reste, et il laisse revenir en arriere sur ce qui est deja franchi. */
+function fil() {
+  return '<ol class="fil">' + ETAPES.map((nom, i) => {
+    const n = i + 1;
+    const cl = n === ETAPE ? 'ici' : (n < ETAPE ? 'fait' : '');
+    const clic = n < ETAPE ? ` data-pas="${n}"` : '';
+    return `<li class="${cl}"${clic}><i>${n < ETAPE ? '✓' : n}</i>
+      <span>${nom}</span></li>`;
+  }).join('') + '</ol>';
+}
+
+/* Ce que l utilisateur a saisi dans l etape courante, verse dans EDITE avant
+   de changer d ecran. Sans cela, passer a l etape suivante perdrait tout ce
+   qui vient d etre tape : le formulaire est reconstruit a chaque pas. */
+function lireEtape() {
+  EDITE = EDITE || { publie: true, remise: {}, cible: { toutes: true } };
+  const v = (id) => { const e = $('#' + id); return e ? e.value.trim() : null; };
+  const c = (id) => { const e = $('#' + id); return e ? e.checked : null; };
+
+  if (v('f-titre') !== null) EDITE.titre = v('f-titre');
+  if (v('f-message') !== null) EDITE.message = v('f-message');
+
+  const btn = document.querySelector('[data-remise].on');
+  if (btn) {
+    EDITE.remise = EDITE.remise || {};
+    EDITE.remise.type = btn.dataset.remise;
+    EDITE.remise.valeur = (v('f-valeur') || '').replace(/[^\d.]/g, '');
+  }
+  if (document.querySelector('input[name="cible"]')) EDITE.cible = cibleSaisie();
+  if ($('#f-d-date')) { EDITE.debut = instantSaisi('d'); EDITE.fin = instantSaisi('f'); }
+  if (c('f-publie') !== null) EDITE.publie = c('f-publie');
+  if (c('f-avant') !== null) EDITE.avant = c('f-avant');
+  if (c('f-pastille') !== null) EDITE.pastille = c('f-pastille');
+}
+
+/* Ce qui manque pour passer a la suite. On refuse d avancer plutot que de
+   laisser decouvrir le probleme au recapitulatif. */
+function manqueEtape() {
+  if (ETAPE === 1 && !(EDITE.titre || '').trim()) return 'Il manque le titre.';
+  if (ETAPE === 2) {
+    const val = Number((EDITE.remise || {}).valeur || 0);
+    if (!val) return 'Indiquez la valeur de la réduction.';
+  }
+  if (ETAPE === 3 && EDITE.cible && EDITE.cible.toutes === false
+      && !(EDITE.cible.chambres || []).length
+      && !(EDITE.cible.services || []).length) {
+    return 'Choisissez au moins une chambre, ou revenez à « toutes les chambres ».';
+  }
+  return '';
+}
+
 function formulairePromo() {
   const e = EDITE || { publie: true, remise: {}, cible: { toutes: true } };
-  const r = e.remise || {};
-  const c = e.cible || { toutes: true };
-  const pct = r.type !== 'montant';
-  const dh = (v, quoi) => {
-    const m = String(v || '').match(/^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})$/);
-    return m ? (quoi === 'date' ? m[1] : m[2]) : '';
-  };
+  const dernier = ETAPE === ETAPES.length;
+  return `${fil()}
+    <div class="carte etape">
+      <h2 class="bloc-t"><i>${ETAPE}</i> ${ETAPES[ETAPE - 1]}</h2>
+      ${[pas1, pas2, pas3, pas4, pas5][ETAPE - 1](e)}
+    </div>
+    <div class="barre">
+      ${ETAPE > 1 ? '<button class="btn" data-pas="prec">‹ Précédent</button>' : ''}
+      <button class="btn" id="annuler">Annuler</button>
+      ${dernier
+        ? '<button class="btn plein" id="enreg">Publier la promotion</button>'
+        : '<button class="btn plein" data-pas="suiv">Suivant ›</button>'}
+      <p class="msg" id="msgf"></p>
+    </div>`;
+}
+
+function pas1(e) {
   const apercu = e.fond
     ? `<img src="${srcImage(e.fond)}" alt="" style="max-width:180px;max-height:180px;
         object-fit:contain;background:var(--bark);border:1px solid var(--line)">`
     : '<p style="color:var(--muted);font-size:13.5px">Aucun visuel choisi.</p>';
-
-  return `<div class="carte etape">
-    <h2 class="bloc-t"><i>1</i> Informations de la promotion</h2>
-    <label class="lb" for="f-titre">Titre</label>
+  return `<label class="lb" for="f-titre">Titre</label>
     <input id="f-titre" value="${ech(e.titre || '')}"
       placeholder="Offre spéciale Week-end">
     <label class="lb" for="f-message">Message promotionnel</label>
-    <textarea id="f-message" rows="2"
-      placeholder="Profitez de -20 % sur votre séjour">${ech(e.message || '')}</textarea>
-    <label class="lb">Visuel</label>
+    <textarea id="f-message" rows="3"
+      placeholder="Profitez de -20 % sur votre séjour du vendredi au dimanche."
+      >${ech(e.message || '')}</textarea>
+    <label class="lb">Visuel de la promotion</label>
     <div class="depot" id="depot">
       <div id="apercu">${apercu}</div>
       <div>
@@ -563,12 +699,13 @@ function formulairePromo() {
       ${ETAT.images.map((n) => `<button type="button" data-img="${ech(n)}"
         class="${e.fond === n ? 'on' : ''}"><img src="/img/opt/${ech(n)}.jpg" alt=""
         loading="lazy"></button>`).join('')}
-    </div>
-  </div>
+    </div>`;
+}
 
-  <div class="carte etape">
-    <h2 class="bloc-t"><i>2</i> La réduction</h2>
-    <label class="lb">Type de réduction</label>
+function pas2(e) {
+  const r = e.remise || {};
+  const pct = r.type !== 'montant';
+  return `<label class="lb">Type de réduction</label>
     <div class="choix">
       <button type="button" class="opt ${pct ? 'on' : ''}" data-remise="pourcentage">
         Pourcentage (%)</button>
@@ -581,12 +718,12 @@ function formulairePromo() {
         placeholder="${pct ? '20' : '25 000'}">
       <span id="unite">${pct ? '%' : 'FCFA'}</span>
     </div>
-    <div class="vitrine" id="apercu-remise"></div>
-  </div>
+    <div class="vitrine" id="apercu-remise"></div>`;
+}
 
-  <div class="carte etape">
-    <h2 class="bloc-t"><i>3</i> Sur quoi s'applique la promotion ?</h2>
-    <label class="radio"><input type="radio" name="cible" value="toutes"
+function pas3(e) {
+  const c = e.cible || { toutes: true };
+  return `<label class="radio"><input type="radio" name="cible" value="toutes"
       ${c.toutes !== false ? 'checked' : ''}> Toutes les chambres</label>
     <label class="radio"><input type="radio" name="cible" value="certaines"
       ${c.toutes === false ? 'checked' : ''}> Sélectionner certaines chambres</label>
@@ -596,19 +733,23 @@ function formulairePromo() {
           ${(c.chambres || []).includes(ch.slug) ? 'checked' : ''}>
         <b>${ech(ch.nom)}</b><span>à partir de ${FCFA(ch.prix)}</span></label>`).join('')}
       ${ETAT.chambres.length ? '' : '<p class="aide">Liste des chambres indisponible.</p>'}
+      <details class="plus">
+        <summary>Autres services (optionnel)</summary>
+        ${[['spa', 'Spa'], ['restaurant', 'Restaurant'],
+           ['experiences', 'Expériences']].map(([k, nom]) => `<label class="chambre">
+          <input type="checkbox" data-sv="${k}"
+            ${(c.services || []).includes(k) ? 'checked' : ''}><b>${nom}</b></label>`).join('')}
+      </details>
     </div>
-    <details class="plus">
-      <summary>Autres services (optionnel)</summary>
-      ${[['spa', 'Spa'], ['restaurant', 'Restaurant'],
-         ['experiences', 'Expériences']].map(([k, nom]) => `<label class="chambre">
-        <input type="checkbox" data-sv="${k}"
-          ${(c.services || []).includes(k) ? 'checked' : ''}><b>${nom}</b></label>`).join('')}
-    </details>
-  </div>
+    <div class="vitrine" id="apercu-remise"></div>`;
+}
 
-  <div class="carte etape">
-    <h2 class="bloc-t"><i>4</i> Période de la promotion</h2>
-    <div class="paire">
+function pas4(e) {
+  const dh = (v, quoi) => {
+    const m = String(v || '').match(/^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})$/);
+    return m ? (quoi === 'date' ? m[1] : m[2]) : '';
+  };
+  return `<div class="paire">
       <div><label class="lb" for="f-d-date">Début de la promotion</label>
         <input type="date" id="f-d-date" value="${dh(e.debut, 'date')}">
         <input type="time" id="f-d-heure" value="${dh(e.debut, 'heure') || '00:00'}"></div>
@@ -617,24 +758,61 @@ function formulairePromo() {
         <input type="time" id="f-f-heure" value="${dh(e.fin, 'heure') || '23:59'}"></div>
     </div>
     <p class="vitrine" id="apercu-periode"></p>
+    <label class="lb">Affichage sur le site</label>
     <label class="bascule"><input type="checkbox" id="f-publie"
       ${e.publie !== false ? 'checked' : ''}> Visible sur le site</label>
     <label class="bascule"><input type="checkbox" id="f-avant"
       ${e.avant ? 'checked' : ''}> Mettre en avant sur la page d'accueil</label>
     <label class="bascule"><input type="checkbox" id="f-pastille"
       ${e.pastille !== false ? 'checked' : ''}> Afficher un badge « PROMO » sur les
-      chambres visées</label>
-  </div>
+      chambres visées</label>`;
+}
 
-  <div class="barre">
-    <button class="btn" id="annuler">Annuler</button>
-    <button class="btn plein" id="enreg">Publier la promotion</button>
-    <p class="msg" id="msgf"></p>
+/* Le recapitulatif ne redemande rien : il montre. A gauche ce qui a ete
+   decide, a droite ce que verra le client. C est le dernier moment pour voir
+   qu une remise vise la mauvaise chambre. */
+function pas5(e) {
+  const r = e.remise || {};
+  const c = e.cible || { toutes: true };
+  const noms = {};
+  ETAT.chambres.forEach((ch) => { noms[ch.slug] = ch.nom; });
+  const taux = !r.valeur ? '—'
+    : r.type === 'montant' ? '−' + FCFA(r.valeur) : '−' + r.valeur + ' %';
+  const surQuoi = c.toutes !== false ? 'Toutes les chambres'
+    : ((c.chambres || []).map((s) => noms[s] || s)
+       .concat((c.services || [])).join(', ') || '—');
+  const jour = (v) => (v ? v.slice(0, 10).split('-').reverse().join('/')
+    + ' à ' + v.slice(11) : '');
+  const periode = (e.debut || e.fin)
+    ? 'Du ' + jour(e.debut) + ' au ' + jour(e.fin)
+    : 'Sans période : affichée tant qu’elle est visible';
+  const st = statutPromo(e);
+  const ligne = (lb, val) => `<div class="recap-l"><span>${lb}</span><b>${val}</b></div>`;
+
+  return `<div class="recap">
+    <div>
+      ${ligne('Titre', ech(e.titre || '—'))}
+      ${ligne('Message', ech(e.message || '—'))}
+      ${ligne('Réduction', taux)}
+      ${ligne("S'applique à", ech(surQuoi))}
+      ${ligne('Période', ech(periode))}
+      ${ligne('État', '<span class="etat ' + st.cl + '">' + st.mot + '</span>')}
+      ${ligne('Affichage', (e.publie === false ? 'Brouillon' : 'Visible')
+        + (e.avant ? ' · en avant sur l’accueil' : '')
+        + (e.pastille !== false ? ' · badge sur les chambres' : ''))}
+    </div>
+    <div class="apercu-client">
+      ${e.fond ? `<img src="${srcImage(e.fond)}" alt="">` : '<div class="vide"></div>'}
+      <div class="dessus">
+        <span class="taux">${taux}</span>
+        <b>${ech(e.titre || '')}</b>
+        <span class="btn plein" style="pointer-events:none">Réserver maintenant</span>
+      </div>
+    </div>
   </div>`;
 }
 
-/* Le formulaire des evenements. Les promotions ont le leur, en quatre
-   temps : voir formulairePromo(). */
+
 function formulaire(type) {
   const e = EDITE || { infos: [], publie: true };
   const apercu = e.fond
@@ -820,7 +998,7 @@ function rendre() {
 document.addEventListener('click', async (e) => {
   const neuf = e.target.closest('[data-neuf]');
   if (neuf) {
-    VUE = neuf.dataset.neuf; EDITE = { infos: [], publie: true };
+    VUE = neuf.dataset.neuf; EDITE = { infos: [], publie: true }; ETAPE = 1;
     [...$('#menu').querySelectorAll('button[data-v]')].forEach(
       (x) => x.classList.toggle('on', x.dataset.v === VUE));
     return rendre();
@@ -829,6 +1007,7 @@ document.addEventListener('click', async (e) => {
   if (mod) {
     const src = mod.dataset.type === 'promotions' ? ETAT.promotions : ETAT.evenements;
     EDITE = JSON.parse(JSON.stringify(src.find((x) => x.id === mod.dataset.mod)));
+    ETAPE = 1;
     EDITE.infos = EDITE.infos || [];
     return rendre();
   }
@@ -871,6 +1050,29 @@ document.addEventListener('click', async (e) => {
     return;
   }
 
+  /* Passer d une etape a l autre. On verse d abord ce qui vient d etre
+     saisi dans EDITE : le formulaire est reconstruit a chaque pas, et
+     sans cela tout serait perdu. */
+  const pas = e.target.closest('[data-pas]');
+  if (pas) {
+    lireEtape();
+    const ou = pas.dataset.pas;
+    if (ou === 'suiv') {
+      const manque = manqueEtape();
+      if (manque) {
+        const m = $('#msgf');
+        if (m) { m.className = 'msg mal'; m.textContent = manque; }
+        return;
+      }
+      ETAPE = Math.min(ETAPES.length, ETAPE + 1);
+    } else if (ou === 'prec') {
+      ETAPE = Math.max(1, ETAPE - 1);
+    } else {
+      ETAPE = Number(ou) || 1;
+    }
+    return rendre();
+  }
+
   const rem = e.target.closest('[data-remise]');
   if (rem) return choisirRemise(rem);
 
@@ -887,7 +1089,7 @@ document.addEventListener('click', async (e) => {
   if (e.target.id === 'annuler') { EDITE = null; return rendre(); }
   if (e.target.id === 'enreg') {
     const val = (id) => { const el = $('#' + id); return el ? el.value.trim() : ''; };
-    if (VUE === 'promotions') return enregistrerPromo(val);
+    if (VUE === 'promotions') return enregistrerPromo();
     const infos = [0, 1, 2, 3].map((i) => {
       const l = $('[data-il="' + i + '"]'), v = $('[data-iv="' + i + '"]');
       return [l ? l.value.trim() : '', v ? v.value.trim() : ''];
@@ -939,6 +1141,9 @@ document.addEventListener('change', async (ev) => {
   const rep = await appel('televerser', { fichier: donnee });
   if (!rep.ok) return dire(rep.message || "Le dépôt a échoué.", true);
   EDITE = EDITE || { infos: [], publie: true };
+  // La saisie de l etape en cours part dans EDITE avant que l apercu ne
+  // soit remplace : deposer une image ne doit pas effacer un titre.
+  if (VUE === 'promotions') lireEtape();
   EDITE.fond = rep.url;
   EDITE.format = format;
   $('#apercu').innerHTML = '<img src="' + rep.url + '" alt="" '
