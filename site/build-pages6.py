@@ -13,30 +13,54 @@ CSS = """
 .sect h2{font-size:clamp(1.9rem,3.4vw,2.6rem);margin:10px 0 12px}
 .sect p{color:#B4A794}
 
-/* A la une : l'evenement ou la promotion du moment, en grand. */
-.une{display:grid;grid-template-columns:400px 1fr;gap:0;background:var(--bark-2);
-  border:1px solid rgba(185,138,80,.42);overflow:hidden;margin-top:26px;min-width:0}
-.une .ph{position:relative;aspect-ratio:1/1;overflow:hidden;min-width:0;background:var(--bark-3)}
-.une .ph img{width:100%;height:100%;object-fit:cover}
-.une .tx{padding:40px 44px;display:flex;flex-direction:column;justify-content:center}
-.une .quand{font-size:10.5px;letter-spacing:.28em;text-transform:uppercase;
-  color:var(--bronze);font-weight:700}
-.une h2{font-size:clamp(1.9rem,3.2vw,2.5rem);margin:10px 0 14px}
-.une p{max-width:58ch;margin-bottom:24px}
-.une .btn{align-self:flex-start}
+/* L'agenda : un evenement a la fois, photo plein cadre.
+   Le carrousel reste dans la largeur du contenu. Un debordement plein ecran
+   demanderait 100vw, qui inclut la barre de defilement et decale la page de
+   8 px — le defaut est deja documente ailleurs dans ce projet. */
+.agenda{position:relative;margin-top:26px;border:1px solid var(--line);overflow:hidden}
+.diapos{position:relative;min-height:520px}
+.diapo{position:absolute;inset:0;opacity:0;visibility:hidden;transition:opacity .7s ease}
+.diapo.on{opacity:1;visibility:visible;position:relative}
+.diapo>picture img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.diapo .voile{position:absolute;inset:0;background:linear-gradient(100deg,
+  rgba(23,16,10,.94) 0%,rgba(23,16,10,.86) 42%,rgba(23,16,10,.42) 100%)}
+.diapo .dedans{position:relative;z-index:2;padding:56px 60px;max-width:70ch}
 
-/* Les evenements dates, en bandes. */
-.evs{display:flex;flex-direction:column;gap:22px;margin-top:26px}
-.ev{display:grid;grid-template-columns:240px 1fr;background:var(--bark-2);
-  border:1px solid var(--line);overflow:hidden;min-width:0;transition:.5s cubic-bezier(.2,.8,.2,1)}
-.ev:hover{border-color:rgba(185,138,80,.5)}
-.ev .ph{aspect-ratio:1/1;overflow:hidden;min-width:0;background:var(--bark-3)}
-.ev .ph img{width:100%;height:100%;object-fit:cover}
-.ev .tx{padding:26px 30px;display:flex;flex-direction:column;justify-content:center}
-.ev .quand{font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:var(--bronze);font-weight:700}
-.ev h3{font-size:1.35rem;margin:8px 0 10px}
-.ev p{margin-bottom:16px}
-.ev .btn{align-self:flex-start;padding:12px 22px}
+.pastille{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--bronze);
+  color:var(--bronze-2);padding:7px 16px;font-size:10.5px;font-weight:700;
+  letter-spacing:.2em;text-transform:uppercase}
+.diapo .cat{display:block;margin-top:22px;font-size:10.5px;letter-spacing:.3em;
+  text-transform:uppercase;color:var(--muted);font-weight:700}
+.diapo h3{font-size:clamp(2.1rem,4.4vw,3.2rem);line-height:1.06;margin:10px 0 16px;
+  font-weight:400}
+.diapo h3 em{font-style:italic;color:var(--bronze-2)}
+.diapo p{max-width:52ch;margin-bottom:26px}
+
+/* Les pastilles d'information : ce qu'on veut savoir avant de venir. */
+.infos{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:30px}
+.infos span{display:flex;flex-direction:column;gap:3px;background:rgba(23,16,10,.72);
+  border:1px solid var(--line);padding:11px 16px;min-width:100px}
+.infos b{font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);
+  font-weight:700}
+.infos i{font-style:normal;font-family:var(--f-display);font-size:1.02rem;color:var(--cream)}
+
+.pilote{position:absolute;right:26px;bottom:26px;z-index:3;display:flex;align-items:center;
+  gap:14px}
+.pilote button{width:42px;height:42px;border:1px solid var(--line);background:rgba(23,16,10,.7);
+  color:var(--bronze-2);font-size:20px;line-height:1;cursor:pointer;transition:.3s;
+  font-family:var(--f-body)}
+.pilote button:hover{border-color:var(--bronze);background:var(--bronze);color:var(--night)}
+.cpt{font-size:12px;letter-spacing:.16em;color:var(--muted);display:flex;gap:5px}
+.cpt b{color:var(--cream);font-weight:700}
+.cpt i{font-style:normal}
+
+@media(max-width:900px){
+  .diapos{min-height:0}
+  .diapo .dedans{padding:34px 24px 92px}
+  .diapo .voile{background:linear-gradient(180deg,rgba(23,16,10,.80),rgba(23,16,10,.95))}
+  .infos span{min-width:0;flex:1 1 46%}
+  .pilote{right:20px;bottom:20px}
+}
 
 @media(max-width:900px){
   .une,.ev{grid-template-columns:1fr}
@@ -209,7 +233,7 @@ b = [header('#demande','Réserver'), drawer('circuits.html'), '''
 </div>
 
 <div class="wrap">
-{{ALAUNE}}{{EVENEMENTS}}
+{{AGENDA}}
   <div class="sect reveal" id="forfaits">
     <span class="eyebrow" data-t="f0">Séjours composés</span>
     <h2 data-t="f1">Nos offres &amp; forfaits</h2>
@@ -350,10 +374,8 @@ b.append('''  </div>
 # Les titres des quatre sections, et les evenements. Les cles des evenements
 # portent un tiret : elles DOIVENT etre quotees, sinon le dictionnaire n'est
 # pas un objet JavaScript valide et tout le script de la page meurt.
-EN_SECTIONS = ('u0:"On now",u1:"What is happening right now",'
-               'v0:"With a date",v1:"Events",'
-               'v2:"The season&rsquo;s gatherings. Posters disappear on their own '
-               'once the date has passed.",'
+EN_SECTIONS = ('u0:"Agenda",u1:"Events",u1b:"on now",''u2:"What happens at the hotel beyond your stay: evenings, the Saturday ''gathering, year-end celebrations.",'
+               
                'f0:"Composed stays",f1:"Our offers &amp; packages",'
                'f2:"Everything is included and the rate is firm: you know what you '
                'pay before you arrive.",'
@@ -361,9 +383,24 @@ EN_SECTIONS = ('u0:"On now",u1:"What is happening right now",'
                'dc2:"Beyond the grounds: the lagoon islands, the river mouth, and '
                'what children remember from a stay here.",'
                'dc3:"See also every activity on the grounds and the lagoon &rarr;",')
-for _s, (_t, _q, _x, _c) in EV_EN.items():
-    EN_SECTIONS += '"q-%s":"%s","t-%s":"%s","x-%s":"%s","c-%s":"%s",' % (
-        _s, _q, _s, _t, _s, _x, _s, _c)
+# Les cles des evenements portent un tiret : elles DOIVENT etre quotees,
+# sinon le dictionnaire n'est pas un objet JavaScript valide et tout le
+# script de la page meurt (voir controle 13 du verificateur).
+from _evenements import INFOS_EN
+for _e in EVENEMENTS:
+    _tr = EV_EN.get(_e['slug'])
+    if not _tr:
+        continue
+    _cat, _tit, _acc, _bad, _tex, _cta, _vals = _tr
+    EN_SECTIONS += ('"g-%s":"%s","t-%s":"%s","a-%s":"%s","b-%s":"%s",'
+                    '"x-%s":"%s","c-%s":"%s",' % (
+        _e['slug'], _cat, _e['slug'], _tit, _e['slug'], _acc,
+        _e['slug'], _bad, _e['slug'], _tex, _e['slug'], _cta))
+    for _i, (_lib, _val) in enumerate(_e['infos']):
+        _k = _lib[:3].lower()
+        EN_SECTIONS += '"il-%s-%s":"%s",' % (_e['slug'], _k, INFOS_EN.get(_lib, _lib))
+        if _i < len(_vals):
+            EN_SECTIONS += '"iv-%s-%s":"%s",' % (_e['slug'], _k, _vals[_i])
 
 JS = NAV_JS + '''
 
@@ -454,87 +491,112 @@ CATALOGUE += [(nom, prix, None, UNITE[unite])
 CATALOGUE += [(titre, prix, ' · '.join(t for _c, t in items), UNITE[unite])
               for _f, _i, _a, _g, _b, _t, titre, items, _d, prix, unite, _pk, _ul in CARDS]
 
-# ── A la une, et les evenements dates ────────────────────────
-# La premiere entree de _evenements.py fait la une ; les suivantes forment
-# la bande des evenements. Une affiche perimee reste dans le fichier mais
-# le navigateur la retire au chargement : le site est statique, et personne
-# ne le reconstruit le 2 janvier pour decrocher l'affiche du reveillon.
-def _fin(e):
-    return ' data-fin="%s"' % e['fin'] if e['fin'] else ''
+# ── L'agenda : un evenement a la fois, plein cadre ───────────
+# Une diapositive perimee est retiree par le navigateur au chargement, avant
+# meme que le carrousel demarre : le site est statique et personne ne le
+# reconstruit le 2 janvier au matin pour decrocher l'affiche du reveillon.
+def _pastilles(e):
+    out = []
+    for lib, val in e['infos']:
+        out.append('<span><b data-t="il-%s-%s">%s</b>'
+                   '<i data-t="iv-%s-%s">%s</i></span>'
+                   % (e['slug'], lib[:3].lower(), lib,
+                      e['slug'], lib[:3].lower(), val))
+    return ''.join(out)
 
-ALAUNE = ''
-if EVENEMENTS:
-    e = EVENEMENTS[0]
-    ALAUNE = '''
-  <div class="sect reveal" id="a-la-une">
-    <span class="eyebrow" data-t="u0">À la une</span>
-    <h2 data-t="u1">Ce qui se passe en ce moment</h2>
-  </div>
-  <article class="une reveal" id="une"%s>
-    <div class="ph"><picture><source srcset="img/opt/%s.webp" type="image/webp">
-      <img src="img/opt/%s.jpg" alt="%s" loading="lazy"></picture></div>
-    <div class="tx">
-      <span class="quand" data-t="q-%s">%s</span>
-      <h2 data-t="t-%s">%s</h2>
-      <p data-t="x-%s">%s</p>
-      <a class="btn btn-solid" href="%s" data-t="c-%s">%s</a>
-    </div>
-  </article>''' % (_fin(e), e['affiche'], e['affiche'], e['titre'],
-                   e['slug'], e['quand'], e['slug'], e['titre'],
-                   e['slug'], e['texte'], e['href'], e['slug'], e['cta'])
-
-SUITE = EVENEMENTS[1:]
-EVBLOC = ''
-if SUITE:
-    EVBLOC = ('''
-  <div class="sect reveal" id="evenements">
-    <span class="eyebrow" data-t="v0">Avec une date</span>
-    <h2 data-t="v1">Événements</h2>
-    <p data-t="v2">Les rendez-vous de la saison. Les affiches disparaissent
-    d'elles-mêmes une fois la date passée.</p>
-  </div>
-  <div class="evs" id="evs">''')
-    for e in SUITE:
-        EVBLOC += '''
-    <article class="ev reveal" id="%s"%s>
-      <div class="ph"><picture><source srcset="img/opt/%s.webp" type="image/webp">
-        <img src="img/opt/%s.jpg" alt="%s" loading="lazy"></picture></div>
-      <div class="tx">
-        <span class="quand" data-t="q-%s">%s</span>
-        <h3 data-t="t-%s">%s</h3>
+DIAPOS = ''
+for _n, e in enumerate(EVENEMENTS):
+    DIAPOS += '''
+    <article class="diapo%s" id="%s"%s>
+      <picture><source srcset="img/opt/%s.webp" type="image/webp">
+        <img src="img/opt/%s.jpg" alt="" loading="lazy"></picture>
+      <div class="voile"></div>
+      <div class="dedans">
+        <span class="pastille" data-t="b-%s">%s</span>
+        <span class="cat" data-t="g-%s">%s</span>
+        <h3><span data-t="t-%s">%s</span> <em data-t="a-%s">%s</em></h3>
         <p data-t="x-%s">%s</p>
-        <a class="btn" href="%s" data-t="c-%s">%s</a>
+        <div class="infos">%s</div>
+        <a class="btn btn-solid" href="%s" data-t="c-%s">%s</a>
       </div>
-    </article>''' % (e['slug'], _fin(e), e['affiche'], e['affiche'], e['titre'],
-                     e['slug'], e['quand'], e['slug'], e['titre'],
-                     e['slug'], e['texte'], e['href'], e['slug'], e['cta'])
-    EVBLOC += NL_ + '  </div>'
+    </article>''' % (
+      ' on' if _n == 0 else '', e['slug'],
+      (' data-fin="%s"' % e['fin']) if e['fin'] else '',
+      e['fond'], e['fond'],
+      e['slug'], e['badge'], e['slug'], e['categorie'],
+      e['slug'], e['titre'], e['slug'], e['accent'],
+      e['slug'], e['texte'], _pastilles(e),
+      e['href'], e['slug'], e['cta'])
+
+AGENDA = ('''
+  <div class="sect reveal" id="a-la-une">
+    <span class="eyebrow" data-t="u0">Agenda</span>
+    <h2><span data-t="u1">Événements</span> <em data-t="u1b">du moment</em></h2>
+    <p data-t="u2">Ce qui se passe à l'hôtel au-delà de votre séjour :
+    soirées, rendez-vous du samedi, fêtes de fin d'année.</p>
+  </div>
+
+  <div class="agenda reveal" id="agenda">
+    <div class="diapos">''' + DIAPOS + '''
+    </div>
+    <div class="pilote">
+      <button type="button" class="prec" aria-label="Événement précédent">&lsaquo;</button>
+      <span class="cpt"><b>01</b><span>/</span><i>01</i></span>
+      <button type="button" class="suiv" aria-label="Événement suivant">&rsaquo;</button>
+    </div>
+  </div>''') if EVENEMENTS else ''
 
 
-# L'expiration se decide dans le navigateur, jamais a la generation : le site
-# est statique et personne ne le reconstruit le 2 janvier au matin pour
-# decrocher l'affiche du reveillon.
+# L'expiration d'abord, le carrousel ensuite : une diapositive perimee ne doit
+# jamais entrer dans le compte. Le site est statique et personne ne le
+# reconstruit le 2 janvier au matin pour decrocher l'affiche du reveillon.
 JS += """
 (function(){
+  var ag = document.getElementById('agenda');
+  if (!ag) return;
   var auj = new Date(); auj.setHours(0,0,0,0);
-  var perime = function(el){
-    var f = el.getAttribute('data-fin');
-    return f && new Date(f + 'T23:59:59') < auj;
-  };
-  var une = document.getElementById('une');
-  if (une && perime(une)) {
-    une.remove();
-    var t = document.getElementById('a-la-une'); if (t) t.remove();
-  }
-  var restants = 0;
-  document.querySelectorAll('.ev').forEach(function(el){
-    if (perime(el)) { el.remove(); return; }
-    restants++;
+
+  var diapos = [].slice.call(ag.querySelectorAll('.diapo'));
+  diapos = diapos.filter(function(d){
+    var f = d.getAttribute('data-fin');
+    if (f && new Date(f + 'T23:59:59') < auj) { d.remove(); return false; }
+    return true;
   });
-  if (!restants) {
-    var s = document.getElementById('evenements'); if (s) s.remove();
-    var g = document.getElementById('evs'); if (g) g.remove();
+
+  /* Plus rien a l'affiche : on retire la section entiere plutot que de
+     laisser un cadre vide. */
+  if (!diapos.length) {
+    ag.remove();
+    var t = document.getElementById('a-la-une'); if (t) t.remove();
+    return;
   }
+
+  var pilote = ag.querySelector('.pilote');
+  var cpt = ag.querySelector('.cpt');
+  var n = 0;
+  var deux = function(v){ return (v < 10 ? '0' : '') + v; };
+
+  function montrer(i){
+    n = (i + diapos.length) % diapos.length;
+    diapos.forEach(function(d, k){ d.classList.toggle('on', k === n); });
+    if (cpt) {
+      cpt.querySelector('b').textContent = deux(n + 1);
+      cpt.querySelector('i').textContent = deux(diapos.length);
+    }
+  }
+  montrer(0);
+
+  /* Un seul evenement : les fleches n'ont plus d'objet. */
+  if (diapos.length < 2) { if (pilote) pilote.remove(); return; }
+
+  ag.querySelector('.prec').addEventListener('click', function(){ montrer(n - 1); });
+  ag.querySelector('.suiv').addEventListener('click', function(){ montrer(n + 1); });
+
+  addEventListener('keydown', function(ev){
+    if (!ag.getBoundingClientRect().height) return;
+    if (ev.key === 'ArrowLeft')  montrer(n - 1);
+    if (ev.key === 'ArrowRight') montrer(n + 1);
+  });
 })();
 """
 
@@ -543,7 +605,7 @@ LD = _schema.bloc(
     _schema.hotel(),
     _schema.fil([('Accueil','index'),('Circuits & Offres',None)]))
 
-CORPS = NL_.join(b).replace('{{ALAUNE}}', ALAUNE).replace('{{EVENEMENTS}}', EVBLOC)
+CORPS = NL_.join(b).replace('{{AGENDA}}', AGENDA)
 
 io.open('circuits.html','w',encoding='utf-8').write(page(
  "Offres &amp; Événements — Hôtel Evannath, Assinie",

@@ -410,6 +410,28 @@ section du dessous. Une chose, un endroit.
 Le bloc Méchoui Party qui vivait à part a été retiré pour la même raison :
 l'événement a maintenant son entrée, il n'a plus besoin de sa section.
 
+### L'agenda : un événement à la fois
+
+La section **Événements du moment** est un carrousel plein cadre, inspiré de
+ce que fait le Platinum Hotel Spa à Cocody — un concurrent direct sur le
+séminaire d'entreprise.
+
+Chaque événement occupe toute la largeur : photo de fond, pastille de
+récurrence, surtitre, titre dont la fin passe en italique bronze, deux phrases,
+puis **trois ou quatre pastilles d'information** — horaire, lieu, ambiance, au
+menu. C'est ce qu'on veut savoir avant de se déplacer, et c'est ce qui manquait
+à une simple carte.
+
+Le compteur `01 / 02` et les deux flèches se tiennent en bas à droite. Les
+flèches du clavier fonctionnent aussi.
+
+**Le carrousel reste dans la largeur du contenu.** Un débordement plein écran
+demanderait `100vw`, qui inclut la barre de défilement et décale la page de
+8 px — le défaut est déjà documenté ailleurs dans ce projet.
+
+S'il ne reste qu'un événement, les flèches disparaissent : elles n'ont plus
+d'objet.
+
 ### Une affiche périmée disparaît toute seule
 
 Chaque entrée porte une `fin`. Passée cette date, **le navigateur retire

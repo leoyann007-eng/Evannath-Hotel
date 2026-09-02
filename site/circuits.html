@@ -174,30 +174,54 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
 .sect h2{font-size:clamp(1.9rem,3.4vw,2.6rem);margin:10px 0 12px}
 .sect p{color:#B4A794}
 
-/* A la une : l'evenement ou la promotion du moment, en grand. */
-.une{display:grid;grid-template-columns:400px 1fr;gap:0;background:var(--bark-2);
-  border:1px solid rgba(185,138,80,.42);overflow:hidden;margin-top:26px;min-width:0}
-.une .ph{position:relative;aspect-ratio:1/1;overflow:hidden;min-width:0;background:var(--bark-3)}
-.une .ph img{width:100%;height:100%;object-fit:cover}
-.une .tx{padding:40px 44px;display:flex;flex-direction:column;justify-content:center}
-.une .quand{font-size:10.5px;letter-spacing:.28em;text-transform:uppercase;
-  color:var(--bronze);font-weight:700}
-.une h2{font-size:clamp(1.9rem,3.2vw,2.5rem);margin:10px 0 14px}
-.une p{max-width:58ch;margin-bottom:24px}
-.une .btn{align-self:flex-start}
+/* L'agenda : un evenement a la fois, photo plein cadre.
+   Le carrousel reste dans la largeur du contenu. Un debordement plein ecran
+   demanderait 100vw, qui inclut la barre de defilement et decale la page de
+   8 px — le defaut est deja documente ailleurs dans ce projet. */
+.agenda{position:relative;margin-top:26px;border:1px solid var(--line);overflow:hidden}
+.diapos{position:relative;min-height:520px}
+.diapo{position:absolute;inset:0;opacity:0;visibility:hidden;transition:opacity .7s ease}
+.diapo.on{opacity:1;visibility:visible;position:relative}
+.diapo>picture img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.diapo .voile{position:absolute;inset:0;background:linear-gradient(100deg,
+  rgba(23,16,10,.94) 0%,rgba(23,16,10,.86) 42%,rgba(23,16,10,.42) 100%)}
+.diapo .dedans{position:relative;z-index:2;padding:56px 60px;max-width:70ch}
 
-/* Les evenements dates, en bandes. */
-.evs{display:flex;flex-direction:column;gap:22px;margin-top:26px}
-.ev{display:grid;grid-template-columns:240px 1fr;background:var(--bark-2);
-  border:1px solid var(--line);overflow:hidden;min-width:0;transition:.5s cubic-bezier(.2,.8,.2,1)}
-.ev:hover{border-color:rgba(185,138,80,.5)}
-.ev .ph{aspect-ratio:1/1;overflow:hidden;min-width:0;background:var(--bark-3)}
-.ev .ph img{width:100%;height:100%;object-fit:cover}
-.ev .tx{padding:26px 30px;display:flex;flex-direction:column;justify-content:center}
-.ev .quand{font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:var(--bronze);font-weight:700}
-.ev h3{font-size:1.35rem;margin:8px 0 10px}
-.ev p{margin-bottom:16px}
-.ev .btn{align-self:flex-start;padding:12px 22px}
+.pastille{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--bronze);
+  color:var(--bronze-2);padding:7px 16px;font-size:10.5px;font-weight:700;
+  letter-spacing:.2em;text-transform:uppercase}
+.diapo .cat{display:block;margin-top:22px;font-size:10.5px;letter-spacing:.3em;
+  text-transform:uppercase;color:var(--muted);font-weight:700}
+.diapo h3{font-size:clamp(2.1rem,4.4vw,3.2rem);line-height:1.06;margin:10px 0 16px;
+  font-weight:400}
+.diapo h3 em{font-style:italic;color:var(--bronze-2)}
+.diapo p{max-width:52ch;margin-bottom:26px}
+
+/* Les pastilles d'information : ce qu'on veut savoir avant de venir. */
+.infos{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:30px}
+.infos span{display:flex;flex-direction:column;gap:3px;background:rgba(23,16,10,.72);
+  border:1px solid var(--line);padding:11px 16px;min-width:100px}
+.infos b{font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);
+  font-weight:700}
+.infos i{font-style:normal;font-family:var(--f-display);font-size:1.02rem;color:var(--cream)}
+
+.pilote{position:absolute;right:26px;bottom:26px;z-index:3;display:flex;align-items:center;
+  gap:14px}
+.pilote button{width:42px;height:42px;border:1px solid var(--line);background:rgba(23,16,10,.7);
+  color:var(--bronze-2);font-size:20px;line-height:1;cursor:pointer;transition:.3s;
+  font-family:var(--f-body)}
+.pilote button:hover{border-color:var(--bronze);background:var(--bronze);color:var(--night)}
+.cpt{font-size:12px;letter-spacing:.16em;color:var(--muted);display:flex;gap:5px}
+.cpt b{color:var(--cream);font-weight:700}
+.cpt i{font-style:normal}
+
+@media(max-width:900px){
+  .diapos{min-height:0}
+  .diapo .dedans{padding:34px 24px 92px}
+  .diapo .voile{background:linear-gradient(180deg,rgba(23,16,10,.80),rgba(23,16,10,.95))}
+  .infos span{min-width:0;flex:1 1 46%}
+  .pilote{right:20px;bottom:20px}
+}
 
 @media(max-width:900px){
   .une,.ev{grid-template-columns:1fr}
@@ -367,46 +391,59 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
 <div class="wrap">
 
   <div class="sect reveal" id="a-la-une">
-    <span class="eyebrow" data-t="u0">À la une</span>
-    <h2 data-t="u1">Ce qui se passe en ce moment</h2>
+    <span class="eyebrow" data-t="u0">Agenda</span>
+    <h2><span data-t="u1">Événements</span> <em data-t="u1b">du moment</em></h2>
+    <p data-t="u2">Ce qui se passe à l'hôtel au-delà de votre séjour :
+    soirées, rendez-vous du samedi, fêtes de fin d'année.</p>
   </div>
-  <article class="une reveal" id="une" data-fin="2027-01-02">
-    <div class="ph"><picture><source srcset="img/opt/gal-lag-nuit-640.webp 640w, img/opt/gal-lag-nuit-1024.webp 1024w, img/opt/gal-lag-nuit.webp 1748w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp">
-      <img width="1748" height="1240" src="img/opt/gal-lag-nuit.jpg" srcset="img/opt/gal-lag-nuit-640.jpg 640w, img/opt/gal-lag-nuit-1024.jpg 1024w, img/opt/gal-lag-nuit.jpg 1748w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" alt="Le Réveillon à Assinie" loading="lazy"></picture></div>
-    <div class="tx">
-      <span class="quand" data-t="q-reveillon">31 décembre</span>
-      <h2 data-t="t-reveillon">Le Réveillon à Assinie</h2>
-      <p data-t="x-reveillon">Dîner de fin d'année au bord de la lagune, puis la nuit au night-club. Les chambres partent tôt sur cette date : la demande se fait dès l'automne.</p>
-      <a class="btn btn-solid" href="reserver.html" data-t="c-reveillon">Demander une chambre</a>
+
+  <div class="agenda reveal" id="agenda">
+    <div class="diapos">
+    <article class="diapo on" id="reveillon" data-fin="2027-01-02">
+      <picture><source srcset="img/opt/gal-lag-nuit-640.webp 640w, img/opt/gal-lag-nuit-1024.webp 1024w, img/opt/gal-lag-nuit.webp 1748w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp">
+        <img width="1748" height="1240" src="img/opt/gal-lag-nuit.jpg" srcset="img/opt/gal-lag-nuit-640.jpg 640w, img/opt/gal-lag-nuit-1024.jpg 1024w, img/opt/gal-lag-nuit.jpg 1748w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" alt="" loading="lazy"></picture>
+      <div class="voile"></div>
+      <div class="dedans">
+        <span class="pastille" data-t="b-reveillon">31 décembre</span>
+        <span class="cat" data-t="g-reveillon">Soirée de fin d'année</span>
+        <h3><span data-t="t-reveillon">Le Réveillon</span> <em data-t="a-reveillon">à Assinie</em></h3>
+        <p data-t="x-reveillon">Dîner de fin d'année au bord de la lagune, puis la nuit au night-club. Les chambres partent tôt sur cette date.</p>
+        <div class="infos"><span><b data-t="il-reveillon-hor">Horaire</b><i data-t="iv-reveillon-hor">Dès 20 h</i></span><span><b data-t="il-reveillon-lie">Lieu</b><i data-t="iv-reveillon-lie">La paillote</i></span><span><b data-t="il-reveillon-amb">Ambiance</b><i data-t="iv-reveillon-amb">DJ résident</i></span><span><b data-t="il-reveillon-au ">Au menu</b><i data-t="iv-reveillon-au ">Dîner de fête</i></span></div>
+        <a class="btn btn-solid" href="reserver.html" data-t="c-reveillon">Réserver ma chambre</a>
+      </div>
+    </article>
+    <article class="diapo" id="mechoui-party">
+      <picture><source srcset="img/opt/gal-tab-terrasse.webp" type="image/webp">
+        <img width="1748" height="1240" src="img/opt/gal-tab-terrasse.jpg" alt="" loading="lazy"></picture>
+      <div class="voile"></div>
+      <div class="dedans">
+        <span class="pastille" data-t="b-mechoui-party">Tous les samedis</span>
+        <span class="cat" data-t="g-mechoui-party">Rendez-vous hebdomadaire</span>
+        <h3><span data-t="t-mechoui-party">La Méchoui</span> <em data-t="a-mechoui-party">Party</em></h3>
+        <p data-t="x-mechoui-party">Méchoui au bord de l'eau, puis la soirée continue au night-club. Ouvert aux clients de l'hôtel comme aux visiteurs de passage.</p>
+        <div class="infos"><span><b data-t="il-mechoui-party-hor">Horaire</b><i data-t="iv-mechoui-party-hor">Dès 15 h</i></span><span><b data-t="il-mechoui-party-lie">Lieu</b><i data-t="iv-mechoui-party-lie">La terrasse</i></span><span><b data-t="il-mechoui-party-amb">Ambiance</b><i data-t="iv-mechoui-party-amb">Happy hour</i></span><span><b data-t="il-mechoui-party-au ">Au menu</b><i data-t="iv-mechoui-party-au ">Méchoui grillé</i></span></div>
+        <a class="btn btn-solid" href="#demande" data-t="c-mechoui-party">Réserver une table</a>
+      </div>
+    </article>
+    <article class="diapo" id="independance" data-fin="2026-08-09">
+      <picture><source srcset="img/opt/ev-independance.webp" type="image/webp">
+        <img width="526" height="526" src="img/opt/ev-independance.jpg" alt="" loading="lazy"></picture>
+      <div class="voile"></div>
+      <div class="dedans">
+        <span class="pastille" data-t="b-independance">7 août</span>
+        <span class="cat" data-t="g-independance">Fête nationale</span>
+        <h3><span data-t="t-independance">Jour de</span> <em data-t="a-independance">l'Indépendance</em></h3>
+        <p data-t="x-independance">L'hôtel salue chaque année la fête nationale. Cette affiche est celle que vous avez diffusée en août.</p>
+        <div class="infos"><span><b data-t="il-independance-hor">Horaire</b><i data-t="iv-independance-hor">Toute la journée</i></span><span><b data-t="il-independance-lie">Lieu</b><i data-t="iv-independance-lie">Le domaine</i></span><span><b data-t="il-independance-amb">Ambiance</b><i data-t="iv-independance-amb">En famille</i></span></div>
+        <a class="btn btn-solid" href="contact.html" data-t="c-independance">Nous écrire</a>
+      </div>
+    </article>
     </div>
-  </article>
-  <div class="sect reveal" id="evenements">
-    <span class="eyebrow" data-t="v0">Avec une date</span>
-    <h2 data-t="v1">Événements</h2>
-    <p data-t="v2">Les rendez-vous de la saison. Les affiches disparaissent
-    d'elles-mêmes une fois la date passée.</p>
-  </div>
-  <div class="evs" id="evs">
-    <article class="ev reveal" id="mechoui-party">
-      <div class="ph"><picture><source srcset="img/opt/gal-tab-terrasse.webp" type="image/webp">
-        <img width="1748" height="1240" src="img/opt/gal-tab-terrasse.jpg" alt="La Méchoui Party" loading="lazy"></picture></div>
-      <div class="tx">
-        <span class="quand" data-t="q-mechoui-party">Chaque samedi, en soirée</span>
-        <h3 data-t="t-mechoui-party">La Méchoui Party</h3>
-        <p data-t="x-mechoui-party">Le rendez-vous du week-end : méchoui en terrasse, puis happy hour et DJ résident au night-club. Ouvert aux clients de l'hôtel comme aux visiteurs de passage.</p>
-        <a class="btn" href="#demande" data-t="c-mechoui-party">En savoir plus</a>
-      </div>
-    </article>
-    <article class="ev reveal" id="independance" data-fin="2026-08-09">
-      <div class="ph"><picture><source srcset="img/opt/ev-independance.webp" type="image/webp">
-        <img width="526" height="526" src="img/opt/ev-independance.jpg" alt="Fête de l'Indépendance" loading="lazy"></picture></div>
-      <div class="tx">
-        <span class="quand" data-t="q-independance">7 août</span>
-        <h3 data-t="t-independance">Fête de l'Indépendance</h3>
-        <p data-t="x-independance">L'hôtel salue chaque année la fête nationale. Cette affiche est celle que vous avez diffusée en août — elle montre comment une publication de vos réseaux prend place ici.</p>
-        <a class="btn" href="contact.html" data-t="c-independance">Nous écrire</a>
-      </div>
-    </article>
+    <div class="pilote">
+      <button type="button" class="prec" aria-label="Événement précédent">&lsaquo;</button>
+      <span class="cpt"><b>01</b><span>/</span><i>01</i></span>
+      <button type="button" class="suiv" aria-label="Événement suivant">&rsaquo;</button>
+    </div>
   </div>
   <div class="sect reveal" id="forfaits">
     <span class="eyebrow" data-t="f0">Séjours composés</span>
@@ -806,7 +843,7 @@ document.querySelectorAll('.pickbtn').forEach(function(b){b.onclick=function(){
 document.getElementById('rf').addEventListener('submit',function(e){e.preventDefault();
   alert("Démonstration : la demande partirait à la réception et à houansouyannaxel@gmail.com, avec une confirmation automatique au client.")});
 
-var EN={mn:"Menu",n1:"Rooms &amp; Suites",n2:"Experiences",n3:"The table",n4:"The spa",n5:"Offers &amp; Events",n6:"Meetings &amp; groups",n7:"Gallery",n8:"About",n9:"Useful information",n10:"Contact",n11:"Book",dr:"Reservations",u0:"On now",u1:"What is happening right now",v0:"With a date",v1:"Events",v2:"The season&rsquo;s gatherings. Posters disappear on their own once the date has passed.",f0:"Composed stays",f1:"Our offers &amp; packages",f2:"Everything is included and the rate is firm: you know what you pay before you arrive.",dc0:"Around Assinie",dc1:"Tours &amp; discoveries",dc2:"Beyond the grounds: the lagoon islands, the river mouth, and what children remember from a stay here.",dc3:"See also every activity on the grounds and the lagoon &rarr;","q-mechoui-party":"Every Saturday evening","t-mechoui-party":"Méchoui Party","x-mechoui-party":"The weekend gathering: méchoui on the terrace, then happy hour and our resident DJ at the night club. Open to hotel guests and visitors alike.","c-mechoui-party":"Find out more","q-reveillon":"31 December","t-reveillon":"New Year's Eve in Assinie","x-reveillon":"A year-end dinner by the lagoon, then the night club. Rooms go early for this date — requests start coming in the autumn.","c-reveillon":"Request a room","q-independance":"7 August","t-independance":"Independence Day","x-independance":"The hotel marks the national holiday each year. This is the artwork you published in August — it shows how a post from your social media finds its place here.","c-independance":"Write to us",cta:"Book",ctc:"Book this package",
+var EN={mn:"Menu",n1:"Rooms &amp; Suites",n2:"Experiences",n3:"The table",n4:"The spa",n5:"Offers &amp; Events",n6:"Meetings &amp; groups",n7:"Gallery",n8:"About",n9:"Useful information",n10:"Contact",n11:"Book",dr:"Reservations",u0:"Agenda",u1:"Events",u1b:"on now",u2:"What happens at the hotel beyond your stay: evenings, the Saturday gathering, year-end celebrations.",f0:"Composed stays",f1:"Our offers &amp; packages",f2:"Everything is included and the rate is firm: you know what you pay before you arrive.",dc0:"Around Assinie",dc1:"Tours &amp; discoveries",dc2:"Beyond the grounds: the lagoon islands, the river mouth, and what children remember from a stay here.",dc3:"See also every activity on the grounds and the lagoon &rarr;","g-reveillon":"Year's end","t-reveillon":"New Year","a-reveillon":"in Assinie","b-reveillon":"31 December","x-reveillon":"A year-end dinner by the lagoon, then the night club. Rooms go early for this date.","c-reveillon":"Book my room","il-reveillon-hor":"Time","iv-reveillon-hor":"From 8 pm","il-reveillon-lie":"Where","iv-reveillon-lie":"The pontoon","il-reveillon-amb":"Mood","iv-reveillon-amb":"Resident DJ","il-reveillon-au ":"On the menu","iv-reveillon-au ":"Festive dinner","g-mechoui-party":"Weekly gathering","t-mechoui-party":"The Méchoui","a-mechoui-party":"Party","b-mechoui-party":"Every Saturday","x-mechoui-party":"Méchoui by the water, then the evening carries on at the night club. Open to hotel guests and visitors alike.","c-mechoui-party":"Book a table","il-mechoui-party-hor":"Time","iv-mechoui-party-hor":"From 3 pm","il-mechoui-party-lie":"Where","iv-mechoui-party-lie":"The terrace","il-mechoui-party-amb":"Mood","iv-mechoui-party-amb":"Happy hour","il-mechoui-party-au ":"On the menu","iv-mechoui-party-au ":"Grilled méchoui","g-independance":"National holiday","t-independance":"Independence","a-independance":"Day","b-independance":"7 August","x-independance":"The hotel marks the national holiday each year. This is the artwork you published in August.","c-independance":"Write to us","il-independance-hor":"Time","iv-independance-hor":"All day","il-independance-lie":"Where","iv-independance-lie":"The grounds","il-independance-amb":"Mood","iv-independance-amb":"Family",cta:"Book",ctc:"Book this package",
 c1:"Home",c2:"Offers &amp; Events",eb:"Eleven offers &amp; one weekly gathering",h1:"Offers &amp; Events",
 lede:"Stays already put together — room, meals, activities and small touches included. Pick one, give us your dates, and the front desk handles the rest.",
 cl:"Live campaign",ct:"Holiday Packs",cs:"Announced on our Facebook page · +225 01 51 52 75 75",
@@ -843,25 +880,51 @@ document.querySelectorAll('.lang button').forEach(function(b){b.onclick=function
   if(typeof EVN_LANG==='function')EVN_LANG(lg);
 }});
 (function(){
+  var ag = document.getElementById('agenda');
+  if (!ag) return;
   var auj = new Date(); auj.setHours(0,0,0,0);
-  var perime = function(el){
-    var f = el.getAttribute('data-fin');
-    return f && new Date(f + 'T23:59:59') < auj;
-  };
-  var une = document.getElementById('une');
-  if (une && perime(une)) {
-    une.remove();
-    var t = document.getElementById('a-la-une'); if (t) t.remove();
-  }
-  var restants = 0;
-  document.querySelectorAll('.ev').forEach(function(el){
-    if (perime(el)) { el.remove(); return; }
-    restants++;
+
+  var diapos = [].slice.call(ag.querySelectorAll('.diapo'));
+  diapos = diapos.filter(function(d){
+    var f = d.getAttribute('data-fin');
+    if (f && new Date(f + 'T23:59:59') < auj) { d.remove(); return false; }
+    return true;
   });
-  if (!restants) {
-    var s = document.getElementById('evenements'); if (s) s.remove();
-    var g = document.getElementById('evs'); if (g) g.remove();
+
+  /* Plus rien a l'affiche : on retire la section entiere plutot que de
+     laisser un cadre vide. */
+  if (!diapos.length) {
+    ag.remove();
+    var t = document.getElementById('a-la-une'); if (t) t.remove();
+    return;
   }
+
+  var pilote = ag.querySelector('.pilote');
+  var cpt = ag.querySelector('.cpt');
+  var n = 0;
+  var deux = function(v){ return (v < 10 ? '0' : '') + v; };
+
+  function montrer(i){
+    n = (i + diapos.length) % diapos.length;
+    diapos.forEach(function(d, k){ d.classList.toggle('on', k === n); });
+    if (cpt) {
+      cpt.querySelector('b').textContent = deux(n + 1);
+      cpt.querySelector('i').textContent = deux(diapos.length);
+    }
+  }
+  montrer(0);
+
+  /* Un seul evenement : les fleches n'ont plus d'objet. */
+  if (diapos.length < 2) { if (pilote) pilote.remove(); return; }
+
+  ag.querySelector('.prec').addEventListener('click', function(){ montrer(n - 1); });
+  ag.querySelector('.suiv').addEventListener('click', function(){ montrer(n + 1); });
+
+  addEventListener('keydown', function(ev){
+    if (!ag.getBoundingClientRect().height) return;
+    if (ev.key === 'ArrowLeft')  montrer(n - 1);
+    if (ev.key === 'ArrowRight') montrer(n + 1);
+  });
 })();
 
 </script>
