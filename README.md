@@ -551,6 +551,13 @@ Deux modes, décidés par la présence de `BLOB_READ_WRITE_TOKEN` :
 Laisser croire qu'une affiche est enregistrée alors qu'elle disparaîtra au
 prochain déploiement serait le pire défaut possible pour cet outil.
 
+**Ne saisissez pas `BLOB_READ_WRITE_TOKEN` à la main.** Connecter le magasin
+au projet crée la variable tout seul. Une variable saisie manuellement, elle,
+survit à la suppression du magasin qu'elle désignait et l'emporte sur celle de
+la connexion : le code parle alors à un magasin disparu — « This store does
+not exist ». *Paramètres* affiche l'identifiant du magasin réellement visé,
+à comparer avec celui de Vercel.
+
 **Le magasin doit être en accès public.** C'est un choix fait à la création et
 qui ne se change pas ensuite. Un magasin privé refuse l'écriture avec
 « Cannot use public access on a private store » — et il ne conviendrait de

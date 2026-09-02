@@ -75,17 +75,33 @@ async function ecrire(donnees) {
     }
     return { ok: true };
   } catch (e) {
-    return {
-      ok: false,
-      message: /Cannot find module/.test(String(e && e.message))
-        ? "Le paquet @vercel/blob n'est pas installé. Ajoutez-le aux dépendances."
-        : /private access|private store/i.test(String(e && e.message))
-        ? "Le magasin Blob est en accès privé. Les affiches d'un site public "
-          + "doivent être lisibles par les visiteurs : créez un magasin en accès "
-          + 'public et connectez-le à la place.'
-        : "Le stockage n'a pas accepté l'enregistrement : " + String(e && e.message).slice(0, 120),
-    };
+    return { ok: false, message: expliquer(e) };
   }
+}
+
+/* Les pannes de stockage ont des causes precises et des gestes precis. Une
+   erreur brute — « This store does not exist » — n'aide personne : on traduit
+   celles qu'on connait en ce qu'il faut aller faire. */
+function expliquer(e) {
+  const m = String(e && e.message);
+  if (/Cannot find module/.test(m))
+    return "Le paquet @vercel/blob n'est pas installé. Ajoutez-le aux dépendances.";
+  if (/private access|private store/i.test(m))
+    return "Le magasin Blob est en accès privé. Les affiches d'un site public "
+      + 'doivent être lisibles par les visiteurs : créez un magasin en accès '
+      + 'public et connectez-le à la place.';
+  // Cas typique : BLOB_READ_WRITE_TOKEN a ete saisi a la main, puis le magasin
+  // supprime. La variable manuelle survit a la suppression du magasin et
+  // l'emporte sur celle qu'ajoute la connexion du nouveau.
+  if (/store does not exist|no such store|store not found/i.test(m))
+    return "Le jeton désigne un magasin qui n'existe plus. Si "
+      + 'BLOB_READ_WRITE_TOKEN a été saisi à la main dans les variables '
+      + "d'environnement, supprimez cette variable : celle du magasin connecté "
+      + 'prendra le relais. Puis redéployez.';
+  if (/unauthorized|forbidden|invalid token/i.test(m))
+    return 'Le jeton de stockage est refusé. Reconnectez le magasin au projet, '
+      + 'puis redéployez.';
+  return "Le stockage a refusé l'opération : " + m.slice(0, 140);
 }
 
 // ── Session ────────────────────────────────────────────────────────────────
@@ -221,6 +237,10 @@ module.exports = async function handler(req, res) {
     return json(res, 200, {
       ok: true,
       stockage: JETON_BLOB ? 'durable' : 'demonstration',
+      // L'identifiant du magasin vise, lisible dans le jeton. Il se compare a
+      // celui affiche par Vercel : c'est ainsi qu'on voit a quel magasin on
+      // parle. Ce n'est pas la partie secrete, et l'etat demande une session.
+      magasin: (JETON_BLOB.split('_')[3] || '').slice(0, 24) || null,
       evenements: (d.evenements || []).length,
       promotions: (d.promotions || []).length,
       medias: (d.medias || []).length,
@@ -260,13 +280,7 @@ module.exports = async function handler(req, res) {
       });
       return json(res, 200, { ok: true, url: r.url });
     } catch (e) {
-      const m = String(e && e.message);
-      return json(res, 502, { ok: false,
-        message: /private access|private store/i.test(m)
-          ? "Le magasin Blob est en accès privé. Une affiche doit être lisible "
-            + "par les visiteurs du site : créez un magasin en accès public et "
-            + 'connectez-le à la place.'
-          : "Le dépôt a échoué : " + m.slice(0, 120) });
+      return json(res, 502, { ok: false, message: expliquer(e) });
     }
   }
 
