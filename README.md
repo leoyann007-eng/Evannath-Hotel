@@ -43,6 +43,7 @@ Python à partir de gabarits, pour éviter la saisie manuelle.
 | `contact.html` | 4 canaux, formulaire validé, carte d'accès |
 | `experiences.html` | 6 lieux du domaine, 4 activités nautiques, 4 excursions |
 | `seminaires.html` | 5 configurations de salle, 4 formules, demande de devis |
+| `evenements.html` | Événements &amp; offres du moment — les affiches datées |
 | `informations-utiles.html` | 17 questions en accordéon |
 | `mentions-legales.html` | Trame juridique à compléter |
 | `404.html` | Page introuvable |
@@ -381,6 +382,67 @@ est lu — un appel prématuré verrouille la décision alors que la largeur de 
 fenêtre n'est pas encore connue.
 
 Pour refaire les extraits avec d'autres bornes, tout est dans `outils-video.sh`.
+
+## Les événements
+
+L'établissement produit des affiches — Packs Vacances, Réveillon, fête de
+l'Indépendance — et les publie sur ses réseaux. Son site n'avait aucun endroit
+pour les recevoir : c'est d'ailleurs l'un des constats de l'audit, « votre
+campagne en cours n'est pas sur votre site ».
+
+`evenements.html` est cet endroit. Elle se génère depuis `_evenements.py`,
+**le seul fichier à modifier pour publier une affiche**.
+
+**La page ne répète aucun tarif.** Les formules permanentes restent sur
+`circuits.html` ; l'événement y renvoie. Deux prix pour la même offre finissent
+toujours par diverger, et l'écart ne se voit nulle part — c'est ce que le
+contrôle 7 sexies traque déjà entre l'accueil et les circuits.
+
+### Une affiche périmée disparaît toute seule
+
+Chaque entrée porte une `fin`. Passée cette date, **le navigateur retire
+l'entrée** au chargement : le site est statique, et personne ne le reconstruit
+le 2 janvier au matin pour décrocher l'affiche du réveillon.
+
+Le même mécanisme tient le bandeau de l'accueil, qui met en avant la première
+entrée de la liste. Ce bandeau ne porte pas la classe `reveal` : il annonce ce
+qui se passe maintenant, il n'a pas à attendre le défilement — ni à disparaître
+si le script échoue.
+
+Il est placé **sous** la carte de réservation, et non au-dessus : `.booking`
+remonte de 58 px avec un `z-index` supérieur pour chevaucher le hero, et
+recouvrait le bandeau entièrement.
+
+### Ce que Google en voit
+
+`_schema.evenements()` ne déclare en `Event` que les entrées **qui portent une
+date de fin**. Un Event sans date n'en est pas un pour Google, qui exige
+`startDate` ; déclarer la Méchoui Party du samedi avec une date inventée
+reviendrait à mentir au moteur, lequel affiche ces dates telles quelles dans
+ses résultats.
+
+### La navigation passe à douze entrées
+
+Ajouter « Événements » a révélé une recopie que le projet combat partout
+ailleurs : **les trois pages à gabarit portaient leur navigation en dur**,
+ainsi que le dictionnaire anglais du menu. Une entrée ajoutée les manquait donc
+en silence — le contrôle 10 ne l'a vu qu'après coup.
+
+`liens_nav()` rend désormais le bloc depuis `LINKS`, et les gabarits le
+consomment par `{{NAV_LINKS}}` et `{{EN_NAV}}`. Il n'y a plus qu'une source.
+
+### Le contrôle qui manquait
+
+En écrivant cette page, une clé de traduction portant un tiret —
+`q-packs-vacances:` — a suffi à **casser tout le JavaScript de la page** :
+JavaScript refuse un tiret dans une clé non quotée. La page s'affichait
+normalement ; seuls la bascule de langue, le tiroir, l'apparition au défilement
+et l'expiration des affiches avaient disparu.
+
+Rien ne le détectait. `verifier.py` (contrôle 13) passe maintenant chaque script
+de chaque page à `node --check`. Les deux cas — clé à tiret non quotée, virgule
+parasite — ont été testés en les provoquant. Le contrôle 7 quater accepte
+désormais les clés quotées, qui sont légitimes.
 
 ## Version anglaise
 
@@ -885,7 +947,11 @@ Avant toute mise en production :
    `seminaires.html` (théâtre 60, classe 35, en U 25, cocktail 90, banquet 70)
    sont des hypothèses : l'établissement ne publie aucun chiffre. À remplacer
    par les capacités réelles avant mise en production.
-7. **Licence de la police** — le site d'origine utilise
+7. **Les dates des événements** — `_evenements.py` porte des périodes
+   plausibles (Réveillon au 31 décembre, Méchoui Party le samedi) mais
+   l'établissement ne publie aucun calendrier. À confirmer, et à compléter
+   avec leurs vraies affiches.
+8. **Licence de la police** — le site d'origine utilise
    `MADE-TOMMY-Regular_PERSONAL-USE.otf`, dont la licence n'autorise pas
    l'usage commercial. La maquette n'utilise que des polices libres.
 8. **Quelle adresse e-mail afficher** — deux existent :

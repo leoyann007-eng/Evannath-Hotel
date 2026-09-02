@@ -313,6 +313,24 @@ footer{background:#0F0A06;border-top:1px solid var(--line);padding:74px 0 28px}
   .booking{margin-top:-30px}
   #lb .prev{left:8px}#lb .next{right:8px}
 }
+
+/* Bandeau de l'evenement en cours. Il disparait de lui-meme passee sa date
+   de fin : un site d'hotel qui annonce encore le reveillon en mars fait
+   plus de mal que pas d'annonce du tout. */
+.bandeau{max-width:var(--max);margin:34px auto 0;padding:0 24px;position:relative;z-index:11}
+.bandeau a{display:flex;align-items:center;gap:20px;background:var(--bark-2);
+  border:1px solid var(--line);padding:16px 22px;transition:.4s cubic-bezier(.2,.8,.2,1)}
+.bandeau a:hover{border-color:rgba(185,138,80,.55);transform:translateY(-2px)}
+.bandeau .quand{font-size:10px;letter-spacing:.26em;text-transform:uppercase;
+  color:var(--bronze);font-weight:700;white-space:nowrap}
+.bandeau b{font-family:var(--f-display);font-weight:400;font-size:1.16rem;color:var(--cream)}
+.bandeau span.t{color:#B4A794;font-size:14px}
+.bandeau .fl{margin-left:auto;color:var(--bronze);white-space:nowrap;font-size:12px;
+  letter-spacing:.18em;text-transform:uppercase;font-weight:700}
+@media(max-width:760px){
+  .bandeau a{flex-wrap:wrap;gap:8px}
+  .bandeau span.t,.bandeau .fl{display:none}
+}
 </style>
 <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":["Hotel","LodgingBusiness"],"@id":"https://evannathhotel.vercel.app/#hotel","name":"Hôtel Evannath","alternateName":"Evannath — Le Rêve Africain","slogan":"Le Rêve Africain","description":"Hôtel de 46 chambres et suites à Assinie PK 19, en Côte d'Ivoire, face à la lagune Aby : paillote sur pilotis, piscine, spa, restaurant et salle de séminaire. Navette aéroport offerte.","url":"https://evannathhotel.vercel.app/","logo":"https://evannathhotel.vercel.app/img/opt/logo-blanc.png","image":["https://evannathhotel.vercel.app/img/opt/gal-lag-ponton.jpg","https://evannathhotel.vercel.app/img/opt/hero-aerien.jpg","https://evannathhotel.vercel.app/img/opt/hero-chambre-wax.jpg","https://evannathhotel.vercel.app/img/opt/g-resto.jpg"],"address":{"@type":"PostalAddress","streetAddress":"Assinie PK 19","addressLocality":"Assinie-Mafia","addressRegion":"Comoé","addressCountry":"CI"},"telephone":"+225 27 21 73 12 65","email":"houansouyannaxel@gmail.com","sameAs":["https://www.facebook.com/evannathhotel","https://www.instagram.com/evannathhotel"],"priceRange":"67 000 – 280 000 XOF","currenciesAccepted":"XOF","paymentAccepted":"Espèces, Wave, Orange Money, MTN Mobile Money, carte bancaire","numberOfRooms":{"@type":"QuantitativeValue","value":46},"petsAllowed":false,"amenityFeature":[{"@type":"LocationFeatureSpecification","name":"Piscine exterieure","value":true},{"@type":"LocationFeatureSpecification","name":"Spa","value":true},{"@type":"LocationFeatureSpecification","name":"Sauna","value":true},{"@type":"LocationFeatureSpecification","name":"Restaurant","value":true},{"@type":"LocationFeatureSpecification","name":"Bar","value":true},{"@type":"LocationFeatureSpecification","name":"Wifi gratuit","value":true},{"@type":"LocationFeatureSpecification","name":"Parking gratuit","value":true},{"@type":"LocationFeatureSpecification","name":"Navette aeroport gratuite","value":true},{"@type":"LocationFeatureSpecification","name":"Salle de conference","value":true},{"@type":"LocationFeatureSpecification","name":"Climatisation","value":true},{"@type":"LocationFeatureSpecification","name":"Reception 24h/24","value":true},{"@type":"LocationFeatureSpecification","name":"Petit-dejeuner inclus","value":true},{"@type":"LocationFeatureSpecification","name":"Acces lagune","value":true}],"checkinTime":"14:00","checkoutTime":"12:00","contactPoint":[{"@type":"ContactPoint","contactType":"reservations","telephone":"+225 27 21 73 12 65","email":"houansouyannaxel@gmail.com","availableLanguage":["fr","en"]},{"@type":"ContactPoint","contactType":"reservations","telephone":"+225 01 51 52 75 75","email":"houansouyannaxel@gmail.com","availableLanguage":["fr","en"]}],"hasMap":"https://www.google.com/maps/search/Assinie+PK+19","containsPlace":{"@id":"https://evannathhotel.vercel.app/#restaurant"}},{"@type":"WebSite","@id":"https://evannathhotel.vercel.app/#website","url":"https://evannathhotel.vercel.app/","name":"Hôtel Evannath","inLanguage":"fr-CI","publisher":{"@id":"https://evannathhotel.vercel.app/#hotel"}},{"@type":"Restaurant","@id":"https://evannathhotel.vercel.app/#restaurant","name":"La table de l'Hôtel Evannath","description":"Cuisine ivoirienne et continentale à Assinie PK 19 : poisson du jour, kedjenou, grillades et cocktails, en terrasse face à la piscine.","url":"https://evannathhotel.vercel.app/carte","servesCuisine":["Ivoirienne","Africaine","Française","Fruits de mer"],"priceRange":"XOF","currenciesAccepted":"XOF","address":{"@type":"PostalAddress","streetAddress":"Assinie PK 19","addressLocality":"Assinie-Mafia","addressRegion":"Comoé","addressCountry":"CI"},"telephone":"+225 27 21 73 12 65","image":"https://evannathhotel.vercel.app/img/opt/gal-lag-nuit.jpg","hasMenu":"https://evannathhotel.vercel.app/carte","containedInPlace":{"@id":"https://evannathhotel.vercel.app/#hotel"}}]}</script>
 </head>
@@ -346,12 +364,13 @@ footer{background:#0F0A06;border-top:1px solid var(--line);padding:74px 0 28px}
       <a href="carte.html"><i>03</i><span data-t="n3">La table</span></a>
       <a href="spa.html"><i>04</i><span data-t="n4">Le spa</span></a>
       <a href="circuits.html"><i>05</i><span data-t="n5">Circuits &amp; Offres</span></a>
-      <a href="seminaires.html"><i>06</i><span data-t="n6">Séminaires &amp; groupes</span></a>
-      <a href="galerie.html"><i>07</i><span data-t="n7">Galerie</span></a>
-      <a href="a-propos.html"><i>08</i><span data-t="n8">À propos</span></a>
-      <a href="informations-utiles.html"><i>09</i><span data-t="n9">Informations utiles</span></a>
-      <a href="contact.html"><i>10</i><span data-t="n10">Contact</span></a>
-      <a href="reserver.html"><i>11</i><span data-t="n11">Réserver</span></a>
+      <a href="evenements.html"><i>06</i><span data-t="n6">Événements</span></a>
+      <a href="seminaires.html"><i>07</i><span data-t="n7">Séminaires &amp; groupes</span></a>
+      <a href="galerie.html"><i>08</i><span data-t="n8">Galerie</span></a>
+      <a href="a-propos.html"><i>09</i><span data-t="n9">À propos</span></a>
+      <a href="informations-utiles.html"><i>10</i><span data-t="n10">Informations utiles</span></a>
+      <a href="contact.html"><i>11</i><span data-t="n11">Contact</span></a>
+      <a href="reserver.html"><i>12</i><span data-t="n12">Réserver</span></a>
     </nav>
     <aside class="dw-side">
       <div class="ph"><picture><source srcset="img/opt/gal-art-lanterne-640.webp 640w, img/opt/gal-art-lanterne-1024.webp 1024w, img/opt/gal-art-lanterne.webp 1748w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp">
@@ -389,7 +408,6 @@ footer{background:#0F0A06;border-top:1px solid var(--line);padding:74px 0 28px}
   </div>
   <div class="scroll-hint"><i></i><span data-t="sc">Scroll</span></div>
 </section>
-
 <div class="booking wrap" id="reserver">
   <form class="book-card" id="bkf">
     <div class="field"><label for="d1" data-t="in">Arrivée</label><input type="date" id="d1"></div>
@@ -418,6 +436,9 @@ footer{background:#0F0A06;border-top:1px solid var(--line);padding:74px 0 28px}
     </div>
   </form>
 </div>
+
+<div class="bandeau" id="bandeau"><a href="evenements.html#packs-vacances"><span class="quand" data-t="bq">Saison en cours</span><b data-t="bt">Packs Vacances</b><span class="t" data-t="bx">Et tout ce qui se passe à l'hôtel en ce moment.</span><span class="fl" data-t="bf">Voir tout</span></a></div>
+
 
 <section class="wrap" style="padding-top:86px">
   <div class="stats reveal">
@@ -858,8 +879,8 @@ function go(i){ri=(i+rn)%rn;rt.style.transform='translateX('+(-ri*100)+'%)';[].s
 go(0);var auto=setInterval(function(){go(ri+1)},6500);
 rt.addEventListener('pointerdown',function(){clearInterval(auto)});
 
-var EN={book:"Book now",mn:"Menu",
-n1:"Rooms &amp; Suites",n2:"Experiences",n3:"The table",n4:"The spa",n5:"Packages &amp; Offers",n6:"Meetings &amp; groups",n7:"Gallery",n8:"About",n9:"Useful information",n10:"Contact",n11:"Book",dr:"Reservations",vx:"All experiences",vch:"Compare all seven",
+var EN={book:"Book now",
+mn:"Menu",n1:"Rooms &amp; Suites",n2:"Experiences",n3:"The table",n4:"The spa",n5:"Packages &amp; Offers",n6:"Events",n7:"Meetings &amp; groups",n8:"Gallery",n9:"About",n10:"Useful information",n11:"Contact",n12:"Book",dr:"Reservations",bq:"Current season",bt:"Holiday Packages",bx:"On now at the hotel.",bf:"See all",vx:"All experiences",vch:"Compare all seven",
 eb:"Assinie · PK 19 · Aby Lagoon",h1e:"African",
 lede:"46 rooms and suites, a wooden deck set out over the lagoon, and the quiet of the Comoé. Book direct — the rate is always best here.",
 cta1:"Book direct",cta2:"See the rooms",sc:"Scroll",
@@ -918,5 +939,5 @@ document.querySelectorAll('.lang button').forEach(function(b){b.onclick=function
   if(typeof EVN_LANG==='function')EVN_LANG(lg);
 }});
 </script>
-</body>
+<script>(function(){var b=document.getElementById('bandeau');if(!b)return;var f=b.getAttribute('data-fin');var a=new Date();a.setHours(0,0,0,0);if(f&&new Date(f+'T23:59:59')<a)b.remove();})();</script></body>
 </html>

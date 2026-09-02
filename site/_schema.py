@@ -229,13 +229,49 @@ def galerie(photos):
     }
 
 
+def evenements(items):
+    """items : liste de (slug, titre, texte, image, fin ISO ou None).
+
+    Un Event sans date n'est pas un Event pour Google : il exige startDate.
+    Les rendez-vous qui reviennent chaque annee — la Mechoui Party du samedi,
+    le coffret anniversaire — n'en sont donc PAS. Les declarer avec une date
+    inventee reviendrait a mentir au moteur, qui affiche ces dates telles
+    quelles dans ses resultats. On ne retient que ceux qui portent une fin.
+    """
+    out = []
+    for slug, titre, texte, image, fin in items:
+        if not fin:
+            continue
+        out.append({
+            '@type': 'Event',
+            'name': titre,
+            'description': texte,
+            'url': SITE + '/evenements#' + slug,
+            'image': SITE + '/img/opt/' + image + '.jpg',
+            'endDate': fin,
+            'eventStatus': 'https://schema.org/EventScheduled',
+            'eventAttendanceMode': 'https://schema.org/OfflineEventAttendanceMode',
+            'location': {'@id': ID_HOTEL},
+            'organizer': {'@id': ID_HOTEL},
+        })
+    return out
+
+
 def bloc(*entites):
     """Assemble les entites en un seul <script type=application/ld+json>.
 
     Un unique graphe plutot que plusieurs balises : Google lit mieux, et les
     references par @id restent resolvables entre entites.
+
+    Une entite peut etre une liste — evenements() en renvoie une. On aplatit :
+    imbriquee, elle produirait un @graph contenant un tableau, que Google
+    ignore en silence.
     """
-    graphe = [e for e in entites if e]
+    graphe = []
+    for e in entites:
+        if not e:
+            continue
+        graphe.extend(e) if isinstance(e, list) else graphe.append(e)
     doc = {'@context': 'https://schema.org', '@graph': graphe}
     return ('<script type="application/ld+json">'
             + json.dumps(doc, ensure_ascii=False, separators=(',', ':'))

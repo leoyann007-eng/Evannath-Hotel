@@ -4,7 +4,7 @@
 A lancer apres les generateurs. Chaque controle correspond a un defaut qui est
 reellement survenu sur ce projet — ils sont la pour qu'il ne revienne pas.
 """
-import io, os, re, glob, json, sys
+import io, os, re, glob, json, sys, subprocess, tempfile
 sys.path.insert(0, '.')
 from _chrome import TOKENS, NAV_BASE, LANG_JS, empreinte, WA, MAIL
 
@@ -21,6 +21,11 @@ def _taille_de(chemin):
 def _largeur_de(chemin):
     return _taille_de(chemin)[0]
 
+
+# node sert au controle 13. Absent, le controle est saute — mieux vaut un
+# verificateur qui tourne partout qu'un verificateur qui refuse de demarrer.
+import shutil
+_node = shutil.which('node')
 
 IGNORE = {'index-luxe-variante.html', 'carte-template.html',
           'spa-template.html', 'index-template.html'}
@@ -136,7 +141,10 @@ def controler():
         else:
             bloc = s[i + 8:]
             bloc = bloc[:bloc.find('};')]
-            declarees = re.findall(r'(?:^|,)\s*([\w-]+)\s*:', bloc)
+            # Une cle portant un tiret DOIT etre quotee — JavaScript refuse
+            # « q-packs-vacances: » sans guillemets. Les deux formes sont donc
+            # legitimes, et le controle doit lire les deux.
+            declarees = re.findall(r'(?:^|,)\s*"?([\w-]+)"?\s*:', bloc)
             traduites = set(declarees)
             doublons = sorted({k for k in declarees if declarees.count(k) > 1})
             if doublons:
@@ -253,7 +261,7 @@ def controler():
                 pb.append((f, 'lien mort : ' + h))
 
         # 10. navigation complete et repere principal
-        if len(re.findall(r'<a href="[^"]+"[^>]*><i>\d+</i><span data-t="n\d+"', s)) != 11:
+        if len(re.findall(r'<a href="[^"]+"[^>]*><i>\d+</i><span data-t="n\d+"', s)) != 12:
             pb.append((f, 'navigation incomplete'))
         if s.count('<main id="contenu">') != 1:
             pb.append((f, 'balise <main> absente ou en double'))
@@ -296,6 +304,29 @@ def controler():
         adresses = set(re.findall(r'mailto:([\w.+-]+@[\w.-]+\.\w+)', s)) - {MAIL}
         if adresses:
             pb.append((f, 'mailto vers %s' % ', '.join(sorted(adresses))))
+
+        # 13. le JavaScript de la page doit se parser.
+        # Une erreur de syntaxe ne se VOIT pas : la page s'affiche, mais tout
+        # son comportement disparait d'un coup — bascule de langue, tiroir,
+        # apparition au defilement, expiration des affiches. C'est arrive avec
+        # une cle de dictionnaire portant un tiret, « q-packs-vacances », que
+        # JavaScript refuse sans guillemets.
+        if _node:
+            for i, js in enumerate(re.findall(
+                    r'<script(?![^>]*(?:src=|type="application))[^>]*>(.*?)</script>',
+                    s, re.S)):
+                if not js.strip():
+                    continue
+                tmp = tempfile.NamedTemporaryFile('w', suffix='.js', delete=False,
+                                                  encoding='utf-8')
+                tmp.write(js); tmp.close()
+                r = subprocess.run([_node, '--check', tmp.name],
+                                   capture_output=True, text=True)
+                os.unlink(tmp.name)
+                if r.returncode:
+                    detail = [l for l in r.stderr.split(chr(10)) if 'Error' in l]
+                    pb.append((f, 'script %d invalide : %s'
+                               % (i + 1, (detail or ['?'])[0].strip()[:70])))
 
         # 12. une barre collante doit avoir son rideau
         if 'collante"' in s:

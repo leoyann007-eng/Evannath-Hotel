@@ -7,11 +7,45 @@ Elle consomme desormais les memes briques que les autres, et ne garde en
 propre que les six valeurs de couleur qui lui sont specifiques.
 """
 import io
-from _chrome import TOKENS, NAV_BASE, LANG_JS, dimensionner, responsive, versionner, WA, WA_TEXTE, MAIL
+from _chrome import (TOKENS, NAV_BASE, LANG_JS, dimensionner, responsive, versionner,
+                     liens_nav, EN_NAV, WA, WA_TEXTE, MAIL)
+from _evenements import EVENEMENTS, EN as EV_EN
 import _schema
 
+
+# Le bandeau de l'accueil : le premier evenement de la liste, celui que
+# l'etablissement veut mettre en avant. Il porte sa date de fin et disparait
+# tout seul — le meme mecanisme que sur la page Evenements.
+_e = EVENEMENTS[0] if EVENEMENTS else None
+if _e:
+    _fin = ' data-fin="%s"' % _e['fin'] if _e['fin'] else ''
+    # Pas de classe « reveal » : le bandeau annonce ce qui se passe MAINTENANT.
+    # L'attendre au defilement le rendrait invisible tant que le script n'a
+    # pas tourne, et invisible tout court si le script echoue.
+    BANDEAU = ('<div class="bandeau" id="bandeau"%s>'
+               '<a href="evenements.html#%s">'
+               '<span class="quand" data-t="bq">%s</span>'
+               '<b data-t="bt">%s</b>'
+               '<span class="t" data-t="bx">%s</span>'
+               '<span class="fl" data-t="bf">Voir tout</span>'
+               '</a></div>') % (_fin, _e['slug'], _e['quand'], _e['titre'],
+                                "Et tout ce qui se passe à l'hôtel en ce moment.")
+    _en = EV_EN.get(_e['slug'])
+    EN_BANDEAU = ('bq:"%s",bt:"%s",bx:"On now at the hotel.",bf:"See all",'
+                  % (_en[1], _en[0])) if _en else ''
+else:
+    BANDEAU, EN_BANDEAU = '', ''
+
+# L'expiration, cote navigateur.
+JS_BANDEAU = ("<script>(function(){var b=document.getElementById('bandeau');"
+              "if(!b)return;var f=b.getAttribute('data-fin');var a=new Date();"
+              "a.setHours(0,0,0,0);"
+              "if(f&&new Date(f+'T23:59:59')<a)b.remove();})();</script>")
 html = io.open('index-template.html', encoding='utf-8').read()
 html = (html
+        .replace('{{BANDEAU}}', BANDEAU)
+        .replace('{{NAV_LINKS}}', liens_nav('index.html'))
+        .replace('{{EN_NAV}}', EN_NAV + EN_BANDEAU)
         .replace('{{WA}}', WA)
         .replace('{{WA_TEXTE}}', WA_TEXTE)
         .replace('{{TOKENS}}', TOKENS)
@@ -42,5 +76,5 @@ html = versionner(responsive(dimensionner(html), hero='hero-chambre-wax',
 html = html.replace('{{MAIL}}', MAIL)
 
 assert '{{' not in html, 'un placeholder n a pas ete remplace'
-io.open('index.html', 'w', encoding='utf-8').write(html)
+io.open('index.html', 'w', encoding='utf-8').write(html.replace('</body>', JS_BANDEAU + '</body>'))
 print('index.html            ok')
