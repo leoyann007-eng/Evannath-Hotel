@@ -29,7 +29,11 @@ const JETON_BLOB = process.env.BLOB_READ_WRITE_TOKEN || '';
 const DUREE = 12 * 3600;                     // 12 h de session
 
 // ── Stockage ───────────────────────────────────────────────────────────────
-const CLE = 'evannath/donnees.json';
+// Le fichier de donnees porte un suffixe aleatoire, ajoute par Blob.
+// Ecrit a une adresse fixe, son URL serait devinable — et publique, puisque
+// le magasin l'est : n'importe qui lirait tout, brouillons non publies
+// compris. On le retrouve par prefixe, cote serveur, jeton en main.
+const PREFIXE = 'evannath/donnees';
 let memoire = null;                          // mode demonstration
 
 const VIDE = { evenements: [], promotions: [], medias: [], maj: null };
@@ -38,9 +42,13 @@ async function lire() {
   if (!JETON_BLOB) return memoire || (memoire = structuredClone(VIDE));
   try {
     const { list } = await import('@vercel/blob');
-    const { blobs } = await list({ prefix: CLE, token: JETON_BLOB });
+    const { blobs } = await list({ prefix: PREFIXE, token: JETON_BLOB });
     if (!blobs.length) return structuredClone(VIDE);
-    const r = await fetch(blobs[0].url, { cache: 'no-store' });
+    // Si un menage a echoue, plusieurs versions coexistent : on prend la
+    // plus recente.
+    const b = blobs.slice().sort(
+      (x, y) => new Date(y.uploadedAt) - new Date(x.uploadedAt))[0];
+    const r = await fetch(b.url, { cache: 'no-store' });
     return r.ok ? await r.json() : structuredClone(VIDE);
   } catch (e) {
     return structuredClone(VIDE);
@@ -54,17 +62,27 @@ async function ecrire(donnees) {
   donnees.maj = new Date().toISOString();
   if (!JETON_BLOB) { memoire = donnees; return { ok: true }; }
   try {
-    const { put } = await import('@vercel/blob');
-    await put(CLE, JSON.stringify(donnees), {
-      access: 'public', token: JETON_BLOB,
-      contentType: 'application/json', addRandomSuffix: false,
+    const { put, list, del } = await import('@vercel/blob');
+    const avant = await list({ prefix: PREFIXE, token: JETON_BLOB });
+    await put(PREFIXE + '.json', JSON.stringify(donnees), {
+      access: 'public', token: JETON_BLOB, contentType: 'application/json',
     });
+    // Les versions precedentes partent APRES l'ecriture : si celle-ci echoue,
+    // l'ancienne reste en place plutot que de tout perdre.
+    if (avant.blobs.length) {
+      try { await del(avant.blobs.map((b) => b.url), { token: JETON_BLOB }); }
+      catch (e) { /* du menage rate ne doit pas faire echouer la publication */ }
+    }
     return { ok: true };
   } catch (e) {
     return {
       ok: false,
       message: /Cannot find module/.test(String(e && e.message))
         ? "Le paquet @vercel/blob n'est pas installé. Ajoutez-le aux dépendances."
+        : /private access|private store/i.test(String(e && e.message))
+        ? "Le magasin Blob est en accès privé. Les affiches d'un site public "
+          + "doivent être lisibles par les visiteurs : créez un magasin en accès "
+          + 'public et connectez-le à la place.'
         : "Le stockage n'a pas accepté l'enregistrement : " + String(e && e.message).slice(0, 120),
     };
   }
@@ -242,8 +260,13 @@ module.exports = async function handler(req, res) {
       });
       return json(res, 200, { ok: true, url: r.url });
     } catch (e) {
+      const m = String(e && e.message);
       return json(res, 502, { ok: false,
-        message: "Le dépôt a échoué : " + String(e && e.message).slice(0, 120) });
+        message: /private access|private store/i.test(m)
+          ? "Le magasin Blob est en accès privé. Une affiche doit être lisible "
+            + "par les visiteurs du site : créez un magasin en accès public et "
+            + 'connectez-le à la place.'
+          : "Le dépôt a échoué : " + m.slice(0, 120) });
     }
   }
 

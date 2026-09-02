@@ -551,6 +551,19 @@ Deux modes, décidés par la présence de `BLOB_READ_WRITE_TOKEN` :
 Laisser croire qu'une affiche est enregistrée alors qu'elle disparaîtra au
 prochain déploiement serait le pire défaut possible pour cet outil.
 
+**Le magasin doit être en accès public.** C'est un choix fait à la création et
+qui ne se change pas ensuite. Un magasin privé refuse l'écriture avec
+« Cannot use public access on a private store » — et il ne conviendrait de
+toute façon pas : les affiches s'affichent aux visiteurs du site, elles
+doivent être lisibles sans jeton.
+
+**Le fichier de données, lui, porte un suffixe aléatoire.** Écrit à une adresse
+fixe dans un magasin public, son URL serait devinable : n'importe qui lirait
+tous les événements, **brouillons non publiés compris**. Il se retrouve par
+préfixe, côté serveur, jeton en main. Les versions précédentes sont effacées
+après chaque écriture réussie — jamais avant, pour qu'un échec ne fasse pas
+tout perdre.
+
 Pour passer en durable : créer un magasin Vercel Blob dans l'onglet *Storage*
 et le connecter au projet, en cochant **Production et Preview**. Vercel injecte
 alors `BLOB_READ_WRITE_TOKEN` de lui-même — ne le saisissez pas à la main, vous
