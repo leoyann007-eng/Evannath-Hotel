@@ -150,6 +150,15 @@ h1.t{font-family:var(--f-t);font-size:30px;font-weight:400}
   align-items:center;margin-bottom:8px}
 .formule input,.formule select{margin:0}
 .formule .fl{height:34px;font-size:14px}
+.pack-l{grid-template-columns:52px 1fr 120px 130px 30px}
+/* La vignette dit quelle photo porte le pack, et sert a en changer. */
+.vign{width:52px;height:40px;padding:0;overflow:hidden;cursor:pointer;
+  background:var(--bark-3);border:1px solid var(--line);display:flex;
+  align-items:center;justify-content:center}
+.vign img{width:100%;height:100%;object-fit:cover;display:block}
+.vign span{font-size:9px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--muted)}
+.vign:hover{border-color:var(--bronze-2)}
 @media (max-width:720px){
   .formule{grid-template-columns:1fr 1fr;gap:6px}
   .choix.trois{grid-template-columns:1fr}
@@ -273,6 +282,7 @@ details.plus summary::marker{color:var(--bronze)}
       <h2>Gestion</h2>
       <button data-v="evenements"><i>◆</i>Événements</button>
       <button data-v="promotions"><i>◉</i>Promotions</button>
+      <button data-v="campagnes"><i>☀</i>Campagnes saisonnières</button>
       <h2>Médias</h2>
       <button data-v="galerie"><i>▣</i>Galerie</button>
       <h2>Administration</h2>
@@ -292,7 +302,10 @@ details.plus summary::marker{color:var(--bronze)}
    ───────────────────────────────────────────────────────────────────────── */
 const API = '/api/admin';
 let ETAT = { stockage: '', magasin: '', variable: '', evenements: [],
-             promotions: [], images: [], chambres: [] };
+             promotions: [], campagnes: [], images: [], chambres: [] };
+/* Quand on choisit la photo d un pack, il faut savoir DE QUEL pack : la
+   grille de photos est unique, les packs sont plusieurs. */
+let PHOTO_POUR = null;
 let VUE = 'bord';
 let EDITE = null;                       // l'entree en cours de modification
 
@@ -352,6 +365,7 @@ async function charger() {
   ETAT.maj = etat.maj;
   ETAT.evenements = (tout.donnees && tout.donnees.evenements) || [];
   ETAT.promotions = (tout.donnees && tout.donnees.promotions) || [];
+  ETAT.campagnes = (tout.donnees && tout.donnees.campagnes) || [];
   ETAT.chambres = chambres;
   ETAT.images = images;
   rendre();
@@ -381,13 +395,27 @@ const expire = (e) => e.fin && new Date(e.fin + 'T23:59:59') < new Date();
 function etatDe(e, type) {
   // Une promotion a un etat que sa periode dicte : programmee avant,
   // active pendant, terminee apres. Un evenement, lui, expire.
-  if (type === 'promotions') {
+  if (type === 'promotions' || type === 'campagnes') {
     const st = statutPromo(e);
     return '<span class="etat ' + st.cl + '">' + st.mot + '</span>';
   }
   if (e.publie === false) return '<span class="etat dort">Brouillon</span>';
   if (expire(e)) return '<span class="etat fini">Terminé</span>';
   return '<span class="etat vif">En ligne</span>';
+}
+
+/** Ce qu'une campagne annonce, en une ligne : combien de packs, et quand. */
+/** Le nom que l API attend pour une collection. */
+function typeApi(vue) {
+  return vue === 'promotions' ? 'promotion'
+    : vue === 'campagnes' ? 'campagne' : 'evenement';
+}
+
+function resumeCampagne(c) {
+  const n = (c.packs || []).length;
+  const jour = (v) => (v || '').slice(0, 10).split('-').reverse().join('/');
+  return ech(n + ' pack' + (n > 1 ? 's' : '')
+    + ((c.debut || c.fin) ? ' · du ' + jour(c.debut) + ' au ' + jour(c.fin) : ''));
 }
 
 /** Ce qu'une promotion fait, en une ligne : combien, sur quoi, quand. */
@@ -412,8 +440,10 @@ function resumePromo(p) {
 }
 
 function liste(type) {
-  const src = type === 'promotions' ? ETAT.promotions : ETAT.evenements;
-  const nom = type === 'promotions' ? 'promotion' : 'événement';
+  const src = type === 'promotions' ? ETAT.promotions
+    : type === 'campagnes' ? ETAT.campagnes : ETAT.evenements;
+  const nom = type === 'promotions' ? 'promotion'
+    : type === 'campagnes' ? 'campagne' : 'événement';
   if (!src.length) {
     return `<div class="carte" style="text-align:center;padding:44px">
       <p style="color:var(--muted)">Aucun ${nom} pour le moment.</p>
@@ -433,10 +463,15 @@ function liste(type) {
           ${i === src.length - 1 ? 'disabled' : ''} title="Descendre"
           aria-label="Descendre ${ech(e.titre)}">&#9660;</button>
       </div>
-      ${e.fond ? `<img class="vig" src="${srcImage(e.fond)}" alt="">` : '<div class="vig"></div>'}
+      ${(() => { const im = type === 'campagnes'
+          ? ((e.packs || [])[0] || {}).image : e.fond;
+        return im ? `<img class="vig" src="${srcImage(im)}" alt="">`
+                  : '<div class="vig"></div>'; })()}
       <div class="txt">
-        <b>${ech(e.titre)} ${e.accent ? '<em style="color:var(--bronze-2)">' + ech(e.accent) + '</em>' : ''}</b>
-        <span>${type === 'promotions' ? resumePromo(e)
+        <b>${ech(e.titre)}${type === 'campagnes' && e.emoji ? ' ' + ech(e.emoji) : ''}
+          ${e.accent ? '<em style="color:var(--bronze-2)">' + ech(e.accent) + '</em>' : ''}</b>
+        <span>${type === 'campagnes' ? resumeCampagne(e)
+          : type === 'promotions' ? resumePromo(e)
           : ech(e.badge || e.quand || '—') + (e.fin ? ' · se termine le ' + ech(e.fin) : '')}</span>
       </div>
       ${etatDe(e, type)}
@@ -484,14 +519,15 @@ function statutPromo(p) {
   return { cl: 'vif', mot: 'Active' };
 }
 
-/** Les lignes de formules telles qu elles sont a l ecran. On garde les lignes
-    vides : l utilisateur est peut-etre en train de les remplir. Le serveur,
-    lui, les ecartera a l enregistrement. */
-function formulesSaisies() {
-  return [...document.querySelectorAll('#formules .formule')].map((d) => ({
+/** Les packs tels qu ils sont a l ecran. On garde les lignes vides :
+    l utilisateur est peut-etre en train de les remplir. Le serveur, lui, les
+    ecartera a l enregistrement. */
+function packsSaisis() {
+  return [...document.querySelectorAll('#packs .formule')].map((d, i) => ({
     nom: (d.querySelector('[data-fn]').value || '').trim(),
     prix: (d.querySelector('[data-fp]').value || '').replace(/[^\d]/g, ''),
     unite: d.querySelector('[data-fu]').value,
+    image: ((EDITE.packs || [])[i] || {}).image || '',
   }));
 }
 
@@ -608,6 +644,38 @@ function choisirRemise(bouton) {
    des etapes precedentes n existent plus : les lire faisait echouer la
    publication sur un « classList of null », juste au moment ou l on croyait
    avoir fini. EDITE est la seule source qui traverse les cinq etapes. */
+async function enregistrerCampagne() {
+  lireEtape();
+  const e = EDITE || {};
+  const entree = {
+    id: e.id,
+    titre: e.titre || '',
+    emoji: e.emoji || '',
+    accroche: e.accroche || '',
+    note: e.note || '',
+    packs: e.packs || [],
+    debut: e.debut || null,
+    fin: e.fin || null,
+    publie: e.publie !== false,
+  };
+  const msg = $('#msgf');
+  const r = await appel('enregistrer', { type: 'campagne', entree });
+  if (!r.ok) { msg.className = 'msg mal'; msg.textContent = r.message || 'Échec.'; return; }
+  const st = statutPromo(entree);
+  const quand = (v) => (v ? v.slice(8, 10) + '/' + v.slice(5, 7) + '/'
+    + v.slice(0, 4) + ' à ' + v.slice(11) : '');
+  msg.className = 'msg ' + (st.mot === 'Active' ? 'bon' : 'mal');
+  msg.textContent =
+    entree.publie === false ? 'Enregistrée en brouillon : elle n’apparaît pas sur le site.'
+    : st.mot === 'Programmée'
+      ? 'Enregistrée. Elle apparaîtra sur le site le ' + quand(entree.debut) + '.'
+    : st.mot === 'Terminée'
+      ? 'Enregistrée, mais sa période est déjà passée : elle n’apparaît pas sur le site.'
+    : 'Publiée. Elle est visible sur le site dès maintenant.';
+  EDITE = null;
+  setTimeout(charger, 1400);
+}
+
 async function enregistrerPromo() {
   lireEtape();
   const e = EDITE || {};
@@ -660,14 +728,15 @@ const UNITES = [['forfait', 'le forfait'], ['personne', 'par personne'],
 
 /* Une campagne de formules ne vise pas des chambres : elle EST l offre. La
    troisieme etape change donc de sujet selon la forme choisie a la deuxieme. */
-function estFormules() {
-  return EDITE && EDITE.remise && EDITE.remise.type === 'formules';
-}
+function estCampagne() { return VUE === 'campagnes'; }
 function etapes() {
-  return ['Informations générales', 'Réduction',
-          estFormules() ? 'Les formules' : "S'applique à",
+  if (estCampagne()) {
+    return ['La campagne', 'Les packs', 'Période & affichage', 'Récapitulatif'];
+  }
+  return ['Informations générales', 'Réduction', "S'applique à",
           'Période & affichage', 'Récapitulatif'];
 }
+function nbEtapes() { return etapes().length; }
 const ETAPES = { get length() { return 5; } };
 let ETAPE = 1;
 
@@ -701,7 +770,10 @@ function lireEtape() {
     EDITE.remise.valeur = (v('f-valeur') || '').replace(/[^\d.]/g, '');
   }
   if (document.querySelector('input[name="cible"]')) EDITE.cible = cibleSaisie();
-  if (document.getElementById('formules')) EDITE.formules = formulesSaisies();
+  if (document.getElementById('packs')) EDITE.packs = packsSaisis();
+  if (v('f-emoji') !== null) EDITE.emoji = v('f-emoji');
+  if (v('f-accroche') !== null) EDITE.accroche = v('f-accroche');
+  if (v('f-note') !== null) EDITE.note = v('f-note');
   if ($('#f-d-date')) { EDITE.debut = instantSaisi('d'); EDITE.fin = instantSaisi('f'); }
   if (c('f-publie') !== null) EDITE.publie = c('f-publie');
   if (c('f-avant') !== null) EDITE.avant = c('f-avant');
@@ -712,15 +784,18 @@ function lireEtape() {
    laisser decouvrir le probleme au recapitulatif. */
 function manqueEtape() {
   if (ETAPE === 1 && !(EDITE.titre || '').trim()) return 'Il manque le titre.';
-  if (ETAPE === 2 && !estFormules()) {
+  if (estCampagne()) {
+    if (ETAPE === 2) {
+      const ok = (EDITE.packs || []).filter((p) => p.nom && Number(p.prix));
+      if (!ok.length) return 'Ajoutez au moins un pack, avec son nom et son prix.';
+    }
+    return '';
+  }
+  if (ETAPE === 2) {
     const val = Number((EDITE.remise || {}).valeur || 0);
     if (!val) return 'Indiquez la valeur de la réduction.';
   }
-  if (ETAPE === 3 && estFormules()) {
-    const ok = (EDITE.formules || []).filter((f) => f.nom && Number(f.prix));
-    if (!ok.length) return 'Ajoutez au moins une formule, avec son nom et son prix.';
-  }
-  if (ETAPE === 3 && !estFormules() && EDITE.cible && EDITE.cible.toutes === false
+  if (ETAPE === 3 && EDITE.cible && EDITE.cible.toutes === false
       && !(EDITE.cible.chambres || []).length
       && !(EDITE.cible.services || []).length) {
     return 'Choisissez au moins une chambre, ou revenez à « toutes les chambres ».';
@@ -730,11 +805,12 @@ function manqueEtape() {
 
 function formulairePromo() {
   const e = EDITE || { publie: true, remise: {}, cible: { toutes: true } };
-  const dernier = ETAPE === 5;
+  const dernier = ETAPE === nbEtapes();
   return `${fil()}
     <div class="carte etape">
       <h2 class="bloc-t"><i>${ETAPE}</i> ${etapes()[ETAPE - 1]}</h2>
-      ${[pas1, pas2, pas3, pas4, pas5][ETAPE - 1](e)}
+      ${(estCampagne() ? [camp1, camp2, pas4, camp4]
+                       : [pas1, pas2, pas3, pas4, pas5])[ETAPE - 1](e)}
     </div>
     <div class="barre">
       ${ETAPE > 1 ? '<button class="btn" data-pas="prec">‹ Précédent</button>' : ''}
@@ -778,31 +854,24 @@ function pas1(e) {
 
 function pas2(e) {
   const r = e.remise || {};
-  const t = r.type === 'montant' ? 'montant'
-    : r.type === 'formules' ? 'formules' : 'pourcentage';
-  const bouton = (cle, txt) => `<button type="button"
-    class="opt ${t === cle ? 'on' : ''}" data-remise="${cle}">${txt}</button>`;
-  return `<label class="lb">Type d'offre</label>
-    <div class="choix trois">
-      ${bouton('pourcentage', 'Pourcentage (%)')}
-      ${bouton('montant', 'Montant fixe (FCFA)')}
-      ${bouton('formules', 'Formules à prix fixe')}
+  const pct = r.type !== 'montant';
+  return `<label class="lb">Type de réduction</label>
+    <div class="choix">
+      <button type="button" class="opt ${pct ? 'on' : ''}" data-remise="pourcentage">
+        Pourcentage (%)</button>
+      <button type="button" class="opt ${pct ? '' : 'on'}" data-remise="montant">
+        Montant fixe (FCFA)</button>
     </div>
-    ${t === 'formules'
-      ? `<p class="vitrine"><span class="aide">Une campagne de formules — les
-          Packs Vacances, par exemple. Vous saisirez chaque formule et son prix
-          à l'étape suivante. Rien n'est calculé : les prix sont fermes.</span></p>`
-      : `<label class="lb" for="f-valeur">Valeur de la réduction</label>
-        <div class="suffixe">
-          <input id="f-valeur" inputmode="numeric" value="${ech(String(r.valeur || ''))}"
-            placeholder="${t === 'montant' ? '25 000' : '20'}">
-          <span id="unite">${t === 'montant' ? 'FCFA' : '%'}</span>
-        </div>
-        <div class="vitrine" id="apercu-remise"></div>`}`;
+    <label class="lb" for="f-valeur">Valeur de la réduction</label>
+    <div class="suffixe">
+      <input id="f-valeur" inputmode="numeric" value="${ech(String(r.valeur || ''))}"
+        placeholder="${pct ? '20' : '25 000'}">
+      <span id="unite">${pct ? '%' : 'FCFA'}</span>
+    </div>
+    <div class="vitrine" id="apercu-remise"></div>`;
 }
 
 function pas3(e) {
-  if (e.remise && e.remise.type === 'formules') return pasFormules(e);
   const c = e.cible || { toutes: true };
   return `<label class="radio"><input type="radio" name="cible" value="toutes"
       ${c.toutes !== false ? 'checked' : ''}> Toutes les chambres</label>
@@ -825,29 +894,85 @@ function pas3(e) {
     <div class="vitrine" id="apercu-remise"></div>`;
 }
 
-/* Les formules d une campagne : un nom, un prix, une unite. Autant de lignes
-   qu il en faut, ajoutees et retirees a la main — quatre pour les Packs
-   Vacances, deux pour une autre saison. */
-function pasFormules(e) {
-  const l = (e.formules && e.formules.length) ? e.formules : [{}];
-  return `<p class="aide" style="margin-bottom:14px">Chaque ligne devient une
-      carte réservable sur le site, avec son prix ferme.</p>
-    <div id="formules">
-      ${l.map((f, i) => `<div class="formule">
-        <input data-fn="${i}" value="${ech(f.nom || '')}" placeholder="Pack Famille">
-        <input data-fp="${i}" inputmode="numeric" value="${ech(String(f.prix || ''))}"
+/* ── Campagnes saisonnieres ────────────────────────────────────────────
+   Vacances, Saint-Valentin, Noel : une campagne porte un nom, une periode, et
+   les packs qu elle annonce. Chaque pack a sa photo — c est elle qui fait la
+   carte, et c est pour cela qu une campagne n est pas une promotion. */
+function camp1(e) {
+  return `<label class="lb" for="f-titre">Nom de la campagne</label>
+    <input id="f-titre" value="${ech(e.titre || '')}" placeholder="Vacances">
+    <label class="lb" for="f-emoji">Emoji (facultatif)</label>
+    <input id="f-emoji" value="${ech(e.emoji || '')}" placeholder="☀️"
+      style="max-width:120px">
+    <label class="lb" for="f-accroche">Accroche</label>
+    <textarea id="f-accroche" rows="2"
+      placeholder="« Les vacances qui vous ressemblent. » Quatre formules pensées pour la saison."
+      >${ech(e.accroche || '')}</textarea>
+    <label class="lb" for="f-note">Mention en haut à droite (facultatif)</label>
+    <input id="f-note" value="${ech(e.note || '')}"
+      placeholder="Annoncés sur notre page Facebook">`;
+}
+
+function camp2(e) {
+  const l = (e.packs && e.packs.length) ? e.packs : [{}];
+  const vign = (p) => p.image
+    ? `<img src="${srcImage(p.image)}" alt="">`
+    : '<span>photo</span>';
+  return `<p class="aide" style="margin-bottom:14px">Chaque pack devient une
+      carte réservable sur le site, avec sa photo et son prix ferme.</p>
+    <div id="packs">
+      ${l.map((p, i) => `<div class="formule pack-l">
+        <button type="button" class="vign" data-photo="${i}"
+          title="Choisir la photo">${vign(p)}</button>
+        <input data-fn="${i}" value="${ech(p.nom || '')}" placeholder="Pack Famille">
+        <input data-fp="${i}" inputmode="numeric" value="${ech(String(p.prix || ''))}"
           placeholder="250 000">
         <select data-fu="${i}">
           ${UNITES.map(([k, nom]) => `<option value="${k}"
-            ${(f.unite || 'forfait') === k ? 'selected' : ''}>${nom}</option>`).join('')}
+            ${(p.unite || 'forfait') === k ? 'selected' : ''}>${nom}</option>`).join('')}
         </select>
         <button type="button" class="fl" data-form-sup="${i}"
-          title="Retirer cette formule" aria-label="Retirer la formule ${i + 1}"
+          title="Retirer ce pack" aria-label="Retirer le pack ${i + 1}"
           ${l.length < 2 ? 'disabled' : ''}>&times;</button>
       </div>`).join('')}
     </div>
     <button type="button" class="btn mince" data-form-ajout=""
-      style="margin-top:12px">Ajouter une formule</button>`;
+      style="margin-top:12px">Ajouter un pack</button>
+    <div class="grille-img" id="imgs" ${PHOTO_POUR === null ? 'hidden' : ''}>
+      ${ETAT.images.map((n) => `<button type="button" data-img="${ech(n)}"
+        ><img src="/img/opt/${ech(n)}.jpg" alt="" loading="lazy"></button>`).join('')}
+    </div>`;
+}
+
+function camp4(e) {
+  const jour = (v) => (v ? v.slice(8, 10) + '/' + v.slice(5, 7) + '/' + v.slice(0, 4)
+    + ' à ' + v.slice(11) : '');
+  const st = statutPromo(e);
+  const ligne = (lb, val) => `<div class="recap-l"><span>${lb}</span><b>${val}</b></div>`;
+  return `<div class="recap">
+    <div>
+      ${ligne('Campagne', ech((e.titre || '—') + (e.emoji ? ' ' + e.emoji : '')))}
+      ${ligne('Accroche', ech(e.accroche || '—'))}
+      ${ligne('Packs', (e.packs || []).filter((p) => p.nom && p.prix)
+        .map((p) => ech(p.nom) + ' — ' + FCFA(p.prix) + ' '
+          + ((UNITES.find((u) => u[0] === p.unite) || UNITES[0])[1]))
+        .join('<br>') || '—')}
+      ${ligne('Période', (e.debut || e.fin)
+        ? ech('Du ' + jour(e.debut) + ' au ' + jour(e.fin))
+        : 'Sans période : affichée tant qu’elle est visible')}
+      ${ligne('État', '<span class="etat ' + st.cl + '">' + st.mot + '</span>')}
+      ${ligne('Affichage', e.publie === false ? 'Brouillon' : 'Visible')}
+    </div>
+    <div class="apercu-client affiche">
+      ${(e.packs || [])[0] && (e.packs || [])[0].image
+        ? `<img src="${srcImage(e.packs[0].image)}" alt="">`
+        : '<div class="vide"></div>'}
+      <div class="dessus">
+        <span class="taux">Campagne en cours</span>
+        <b>${ech(e.titre || '')}</b>
+      </div>
+    </div>
+  </div>`;
 }
 
 function pas4(e) {
@@ -1051,6 +1176,17 @@ function rendre() {
       const s = $('#f-href');
       if (s) s.value = EDITE.href || '#demande';
     }
+  } else if (VUE === 'campagnes') {
+    v.innerHTML = `<div class="entete">
+        <div><h1 class="t">Campagnes saisonnières</h1>
+        <p class="sous">Vacances, Saint-Valentin, Noël : un nom, une période,
+        et les packs qu'elle annonce.</p></div>
+        ${EDITE ? '' : '<button class="btn plein" data-neuf="campagnes">Ajouter</button>'}
+      </div>
+      ${avertissement()}
+      <p class="msg mal" id="msgl"></p>
+      ${EDITE ? formulairePromo() : liste('campagnes')}`;
+    if (EDITE) brancherPromo();
   } else if (VUE === 'galerie') {
     v.innerHTML = `<div class="entete"><div>
         <h1 class="t">Galerie</h1>
@@ -1118,7 +1254,8 @@ document.addEventListener('click', async (e) => {
   }
   const mod = e.target.closest('[data-mod]');
   if (mod) {
-    const src = mod.dataset.type === 'promotions' ? ETAT.promotions : ETAT.evenements;
+    const src = mod.dataset.type === 'promotions' ? ETAT.promotions
+      : mod.dataset.type === 'campagnes' ? ETAT.campagnes : ETAT.evenements;
     EDITE = JSON.parse(JSON.stringify(src.find((x) => x.id === mod.dataset.mod)));
     ETAPE = 1;
     EDITE.infos = EDITE.infos || [];
@@ -1131,15 +1268,15 @@ document.addEventListener('click', async (e) => {
   const bouge = e.target.closest('[data-bouge]');
   if (bouge) {
     const type = bouge.dataset.type;
-    const src = type === 'promotions' ? ETAT.promotions : ETAT.evenements;
+    const src = type === 'promotions' ? ETAT.promotions
+      : type === 'campagnes' ? ETAT.campagnes : ETAT.evenements;
     const i = Number(bouge.dataset.i);
     const j = bouge.dataset.bouge === 'haut' ? i - 1 : i + 1;
     if (j < 0 || j >= src.length) return;
     const ordre = src.map((x) => x.id);
     ordre.splice(j, 0, ordre.splice(i, 1)[0]);
     const msg = $('#msgl');
-    const r = await appel('ordonner',
-      { type: type === 'promotions' ? 'promotion' : 'evenement', ordre });
+    const r = await appel('ordonner', { type: typeApi(type), ordre });
     if (!r.ok) {
       if (msg) msg.textContent = r.message || "L'ordre n'a pas pu être enregistré.";
       return;
@@ -1151,8 +1288,7 @@ document.addEventListener('click', async (e) => {
   const sup = e.target.closest('[data-sup]');
   if (sup) {
     if (!confirm('Supprimer définitivement ?')) return;
-    await appel('supprimer', { type: sup.dataset.type === 'promotions' ? 'promotion' : 'evenement',
-                               id: sup.dataset.sup });
+    await appel('supprimer', { type: typeApi(sup.dataset.type), id: sup.dataset.sup });
     return charger();
   }
   if (e.target.id === 'choisir') { $('#f-fichier').click(); return; }
@@ -1177,7 +1313,7 @@ document.addEventListener('click', async (e) => {
         if (m) { m.className = 'msg mal'; m.textContent = manque; }
         return;
       }
-      ETAPE = Math.min(5, ETAPE + 1);
+      ETAPE = Math.min(nbEtapes(), ETAPE + 1);
     } else if (ou === 'prec') {
       ETAPE = Math.max(1, ETAPE - 1);
     } else {
@@ -1186,17 +1322,26 @@ document.addEventListener('click', async (e) => {
     return rendre();
   }
 
+  /* La grille de photos est unique, les packs sont plusieurs : on retient
+     lequel attend sa photo. */
+  const vign = e.target.closest('[data-photo]');
+  if (vign) {
+    lireEtape();
+    PHOTO_POUR = Number(vign.dataset.photo);
+    return rendre();
+  }
+
   const plus = e.target.closest('[data-form-ajout]');
   if (plus) {
     lireEtape();
-    EDITE.formules = (EDITE.formules || []).concat([{ unite: 'forfait' }]);
+    EDITE.packs = (EDITE.packs || []).concat([{ unite: 'forfait' }]);
     return rendre();
   }
   const moins = e.target.closest('[data-form-sup]');
   if (moins) {
     lireEtape();
-    EDITE.formules = (EDITE.formules || []);
-    EDITE.formules.splice(Number(moins.dataset.formSup), 1);
+    EDITE.packs = (EDITE.packs || []);
+    EDITE.packs.splice(Number(moins.dataset.formSup), 1);
     return rendre();
   }
 
@@ -1204,6 +1349,13 @@ document.addEventListener('click', async (e) => {
   if (rem) return choisirRemise(rem);
 
   const img = e.target.closest('[data-img]');
+  if (img && PHOTO_POUR !== null) {
+    lireEtape();
+    EDITE.packs = EDITE.packs || [];
+    if (EDITE.packs[PHOTO_POUR]) EDITE.packs[PHOTO_POUR].image = img.dataset.img;
+    PHOTO_POUR = null;
+    return rendre();
+  }
   if (img) {
     [...$('#imgs').children].forEach((b) => b.classList.toggle('on', b === img));
     if (EDITE) { EDITE.fond = img.dataset.img; EDITE.format = 'fond'; }
@@ -1216,6 +1368,7 @@ document.addEventListener('click', async (e) => {
   if (e.target.id === 'annuler') { EDITE = null; return rendre(); }
   if (e.target.id === 'enreg') {
     const val = (id) => { const el = $('#' + id); return el ? el.value.trim() : ''; };
+    if (VUE === 'campagnes') return enregistrerCampagne();
     if (VUE === 'promotions') return enregistrerPromo();
     const infos = [0, 1, 2, 3].map((i) => {
       const l = $('[data-il="' + i + '"]'), v = $('[data-iv="' + i + '"]');

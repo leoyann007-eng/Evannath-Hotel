@@ -50,7 +50,8 @@ const DUREE = 12 * 3600;                     // 12 h de session
 const PREFIXE = 'evannath/donnees';
 let memoire = null;                          // mode demonstration
 
-const VIDE = { evenements: [], promotions: [], medias: [], maj: null };
+const VIDE = { evenements: [], promotions: [], campagnes: [], medias: [],
+               maj: null };
 
 async function lire() {
   if (!JETON_BLOB) return memoire || (memoire = structuredClone(VIDE));
@@ -179,6 +180,49 @@ const LIMITES = {
   cta: 40, href: 200, fond: 120, quand: 60, libelle: 30, valeur: 60,
 };
 
+/** La collection ou vit un type d entree. Trois objets, une seule
+    traduction : la deduire a trois endroits differents finissait par en
+    oublier un. */
+function collection(type) {
+  return type === 'promotion' ? 'promotions'
+    : type === 'campagne' ? 'campagnes' : 'evenements';
+}
+
+/** Une campagne saisonniere : un titre, une periode, et les packs qu elle
+    annonce. Chaque pack a sa photo — c est elle qui fait la carte.
+
+    Ce n est ni un evenement (pas de date unique) ni une promotion (rien a
+    remiser : les prix sont fermes). D ou son propre objet. */
+function nettoyerCampagne(e) {
+  const o = {
+    id: propre(e.id, 40) || crypto.randomUUID(),
+    titre: propre(e.titre, LIMITES.titre),
+    emoji: propre(e.emoji, 8),
+    accroche: propre(e.accroche, LIMITES.texte),
+    note: propre(e.note, 120),
+    debut: instant(e.debut),
+    fin: instant(e.fin),
+    publie: e.publie !== false,
+    packs: (Array.isArray(e.packs) ? e.packs : []).slice(0, 8)
+      .map((p) => ({
+        nom: propre(p && p.nom, 60),
+        prix: nombre(p && p.prix),
+        unite: UNITES.includes(p && p.unite) ? p.unite : 'forfait',
+        // Nom d une photo du site, ou URL d un visuel depose.
+        image: propre(p && p.image, 400),
+      }))
+      // Un pack sans nom ni prix n a rien a montrer.
+      .filter((p) => p.nom && p.prix),
+  };
+  if (o.debut && o.fin && o.debut > o.fin) {
+    const t = o.debut; o.debut = o.fin; o.fin = t;
+  }
+  const manque = [];
+  if (!o.titre) manque.push('titre');
+  if (!o.packs.length) manque.push('pack');
+  return { objet: o, manque };
+}
+
 /** Une entree nettoyee. On refuse plutot que de corriger en silence :
  *  un evenement sans titre ni date n'a rien a faire en ligne. */
 function nettoyer(e, type) {
@@ -211,24 +255,10 @@ function nettoyer(e, type) {
        remise, un perimetre — sur quelles chambres — et une periode qui
        commence : un evenement se retire, une promotion se programme. */
     o.message = propre(e.message, LIMITES.texte);
-    /* Trois formes d offre, pas deux. « formules » est celle des Packs
-       Vacances : pas une remise a calculer, mais des forfaits a prix ferme
-       annonces ensemble sous une meme affiche. */
-    const forme = e.remise && e.remise.type;
     o.remise = {
-      type: forme === 'montant' ? 'montant'
-        : forme === 'formules' ? 'formules' : 'pourcentage',
+      type: e.remise && e.remise.type === 'montant' ? 'montant' : 'pourcentage',
       valeur: nombre(e.remise && e.remise.valeur),
     };
-    o.formules = o.remise.type !== 'formules' ? [] : (
-      Array.isArray(e.formules) ? e.formules : []).slice(0, 8)
-      .map((f) => ({
-        nom: propre(f && f.nom, 60),
-        prix: nombre(f && f.prix),
-        unite: UNITES.includes(f && f.unite) ? f.unite : 'forfait',
-      }))
-      // Une formule sans nom ni prix n a rien a montrer.
-      .filter((f) => f.nom && f.prix);
     // Une remise en pourcentage au-dela de 100 n'a pas de sens, et une remise
     // nulle non plus : on borne plutot que d'accepter une aberration.
     if (o.remise.type === 'pourcentage') {
@@ -241,10 +271,6 @@ function nettoyer(e, type) {
         .filter((x) => SERVICES.includes(x)),
     };
     if (o.cible.toutes) { o.cible.chambres = []; o.cible.services = []; }
-    // Une campagne de formules ne vise pas des chambres : elle EST l offre.
-    if (o.remise.type === 'formules') {
-      o.cible = { toutes: true, chambres: [], services: [] };
-    }
     o.debut = instant(e.debut);
     o.fin = instant(e.fin);
     // Une periode a l'envers masquerait la promotion sans rien dire : on la
@@ -298,6 +324,7 @@ module.exports = async function handler(req, res) {
     return res.status(200).json({
       evenements: (d.evenements || []).filter(visible),
       promotions: (d.promotions || []).filter(visible).filter(enCours),
+      campagnes: (d.campagnes || []).filter(visible).filter(enCours),
       maj: d.maj,
     });
   }
@@ -395,8 +422,10 @@ module.exports = async function handler(req, res) {
     if (req.method !== 'POST') return json(res, 405, { ok: false });
     let corps = req.body;
     if (typeof corps === 'string') { try { corps = JSON.parse(corps); } catch { corps = {}; } }
-    const type = corps.type === 'promotion' ? 'promotions' : 'evenements';
-    const { objet, manque } = nettoyer(corps.entree || {}, corps.type);
+    const type = collection(corps.type);
+    const { objet, manque } = corps.type === 'campagne'
+      ? nettoyerCampagne(corps.entree || {})
+      : nettoyer(corps.entree || {}, corps.type);
     if (manque.length) {
       return json(res, 422, { ok: false, champs: manque, message: 'Il manque le ' + manque.join(' et le ') + '.' });
     }
@@ -413,7 +442,7 @@ module.exports = async function handler(req, res) {
     if (req.method !== 'POST') return json(res, 405, { ok: false });
     let corps = req.body;
     if (typeof corps === 'string') { try { corps = JSON.parse(corps); } catch { corps = {}; } }
-    const type = corps.type === 'promotion' ? 'promotions' : 'evenements';
+    const type = collection(corps.type);
     const d = await lire();
     d[type] = (d[type] || []).filter((x) => x.id !== corps.id);
     const w = await ecrire(d);
@@ -425,7 +454,7 @@ module.exports = async function handler(req, res) {
     if (req.method !== 'POST') return json(res, 405, { ok: false });
     let corps = req.body;
     if (typeof corps === 'string') { try { corps = JSON.parse(corps); } catch { corps = {}; } }
-    const type = corps.type === 'promotion' ? 'promotions' : 'evenements';
+    const type = collection(corps.type);
     const d = await lire();
     const par = new Map((d[type] || []).map((x) => [x.id, x]));
     d[type] = (corps.ordre || []).map((id) => par.get(id)).filter(Boolean);

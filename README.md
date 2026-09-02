@@ -551,6 +551,16 @@ Deux modes, décidés par la présence de `BLOB_READ_WRITE_TOKEN` :
 Laisser croire qu'une affiche est enregistrée alors qu'elle disparaîtra au
 prochain déploiement serait le pire défaut possible pour cet outil.
 
+**Trois objets, pas un.** Un **événement** a une date et se retire. Une
+**promotion** a une remise, un périmètre et une période qui commence. Une
+**campagne saisonnière** — Vacances, Saint-Valentin, Noël — n'a rien à
+remiser : elle annonce des packs à prix ferme, chacun avec sa photo. Les
+confondre menait à greffer des champs les uns sur les autres ; chacun a
+désormais son entrée, son formulaire et sa forme sur le site.
+
+Les quatre Packs Vacances écrits en dur restent comme secours : dès qu'une
+campagne est publiée, elle prend leur place, au même gabarit.
+
 **L'ordre de la liste est l'ordre du carrousel.** Les flèches ▲ ▼ de chaque
 ligne le changent : la première ligne est la première diapositive. Le serveur
 réordonne sur la liste complète d'identifiants envoyée par l'interface — aucune

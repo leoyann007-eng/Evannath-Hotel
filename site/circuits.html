@@ -281,17 +281,7 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
 .remise p{color:var(--cream);margin:0 0 14px;max-width:62ch}
 .remise .sur{font-size:12.5px;color:var(--muted);margin-bottom:16px}
 
-/* Les formules d une campagne : autant de cartes que de prix fermes. */
-.remise .formules{display:grid;gap:12px;margin-top:6px;
-  grid-template-columns:repeat(auto-fit,minmax(148px,1fr))}
-.f-carte{border:1px solid var(--line);padding:16px 14px;background:var(--bark)}
-.f-carte h4{font-family:var(--f-display);font-size:16px;font-weight:400;
-  margin:0 0 8px}
-.f-carte b{display:block;font-family:var(--f-display);font-size:24px;
-  color:var(--bronze-2);font-weight:400;line-height:1}
-.f-carte span{display:block;font-size:10px;letter-spacing:.13em;
-  text-transform:uppercase;color:var(--muted);margin:5px 0 13px}
-.f-carte .pick{width:100%;text-align:center}
+
 @media (max-width:820px){
   .remise,.remise.affiche{grid-template-columns:1fr}
   .remise>picture{max-height:260px}
@@ -513,8 +503,13 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
        qu'un cadre annoncant des offres absentes. -->
   <div class="remises" id="remises"></div>
 
+  <!-- Les campagnes publiees depuis l'administration prennent la place de
+       celle qui suit, figee dans le code. Celle-ci reste comme secours :
+       la page garde du contenu si l'API se tait. -->
+  <div id="campagnes"></div>
+
   <!-- Campagne relevée sur la page Facebook (21 000 abonnés) : absente du site actuel -->
-  <section class="camp reveal">
+  <section class="camp reveal" id="camp-figee">
     <div class="top">
       <div>
         <span class="live"><i></i><span data-t="cl">Campagne en cours</span></span>
@@ -1114,10 +1109,107 @@ window.NOMS_CHAMBRES = {"chambre-standard": "Chambre Standard", "deluxe-baldaqui
     demarrer(true);
     devoiler();
     poserRemises(j && j.promotions);
+    poserCampagnes(j && j.campagnes);
   }
 
   /* Les remises publiees depuis l'administration. Le serveur ne renvoie
      que celles dont la periode court : rien a filtrer ici. */
+  /* Une campagne publiee reprend exactement le gabarit des packs figes :
+     meme section, memes cartes, meme bouton. Ce n est pas un autre
+     affichage, c est le meme, rempli autrement. */
+  function poserCampagnes(liste){
+    var hote = document.getElementById('campagnes');
+    if (!hote || !liste || !liste.length) return;
+
+    // Du contenu publie remplace le contenu fige, comme pour l agenda.
+    var figee = document.getElementById('camp-figee');
+    if (figee) figee.remove();
+
+    var choix = document.getElementById('circ');
+    liste.forEach(function(c){
+      var sec = document.createElement('section');
+      sec.className = 'camp';
+
+      var top = document.createElement('div');
+      top.className = 'top';
+      var g = document.createElement('div');
+      g.innerHTML = '<span class="live"><i></i><span>Campagne en cours</span>'
+        + '</span>';
+      var h = document.createElement('h2');
+      h.textContent = (c.titre || '') + (c.emoji ? ' ' + c.emoji : '');
+      g.appendChild(h);
+      top.appendChild(g);
+      if (c.note) {
+        var n = document.createElement('p');
+        n.style.cssText = 'font-size:13px;color:var(--muted);'
+          + 'max-width:30ch;text-align:right';
+        n.textContent = c.note;
+        top.appendChild(n);
+      }
+      sec.appendChild(top);
+
+      if (c.accroche) {
+        var a = document.createElement('p');
+        a.textContent = c.accroche;
+        sec.appendChild(a);
+      }
+
+      var grille = document.createElement('div');
+      grille.className = 'packs';
+      (c.packs || []).forEach(function(p){
+        var art = document.createElement('article');
+        art.className = 'pack';
+
+        var ph = document.createElement('div');
+        ph.className = 'ph';
+        if (p.image) {
+          var im = document.createElement('img');
+          im.src = /^https?:/.test(p.image) ? p.image
+            : 'img/opt/' + p.image + '.jpg';
+          im.alt = p.nom || '';
+          im.loading = 'lazy';
+          im.onerror = function(){ ph.remove(); };
+          ph.appendChild(im);
+        }
+        art.appendChild(ph);
+
+        var dedans = document.createElement('div');
+        dedans.className = 'in';
+        var t = document.createElement('h3'); t.textContent = p.nom || '';
+        var pr = document.createElement('b');
+        pr.textContent = Number(p.prix).toLocaleString('fr-FR');
+        var u = document.createElement('span');
+        u.textContent = 'FCFA · ' + (UNITES_NOM[p.unite] || 'le forfait');
+        var bt = document.createElement('button');
+        bt.type = 'button';
+        bt.className = 'pick pickbtn';
+        bt.dataset.c = p.nom;
+        bt.dataset.p = String(p.prix);
+        bt.dataset.u = p.unite || 'forfait';
+        bt.textContent = 'Choisir';
+
+        /* Le bouton selectionne une option de la liste de demande. Un pack
+           publie depuis l administration n y figure pas : sans cet ajout,
+           le clic serait sans effet, sans erreur et sans trace. */
+        var val = p.prix + '|' + (p.unite || 'forfait');
+        if (choix && !choix.querySelector('option[value="' + val + '"]')) {
+          var o = document.createElement('option');
+          o.value = val;
+          o.textContent = p.nom + ' — '
+            + Number(p.prix).toLocaleString('fr-FR') + ' FCFA';
+          choix.appendChild(o);
+        }
+
+        dedans.appendChild(t); dedans.appendChild(pr);
+        dedans.appendChild(u); dedans.appendChild(bt);
+        art.appendChild(dedans);
+        grille.appendChild(art);
+      });
+      sec.appendChild(grille);
+      hote.appendChild(sec);
+    });
+  }
+
   var UNITES_NOM = { forfait: 'le forfait', personne: 'par personne',
                      enfant: 'par enfant', nuit: 'par nuit' };
 
@@ -1163,12 +1255,7 @@ window.NOMS_CHAMBRES = {"chambre-standard": "Chambre Standard", "deluxe-baldaqui
       var haut = document.createElement('div');
       haut.className = 'haut';
       var r = p.remise || {};
-      if (r.type === 'formules') {
-        var t = document.createElement('span');
-        t.className = 'taux';
-        t.textContent = 'Campagne en cours';
-        haut.appendChild(t);
-      } else if (r.valeur) {
+      if (r.valeur) {
         var t = document.createElement('span');
         t.className = 'taux';
         t.textContent = r.type === 'montant'
@@ -1195,62 +1282,22 @@ window.NOMS_CHAMBRES = {"chambre-standard": "Chambre Standard", "deluxe-baldaqui
         d.appendChild(m);
       }
 
-      /* Une campagne de formules n a pas de perimetre : elle EST l offre.
-         Elle affiche ses formules, chacune reservable a son prix ferme. */
-      if (r.type === 'formules' && (p.formules || []).length) {
-        var g = document.createElement('div');
-        g.className = 'formules';
-        p.formules.forEach(function(f){
-          var art = document.createElement('article');
-          art.className = 'f-carte';
-          var h = document.createElement('h4');
-          h.textContent = f.nom;
-          var pr = document.createElement('b');
-          pr.textContent = Number(f.prix).toLocaleString('fr-FR');
-          var u = document.createElement('span');
-          u.textContent = 'FCFA · ' + (UNITES_NOM[f.unite] || 'le forfait');
-          var bt = document.createElement('button');
-          bt.type = 'button';
-          bt.className = 'pick pickbtn';
-          bt.dataset.c = f.nom;
-          bt.dataset.p = String(f.prix);
-          bt.dataset.u = f.unite || 'forfait';
-          bt.textContent = 'Choisir';
-          /* Le bouton choisit une option de la liste de demande. Une formule
-             publiee depuis l administration n y figure pas : on l ajoute, sans
-             quoi le clic serait sans effet. */
-          var val = f.prix + '|' + (f.unite || 'forfait');
-          var liste = document.getElementById('circ');
-          if (liste && !liste.querySelector('option[value="' + val + '"]')) {
-            var o = document.createElement('option');
-            o.value = val;
-            o.textContent = f.nom + ' — ' + Number(f.prix).toLocaleString('fr-FR')
-              + ' FCFA';
-            liste.appendChild(o);
-          }
-          art.appendChild(h); art.appendChild(pr); art.appendChild(u);
-          art.appendChild(bt);
-          g.appendChild(art);
-        });
-        d.appendChild(g);
+      var c = p.cible || {};
+      var sur = document.createElement('div');
+      sur.className = 'sur';
+      if (c.toutes === false && (c.chambres || []).length) {
+        sur.textContent = 'Sur : ' + c.chambres.map(function(s){
+          return noms[s] || s; }).join(', ');
       } else {
-        var c = p.cible || {};
-        var sur = document.createElement('div');
-        sur.className = 'sur';
-        if (c.toutes === false && (c.chambres || []).length) {
-          sur.textContent = 'Sur : ' + c.chambres.map(function(s){
-            return noms[s] || s; }).join(', ');
-        } else {
-          sur.textContent = 'Sur toutes nos chambres.';
-        }
-        d.appendChild(sur);
-
-        var a = document.createElement('a');
-        a.className = 'btn btn-solid';
-        a.href = 'reserver.html';
-        a.textContent = 'Réserver maintenant';
-        d.appendChild(a);
+        sur.textContent = 'Sur toutes nos chambres.';
       }
+      d.appendChild(sur);
+
+      var a = document.createElement('a');
+      a.className = 'btn btn-solid';
+      a.href = 'reserver.html';
+      a.textContent = 'Réserver maintenant';
+      d.appendChild(a);
 
       art.appendChild(d);
       hote.appendChild(art);
