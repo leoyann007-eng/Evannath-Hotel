@@ -669,6 +669,7 @@ async function enregistrerCampagne() {
     accroche: e.accroche || '',
     note: e.note || '',
     packs: e.packs || [],
+    avant: e.avant === true,
     debut: e.debut || null,
     fin: e.fin || null,
     publie: e.publie !== false,
@@ -1006,7 +1007,8 @@ function camp4(e) {
         ? ech('Du ' + jour(e.debut) + ' au ' + jour(e.fin))
         : 'Sans période : affichée tant qu’elle est visible')}
       ${ligne('État', '<span class="etat ' + st.cl + '">' + st.mot + '</span>')}
-      ${ligne('Affichage', e.publie === false ? 'Brouillon' : 'Visible')}
+      ${ligne('Affichage', (e.publie === false ? 'Brouillon' : 'Visible')
+        + (e.avant ? ' · en avant sur l’accueil' : ''))}
     </div>
     <div class="apercu-client affiche">
       ${(() => { const im = e.visuel || ((e.packs || [])[0] || {}).image;
@@ -1026,10 +1028,12 @@ function pas4(e) {
     return m ? (quoi === 'date' ? m[1] : m[2]) : '';
   };
   return `<div class="paire">
-      <div><label class="lb" for="f-d-date">Début de la promotion</label>
+      <div><label class="lb" for="f-d-date">${estCampagne()
+        ? 'Début de la campagne' : 'Début de la promotion'}</label>
         <input type="date" id="f-d-date" value="${dh(e.debut, 'date')}">
         <input type="time" id="f-d-heure" value="${dh(e.debut, 'heure') || '00:00'}"></div>
-      <div><label class="lb" for="f-f-date">Fin de la promotion</label>
+      <div><label class="lb" for="f-f-date">${estCampagne()
+        ? 'Fin de la campagne' : 'Fin de la promotion'}</label>
         <input type="date" id="f-f-date" value="${dh(e.fin, 'date')}">
         <input type="time" id="f-f-heure" value="${dh(e.fin, 'heure') || '23:59'}"></div>
     </div>
@@ -1039,7 +1043,7 @@ function pas4(e) {
       ${e.publie !== false ? 'checked' : ''}> Visible sur le site</label>
     <label class="bascule"><input type="checkbox" id="f-avant"
       ${e.avant ? 'checked' : ''}> Mettre en avant sur la page d'accueil</label>
-    ${(e.remise || {}).type === 'formules' ? '' : `
+    ${estCampagne() ? '' : `
     <label class="bascule"><input type="checkbox" id="f-pastille"
       ${e.pastille !== false ? 'checked' : ''}> Afficher un badge « PROMO » sur les
       chambres visées</label>`}`;

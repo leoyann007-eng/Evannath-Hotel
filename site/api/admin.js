@@ -221,6 +221,8 @@ function nettoyerCampagne(e) {
     debut: instant(e.debut),
     fin: instant(e.fin),
     publie: e.publie !== false,
+    // Mise en avant sur la page d accueil.
+    avant: e.avant === true,
     packs: (Array.isArray(e.packs) ? e.packs : []).slice(0, 8)
       .map((p) => ({
         nom: propre(p && p.nom, 60),

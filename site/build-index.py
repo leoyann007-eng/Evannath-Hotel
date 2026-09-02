@@ -56,8 +56,12 @@ JS_BANDEAU = r"""<script>
   fetch('/api/admin?a=public', { cache: 'no-store' })
     .then(function(r){ return r.ok ? r.json() : null; })
     .then(function(j){
-      if (!j || !j.promotions) return;
-      var p = j.promotions.filter(function(x){ return x.avant; })[0];
+      if (!j) return;
+
+      /* Une campagne mise en avant passe devant une promotion : c'est le
+         moment commercial le plus large, et elle porte plusieurs offres. */
+      var camp = (j.campagnes || []).filter(function(x){ return x.avant; })[0];
+      var p = camp || (j.promotions || []).filter(function(x){ return x.avant; })[0];
       if (!p) return;
 
       var d = document.getElementById('bandeau');
@@ -71,10 +75,21 @@ JS_BANDEAU = r"""<script>
       }
 
       var r = p.remise || {};
-      var taux = !r.valeur ? 'Offre en cours'
-        : r.type === 'montant'
-          ? '−' + Number(r.valeur).toLocaleString('fr-FR') + ' F'
-          : '−' + r.valeur + ' %';
+      var taux;
+      if (camp) {
+        /* Une campagne n'a pas de remise : ce qui attire, c'est son prix
+           d'entrée. « Dès 15 000 F » dit plus que « campagne en cours ». */
+        var prix = (p.packs || []).map(function(x){ return Number(x.prix) || 0; })
+          .filter(function(n){ return n > 0; });
+        taux = prix.length
+          ? 'Dès ' + Math.min.apply(null, prix).toLocaleString('fr-FR') + ' F'
+          : 'Campagne en cours';
+      } else {
+        taux = !r.valeur ? 'Offre en cours'
+          : r.type === 'montant'
+            ? '−' + Number(r.valeur).toLocaleString('fr-FR') + ' F'
+            : '−' + r.valeur + ' %';
+      }
 
       var a2 = document.createElement('a');
       a2.href = 'circuits.html#forfaits';
@@ -86,8 +101,10 @@ JS_BANDEAU = r"""<script>
       };
       mettre('quand', taux);
       mettre('', p.titre || '', 'b');
-      mettre('t', p.message || '');
-      mettre('fl', 'Voir l’offre');
+      /* L'accroche d'une campagne tient sur plusieurs lignes : le bandeau
+         n'en prend que la première. */
+      mettre('t', (p.message || p.accroche || '').split('\n')[0]);
+      mettre('fl', camp ? 'Voir les packs' : 'Voir l’offre');
 
       d.innerHTML = '';
       d.appendChild(a2);
