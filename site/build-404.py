@@ -54,7 +54,7 @@ WAYS = [
   "Sept catégories, de 67 000 à 280 000 FCFA la nuit.", 'w1p'),
  ('carte.html',          'gal-tab-dressee', "La table",          'w2',
   "Cuisine ivoirienne, poisson du jour, cocktails maison.", 'w2p'),
- ('circuits.html',       'gal-lag-ponton',  "Circuits & Offres", 'w3',
+ ('circuits.html',       'gal-lag-ponton',  "Offres & Événements", 'w3',
   "Onze formules, du Pack Enfant à la lune de miel.", 'w3p'),
  ('galerie.html',        'gal-dom-aerien',  "Galerie",           'w4',
   "Quarante-sept photographies du domaine.", 'w4p'),

@@ -230,7 +230,7 @@ def rendre_cartes(liste):
 b = [header('#demande','Réserver'), drawer('circuits.html'), '''
 <div class="wrap head">
   <nav class="crumb" aria-label="Fil d'Ariane">
-    <a href="index.html" data-t="c1">Accueil</a> &nbsp;·&nbsp; <span data-t="c2">Circuits &amp; Offres</span>
+    <a href="index.html" data-t="c1">Accueil</a> &nbsp;·&nbsp; <span data-t="c2">Offres &amp; Événements</span>
   </nav>
   <span class="eyebrow" data-t="eb">Onze offres &amp; un rendez-vous hebdomadaire</span>
   <h1 data-t="h1">Offres &amp; Événements</h1>
@@ -729,7 +729,7 @@ JS += """
 LD = _schema.bloc(
     _schema.service('Circuits et forfaits', "Packs Vacances, lune de miel, week-end intense, circuits touristiques et coffret anniversaire à l'Hôtel Evannath, Assinie.", 'circuits', image='r-mezzanine', catalogue=CATALOGUE),
     _schema.hotel(),
-    _schema.fil([('Accueil','index'),('Circuits & Offres',None)]))
+    _schema.fil([('Accueil','index'),('Offres & Événements',None)]))
 
 CORPS = NL_.join(b).replace('{{AGENDA}}', AGENDA)
 
