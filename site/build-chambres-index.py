@@ -21,6 +21,14 @@ def fmt(n):
 FAM_NOM = {'chambre': 'Chambre', 'suite': 'Suite', 'famille': 'Famille'}
 
 CSS = """
+/* Une promotion en cours se signale sur la carte de la chambre visee.
+   Le badge est pose apres coup, en JavaScript : la page est statique, la
+   promotion ne l est pas. */
+.card .ph{position:relative}
+.card .promo{position:absolute;top:12px;right:12px;z-index:2;
+  padding:5px 11px;font-size:12px;font-weight:700;letter-spacing:.04em;
+  background:var(--bronze-2);color:var(--night)}
+
 /* L'en-tete est fixe : le hero doit lui reserver sa hauteur, comme le font
    les pages sans hero avec leur padding de 150px. Sans cela, sur un ecran
    court, le contenu aligne en bas remonte et passe sous l'en-tete. */
@@ -164,7 +172,7 @@ for c in CHAMBRES:
     ph, alt, _ = c['photos'][0]
     tag = '<span class="tag">%s</span>' % c['tag'] if c['tag'] else ''
     resume = c['p1'].split('. ')[0] + '.'
-    b.append('''    <article class="card" data-fam="%s" data-prix="%d" data-pax="%d">
+    b.append('''    <article class="card" data-slug="%s" data-fam="%s" data-prix="%d" data-pax="%d">
       <a href="%s.html" aria-label="%s — %s FCFA la nuit">
         <div class="ph">%s<picture><source srcset="img/opt/%s.webp" type="image/webp">
           <img loading="lazy" src="img/opt/%s.jpg" width="1400" height="933" alt="%s"></picture></div>
@@ -178,7 +186,7 @@ for c in CHAMBRES:
           <a href="%s.html" class="go">Voir la chambre &nbsp;&rarr;</a>
         </div>
       </div>
-    </article>''' % (FAMILLE[c['slug']], c['prix'], c['pax'],
+    </article>''' % (c['slug'], FAMILLE[c['slug']], c['prix'], c['pax'],
                      c['slug'], c['nom'], fmt(c['prix']),
                      tag, ph, ph, alt,
                      c['slug'], c['nom'], c['meta'], resume,
@@ -289,6 +297,42 @@ LD = _schema.bloc(
          for i, c in enumerate(sorted(CHAMBRES, key=lambda x: x['prix']), 1)]},
     _schema.hotel(),
     _schema.fil([('Accueil', 'index'), ('Chambres &amp; Suites', None)]))
+
+JS += '''
+
+/* Les promotions publiees depuis l administration posent un badge sur les
+   chambres visees. Le serveur ne renvoie que celles dont la periode court.
+   Si l API se tait, les cartes restent telles quelles : une promotion non
+   signalee vaut mieux qu une page qui ne s affiche pas. */
+fetch('/api/admin?a=public', { cache: 'no-store' })
+  .then(function(r){ return r.ok ? r.json() : null; })
+  .then(function(j){
+    if (!j || !j.promotions) return;
+    j.promotions.forEach(function(p){
+      if (p.pastille === false) return;
+      var r = p.remise || {};
+      if (!r.valeur) return;
+      var texte = r.type === 'montant'
+        ? '−' + Number(r.valeur).toLocaleString('fr-FR') + ' F'
+        : '−' + r.valeur + ' %';
+      var c = p.cible || {};
+      [].slice.call(document.querySelectorAll('.card[data-slug]'))
+        .forEach(function(carte){
+          var vise = c.toutes !== false
+            || (c.chambres || []).indexOf(carte.dataset.slug) >= 0;
+          if (!vise || carte.querySelector('.promo')) return;
+          var ph = carte.querySelector('.ph');
+          if (!ph) return;
+          var b = document.createElement('span');
+          b.className = 'promo';
+          b.textContent = texte;
+          b.title = p.titre || 'Promotion en cours';
+          ph.appendChild(b);
+        });
+    });
+  })
+  .catch(function(){});
+'''
 
 io.open('chambres.html', 'w', encoding='utf-8').write(page(
     "Chambres &amp; Suites — Hôtel Evannath, Assinie | de 67 000 à 280 000 FCFA",

@@ -170,6 +170,14 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
 }
 
 
+/* Une promotion en cours se signale sur la carte de la chambre visee.
+   Le badge est pose apres coup, en JavaScript : la page est statique, la
+   promotion ne l est pas. */
+.card .ph{position:relative}
+.card .promo{position:absolute;top:12px;right:12px;z-index:2;
+  padding:5px 11px;font-size:12px;font-weight:700;letter-spacing:.04em;
+  background:var(--bronze-2);color:var(--night)}
+
 /* L'en-tete est fixe : le hero doit lui reserver sa hauteur, comme le font
    les pages sans hero avec leur padding de 150px. Sans cela, sur un ecran
    court, le contenu aligne en bas remonte et passe sous l'en-tete. */
@@ -338,7 +346,7 @@ caption{caption-side:bottom;padding:16px 4px 0;font-size:12.5px;color:var(--mute
   </div>
 
   <div class="rooms" id="grille">
-    <article class="card" data-fam="chambre" data-prix="67000" data-pax="2">
+    <article class="card" data-slug="chambre-standard" data-fam="chambre" data-prix="67000" data-pax="2">
       <a href="chambre-standard.html" aria-label="Chambre Standard — 67 000 FCFA la nuit">
         <div class="ph"><span class="tag">Best-seller</span><picture><source srcset="img/opt/r-standard-640.webp 640w, img/opt/r-standard.webp 900w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp">
           <img width="900" height="600" loading="lazy" src="img/opt/r-standard.jpg" srcset="img/opt/r-standard-640.jpg 640w, img/opt/r-standard.jpg 900w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" alt="La Chambre Standard"></picture></div>
@@ -353,7 +361,7 @@ caption{caption-side:bottom;padding:16px 4px 0;font-size:12.5px;color:var(--mute
         </div>
       </div>
     </article>
-    <article class="card" data-fam="chambre" data-prix="82000" data-pax="2">
+    <article class="card" data-slug="deluxe-baldaquin" data-fam="chambre" data-prix="82000" data-pax="2">
       <a href="deluxe-baldaquin.html" aria-label="Deluxe · lits à baldaquin — 82 000 FCFA la nuit">
         <div class="ph"><picture><source srcset="img/opt/ig-baldaquin.webp" type="image/webp">
           <img width="640" height="334" loading="lazy" src="img/opt/ig-baldaquin.jpg" alt="Chambre Deluxe à lits à baldaquin"></picture></div>
@@ -368,7 +376,7 @@ caption{caption-side:bottom;padding:16px 4px 0;font-size:12.5px;color:var(--mute
         </div>
       </div>
     </article>
-    <article class="card" data-fam="chambre" data-prix="97000" data-pax="3">
+    <article class="card" data-slug="deluxe-superieure" data-fam="chambre" data-prix="97000" data-pax="3">
       <a href="deluxe-superieure.html" aria-label="Deluxe Supérieure — 97 000 FCFA la nuit">
         <div class="ph"><span class="tag">Salle à manger privée</span><picture><source srcset="img/opt/r-wax-640.webp 640w, img/opt/r-wax.webp 900w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp">
           <img width="900" height="638" loading="lazy" src="img/opt/r-wax.jpg" srcset="img/opt/r-wax-640.jpg 640w, img/opt/r-wax.jpg 900w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" alt="Deluxe Supérieure, textiles wax"></picture></div>
@@ -383,7 +391,7 @@ caption{caption-side:bottom;padding:16px 4px 0;font-size:12.5px;color:var(--mute
         </div>
       </div>
     </article>
-    <article class="card" data-fam="suite" data-prix="107000" data-pax="2">
+    <article class="card" data-slug="suite-anglaise" data-fam="suite" data-prix="107000" data-pax="2">
       <a href="suite-anglaise.html" aria-label="Suite Anglaise — 107 000 FCFA la nuit">
         <div class="ph"><span class="tag">Vue lagune</span><picture><source srcset="img/opt/r-anglaise-640.webp 640w, img/opt/r-anglaise.webp 1080w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp">
           <img width="1080" height="720" loading="lazy" src="img/opt/r-anglaise.jpg" srcset="img/opt/r-anglaise-640.jpg 640w, img/opt/r-anglaise.jpg 1080w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" alt="La Suite Anglaise, vue depuis l'entrée"></picture></div>
@@ -398,7 +406,7 @@ caption{caption-side:bottom;padding:16px 4px 0;font-size:12.5px;color:var(--mute
         </div>
       </div>
     </article>
-    <article class="card" data-fam="chambre" data-prix="127000" data-pax="2">
+    <article class="card" data-slug="chambre-mezzanine" data-fam="chambre" data-prix="127000" data-pax="2">
       <a href="chambre-mezzanine.html" aria-label="Chambre en Mezzanine — 127 000 FCFA la nuit">
         <div class="ph"><picture><source srcset="img/opt/r-mezz2-640.webp 640w, img/opt/r-mezz2.webp 900w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp">
           <img width="900" height="638" loading="lazy" src="img/opt/r-mezz2.jpg" srcset="img/opt/r-mezz2-640.jpg 640w, img/opt/r-mezz2.jpg 900w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" alt="Chambre en Mezzanine"></picture></div>
@@ -413,7 +421,7 @@ caption{caption-side:bottom;padding:16px 4px 0;font-size:12.5px;color:var(--mute
         </div>
       </div>
     </article>
-    <article class="card" data-fam="famille" data-prix="142000" data-pax="4">
+    <article class="card" data-slug="mezzanine-superieure" data-fam="famille" data-prix="142000" data-pax="4">
       <a href="mezzanine-superieure.html" aria-label="Mezzanine Supérieure — 142 000 FCFA la nuit">
         <div class="ph"><span class="tag">Terrasse privative</span><picture><source srcset="img/opt/r-mezzanine-640.webp 640w, img/opt/r-mezzanine.webp 900w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp">
           <img width="900" height="600" loading="lazy" src="img/opt/r-mezzanine.jpg" srcset="img/opt/r-mezzanine-640.jpg 640w, img/opt/r-mezzanine.jpg 900w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" alt="Mezzanine Supérieure"></picture></div>
@@ -428,7 +436,7 @@ caption{caption-side:bottom;padding:16px 4px 0;font-size:12.5px;color:var(--mute
         </div>
       </div>
     </article>
-    <article class="card" data-fam="famille" data-prix="280000" data-pax="6">
+    <article class="card" data-slug="suite-arabe" data-fam="famille" data-prix="280000" data-pax="6">
       <a href="suite-arabe.html" aria-label="Suite Arabe — 280 000 FCFA la nuit">
         <div class="ph"><span class="tag">Signature</span><picture><source srcset="img/opt/sa-main-640.webp 640w, img/opt/sa-main-1024.webp 1024w, img/opt/sa-main.webp 1400w" sizes="100vw" type="image/webp">
           <img width="1400" height="933" loading="lazy" src="img/opt/sa-main.jpg" srcset="img/opt/sa-main-640.jpg 640w, img/opt/sa-main-1024.jpg 1024w, img/opt/sa-main.jpg 1400w" sizes="100vw" alt="La Suite Arabe"></picture></div>
@@ -666,6 +674,40 @@ document.querySelectorAll('.lang button').forEach(function(b){b.onclick=function
      placeholder de champ, par exemple — declare window.EVN_LANG. */
   if(typeof EVN_LANG==='function')EVN_LANG(lg);
 }});
+
+/* Les promotions publiees depuis l administration posent un badge sur les
+   chambres visees. Le serveur ne renvoie que celles dont la periode court.
+   Si l API se tait, les cartes restent telles quelles : une promotion non
+   signalee vaut mieux qu une page qui ne s affiche pas. */
+fetch('/api/admin?a=public', { cache: 'no-store' })
+  .then(function(r){ return r.ok ? r.json() : null; })
+  .then(function(j){
+    if (!j || !j.promotions) return;
+    j.promotions.forEach(function(p){
+      if (p.pastille === false) return;
+      var r = p.remise || {};
+      if (!r.valeur) return;
+      var texte = r.type === 'montant'
+        ? '−' + Number(r.valeur).toLocaleString('fr-FR') + ' F'
+        : '−' + r.valeur + ' %';
+      var c = p.cible || {};
+      [].slice.call(document.querySelectorAll('.card[data-slug]'))
+        .forEach(function(carte){
+          var vise = c.toutes !== false
+            || (c.chambres || []).indexOf(carte.dataset.slug) >= 0;
+          if (!vise || carte.querySelector('.promo')) return;
+          var ph = carte.querySelector('.ph');
+          if (!ph) return;
+          var b = document.createElement('span');
+          b.className = 'promo';
+          b.textContent = texte;
+          b.title = p.titre || 'Promotion en cours';
+          ph.appendChild(b);
+        });
+    });
+  })
+  .catch(function(){});
+
 </script>
 </body>
 </html>

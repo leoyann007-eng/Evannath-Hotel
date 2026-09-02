@@ -7,6 +7,7 @@ Elle consomme desormais les memes briques que les autres, et ne garde en
 propre que les six valeurs de couleur qui lui sont specifiques.
 """
 import io
+NL_ = chr(10)
 from _chrome import (TOKENS, NAV_BASE, LANG_JS, dimensionner, responsive, versionner,
                      liens_nav, EN_NAV, WA, WA_TEXTE, MAIL)
 from _evenements import EVENEMENTS, EN as EV_EN
@@ -37,10 +38,63 @@ else:
     BANDEAU, EN_BANDEAU = '', ''
 
 # L'expiration, cote navigateur.
-JS_BANDEAU = ("<script>(function(){var b=document.getElementById('bandeau');"
-              "if(!b)return;var f=b.getAttribute('data-fin');var a=new Date();"
-              "a.setHours(0,0,0,0);"
-              "if(f&&new Date(f+'T23:59:59')<a)b.remove();})();</script>")
+JS_BANDEAU = r"""<script>
+(function(){
+  var b = document.getElementById('bandeau');
+
+  /* L'evenement fige dans la page expire tout seul. */
+  if (b) {
+    var f = b.getAttribute('data-fin');
+    var a = new Date(); a.setHours(0, 0, 0, 0);
+    if (f && new Date(f + 'T23:59:59') < a) b.remove();
+  }
+
+  /* Une promotion mise en avant depuis l'administration prend la place : c'est
+     ce que promet la case « Mettre en avant sur la page d'accueil ». Le serveur
+     ne renvoie que les promotions dont la periode court. Si aucune n'est mise
+     en avant, le bandeau garde l'evenement — ou reste absent. */
+  fetch('/api/admin?a=public', { cache: 'no-store' })
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(j){
+      if (!j || !j.promotions) return;
+      var p = j.promotions.filter(function(x){ return x.avant; })[0];
+      if (!p) return;
+
+      var d = document.getElementById('bandeau');
+      if (!d) {
+        var hero = document.querySelector('.hero');
+        if (!hero || !hero.parentNode) return;
+        d = document.createElement('div');
+        d.className = 'bandeau';
+        d.id = 'bandeau';
+        hero.parentNode.insertBefore(d, hero.nextSibling);
+      }
+
+      var r = p.remise || {};
+      var taux = !r.valeur ? 'Offre en cours'
+        : r.type === 'montant'
+          ? '−' + Number(r.valeur).toLocaleString('fr-FR') + ' F'
+          : '−' + r.valeur + ' %';
+
+      var a2 = document.createElement('a');
+      a2.href = 'circuits.html#forfaits';
+      var mettre = function(cl, txt, balise){
+        var el = document.createElement(balise || 'span');
+        if (cl) el.className = cl;
+        el.textContent = txt;
+        a2.appendChild(el);
+      };
+      mettre('quand', taux);
+      mettre('', p.titre || '', 'b');
+      mettre('t', p.message || '');
+      mettre('fl', 'Voir l’offre');
+
+      d.innerHTML = '';
+      d.appendChild(a2);
+    })
+    .catch(function(){});
+})();
+</script>"""
 html = io.open('index-template.html', encoding='utf-8').read()
 html = (html
         .replace('{{BANDEAU}}', BANDEAU)
