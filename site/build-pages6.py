@@ -137,9 +137,18 @@ CSS = """
 .pack span{font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600;display:block;margin-top:5px}
 .pack .pick{width:100%;margin-top:16px;text-align:center}
 /* L affiche d une campagne : montree entiere, elle porte deja son message. */
-.camp-visuel{margin:18px 0 4px;border:1px solid var(--line);
-  background:var(--night)}
-.camp-visuel img{width:100%;height:auto;display:block}
+.camp-duo{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);
+  gap:26px;align-items:center;margin:20px 0 6px}
+.camp-duo.seul{grid-template-columns:1fr}
+.camp-visuel{border:1px solid var(--line);background:var(--night)}
+/* Plafonnee : une affiche carree ou verticale rendait la colonne enorme et
+   repoussait les cartes hors de l ecran. */
+.camp-visuel{display:flex;align-items:center;justify-content:center}
+.camp-visuel img{width:100%;height:auto;max-height:440px;object-fit:contain;
+  display:block}
+/* Le decoupage en lignes vient de l hotel : on le respecte. */
+.camp-texte{white-space:pre-line;margin:0;max-width:52ch}
+@media (max-width:860px){ .camp-duo{grid-template-columns:1fr;gap:18px} }
 .star{display:grid;grid-template-columns:1.15fr 1fr;border:1px solid var(--line);margin-bottom:64px;background:var(--bark-2)}
 .star .ph{position:relative;overflow:hidden;min-height:420px}
 .star .ph img{width:100%;height:100%;object-fit:cover}
@@ -839,15 +848,12 @@ JS += """
       }
       sec.appendChild(top);
 
-      if (c.accroche) {
-        var a = document.createElement('p');
-        a.textContent = c.accroche;
-        sec.appendChild(a);
-      }
+      /* L affiche et l accroche cote a cote. L affiche porte deja les
+         formules et les contacts ; le texte l accompagne au lieu de la
+         precéder en un bloc qu on ne lit pas. */
+      var duo = document.createElement('div');
+      duo.className = 'camp-duo';
 
-      /* L affiche de la campagne, celle publiee sur Facebook. Elle porte deja
-         les formules et les contacts : on la montre entiere, avant les cartes
-         qui, elles, permettent de reserver. */
       if (c.visuel) {
         var fig = document.createElement('div');
         fig.className = 'camp-visuel';
@@ -856,10 +862,21 @@ JS += """
           : 'img/opt/' + c.visuel + '.jpg';
         vi.alt = c.titre || '';
         vi.loading = 'eager';
-        vi.onerror = function(){ fig.remove(); };
+        vi.onerror = function(){ fig.remove(); duo.classList.add('seul'); };
         fig.appendChild(vi);
-        sec.appendChild(fig);
+        duo.appendChild(fig);
+      } else {
+        duo.classList.add('seul');
       }
+
+      if (c.accroche) {
+        var a = document.createElement('p');
+        a.className = 'camp-texte';
+        // Les retours a la ligne de l hotel sont son decoupage : on les garde.
+        a.textContent = c.accroche;
+        duo.appendChild(a);
+      }
+      if (duo.children.length) sec.appendChild(duo);
 
       var grille = document.createElement('div');
       grille.className = 'packs';

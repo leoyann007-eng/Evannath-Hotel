@@ -145,6 +145,20 @@ const authentifie = (req) => jetonValide(cookieSession(req));
 // ── Validation ─────────────────────────────────────────────────────────────
 const propre = (v, max) => String(v == null ? '' : v).replace(/\s+/g, ' ').trim().slice(0, max);
 
+/* Un texte de plusieurs lignes. propre() ecrase les retours a la ligne et
+   coupe a la longueur maximale sans rien dire : une accroche ecrite en liste
+   revenait en un bloc, amputee de sa fin en plein mot. Ici les lignes sont
+   gardees, les blancs en trop reduits, et la longueur n est PAS tronquee —
+   c est a l appelant de refuser, pour que rien ne disparaisse en silence. */
+function texteLong(v) {
+  return String(v == null ? '' : v)
+    .replace(/\r\n?/g, '\n')
+    .replace(/[ \t]+/g, ' ')
+    .replace(/\n{3,}/g, '\n\n')
+    .split('\n').map((l) => l.trim()).join('\n')
+    .trim();
+}
+
 /* Les services qu'une promotion peut viser en plus des chambres. La liste est
    fermee : une valeur inventee par un appel malveillant ne doit pas se
    retrouver affichee sur le site. */
@@ -178,6 +192,8 @@ function listeDe(v, combien, taille) {
 const LIMITES = {
   titre: 80, accent: 40, categorie: 60, badge: 40, texte: 400,
   cta: 40, href: 200, fond: 120, quand: 60, libelle: 30, valeur: 60,
+  // L accroche d une campagne : de quoi presenter quatre packs.
+  accroche: 1200,
 };
 
 /** La collection ou vit un type d entree. Trois objets, une seule
@@ -200,7 +216,7 @@ function nettoyerCampagne(e) {
     // L affiche de la campagne — celle publiee sur Facebook. Nom d une
     // photo du site, ou URL d un visuel depose.
     visuel: propre(e.visuel, 400),
-    accroche: propre(e.accroche, LIMITES.texte),
+    accroche: texteLong(e.accroche),
     note: propre(e.note, 120),
     debut: instant(e.debut),
     fin: instant(e.fin),
@@ -222,6 +238,12 @@ function nettoyerCampagne(e) {
   const manque = [];
   if (!o.titre) manque.push('titre');
   if (!o.packs.length) manque.push('pack');
+  if (o.accroche.length > LIMITES.accroche) {
+    return { objet: o, manque: ['accroche'],
+      message: 'L’accroche fait ' + o.accroche.length + ' caractères pour '
+        + LIMITES.accroche + ' au maximum. Retirez-en '
+        + (o.accroche.length - LIMITES.accroche) + '.' };
+  }
   return { objet: o, manque };
 }
 
@@ -425,11 +447,12 @@ module.exports = async function handler(req, res) {
     let corps = req.body;
     if (typeof corps === 'string') { try { corps = JSON.parse(corps); } catch { corps = {}; } }
     const type = collection(corps.type);
-    const { objet, manque } = corps.type === 'campagne'
+    const { objet, manque, message } = corps.type === 'campagne'
       ? nettoyerCampagne(corps.entree || {})
       : nettoyer(corps.entree || {}, corps.type);
     if (manque.length) {
-      return json(res, 422, { ok: false, champs: manque, message: 'Il manque le ' + manque.join(' et le ') + '.' });
+      return json(res, 422, { ok: false, champs: manque,
+        message: message || 'Il manque le ' + manque.join(' et le ') + '.' });
     }
     const d = await lire();
     d[type] = d[type] || [];

@@ -616,7 +616,7 @@ function brancherPromo() {
      franchi d etapes. On les pose une seule fois. */
   if (!ECOUTE_PROMO) {
     ECOUTE_PROMO = true;
-    f.addEventListener('input', rafraichirPromo);
+    f.addEventListener('input', () => { rafraichirPromo(); compterAccroche(); });
     f.addEventListener('change', (ev) => {
       const rad = ev.target.closest('input[name="cible"]');
       if (rad) {
@@ -627,6 +627,18 @@ function brancherPromo() {
     });
   }
   rafraichirPromo();
+  compterAccroche();
+}
+
+/* Combien il reste. Sans ce compte, on decouvrait la coupure une fois publie —
+   et on ne la decouvrait meme pas, puisqu elle etait silencieuse. */
+function compterAccroche() {
+  const t = $('#f-accroche'), p = $('#compte-accroche');
+  if (!t || !p) return;
+  const n = t.value.length, max = 1200;
+  p.textContent = n + ' / ' + max + ' caractères'
+    + (n > max ? ' — ' + (n - max) + ' de trop' : '');
+  p.style.color = n > max ? 'var(--err)' : '';
 }
 
 /** Le type d offre se choisit par trois boutons plutot que par une liste
@@ -905,9 +917,10 @@ function camp1(e) {
   return `<label class="lb" for="f-titre">Nom de la campagne</label>
     <input id="f-titre" value="${ech(e.titre || '')}" placeholder="Vacances">
     <label class="lb" for="f-accroche">Accroche</label>
-    <textarea id="f-accroche" rows="2"
-      placeholder="« Les vacances qui vous ressemblent. » Quatre formules pensées pour la saison."
+    <textarea id="f-accroche" rows="6"
+      placeholder="« Les vacances qui vous ressemblent. »&#10;- Le Pack Famille pour partager des moments uniques&#10;- Le Pack Couple pour une escapade à deux"
       >${ech(e.accroche || '')}</textarea>
+    <p class="aide" id="compte-accroche"></p>
     <label class="lb" for="f-note">Mention en haut à droite (facultatif)</label>
     <input id="f-note" value="${ech(e.note || '')}"
       placeholder="Annoncés sur notre page Facebook">
