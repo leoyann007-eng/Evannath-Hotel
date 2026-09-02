@@ -32,6 +32,21 @@ for f in sorted(glob.glob('*.html')):
     pages.append((slug, PRIORITE.get(slug, '0.5'),
                   datetime.date.fromtimestamp(os.path.getmtime(f)).isoformat()))
 
+# ── Inventaire des photos, pour le selecteur d'images de l'administration ──
+# On ne liste que les originaux : ni les paliers responsives (-640, -1024,
+# -1600), ni les vignettes, ni les affiches de video.
+import json, re
+os.makedirs('donnees', exist_ok=True)
+_ecart = re.compile(r'-(640|1024|1600|t|t360)$')
+_photos = sorted({
+    os.path.basename(f)[:-4] for f in glob.glob('img/opt/*.jpg')
+    if not _ecart.search(os.path.basename(f)[:-4])
+    and not os.path.basename(f).endswith('-affiche.jpg')
+})
+io.open('donnees/images.json', 'w', encoding='utf-8').write(
+    json.dumps(_photos, ensure_ascii=False))
+print('donnees/images.json     %d photos' % len(_photos))
+
 lignes = ['<?xml version="1.0" encoding="UTF-8"?>',
           '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
 for slug, prio, maj in sorted(pages, key=lambda p: (-float(p[1]), p[0])):

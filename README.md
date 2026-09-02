@@ -480,6 +480,62 @@ immédiatement trouvé deux défauts qui dormaient : sur `circuits`, le bouton d
 l'en-tête et celui du circuit partageaient `cta` — en anglais l'en-tête affichait
 « Book this package » ; sur `spa`, « Accueil » et « La case » partageaient `c1`,
 et le fil d'Ariane devenait « La case » après un aller-retour de langue.
+## L'administration
+
+`/admin` — un espace pour que l'établissement publie ses événements et ses
+promotions **sans intervention**. C'était la condition pour que la page vive :
+une section qu'il faut demander à son prestataire de mettre à jour meurt en
+trois mois.
+
+| Écran | Ce qu'il fait |
+|---|---|
+| Tableau de bord | les compteurs, l'état du stockage, un raccourci pour publier |
+| Événements | créer, modifier, dépublier, supprimer |
+| Promotions | les mêmes champs, plus une remise et un code |
+| Galerie | les 90 photos du site, pour choisir un fond |
+| Paramètres | l'état de l'installation |
+| Utilisateurs | qui peut publier |
+
+### Ce qui ne casse pas le site
+
+Le contenu généré depuis `_evenements.py` **reste en place**. La page le rend
+comme avant, puis demande à l'API s'il existe des événements publiés ; s'il y
+en a, elle refait les diapositives. Trois conséquences :
+
+- la page fonctionne **sans JavaScript**, avec le contenu construit ;
+- si l'API se tait, elle affiche le contenu construit ;
+- publier une affiche ne demande **aucune reconstruction** : elle est en ligne
+  à la seconde.
+
+### Le stockage, et ce qu'il reste à brancher
+
+Deux modes, décidés par la présence de `BLOB_READ_WRITE_TOKEN` :
+
+| Mode | Quand | Ce qui se passe |
+|---|---|---|
+| **Démonstration** | pas de jeton | les données vivent en mémoire et se perdent au redéploiement |
+| **Durable** | jeton présent | Vercel Blob — les données sont conservées |
+
+**Le mode est affiché en clair dans l'interface**, en rouge, sur chaque écran.
+Laisser croire qu'une affiche est enregistrée alors qu'elle disparaîtra au
+prochain déploiement serait le pire défaut possible pour cet outil.
+
+Pour passer en durable : créer un magasin Vercel Blob, définir
+`BLOB_READ_WRITE_TOKEN`, et **ajouter `@vercel/blob` aux dépendances** — le
+`package.json` est actuellement écarté du dépôt, il faudra l'y remettre.
+
+### L'accès
+
+Un mot de passe, défini par `ADMIN_MDP`, échangé contre un cookie signé de
+12 heures. La comparaison est à durée constante : une comparaison naïve laisse
+deviner le mot de passe caractère par caractère.
+
+Ce n'est pas un système multi-comptes. Des comptes nominatifs, avec un journal
+de qui a publié quoi, demandent le stockage durable — c'est la suite logique.
+
+Sans `ADMIN_MDP`, la connexion répond 503 avec la marche à suivre plutôt que
+d'échouer sans explication.
+
 ## Version anglaise
 
 Le bouton FR/EN capture le français depuis le DOM au chargement, puis

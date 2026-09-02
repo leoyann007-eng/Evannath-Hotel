@@ -540,33 +540,29 @@ AGENDA = ('''
   </div>''') if EVENEMENTS else ''
 
 
-# L'expiration d'abord, le carrousel ensuite : une diapositive perimee ne doit
-# jamais entrer dans le compte. Le site est statique et personne ne le
-# reconstruit le 2 janvier au matin pour decrocher l'affiche du reveillon.
+# ── Le carrousel de l'agenda ─────────────────────────────────
+# Trois choses, dans cet ordre : on ecarte les diapositives perimees, on
+# demande a l'administration s'il y a des evenements publies, et on demarre.
+# Le contenu genere sert de secours : la page fonctionne sans JavaScript, et
+# si l'API se tait, elle affiche ce qui a ete construit.
 JS += """
 (function(){
   var ag = document.getElementById('agenda');
   if (!ag) return;
-  var auj = new Date(); auj.setHours(0,0,0,0);
-
-  var diapos = [].slice.call(ag.querySelectorAll('.diapo'));
-  diapos = diapos.filter(function(d){
-    var f = d.getAttribute('data-fin');
-    if (f && new Date(f + 'T23:59:59') < auj) { d.remove(); return false; }
-    return true;
-  });
-
-  /* Plus rien a l'affiche : on retire la section entiere plutot que de
-     laisser un cadre vide. */
-  if (!diapos.length) {
-    ag.remove();
-    var t = document.getElementById('a-la-une'); if (t) t.remove();
-    return;
-  }
-
+  var hote = ag.querySelector('.diapos');
   var pilote = ag.querySelector('.pilote');
   var cpt = ag.querySelector('.cpt');
-  var n = 0;
+  var modele = ag.querySelector('.diapo').cloneNode(true);
+  var diapos = [], n = 0, minuteur = null;
+  var calme = matchMedia('(prefers-reduced-motion: reduce)');
+  var DELAI = 7000;
+
+  var perime = function(el){
+    var f = el.getAttribute('data-fin');
+    if (!f) return false;
+    var auj = new Date(); auj.setHours(0,0,0,0);
+    return new Date(f + 'T23:59:59') < auj;
+  };
   var deux = function(v){ return (v < 10 ? '0' : '') + v; };
 
   function montrer(i){
@@ -577,27 +573,66 @@ JS += """
       cpt.querySelector('i').textContent = deux(diapos.length);
     }
   }
-  montrer(0);
 
-  /* Un seul evenement : les fleches n'ont plus d'objet. */
-  if (diapos.length < 2) { if (pilote) pilote.remove(); return; }
-
-  /* Defilement automatique.
-     Il s'arrete des qu'on survole, qu'on met le clavier dans le carrousel, ou
+  /* Le defilement s'arrete des qu'on survole, qu'on met le clavier dedans, ou
      que l'onglet passe en arriere-plan : un carrousel qui tourne pendant qu'on
-     lit une pastille est plus agacant qu'utile. Toute action manuelle relance
-     le compte a zero, pour ne pas enchainer juste apres un clic.
-     Et rien ne bouge si le visiteur a demande moins de mouvement. */
-  var DELAI = 7000;
-  var minuteur = null;
-  var calme = matchMedia('(prefers-reduced-motion: reduce)');
-
+     lit une pastille est plus agacant qu'utile. */
   function relancer(){
     clearInterval(minuteur);
-    if (calme.matches) return;
+    if (calme.matches || diapos.length < 2) return;
     minuteur = setInterval(function(){ montrer(n + 1); }, DELAI);
   }
   function suspendre(){ clearInterval(minuteur); }
+
+  function demarrer(){
+    diapos = [].slice.call(hote.querySelectorAll('.diapo')).filter(function(d){
+      if (perime(d)) { d.remove(); return false; }
+      return true;
+    });
+    /* Plus rien a l'affiche : on retire la section plutot que d'exposer un
+       cadre vide. */
+    if (!diapos.length) {
+      ag.remove();
+      var t = document.getElementById('a-la-une'); if (t) t.remove();
+      return;
+    }
+    montrer(0);
+    if (pilote) pilote.style.display = diapos.length < 2 ? 'none' : '';
+    relancer();
+  }
+
+  /* Les evenements publies depuis l'administration remplacent les generes. */
+  function refaire(liste){
+    hote.innerHTML = '';
+    liste.forEach(function(e){
+      var d = modele.cloneNode(true);
+      d.id = e.id || ''; d.className = 'diapo';
+      if (e.fin) d.setAttribute('data-fin', e.fin); else d.removeAttribute('data-fin');
+      var im = d.querySelector('img'), so = d.querySelector('source');
+      if (e.fond && im) im.src = 'img/opt/' + e.fond + '.jpg';
+      if (e.fond && so) so.srcset = 'img/opt/' + e.fond + '.webp';
+      d.querySelector('.pastille').textContent = e.badge || '';
+      d.querySelector('.cat').textContent = e.categorie || '';
+      d.querySelector('h3 span').textContent = e.titre || '';
+      d.querySelector('h3 em').textContent = e.accent || '';
+      d.querySelector('p').textContent = e.texte || '';
+      var inf = d.querySelector('.infos');
+      inf.innerHTML = '';
+      (e.infos || []).forEach(function(pv){
+        var c = document.createElement('span');
+        var b = document.createElement('b'); b.textContent = pv[0];
+        var it = document.createElement('i'); it.textContent = pv[1];
+        c.appendChild(b); c.appendChild(it); inf.appendChild(c);
+      });
+      var a = d.querySelector('.btn');
+      a.textContent = e.cta || 'En savoir plus';
+      a.setAttribute('href', e.href || '#demande');
+      /* Ces textes viennent de l'administration : ils n'ont pas de traduction,
+         et doivent echapper au dictionnaire de la bascule de langue. */
+      d.querySelectorAll('[data-t]').forEach(function(x){ x.removeAttribute('data-t'); });
+      hote.appendChild(d);
+    });
+  }
 
   ag.addEventListener('mouseenter', suspendre);
   ag.addEventListener('mouseleave', relancer);
@@ -610,16 +645,22 @@ JS += """
 
   ag.querySelector('.prec').addEventListener('click', function(){ montrer(n - 1); relancer(); });
   ag.querySelector('.suiv').addEventListener('click', function(){ montrer(n + 1); relancer(); });
-  relancer();
-
   addEventListener('keydown', function(ev){
     if (!ag.getBoundingClientRect().height) return;
     if (ev.key === 'ArrowLeft')  { montrer(n - 1); relancer(); }
     if (ev.key === 'ArrowRight') { montrer(n + 1); relancer(); }
   });
+
+  demarrer();
+
+  fetch('/api/admin?a=public').then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(j){
+      if (!j || !j.evenements || !j.evenements.length) return;
+      refaire(j.evenements);
+      demarrer();
+    }).catch(function(){});
 })();
 """
-
 LD = _schema.bloc(
     _schema.service('Circuits et forfaits', "Packs Vacances, lune de miel, week-end intense, circuits touristiques et coffret anniversaire à l'Hôtel Evannath, Assinie.", 'circuits', image='r-mezzanine', catalogue=CATALOGUE),
     _schema.hotel(),

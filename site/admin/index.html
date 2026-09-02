@@ -1,0 +1,491 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Administration — Hôtel Evannath</title>
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Karla:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --night:#100B06; --bark:#17100A; --bark-2:#1E150D; --bark-3:#2A1E13;
+  --bronze:#B98A50; --bronze-2:#DFBB84; --cream:#F6EEE2; --muted:#9C8B78;
+  --line:rgba(185,138,80,.18); --palm:#8FAE63; --err:#E08A7B;
+  --f-t:"Marcellus",Georgia,serif; --f-b:"Karla",system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bark);color:var(--cream);font-family:var(--f-b);font-size:15px;line-height:1.6}
+a{color:var(--bronze-2);text-decoration:none}
+:focus-visible{outline:2px solid var(--bronze);outline-offset:2px}
+
+/* ── Connexion ─────────────────────────────────────────── */
+#porte{min-height:100vh;display:grid;place-items:center;padding:24px}
+#porte form{width:100%;max-width:380px;background:var(--bark-2);border:1px solid var(--line);padding:38px 34px}
+#porte h1{font-family:var(--f-t);font-size:26px;font-weight:400;margin-bottom:6px}
+#porte p{color:var(--muted);font-size:13.5px;margin-bottom:26px}
+
+/* ── Cadre ─────────────────────────────────────────────── */
+#cadre{display:none;min-height:100vh;grid-template-columns:250px 1fr}
+#cadre.on{display:grid}
+aside{background:var(--night);border-right:1px solid var(--line);padding:26px 0;position:sticky;top:0;height:100vh;overflow:auto}
+.marque{padding:0 24px 26px;border-bottom:1px solid var(--line);margin-bottom:20px}
+.marque b{font-family:var(--f-t);font-size:18px;font-weight:400;display:block}
+.marque span{font-size:9.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--bronze)}
+nav h2{font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);
+  font-weight:700;padding:20px 24px 8px}
+nav button{display:flex;align-items:center;gap:12px;width:100%;background:none;border:0;
+  color:var(--cream);font:400 14.5px/1.4 var(--f-b);padding:11px 24px;cursor:pointer;
+  text-align:left;border-left:2px solid transparent;transition:.2s}
+nav button:hover{background:var(--bark-2)}
+nav button.on{background:var(--bark-2);border-left-color:var(--bronze);color:var(--bronze-2)}
+nav button i{font-style:normal;font-size:16px;width:20px;text-align:center}
+
+main{padding:34px 40px 60px;max-width:1100px}
+.entete{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;
+  flex-wrap:wrap;margin-bottom:26px}
+h1.t{font-family:var(--f-t);font-size:30px;font-weight:400}
+.sous{color:var(--muted);font-size:14px;margin-top:4px}
+
+/* ── Blocs ─────────────────────────────────────────────── */
+.carte{background:var(--bark-2);border:1px solid var(--line);padding:24px 26px;margin-bottom:20px}
+.chiffres{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:24px}
+.chiffre{background:var(--bark-2);border:1px solid var(--line);padding:22px 24px}
+.chiffre b{font-family:var(--f-t);font-size:34px;color:var(--bronze);display:block;line-height:1}
+.chiffre span{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
+  font-weight:700;display:block;margin-top:8px}
+
+.alerte{border-left:3px solid var(--err);background:rgba(224,138,123,.07);padding:16px 20px;margin-bottom:22px}
+.alerte b{color:var(--err);display:block;margin-bottom:4px}
+.alerte span{font-size:13.5px;color:#D6CBBB}
+
+/* ── Listes ────────────────────────────────────────────── */
+.ligne{display:flex;align-items:center;gap:16px;background:var(--bark-2);
+  border:1px solid var(--line);padding:14px 18px;margin-bottom:10px}
+.ligne .vig{width:64px;height:48px;object-fit:cover;background:var(--bark-3);flex:none}
+.ligne .txt{flex:1;min-width:0}
+.ligne .txt b{font-family:var(--f-t);font-size:16px;font-weight:400;display:block}
+.ligne .txt span{font-size:12.5px;color:var(--muted)}
+.etat{font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;font-weight:700;
+  padding:5px 10px;border:1px solid var(--line);white-space:nowrap}
+.etat.vif{color:var(--palm);border-color:rgba(143,174,99,.45)}
+.etat.dort{color:var(--muted)}
+.etat.fini{color:var(--err);border-color:rgba(224,138,123,.4)}
+
+/* ── Boutons et champs ─────────────────────────────────── */
+.btn{display:inline-flex;align-items:center;gap:9px;border:1px solid var(--bronze);
+  background:none;color:var(--bronze);font:700 11px/1 var(--f-b);letter-spacing:.18em;
+  text-transform:uppercase;padding:14px 24px;cursor:pointer;transition:.3s;font-family:var(--f-b)}
+.btn:hover{background:var(--bronze);color:var(--night)}
+.btn.plein{background:var(--bronze);color:var(--night)}
+.btn.plein:hover{background:var(--bronze-2);border-color:var(--bronze-2)}
+.btn.mince{padding:9px 15px;font-size:10px;letter-spacing:.14em}
+.btn.danger{border-color:rgba(224,138,123,.5);color:var(--err)}
+.btn.danger:hover{background:var(--err);color:var(--night)}
+
+label{display:block;font-size:10px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--muted);font-weight:700;margin-bottom:7px}
+input,textarea,select{width:100%;background:var(--bark);border:1px solid var(--line);
+  color:var(--cream);font:400 14.5px/1.5 var(--f-b);padding:12px 14px}
+input:focus,textarea:focus,select:focus{border-color:var(--bronze);outline:none}
+textarea{min-height:96px;resize:vertical}
+.champ{margin-bottom:18px}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.aide{font-size:12px;color:var(--muted);margin-top:6px}
+
+.puces{display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end;margin-bottom:10px}
+
+.grille-img{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;
+  max-height:260px;overflow:auto;padding:4px;border:1px solid var(--line);background:var(--bark)}
+.grille-img button{border:2px solid transparent;background:none;padding:0;cursor:pointer;display:block}
+.grille-img button.on{border-color:var(--bronze)}
+.grille-img img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}
+
+.pied{display:flex;gap:12px;align-items:center;margin-top:24px;flex-wrap:wrap}
+.msg{font-size:13.5px}
+.msg.bon{color:var(--palm)}
+.msg.mal{color:var(--err)}
+
+@media(max-width:860px){
+  #cadre.on{grid-template-columns:1fr}
+  aside{position:static;height:auto}
+  main{padding:24px 20px 50px}
+  .duo,.puces{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ── Connexion ─────────────────────────────────────────── -->
+<div id="porte">
+  <form id="fporte">
+    <h1>Hôtel Evannath</h1>
+    <p>Espace d'administration</p>
+    <div class="champ">
+      <label for="mdp">Mot de passe</label>
+      <input type="password" id="mdp" autocomplete="current-password" required>
+    </div>
+    <button class="btn plein" style="width:100%;justify-content:center">Entrer</button>
+    <p class="msg mal" id="errporte" style="margin-top:14px"></p>
+  </form>
+</div>
+
+<!-- ── Administration ────────────────────────────────────── -->
+<div id="cadre">
+  <aside>
+    <div class="marque">
+      <b>Evannath</b>
+      <span>Administration</span>
+    </div>
+    <nav id="menu">
+      <button data-v="bord" class="on"><i>▦</i>Tableau de bord</button>
+      <h2>Gestion</h2>
+      <button data-v="evenements"><i>◆</i>Événements</button>
+      <button data-v="promotions"><i>◉</i>Promotions</button>
+      <h2>Médias</h2>
+      <button data-v="galerie"><i>▣</i>Galerie</button>
+      <h2>Administration</h2>
+      <button data-v="parametres"><i>⚙</i>Paramètres</button>
+      <button data-v="utilisateurs"><i>◐</i>Utilisateurs</button>
+      <h2>&nbsp;</h2>
+      <button id="sortir"><i>↩</i>Se déconnecter</button>
+    </nav>
+  </aside>
+  <main id="vue"></main>
+</div>
+
+<script>
+/* ─────────────────────────────────────────────────────────────────────────
+   Une page, six vues. Pas de bibliotheque : l'administration doit survivre a
+   ses dependances, et elle n'a que six ecrans.
+   ───────────────────────────────────────────────────────────────────────── */
+const API = '/api/admin';
+let ETAT = { stockage: '', evenements: [], promotions: [], images: [] };
+let VUE = 'bord';
+let EDITE = null;                       // l'entree en cours de modification
+
+const $ = (s, r) => (r || document).querySelector(s);
+const ech = (s) => String(s == null ? '' : s)
+  .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+async function appel(action, corps, methode) {
+  const o = { method: methode || (corps ? 'POST' : 'GET'), headers: {} };
+  if (corps) { o.headers['Content-Type'] = 'application/json'; o.body = JSON.stringify(corps); }
+  const r = await fetch(API + '?a=' + action, o);
+  const j = await r.json().catch(() => ({}));
+  if (r.status === 401 && action !== 'entrer') { montrerPorte(); throw new Error('session'); }
+  return { code: r.status, ...j };
+}
+
+/* ── Connexion ─────────────────────────────────────────── */
+function montrerPorte() {
+  $('#porte').style.display = 'grid';
+  $('#cadre').classList.remove('on');
+}
+function montrerCadre() {
+  $('#porte').style.display = 'none';
+  $('#cadre').classList.add('on');
+  charger();
+}
+
+$('#fporte').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  $('#errporte').textContent = '';
+  const r = await appel('entrer', { mdp: $('#mdp').value });
+  if (r.ok) { $('#mdp').value = ''; montrerCadre(); }
+  else $('#errporte').textContent = r.message || 'Connexion impossible.';
+});
+
+$('#sortir').addEventListener('click', async () => {
+  await appel('sortir', {});
+  montrerPorte();
+});
+
+/* ── Chargement ────────────────────────────────────────── */
+async function charger() {
+  const [etat, tout, images] = await Promise.all([
+    appel('etat'),
+    appel('tout'),
+    fetch('/donnees/images.json').then((r) => (r.ok ? r.json() : [])).catch(() => []),
+  ]);
+  ETAT.stockage = etat.stockage;
+  ETAT.maj = etat.maj;
+  ETAT.evenements = (tout.donnees && tout.donnees.evenements) || [];
+  ETAT.promotions = (tout.donnees && tout.donnees.promotions) || [];
+  ETAT.images = images;
+  rendre();
+}
+
+$('#menu').addEventListener('click', (e) => {
+  const b = e.target.closest('button[data-v]');
+  if (!b) return;
+  VUE = b.dataset.v; EDITE = null;
+  [...$('#menu').querySelectorAll('button')].forEach((x) => x.classList.toggle('on', x === b));
+  rendre();
+});
+
+/* ── Rendu ─────────────────────────────────────────────── */
+function avertissement() {
+  if (ETAT.stockage === 'durable') return '';
+  return `<div class="alerte">
+    <b>Mode démonstration</b>
+    <span>Le stockage durable n'est pas encore branché : ce que vous enregistrez
+    ici disparaîtra au prochain redéploiement. Pour conserver les données,
+    ajoutez un magasin Vercel Blob et la variable BLOB_READ_WRITE_TOKEN.</span>
+  </div>`;
+}
+
+const expire = (e) => e.fin && new Date(e.fin + 'T23:59:59') < new Date();
+
+function etatDe(e) {
+  if (e.publie === false) return '<span class="etat dort">Brouillon</span>';
+  if (expire(e)) return '<span class="etat fini">Terminé</span>';
+  return '<span class="etat vif">En ligne</span>';
+}
+
+function liste(type) {
+  const src = type === 'promotions' ? ETAT.promotions : ETAT.evenements;
+  const nom = type === 'promotions' ? 'promotion' : 'événement';
+  if (!src.length) {
+    return `<div class="carte" style="text-align:center;padding:44px">
+      <p style="color:var(--muted)">Aucun ${nom} pour le moment.</p>
+      <button class="btn plein" style="margin-top:18px" data-neuf="${type}">Créer le premier</button>
+    </div>`;
+  }
+  return src.map((e) => `
+    <div class="ligne">
+      ${e.fond ? `<img class="vig" src="/img/opt/${ech(e.fond)}.jpg" alt="">` : '<div class="vig"></div>'}
+      <div class="txt">
+        <b>${ech(e.titre)} ${e.accent ? '<em style="color:var(--bronze-2)">' + ech(e.accent) + '</em>' : ''}</b>
+        <span>${ech(e.badge || e.quand || '—')}${e.fin ? ' · se termine le ' + ech(e.fin) : ''}</span>
+      </div>
+      ${etatDe(e)}
+      <button class="btn mince" data-mod="${ech(e.id)}" data-type="${type}">Modifier</button>
+      <button class="btn mince danger" data-sup="${ech(e.id)}" data-type="${type}">Supprimer</button>
+    </div>`).join('');
+}
+
+function formulaire(type) {
+  const e = EDITE || { infos: [], publie: true };
+  const promo = type === 'promotions';
+  const puce = (i) => {
+    const p = e.infos[i] || ['', ''];
+    return `<div class="puces">
+      <div><label>Libellé</label><input data-il="${i}" value="${ech(p[0])}" placeholder="Horaire"></div>
+      <div><label>Valeur</label><input data-iv="${i}" value="${ech(p[1])}" placeholder="Dès 20 h"></div>
+    </div>`;
+  };
+  return `<div class="carte">
+    <div class="duo">
+      <div class="champ"><label for="f-titre">Titre</label>
+        <input id="f-titre" value="${ech(e.titre)}" placeholder="Le Réveillon"></div>
+      <div class="champ"><label for="f-accent">Fin du titre, en italique</label>
+        <input id="f-accent" value="${ech(e.accent)}" placeholder="à Assinie"></div>
+    </div>
+    <div class="duo">
+      <div class="champ"><label for="f-cat">Surtitre</label>
+        <input id="f-cat" value="${ech(e.categorie)}" placeholder="Soirée de fin d'année"></div>
+      <div class="champ"><label for="f-badge">Pastille</label>
+        <input id="f-badge" value="${ech(e.badge)}" placeholder="31 décembre"></div>
+    </div>
+    ${promo ? `<div class="duo">
+      <div class="champ"><label for="f-red">Réduction</label>
+        <input id="f-red" value="${ech(e.reduction)}" placeholder="−20 %"></div>
+      <div class="champ"><label for="f-code">Code</label>
+        <input id="f-code" value="${ech(e.code)}" placeholder="EVANNATH20"></div>
+    </div>` : ''}
+    <div class="champ"><label for="f-texte">Texte</label>
+      <textarea id="f-texte" placeholder="Deux phrases, pas davantage.">${ech(e.texte)}</textarea>
+      <p class="aide">Deux phrases suffisent. Le reste se lit sur la page de réservation.</p></div>
+
+    <div class="duo">
+      <div class="champ"><label for="f-quand">Quand, en toutes lettres</label>
+        <input id="f-quand" value="${ech(e.quand)}" placeholder="Chaque samedi, dès 15 h"></div>
+      <div class="champ"><label for="f-fin">Se termine le</label>
+        <input type="date" id="f-fin" value="${ech(e.fin)}">
+        <p class="aide">Laissez vide si l'événement revient chaque année.
+        Sinon, il disparaît du site tout seul après cette date.</p></div>
+    </div>
+
+    <div class="champ"><label>Informations affichées</label>
+      ${[0, 1, 2, 3].map(puce).join('')}</div>
+
+    <div class="duo">
+      <div class="champ"><label for="f-cta">Texte du bouton</label>
+        <input id="f-cta" value="${ech(e.cta)}" placeholder="Réserver ma place"></div>
+      <div class="champ"><label for="f-href">Le bouton mène à</label>
+        <select id="f-href">
+          <option value="#demande">Le formulaire de demande</option>
+          <option value="reserver.html">La page Réserver</option>
+          <option value="contact.html">La page Contact</option>
+          <option value="carte.html">La carte du restaurant</option>
+          <option value="spa.html">Le spa</option>
+        </select></div>
+    </div>
+
+    <div class="champ"><label>Image de fond</label>
+      <div class="grille-img" id="imgs">
+        ${ETAT.images.map((n) => `<button type="button" data-img="${ech(n)}"
+          class="${e.fond === n ? 'on' : ''}"><img src="/img/opt/${ech(n)}.jpg" alt="" loading="lazy"></button>`).join('')}
+      </div>
+      <p class="aide">Choisissez parmi les photos du site.
+      Pour ajouter une affiche, passez par Médias → Galerie.</p></div>
+
+    <div class="champ">
+      <label style="display:flex;align-items:center;gap:10px;text-transform:none;
+        letter-spacing:0;font-size:14.5px;color:var(--cream)">
+        <input type="checkbox" id="f-publie" style="width:auto" ${e.publie !== false ? 'checked' : ''}>
+        Visible sur le site
+      </label>
+    </div>
+
+    <div class="pied">
+      <button class="btn plein" id="enreg">Enregistrer</button>
+      <button class="btn" id="annuler">Annuler</button>
+      <span class="msg" id="msgf"></span>
+    </div>
+  </div>`;
+}
+
+function rendre() {
+  const v = $('#vue');
+  if (VUE === 'bord') {
+    const actifs = ETAT.evenements.filter((e) => e.publie !== false && !expire(e)).length;
+    v.innerHTML = `<div class="entete"><div>
+        <h1 class="t">Tableau de bord</h1>
+        <p class="sous">${ETAT.maj ? 'Dernière modification le ' + new Date(ETAT.maj).toLocaleString('fr-FR') : 'Aucune modification enregistrée.'}</p>
+      </div></div>
+      ${avertissement()}
+      <div class="chiffres">
+        <div class="chiffre"><b>${actifs}</b><span>Événements en ligne</span></div>
+        <div class="chiffre"><b>${ETAT.evenements.length}</b><span>Événements au total</span></div>
+        <div class="chiffre"><b>${ETAT.promotions.length}</b><span>Promotions</span></div>
+        <div class="chiffre"><b>${ETAT.images.length}</b><span>Photos disponibles</span></div>
+      </div>
+      <div class="carte">
+        <h2 style="font-family:var(--f-t);font-weight:400;font-size:20px;margin-bottom:10px">Publier une affiche</h2>
+        <p style="color:var(--muted);margin-bottom:18px">Un événement daté disparaît du site
+        tout seul le lendemain de sa date de fin. Vous n'avez rien à décrocher.</p>
+        <button class="btn plein" data-neuf="evenements">Nouvel événement</button>
+      </div>`;
+  } else if (VUE === 'evenements' || VUE === 'promotions') {
+    const promo = VUE === 'promotions';
+    v.innerHTML = `<div class="entete">
+        <div><h1 class="t">${promo ? 'Promotions' : 'Événements'}</h1>
+        <p class="sous">${promo
+          ? 'Les remises et offres limitées dans le temps.'
+          : 'Ce qui a une date : soirées, fêtes, rendez-vous du samedi.'}</p></div>
+        ${EDITE ? '' : `<button class="btn plein" data-neuf="${VUE}">Ajouter</button>`}
+      </div>
+      ${avertissement()}
+      ${EDITE ? formulaire(VUE) : liste(VUE)}`;
+    if (EDITE) {
+      const s = $('#f-href');
+      if (s) s.value = EDITE.href || '#demande';
+    }
+  } else if (VUE === 'galerie') {
+    v.innerHTML = `<div class="entete"><div>
+        <h1 class="t">Galerie</h1>
+        <p class="sous">Les ${ETAT.images.length} photos disponibles pour vos événements.</p>
+      </div></div>
+      <div class="carte">
+        <p style="color:var(--muted);margin-bottom:16px">Le téléversement d'affiches
+        demande le stockage durable. Une fois branché, vous pourrez déposer ici les
+        visuels que vous publiez sur vos réseaux.</p>
+        <div class="grille-img" style="max-height:none">
+          ${ETAT.images.map((n) => `<button type="button" title="${ech(n)}">
+            <img src="/img/opt/${ech(n)}.jpg" alt="${ech(n)}" loading="lazy"></button>`).join('')}
+        </div>
+      </div>`;
+  } else if (VUE === 'parametres') {
+    v.innerHTML = `<div class="entete"><div>
+        <h1 class="t">Paramètres</h1>
+        <p class="sous">L'état de l'installation.</p></div></div>
+      ${avertissement()}
+      <div class="carte">
+        <div class="ligne" style="margin:0"><div class="txt">
+          <b>Stockage</b><span>${ETAT.stockage === 'durable'
+            ? 'Vercel Blob — les données sont conservées.'
+            : 'Mémoire — les données se perdent au redéploiement.'}</span></div>
+          <span class="etat ${ETAT.stockage === 'durable' ? 'vif' : 'fini'}">${
+            ETAT.stockage === 'durable' ? 'Durable' : 'Démonstration'}</span></div>
+      </div>
+      <div class="carte">
+        <p style="color:var(--muted)">Les numéros de téléphone, l'adresse e-mail et les
+        tarifs se règlent aujourd'hui dans le code du site. Les rendre modifiables ici
+        fait partie de ce qui reste à construire.</p>
+      </div>`;
+  } else if (VUE === 'utilisateurs') {
+    v.innerHTML = `<div class="entete"><div>
+        <h1 class="t">Utilisateurs</h1>
+        <p class="sous">Qui peut publier.</p></div></div>
+      <div class="carte">
+        <p style="color:var(--muted)">L'accès se fait aujourd'hui par <strong>un mot de
+        passe unique</strong>, partagé par l'équipe et défini dans les variables Vercel.
+        C'est le strict nécessaire pour que la page ne soit pas ouverte à tous.</p>
+        <p style="color:var(--muted);margin-top:14px">Des comptes nominatifs — avec un
+        journal de qui a publié quoi — demandent le stockage durable. C'est la suite
+        logique, une fois le magasin branché.</p>
+      </div>`;
+  }
+}
+
+/* ── Actions ───────────────────────────────────────────── */
+document.addEventListener('click', async (e) => {
+  const neuf = e.target.closest('[data-neuf]');
+  if (neuf) {
+    VUE = neuf.dataset.neuf; EDITE = { infos: [], publie: true };
+    [...$('#menu').querySelectorAll('button[data-v]')].forEach(
+      (x) => x.classList.toggle('on', x.dataset.v === VUE));
+    return rendre();
+  }
+  const mod = e.target.closest('[data-mod]');
+  if (mod) {
+    const src = mod.dataset.type === 'promotions' ? ETAT.promotions : ETAT.evenements;
+    EDITE = JSON.parse(JSON.stringify(src.find((x) => x.id === mod.dataset.mod)));
+    EDITE.infos = EDITE.infos || [];
+    return rendre();
+  }
+  const sup = e.target.closest('[data-sup]');
+  if (sup) {
+    if (!confirm('Supprimer définitivement ?')) return;
+    await appel('supprimer', { type: sup.dataset.type === 'promotions' ? 'promotion' : 'evenement',
+                               id: sup.dataset.sup });
+    return charger();
+  }
+  const img = e.target.closest('[data-img]');
+  if (img) {
+    [...$('#imgs').children].forEach((b) => b.classList.toggle('on', b === img));
+    if (EDITE) EDITE.fond = img.dataset.img;
+    return;
+  }
+  if (e.target.id === 'annuler') { EDITE = null; return rendre(); }
+  if (e.target.id === 'enreg') {
+    const val = (id) => { const el = $('#' + id); return el ? el.value.trim() : ''; };
+    const infos = [0, 1, 2, 3].map((i) => {
+      const l = $('[data-il="' + i + '"]'), v = $('[data-iv="' + i + '"]');
+      return [l ? l.value.trim() : '', v ? v.value.trim() : ''];
+    }).filter((p) => p[0] && p[1]);
+    const entree = {
+      id: EDITE && EDITE.id, titre: val('f-titre'), accent: val('f-accent'),
+      categorie: val('f-cat'), badge: val('f-badge'), texte: val('f-texte'),
+      quand: val('f-quand'), fin: val('f-fin') || null, cta: val('f-cta'),
+      href: val('f-href'), fond: (EDITE && EDITE.fond) || '',
+      publie: $('#f-publie').checked, infos,
+      reduction: val('f-red'), code: val('f-code'),
+    };
+    const msg = $('#msgf');
+    const r = await appel('enregistrer',
+      { type: VUE === 'promotions' ? 'promotion' : 'evenement', entree });
+    if (!r.ok) { msg.className = 'msg mal'; msg.textContent = r.message || 'Échec.'; return; }
+    msg.className = 'msg bon'; msg.textContent = 'Enregistré.';
+    EDITE = null;
+    setTimeout(charger, 400);
+  }
+});
+
+/* Au chargement : la session existe-t-elle deja ? */
+appel('etat').then((r) => { if (r.ok) montrerCadre(); }).catch(() => {});
+</script>
+</body>
+</html>
