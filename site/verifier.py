@@ -340,6 +340,27 @@ def controler():
                     pb.append((f, 'script %d invalide : %s'
                                % (i + 1, (detail or ['?'])[0].strip()[:70])))
 
+        # 14. une image reconstruite en JavaScript efface le srcset du modele.
+        # Le carrousel clone une diapositive generee pour y poser l'evenement
+        # publie depuis l'administration. Le clone porte le srcset d'une photo
+        # du site, et srcset l'emporte sur src : l'affiche deposee par l'hotel
+        # ne s'affichait jamais, on voyait la photo du modele a sa place. Le
+        # defaut est invisible — une image s'affiche, simplement pas la bonne.
+        # On ne vise que les <img> reprises d'un modele existant. Une image
+        # construite de zero — la visionneuse, une source video — n'herite
+        # d'aucun srcset et n'a rien a effacer.
+        for js in re.findall(r'<script(?![^>]*src=)[^>]*>(.*?)</script>', s, re.S):
+            if 'cloneNode' not in js:
+                continue
+            reprises = set(re.findall(
+                r"""(\w+)\s*=\s*[^;
+]*\.querySelector\(['\"]img""", js))
+            for pose in reprises:
+                if re.search(r'\b%s\.src\s*=' % pose, js) \
+                        and ("%s.removeAttribute('srcset')" % pose) not in js:
+                    pb.append((f, "%s.src posé sur une image reprise d'un"
+                               " modèle sans effacer son srcset" % pose))
+
         # Le controle 12 — rideau des barres collantes — a disparu avec le
         # mecanisme lui-meme : les barres de filtres ne sont plus collantes.
 

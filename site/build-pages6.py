@@ -596,18 +596,27 @@ JS += """
   }
   function suspendre(){ clearInterval(minuteur); }
 
-  function demarrer(){
+  /* definitif : la reponse du back-office est connue (arrivee ou echouee).
+     Avant elle, une section vide est seulement masquee, jamais retiree — les
+     evenements figes dans le code finissent tous par perimer, et les retirer
+     tout de suite detachait le conteneur du document : ce que l'hotel venait
+     de publier s'ecrivait ensuite dans un element absent de la page. */
+  function demarrer(definitif){
     diapos = [].slice.call(hote.querySelectorAll('.diapo')).filter(function(d){
       if (perime(d)) { d.remove(); return false; }
       return true;
     });
-    /* Plus rien a l'affiche : on retire la section plutot que d'exposer un
-       cadre vide. */
+    var titre = document.getElementById('a-la-une');
     if (!diapos.length) {
-      ag.remove();
-      var t = document.getElementById('a-la-une'); if (t) t.remove();
+      /* Plus rien a l'affiche : on retire la section plutot que d'exposer un
+         cadre vide. */
+      if (definitif) { ag.remove(); if (titre) titre.remove(); return; }
+      ag.style.display = 'none';
+      if (titre) titre.style.display = 'none';
       return;
     }
+    ag.style.display = '';
+    if (titre) titre.style.display = '';
     montrer(0);
     if (pilote) pilote.style.display = diapos.length < 2 ? 'none' : '';
     relancer();
@@ -625,7 +634,16 @@ JS += """
          photo du site. */
       if (e.fond) {
         var url = /^https?:/.test(e.fond) ? e.fond : 'img/opt/' + e.fond + '.jpg';
-        if (im) { im.src = url; im.removeAttribute('width'); im.removeAttribute('height'); }
+        if (im) {
+          im.src = url;
+          /* Le modele est clone d'une diapositive generee : son img porte le
+             srcset d'une photo du site. Or srcset l'emporte sur src — sans cet
+             effacement, l'affiche deposee par l'hotel ne s'affiche jamais, et
+             c'est la photo du modele qu'on voit a sa place. */
+          im.removeAttribute('srcset'); im.removeAttribute('sizes');
+          im.removeAttribute('width'); im.removeAttribute('height');
+          im.alt = e.titre || '';
+        }
         if (so) {
           if (/^https?:/.test(e.fond)) so.remove();
           else so.srcset = 'img/opt/' + e.fond + '.webp';
@@ -678,15 +696,18 @@ JS += """
     if (ev.key === 'ArrowRight') { montrer(n + 1); relancer(); }
   });
 
-  demarrer();
+  demarrer(false);
 
+  /* Le verdict tombe dans tous les cas — reponse vide, page hors ligne,
+     fonction en panne — sinon une section masquee le resterait. */
+  function conclure(j){
+    if (j && j.evenements && j.evenements.length) refaire(j.evenements);
+    demarrer(true);
+  }
   fetch('/api/admin?a=public', { cache: 'no-store' })
     .then(function(r){ return r.ok ? r.json() : null; })
-    .then(function(j){
-      if (!j || !j.evenements || !j.evenements.length) return;
-      refaire(j.evenements);
-      demarrer();
-    }).catch(function(){});
+    .then(conclure)
+    .catch(function(){ demarrer(true); });
 })();
 """
 LD = _schema.bloc(
