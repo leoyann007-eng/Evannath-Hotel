@@ -170,7 +170,7 @@ details.plus summary::marker{color:var(--bronze)}
    ses dependances, et elle n'a que six ecrans.
    ───────────────────────────────────────────────────────────────────────── */
 const API = '/api/admin';
-let ETAT = { stockage: '', magasin: '', evenements: [], promotions: [], images: [] };
+let ETAT = { stockage: '', magasin: '', variable: '', evenements: [], promotions: [], images: [] };
 let VUE = 'bord';
 let EDITE = null;                       // l'entree en cours de modification
 
@@ -223,6 +223,7 @@ async function charger() {
   ]);
   ETAT.stockage = etat.stockage;
   ETAT.magasin = etat.magasin;
+  ETAT.variable = etat.variable;
   ETAT.maj = etat.maj;
   ETAT.evenements = (tout.donnees && tout.donnees.evenements) || [];
   ETAT.promotions = (tout.donnees && tout.donnees.promotions) || [];
@@ -443,7 +444,11 @@ function rendre() {
           <b>Magasin visé</b><span>Comparez cet identifiant à celui du magasin
           Blob dans Vercel. S'ils diffèrent, le jeton pointe ailleurs.</span></div>
           <code style="font-size:12px;color:var(--sand)">${ETAT.magasin}</code>
-          </div>` : ''}
+          </div>
+        <div class="ligne"><div class="txt"><b>Variable lue</b>
+          <span>Le nom de la variable d'environnement d'où vient le jeton.</span>
+          </div><code style="font-size:12px;color:var(--sand)">${
+          ETAT.variable}</code></div>` : ''}
       </div>
       <div class="carte">
         <p style="color:var(--muted)">Les numéros de téléphone, l'adresse e-mail et les

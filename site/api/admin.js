@@ -25,7 +25,21 @@ const crypto = require('crypto');
 
 const MDP = process.env.ADMIN_MDP || '';
 const SECRET = process.env.ADMIN_SECRET || MDP || 'evannath-sans-secret';
-const JETON_BLOB = process.env.BLOB_READ_WRITE_TOKEN || '';
+/* Connecter un magasin Blob a un projet permet de choisir un prefixe de
+   variables : le jeton s'appelle alors MONPREFIXE_READ_WRITE_TOKEN. Chercher
+   le seul nom BLOB_READ_WRITE_TOKEN laissait le stockage invisible alors qu'il
+   etait bien branche. On reconnait le jeton a sa forme, quel que soit son nom. */
+function trouverJeton() {
+  if (process.env.BLOB_READ_WRITE_TOKEN)
+    return { valeur: process.env.BLOB_READ_WRITE_TOKEN, nom: 'BLOB_READ_WRITE_TOKEN' };
+  for (const nom of Object.keys(process.env)) {
+    const v = process.env[nom] || '';
+    if (/READ_WRITE_TOKEN$/.test(nom) && /^vercel_blob_rw_/.test(v))
+      return { valeur: v, nom };
+  }
+  return { valeur: '', nom: '' };
+}
+const { valeur: JETON_BLOB, nom: NOM_JETON } = trouverJeton();
 const DUREE = 12 * 3600;                     // 12 h de session
 
 // ── Stockage ───────────────────────────────────────────────────────────────
@@ -241,6 +255,10 @@ module.exports = async function handler(req, res) {
       // celui affiche par Vercel : c'est ainsi qu'on voit a quel magasin on
       // parle. Ce n'est pas la partie secrete, et l'etat demande une session.
       magasin: (JETON_BLOB.split('_')[3] || '').slice(0, 24) || null,
+      // Le nom de la variable d'ou vient le jeton : il dit quelle variable le
+      // deploiement voit reellement, ce que la liste de Vercel ne montre pas
+      // toujours pour les magasins connectes.
+      variable: NOM_JETON || null,
       evenements: (d.evenements || []).length,
       promotions: (d.promotions || []).length,
       medias: (d.medias || []).length,

@@ -551,6 +551,13 @@ Deux modes, décidés par la présence de `BLOB_READ_WRITE_TOKEN` :
 Laisser croire qu'une affiche est enregistrée alors qu'elle disparaîtra au
 prochain déploiement serait le pire défaut possible pour cet outil.
 
+**Le nom de la variable n'a pas d'importance.** Connecter un magasin permet de
+choisir un préfixe : le jeton s'appelle alors `MONPRÉFIXE_READ_WRITE_TOKEN`.
+Le code reconnaît le jeton à sa forme — `vercel_blob_rw_…` — dans n'importe
+quelle variable finissant par `READ_WRITE_TOKEN`. *Paramètres* affiche le nom
+de celle qui a été lue, ce que la liste de Vercel ne montre pas toujours pour
+les magasins connectés.
+
 **Ne saisissez pas `BLOB_READ_WRITE_TOKEN` à la main.** Connecter le magasin
 au projet crée la variable tout seul. Une variable saisie manuellement, elle,
 survit à la suppression du magasin qu'elle désignait et l'emporte sur celle de
