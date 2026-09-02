@@ -145,7 +145,11 @@ module.exports = async function handler(req, res) {
   // ── Lecture publique : ce que la page Offres & Evenements consomme ──────
   if (action === 'public') {
     const d = await lire();
-    res.setHeader('Cache-Control', 'public, max-age=60, stale-while-revalidate=600');
+    // Aucun cache. Une affiche publiee doit apparaitre a la seconde : un
+    // cache d'une minute, c'est une minute a se demander si l'enregistrement
+    // a fonctionne. La reponse fait quelques centaines d'octets, la depense
+    // est negligeable.
+    res.setHeader('Cache-Control', 'no-store, max-age=0');
     const visible = (x) => x.publie !== false;
     return res.status(200).json({
       evenements: (d.evenements || []).filter(visible),

@@ -59,6 +59,13 @@ site/img/fb/
 site/index-luxe-variante.html
 site/*.gardefou
 
+# ── Secrets locaux ────────────────────────────────────────────
+# .env.local porte ADMIN_MDP et le jeton du stockage. Il ne doit JAMAIS
+# partir dans le depot : un mot de passe pousse sur un depot distant est
+# a considerer comme divulgue, meme si on l'efface ensuite.
+.env.local
+.env
+
 # ── Environnement local ───────────────────────────────────────
 .claude/
 __pycache__/

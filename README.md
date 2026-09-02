@@ -524,6 +524,44 @@ Pour passer en durable : créer un magasin Vercel Blob, définir
 `BLOB_READ_WRITE_TOKEN`, et **ajouter `@vercel/blob` aux dépendances** — le
 `package.json` est actuellement écarté du dépôt, il faudra l'y remettre.
 
+### Mettre l'administration en service
+
+**1. Choisir un mot de passe.** Générez-le, ne l'inventez pas :
+
+```
+node -e "console.log(require('crypto').randomBytes(18).toString('base64url'))"
+```
+
+**2. Dans Vercel** — *Settings → Environment Variables* :
+
+| Variable | Valeur |
+|---|---|
+| `ADMIN_MDP` | le mot de passe généré |
+| `ADMIN_SECRET` | une seconde chaîne au hasard, qui signe les sessions |
+| `BLOB_READ_WRITE_TOKEN` | le jeton du magasin Vercel Blob, pour le stockage durable |
+
+Redéployer après les avoir définies. Sans `ADMIN_MDP`, la connexion répond 503
+avec la marche à suivre.
+
+**3. Essayer avant de déployer.** Un serveur local exécute les fonctions, ce
+que `python -m http.server` ne sait pas faire :
+
+```
+node serveur-local.js
+```
+
+Il lit `.env.local` à la racine — une ligne par variable, `NOM=valeur`. **Ce
+fichier est écarté du dépôt** : un mot de passe poussé sur un dépôt distant est
+à considérer comme divulgué, même effacé ensuite.
+
+Le site répond alors sur <http://localhost:5599>, l'administration sur
+<http://localhost:5599/admin/>. Le serveur annonce au démarrage si `ADMIN_MDP`
+est défini et quel stockage est actif.
+
+*Une modification d'une fonction demande un redémarrage : les modules sont
+chargés une fois et gardés. Les recharger à chaque appel remettrait à zéro le
+stockage de démonstration — chaque événement créé se perdait dans la seconde.*
+
 ### L'accès
 
 Un mot de passe, défini par `ADMIN_MDP`, échangé contre un cookie signé de

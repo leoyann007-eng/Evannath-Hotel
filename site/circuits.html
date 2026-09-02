@@ -980,7 +980,8 @@ document.querySelectorAll('.lang button').forEach(function(b){b.onclick=function
 
   demarrer();
 
-  fetch('/api/admin?a=public').then(function(r){ return r.ok ? r.json() : null; })
+  fetch('/api/admin?a=public', { cache: 'no-store' })
+    .then(function(r){ return r.ok ? r.json() : null; })
     .then(function(j){
       if (!j || !j.evenements || !j.evenements.length) return;
       refaire(j.evenements);
