@@ -23,6 +23,16 @@
 
 const crypto = require('crypto');
 
+/* La version du deploiement. Vercel la fournit ; en local elle est fixee au
+   demarrage du serveur, ce qui suffit : redemarrer simule un deploiement.
+
+   Elle sert a une seule chose, mais elle est necessaire : une page
+   d administration ouverte AVANT un deploiement continue d executer l ancien
+   code. On coche une case que l ancienne version ne connait pas, on publie,
+   rien ne se passe, et personne ne peut le savoir. C est arrive. */
+const VERSION = (process.env.VERCEL_GIT_COMMIT_SHA
+  || process.env.VERSION || 'local-' + Date.now()).slice(0, 12);
+
 const MDP = process.env.ADMIN_MDP || '';
 const SECRET = process.env.ADMIN_SECRET || MDP || 'evannath-sans-secret';
 /* Connecter un magasin Blob a un projet permet de choisir un prefixe de
@@ -392,6 +402,7 @@ module.exports = async function handler(req, res) {
     const d = await lire();
     return json(res, 200, {
       ok: true,
+      version: VERSION,
       stockage: JETON_BLOB ? 'durable' : 'demonstration',
       // L'identifiant du magasin vise, lisible dans le jeton. Il se compare a
       // celui affiche par Vercel : c'est ainsi qu'on voit a quel magasin on

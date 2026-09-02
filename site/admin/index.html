@@ -86,6 +86,13 @@ h1.t{font-family:var(--f-t);font-size:30px;font-weight:400}
 /* Les quatre temps sont numerotes : on sait ou on en est sans compter. */
 .etape{position:relative}
 
+/* Le bandeau de page perimee : il doit se voir, pas se deviner. */
+.perimee{display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+  padding:16px 20px;margin-bottom:20px;background:rgba(224,138,123,.10);
+  border:1px solid var(--err)}
+.perimee b{color:var(--err);flex:none}
+.perimee span{flex:1;min-width:220px;font-size:13px;color:var(--sand)}
+
 /* Le fil des etapes : ou l on en est, ce qui reste, et le retour en
    arriere sur ce qui est deja franchi. */
 .fil{display:flex;align-items:center;gap:0;list-style:none;margin:0 0 22px;
@@ -306,6 +313,12 @@ let ETAT = { stockage: '', magasin: '', variable: '', evenements: [],
 /* Quand on choisit la photo d un pack, il faut savoir DE QUEL pack : la
    grille de photos est unique, les packs sont plusieurs. */
 let PHOTO_POUR = null;
+/* La version du serveur au moment ou cette page a ete chargee. Si le serveur
+   en annonce une autre plus tard, c est qu un deploiement a eu lieu depuis :
+   cette page execute du code perime, et ce qu on y fait peut se perdre en
+   silence. */
+let VERSION_PAGE = null;
+let PERIMEE = false;
 let CIBLE_DEPOT = 'fond';
 let VUE = 'bord';
 let EDITE = null;                       // l'entree en cours de modification
@@ -367,6 +380,9 @@ async function charger() {
   ETAT.evenements = (tout.donnees && tout.donnees.evenements) || [];
   ETAT.promotions = (tout.donnees && tout.donnees.promotions) || [];
   ETAT.campagnes = (tout.donnees && tout.donnees.campagnes) || [];
+  ETAT.version = etat.version || '';
+  if (VERSION_PAGE === null) VERSION_PAGE = ETAT.version;
+  else if (ETAT.version && ETAT.version !== VERSION_PAGE) PERIMEE = true;
   ETAT.chambres = chambres;
   ETAT.images = images;
   rendre();
@@ -381,6 +397,19 @@ $('#menu').addEventListener('click', (e) => {
 });
 
 /* ── Rendu ─────────────────────────────────────────────── */
+/* Un bandeau franc plutot qu une note discrete : tant qu on ne recharge pas,
+   ce qu on enregistre peut ne pas partir. */
+function perimee() {
+  if (!PERIMEE) return '';
+  return `<div class="perimee">
+    <b>Cette page n'est plus à jour.</b>
+    <span>Le site a été mis à jour depuis que vous l'avez ouverte. Rechargez
+    avant de continuer : sans cela, certains réglages peuvent ne pas être
+    enregistrés.</span>
+    <button class="btn plein" id="recharger">Recharger</button>
+  </div>`;
+}
+
 function avertissement() {
   if (ETAT.stockage === 'durable') return '';
   return `<div class="alerte">
@@ -1256,7 +1285,13 @@ function rendre() {
         <p class="sous">L'état de l'installation.</p></div></div>
       ${avertissement()}
       <div class="carte">
-        <div class="ligne" style="margin:0"><div class="txt">
+        <div class="ligne" style="margin:0"><div class="txt"><b>Version</b>
+          <span>Celle du déploiement en cours. Si votre page en affichait
+          une autre, elle serait périmée et vos réglages pourraient se
+          perdre.</span></div>
+          <code style="font-size:12px;color:var(--sand)">${ETAT.version
+            || 'inconnue'}</code></div>
+        <div class="ligne"><div class="txt">
           <b>Stockage</b><span>${ETAT.stockage === 'durable'
             ? 'Vercel Blob — les données sont conservées.'
             : 'Mémoire — les données se perdent au redéploiement.'}</span></div>
@@ -1267,6 +1302,7 @@ function rendre() {
           Blob dans Vercel. S'ils diffèrent, le jeton pointe ailleurs.</span></div>
           <code style="font-size:12px;color:var(--sand)">${ETAT.magasin}</code>
           </div>
+
         <div class="ligne"><div class="txt"><b>Variable lue</b>
           <span>Le nom de la variable d'environnement d'où vient le jeton.</span>
           </div><code style="font-size:12px;color:var(--sand)">${
@@ -1290,10 +1326,16 @@ function rendre() {
         logique, une fois le magasin branché.</p>
       </div>`;
   }
+
+  /* Le bandeau de page périmée passe devant tout le reste, sur toutes les
+     vues. Le poser vue par vue en oubliait trois. */
+  if (PERIMEE) v.insertAdjacentHTML("afterbegin", perimee());
 }
 
 /* ── Actions ───────────────────────────────────────────── */
 document.addEventListener('click', async (e) => {
+  if (e.target.id === 'recharger') { location.reload(); return; }
+
   const neuf = e.target.closest('[data-neuf]');
   if (neuf) {
     VUE = neuf.dataset.neuf; EDITE = { infos: [], publie: true }; ETAPE = 1;
