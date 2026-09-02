@@ -1454,6 +1454,27 @@ document.addEventListener('click', async (e) => {
    celles des reseaux portent deja dates, tarif et telephone — et se montre
    ENTIER. Un visuel large est une photo, et sert de fond. Rien a demander a
    l'utilisateur. */
+/** Réduit un visuel trop grand pour l'usage qu'on en fait. Rend la donnée
+    d'origine quand il n'y a rien à gagner : mieux vaut ne pas ré-encoder. */
+function alleger(im, donnee, poids) {
+  const MAX = 1400;
+  if (!im) return donnee;
+  const cote = Math.max(im.width, im.height);
+  if (cote <= MAX && poids <= 400 * 1024) return donnee;
+  const f = Math.min(1, MAX / cote);
+  const c = document.createElement('canvas');
+  c.width = Math.round(im.width * f);
+  c.height = Math.round(im.height * f);
+  const ctx = c.getContext('2d');
+  /* Un PNG transparent deviendrait noir : on pose le fond du site dessous. */
+  ctx.fillStyle = '#17100A';
+  ctx.fillRect(0, 0, c.width, c.height);
+  ctx.drawImage(im, 0, 0, c.width, c.height);
+  const reduit = c.toDataURL('image/jpeg', 0.85);
+  // Si le ré-encodage ne gagne rien, on garde l'original.
+  return reduit.length < donnee.length ? reduit : donnee;
+}
+
 document.addEventListener('change', async (ev) => {
   if (ev.target.id !== 'f-fichier') return;
   const f = ev.target.files && ev.target.files[0];
@@ -1468,14 +1489,28 @@ document.addEventListener('change', async (ev) => {
   const donnee = await new Promise((r) => {
     const l = new FileReader(); l.onload = () => r(l.result); l.readAsDataURL(f);
   });
-  /* Les proportions, lues avant l'envoi. */
-  const format = await new Promise((r) => {
+  /* L'image est lue une fois : elle donne les proportions ET sert à
+     l'alléger. */
+  const im = await new Promise((r) => {
     const i = new Image();
-    i.onload = () => { const q = i.width / i.height; r(q > 0.8 && q < 1.25 ? 'affiche' : 'fond'); };
-    i.onerror = () => r('affiche');
+    i.onload = () => r(i);
+    i.onerror = () => r(null);
     i.src = donnee;
   });
-  const rep = await appel('televerser', { fichier: donnee });
+  const q = im ? im.width / im.height : 1;
+  const format = q > 0.8 && q < 1.25 ? 'affiche' : 'fond';
+
+  /* Un visuel sort d'un téléphone ou d'un réseau : 2048 × 2048 et 400 Ko pour
+     une carte de 265 pixels. Quatre packs pesaient 1,5 Mo — six fois la page
+     d'accueil entière. On le réduit ici, avant l'envoi : ce qui n'est jamais
+     déposé n'a jamais à être téléchargé par les visiteurs. */
+  const envoi = alleger(im, donnee, f.size);
+  if (envoi !== donnee) {
+    const avant = Math.round(f.size / 1024);
+    const apres = Math.round(envoi.length * 0.75 / 1024);
+    dire('Envoi en cours… (' + avant + ' Ko allégés à ' + apres + ' Ko)');
+  }
+  const rep = await appel('televerser', { fichier: envoi });
   if (!rep.ok) return dire(rep.message || "Le dépôt a échoué.", true);
   EDITE = EDITE || { infos: [], publie: true };
   // La saisie de l etape en cours part dans EDITE avant que l apercu ne

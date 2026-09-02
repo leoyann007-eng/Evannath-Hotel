@@ -85,7 +85,7 @@ CSS = """
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
 .camp h2{margin:12px 0 0}
 .camp>p{max-width:62ch}
-.packs{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:26px}
+.packs{align-items:start;display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:26px}
 .pack{border:1px solid var(--line);overflow:hidden;background:var(--bark);transition:.45s}
 
 /* Une remise se lit en trois secondes : le montant, sur quoi, jusqu à quand. */
@@ -129,6 +129,9 @@ CSS = """
 }
 .pack:hover{border-color:rgba(185,138,80,.55);transform:translateY(-4px)}
 .pack .ph{aspect-ratio:3/2;overflow:hidden}
+/* Rien n est rogne : le visuel impose sa hauteur. */
+.pack .ph.libre{aspect-ratio:auto;background:var(--night)}
+.pack .ph.libre img{height:auto;object-fit:contain}
 .pack .ph img{width:100%;height:100%;object-fit:cover;transition:1s cubic-bezier(.2,.8,.2,1)}
 .pack:hover .ph img{transform:scale(1.07)}
 .pack .in{padding:20px}
@@ -885,7 +888,11 @@ JS += """
         art.className = 'pack';
 
         var ph = document.createElement('div');
-        ph.className = 'ph';
+        /* Les packs figes portent des photos, que le cadre 3/2 recadre
+           sans dommage. Un pack publie porte une AFFICHE, souvent carree :
+           la recadrer coupe son texte. La carte suit donc les proportions
+           du visuel deposé. */
+        ph.className = 'ph libre';
         if (p.image) {
           var im = document.createElement('img');
           /* La vignette quand elle existe : la carte est petite, l image
