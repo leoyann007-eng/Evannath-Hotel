@@ -256,6 +256,9 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
 .remise.sans-image{grid-template-columns:1fr}
 .remise>picture{display:block;background:var(--night)}
 .remise img{width:100%;height:100%;object-fit:cover;display:block}
+.remise.affiche>picture{padding:18px;background:var(--night)}
+.remise.affiche img{height:auto;object-fit:contain;max-height:340px;
+  margin:0 auto}
 .remise .dedans{padding:26px 28px}
 .remise .haut{display:flex;align-items:center;gap:12px;flex-wrap:wrap;
   margin-bottom:10px}
@@ -1092,7 +1095,12 @@ window.NOMS_CHAMBRES = {"chambre-standard": "Chambre Standard", "deluxe-baldaqui
         ? (/^https?:/.test(p.fond) ? p.fond : 'img/opt/' + p.fond + '.jpg')
         : '';
       var art = document.createElement('article');
-      art.className = 'remise' + (img ? '' : ' sans-image');
+      /* Une affiche verticale — celles que l hotel publie sur Facebook —
+         se montre ENTIERE : elle porte deja les dates, le tarif et le
+         telephone. La rogner rend illisible ce qu elle dit. Une photo
+         large, elle, se recadre sans dommage. */
+      art.className = 'remise' + (img ? '' : ' sans-image')
+        + (p.format === 'affiche' ? ' affiche' : '');
 
       if (img) {
         var pic = document.createElement('picture');

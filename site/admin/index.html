@@ -593,9 +593,25 @@ async function enregistrerPromo() {
   const msg = $('#msgf');
   const r = await appel('enregistrer', { type: 'promotion', entree });
   if (!r.ok) { msg.className = 'msg mal'; msg.textContent = r.message || 'Échec.'; return; }
-  msg.className = 'msg bon'; msg.textContent = 'Publiée.';
+
+  /* « Publiée » tout court a induit en erreur : une promotion dont la
+     periode commence plus tard n apparait pas sur le site, et rien ne le
+     disait. On annonce ce qui va reellement se passer. */
+  const st = statutPromo(entree);
+  const quand = (v) => v ? v.slice(8, 10) + '/' + v.slice(5, 7) + '/'
+    + v.slice(0, 4) + ' à ' + v.slice(11) : '';
+  msg.className = 'msg ' + (st.mot === 'Active' ? 'bon' : 'mal');
+  msg.textContent =
+    entree.publie === false ? 'Enregistrée en brouillon : elle n’apparaît pas sur le site.'
+    : st.mot === 'Programmée'
+      ? 'Enregistrée. Elle apparaîtra sur le site le ' + quand(entree.debut) + '.'
+    : st.mot === 'Terminée'
+      ? 'Enregistrée, mais sa période est déjà passée : elle n’apparaît pas '
+        + 'sur le site.'
+    : 'Publiée. Elle est visible sur le site dès maintenant.';
+
   EDITE = null;
-  setTimeout(charger, 400);
+  setTimeout(charger, 1400);
 }
 
 const ETAPES = ['Informations générales', 'Réduction', "S'applique à",
