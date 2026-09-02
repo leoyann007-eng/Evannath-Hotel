@@ -81,6 +81,58 @@ h1.t{font-family:var(--f-t);font-size:30px;font-weight:400}
 .btn.plein:hover{background:var(--bronze-2);border-color:var(--bronze-2)}
 .btn.mince{padding:9px 15px;font-size:10px;letter-spacing:.14em}
 .rang{display:flex;flex-direction:column;gap:3px;flex:none}
+
+/* ── Formulaire des promotions ──────────────────────────────────────── */
+/* Les quatre temps sont numerotes : on sait ou on en est sans compter. */
+.etape{position:relative}
+.bloc-t i{display:inline-flex;align-items:center;justify-content:center;
+  width:22px;height:22px;margin-right:9px;font-style:normal;font-size:11px;
+  font-weight:700;background:var(--bronze-2);color:var(--night);
+  border-radius:50%;vertical-align:2px}
+.lb{display:block;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--muted);font-weight:700;margin:16px 0 6px}
+.etape .lb:first-of-type{margin-top:0}
+
+/* Deux options se montrent, elles ne se cherchent pas dans une liste. */
+.choix{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.opt{padding:14px 16px;text-align:left;font-size:13px;cursor:pointer;
+  background:var(--bark-3);color:var(--sand);border:1px solid var(--line);
+  transition:.2s}
+.opt:hover{border-color:var(--bronze-2)}
+.opt.on{border-color:var(--bronze-2);background:rgba(185,138,80,.12);
+  color:var(--bronze-2);font-weight:600}
+
+.suffixe{display:flex;align-items:stretch}
+.suffixe input{flex:1;border-right:0}
+.suffixe span{display:flex;align-items:center;padding:0 16px;font-size:12.5px;
+  color:var(--muted);background:var(--bark-3);border:1px solid var(--line)}
+
+/* L apercu montre un prix reel : une remise se juge sur un montant. */
+.vitrine{margin-top:14px;padding:14px 16px;background:var(--bark-3);
+  border:1px solid var(--line);font-size:13.5px}
+.vitrine s{color:var(--muted)}
+.vitrine .prix{color:var(--bronze-2);font-size:16px;margin-left:6px}
+.vitrine .etiq{display:inline-block;margin-left:8px;padding:2px 8px;
+  font-size:11px;font-weight:700;background:var(--bronze-2);color:var(--night)}
+
+.radio,.bascule{display:flex;align-items:center;gap:10px;margin:9px 0;
+  font-size:13.5px;cursor:pointer}
+.chambre{display:flex;align-items:center;gap:10px;padding:9px 12px;margin:5px 0;
+  background:var(--bark-3);border:1px solid var(--line);font-size:13.5px;
+  cursor:pointer}
+.chambre b{font-weight:500;flex:1}
+.chambre span{color:var(--muted);font-size:12.5px}
+#les-chambres{margin-top:10px}
+
+.paire{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.paire input{margin-bottom:8px}
+
+/* Programmee : ni en ligne, ni terminee. Elle attend son heure. */
+.etat.attend{color:var(--bronze-2);border-color:rgba(185,138,80,.45)}
+
+@media (max-width:640px){
+  .choix,.paire{grid-template-columns:1fr}
+}
 .fl{width:26px;height:21px;line-height:1;font-size:9px;cursor:pointer;
   background:var(--bark-3);color:var(--sand);border:1px solid var(--line);
   transition:.2s}
@@ -107,6 +159,9 @@ textarea{min-height:96px;resize:vertical}
 .grille-img button{border:2px solid transparent;background:none;padding:0;cursor:pointer;display:block}
 .grille-img button.on{border-color:var(--bronze)}
 .grille-img img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}
+/* display:grid l emportait sur l attribut hidden : la grille de photos
+   s affichait alors que le bouton proposait encore de l ouvrir. */
+.grille-img[hidden]{display:none}
 
 .bloc-t{font-family:var(--f-t);font-weight:400;font-size:19px;margin-bottom:14px}
 .depot{display:flex;gap:22px;align-items:flex-start;flex-wrap:wrap;
@@ -177,7 +232,8 @@ details.plus summary::marker{color:var(--bronze)}
    ses dependances, et elle n'a que six ecrans.
    ───────────────────────────────────────────────────────────────────────── */
 const API = '/api/admin';
-let ETAT = { stockage: '', magasin: '', variable: '', evenements: [], promotions: [], images: [] };
+let ETAT = { stockage: '', magasin: '', variable: '', evenements: [],
+             promotions: [], images: [], chambres: [] };
 let VUE = 'bord';
 let EDITE = null;                       // l'entree en cours de modification
 
@@ -223,10 +279,13 @@ $('#sortir').addEventListener('click', async () => {
 
 /* ── Chargement ────────────────────────────────────────── */
 async function charger() {
-  const [etat, tout, images] = await Promise.all([
+  const [etat, tout, images, chambres] = await Promise.all([
     appel('etat'),
     appel('tout'),
     fetch('/donnees/images.json').then((r) => (r.ok ? r.json() : [])).catch(() => []),
+    // Les chambres et leurs tarifs viennent du site lui-meme : une promotion
+    // les vise, et personne ne doit les ressaisir a la main.
+    fetch('/donnees/chambres.json').then((r) => (r.ok ? r.json() : [])).catch(() => []),
   ]);
   ETAT.stockage = etat.stockage;
   ETAT.magasin = etat.magasin;
@@ -234,6 +293,7 @@ async function charger() {
   ETAT.maj = etat.maj;
   ETAT.evenements = (tout.donnees && tout.donnees.evenements) || [];
   ETAT.promotions = (tout.donnees && tout.donnees.promotions) || [];
+  ETAT.chambres = chambres;
   ETAT.images = images;
   rendre();
 }
@@ -259,10 +319,31 @@ function avertissement() {
 
 const expire = (e) => e.fin && new Date(e.fin + 'T23:59:59') < new Date();
 
-function etatDe(e) {
+function etatDe(e, type) {
+  // Une promotion a un etat que sa periode dicte : programmee avant,
+  // active pendant, terminee apres. Un evenement, lui, expire.
+  if (type === 'promotions') {
+    const st = statutPromo(e);
+    return '<span class="etat ' + st.cl + '">' + st.mot + '</span>';
+  }
   if (e.publie === false) return '<span class="etat dort">Brouillon</span>';
   if (expire(e)) return '<span class="etat fini">Terminé</span>';
   return '<span class="etat vif">En ligne</span>';
+}
+
+/** Ce qu'une promotion fait, en une ligne : combien, sur quoi, quand. */
+function resumePromo(p) {
+  const r = p.remise || {};
+  const combien = !r.valeur ? 'sans remise'
+    : r.type === 'montant' ? '−' + FCFA(r.valeur) : '−' + r.valeur + ' %';
+  const c = p.cible || {};
+  const surQuoi = c.toutes !== false ? 'toutes les chambres'
+    : ((c.chambres || []).length || 0) + ' chambre'
+      + (((c.chambres || []).length || 0) > 1 ? 's' : '');
+  const jour = (v) => (v || '').slice(0, 10).split('-').reverse().join('/');
+  const quand = p.debut || p.fin
+    ? ' · du ' + jour(p.debut) + ' au ' + jour(p.fin) : '';
+  return ech(combien) + ' sur ' + ech(surQuoi) + ech(quand);
 }
 
 function liste(type) {
@@ -290,9 +371,10 @@ function liste(type) {
       ${e.fond ? `<img class="vig" src="${srcImage(e.fond)}" alt="">` : '<div class="vig"></div>'}
       <div class="txt">
         <b>${ech(e.titre)} ${e.accent ? '<em style="color:var(--bronze-2)">' + ech(e.accent) + '</em>' : ''}</b>
-        <span>${ech(e.badge || e.quand || '—')}${e.fin ? ' · se termine le ' + ech(e.fin) : ''}</span>
+        <span>${type === 'promotions' ? resumePromo(e)
+          : ech(e.badge || e.quand || '—') + (e.fin ? ' · se termine le ' + ech(e.fin) : '')}</span>
       </div>
-      ${etatDe(e)}
+      ${etatDe(e, type)}
       <button class="btn mince" data-mod="${ech(e.id)}" data-type="${type}">Modifier</button>
       <button class="btn mince danger" data-sup="${ech(e.id)}" data-type="${type}">Supprimer</button>
     </div>`).join('');
@@ -303,9 +385,258 @@ function liste(type) {
    dates, le tarif et le telephone. Lui demander de ressaisir tout cela serait
    lui faire faire le travail deux fois. Le reste est repliable, et vide par
    defaut. */
+/* ── Promotions ────────────────────────────────────────────
+   Une promotion n'est pas un evenement. Elle porte une remise, un perimetre
+   — sur quelles chambres — et une periode qui COMMENCE : un evenement se
+   retire, une promotion se programme. Elle a donc son propre formulaire,
+   en quatre temps, plutot qu'un champ « reduction » greffe sur celui des
+   evenements. */
+
+const FCFA = (n) => Number(n || 0).toLocaleString('fr-FR')
+  .replace(/ | /g, ' ') + ' F';
+
+/** La chambre servant d'exemple dans l'apercu : la premiere visee, sinon la
+    premiere du catalogue. Une remise se juge sur un prix reel, pas sur un
+    pourcentage abstrait. */
+function chambreTemoin(cible) {
+  const l = ETAT.chambres;
+  if (!l.length) return null;
+  if (cible && !cible.toutes && cible.chambres && cible.chambres.length) {
+    const t = l.find((c) => c.slug === cible.chambres[0]);
+    if (t) return t;
+  }
+  return l[0];
+}
+
+/** L'etat d'une promotion, lu de sa periode. */
+function statutPromo(p) {
+  if (p.publie === false) return { cl: 'dort', mot: 'Brouillon' };
+  const n = new Date();
+  const d = p.debut ? new Date(p.debut) : null;
+  const f = p.fin ? new Date(p.fin) : null;
+  if (d && n < d) return { cl: 'attend', mot: 'Programmée' };
+  if (f && n > f) return { cl: 'fini', mot: 'Terminée' };
+  return { cl: 'vif', mot: 'Active' };
+}
+
+function cibleSaisie() {
+  const rad = document.querySelector('input[name="cible"]:checked');
+  const toutes = !rad || rad.value === 'toutes';
+  return {
+    toutes,
+    chambres: toutes ? [] : [...document.querySelectorAll('[data-ch]:checked')]
+      .map((x) => x.dataset.ch),
+    services: toutes ? [] : [...document.querySelectorAll('[data-sv]:checked')]
+      .map((x) => x.dataset.sv),
+  };
+}
+
+/** 'AAAA-MM-JJTHH:MM' a partir des deux champs, ou null si la date manque. */
+function instantSaisi(quoi) {
+  const d = document.getElementById('f-' + quoi + '-date');
+  const h = document.getElementById('f-' + quoi + '-heure');
+  if (!d || !d.value) return null;
+  return d.value + 'T' + ((h && h.value) || (quoi === 'd' ? '00:00' : '23:59'));
+}
+
+/** Ce que verront les clients, recalcule a chaque frappe. */
+function rafraichirPromo() {
+  const vit = document.getElementById('apercu-remise');
+  if (!vit) return;
+  const pct = !!document.querySelector('[data-remise="pourcentage"].on');
+  const v = Math.abs(Math.round(Number(
+    (document.getElementById('f-valeur').value || '').replace(/[^\d.]/g, '')))) || 0;
+  const t = chambreTemoin(cibleSaisie());
+  if (!t || !v) {
+    vit.innerHTML = '<span class="aide">Indiquez une valeur pour voir le prix'
+      + ' remisé.</span>';
+  } else {
+    const remise = pct ? Math.round(t.prix * Math.min(v, 100) / 100)
+                       : Math.min(v, t.prix);
+    vit.innerHTML = 'Sur la <b>' + ech(t.nom) + '</b> : <s>' + FCFA(t.prix)
+      + '</s> <b class="prix">' + FCFA(t.prix - remise) + '</b> '
+      + '<span class="etiq">−'
+      + (pct ? Math.min(v, 100) + ' %' : FCFA(Math.min(v, t.prix))) + '</span>';
+  }
+  const per = document.getElementById('apercu-periode');
+  if (per) {
+    const d = instantSaisi('d'), f = instantSaisi('f');
+    const st = statutPromo({ publie: document.getElementById('f-publie').checked,
+                             debut: d, fin: f });
+    per.innerHTML = (!d && !f)
+      ? '<span class="aide">Sans période, la promotion reste affichée tant '
+        + "qu'elle est visible.</span>"
+      : 'Aujourd’hui : <span class="etat ' + st.cl + '">' + st.mot + '</span>';
+  }
+}
+
+/* Les trois reglages qui se repondent — type de remise, perimetre,
+   periode — doivent se voir immediatement. Sinon on publie une remise
+   de 200 % ou une promotion deja terminee sans le savoir. */
+function brancherPromo() {
+  const f = $('#vue');
+  if (!f) return;
+  f.addEventListener('input', rafraichirPromo);
+  f.addEventListener('change', (ev) => {
+    const rad = ev.target.closest('input[name="cible"]');
+    if (rad) {
+      const l = $('#les-chambres');
+      if (l) l.hidden = rad.value !== 'certaines';
+    }
+    rafraichirPromo();
+  });
+  rafraichirPromo();
+}
+
+/** Le type de remise se choisit par deux boutons plutot que par une liste
+    deroulante : deux options se montrent, elles ne se cherchent pas. */
+function choisirRemise(bouton) {
+  [...document.querySelectorAll('[data-remise]')].forEach(
+    (b) => b.classList.toggle('on', b === bouton));
+  const pct = bouton.dataset.remise === 'pourcentage';
+  const u = $('#unite'); if (u) u.textContent = pct ? '%' : 'FCFA';
+  const v = $('#f-valeur'); if (v) v.placeholder = pct ? '20' : '25 000';
+  rafraichirPromo();
+}
+
+async function enregistrerPromo(val) {
+  const entree = {
+    id: EDITE && EDITE.id,
+    titre: val('f-titre'),
+    message: val('f-message'),
+    fond: (EDITE && EDITE.fond) || '',
+    format: (EDITE && EDITE.format) || 'fond',
+    remise: {
+      type: $('[data-remise="montant"]').classList.contains('on')
+        ? 'montant' : 'pourcentage',
+      valeur: (val('f-valeur') || '').replace(/[^\d.]/g, ''),
+    },
+    cible: cibleSaisie(),
+    debut: instantSaisi('d'),
+    fin: instantSaisi('f'),
+    publie: $('#f-publie').checked,
+    avant: $('#f-avant').checked,
+    pastille: $('#f-pastille').checked,
+  };
+  const msg = $('#msgf');
+  const r = await appel('enregistrer', { type: 'promotion', entree });
+  if (!r.ok) { msg.className = 'msg mal'; msg.textContent = r.message || 'Échec.'; return; }
+  msg.className = 'msg bon'; msg.textContent = 'Publiée.';
+  EDITE = null;
+  setTimeout(charger, 400);
+}
+
+function formulairePromo() {
+  const e = EDITE || { publie: true, remise: {}, cible: { toutes: true } };
+  const r = e.remise || {};
+  const c = e.cible || { toutes: true };
+  const pct = r.type !== 'montant';
+  const dh = (v, quoi) => {
+    const m = String(v || '').match(/^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})$/);
+    return m ? (quoi === 'date' ? m[1] : m[2]) : '';
+  };
+  const apercu = e.fond
+    ? `<img src="${srcImage(e.fond)}" alt="" style="max-width:180px;max-height:180px;
+        object-fit:contain;background:var(--bark);border:1px solid var(--line)">`
+    : '<p style="color:var(--muted);font-size:13.5px">Aucun visuel choisi.</p>';
+
+  return `<div class="carte etape">
+    <h2 class="bloc-t"><i>1</i> Informations de la promotion</h2>
+    <label class="lb" for="f-titre">Titre</label>
+    <input id="f-titre" value="${ech(e.titre || '')}"
+      placeholder="Offre spéciale Week-end">
+    <label class="lb" for="f-message">Message promotionnel</label>
+    <textarea id="f-message" rows="2"
+      placeholder="Profitez de -20 % sur votre séjour">${ech(e.message || '')}</textarea>
+    <label class="lb">Visuel</label>
+    <div class="depot" id="depot">
+      <div id="apercu">${apercu}</div>
+      <div>
+        <input type="file" id="f-fichier" accept="image/jpeg,image/png,image/webp" hidden>
+        <button type="button" class="btn" id="choisir">Ajouter une image ou un flyer</button>
+        <button type="button" class="btn mince" id="basculer" style="margin-left:8px">
+          ou choisir une photo du site</button>
+        <p class="aide">JPEG, PNG ou WebP, 4 Mo au maximum.</p>
+      </div>
+    </div>
+    <div class="grille-img" id="imgs" hidden>
+      ${ETAT.images.map((n) => `<button type="button" data-img="${ech(n)}"
+        class="${e.fond === n ? 'on' : ''}"><img src="/img/opt/${ech(n)}.jpg" alt=""
+        loading="lazy"></button>`).join('')}
+    </div>
+  </div>
+
+  <div class="carte etape">
+    <h2 class="bloc-t"><i>2</i> La réduction</h2>
+    <label class="lb">Type de réduction</label>
+    <div class="choix">
+      <button type="button" class="opt ${pct ? 'on' : ''}" data-remise="pourcentage">
+        Pourcentage (%)</button>
+      <button type="button" class="opt ${pct ? '' : 'on'}" data-remise="montant">
+        Montant fixe (FCFA)</button>
+    </div>
+    <label class="lb" for="f-valeur">Valeur de la réduction</label>
+    <div class="suffixe">
+      <input id="f-valeur" inputmode="numeric" value="${ech(String(r.valeur || ''))}"
+        placeholder="${pct ? '20' : '25 000'}">
+      <span id="unite">${pct ? '%' : 'FCFA'}</span>
+    </div>
+    <div class="vitrine" id="apercu-remise"></div>
+  </div>
+
+  <div class="carte etape">
+    <h2 class="bloc-t"><i>3</i> Sur quoi s'applique la promotion ?</h2>
+    <label class="radio"><input type="radio" name="cible" value="toutes"
+      ${c.toutes !== false ? 'checked' : ''}> Toutes les chambres</label>
+    <label class="radio"><input type="radio" name="cible" value="certaines"
+      ${c.toutes === false ? 'checked' : ''}> Sélectionner certaines chambres</label>
+    <div id="les-chambres" ${c.toutes === false ? '' : 'hidden'}>
+      ${ETAT.chambres.map((ch) => `<label class="chambre">
+        <input type="checkbox" data-ch="${ech(ch.slug)}"
+          ${(c.chambres || []).includes(ch.slug) ? 'checked' : ''}>
+        <b>${ech(ch.nom)}</b><span>à partir de ${FCFA(ch.prix)}</span></label>`).join('')}
+      ${ETAT.chambres.length ? '' : '<p class="aide">Liste des chambres indisponible.</p>'}
+    </div>
+    <details class="plus">
+      <summary>Autres services (optionnel)</summary>
+      ${[['spa', 'Spa'], ['restaurant', 'Restaurant'],
+         ['experiences', 'Expériences']].map(([k, nom]) => `<label class="chambre">
+        <input type="checkbox" data-sv="${k}"
+          ${(c.services || []).includes(k) ? 'checked' : ''}><b>${nom}</b></label>`).join('')}
+    </details>
+  </div>
+
+  <div class="carte etape">
+    <h2 class="bloc-t"><i>4</i> Période de la promotion</h2>
+    <div class="paire">
+      <div><label class="lb" for="f-d-date">Début de la promotion</label>
+        <input type="date" id="f-d-date" value="${dh(e.debut, 'date')}">
+        <input type="time" id="f-d-heure" value="${dh(e.debut, 'heure') || '00:00'}"></div>
+      <div><label class="lb" for="f-f-date">Fin de la promotion</label>
+        <input type="date" id="f-f-date" value="${dh(e.fin, 'date')}">
+        <input type="time" id="f-f-heure" value="${dh(e.fin, 'heure') || '23:59'}"></div>
+    </div>
+    <p class="vitrine" id="apercu-periode"></p>
+    <label class="bascule"><input type="checkbox" id="f-publie"
+      ${e.publie !== false ? 'checked' : ''}> Visible sur le site</label>
+    <label class="bascule"><input type="checkbox" id="f-avant"
+      ${e.avant ? 'checked' : ''}> Mettre en avant sur la page d'accueil</label>
+    <label class="bascule"><input type="checkbox" id="f-pastille"
+      ${e.pastille !== false ? 'checked' : ''}> Afficher un badge « PROMO » sur les
+      chambres visées</label>
+  </div>
+
+  <div class="barre">
+    <button class="btn" id="annuler">Annuler</button>
+    <button class="btn plein" id="enreg">Publier la promotion</button>
+    <p class="msg" id="msgf"></p>
+  </div>`;
+}
+
+/* Le formulaire des evenements. Les promotions ont le leur, en quatre
+   temps : voir formulairePromo(). */
 function formulaire(type) {
   const e = EDITE || { infos: [], publie: true };
-  const promo = type === 'promotions';
   const apercu = e.fond
     ? `<img src="${srcImage(e.fond)}" alt="" style="max-width:210px;max-height:210px;
         object-fit:contain;background:var(--bark);border:1px solid var(--line)">`
@@ -369,12 +700,6 @@ function formulaire(type) {
       </div>
       <div class="champ"><label for="f-accent">Fin du titre, en italique</label>
         <input id="f-accent" value="${ech(e.accent)}" placeholder="à Assinie"></div>
-      ${promo ? `<div class="duo">
-        <div class="champ"><label for="f-red">Réduction</label>
-          <input id="f-red" value="${ech(e.reduction)}" placeholder="−20 %"></div>
-        <div class="champ"><label for="f-code">Code</label>
-          <input id="f-code" value="${ech(e.code)}" placeholder="EVANNATH20"></div>
-      </div>` : ''}
       <div class="champ"><label for="f-texte">Texte</label>
         <textarea id="f-texte" placeholder="Deux phrases si l'affiche ne dit pas tout.">${ech(e.texte)}</textarea></div>
       <div class="champ"><label>Informations affichées</label>
@@ -428,8 +753,10 @@ function rendre() {
       </div>
       ${avertissement()}
       <p class="msg mal" id="msgl"></p>
-      ${EDITE ? formulaire(VUE) : liste(VUE)}`;
-    if (EDITE) {
+      ${EDITE ? (promo ? formulairePromo() : formulaire(VUE)) : liste(VUE)}`;
+    if (EDITE && promo) {
+      brancherPromo();
+    } else if (EDITE) {
       const s = $('#f-href');
       if (s) s.value = EDITE.href || '#demande';
     }
@@ -544,6 +871,9 @@ document.addEventListener('click', async (e) => {
     return;
   }
 
+  const rem = e.target.closest('[data-remise]');
+  if (rem) return choisirRemise(rem);
+
   const img = e.target.closest('[data-img]');
   if (img) {
     [...$('#imgs').children].forEach((b) => b.classList.toggle('on', b === img));
@@ -557,6 +887,7 @@ document.addEventListener('click', async (e) => {
   if (e.target.id === 'annuler') { EDITE = null; return rendre(); }
   if (e.target.id === 'enreg') {
     const val = (id) => { const el = $('#' + id); return el ? el.value.trim() : ''; };
+    if (VUE === 'promotions') return enregistrerPromo(val);
     const infos = [0, 1, 2, 3].map((i) => {
       const l = $('[data-il="' + i + '"]'), v = $('[data-iv="' + i + '"]');
       return [l ? l.value.trim() : '', v ? v.value.trim() : ''];
@@ -568,7 +899,6 @@ document.addEventListener('click', async (e) => {
       href: val('f-href'), fond: (EDITE && EDITE.fond) || '',
       format: (EDITE && EDITE.format) || 'fond',
       publie: $('#f-publie').checked, infos,
-      reduction: val('f-red'), code: val('f-code'),
     };
     const msg = $('#msgf');
     const r = await appel('enregistrer',

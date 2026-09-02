@@ -247,6 +247,31 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
 .camp>p{max-width:62ch}
 .packs{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:26px}
 .pack{border:1px solid var(--line);overflow:hidden;background:var(--bark);transition:.45s}
+
+/* Une remise se lit en trois secondes : le montant, sur quoi, jusqu à quand. */
+.remises{display:grid;gap:18px;margin-top:26px}
+.remises:empty{display:none}
+.remise{display:grid;grid-template-columns:minmax(0,220px) 1fr;
+  border:1px solid var(--bronze-2);background:var(--bark-2)}
+.remise.sans-image{grid-template-columns:1fr}
+.remise>picture{display:block;background:var(--night)}
+.remise img{width:100%;height:100%;object-fit:cover;display:block}
+.remise .dedans{padding:26px 28px}
+.remise .haut{display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  margin-bottom:10px}
+.remise .taux{display:inline-block;padding:5px 12px;font-size:15px;
+  font-weight:700;background:var(--bronze-2);color:var(--night);
+  letter-spacing:.02em}
+.remise .jusqua{font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--muted);font-weight:700}
+.remise h3{font-family:var(--f-display);font-size:26px;font-weight:400;
+  line-height:1.15;margin:0 0 8px}
+.remise p{color:var(--cream);margin:0 0 14px;max-width:62ch}
+.remise .sur{font-size:12.5px;color:var(--muted);margin-bottom:16px}
+@media (max-width:820px){
+  .remise{grid-template-columns:1fr}
+  .remise>picture{max-height:260px}
+}
 .pack:hover{border-color:rgba(185,138,80,.55);transform:translateY(-4px)}
 .pack .ph{aspect-ratio:3/2;overflow:hidden}
 .pack .ph img{width:100%;height:100%;object-fit:cover;transition:1s cubic-bezier(.2,.8,.2,1)}
@@ -457,6 +482,11 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
     <p data-t="f2">Tout est compris et le tarif est ferme : vous savez ce que
     vous payez avant d'arriver.</p>
   </div>
+
+  <!-- Les remises publiees depuis l'administration. Le bloc reste vide
+       — donc invisible — tant qu'il n'y en a aucune : mieux vaut rien
+       qu'un cadre annoncant des offres absentes. -->
+  <div class="remises" id="remises"></div>
 
   <!-- Campagne relevée sur la page Facebook (21 000 abonnés) : absente du site actuel -->
   <section class="camp reveal">
@@ -885,6 +915,8 @@ document.querySelectorAll('.lang button').forEach(function(b){b.onclick=function
      placeholder de champ, par exemple — declare window.EVN_LANG. */
   if(typeof EVN_LANG==='function')EVN_LANG(lg);
 }});
+window.NOMS_CHAMBRES = {"chambre-standard": "Chambre Standard", "deluxe-baldaquin": "Deluxe · lits à baldaquin", "deluxe-superieure": "Deluxe Supérieure", "suite-anglaise": "Suite Anglaise", "chambre-mezzanine": "Chambre en Mezzanine", "mezzanine-superieure": "Mezzanine Supérieure", "suite-arabe": "Suite Arabe"};
+
 (function(){
   var ag = document.getElementById('agenda');
   if (!ag) return;
@@ -1046,6 +1078,89 @@ document.querySelectorAll('.lang button').forEach(function(b){b.onclick=function
     if (j && j.evenements && j.evenements.length) refaire(j.evenements);
     demarrer(true);
     devoiler();
+    poserRemises(j && j.promotions);
+  }
+
+  /* Les remises publiees depuis l'administration. Le serveur ne renvoie
+     que celles dont la periode court : rien a filtrer ici. */
+  function poserRemises(liste){
+    var hote = document.getElementById('remises');
+    if (!hote || !liste || !liste.length) return;
+    var noms = window.NOMS_CHAMBRES || {};
+    liste.forEach(function(p){
+      var img = p.fond
+        ? (/^https?:/.test(p.fond) ? p.fond : 'img/opt/' + p.fond + '.jpg')
+        : '';
+      var art = document.createElement('article');
+      art.className = 'remise' + (img ? '' : ' sans-image');
+
+      if (img) {
+        var pic = document.createElement('picture');
+        var im = document.createElement('img');
+        im.src = img; im.alt = p.titre || ''; im.loading = 'lazy';
+        /* Une image supprimee ou mal nommee laisserait un cadre vide avec
+           une icone cassee. On retire la colonne : la carte se lit tres
+           bien sans visuel, mal avec un trou. */
+        im.onerror = function(){
+          pic.remove();
+          art.className = 'remise sans-image';
+        };
+        pic.appendChild(im); art.appendChild(pic);
+      }
+
+      var d = document.createElement('div');
+      d.className = 'dedans';
+
+      var haut = document.createElement('div');
+      haut.className = 'haut';
+      var r = p.remise || {};
+      if (r.valeur) {
+        var t = document.createElement('span');
+        t.className = 'taux';
+        t.textContent = r.type === 'montant'
+          ? '−' + Number(r.valeur).toLocaleString('fr-FR') + ' F'
+          : '−' + r.valeur + ' %';
+        haut.appendChild(t);
+      }
+      if (p.fin) {
+        var j2 = document.createElement('span');
+        j2.className = 'jusqua';
+        j2.textContent = 'Jusqu’au ' + p.fin.slice(0, 10).split('-')
+          .reverse().join('/');
+        haut.appendChild(j2);
+      }
+      if (haut.children.length) d.appendChild(haut);
+
+      var h = document.createElement('h3');
+      h.textContent = p.titre || '';
+      d.appendChild(h);
+
+      if (p.message) {
+        var m = document.createElement('p');
+        m.textContent = p.message;
+        d.appendChild(m);
+      }
+
+      var c = p.cible || {};
+      var sur = document.createElement('div');
+      sur.className = 'sur';
+      if (c.toutes === false && (c.chambres || []).length) {
+        sur.textContent = 'Sur : ' + c.chambres.map(function(s){
+          return noms[s] || s; }).join(', ');
+      } else {
+        sur.textContent = 'Sur toutes nos chambres.';
+      }
+      d.appendChild(sur);
+
+      var a = document.createElement('a');
+      a.className = 'btn btn-solid';
+      a.href = 'reserver.html';
+      a.textContent = 'Réserver maintenant';
+      d.appendChild(a);
+
+      art.appendChild(d);
+      hote.appendChild(art);
+    });
   }
   fetch('/api/admin?a=public', { cache: 'no-store' })
     .then(function(r){ return r.ok ? r.json() : null; })

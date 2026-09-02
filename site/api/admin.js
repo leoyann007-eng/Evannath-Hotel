@@ -144,6 +144,31 @@ const authentifie = (req) => jetonValide(cookieSession(req));
 // ── Validation ─────────────────────────────────────────────────────────────
 const propre = (v, max) => String(v == null ? '' : v).replace(/\s+/g, ' ').trim().slice(0, max);
 
+/* Les services qu'une promotion peut viser en plus des chambres. La liste est
+   fermee : une valeur inventee par un appel malveillant ne doit pas se
+   retrouver affichee sur le site. */
+const SERVICES = ['spa', 'restaurant', 'experiences'];
+
+/** Un nombre positif, ou zero. Une chaine vide, un texte, un signe moins :
+    tout cela vaut zero plutot qu'un NaN qui contaminerait l'affichage. */
+function nombre(v) {
+  const n = Math.round(Math.abs(Number(v)));
+  return Number.isFinite(n) ? n : 0;
+}
+
+/** Un instant 'AAAA-MM-JJTHH:MM', ou null. */
+function instant(v) {
+  const t = String(v || '').trim();
+  return /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(t) ? t : null;
+}
+
+/** Une liste de chaines courtes, bornee en nombre et en longueur. */
+function listeDe(v, combien, taille) {
+  return Array.isArray(v)
+    ? v.slice(0, combien).map((x) => propre(x, taille)).filter(Boolean)
+    : [];
+}
+
 const LIMITES = {
   titre: 80, accent: 40, categorie: 60, badge: 40, texte: 400,
   cta: 40, href: 200, fond: 120, quand: 60, libelle: 30, valeur: 60,
@@ -177,8 +202,37 @@ function nettoyer(e, type) {
       : [],
   };
   if (type === 'promotion') {
-    o.reduction = propre(e.reduction, 20);
+    /* Une promotion n'est pas un evenement avec un prix barre. Elle a une
+       remise, un perimetre — sur quelles chambres — et une periode qui
+       commence : un evenement se retire, une promotion se programme. */
+    o.message = propre(e.message, LIMITES.texte);
+    o.remise = {
+      type: e.remise && e.remise.type === 'montant' ? 'montant' : 'pourcentage',
+      valeur: nombre(e.remise && e.remise.valeur),
+    };
+    // Une remise en pourcentage au-dela de 100 n'a pas de sens, et une remise
+    // nulle non plus : on borne plutot que d'accepter une aberration.
+    if (o.remise.type === 'pourcentage') {
+      o.remise.valeur = Math.min(o.remise.valeur, 100);
+    }
+    o.cible = {
+      toutes: !(e.cible && e.cible.toutes === false),
+      chambres: listeDe(e.cible && e.cible.chambres, 20, 60),
+      services: listeDe(e.cible && e.cible.services, 6, 30)
+        .filter((x) => SERVICES.includes(x)),
+    };
+    if (o.cible.toutes) { o.cible.chambres = []; o.cible.services = []; }
+    o.debut = instant(e.debut);
+    o.fin = instant(e.fin);
+    // Une periode a l'envers masquerait la promotion sans rien dire : on la
+    // remet a l'endroit.
+    if (o.debut && o.fin && o.debut > o.fin) {
+      const t = o.debut; o.debut = o.fin; o.fin = t;
+    }
+    o.avant = e.avant === true;          // mise en avant sur l'accueil
+    o.pastille = e.pastille !== false;   // badge PROMO sur les chambres visees
     o.code = propre(e.code, 24).toUpperCase();
+    delete o.infos; delete o.accent; delete o.categorie; delete o.quand;
   }
   // Seul le titre est exige. Le texte ne l'est pas : quand l'evenement est
   // annonce par une affiche, celle-ci porte deja les dates, le tarif et le
@@ -206,9 +260,21 @@ module.exports = async function handler(req, res) {
     // est negligeable.
     res.setHeader('Cache-Control', 'no-store, max-age=0');
     const visible = (x) => x.publie !== false;
+    /* Une promotion programmee ne doit pas sortir d'ici : son contenu
+       serait lisible par n'importe qui avant l'heure, et une promotion
+       terminee resterait affichee sur une page ouverte depuis longtemps.
+       Le tri se fait donc cote serveur, pas cote navigateur. */
+    const maintenant = Date.now();
+    const enCours = (p) => {
+      const d1 = p.debut ? Date.parse(p.debut) : null;
+      const d2 = p.fin ? Date.parse(p.fin) : null;
+      if (d1 && maintenant < d1) return false;
+      if (d2 && maintenant > d2) return false;
+      return true;
+    };
     return res.status(200).json({
       evenements: (d.evenements || []).filter(visible),
-      promotions: (d.promotions || []).filter(visible),
+      promotions: (d.promotions || []).filter(visible).filter(enCours),
       maj: d.maj,
     });
   }
