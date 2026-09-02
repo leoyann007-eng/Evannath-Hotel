@@ -551,6 +551,11 @@ Deux modes, décidés par la présence de `BLOB_READ_WRITE_TOKEN` :
 Laisser croire qu'une affiche est enregistrée alors qu'elle disparaîtra au
 prochain déploiement serait le pire défaut possible pour cet outil.
 
+**L'ordre de la liste est l'ordre du carrousel.** Les flèches ▲ ▼ de chaque
+ligne le changent : la première ligne est la première diapositive. Le serveur
+réordonne sur la liste complète d'identifiants envoyée par l'interface — aucune
+position n'est stockée, donc ni trou ni doublon possibles dans la numérotation.
+
 **Le nom de la variable n'a pas d'importance.** Connecter un magasin permet de
 choisir un préfixe : le jeton s'appelle alors `MONPRÉFIXE_READ_WRITE_TOKEN`.
 Le code reconnaît le jeton à sa forme — `vercel_blob_rw_…` — dans n'importe

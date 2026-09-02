@@ -80,6 +80,13 @@ h1.t{font-family:var(--f-t);font-size:30px;font-weight:400}
 .btn.plein{background:var(--bronze);color:var(--night)}
 .btn.plein:hover{background:var(--bronze-2);border-color:var(--bronze-2)}
 .btn.mince{padding:9px 15px;font-size:10px;letter-spacing:.14em}
+.rang{display:flex;flex-direction:column;gap:3px;flex:none}
+.fl{width:26px;height:21px;line-height:1;font-size:9px;cursor:pointer;
+  background:var(--bark-3);color:var(--sand);border:1px solid var(--line);
+  transition:.2s}
+.fl:hover:not([disabled]){background:var(--bronze-2);color:var(--night);
+  border-color:var(--bronze-2)}
+.fl[disabled]{opacity:.28;cursor:default}
 .btn.danger{border-color:rgba(224,138,123,.5);color:var(--err)}
 .btn.danger:hover{background:var(--err);color:var(--night)}
 
@@ -267,8 +274,19 @@ function liste(type) {
       <button class="btn plein" style="margin-top:18px" data-neuf="${type}">Créer le premier</button>
     </div>`;
   }
-  return src.map((e) => `
+  /* L'ordre de la liste est l'ordre du carrousel : la premiere ligne est la
+     premiere diapositive. Les fleches le disent en le faisant — pas de champ
+     « position » a remplir, pas de numero a se rappeler. */
+  return src.map((e, i) => `
     <div class="ligne">
+      <div class="rang">
+        <button class="fl" data-bouge="haut" data-type="${type}" data-i="${i}"
+          ${i === 0 ? 'disabled' : ''} title="Remonter"
+          aria-label="Remonter ${ech(e.titre)}">&#9650;</button>
+        <button class="fl" data-bouge="bas" data-type="${type}" data-i="${i}"
+          ${i === src.length - 1 ? 'disabled' : ''} title="Descendre"
+          aria-label="Descendre ${ech(e.titre)}">&#9660;</button>
+      </div>
       ${e.fond ? `<img class="vig" src="${srcImage(e.fond)}" alt="">` : '<div class="vig"></div>'}
       <div class="txt">
         <b>${ech(e.titre)} ${e.accent ? '<em style="color:var(--bronze-2)">' + ech(e.accent) + '</em>' : ''}</b>
@@ -409,6 +427,7 @@ function rendre() {
         ${EDITE ? '' : `<button class="btn plein" data-neuf="${VUE}">Ajouter</button>`}
       </div>
       ${avertissement()}
+      <p class="msg mal" id="msgl"></p>
       ${EDITE ? formulaire(VUE) : liste(VUE)}`;
     if (EDITE) {
       const s = $('#f-href');
@@ -486,6 +505,30 @@ document.addEventListener('click', async (e) => {
     EDITE.infos = EDITE.infos || [];
     return rendre();
   }
+  /* Deplacer une ligne : on echange avec sa voisine et on envoie l'ordre
+     complet. Le serveur reordonne sur cette liste d'identifiants, ce qui
+     evite toute notion de position stockee — donc tout risque de trous ou
+     de doublons dans la numerotation. */
+  const bouge = e.target.closest('[data-bouge]');
+  if (bouge) {
+    const type = bouge.dataset.type;
+    const src = type === 'promotions' ? ETAT.promotions : ETAT.evenements;
+    const i = Number(bouge.dataset.i);
+    const j = bouge.dataset.bouge === 'haut' ? i - 1 : i + 1;
+    if (j < 0 || j >= src.length) return;
+    const ordre = src.map((x) => x.id);
+    ordre.splice(j, 0, ordre.splice(i, 1)[0]);
+    const msg = $('#msgl');
+    const r = await appel('ordonner',
+      { type: type === 'promotions' ? 'promotion' : 'evenement', ordre });
+    if (!r.ok) {
+      if (msg) msg.textContent = r.message || "L'ordre n'a pas pu être enregistré.";
+      return;
+    }
+    if (msg) msg.textContent = '';
+    return charger();
+  }
+
   const sup = e.target.closest('[data-sup]');
   if (sup) {
     if (!confirm('Supprimer définitivement ?')) return;
