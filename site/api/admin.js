@@ -113,7 +113,12 @@ function nettoyer(e, type) {
     texte: propre(e.texte, LIMITES.texte),
     cta: propre(e.cta, LIMITES.cta) || 'En savoir plus',
     href: propre(e.href, LIMITES.href) || '#demande',
-    fond: propre(e.fond, LIMITES.fond),
+    // Soit un nom de photo du site, soit l'URL d'une affiche televersee.
+    fond: propre(e.fond, 400),
+    // 'affiche' : le visuel est montre ENTIER, a cote du texte. C'est le cas
+    //   des carres publies sur les reseaux, qui portent deja l'information.
+    // 'fond'    : une photo large, recadree derriere le texte.
+    format: e.format === 'affiche' ? 'affiche' : 'fond',
     quand: propre(e.quand, LIMITES.quand),
     fin: /^\d{4}-\d{2}-\d{2}$/.test(e.fin || '') ? e.fin : null,
     publie: e.publie !== false,
@@ -127,9 +132,11 @@ function nettoyer(e, type) {
     o.reduction = propre(e.reduction, 20);
     o.code = propre(e.code, 24).toUpperCase();
   }
+  // Seul le titre est exige. Le texte ne l'est pas : quand l'evenement est
+  // annonce par une affiche, celle-ci porte deja les dates, le tarif et le
+  // telephone. Le redemander serait faire saisir deux fois la meme chose.
   const manque = [];
   if (!o.titre) manque.push('titre');
-  if (!o.texte) manque.push('texte');
   return { objet: o, manque };
 }
 
@@ -204,6 +211,41 @@ module.exports = async function handler(req, res) {
   }
 
   if (action === 'tout') return json(res, 200, { ok: true, donnees: await lire() });
+
+  /* Televersement d'une affiche.
+     L'etablissement communique par des visuels carres qui portent deja
+     l'information — dates, tarif, telephone. C'est ce fichier-la qu'il faut
+     pouvoir deposer, pas une photo choisie dans la banque du site. */
+  if (action === 'televerser') {
+    if (req.method !== 'POST') return json(res, 405, { ok: false });
+    if (!JETON_BLOB) {
+      return json(res, 503, { ok: false,
+        message: 'Le stockage durable est nécessaire pour déposer une affiche.' });
+    }
+    let corps = req.body;
+    if (typeof corps === 'string') { try { corps = JSON.parse(corps); } catch { corps = {}; } }
+    const donnee = String((corps && corps.fichier) || '');
+    const m = donnee.match(/^data:(image\/(png|jpeg|jpg|webp));base64,(.+)$/);
+    if (!m) return json(res, 422, { ok: false, message: 'Formats acceptés : JPEG, PNG, WebP.' });
+    const octets = Buffer.from(m[3], 'base64');
+    if (octets.length > 4 * 1024 * 1024) {
+      return json(res, 413, { ok: false,
+        message: 'Affiche trop lourde : ' + Math.round(octets.length / 1048576) + ' Mo pour 4 Mo au maximum.' });
+    }
+    const ext = m[2] === 'jpg' ? 'jpeg' : m[2];
+    const nom = 'evannath/affiches/' + Date.now() + '-'
+              + crypto.randomBytes(4).toString('hex') + '.' + ext;
+    try {
+      const { put } = await import('@vercel/blob');
+      const r = await put(nom, octets, {
+        access: 'public', token: JETON_BLOB, contentType: m[1],
+      });
+      return json(res, 200, { ok: true, url: r.url });
+    } catch (e) {
+      return json(res, 502, { ok: false,
+        message: "Le dépôt a échoué : " + String(e && e.message).slice(0, 120) });
+    }
+  }
 
   if (action === 'enregistrer') {
     if (req.method !== 'POST') return json(res, 405, { ok: false });

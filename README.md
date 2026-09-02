@@ -496,6 +496,37 @@ trois mois.
 | Paramètres | l'état de l'installation |
 | Utilisateurs | qui peut publier |
 
+### Le formulaire tient en cinq champs
+
+L'établissement communique par des **affiches carrées** — celles qu'il publie
+sur ses réseaux portent déjà les dates, le tarif, ce qui est compris et le
+téléphone. Lui demander de ressaisir tout cela serait lui faire faire le
+travail deux fois.
+
+Le formulaire demande donc : **l'affiche, un titre, quand, jusqu'à quand, et
+le bouton.** Le reste — surtitre, pastille, texte, informations détaillées —
+est replié sous « Plus de détails », et vide par défaut.
+
+Seul le titre est exigé. Le texte ne l'est pas : quand l'affiche dit tout, le
+redemander n'a pas de sens.
+
+### Une affiche se montre entière, une photo sert de fond
+
+Deux mises en page, choisies **sans rien demander** : au dépôt, les
+proportions du fichier décident.
+
+| Proportions | Format | Rendu |
+|---|---|---|
+| carré (0,8 à 1,25) | `affiche` | montrée **entière**, à côté du texte |
+| large | `fond` | recadrée derrière le texte |
+
+C'était le défaut de la première version : une affiche carrée passée en fond
+était recadrée, et mon texte s'écrivait par-dessus le sien.
+
+Les champs laissés vides ne sont pas rendus — un paragraphe vide occupe une
+marge et creuse un trou. Et si la pastille n'est pas renseignée, elle reprend
+le « quand » : la date saisie doit se voir quelque part.
+
 ### Ce qui ne casse pas le site
 
 Le contenu généré depuis `_evenements.py` **reste en place**. La page le rend

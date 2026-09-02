@@ -179,7 +179,7 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
    demanderait 100vw, qui inclut la barre de defilement et decale la page de
    8 px — le defaut est deja documente ailleurs dans ce projet. */
 .agenda{position:relative;margin-top:26px;border:1px solid var(--line);overflow:hidden}
-.diapos{position:relative;min-height:520px}
+.diapos{position:relative}
 .diapo{position:absolute;inset:0;opacity:0;visibility:hidden;transition:opacity .7s ease}
 .diapo.on{opacity:1;visibility:visible;position:relative}
 .diapo>picture img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
@@ -204,6 +204,18 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
 .infos b{font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);
   font-weight:700}
 .infos i{font-style:normal;font-family:var(--f-display);font-size:1.02rem;color:var(--cream)}
+
+/* Une affiche des reseaux se montre ENTIERE. Elle porte deja ses dates, son
+   tarif et son telephone : la recadrer en fond reviendrait a couper
+   l'information et a ecrire par-dessus. */
+.diapo.affiche{display:grid;grid-template-columns:minmax(0,440px) 1fr;align-items:center;
+  background:var(--bark-2)}
+.diapo.affiche>picture{position:relative;display:block;padding:24px;background:var(--night)}
+.diapo.affiche>picture img{position:static;inset:auto;width:100%;height:auto;object-fit:contain}
+.diapo.affiche .voile{display:none}
+.diapo.affiche .dedans{padding:40px 44px;max-width:none}
+@media(max-width:900px){.diapo.affiche{grid-template-columns:1fr}
+  .diapo.affiche>picture{padding:16px}}
 
 .pilote{position:absolute;right:26px;bottom:26px;z-index:3;display:flex;align-items:center;
   gap:14px}
@@ -933,16 +945,31 @@ document.querySelectorAll('.lang button').forEach(function(b){b.onclick=function
     hote.innerHTML = '';
     liste.forEach(function(e){
       var d = modele.cloneNode(true);
-      d.id = e.id || ''; d.className = 'diapo';
+      d.id = e.id || ''; d.className = 'diapo' + (e.format === 'affiche' ? ' affiche' : '');
       if (e.fin) d.setAttribute('data-fin', e.fin); else d.removeAttribute('data-fin');
       var im = d.querySelector('img'), so = d.querySelector('source');
-      if (e.fond && im) im.src = 'img/opt/' + e.fond + '.jpg';
-      if (e.fond && so) so.srcset = 'img/opt/' + e.fond + '.webp';
-      d.querySelector('.pastille').textContent = e.badge || '';
-      d.querySelector('.cat').textContent = e.categorie || '';
+      /* Le champ porte soit l'URL d'une affiche deposee, soit le nom d'une
+         photo du site. */
+      if (e.fond) {
+        var url = /^https?:/.test(e.fond) ? e.fond : 'img/opt/' + e.fond + '.jpg';
+        if (im) { im.src = url; im.removeAttribute('width'); im.removeAttribute('height'); }
+        if (so) {
+          if (/^https?:/.test(e.fond)) so.remove();
+          else so.srcset = 'img/opt/' + e.fond + '.webp';
+        }
+      }
+      /* Un champ vide se retire : laisse en place, il occupe une marge et
+         creuse un trou dans la diapositive. */
+      var poser = function(sel, val){
+        var el = d.querySelector(sel);
+        if (!el) return;
+        if (val) el.textContent = val; else el.remove();
+      };
+      poser('.pastille', e.badge || e.quand);
+      poser('.cat', e.categorie);
       d.querySelector('h3 span').textContent = e.titre || '';
-      d.querySelector('h3 em').textContent = e.accent || '';
-      d.querySelector('p').textContent = e.texte || '';
+      poser('h3 em', e.accent);
+      poser('p', e.texte);
       var inf = d.querySelector('.infos');
       inf.innerHTML = '';
       (e.infos || []).forEach(function(pv){

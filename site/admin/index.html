@@ -101,6 +101,16 @@ textarea{min-height:96px;resize:vertical}
 .grille-img button.on{border-color:var(--bronze)}
 .grille-img img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}
 
+.bloc-t{font-family:var(--f-t);font-weight:400;font-size:19px;margin-bottom:14px}
+.depot{display:flex;gap:22px;align-items:flex-start;flex-wrap:wrap;
+  border:1px dashed var(--line);padding:20px;background:var(--bark)}
+.depot.survol{border-color:var(--bronze);background:var(--bark-3)}
+#apercu{flex:none}
+details.plus{border-top:1px solid var(--line);margin-top:24px;padding-top:6px}
+details.plus summary{cursor:pointer;font-size:11px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--bronze);font-weight:700;padding:12px 0}
+details.plus summary::marker{color:var(--bronze)}
+
 .pied{display:flex;gap:12px;align-items:center;margin-top:24px;flex-wrap:wrap}
 .msg{font-size:13.5px}
 .msg.bon{color:var(--palm)}
@@ -165,6 +175,9 @@ let VUE = 'bord';
 let EDITE = null;                       // l'entree en cours de modification
 
 const $ = (s, r) => (r || document).querySelector(s);
+/* Le champ image porte soit l'URL d'une affiche deposee, soit le nom d'une
+   photo du site. */
+const srcImage = (v) => (/^https?:/.test(v || '') ? v : '/img/opt/' + v + '.jpg');
 const ech = (s) => String(s == null ? '' : s)
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
@@ -254,7 +267,7 @@ function liste(type) {
   }
   return src.map((e) => `
     <div class="ligne">
-      ${e.fond ? `<img class="vig" src="/img/opt/${ech(e.fond)}.jpg" alt="">` : '<div class="vig"></div>'}
+      ${e.fond ? `<img class="vig" src="${srcImage(e.fond)}" alt="">` : '<div class="vig"></div>'}
       <div class="txt">
         <b>${ech(e.titre)} ${e.accent ? '<em style="color:var(--bronze-2)">' + ech(e.accent) + '</em>' : ''}</b>
         <span>${ech(e.badge || e.quand || '—')}${e.fin ? ' · se termine le ' + ech(e.fin) : ''}</span>
@@ -265,55 +278,58 @@ function liste(type) {
     </div>`).join('');
 }
 
+/* Le formulaire tient en cinq champs.
+   L'etablissement communique par des affiches carrees qui portent deja les
+   dates, le tarif et le telephone. Lui demander de ressaisir tout cela serait
+   lui faire faire le travail deux fois. Le reste est repliable, et vide par
+   defaut. */
 function formulaire(type) {
   const e = EDITE || { infos: [], publie: true };
   const promo = type === 'promotions';
-  const puce = (i) => {
-    const p = e.infos[i] || ['', ''];
+  const apercu = e.fond
+    ? `<img src="${srcImage(e.fond)}" alt="" style="max-width:210px;max-height:210px;
+        object-fit:contain;background:var(--bark);border:1px solid var(--line)">`
+    : '<p style="color:var(--muted);font-size:13.5px">Aucune affiche choisie.</p>';
+  const puce = (k) => {
+    const pv = e.infos[k] || ['', ''];
     return `<div class="puces">
-      <div><label>Libellé</label><input data-il="${i}" value="${ech(p[0])}" placeholder="Horaire"></div>
-      <div><label>Valeur</label><input data-iv="${i}" value="${ech(p[1])}" placeholder="Dès 20 h"></div>
+      <div><input data-il="${k}" value="${ech(pv[0])}" placeholder="Horaire"></div>
+      <div><input data-iv="${k}" value="${ech(pv[1])}" placeholder="Dès 20 h"></div>
     </div>`;
   };
+
   return `<div class="carte">
-    <div class="duo">
-      <div class="champ"><label for="f-titre">Titre</label>
-        <input id="f-titre" value="${ech(e.titre)}" placeholder="Le Réveillon"></div>
-      <div class="champ"><label for="f-accent">Fin du titre, en italique</label>
-        <input id="f-accent" value="${ech(e.accent)}" placeholder="à Assinie"></div>
+    <h2 class="bloc-t">L'affiche</h2>
+    <div class="depot" id="depot">
+      <div id="apercu">${apercu}</div>
+      <div>
+        <input type="file" id="f-fichier" accept="image/jpeg,image/png,image/webp" hidden>
+        <button type="button" class="btn" id="choisir">Déposer une affiche</button>
+        <button type="button" class="btn mince" id="basculer" style="margin-left:8px">
+          ou choisir une photo du site</button>
+        <p class="aide" id="aide-img">JPEG, PNG ou WebP, 4 Mo au maximum.
+        L'affiche est montrée entière, sans recadrage.</p>
+      </div>
     </div>
-    <div class="duo">
-      <div class="champ"><label for="f-cat">Surtitre</label>
-        <input id="f-cat" value="${ech(e.categorie)}" placeholder="Soirée de fin d'année"></div>
-      <div class="champ"><label for="f-badge">Pastille</label>
-        <input id="f-badge" value="${ech(e.badge)}" placeholder="31 décembre"></div>
+    <div class="grille-img" id="imgs" hidden>
+      ${ETAT.images.map((n) => `<button type="button" data-img="${ech(n)}"
+        class="${e.fond === n ? 'on' : ''}"><img src="/img/opt/${ech(n)}.jpg" alt="" loading="lazy"></button>`).join('')}
     </div>
-    ${promo ? `<div class="duo">
-      <div class="champ"><label for="f-red">Réduction</label>
-        <input id="f-red" value="${ech(e.reduction)}" placeholder="−20 %"></div>
-      <div class="champ"><label for="f-code">Code</label>
-        <input id="f-code" value="${ech(e.code)}" placeholder="EVANNATH20"></div>
-    </div>` : ''}
-    <div class="champ"><label for="f-texte">Texte</label>
-      <textarea id="f-texte" placeholder="Deux phrases, pas davantage.">${ech(e.texte)}</textarea>
-      <p class="aide">Deux phrases suffisent. Le reste se lit sur la page de réservation.</p></div>
 
+    <h2 class="bloc-t" style="margin-top:28px">L'essentiel</h2>
+    <div class="champ"><label for="f-titre">Titre</label>
+      <input id="f-titre" value="${ech(e.titre)}" placeholder="Saint-Sylvestre"></div>
     <div class="duo">
-      <div class="champ"><label for="f-quand">Quand, en toutes lettres</label>
-        <input id="f-quand" value="${ech(e.quand)}" placeholder="Chaque samedi, dès 15 h"></div>
-      <div class="champ"><label for="f-fin">Se termine le</label>
+      <div class="champ"><label for="f-quand">Quand</label>
+        <input id="f-quand" value="${ech(e.quand)}" placeholder="Du 31 décembre au 1er janvier"></div>
+      <div class="champ"><label for="f-fin">Retirer du site après le</label>
         <input type="date" id="f-fin" value="${ech(e.fin)}">
-        <p class="aide">Laissez vide si l'événement revient chaque année.
-        Sinon, il disparaît du site tout seul après cette date.</p></div>
+        <p class="aide">Laissez vide si l'événement revient chaque année.</p></div>
     </div>
-
-    <div class="champ"><label>Informations affichées</label>
-      ${[0, 1, 2, 3].map(puce).join('')}</div>
-
     <div class="duo">
-      <div class="champ"><label for="f-cta">Texte du bouton</label>
-        <input id="f-cta" value="${ech(e.cta)}" placeholder="Réserver ma place"></div>
-      <div class="champ"><label for="f-href">Le bouton mène à</label>
+      <div class="champ"><label for="f-cta">Bouton</label>
+        <input id="f-cta" value="${ech(e.cta)}" placeholder="Réserver maintenant"></div>
+      <div class="champ"><label for="f-href">Il mène à</label>
         <select id="f-href">
           <option value="#demande">Le formulaire de demande</option>
           <option value="reserver.html">La page Réserver</option>
@@ -323,15 +339,29 @@ function formulaire(type) {
         </select></div>
     </div>
 
-    <div class="champ"><label>Image de fond</label>
-      <div class="grille-img" id="imgs">
-        ${ETAT.images.map((n) => `<button type="button" data-img="${ech(n)}"
-          class="${e.fond === n ? 'on' : ''}"><img src="/img/opt/${ech(n)}.jpg" alt="" loading="lazy"></button>`).join('')}
+    <details class="plus" ${e.texte || e.badge || e.categorie ? 'open' : ''}>
+      <summary>Plus de détails — facultatif</summary>
+      <div class="duo" style="margin-top:18px">
+        <div class="champ"><label for="f-badge">Pastille</label>
+          <input id="f-badge" value="${ech(e.badge)}" placeholder="31 décembre"></div>
+        <div class="champ"><label for="f-cat">Surtitre</label>
+          <input id="f-cat" value="${ech(e.categorie)}" placeholder="Soirée de fin d'année"></div>
       </div>
-      <p class="aide">Choisissez parmi les photos du site.
-      Pour ajouter une affiche, passez par Médias → Galerie.</p></div>
+      <div class="champ"><label for="f-accent">Fin du titre, en italique</label>
+        <input id="f-accent" value="${ech(e.accent)}" placeholder="à Assinie"></div>
+      ${promo ? `<div class="duo">
+        <div class="champ"><label for="f-red">Réduction</label>
+          <input id="f-red" value="${ech(e.reduction)}" placeholder="−20 %"></div>
+        <div class="champ"><label for="f-code">Code</label>
+          <input id="f-code" value="${ech(e.code)}" placeholder="EVANNATH20"></div>
+      </div>` : ''}
+      <div class="champ"><label for="f-texte">Texte</label>
+        <textarea id="f-texte" placeholder="Deux phrases si l'affiche ne dit pas tout.">${ech(e.texte)}</textarea></div>
+      <div class="champ"><label>Informations affichées</label>
+        ${[0, 1, 2, 3].map(puce).join('')}</div>
+    </details>
 
-    <div class="champ">
+    <div class="champ" style="margin-top:18px">
       <label style="display:flex;align-items:center;gap:10px;text-transform:none;
         letter-spacing:0;font-size:14.5px;color:var(--cream)">
         <input type="checkbox" id="f-publie" style="width:auto" ${e.publie !== false ? 'checked' : ''}>
@@ -346,7 +376,6 @@ function formulaire(type) {
     </div>
   </div>`;
 }
-
 function rendre() {
   const v = $('#vue');
   if (VUE === 'bord') {
@@ -453,10 +482,22 @@ document.addEventListener('click', async (e) => {
                                id: sup.dataset.sup });
     return charger();
   }
+  if (e.target.id === 'choisir') { $('#f-fichier').click(); return; }
+  if (e.target.id === 'basculer') {
+    const g = $('#imgs');
+    g.hidden = !g.hidden;
+    e.target.textContent = g.hidden ? 'ou choisir une photo du site' : 'masquer les photos du site';
+    return;
+  }
+
   const img = e.target.closest('[data-img]');
   if (img) {
     [...$('#imgs').children].forEach((b) => b.classList.toggle('on', b === img));
-    if (EDITE) EDITE.fond = img.dataset.img;
+    if (EDITE) { EDITE.fond = img.dataset.img; EDITE.format = 'fond'; }
+    const a = $('#apercu');
+    if (a) a.innerHTML = '<img src="' + srcImage(img.dataset.img) + '" alt="" '
+      + 'style="max-width:210px;max-height:210px;object-fit:contain;'
+      + 'background:var(--bark);border:1px solid var(--line)">';
     return;
   }
   if (e.target.id === 'annuler') { EDITE = null; return rendre(); }
@@ -471,6 +512,7 @@ document.addEventListener('click', async (e) => {
       categorie: val('f-cat'), badge: val('f-badge'), texte: val('f-texte'),
       quand: val('f-quand'), fin: val('f-fin') || null, cta: val('f-cta'),
       href: val('f-href'), fond: (EDITE && EDITE.fond) || '',
+      format: (EDITE && EDITE.format) || 'fond',
       publie: $('#f-publie').checked, infos,
       reduction: val('f-red'), code: val('f-code'),
     };
@@ -482,6 +524,45 @@ document.addEventListener('click', async (e) => {
     EDITE = null;
     setTimeout(charger, 400);
   }
+});
+
+/* Depot d'une affiche.
+   Le format se deduit des proportions : un visuel carre est une affiche —
+   celles des reseaux portent deja dates, tarif et telephone — et se montre
+   ENTIER. Un visuel large est une photo, et sert de fond. Rien a demander a
+   l'utilisateur. */
+document.addEventListener('change', async (ev) => {
+  if (ev.target.id !== 'f-fichier') return;
+  const f = ev.target.files && ev.target.files[0];
+  if (!f) return;
+  const aide = $('#aide-img');
+  const dire = (t, mal) => { if (aide) { aide.textContent = t; aide.style.color = mal ? 'var(--err)' : ''; } };
+
+  if (f.size > 4 * 1024 * 1024) {
+    return dire('Affiche trop lourde : ' + (f.size / 1048576).toFixed(1) + ' Mo pour 4 Mo au maximum.', true);
+  }
+  dire('Envoi en cours…');
+  const donnee = await new Promise((r) => {
+    const l = new FileReader(); l.onload = () => r(l.result); l.readAsDataURL(f);
+  });
+  /* Les proportions, lues avant l'envoi. */
+  const format = await new Promise((r) => {
+    const i = new Image();
+    i.onload = () => { const q = i.width / i.height; r(q > 0.8 && q < 1.25 ? 'affiche' : 'fond'); };
+    i.onerror = () => r('affiche');
+    i.src = donnee;
+  });
+  const rep = await appel('televerser', { fichier: donnee });
+  if (!rep.ok) return dire(rep.message || "Le dépôt a échoué.", true);
+  EDITE = EDITE || { infos: [], publie: true };
+  EDITE.fond = rep.url;
+  EDITE.format = format;
+  $('#apercu').innerHTML = '<img src="' + rep.url + '" alt="" '
+    + 'style="max-width:210px;max-height:210px;object-fit:contain;'
+    + 'background:var(--bark);border:1px solid var(--line)">';
+  dire(format === 'affiche'
+    ? 'Affiche déposée. Elle sera montrée entière, sans recadrage.'
+    : 'Photo déposée. Elle servira de fond, derrière le texte.');
 });
 
 /* Au chargement : la session existe-t-elle deja ? */

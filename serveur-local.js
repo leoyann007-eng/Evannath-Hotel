@@ -118,7 +118,10 @@ const serveur = http.createServer(async (req, res) => {
   let fichier = path.join(RACINE, chemin);
 
   // cleanUrls : /contact sert contact.html, comme en production.
-  if (!fs.existsSync(fichier) && !path.extname(fichier)) {
+  // Un dossier existant — /admin — doit servir son index.html : tester
+  // seulement l'absence du chemin laissait passer ce cas, et /admin
+  // repondait 404 alors que la page etait bien la.
+  if (!path.extname(fichier)) {
     if (fs.existsSync(fichier + '.html')) fichier += '.html';
     else if (fs.existsSync(path.join(fichier, 'index.html'))) fichier = path.join(fichier, 'index.html');
   }
