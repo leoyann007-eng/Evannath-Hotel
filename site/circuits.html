@@ -280,6 +280,18 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
   line-height:1.15;margin:0 0 8px}
 .remise p{color:var(--cream);margin:0 0 14px;max-width:62ch}
 .remise .sur{font-size:12.5px;color:var(--muted);margin-bottom:16px}
+
+/* Les formules d une campagne : autant de cartes que de prix fermes. */
+.remise .formules{display:grid;gap:12px;margin-top:6px;
+  grid-template-columns:repeat(auto-fit,minmax(148px,1fr))}
+.f-carte{border:1px solid var(--line);padding:16px 14px;background:var(--bark)}
+.f-carte h4{font-family:var(--f-display);font-size:16px;font-weight:400;
+  margin:0 0 8px}
+.f-carte b{display:block;font-family:var(--f-display);font-size:24px;
+  color:var(--bronze-2);font-weight:400;line-height:1}
+.f-carte span{display:block;font-size:10px;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--muted);margin:5px 0 13px}
+.f-carte .pick{width:100%;text-align:center}
 @media (max-width:820px){
   .remise,.remise.affiche{grid-template-columns:1fr}
   .remise>picture{max-height:260px}
@@ -862,14 +874,17 @@ var circ=document.getElementById('circ'),dt=document.getElementById('dt'),qt=doc
 function iso(d){return new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10)}
 dt.value=iso(new Date(Date.now()+864e5*7)); dt.min=iso(new Date());
 function fmt(n){return n.toLocaleString('fr-FR').replace(/ | |,/g,' ')}
-var UNITS={forfait:['forfait','forfaits'],personne:['personne','personnes'],enfant:['enfant','enfants']};
+var UNITS={forfait:['forfait','forfaits'],personne:['personne','personnes'],
+  enfant:['enfant','enfants'],nuit:['nuit','nuits']};
 function recap(){
   var parts=circ.value.split('|'),prix=+parts[0],unite=parts[1];
   var label=circ.options[circ.selectedIndex].text.split('—')[0].trim();
   var n=Math.max(1,Math.min(40,+qt.value||1));
   // un forfait couple ne se multiplie pas : on ne compte que les unités facturables
   var facturable=(unite==='forfait')?1:n;
-  var mots=UNITS[unite];
+  // Une unite inconnue — une formule publiee avec une unite ajoutee plus
+  // tard — ne doit pas casser le calcul et emporter toute la page.
+  var mots=UNITS[unite]||UNITS.forfait;
   document.getElementById('rc').textContent=label;
   document.getElementById('rd').textContent=dt.value?new Date(dt.value).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'}):'—';
   document.getElementById('rql').textContent=(unite==='forfait')?'Forfait':'Quantité';
@@ -882,12 +897,19 @@ function recap(){
 [circ,dt,qt].forEach(function(e){e.addEventListener('input',recap);e.addEventListener('change',recap)});
 recap();
 
-document.querySelectorAll('.pickbtn').forEach(function(b){b.onclick=function(){
-  var want=b.dataset.p+'|'+b.dataset.u;
-  for(var i=0;i<circ.options.length;i++){if(circ.options[i].value===want){circ.selectedIndex=i;break}}
+/* Delegation : les formules publiees depuis l administration arrivent APRES
+   le chargement. Attacher le clic a chaque bouton existant les laissait
+   inertes — on cliquait, rien ne se passait, sans erreur. */
+document.addEventListener('click', function(ev){
+  var b = ev.target.closest && ev.target.closest('.pickbtn');
+  if (!b) return;
+  var want = b.dataset.p + '|' + b.dataset.u;
+  for (var i = 0; i < circ.options.length; i++) {
+    if (circ.options[i].value === want) { circ.selectedIndex = i; break; }
+  }
   recap();
   document.getElementById('demande').scrollIntoView({behavior:'smooth',block:'start'});
-}});
+});
 
 document.getElementById('rf').addEventListener('submit',function(e){e.preventDefault();
   alert("Démonstration : la demande partirait à la réception et à houansouyannaxel@gmail.com, avec une confirmation automatique au client.")});
@@ -1096,6 +1118,9 @@ window.NOMS_CHAMBRES = {"chambre-standard": "Chambre Standard", "deluxe-baldaqui
 
   /* Les remises publiees depuis l'administration. Le serveur ne renvoie
      que celles dont la periode court : rien a filtrer ici. */
+  var UNITES_NOM = { forfait: 'le forfait', personne: 'par personne',
+                     enfant: 'par enfant', nuit: 'par nuit' };
+
   function poserRemises(liste){
     var hote = document.getElementById('remises');
     if (!hote || !liste || !liste.length) return;
@@ -1138,7 +1163,12 @@ window.NOMS_CHAMBRES = {"chambre-standard": "Chambre Standard", "deluxe-baldaqui
       var haut = document.createElement('div');
       haut.className = 'haut';
       var r = p.remise || {};
-      if (r.valeur) {
+      if (r.type === 'formules') {
+        var t = document.createElement('span');
+        t.className = 'taux';
+        t.textContent = 'Campagne en cours';
+        haut.appendChild(t);
+      } else if (r.valeur) {
         var t = document.createElement('span');
         t.className = 'taux';
         t.textContent = r.type === 'montant'
@@ -1165,22 +1195,62 @@ window.NOMS_CHAMBRES = {"chambre-standard": "Chambre Standard", "deluxe-baldaqui
         d.appendChild(m);
       }
 
-      var c = p.cible || {};
-      var sur = document.createElement('div');
-      sur.className = 'sur';
-      if (c.toutes === false && (c.chambres || []).length) {
-        sur.textContent = 'Sur : ' + c.chambres.map(function(s){
-          return noms[s] || s; }).join(', ');
+      /* Une campagne de formules n a pas de perimetre : elle EST l offre.
+         Elle affiche ses formules, chacune reservable a son prix ferme. */
+      if (r.type === 'formules' && (p.formules || []).length) {
+        var g = document.createElement('div');
+        g.className = 'formules';
+        p.formules.forEach(function(f){
+          var art = document.createElement('article');
+          art.className = 'f-carte';
+          var h = document.createElement('h4');
+          h.textContent = f.nom;
+          var pr = document.createElement('b');
+          pr.textContent = Number(f.prix).toLocaleString('fr-FR');
+          var u = document.createElement('span');
+          u.textContent = 'FCFA · ' + (UNITES_NOM[f.unite] || 'le forfait');
+          var bt = document.createElement('button');
+          bt.type = 'button';
+          bt.className = 'pick pickbtn';
+          bt.dataset.c = f.nom;
+          bt.dataset.p = String(f.prix);
+          bt.dataset.u = f.unite || 'forfait';
+          bt.textContent = 'Choisir';
+          /* Le bouton choisit une option de la liste de demande. Une formule
+             publiee depuis l administration n y figure pas : on l ajoute, sans
+             quoi le clic serait sans effet. */
+          var val = f.prix + '|' + (f.unite || 'forfait');
+          var liste = document.getElementById('circ');
+          if (liste && !liste.querySelector('option[value="' + val + '"]')) {
+            var o = document.createElement('option');
+            o.value = val;
+            o.textContent = f.nom + ' — ' + Number(f.prix).toLocaleString('fr-FR')
+              + ' FCFA';
+            liste.appendChild(o);
+          }
+          art.appendChild(h); art.appendChild(pr); art.appendChild(u);
+          art.appendChild(bt);
+          g.appendChild(art);
+        });
+        d.appendChild(g);
       } else {
-        sur.textContent = 'Sur toutes nos chambres.';
-      }
-      d.appendChild(sur);
+        var c = p.cible || {};
+        var sur = document.createElement('div');
+        sur.className = 'sur';
+        if (c.toutes === false && (c.chambres || []).length) {
+          sur.textContent = 'Sur : ' + c.chambres.map(function(s){
+            return noms[s] || s; }).join(', ');
+        } else {
+          sur.textContent = 'Sur toutes nos chambres.';
+        }
+        d.appendChild(sur);
 
-      var a = document.createElement('a');
-      a.className = 'btn btn-solid';
-      a.href = 'reserver.html';
-      a.textContent = 'Réserver maintenant';
-      d.appendChild(a);
+        var a = document.createElement('a');
+        a.className = 'btn btn-solid';
+        a.href = 'reserver.html';
+        a.textContent = 'Réserver maintenant';
+        d.appendChild(a);
+      }
 
       art.appendChild(d);
       hote.appendChild(art);

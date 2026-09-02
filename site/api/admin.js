@@ -149,6 +149,11 @@ const propre = (v, max) => String(v == null ? '' : v).replace(/\s+/g, ' ').trim(
    retrouver affichee sur le site. */
 const SERVICES = ['spa', 'restaurant', 'experiences'];
 
+/* Les unites d une formule a prix fixe. Liste fermee, comme les services :
+   ce qui s affiche sur le site ne doit jamais venir d une valeur inventee
+   par un appel exterieur. */
+const UNITES = ['forfait', 'personne', 'enfant', 'nuit'];
+
 /** Un nombre positif, ou zero. Une chaine vide, un texte, un signe moins :
     tout cela vaut zero plutot qu'un NaN qui contaminerait l'affichage. */
 function nombre(v) {
@@ -206,10 +211,24 @@ function nettoyer(e, type) {
        remise, un perimetre — sur quelles chambres — et une periode qui
        commence : un evenement se retire, une promotion se programme. */
     o.message = propre(e.message, LIMITES.texte);
+    /* Trois formes d offre, pas deux. « formules » est celle des Packs
+       Vacances : pas une remise a calculer, mais des forfaits a prix ferme
+       annonces ensemble sous une meme affiche. */
+    const forme = e.remise && e.remise.type;
     o.remise = {
-      type: e.remise && e.remise.type === 'montant' ? 'montant' : 'pourcentage',
+      type: forme === 'montant' ? 'montant'
+        : forme === 'formules' ? 'formules' : 'pourcentage',
       valeur: nombre(e.remise && e.remise.valeur),
     };
+    o.formules = o.remise.type !== 'formules' ? [] : (
+      Array.isArray(e.formules) ? e.formules : []).slice(0, 8)
+      .map((f) => ({
+        nom: propre(f && f.nom, 60),
+        prix: nombre(f && f.prix),
+        unite: UNITES.includes(f && f.unite) ? f.unite : 'forfait',
+      }))
+      // Une formule sans nom ni prix n a rien a montrer.
+      .filter((f) => f.nom && f.prix);
     // Une remise en pourcentage au-dela de 100 n'a pas de sens, et une remise
     // nulle non plus : on borne plutot que d'accepter une aberration.
     if (o.remise.type === 'pourcentage') {
@@ -222,6 +241,10 @@ function nettoyer(e, type) {
         .filter((x) => SERVICES.includes(x)),
     };
     if (o.cible.toutes) { o.cible.chambres = []; o.cible.services = []; }
+    // Une campagne de formules ne vise pas des chambres : elle EST l offre.
+    if (o.remise.type === 'formules') {
+      o.cible = { toutes: true, chambres: [], services: [] };
+    }
     o.debut = instant(e.debut);
     o.fin = instant(e.fin);
     // Une periode a l'envers masquerait la promotion sans rien dire : on la

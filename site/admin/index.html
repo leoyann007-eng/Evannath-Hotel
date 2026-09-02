@@ -143,6 +143,17 @@ h1.t{font-family:var(--f-t);font-size:30px;font-weight:400}
 
 /* Deux options se montrent, elles ne se cherchent pas dans une liste. */
 .choix{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.choix.trois{grid-template-columns:repeat(3,1fr)}
+
+/* Une ligne de formule : nom, prix, unite, et de quoi la retirer. */
+.formule{display:grid;grid-template-columns:1fr 130px 140px 30px;gap:8px;
+  align-items:center;margin-bottom:8px}
+.formule input,.formule select{margin:0}
+.formule .fl{height:34px;font-size:14px}
+@media (max-width:720px){
+  .formule{grid-template-columns:1fr 1fr;gap:6px}
+  .choix.trois{grid-template-columns:1fr}
+}
 .opt{padding:14px 16px;text-align:left;font-size:13px;cursor:pointer;
   background:var(--bark-3);color:var(--sand);border:1px solid var(--line);
   transition:.2s}
@@ -382,6 +393,12 @@ function etatDe(e, type) {
 /** Ce qu'une promotion fait, en une ligne : combien, sur quoi, quand. */
 function resumePromo(p) {
   const r = p.remise || {};
+  const jourD = (v) => (v || '').slice(0, 10).split('-').reverse().join('/');
+  if (r.type === 'formules') {
+    const n = (p.formules || []).length;
+    return ech(n + ' formule' + (n > 1 ? 's' : '')
+      + ((p.debut || p.fin) ? ' · du ' + jourD(p.debut) + ' au ' + jourD(p.fin) : ''));
+  }
   const combien = !r.valeur ? 'sans remise'
     : r.type === 'montant' ? '−' + FCFA(r.valeur) : '−' + r.valeur + ' %';
   const c = p.cible || {};
@@ -465,6 +482,17 @@ function statutPromo(p) {
   if (d && n < d) return { cl: 'attend', mot: 'Programmée' };
   if (f && n > f) return { cl: 'fini', mot: 'Terminée' };
   return { cl: 'vif', mot: 'Active' };
+}
+
+/** Les lignes de formules telles qu elles sont a l ecran. On garde les lignes
+    vides : l utilisateur est peut-etre en train de les remplir. Le serveur,
+    lui, les ecartera a l enregistrement. */
+function formulesSaisies() {
+  return [...document.querySelectorAll('#formules .formule')].map((d) => ({
+    nom: (d.querySelector('[data-fn]').value || '').trim(),
+    prix: (d.querySelector('[data-fp]').value || '').replace(/[^\d]/g, ''),
+    unite: d.querySelector('[data-fu]').value,
+  }));
 }
 
 function cibleSaisie() {
@@ -562,15 +590,18 @@ function brancherPromo() {
   rafraichirPromo();
 }
 
-/** Le type de remise se choisit par deux boutons plutot que par une liste
-    deroulante : deux options se montrent, elles ne se cherchent pas. */
+/** Le type d offre se choisit par trois boutons plutot que par une liste
+    deroulante : trois options se montrent, elles ne se cherchent pas.
+
+    Le changement redessine l etape, car la forme de l ecran en depend :
+    « formules » n a pas de valeur a saisir, et le fil des etapes annonce
+    alors « Les formules » et non « S'applique a ». Se contenter de basculer
+    une classe laissait le champ de valeur en place et le fil mentait. */
 function choisirRemise(bouton) {
-  [...document.querySelectorAll('[data-remise]')].forEach(
-    (b) => b.classList.toggle('on', b === bouton));
-  const pct = bouton.dataset.remise === 'pourcentage';
-  const u = $('#unite'); if (u) u.textContent = pct ? '%' : 'FCFA';
-  const v = $('#f-valeur'); if (v) v.placeholder = pct ? '20' : '25 000';
-  rafraichirPromo();
+  lireEtape();
+  EDITE.remise = EDITE.remise || {};
+  EDITE.remise.type = bouton.dataset.remise;
+  rendre();
 }
 
 /* On publie depuis EDITE, pas depuis l ecran. Au recapitulatif, les champs
@@ -588,9 +619,11 @@ async function enregistrerPromo() {
     fond: e.fond || '',
     format: e.format || 'fond',
     remise: {
-      type: r0.type === 'montant' ? 'montant' : 'pourcentage',
+      type: r0.type === 'montant' ? 'montant'
+        : r0.type === 'formules' ? 'formules' : 'pourcentage',
       valeur: r0.valeur || 0,
     },
+    formules: e.formules || [],
     cible: e.cible || { toutes: true },
     debut: e.debut || null,
     fin: e.fin || null,
@@ -622,14 +655,26 @@ async function enregistrerPromo() {
   setTimeout(charger, 1400);
 }
 
-const ETAPES = ['Informations générales', 'Réduction', "S'applique à",
-                'Période & affichage', 'Récapitulatif'];
+const UNITES = [['forfait', 'le forfait'], ['personne', 'par personne'],
+                ['enfant', 'par enfant'], ['nuit', 'par nuit']];
+
+/* Une campagne de formules ne vise pas des chambres : elle EST l offre. La
+   troisieme etape change donc de sujet selon la forme choisie a la deuxieme. */
+function estFormules() {
+  return EDITE && EDITE.remise && EDITE.remise.type === 'formules';
+}
+function etapes() {
+  return ['Informations générales', 'Réduction',
+          estFormules() ? 'Les formules' : "S'applique à",
+          'Période & affichage', 'Récapitulatif'];
+}
+const ETAPES = { get length() { return 5; } };
 let ETAPE = 1;
 
 /* Le fil des etapes. Il ne sert pas a decorer : il dit ou l on en est, ce qui
    reste, et il laisse revenir en arriere sur ce qui est deja franchi. */
 function fil() {
-  return '<ol class="fil">' + ETAPES.map((nom, i) => {
+  return '<ol class="fil">' + etapes().map((nom, i) => {
     const n = i + 1;
     const cl = n === ETAPE ? 'ici' : (n < ETAPE ? 'fait' : '');
     const clic = n < ETAPE ? ` data-pas="${n}"` : '';
@@ -656,6 +701,7 @@ function lireEtape() {
     EDITE.remise.valeur = (v('f-valeur') || '').replace(/[^\d.]/g, '');
   }
   if (document.querySelector('input[name="cible"]')) EDITE.cible = cibleSaisie();
+  if (document.getElementById('formules')) EDITE.formules = formulesSaisies();
   if ($('#f-d-date')) { EDITE.debut = instantSaisi('d'); EDITE.fin = instantSaisi('f'); }
   if (c('f-publie') !== null) EDITE.publie = c('f-publie');
   if (c('f-avant') !== null) EDITE.avant = c('f-avant');
@@ -666,11 +712,15 @@ function lireEtape() {
    laisser decouvrir le probleme au recapitulatif. */
 function manqueEtape() {
   if (ETAPE === 1 && !(EDITE.titre || '').trim()) return 'Il manque le titre.';
-  if (ETAPE === 2) {
+  if (ETAPE === 2 && !estFormules()) {
     const val = Number((EDITE.remise || {}).valeur || 0);
     if (!val) return 'Indiquez la valeur de la réduction.';
   }
-  if (ETAPE === 3 && EDITE.cible && EDITE.cible.toutes === false
+  if (ETAPE === 3 && estFormules()) {
+    const ok = (EDITE.formules || []).filter((f) => f.nom && Number(f.prix));
+    if (!ok.length) return 'Ajoutez au moins une formule, avec son nom et son prix.';
+  }
+  if (ETAPE === 3 && !estFormules() && EDITE.cible && EDITE.cible.toutes === false
       && !(EDITE.cible.chambres || []).length
       && !(EDITE.cible.services || []).length) {
     return 'Choisissez au moins une chambre, ou revenez à « toutes les chambres ».';
@@ -680,10 +730,10 @@ function manqueEtape() {
 
 function formulairePromo() {
   const e = EDITE || { publie: true, remise: {}, cible: { toutes: true } };
-  const dernier = ETAPE === ETAPES.length;
+  const dernier = ETAPE === 5;
   return `${fil()}
     <div class="carte etape">
-      <h2 class="bloc-t"><i>${ETAPE}</i> ${ETAPES[ETAPE - 1]}</h2>
+      <h2 class="bloc-t"><i>${ETAPE}</i> ${etapes()[ETAPE - 1]}</h2>
       ${[pas1, pas2, pas3, pas4, pas5][ETAPE - 1](e)}
     </div>
     <div class="barre">
@@ -728,24 +778,31 @@ function pas1(e) {
 
 function pas2(e) {
   const r = e.remise || {};
-  const pct = r.type !== 'montant';
-  return `<label class="lb">Type de réduction</label>
-    <div class="choix">
-      <button type="button" class="opt ${pct ? 'on' : ''}" data-remise="pourcentage">
-        Pourcentage (%)</button>
-      <button type="button" class="opt ${pct ? '' : 'on'}" data-remise="montant">
-        Montant fixe (FCFA)</button>
+  const t = r.type === 'montant' ? 'montant'
+    : r.type === 'formules' ? 'formules' : 'pourcentage';
+  const bouton = (cle, txt) => `<button type="button"
+    class="opt ${t === cle ? 'on' : ''}" data-remise="${cle}">${txt}</button>`;
+  return `<label class="lb">Type d'offre</label>
+    <div class="choix trois">
+      ${bouton('pourcentage', 'Pourcentage (%)')}
+      ${bouton('montant', 'Montant fixe (FCFA)')}
+      ${bouton('formules', 'Formules à prix fixe')}
     </div>
-    <label class="lb" for="f-valeur">Valeur de la réduction</label>
-    <div class="suffixe">
-      <input id="f-valeur" inputmode="numeric" value="${ech(String(r.valeur || ''))}"
-        placeholder="${pct ? '20' : '25 000'}">
-      <span id="unite">${pct ? '%' : 'FCFA'}</span>
-    </div>
-    <div class="vitrine" id="apercu-remise"></div>`;
+    ${t === 'formules'
+      ? `<p class="vitrine"><span class="aide">Une campagne de formules — les
+          Packs Vacances, par exemple. Vous saisirez chaque formule et son prix
+          à l'étape suivante. Rien n'est calculé : les prix sont fermes.</span></p>`
+      : `<label class="lb" for="f-valeur">Valeur de la réduction</label>
+        <div class="suffixe">
+          <input id="f-valeur" inputmode="numeric" value="${ech(String(r.valeur || ''))}"
+            placeholder="${t === 'montant' ? '25 000' : '20'}">
+          <span id="unite">${t === 'montant' ? 'FCFA' : '%'}</span>
+        </div>
+        <div class="vitrine" id="apercu-remise"></div>`}`;
 }
 
 function pas3(e) {
+  if (e.remise && e.remise.type === 'formules') return pasFormules(e);
   const c = e.cible || { toutes: true };
   return `<label class="radio"><input type="radio" name="cible" value="toutes"
       ${c.toutes !== false ? 'checked' : ''}> Toutes les chambres</label>
@@ -768,6 +825,31 @@ function pas3(e) {
     <div class="vitrine" id="apercu-remise"></div>`;
 }
 
+/* Les formules d une campagne : un nom, un prix, une unite. Autant de lignes
+   qu il en faut, ajoutees et retirees a la main — quatre pour les Packs
+   Vacances, deux pour une autre saison. */
+function pasFormules(e) {
+  const l = (e.formules && e.formules.length) ? e.formules : [{}];
+  return `<p class="aide" style="margin-bottom:14px">Chaque ligne devient une
+      carte réservable sur le site, avec son prix ferme.</p>
+    <div id="formules">
+      ${l.map((f, i) => `<div class="formule">
+        <input data-fn="${i}" value="${ech(f.nom || '')}" placeholder="Pack Famille">
+        <input data-fp="${i}" inputmode="numeric" value="${ech(String(f.prix || ''))}"
+          placeholder="250 000">
+        <select data-fu="${i}">
+          ${UNITES.map(([k, nom]) => `<option value="${k}"
+            ${(f.unite || 'forfait') === k ? 'selected' : ''}>${nom}</option>`).join('')}
+        </select>
+        <button type="button" class="fl" data-form-sup="${i}"
+          title="Retirer cette formule" aria-label="Retirer la formule ${i + 1}"
+          ${l.length < 2 ? 'disabled' : ''}>&times;</button>
+      </div>`).join('')}
+    </div>
+    <button type="button" class="btn mince" data-form-ajout=""
+      style="margin-top:12px">Ajouter une formule</button>`;
+}
+
 function pas4(e) {
   const dh = (v, quoi) => {
     const m = String(v || '').match(/^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})$/);
@@ -787,9 +869,10 @@ function pas4(e) {
       ${e.publie !== false ? 'checked' : ''}> Visible sur le site</label>
     <label class="bascule"><input type="checkbox" id="f-avant"
       ${e.avant ? 'checked' : ''}> Mettre en avant sur la page d'accueil</label>
+    ${(e.remise || {}).type === 'formules' ? '' : `
     <label class="bascule"><input type="checkbox" id="f-pastille"
       ${e.pastille !== false ? 'checked' : ''}> Afficher un badge « PROMO » sur les
-      chambres visées</label>`;
+      chambres visées</label>`}`;
 }
 
 /* Le recapitulatif ne redemande rien : il montre. A gauche ce qui a ete
@@ -800,7 +883,9 @@ function pas5(e) {
   const c = e.cible || { toutes: true };
   const noms = {};
   ETAT.chambres.forEach((ch) => { noms[ch.slug] = ch.nom; });
-  const taux = !r.valeur ? '—'
+  const taux = r.type === 'formules'
+      ? ((e.formules || []).filter((f) => f.nom && f.prix).length || 0) + ' formules'
+    : !r.valeur ? '—'
     : r.type === 'montant' ? '−' + FCFA(r.valeur) : '−' + r.valeur + ' %';
   const surQuoi = c.toutes !== false ? 'Toutes les chambres'
     : ((c.chambres || []).map((s) => noms[s] || s)
@@ -817,13 +902,18 @@ function pas5(e) {
     <div>
       ${ligne('Titre', ech(e.titre || '—'))}
       ${ligne('Message', ech(e.message || '—'))}
-      ${ligne('Réduction', taux)}
-      ${ligne("S'applique à", ech(surQuoi))}
+      ${(e.remise || {}).type === 'formules'
+        ? ligne('Formules', (e.formules || []).filter((f) => f.nom && f.prix)
+            .map((f) => ech(f.nom) + ' — ' + FCFA(f.prix) + ' '
+              + ((UNITES.find((u) => u[0] === f.unite) || UNITES[0])[1]))
+            .join('<br>') || '—')
+        : ligne('Réduction', taux) + ligne("S'applique à", ech(surQuoi))}
       ${ligne('Période', ech(periode))}
       ${ligne('État', '<span class="etat ' + st.cl + '">' + st.mot + '</span>')}
       ${ligne('Affichage', (e.publie === false ? 'Brouillon' : 'Visible')
         + (e.avant ? ' · en avant sur l’accueil' : '')
-        + (e.pastille !== false ? ' · badge sur les chambres' : ''))}
+        + (e.pastille !== false && (e.remise || {}).type !== 'formules'
+           ? ' · badge sur les chambres' : ''))}
     </div>
     <div class="apercu-client${e.format === 'affiche' ? ' affiche' : ''}">
       ${e.fond ? `<img src="${srcImage(e.fond)}" alt="">` : '<div class="vide"></div>'}
@@ -1087,12 +1177,26 @@ document.addEventListener('click', async (e) => {
         if (m) { m.className = 'msg mal'; m.textContent = manque; }
         return;
       }
-      ETAPE = Math.min(ETAPES.length, ETAPE + 1);
+      ETAPE = Math.min(5, ETAPE + 1);
     } else if (ou === 'prec') {
       ETAPE = Math.max(1, ETAPE - 1);
     } else {
       ETAPE = Number(ou) || 1;
     }
+    return rendre();
+  }
+
+  const plus = e.target.closest('[data-form-ajout]');
+  if (plus) {
+    lireEtape();
+    EDITE.formules = (EDITE.formules || []).concat([{ unite: 'forfait' }]);
+    return rendre();
+  }
+  const moins = e.target.closest('[data-form-sup]');
+  if (moins) {
+    lireEtape();
+    EDITE.formules = (EDITE.formules || []);
+    EDITE.formules.splice(Number(moins.dataset.formSup), 1);
     return rendre();
   }
 
