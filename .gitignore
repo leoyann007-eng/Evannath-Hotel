@@ -29,11 +29,17 @@ Devis-modele.pdf
 # géométrique. Reconstructibles à volonté par « node .deck/deck.js ».
 .deck/
 
-# pptxgenjs, installé uniquement pour fabriquer le support. Le site, lui,
-# n'a aucune dépendance npm — seuls les tests tournent, sur node nu.
+# pptxgenjs, installé à la racine uniquement pour fabriquer le support de
+# présentation. Rien de tout cela ne part en production.
 node_modules/
-package.json
-package-lock.json
+/package.json
+/package-lock.json
+
+# site/package.json, lui, EST versionné : Vercel y lit les dépendances des
+# fonctions serverless — @vercel/blob pour le stockage de l'administration.
+# Le site lui-même n'a toujours aucune dépendance : il est généré en Python
+# et servi en statique.
+!site/package.json
 
 # Captures du site d'origine, prises pour illustrer l'audit. Ce sont des
 # copies d'ecran du site d'un tiers : elles servent la proposition, elles

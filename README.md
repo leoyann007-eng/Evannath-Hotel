@@ -520,9 +520,22 @@ Deux modes, décidés par la présence de `BLOB_READ_WRITE_TOKEN` :
 Laisser croire qu'une affiche est enregistrée alors qu'elle disparaîtra au
 prochain déploiement serait le pire défaut possible pour cet outil.
 
-Pour passer en durable : créer un magasin Vercel Blob, définir
-`BLOB_READ_WRITE_TOKEN`, et **ajouter `@vercel/blob` aux dépendances** — le
-`package.json` est actuellement écarté du dépôt, il faudra l'y remettre.
+Pour passer en durable : créer un magasin Vercel Blob dans l'onglet *Storage*
+et le connecter au projet, en cochant **Production et Preview**. Vercel injecte
+alors `BLOB_READ_WRITE_TOKEN` de lui-même — ne le saisissez pas à la main, vous
+auriez un doublon.
+
+**Créez un magasin dédié plutôt que d'en partager un** avec un autre projet :
+le jour où le site est remis à l'établissement, un magasin partagé ne se remet
+pas.
+
+`site/package.json` déclare `@vercel/blob` — c'est là que Vercel lit les
+dépendances des fonctions, la racine du projet étant `site/`. Le site lui-même
+n'a toujours aucune dépendance : il est généré en Python et servi en statique.
+
+Si le jeton est absent ou refusé, **l'enregistrement échoue visiblement** :
+l'interface affiche la cause. Un échec silencieux ici, c'est une affiche qu'on
+croit publiée et qui ne l'est pas.
 
 ### Mettre l'administration en service
 
