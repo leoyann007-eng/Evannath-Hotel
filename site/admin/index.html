@@ -120,6 +120,14 @@ h1.t{font-family:var(--f-t);font-size:30px;font-weight:400}
 .apercu-client .dessus{position:relative;padding:22px;display:flex;
   flex-direction:column;align-items:flex-start;gap:10px;min-height:230px;
   justify-content:flex-end}
+
+/* Une affiche porte deja son message : la voiler et ecrire par-dessus la
+   rend illisible. On la montre entiere, et le rappel passe dessous. */
+.apercu-client.affiche{display:flex;flex-direction:column}
+.apercu-client.affiche img{position:static;height:auto;object-fit:contain;
+  opacity:1}
+.apercu-client.affiche .dessus{min-height:0;padding:14px 16px;
+  justify-content:flex-start;gap:8px}
 .apercu-client .taux{padding:4px 10px;font-size:13px;font-weight:700;
   background:var(--bronze-2);color:var(--night)}
 .apercu-client b{font-family:var(--f-display);font-size:20px;font-weight:400;
@@ -817,12 +825,11 @@ function pas5(e) {
         + (e.avant ? ' · en avant sur l’accueil' : '')
         + (e.pastille !== false ? ' · badge sur les chambres' : ''))}
     </div>
-    <div class="apercu-client">
+    <div class="apercu-client${e.format === 'affiche' ? ' affiche' : ''}">
       ${e.fond ? `<img src="${srcImage(e.fond)}" alt="">` : '<div class="vide"></div>'}
       <div class="dessus">
         <span class="taux">${taux}</span>
         <b>${ech(e.titre || '')}</b>
-        <span class="btn plein" style="pointer-events:none">Réserver maintenant</span>
       </div>
     </div>
   </div>`;
