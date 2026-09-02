@@ -136,6 +136,10 @@ CSS = """
 .pack b{font-family:var(--f-display);font-size:1.55rem;color:var(--bronze);display:block;line-height:1;font-variant-numeric:tabular-nums;font-weight:400}
 .pack span{font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600;display:block;margin-top:5px}
 .pack .pick{width:100%;margin-top:16px;text-align:center}
+/* L affiche d une campagne : montree entiere, elle porte deja son message. */
+.camp-visuel{margin:18px 0 4px;border:1px solid var(--line);
+  background:var(--night)}
+.camp-visuel img{width:100%;height:auto;display:block}
 .star{display:grid;grid-template-columns:1.15fr 1fr;border:1px solid var(--line);margin-bottom:64px;background:var(--bark-2)}
 .star .ph{position:relative;overflow:hidden;min-height:420px}
 .star .ph img{width:100%;height:100%;object-fit:cover}
@@ -823,7 +827,7 @@ JS += """
       g.innerHTML = '<span class="live"><i></i><span>Campagne en cours</span>'
         + '</span>';
       var h = document.createElement('h2');
-      h.textContent = (c.titre || '') + (c.emoji ? ' ' + c.emoji : '');
+      h.textContent = c.titre || '';
       g.appendChild(h);
       top.appendChild(g);
       if (c.note) {
@@ -839,6 +843,22 @@ JS += """
         var a = document.createElement('p');
         a.textContent = c.accroche;
         sec.appendChild(a);
+      }
+
+      /* L affiche de la campagne, celle publiee sur Facebook. Elle porte deja
+         les formules et les contacts : on la montre entiere, avant les cartes
+         qui, elles, permettent de reserver. */
+      if (c.visuel) {
+        var fig = document.createElement('div');
+        fig.className = 'camp-visuel';
+        var vi = document.createElement('img');
+        vi.src = /^https?:/.test(c.visuel) ? c.visuel
+          : 'img/opt/' + c.visuel + '.jpg';
+        vi.alt = c.titre || '';
+        vi.loading = 'eager';
+        vi.onerror = function(){ fig.remove(); };
+        fig.appendChild(vi);
+        sec.appendChild(fig);
       }
 
       var grille = document.createElement('div');

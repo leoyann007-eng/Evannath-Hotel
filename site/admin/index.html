@@ -306,6 +306,7 @@ let ETAT = { stockage: '', magasin: '', variable: '', evenements: [],
 /* Quand on choisit la photo d un pack, il faut savoir DE QUEL pack : la
    grille de photos est unique, les packs sont plusieurs. */
 let PHOTO_POUR = null;
+let CIBLE_DEPOT = 'fond';
 let VUE = 'bord';
 let EDITE = null;                       // l'entree en cours de modification
 
@@ -466,11 +467,11 @@ function liste(type) {
           aria-label="Descendre ${ech(e.titre)}">&#9660;</button>
       </div>
       ${(() => { const im = type === 'campagnes'
-          ? ((e.packs || [])[0] || {}).image : e.fond;
+          ? (e.visuel || ((e.packs || [])[0] || {}).image) : e.fond;
         return im ? `<img class="vig" src="${srcImage(im)}" alt="">`
                   : '<div class="vig"></div>'; })()}
       <div class="txt">
-        <b>${ech(e.titre)}${type === 'campagnes' && e.emoji ? ' ' + ech(e.emoji) : ''}
+        <b>${ech(e.titre)}
           ${e.accent ? '<em style="color:var(--bronze-2)">' + ech(e.accent) + '</em>' : ''}</b>
         <span>${type === 'campagnes' ? resumeCampagne(e)
           : type === 'promotions' ? resumePromo(e)
@@ -652,7 +653,7 @@ async function enregistrerCampagne() {
   const entree = {
     id: e.id,
     titre: e.titre || '',
-    emoji: e.emoji || '',
+    visuel: e.visuel || '',
     accroche: e.accroche || '',
     note: e.note || '',
     packs: e.packs || [],
@@ -773,7 +774,7 @@ function lireEtape() {
   }
   if (document.querySelector('input[name="cible"]')) EDITE.cible = cibleSaisie();
   if (document.getElementById('packs')) EDITE.packs = packsSaisis();
-  if (v('f-emoji') !== null) EDITE.emoji = v('f-emoji');
+
   if (v('f-accroche') !== null) EDITE.accroche = v('f-accroche');
   if (v('f-note') !== null) EDITE.note = v('f-note');
   if ($('#f-d-date')) { EDITE.debut = instantSaisi('d'); EDITE.fin = instantSaisi('f'); }
@@ -903,16 +904,35 @@ function pas3(e) {
 function camp1(e) {
   return `<label class="lb" for="f-titre">Nom de la campagne</label>
     <input id="f-titre" value="${ech(e.titre || '')}" placeholder="Vacances">
-    <label class="lb" for="f-emoji">Emoji (facultatif)</label>
-    <input id="f-emoji" value="${ech(e.emoji || '')}" placeholder="☀️"
-      style="max-width:120px">
     <label class="lb" for="f-accroche">Accroche</label>
     <textarea id="f-accroche" rows="2"
       placeholder="« Les vacances qui vous ressemblent. » Quatre formules pensées pour la saison."
       >${ech(e.accroche || '')}</textarea>
     <label class="lb" for="f-note">Mention en haut à droite (facultatif)</label>
     <input id="f-note" value="${ech(e.note || '')}"
-      placeholder="Annoncés sur notre page Facebook">`;
+      placeholder="Annoncés sur notre page Facebook">
+    <label class="lb">Visuel de la campagne (facultatif)</label>
+    <div class="depot">
+      <div id="apercu">${e.visuel
+        ? `<img src="${srcImage(e.visuel)}" alt="" style="max-width:260px;
+            max-height:180px;object-fit:contain;background:var(--bark);
+            border:1px solid var(--line)">`
+        : '<p style="color:var(--muted);font-size:13.5px">Aucun visuel.</p>'}</div>
+      <div>
+        <input type="file" id="f-fichier" accept="image/jpeg,image/png,image/webp" hidden>
+        <button type="button" class="btn" id="choisir" data-vers="visuel">
+          Déposer depuis mon ordinateur</button>
+        <button type="button" class="btn mince" id="basculer" style="margin-left:8px">
+          ou choisir une photo du site</button>
+        <p class="aide" id="aide-img">L'affiche de la campagne, celle que vous
+        publiez sur Facebook. JPEG, PNG ou WebP, 4 Mo au maximum.</p>
+      </div>
+    </div>
+    <div class="grille-img" id="imgs" hidden>
+      ${ETAT.images.map((n) => `<button type="button" data-img="${ech(n)}"
+        class="${e.visuel === n ? 'on' : ''}"><img src="/img/opt/${ech(n)}.jpg"
+        alt="" loading="lazy"></button>`).join('')}
+    </div>`;
 }
 
 function camp2(e) {
@@ -940,6 +960,16 @@ function camp2(e) {
     </div>
     <button type="button" class="btn mince" data-form-ajout=""
       style="margin-top:12px">Ajouter un pack</button>
+    ${PHOTO_POUR === null ? '' : `
+      <div class="depot" style="margin-top:16px">
+        <div>
+          <input type="file" id="f-fichier" accept="image/jpeg,image/png,image/webp" hidden>
+          <button type="button" class="btn" id="choisir" data-vers="pack">
+            Déposer depuis mon ordinateur</button>
+          <p class="aide" id="aide-img">Photo du pack ${PHOTO_POUR + 1}.
+          JPEG, PNG ou WebP, 4 Mo au maximum. Ou choisissez ci-dessous.</p>
+        </div>
+      </div>`}
     <div class="grille-img" id="imgs" ${PHOTO_POUR === null ? 'hidden' : ''}>
       ${ETAT.images.map((n) => `<button type="button" data-img="${ech(n)}"
         ><img src="/img/opt/${ech(n)}.jpg" alt="" loading="lazy"></button>`).join('')}
@@ -953,7 +983,7 @@ function camp4(e) {
   const ligne = (lb, val) => `<div class="recap-l"><span>${lb}</span><b>${val}</b></div>`;
   return `<div class="recap">
     <div>
-      ${ligne('Campagne', ech((e.titre || '—') + (e.emoji ? ' ' + e.emoji : '')))}
+      ${ligne('Campagne', ech(e.titre || '—'))}
       ${ligne('Accroche', ech(e.accroche || '—'))}
       ${ligne('Packs', (e.packs || []).filter((p) => p.nom && p.prix)
         .map((p) => ech(p.nom) + ' — ' + FCFA(p.prix) + ' '
@@ -966,9 +996,9 @@ function camp4(e) {
       ${ligne('Affichage', e.publie === false ? 'Brouillon' : 'Visible')}
     </div>
     <div class="apercu-client affiche">
-      ${(e.packs || [])[0] && (e.packs || [])[0].image
-        ? `<img src="${srcImage(e.packs[0].image)}" alt="">`
-        : '<div class="vide"></div>'}
+      ${(() => { const im = e.visuel || ((e.packs || [])[0] || {}).image;
+        return im ? `<img src="${srcImage(im)}" alt="">`
+                  : '<div class="vide"></div>'; })()}
       <div class="dessus">
         <span class="taux">Campagne en cours</span>
         <b>${ech(e.titre || '')}</b>
@@ -1293,7 +1323,14 @@ document.addEventListener('click', async (e) => {
     await appel('supprimer', { type: typeApi(sup.dataset.type), id: sup.dataset.sup });
     return charger();
   }
-  if (e.target.id === 'choisir') { $('#f-fichier').click(); return; }
+  /* Une image deposee peut aller a trois endroits : l affiche d un
+     evenement ou d une promotion, le visuel d une campagne, ou la photo d un
+     pack. On retient lequel avant d ouvrir le selecteur de fichier. */
+  if (e.target.id === 'choisir') {
+    CIBLE_DEPOT = e.target.dataset.vers || 'fond';
+    $('#f-fichier').click();
+    return;
+  }
   if (e.target.id === 'basculer') {
     const g = $('#imgs');
     g.hidden = !g.hidden;
@@ -1351,6 +1388,11 @@ document.addEventListener('click', async (e) => {
   if (rem) return choisirRemise(rem);
 
   const img = e.target.closest('[data-img]');
+  if (img && VUE === 'campagnes' && ETAPE === 1) {
+    lireEtape();
+    EDITE.visuel = img.dataset.img;
+    return rendre();
+  }
   if (img && PHOTO_POUR !== null) {
     lireEtape();
     EDITE.packs = EDITE.packs || [];
@@ -1425,7 +1467,21 @@ document.addEventListener('change', async (ev) => {
   EDITE = EDITE || { infos: [], publie: true };
   // La saisie de l etape en cours part dans EDITE avant que l apercu ne
   // soit remplace : deposer une image ne doit pas effacer un titre.
-  if (VUE === 'promotions') lireEtape();
+  if (VUE === 'promotions' || VUE === 'campagnes') lireEtape();
+
+  if (CIBLE_DEPOT === 'pack') {
+    EDITE.packs = EDITE.packs || [];
+    if (EDITE.packs[PHOTO_POUR]) EDITE.packs[PHOTO_POUR].image = rep.url;
+    PHOTO_POUR = null;
+    CIBLE_DEPOT = 'fond';
+    return rendre();
+  }
+  if (CIBLE_DEPOT === 'visuel') {
+    EDITE.visuel = rep.url;
+    CIBLE_DEPOT = 'fond';
+    return rendre();
+  }
+
   EDITE.fond = rep.url;
   EDITE.format = format;
   $('#apercu').innerHTML = '<img src="' + rep.url + '" alt="" '

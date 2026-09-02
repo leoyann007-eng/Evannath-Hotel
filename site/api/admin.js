@@ -197,7 +197,9 @@ function nettoyerCampagne(e) {
   const o = {
     id: propre(e.id, 40) || crypto.randomUUID(),
     titre: propre(e.titre, LIMITES.titre),
-    emoji: propre(e.emoji, 8),
+    // L affiche de la campagne — celle publiee sur Facebook. Nom d une
+    // photo du site, ou URL d un visuel depose.
+    visuel: propre(e.visuel, 400),
     accroche: propre(e.accroche, LIMITES.texte),
     note: propre(e.note, 120),
     debut: instant(e.debut),
