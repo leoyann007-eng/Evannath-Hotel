@@ -945,6 +945,8 @@ document.querySelectorAll('.lang button').forEach(function(b){b.onclick=function
      placeholder de champ, par exemple — declare window.EVN_LANG. */
   if(typeof EVN_LANG==='function')EVN_LANG(lg);
 }});
+window.VIGNETTES = ["g-aerien", "g-art", "g-bar", "g-chambre", "g-entree", "g-lagune", "g-lobby", "g-petitdej", "g-resto", "g-seminaire", "g-terrasse", "g-vue", "gal-art-bois", "gal-art-hall", "gal-art-lanterne", "gal-art-lumineuse", "gal-art-masques", "gal-art-salon", "gal-art-statue", "gal-ch-bain", "gal-ch-bureau", "gal-ch-mezz", "gal-ch-salon", "gal-ch-wax", "gal-ch-wax2", "gal-dom-aerien", "gal-dom-batiment", "gal-dom-couchant", "gal-dom-enseigne", "gal-dom-facade", "gal-dom-fontaine", "gal-dom-jardin", "gal-dom-mangrove", "gal-dom-pirogue", "gal-dom-piscine", "gal-dom-reve", "gal-lag-bateau", "gal-lag-cocotiers", "gal-lag-large", "gal-lag-nuit", "gal-lag-ponton", "gal-lag-rotin", "gal-lag-transat", "gal-spa-bassin", "gal-spa-case", "gal-spa-couchant", "gal-spa-huiles", "gal-tab-cave", "gal-tab-cocktail", "gal-tab-cocktails", "gal-tab-comptoir", "gal-tab-corbeille", "gal-tab-dejeuner", "gal-tab-dressee", "gal-tab-fruits", "gal-tab-rotin", "gal-tab-salle", "gal-tab-terrasse", "gal-tab-vin", "ig-jacuzzi"];
+
 window.NOMS_CHAMBRES = {"chambre-standard": "Chambre Standard", "deluxe-baldaquin": "Deluxe · lits à baldaquin", "deluxe-superieure": "Deluxe Supérieure", "suite-anglaise": "Suite Anglaise", "chambre-mezzanine": "Chambre en Mezzanine", "mezzanine-superieure": "Mezzanine Supérieure", "suite-arabe": "Suite Arabe"};
 
 (function(){
@@ -1164,10 +1166,17 @@ window.NOMS_CHAMBRES = {"chambre-standard": "Chambre Standard", "deluxe-baldaqui
         ph.className = 'ph';
         if (p.image) {
           var im = document.createElement('img');
+          /* La vignette quand elle existe : la carte est petite, l image
+             pleine y pese trois a six fois plus pour rien. */
+          var vg = (window.VIGNETTES || []).indexOf(p.image) >= 0 ? '-t' : '';
           im.src = /^https?:/.test(p.image) ? p.image
-            : 'img/opt/' + p.image + '.jpg';
+            : 'img/opt/' + p.image + vg + '.jpg';
           im.alt = p.nom || '';
-          im.loading = 'lazy';
+          /* Pas de chargement paresseux : une image inseree APRES le
+             chargement de la page n est pas prise en charge — verifie, la
+             ressource repond 200 et la meme image en chargement immediat
+             s affiche. Quatre vignettes ne justifient pas ce risque. */
+          im.loading = 'eager';
           im.onerror = function(){ ph.remove(); };
           ph.appendChild(im);
         }

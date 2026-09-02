@@ -621,6 +621,14 @@ AGENDA = ('''
 # si l'API se tait, elle affiche ce qui a ete construit.
 # Les noms des chambres, pour que les remises disent « Suite Anglaise » et
 # non « suite-anglaise ». Ils viennent du catalogue, pas d une liste recopiee.
+# Les cartes de pack sont petites : servir l image pleine y serait trois a
+# six fois plus lourd pour rien. On dit au navigateur lesquelles ont une
+# vignette -t, la version figee les utilise deja.
+import glob as _glob, os as _os
+_vign = sorted(_os.path.basename(f)[:-6] for f in _glob.glob('img/opt/*-t.jpg'))
+JS += (chr(10) + 'window.VIGNETTES = '
+       + _json.dumps(_vign, ensure_ascii=False) + ';' + chr(10))
+
 JS += (chr(10) + 'window.NOMS_CHAMBRES = '
        + _json.dumps({c['slug']: c['nom'] for c in _chambres.CHAMBRES},
                      ensure_ascii=False) + ';' + chr(10))
@@ -843,10 +851,17 @@ JS += """
         ph.className = 'ph';
         if (p.image) {
           var im = document.createElement('img');
+          /* La vignette quand elle existe : la carte est petite, l image
+             pleine y pese trois a six fois plus pour rien. */
+          var vg = (window.VIGNETTES || []).indexOf(p.image) >= 0 ? '-t' : '';
           im.src = /^https?:/.test(p.image) ? p.image
-            : 'img/opt/' + p.image + '.jpg';
+            : 'img/opt/' + p.image + vg + '.jpg';
           im.alt = p.nom || '';
-          im.loading = 'lazy';
+          /* Pas de chargement paresseux : une image inseree APRES le
+             chargement de la page n est pas prise en charge — verifie, la
+             ressource repond 200 et la meme image en chargement immediat
+             s affiche. Quatre vignettes ne justifient pas ce risque. */
+          im.loading = 'eager';
           im.onerror = function(){ ph.remove(); };
           ph.appendChild(im);
         }
