@@ -75,6 +75,12 @@ p{color:#D6CBBB}
 /* NAV : un seul element */
 header{position:fixed;top:0;left:0;right:0;z-index:100;transition:.45s;padding:22px 0;background:rgba(23,16,10,.9);backdrop-filter:blur(14px)}
 header.scrolled{padding:11px 0;background:rgba(23,16,10,.97);border-bottom:1px solid var(--line)}
+/* Menu ouvert : l en-tete devient opaque, et de la couleur du tiroir.
+   Sinon le contenu du menu defile DESSOUS et transparait par les 10 pour cent
+   qui restent — le logo se melangeait au premier lien. La page, elle, ne
+   defile plus quand le menu est ouvert : l en-tete ne passait donc jamais en
+   mode defile, et gardait son fond translucide. */
+header.menu{background:var(--night);backdrop-filter:none;border-bottom:1px solid var(--line)}
 .nav{display:flex;align-items:center;justify-content:space-between;gap:20px}
 .brand img{width:168px;transition:.45s}
 header.scrolled .brand img{width:132px}
@@ -681,6 +687,7 @@ var bg=document.getElementById('bg'),dw=document.getElementById('dw');
 var dwLinks=[].slice.call(dw.querySelectorAll('nav a'));
 function toggleMenu(){
   var o=dw.classList.toggle('open');
+  hd.classList.toggle('menu',o);
   bg.classList.toggle('open',o);
   bg.setAttribute('aria-expanded',o);
   bg.setAttribute('aria-label',o?'Fermer le menu':'Ouvrir le menu');

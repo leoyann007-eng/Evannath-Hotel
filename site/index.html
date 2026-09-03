@@ -781,6 +781,7 @@ var bg=document.getElementById('bg'),dw=document.getElementById('dw');
 var dwLinks=[].slice.call(dw.querySelectorAll('nav a'));
 function toggleMenu(){
   var o=dw.classList.toggle('open');
+  hd.classList.toggle('menu',o);
   bg.classList.toggle('open',o);
   bg.setAttribute('aria-expanded',o);
   bg.setAttribute('aria-label',o?'Fermer le menu':'Ouvrir le menu');
