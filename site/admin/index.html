@@ -408,6 +408,7 @@ async function charger() {
   ETAT.promotions = (tout.donnees && tout.donnees.promotions) || [];
   ETAT.campagnes = (tout.donnees && tout.donnees.campagnes) || [];
   ETAT.version = etat.version || '';
+  ETAT.panne = etat.panne || '';
   if (VERSION_PAGE === null) VERSION_PAGE = ETAT.version;
   else if (ETAT.version && ETAT.version !== VERSION_PAGE) PERIMEE = true;
   ETAT.chambres = chambres;
@@ -438,6 +439,16 @@ function perimee() {
 }
 
 function avertissement() {
+  /* Une panne de lecture passe avant tout le reste : sans ce bandeau, on
+     lit « Aucun événement » et on croit que tout a disparu. */
+  if (ETAT.panne) {
+    return `<div class="alerte">
+      <b>Le stockage ne répond pas</b>
+      <span>${ETAT.panne} Vos données ne sont pas perdues : elles sont dans le
+      magasin, c'est l'accès qui est en défaut. N'enregistrez rien tant que ce
+      message est là — vous écririez par-dessus.</span>
+    </div>`;
+  }
   if (ETAT.stockage === 'durable') return '';
   return `<div class="alerte">
     <b>Mode démonstration</b>

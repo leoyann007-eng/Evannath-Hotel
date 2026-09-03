@@ -63,19 +63,34 @@ let memoire = null;                          // mode demonstration
 const VIDE = { evenements: [], promotions: [], campagnes: [], medias: [],
                maj: null };
 
+/* La derniere lecture en echec, en clair. Vide quand tout va bien.
+   Sans elle, une lecture qui echoue rendait exactement la meme chose qu un
+   magasin vide : zero evenement, zero promotion, zero campagne, et pas un
+   mot. On croit alors avoir tout perdu — alors que les donnees dorment
+   intactes de l autre cote d un jeton qui ne repond plus. */
+let PANNE = '';
+
 async function lire() {
   if (!JETON_BLOB) return memoire || (memoire = structuredClone(VIDE));
   try {
     const { list } = await import('@vercel/blob');
     const { blobs } = await list({ prefix: PREFIXE, token: JETON_BLOB });
+    PANNE = '';
     if (!blobs.length) return structuredClone(VIDE);
     // Si un menage a echoue, plusieurs versions coexistent : on prend la
     // plus recente.
     const b = blobs.slice().sort(
       (x, y) => new Date(y.uploadedAt) - new Date(x.uploadedAt))[0];
     const r = await fetch(b.url, { cache: 'no-store' });
-    return r.ok ? await r.json() : structuredClone(VIDE);
+    if (!r.ok) {
+      PANNE = 'Le fichier de données existe mais n’a pas pu être lu '
+        + '(erreur ' + r.status + '). Rien n’est perdu : réessayez dans un '
+        + 'instant.';
+      return structuredClone(VIDE);
+    }
+    return await r.json();
   } catch (e) {
+    PANNE = expliquer(e);
     return structuredClone(VIDE);
   }
 }
@@ -339,6 +354,10 @@ module.exports = async function handler(req, res) {
   // ── Lecture publique : ce que la page Offres & Evenements consomme ──────
   if (action === 'public') {
     const d = await lire();
+    /* 503 et non 200 avec des listes vides : le site garde alors ce qui est
+       fige dans ses pages au lieu d effacer les affiches de l hotel parce
+       que le stockage n a pas repondu. */
+    if (PANNE) return json(res, 503, { ok: false, message: PANNE });
     // Aucun cache. Une affiche publiee doit apparaitre a la seconde : un
     // cache d'une minute, c'est une minute a se demander si l'enregistrement
     // a fonctionne. La reponse fait quelques centaines d'octets, la depense
@@ -404,6 +423,8 @@ module.exports = async function handler(req, res) {
       ok: true,
       version: VERSION,
       stockage: JETON_BLOB ? 'durable' : 'demonstration',
+      // Vide quand la lecture s est bien passee.
+      panne: PANNE || null,
       // L'identifiant du magasin vise, lisible dans le jeton. Il se compare a
       // celui affiche par Vercel : c'est ainsi qu'on voit a quel magasin on
       // parle. Ce n'est pas la partie secrete, et l'etat demande une session.
@@ -419,7 +440,11 @@ module.exports = async function handler(req, res) {
     });
   }
 
-  if (action === 'tout') return json(res, 200, { ok: true, donnees: await lire() });
+  if (action === 'tout') {
+    const d = await lire();
+    if (PANNE) return json(res, 503, { ok: false, message: PANNE });
+    return json(res, 200, { ok: true, donnees: d });
+  }
 
   /* Televersement d'une affiche.
      L'etablissement communique par des visuels carres qui portent deja
