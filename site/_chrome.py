@@ -70,13 +70,23 @@ WA_TEST        = '2250758408079'        # Leonardo HOUANSOU, pendant les tests
 # point 8 de « A valider » dans le README. En attendant, on garde celle qui
 # est lue.
 MAIL_HOTEL = 'receptionhotelevannath@gmail.com'
+# Ou arrivent les essais tant que l e-mail sert de canal : c est la valeur a
+# donner a la variable MAIL_DEST chez Vercel. Elle n est PAS affichee.
 MAIL_TEST  = 'houansouyannaxel@gmail.com'
 WA_TEST_TEXTE  = '+225 07 58 40 80 79'
 
 # Les deux seules valeurs que le reste du code doit employer.
 WA       = WA_TEST       if WA_EN_TEST else WA_HOTEL
 WA_TEXTE = WA_TEST_TEXTE if WA_EN_TEST else WA_HOTEL_TEXTE
-MAIL     = MAIL_TEST     if WA_EN_TEST else MAIL_HOTEL
+
+# L adresse AFFICHEE est toujours celle de l hotel — un visiteur qui lit une
+# page de l hotel doit y trouver l adresse de l hotel, pas celle de son
+# prestataire. Le mode d essai ne passe pas par elle : les cinq formulaires
+# partent sur WhatsApp, donc sur WA, qui pointe sur mon numero tant que
+# WA_EN_TEST vaut True. Si l envoi par e-mail est un jour rallume
+# (ENVOI_WHATSAPP a False), le destinataire est la variable MAIL_DEST chez
+# Vercel — pas cette constante-ci.
+MAIL     = MAIL_HOTEL
 
 # En mode WhatsApp, la demande n'est transmise QUE si le visiteur appuie sur
 # envoyer dans l'application. Les ecrans de confirmation doivent donc le dire :
