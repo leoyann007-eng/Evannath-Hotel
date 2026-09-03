@@ -326,9 +326,59 @@ footer{background:#0F0A06;border-top:1px solid var(--line);padding:74px 0 28px}
 .bandeau span.t{color:#B4A794;font-size:14px}
 .bandeau .fl{margin-left:auto;color:var(--bronze);white-space:nowrap;font-size:12px;
   letter-spacing:.18em;text-transform:uppercase;font-weight:700}
+
+/* Le bandeau d'une OFFRE mise en avant depuis l'administration — campagne ou
+   promotion. Il doit faire decider, et un hotel de ce standing ne crie pas :
+   ce qui presse ici est une echeance vraie et un prix d'entree, jamais un
+   compte a rebours ni du rouge. Trois appuis, dans l'ordre de lecture :
+   le nom, le prix, la date qui approche. */
+.bandeau.offre a{align-items:stretch;gap:26px;padding:0;
+  background:linear-gradient(90deg,rgba(185,138,80,.10),rgba(30,21,13,0) 48%),
+    var(--bark-2)}
+/* Le filet bronze de gauche : il distingue l'offre de l'annonce d'evenement,
+   sans ajouter ni couleur ni bruit. */
+.bandeau.offre a:before{content:"";width:3px;flex:none;background:var(--bronze)}
+.bandeau .corps{flex:1;min-width:0;padding:17px 0 17px 22px;
+  display:flex;flex-direction:column;gap:5px}
+.bandeau .sur{display:flex;align-items:baseline;gap:9px}
+.bandeau .genre{font-size:10px;letter-spacing:.28em;text-transform:uppercase;
+  color:var(--bronze);font-weight:700;white-space:nowrap}
+.bandeau .compte{font-size:11.5px;color:var(--muted);white-space:nowrap}
+.bandeau .titre-offre{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.bandeau.offre b{font-size:1.34rem}
+.bandeau .prix{font-family:var(--f-display);font-size:1.3rem;color:var(--bronze-2);
+  white-space:nowrap}
+.bandeau .prix i{font-style:normal;font-size:11px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--muted);margin-left:7px}
+/* Une seule ligne : la hauteur du bandeau ne doit pas dependre de la longueur
+   du texte saisi depuis l'administration. */
+.bandeau .accroche{color:#B4A794;font-size:13.5px;line-height:1.5;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bandeau .agir{flex:none;display:flex;flex-direction:column;align-items:flex-end;
+  justify-content:center;gap:11px;padding:17px 22px 17px 0}
+.bandeau .delai{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--muted);white-space:nowrap}
+/* Quand l'echeance approche, elle passe en clair et prend un point : c'est
+   toute l'urgence qu'on s'autorise. */
+.bandeau .delai.court{color:var(--bronze-2)}
+.bandeau .delai.court:before{content:"";display:inline-block;width:5px;height:5px;
+  border-radius:50%;background:var(--bronze);margin-right:8px;vertical-align:middle}
+.bandeau .bouton{border:1px solid var(--bronze);color:var(--bronze-2);
+  padding:10px 20px;font-size:11px;letter-spacing:.2em;text-transform:uppercase;
+  font-weight:700;white-space:nowrap;transition:.3s}
+.bandeau.offre a:hover .bouton{background:var(--bronze);color:var(--night)}
 @media(max-width:760px){
   .bandeau a{flex-wrap:wrap;gap:8px}
   .bandeau span.t,.bandeau .fl{display:none}
+}
+@media(max-width:760px){
+  /* Le bouton, lui, ne disparait jamais : c'est l'action. */
+  .bandeau.offre a{flex-wrap:wrap;gap:0}
+  .bandeau.offre a:before{width:100%;height:3px}
+  .bandeau .corps{width:100%;padding:15px 18px 12px}
+  .bandeau .accroche{display:none}
+  .bandeau .agir{width:100%;flex-direction:row-reverse;align-items:center;
+    justify-content:space-between;padding:0 18px 16px}
 }
 </style>
 <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":["Hotel","LodgingBusiness"],"@id":"https://evannathhotel.vercel.app/#hotel","name":"Hôtel Evannath","alternateName":"Evannath — Le Rêve Africain","slogan":"Le Rêve Africain","description":"Hôtel de 46 chambres et suites à Assinie PK 19, en Côte d'Ivoire, face à la lagune Aby : paillote sur pilotis, piscine, spa, restaurant et salle de séminaire. Navette aéroport offerte.","url":"https://evannathhotel.vercel.app/","logo":"https://evannathhotel.vercel.app/img/opt/logo-blanc.png","image":["https://evannathhotel.vercel.app/img/opt/gal-lag-ponton.jpg","https://evannathhotel.vercel.app/img/opt/hero-aerien.jpg","https://evannathhotel.vercel.app/img/opt/hero-chambre-wax.jpg","https://evannathhotel.vercel.app/img/opt/g-resto.jpg"],"address":{"@type":"PostalAddress","streetAddress":"Assinie PK 19","addressLocality":"Assinie-Mafia","addressRegion":"Comoé","addressCountry":"CI"},"telephone":"+225 27 21 73 12 65","email":"houansouyannaxel@gmail.com","sameAs":["https://www.facebook.com/evannathhotel","https://www.instagram.com/evannathhotel"],"priceRange":"67 000 – 280 000 XOF","currenciesAccepted":"XOF","paymentAccepted":"Espèces, Wave, Orange Money, MTN Mobile Money, carte bancaire","numberOfRooms":{"@type":"QuantitativeValue","value":46},"petsAllowed":false,"amenityFeature":[{"@type":"LocationFeatureSpecification","name":"Piscine exterieure","value":true},{"@type":"LocationFeatureSpecification","name":"Spa","value":true},{"@type":"LocationFeatureSpecification","name":"Sauna","value":true},{"@type":"LocationFeatureSpecification","name":"Restaurant","value":true},{"@type":"LocationFeatureSpecification","name":"Bar","value":true},{"@type":"LocationFeatureSpecification","name":"Wifi gratuit","value":true},{"@type":"LocationFeatureSpecification","name":"Parking gratuit","value":true},{"@type":"LocationFeatureSpecification","name":"Navette aeroport gratuite","value":true},{"@type":"LocationFeatureSpecification","name":"Salle de conference","value":true},{"@type":"LocationFeatureSpecification","name":"Climatisation","value":true},{"@type":"LocationFeatureSpecification","name":"Reception 24h/24","value":true},{"@type":"LocationFeatureSpecification","name":"Petit-dejeuner inclus","value":true},{"@type":"LocationFeatureSpecification","name":"Acces lagune","value":true}],"checkinTime":"14:00","checkoutTime":"12:00","contactPoint":[{"@type":"ContactPoint","contactType":"reservations","telephone":"+225 27 21 73 12 65","email":"houansouyannaxel@gmail.com","availableLanguage":["fr","en"]},{"@type":"ContactPoint","contactType":"reservations","telephone":"+225 01 51 52 75 75","email":"houansouyannaxel@gmail.com","availableLanguage":["fr","en"]}],"hasMap":"https://www.google.com/maps/search/Assinie+PK+19","containsPlace":{"@id":"https://evannathhotel.vercel.app/#restaurant"}},{"@type":"WebSite","@id":"https://evannathhotel.vercel.app/#website","url":"https://evannathhotel.vercel.app/","name":"Hôtel Evannath","inLanguage":"fr-CI","publisher":{"@id":"https://evannathhotel.vercel.app/#hotel"}},{"@type":"Restaurant","@id":"https://evannathhotel.vercel.app/#restaurant","name":"La table de l'Hôtel Evannath","description":"Cuisine ivoirienne et continentale à Assinie PK 19 : poisson du jour, kedjenou, grillades et cocktails, en terrasse face à la piscine.","url":"https://evannathhotel.vercel.app/carte","servesCuisine":["Ivoirienne","Africaine","Française","Fruits de mer"],"priceRange":"XOF","currenciesAccepted":"XOF","address":{"@type":"PostalAddress","streetAddress":"Assinie PK 19","addressLocality":"Assinie-Mafia","addressRegion":"Comoé","addressCountry":"CI"},"telephone":"+225 27 21 73 12 65","image":"https://evannathhotel.vercel.app/img/opt/gal-lag-nuit.jpg","hasMenu":"https://evannathhotel.vercel.app/carte","containedInPlace":{"@id":"https://evannathhotel.vercel.app/#hotel"}}]}</script>
@@ -972,37 +1022,93 @@ document.querySelectorAll('.lang button').forEach(function(b){b.onclick=function
         hero.parentNode.insertBefore(d, hero.nextSibling);
       }
 
-      var r = p.remise || {};
-      var taux;
+      d.className = 'bandeau offre';
+
+      var el = function(balise, cl, txt){
+        var n = document.createElement(balise);
+        if (cl) n.className = cl;
+        if (txt != null) n.textContent = txt;
+        return n;
+      };
+
+      /* Ce qui fait decider tient en trois choses : ce que c'est, a partir de
+         combien, et jusqu'a quand. Aucune n'est inventee — si la donnee
+         manque, la ligne disparait plutot que de mentir. */
+      var UNITES = { personne: 'par personne', enfant: 'par enfant',
+                     nuit: 'la nuit' };
+      var genre, prix, unite = '', compte = '', lien, appel;
+
       if (camp) {
-        /* Une campagne n'a pas de remise : ce qui attire, c'est son prix
-           d'entrée. « Dès 15 000 F » dit plus que « campagne en cours ». */
-        var prix = (p.packs || []).map(function(x){ return Number(x.prix) || 0; })
-          .filter(function(n){ return n > 0; });
-        taux = prix.length
-          ? 'Dès ' + Math.min.apply(null, prix).toLocaleString('fr-FR') + ' F'
-          : 'Campagne en cours';
+        var packs = (p.packs || []).filter(function(x){ return Number(x.prix) > 0; });
+        var bas = packs.slice().sort(function(x, y){ return x.prix - y.prix; })[0];
+        genre = 'Offre de saison';
+        prix = bas ? 'Dès ' + Number(bas.prix).toLocaleString('fr-FR') + ' F' : '';
+        /* L'unite compte : « dès 15 000 F » quand c'est un tarif par enfant
+           n'est pas la meme promesse qu'un forfait. On la dit. */
+        unite = bas ? (UNITES[bas.unite] || '') : '';
+        compte = packs.length > 1 ? packs.length + ' packs' : '';
+        lien = 'circuits.html#campagnes';
+        appel = 'Voir les packs';
       } else {
-        taux = !r.valeur ? 'Offre en cours'
+        var r = p.remise || {};
+        genre = 'Promotion';
+        prix = !r.valeur ? 'Offre en cours'
           : r.type === 'montant'
             ? '−' + Number(r.valeur).toLocaleString('fr-FR') + ' F'
             : '−' + r.valeur + ' %';
+        compte = p.code ? 'Code ' + p.code : '';
+        lien = 'circuits.html#forfaits';
+        appel = 'Voir l’offre';
+      }
+
+      /* L'echeance. Au-dela de deux semaines on donne la date : elle informe.
+         En deca on donne les jours restants : c'est la meme information, mais
+         elle se lit comme une echeance. Sans date de fin, rien. */
+      var delai = '', court = false;
+      if (p.fin) {
+        var f = new Date(p.fin);
+        if (!isNaN(f.getTime())) {
+          if (String(p.fin).length <= 10) f.setHours(23, 59, 59, 0);
+          var jours = Math.ceil((f - new Date()) / 86400000);
+          if (jours > 0 && jours <= 14) {
+            court = true;
+            delai = jours === 1 ? 'Dernier jour' : 'Plus que ' + jours + ' jours';
+          } else if (jours > 14) {
+            delai = 'Jusqu’au ' + f.toLocaleDateString('fr-FR',
+              { day: 'numeric', month: 'long' });
+          }
+        }
       }
 
       var a2 = document.createElement('a');
-      a2.href = 'circuits.html#forfaits';
-      var mettre = function(cl, txt, balise){
-        var el = document.createElement(balise || 'span');
-        if (cl) el.className = cl;
-        el.textContent = txt;
-        a2.appendChild(el);
-      };
-      mettre('quand', taux);
-      mettre('', p.titre || '', 'b');
+      a2.href = lien;
+
+      var corps = el('div', 'corps');
+      var sur = el('div', 'sur');
+      sur.appendChild(el('span', 'genre', genre));
+      if (compte) sur.appendChild(el('span', 'compte', '· ' + compte));
+      corps.appendChild(sur);
+
+      var titre = el('div', 'titre-offre');
+      titre.appendChild(el('b', '', p.titre || ''));
+      if (prix) {
+        var pr = el('span', 'prix', prix);
+        if (unite) pr.appendChild(el('i', '', unite));
+        titre.appendChild(pr);
+      }
+      corps.appendChild(titre);
+
       /* L'accroche d'une campagne tient sur plusieurs lignes : le bandeau
          n'en prend que la première. */
-      mettre('t', (p.message || p.accroche || '').split('\n')[0]);
-      mettre('fl', camp ? 'Voir les packs' : 'Voir l’offre');
+      var texte = (p.message || p.accroche || '').split('\n')[0];
+      if (texte) corps.appendChild(el('span', 'accroche', texte));
+
+      var agir = el('div', 'agir');
+      if (delai) agir.appendChild(el('span', 'delai' + (court ? ' court' : ''), delai));
+      agir.appendChild(el('span', 'bouton', appel));
+
+      a2.appendChild(corps);
+      a2.appendChild(agir);
 
       d.innerHTML = '';
       d.appendChild(a2);

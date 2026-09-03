@@ -310,9 +310,59 @@ footer{background:#0F0A06;border-top:1px solid var(--line);padding:74px 0 28px}
 .bandeau span.t{color:#B4A794;font-size:14px}
 .bandeau .fl{margin-left:auto;color:var(--bronze);white-space:nowrap;font-size:12px;
   letter-spacing:.18em;text-transform:uppercase;font-weight:700}
+
+/* Le bandeau d'une OFFRE mise en avant depuis l'administration — campagne ou
+   promotion. Il doit faire decider, et un hotel de ce standing ne crie pas :
+   ce qui presse ici est une echeance vraie et un prix d'entree, jamais un
+   compte a rebours ni du rouge. Trois appuis, dans l'ordre de lecture :
+   le nom, le prix, la date qui approche. */
+.bandeau.offre a{align-items:stretch;gap:26px;padding:0;
+  background:linear-gradient(90deg,rgba(185,138,80,.10),rgba(30,21,13,0) 48%),
+    var(--bark-2)}
+/* Le filet bronze de gauche : il distingue l'offre de l'annonce d'evenement,
+   sans ajouter ni couleur ni bruit. */
+.bandeau.offre a:before{content:"";width:3px;flex:none;background:var(--bronze)}
+.bandeau .corps{flex:1;min-width:0;padding:17px 0 17px 22px;
+  display:flex;flex-direction:column;gap:5px}
+.bandeau .sur{display:flex;align-items:baseline;gap:9px}
+.bandeau .genre{font-size:10px;letter-spacing:.28em;text-transform:uppercase;
+  color:var(--bronze);font-weight:700;white-space:nowrap}
+.bandeau .compte{font-size:11.5px;color:var(--muted);white-space:nowrap}
+.bandeau .titre-offre{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.bandeau.offre b{font-size:1.34rem}
+.bandeau .prix{font-family:var(--f-display);font-size:1.3rem;color:var(--bronze-2);
+  white-space:nowrap}
+.bandeau .prix i{font-style:normal;font-size:11px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--muted);margin-left:7px}
+/* Une seule ligne : la hauteur du bandeau ne doit pas dependre de la longueur
+   du texte saisi depuis l'administration. */
+.bandeau .accroche{color:#B4A794;font-size:13.5px;line-height:1.5;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bandeau .agir{flex:none;display:flex;flex-direction:column;align-items:flex-end;
+  justify-content:center;gap:11px;padding:17px 22px 17px 0}
+.bandeau .delai{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--muted);white-space:nowrap}
+/* Quand l'echeance approche, elle passe en clair et prend un point : c'est
+   toute l'urgence qu'on s'autorise. */
+.bandeau .delai.court{color:var(--bronze-2)}
+.bandeau .delai.court:before{content:"";display:inline-block;width:5px;height:5px;
+  border-radius:50%;background:var(--bronze);margin-right:8px;vertical-align:middle}
+.bandeau .bouton{border:1px solid var(--bronze);color:var(--bronze-2);
+  padding:10px 20px;font-size:11px;letter-spacing:.2em;text-transform:uppercase;
+  font-weight:700;white-space:nowrap;transition:.3s}
+.bandeau.offre a:hover .bouton{background:var(--bronze);color:var(--night)}
 @media(max-width:760px){
   .bandeau a{flex-wrap:wrap;gap:8px}
   .bandeau span.t,.bandeau .fl{display:none}
+}
+@media(max-width:760px){
+  /* Le bouton, lui, ne disparait jamais : c'est l'action. */
+  .bandeau.offre a{flex-wrap:wrap;gap:0}
+  .bandeau.offre a:before{width:100%;height:3px}
+  .bandeau .corps{width:100%;padding:15px 18px 12px}
+  .bandeau .accroche{display:none}
+  .bandeau .agir{width:100%;flex-direction:row-reverse;align-items:center;
+    justify-content:space-between;padding:0 18px 16px}
 }
 </style>
 {{JSONLD}}

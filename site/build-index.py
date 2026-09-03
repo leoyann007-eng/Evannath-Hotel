@@ -74,37 +74,93 @@ JS_BANDEAU = r"""<script>
         hero.parentNode.insertBefore(d, hero.nextSibling);
       }
 
-      var r = p.remise || {};
-      var taux;
+      d.className = 'bandeau offre';
+
+      var el = function(balise, cl, txt){
+        var n = document.createElement(balise);
+        if (cl) n.className = cl;
+        if (txt != null) n.textContent = txt;
+        return n;
+      };
+
+      /* Ce qui fait decider tient en trois choses : ce que c'est, a partir de
+         combien, et jusqu'a quand. Aucune n'est inventee — si la donnee
+         manque, la ligne disparait plutot que de mentir. */
+      var UNITES = { personne: 'par personne', enfant: 'par enfant',
+                     nuit: 'la nuit' };
+      var genre, prix, unite = '', compte = '', lien, appel;
+
       if (camp) {
-        /* Une campagne n'a pas de remise : ce qui attire, c'est son prix
-           d'entrée. « Dès 15 000 F » dit plus que « campagne en cours ». */
-        var prix = (p.packs || []).map(function(x){ return Number(x.prix) || 0; })
-          .filter(function(n){ return n > 0; });
-        taux = prix.length
-          ? 'Dès ' + Math.min.apply(null, prix).toLocaleString('fr-FR') + ' F'
-          : 'Campagne en cours';
+        var packs = (p.packs || []).filter(function(x){ return Number(x.prix) > 0; });
+        var bas = packs.slice().sort(function(x, y){ return x.prix - y.prix; })[0];
+        genre = 'Offre de saison';
+        prix = bas ? 'Dès ' + Number(bas.prix).toLocaleString('fr-FR') + ' F' : '';
+        /* L'unite compte : « dès 15 000 F » quand c'est un tarif par enfant
+           n'est pas la meme promesse qu'un forfait. On la dit. */
+        unite = bas ? (UNITES[bas.unite] || '') : '';
+        compte = packs.length > 1 ? packs.length + ' packs' : '';
+        lien = 'circuits.html#campagnes';
+        appel = 'Voir les packs';
       } else {
-        taux = !r.valeur ? 'Offre en cours'
+        var r = p.remise || {};
+        genre = 'Promotion';
+        prix = !r.valeur ? 'Offre en cours'
           : r.type === 'montant'
             ? '−' + Number(r.valeur).toLocaleString('fr-FR') + ' F'
             : '−' + r.valeur + ' %';
+        compte = p.code ? 'Code ' + p.code : '';
+        lien = 'circuits.html#forfaits';
+        appel = 'Voir l’offre';
+      }
+
+      /* L'echeance. Au-dela de deux semaines on donne la date : elle informe.
+         En deca on donne les jours restants : c'est la meme information, mais
+         elle se lit comme une echeance. Sans date de fin, rien. */
+      var delai = '', court = false;
+      if (p.fin) {
+        var f = new Date(p.fin);
+        if (!isNaN(f.getTime())) {
+          if (String(p.fin).length <= 10) f.setHours(23, 59, 59, 0);
+          var jours = Math.ceil((f - new Date()) / 86400000);
+          if (jours > 0 && jours <= 14) {
+            court = true;
+            delai = jours === 1 ? 'Dernier jour' : 'Plus que ' + jours + ' jours';
+          } else if (jours > 14) {
+            delai = 'Jusqu’au ' + f.toLocaleDateString('fr-FR',
+              { day: 'numeric', month: 'long' });
+          }
+        }
       }
 
       var a2 = document.createElement('a');
-      a2.href = 'circuits.html#forfaits';
-      var mettre = function(cl, txt, balise){
-        var el = document.createElement(balise || 'span');
-        if (cl) el.className = cl;
-        el.textContent = txt;
-        a2.appendChild(el);
-      };
-      mettre('quand', taux);
-      mettre('', p.titre || '', 'b');
+      a2.href = lien;
+
+      var corps = el('div', 'corps');
+      var sur = el('div', 'sur');
+      sur.appendChild(el('span', 'genre', genre));
+      if (compte) sur.appendChild(el('span', 'compte', '· ' + compte));
+      corps.appendChild(sur);
+
+      var titre = el('div', 'titre-offre');
+      titre.appendChild(el('b', '', p.titre || ''));
+      if (prix) {
+        var pr = el('span', 'prix', prix);
+        if (unite) pr.appendChild(el('i', '', unite));
+        titre.appendChild(pr);
+      }
+      corps.appendChild(titre);
+
       /* L'accroche d'une campagne tient sur plusieurs lignes : le bandeau
          n'en prend que la première. */
-      mettre('t', (p.message || p.accroche || '').split('\n')[0]);
-      mettre('fl', camp ? 'Voir les packs' : 'Voir l’offre');
+      var texte = (p.message || p.accroche || '').split('\n')[0];
+      if (texte) corps.appendChild(el('span', 'accroche', texte));
+
+      var agir = el('div', 'agir');
+      if (delai) agir.appendChild(el('span', 'delai' + (court ? ' court' : ''), delai));
+      agir.appendChild(el('span', 'bouton', appel));
+
+      a2.appendChild(corps);
+      a2.appendChild(agir);
 
       d.innerHTML = '';
       d.appendChild(a2);
