@@ -48,6 +48,11 @@ CSS = """
 .pane>p.sub{color:#B4A794;margin-bottom:30px}
 
 .f{display:flex;flex-direction:column;margin-bottom:18px}
+/* Largeur explicite : sans elle, un <select> reclame la largeur de son
+   option la plus longue — « Mezzanine superieure … » poussait la colonne,
+   donc la page, de 34 px sur un ecran de 320. min-width:0 ne suffit pas :
+   le navigateur garde la taille intrinseque comme plancher. */
+.f input,.f select,.f textarea{width:100%}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 label{font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--bronze);margin-bottom:8px;font-weight:700}
 input,select,textarea{min-height:48px;background:transparent;border:1px solid var(--line);color:var(--cream);
@@ -102,7 +107,7 @@ input::placeholder,textarea::placeholder{color:#6E6154}
 .next-steps i{font-style:normal;color:var(--bronze);font-weight:700;flex:0 0 auto}
 
 @media(max-width:1080px){
-  .grid{grid-template-columns:1fr;gap:40px}
+  .grid{grid-template-columns:minmax(0,1fr);gap:40px}
   .recap{position:static;order:-1}
 }
 @media(max-width:720px){
@@ -110,7 +115,7 @@ input::placeholder,textarea::placeholder{color:#6E6154}
   .steps{flex-direction:column}
   .steps div{border-right:0;border-bottom:1px solid var(--line)}
   .steps div:last-child{border-bottom:0}
-  .two,.pay{grid-template-columns:1fr}
+  .two,.pay{grid-template-columns:minmax(0,1fr)}
 }
 """
 

@@ -156,9 +156,9 @@ input::placeholder,textarea::placeholder{color:#6E6154}
 @media(max-width:720px){
   section{padding:72px 0}
   .cfg,.eq,.two{grid-template-columns:1fr}
-  .plate{grid-template-columns:1fr;gap:10px;padding:28px 0}
+  .plate{grid-template-columns:minmax(0,1fr);gap:10px;padding:28px 0}
   .plate .n{font-size:1.5rem;opacity:1}
-  .plate .q{text-align:left}
+  .plate .q{text-align:left;white-space:normal}
   .coffret .tx{padding:28px}
 }
 """

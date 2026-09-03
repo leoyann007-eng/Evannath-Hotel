@@ -107,7 +107,10 @@ caption{caption-side:bottom;padding:16px 4px 0;font-size:12.5px;color:var(--mute
 @media(max-width:1080px){.rooms{grid-template-columns:repeat(2,1fr)}.inc{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:720px){
   section{padding:64px 0}
-  .rooms{grid-template-columns:1fr;gap:24px}
+  .rooms{grid-template-columns:minmax(0,1fr);gap:24px}
+  /* « Voir la chambre » en majuscules espacees fait 140 px insecables. A
+     cote du prix, dans une carte de 255 px, les deux ne tenaient pas. */
+  .card .go{white-space:normal}
   .bar{position:static;flex-direction:column;align-items:flex-start;gap:14px}
   .inc{grid-template-columns:1fr}
 }

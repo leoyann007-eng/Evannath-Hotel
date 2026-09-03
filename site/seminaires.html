@@ -50,6 +50,15 @@ html{scroll-behavior:smooth}
 body{background:var(--bark);color:var(--cream);font-family:var(--f-body);font-size:16.5px;line-height:1.7;overflow-x:hidden;-webkit-font-smoothing:antialiased}
 img{max-width:100%;height:auto;display:block}
 a{color:inherit;text-decoration:none}
+/* Une adresse e-mail est un seul mot de 200 px, qu aucun espace ne coupe.
+   Dans une colonne etroite elle n elargit pas seulement sa case : elle
+   elargit la grille, puis la page, qui se met a glisser lateralement sous le
+   doigt. Invisible sur un grand ecran. Et body{overflow-x:hidden} n y change
+   rien : c est html qui porte le defilement de la fenetre, pas body. */
+a[href^="mailto:"],a[href^="tel:"]{overflow-wrap:anywhere}
+/* Un <select> prend la largeur de son option la plus longue et refuse de
+   descendre en dessous : il pousse sa colonne, puis la page. */
+input,select,textarea{min-width:0;max-width:100%}
 :focus-visible{outline:2px solid var(--bronze);outline-offset:3px}
 .wrap{max-width:var(--max);margin:0 auto;padding:0 24px}
 .narrow{max-width:900px;margin:0 auto;padding:0 24px}
@@ -272,9 +281,9 @@ input::placeholder,textarea::placeholder{color:#6E6154}
 @media(max-width:720px){
   section{padding:72px 0}
   .cfg,.eq,.two{grid-template-columns:1fr}
-  .plate{grid-template-columns:1fr;gap:10px;padding:28px 0}
+  .plate{grid-template-columns:minmax(0,1fr);gap:10px;padding:28px 0}
   .plate .n{font-size:1.5rem;opacity:1}
-  .plate .q{text-align:left}
+  .plate .q{text-align:left;white-space:normal}
   .coffret .tx{padding:28px}
 }
 

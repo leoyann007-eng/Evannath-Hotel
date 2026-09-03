@@ -138,7 +138,10 @@ section{padding:104px 0}
 @media(max-width:720px){
   section{padding:72px 0}
   .dom{grid-template-columns:1fr}
-  .plate{grid-template-columns:1fr;gap:10px;padding:28px 0}
+  .plate{grid-template-columns:minmax(0,1fr);gap:10px;padding:28px 0}
+  /* La mention de droite etait insecable : elle fixait a elle seule la
+     largeur minimale de la colonne. */
+  .plate .q{white-space:normal}
   .plate .n{font-size:1.5rem;opacity:1}
   .autour div,.cta{padding:26px}
   .band{height:44vh}

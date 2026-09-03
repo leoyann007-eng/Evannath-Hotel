@@ -49,6 +49,15 @@ html{scroll-behavior:smooth}
 body{background:var(--bark);color:var(--cream);font-family:var(--f-body);font-size:16.5px;line-height:1.7;overflow-x:hidden;-webkit-font-smoothing:antialiased}
 img{max-width:100%;height:auto;display:block}
 a{color:inherit;text-decoration:none}
+/* Une adresse e-mail est un seul mot de 200 px, qu aucun espace ne coupe.
+   Dans une colonne etroite elle n elargit pas seulement sa case : elle
+   elargit la grille, puis la page, qui se met a glisser lateralement sous le
+   doigt. Invisible sur un grand ecran. Et body{overflow-x:hidden} n y change
+   rien : c est html qui porte le defilement de la fenetre, pas body. */
+a[href^="mailto:"],a[href^="tel:"]{overflow-wrap:anywhere}
+/* Un <select> prend la largeur de son option la plus longue et refuse de
+   descendre en dessous : il pousse sa colonne, puis la page. */
+input,select,textarea{min-width:0;max-width:100%}
 :focus-visible{outline:2px solid var(--bronze);outline-offset:3px}
 .wrap{max-width:var(--max);margin:0 auto;padding:0 24px}
 .narrow{max-width:900px;margin:0 auto;padding:0 24px}
@@ -194,6 +203,11 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
 .pane>p.sub{color:#B4A794;margin-bottom:30px}
 
 .f{display:flex;flex-direction:column;margin-bottom:18px}
+/* Largeur explicite : sans elle, un <select> reclame la largeur de son
+   option la plus longue — « Mezzanine superieure … » poussait la colonne,
+   donc la page, de 34 px sur un ecran de 320. min-width:0 ne suffit pas :
+   le navigateur garde la taille intrinseque comme plancher. */
+.f input,.f select,.f textarea{width:100%}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 label{font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--bronze);margin-bottom:8px;font-weight:700}
 input,select,textarea{min-height:48px;background:transparent;border:1px solid var(--line);color:var(--cream);
@@ -248,7 +262,7 @@ input::placeholder,textarea::placeholder{color:#6E6154}
 .next-steps i{font-style:normal;color:var(--bronze);font-weight:700;flex:0 0 auto}
 
 @media(max-width:1080px){
-  .grid{grid-template-columns:1fr;gap:40px}
+  .grid{grid-template-columns:minmax(0,1fr);gap:40px}
   .recap{position:static;order:-1}
 }
 @media(max-width:720px){
@@ -256,7 +270,7 @@ input::placeholder,textarea::placeholder{color:#6E6154}
   .steps{flex-direction:column}
   .steps div{border-right:0;border-bottom:1px solid var(--line)}
   .steps div:last-child{border-bottom:0}
-  .two,.pay{grid-template-columns:1fr}
+  .two,.pay{grid-template-columns:minmax(0,1fr)}
 }
 
 </style>

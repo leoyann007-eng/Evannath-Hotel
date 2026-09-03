@@ -269,6 +269,9 @@ section{padding:106px 0}
 .loc-txt ul{list-style:none;margin:24px 0}
 .loc-txt li{padding:13px 0;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:20px;font-size:14px}
 .loc-txt li span:first-child{color:var(--muted);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;font-weight:600}
+/* L adresse e-mail de cette liste n a pas de lien autour d elle : la regle
+   generale ne l atteint pas. Elle mesurait 202 px de large a elle seule. */
+.loc-txt li span:last-child{overflow-wrap:anywhere}
 .loc-map{min-height:440px;background:var(--bark-2)}
 .loc-map iframe{width:100%;height:100%;border:0;filter:grayscale(.35) sepia(.25) contrast(.95)}
 
@@ -291,7 +294,9 @@ footer{background:#0F0A06;border-top:1px solid var(--line);padding:74px 0 28px}
   .rooms,.exp,.offres{grid-template-columns:repeat(2,1fr)}
   .book-card{grid-template-columns:repeat(2,1fr)}
   .book-card>.btn{grid-column:1/-1;justify-content:center}
-  .loc{grid-template-columns:1fr}
+  /* minmax(0,1fr) et non 1fr : un « 1fr » a pour plancher la taille
+     min-content de son contenu, donc une colonne peut depasser sa grille. */
+  .loc{grid-template-columns:minmax(0,1fr)}
   .f-grid{grid-template-columns:repeat(2,1fr)}
   .gal{grid-template-columns:repeat(2,1fr)}
 }
