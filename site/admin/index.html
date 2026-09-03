@@ -20,37 +20,62 @@ a{color:var(--bronze-2);text-decoration:none}
 :focus-visible{outline:2px solid var(--bronze);outline-offset:2px}
 
 /* ── Connexion ─────────────────────────────────────────── */
-#porte{min-height:100vh;display:grid;place-items:center;padding:24px}
-#porte form{width:100%;max-width:380px;background:var(--bark-2);border:1px solid var(--line);padding:38px 34px}
-#porte h1{font-family:var(--f-t);font-size:26px;font-weight:400;margin-bottom:6px}
+/* Une lueur bronze derriere la carte : la page de connexion est la premiere
+   chose que l hotel voit chaque matin, autant qu elle ait un visage. */
+#porte{min-height:100vh;display:grid;place-items:center;padding:24px;
+  background:radial-gradient(1000px 520px at 50% 12%,rgba(185,138,80,.10),
+    transparent 62%),var(--bark)}
+#porte form{width:100%;max-width:400px;background:var(--bark-2);
+  border:1px solid var(--line);padding:40px 36px 36px;text-align:left;
+  box-shadow:0 24px 60px rgba(0,0,0,.45)}
+#porte .logo{display:block;height:44px;width:auto;margin-bottom:14px}
+#porte .devise{font-size:9.5px;letter-spacing:.26em;text-transform:uppercase;
+  color:var(--bronze);margin-bottom:24px}
+#porte h1{font-family:var(--f-t);font-size:25px;font-weight:400;margin-bottom:6px}
 #porte p{color:var(--muted);font-size:13.5px;margin-bottom:26px}
 
 /* ── Cadre ─────────────────────────────────────────────── */
 #cadre{display:none;min-height:100vh;grid-template-columns:250px 1fr}
 #cadre.on{display:grid}
-aside{background:var(--night);border-right:1px solid var(--line);padding:26px 0;position:sticky;top:0;height:100vh;overflow:auto}
-.marque{padding:0 24px 26px;border-bottom:1px solid var(--line);margin-bottom:20px}
-.marque b{font-family:var(--f-t);font-size:18px;font-weight:400;display:block}
+aside{background:var(--night);border-right:1px solid var(--line);padding:26px 0;
+  position:sticky;top:0;height:100vh;overflow:auto}
+.marque{padding:0 22px 24px;border-bottom:1px solid var(--line);margin-bottom:18px}
+.marque img{display:block;height:34px;width:auto;margin-bottom:10px}
 .marque span{font-size:9.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--bronze)}
 nav h2{font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);
   font-weight:700;padding:20px 24px 8px}
 nav button{display:flex;align-items:center;gap:12px;width:100%;background:none;border:0;
   color:var(--cream);font:400 14.5px/1.4 var(--f-b);padding:11px 24px;cursor:pointer;
-  text-align:left;border-left:2px solid transparent;transition:.2s}
-nav button:hover{background:var(--bark-2)}
-nav button.on{background:var(--bark-2);border-left-color:var(--bronze);color:var(--bronze-2)}
-nav button i{font-style:normal;font-size:16px;width:20px;text-align:center}
+  text-align:left;border-left:2px solid transparent;transition:.18s}
+nav button:hover{background:var(--bark-2);color:var(--bronze-2)}
+nav button:hover i{color:var(--bronze)}
+nav button.on{background:linear-gradient(90deg,rgba(185,138,80,.14),transparent 78%);
+  border-left-color:var(--bronze);color:var(--bronze-2)}
+nav button.on i{color:var(--bronze-2)}
+nav button i{font-style:normal;font-size:15px;width:20px;text-align:center;
+  color:var(--muted);transition:.18s}
 
 main{padding:34px 40px 60px;max-width:1100px}
 .entete{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;
   flex-wrap:wrap;margin-bottom:26px}
-h1.t{font-family:var(--f-t);font-size:30px;font-weight:400}
+h1.t{font-family:var(--f-t);font-size:30px;font-weight:400;line-height:1.15}
+/* Un filet bronze sous le titre : la page a une entete, pas seulement un mot. */
+h1.t:after{content:"";display:block;width:44px;height:2px;background:var(--bronze);
+  margin-top:12px}
 .sous{color:var(--muted);font-size:14px;margin-top:4px}
 
 /* ── Blocs ─────────────────────────────────────────────── */
-.carte{background:var(--bark-2);border:1px solid var(--line);padding:24px 26px;margin-bottom:20px}
+/* Un filet clair en haut du bloc, comme une lumiere rasante : il detache la
+   carte du fond sans ombre lourde. */
+.carte{background:linear-gradient(180deg,rgba(255,255,255,.022),transparent 120px),
+  var(--bark-2);border:1px solid var(--line);padding:24px 26px;margin-bottom:20px}
 .chiffres{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:24px}
-.chiffre{background:var(--bark-2);border:1px solid var(--line);padding:22px 24px}
+.chiffre{position:relative;background:var(--bark-2);border:1px solid var(--line);
+  padding:22px 24px;overflow:hidden;transition:.25s}
+/* Un trait bronze en tete du chiffre : l oeil sait ou commencer. */
+.chiffre:before{content:"";position:absolute;top:0;left:0;width:38px;height:2px;
+  background:var(--bronze)}
+.chiffre:hover{border-color:rgba(185,138,80,.36)}
 .chiffre b{font-family:var(--f-t);font-size:34px;color:var(--bronze);display:block;line-height:1}
 .chiffre span{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
   font-weight:700;display:block;margin-top:8px}
@@ -266,8 +291,10 @@ details.plus summary::marker{color:var(--bronze)}
 <!-- ── Connexion ─────────────────────────────────────────── -->
 <div id="porte">
   <form id="fporte">
-    <h1>Hôtel Evannath</h1>
-    <p>Espace d'administration</p>
+    <img class="logo" src="/img/opt/logo-blanc.png" alt="Hôtel Evannath">
+    <p class="devise">Le rêve africain</p>
+    <h1>Espace d'administration</h1>
+    <p>Publiez vos événements, vos promotions et vos campagnes.</p>
     <div class="champ">
       <label for="mdp">Mot de passe</label>
       <input type="password" id="mdp" autocomplete="current-password" required>
@@ -281,7 +308,7 @@ details.plus summary::marker{color:var(--bronze)}
 <div id="cadre">
   <aside>
     <div class="marque">
-      <b>Evannath</b>
+      <img src="/img/opt/logo-blanc.png" alt="Hôtel Evannath">
       <span>Administration</span>
     </div>
     <nav id="menu">
