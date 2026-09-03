@@ -69,6 +69,8 @@ const VIDE = { evenements: [], promotions: [], campagnes: [], medias: [],
    mot. On croit alors avoir tout perdu — alors que les donnees dorment
    intactes de l autre cote d un jeton qui ne repond plus. */
 let PANNE = '';
+// Combien de versions du fichier coexistent. Une seule en temps normal.
+let FICHIERS = 0;
 
 async function lire() {
   if (!JETON_BLOB) return memoire || (memoire = structuredClone(VIDE));
@@ -76,19 +78,30 @@ async function lire() {
     const { list } = await import('@vercel/blob');
     const { blobs } = await list({ prefix: PREFIXE, token: JETON_BLOB });
     PANNE = '';
+    FICHIERS = blobs.length;
     if (!blobs.length) return structuredClone(VIDE);
-    // Si un menage a echoue, plusieurs versions coexistent : on prend la
-    // plus recente.
-    const b = blobs.slice().sort(
-      (x, y) => new Date(y.uploadedAt) - new Date(x.uploadedAt))[0];
-    const r = await fetch(b.url, { cache: 'no-store' });
-    if (!r.ok) {
-      PANNE = 'Le fichier de données existe mais n’a pas pu être lu '
-        + '(erreur ' + r.status + '). Rien n’est perdu : réessayez dans un '
-        + 'instant.';
-      return structuredClone(VIDE);
+    /* Si un menage a echoue, plusieurs versions coexistent : on prend la plus
+       recente. Mais l inventaire est a consistance differee — il rend parfois
+       une version tout juste supprimee, dont l adresse repond 403. On essaie
+       donc les suivantes au lieu d abandonner a la premiere : abandonner
+       revenait a dire « rien a lire », et le 403 tombait au hasard des
+       instants, une fois sur deux. */
+    const versions = blobs.slice().sort(
+      (x, y) => new Date(y.uploadedAt) - new Date(x.uploadedAt));
+    let dernier = '';
+    for (const b of versions) {
+      try {
+        const r = await fetch(b.url, { cache: 'no-store' });
+        if (r.ok) return await r.json();
+        dernier = 'erreur ' + r.status;
+      } catch (e) {
+        dernier = e.message;
+      }
     }
-    return await r.json();
+    PANNE = 'Aucune des ' + versions.length + ' versions du fichier de données '
+      + 'n’a pu être lue (' + dernier + '). Rien n’est perdu : réessayez dans '
+      + 'un instant.';
+    return structuredClone(VIDE);
   } catch (e) {
     PANNE = expliquer(e);
     return structuredClone(VIDE);
@@ -425,6 +438,7 @@ module.exports = async function handler(req, res) {
       stockage: JETON_BLOB ? 'durable' : 'demonstration',
       // Vide quand la lecture s est bien passee.
       panne: PANNE || null,
+      fichiers: FICHIERS,
       // L'identifiant du magasin vise, lisible dans le jeton. Il se compare a
       // celui affiche par Vercel : c'est ainsi qu'on voit a quel magasin on
       // parle. Ce n'est pas la partie secrete, et l'etat demande une session.
