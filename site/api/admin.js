@@ -493,6 +493,12 @@ module.exports = async function handler(req, res) {
         message: message || 'Il manque le ' + manque.join(' et le ') + '.' });
     }
     const d = await lire();
+    /* JAMAIS d ecriture par-dessus une lecture en echec. lire() rend un objet
+       vide quand elle echoue ; on inserait l entree dedans, puis ecrire()
+       ecrasait le fichier et supprimait la version precedente. Deux affiches
+       ont disparu comme ca. */
+    if (PANNE) return json(res, 503, { ok: false, message: PANNE
+      + ' Rien n a ete enregistre : ecrire maintenant effacerait le reste.' });
     d[type] = d[type] || [];
     const i = d[type].findIndex((x) => x.id === objet.id);
     if (i >= 0) d[type][i] = objet; else d[type].push(objet);
@@ -507,6 +513,12 @@ module.exports = async function handler(req, res) {
     if (typeof corps === 'string') { try { corps = JSON.parse(corps); } catch { corps = {}; } }
     const type = collection(corps.type);
     const d = await lire();
+    /* JAMAIS d ecriture par-dessus une lecture en echec. lire() rend un objet
+       vide quand elle echoue ; on inserait l entree dedans, puis ecrire()
+       ecrasait le fichier et supprimait la version precedente. Deux affiches
+       ont disparu comme ca. */
+    if (PANNE) return json(res, 503, { ok: false, message: PANNE
+      + ' Rien n a ete enregistre : ecrire maintenant effacerait le reste.' });
     d[type] = (d[type] || []).filter((x) => x.id !== corps.id);
     const w = await ecrire(d);
     if (!w.ok) return json(res, 502, { ok: false, message: w.message });
@@ -519,6 +531,8 @@ module.exports = async function handler(req, res) {
     if (typeof corps === 'string') { try { corps = JSON.parse(corps); } catch { corps = {}; } }
     const type = collection(corps.type);
     const d = await lire();
+    if (PANNE) return json(res, 503, { ok: false, message: PANNE
+      + ' Rien n a ete enregistre : ecrire maintenant effacerait le reste.' });
     const par = new Map((d[type] || []).map((x) => [x.id, x]));
     d[type] = (corps.ordre || []).map((id) => par.get(id)).filter(Boolean);
     const w = await ecrire(d);
