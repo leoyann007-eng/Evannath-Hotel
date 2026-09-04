@@ -340,12 +340,34 @@ let ETAT = { stockage: '', magasin: '', variable: '', evenements: [],
 /* Quand on choisit la photo d un pack, il faut savoir DE QUEL pack : la
    grille de photos est unique, les packs sont plusieurs. */
 let PHOTO_POUR = null;
-/* La version du serveur au moment ou cette page a ete chargee. Si le serveur
-   en annonce une autre plus tard, c est qu un deploiement a eu lieu depuis :
-   cette page execute du code perime, et ce qu on y fait peut se perdre en
-   silence. */
-let VERSION_PAGE = null;
+/* L empreinte du fichier de CETTE page, telle que le serveur la sert.
+   Le numero de version du deploiement ne convenait pas : il change des qu on
+   met en ligne quoi que ce soit, y compris une correction sur le site public
+   qui ne touche pas l administration. Le bandeau apparaissait alors apres
+   chaque mise en ligne, sans raison, et un avertissement qui se trompe finit
+   par ne plus etre lu.
+
+   Ce qui compte n est pas que le serveur ait change : il est interroge a
+   chaque appel, il est donc toujours a jour. Ce qui compte est que le code
+   de cette page-ci ait change pendant qu elle etait ouverte — c est le seul
+   cas ou recharger sert a quelque chose. */
+let EMPREINTE = null;
 let PERIMEE = false;
+
+async function verifierEmpreinte() {
+  try {
+    const r = await fetch('/admin/index.html?e=' + Date.now(),
+      { method: 'HEAD', cache: 'no-store' });
+    const e = r.headers.get('etag') || r.headers.get('last-modified') || '';
+    // Sans empreinte — un serveur local, par exemple — on ne dit rien plutot
+    // que d avertir a tort.
+    if (!e) return;
+    if (EMPREINTE === null) EMPREINTE = e;
+    else if (e !== EMPREINTE) PERIMEE = true;
+  } catch (err) {
+    /* Reseau coupe : ce n est pas une raison de crier au loup. */
+  }
+}
 let CIBLE_DEPOT = 'fond';
 let VUE = 'bord';
 let EDITE = null;                       // l'entree en cours de modification
@@ -409,8 +431,7 @@ async function charger() {
   ETAT.campagnes = (tout.donnees && tout.donnees.campagnes) || [];
   ETAT.version = etat.version || '';
   ETAT.panne = etat.panne || '';
-  if (VERSION_PAGE === null) VERSION_PAGE = ETAT.version;
-  else if (ETAT.version && ETAT.version !== VERSION_PAGE) PERIMEE = true;
+  await verifierEmpreinte();
   ETAT.chambres = chambres;
   ETAT.images = images;
   rendre();
