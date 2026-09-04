@@ -275,7 +275,7 @@ var cat=document.getElementById('cat'),d1=document.getElementById('d1'),
 function libelleCat(k){
   var t=EVN_REMISE.prix(CH[k][1],k);
   return CH[k][0]+' — '+fmt(t)+' FCFA'
-    +(t<CH[k][1]?' (au lieu de '+fmt(CH[k][1])+')':'');
+    +(t<CH[k][1]?' ('+T[LG].aulieu+' '+fmt(CH[k][1])+')':'');
 }
 Object.keys(CH).forEach(function(k){
   var o=document.createElement('option');
@@ -291,11 +291,13 @@ function iso(d){return new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOStri
    le point d'extension prevu pour ce cas. */
 var LG='fr';
 var T={fr:{loc:'fr-FR',p1:' personne',pp:' personnes',n1:'Nuit',nn:'Nuits',tarif:'Tarif',
+           aulieu:'au lieu de',
            merci:'{{CG}}Merci ',dem:'. Votre demande pour la ',du:' du ',au:' au ',
            part:"{{PART}}",
            solde:"Le solde se règle à l'arrivée, sur place.",
            nav1:'Votre navette aéroport est notée (',nav2:"). Le solde se règle à l'arrivée."},
      en:{loc:'en-GB',p1:' guest',pp:' guests',n1:'Night',nn:'Nights',tarif:'Rate',
+           aulieu:'instead of',
            merci:'{{CG_EN}}Thank you ',dem:'. Your request for the ',du:' from ',au:' to ',
            part:'{{PART_EN}}',
            solde:'The balance is settled on arrival, at the hotel.',
@@ -304,7 +306,11 @@ function jour(v){return v?new Date(v).toLocaleDateString(T[LG].loc,{weekday:'lon
 /* Le recapitulatif a la place d'etre compact ; une demande relue en janvier
    pour un sejour de decembre, non. Le message porte donc l'annee. */
 function jourAn(v){return v?new Date(v).toLocaleDateString(T[LG].loc,{weekday:'long',day:'numeric',month:'long',year:'numeric'}):'—'}
-function EVN_LANG(lg){ LG=T[lg]?lg:'fr'; remplirPax(); calc(); }
+function EVN_LANG(lg){ LG=T[lg]?lg:'fr';
+  /* Les libelles des categories sont ecrits par ce script : [data-t] ne
+     les atteint pas, il faut les refaire a la main a chaque bascule. */
+  [].forEach.call(cat.options,function(o){o.textContent=libelleCat(o.value)});
+  remplirPax(); calc(); }
 
 // on reprend ce qui a été choisi sur la fiche chambre
 var q=new URLSearchParams(location.search);
