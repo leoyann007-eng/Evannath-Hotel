@@ -431,6 +431,7 @@ async function charger() {
   ETAT.campagnes = (tout.donnees && tout.donnees.campagnes) || [];
   ETAT.version = etat.version || '';
   ETAT.panne = etat.panne || '';
+  ETAT.fichiers = etat.fichiers || 0;
   await verifierEmpreinte();
   ETAT.chambres = chambres;
   ETAT.images = images;
@@ -1362,6 +1363,10 @@ function rendre() {
           <code style="font-size:12px;color:var(--sand)">${ETAT.magasin}</code>
           </div>
 
+        <div class="ligne"><div class="txt"><b>Sauvegardes</b>
+          <span>Exemplaires du fichier de données conservés. Chaque publication
+          en ajoute un ; les dix plus récents sont gardés.</span></div>
+          <code style="font-size:12px;color:var(--sand)">${ETAT.fichiers || 0}</code></div>
         <div class="ligne"><div class="txt"><b>Variable lue</b>
           <span>Le nom de la variable d'environnement d'où vient le jeton.</span>
           </div><code style="font-size:12px;color:var(--sand)">${

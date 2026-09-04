@@ -58,6 +58,12 @@ const DUREE = 12 * 3600;                     // 12 h de session
 // le magasin l'est : n'importe qui lirait tout, brouillons non publies
 // compris. On le retrouve par prefixe, cote serveur, jeton en main.
 const PREFIXE = 'evannath/donnees';
+/* Combien d exemplaires du fichier on conserve. Il pese deux kilo-octets :
+   en garder dix coute vingt kilo-octets, et transforme une catastrophe en un
+   retour en arriere. Le 3 septembre 2026, une ecriture par-dessus une lecture
+   en echec a efface deux affiches ; il n existait alors qu un seul
+   exemplaire, et rien derriere. */
+const GARDE = 10;
 let memoire = null;                          // mode demonstration
 
 const VIDE = { evenements: [], promotions: [], campagnes: [], medias: [],
@@ -89,10 +95,24 @@ async function lire() {
     const versions = blobs.slice().sort(
       (x, y) => new Date(y.uploadedAt) - new Date(x.uploadedAt));
     let dernier = '';
-    for (const b of versions) {
+    for (let i = 0; i < versions.length; i++) {
+      const b = versions[i];
       try {
         const r = await fetch(b.url, { cache: 'no-store' });
-        if (r.ok) return await r.json();
+        if (r.ok) {
+          /* Se rabattre sur une version anterieure sauve l affichage, mais ce
+             qu on montre alors n est PAS l etat courant. Enregistrer par-dessus
+             ecraserait des modifications plus recentes avec du vieux : on
+             previent, et les ecritures refusent. */
+          if (i > 0) {
+            PANNE = 'La version la plus récente du fichier de données n’a pas '
+              + 'pu être lue. Ce qui s’affiche date du '
+              + new Date(b.uploadedAt).toLocaleString('fr-FR')
+              + '. N’enregistrez rien : vous écraseriez des modifications plus '
+              + 'récentes. Rechargez dans un instant.';
+          }
+          return await r.json();
+        }
         dernier = 'erreur ' + r.status;
       } catch (e) {
         dernier = e.message;
@@ -120,10 +140,16 @@ async function ecrire(donnees) {
     await put(PREFIXE + '.json', JSON.stringify(donnees), {
       access: 'public', token: JETON_BLOB, contentType: 'application/json',
     });
-    // Les versions precedentes partent APRES l'ecriture : si celle-ci echoue,
-    // l'ancienne reste en place plutot que de tout perdre.
-    if (avant.blobs.length) {
-      try { await del(avant.blobs.map((b) => b.url), { token: JETON_BLOB }); }
+    /* Les versions precedentes partent APRES l'ecriture : si celle-ci echoue,
+       l'ancienne reste en place plutot que de tout perdre. On n'enleve que le
+       surplus — les GARDE-1 plus recentes restent, et forment avec la nouvelle
+       les GARDE exemplaires conserves. */
+    const surplus = avant.blobs.slice()
+      .sort((x, y) => new Date(y.uploadedAt) - new Date(x.uploadedAt))
+      .slice(GARDE - 1)
+      .map((b) => b.url);
+    if (surplus.length) {
+      try { await del(surplus, { token: JETON_BLOB }); }
       catch (e) { /* du menage rate ne doit pas faire echouer la publication */ }
     }
     return { ok: true };
