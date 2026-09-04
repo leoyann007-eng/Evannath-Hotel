@@ -454,13 +454,13 @@ footer{background:#0F0A06;border-top:1px solid var(--line);padding:74px 0 28px}
     </div>
     <div class="field"><label for="cat" data-t="cat">Catégorie</label>
       <select id="cat">
-        <option value="67000">Chambre Standard</option>
-        <option value="82000">Deluxe · lits à baldaquin</option>
-        <option value="97000">Deluxe Supérieure</option>
-        <option value="107000">Suite Anglaise</option>
-        <option value="127000">Chambre en Mezzanine</option>
-        <option value="142000">Mezzanine Supérieure</option>
-        <option value="280000">Suite Arabe</option>
+        <option value="67000" data-slug="chambre-standard">Chambre Standard</option>
+        <option value="82000" data-slug="deluxe-baldaquin">Deluxe · lits à baldaquin</option>
+        <option value="97000" data-slug="deluxe-superieure">Deluxe Supérieure</option>
+        <option value="107000" data-slug="suite-anglaise">Suite Anglaise</option>
+        <option value="127000" data-slug="chambre-mezzanine">Chambre en Mezzanine</option>
+        <option value="142000" data-slug="mezzanine-superieure">Mezzanine Supérieure</option>
+        <option value="280000" data-slug="suite-arabe">Suite Arabe</option>
       </select>
     </div>
     <button type="submit" class="btn btn-solid" data-t="check">Vérifier</button>
@@ -752,6 +752,7 @@ footer{background:#0F0A06;border-top:1px solid var(--line);padding:74px 0 28px}
 window.addEventListener('load',function(){document.getElementById('pre').classList.add('done')});
 setTimeout(function(){document.getElementById('pre').classList.add('done')},2600);
 
+{{REMISE_JS}}
 {{NAV_BASE}}
 
 // Les visuels suivants ne sont chargés qu'une fois la page affichée.
@@ -798,8 +799,31 @@ function calc(){
   var a=new Date(d1.value),b=new Date(d2.value);
   var n=Math.round((b-a)/864e5); if(!n||n<1)n=1;
   document.getElementById('nn').textContent=n;
-  document.getElementById('tt').textContent=fmt(n*+cat.value)+' FCFA';
+  /* Le tarif applique, pas celui de la grille : une estimation qui ignore la
+     promotion annoncee trois ecrans plus bas serait fausse des l'accueil. */
+  var o=cat.options[cat.selectedIndex];
+  var tarif=EVN_REMISE.prix(+cat.value, o ? o.dataset.slug : '');
+  document.getElementById('tt').textContent=fmt(n*tarif)+' FCFA';
 }
+EVN_REMISE.quand(function(R){
+  calc();
+  document.querySelectorAll('.room-foot').forEach(function(pied){
+    var lien=pied.querySelector('a[href$=".html"]');
+    var b=pied.querySelector('.price b');
+    if(!lien||!b)return;
+    var slug=lien.getAttribute('href').replace('.html','');
+    var plein=Number(b.textContent.replace(/[^0-9]/g,''))||0;
+    var tarif=R.prix(plein,slug);
+    if(!plein||tarif>=plein)return;
+    var barre=document.createElement('s');
+    barre.className='avant';
+    barre.textContent=fmt(plein);
+    b.parentNode.insertBefore(barre,b);
+    b.textContent=fmt(tarif);
+    b.className='apres';
+  });
+});
+
 [d1,d2,cat].forEach(function(e){e.addEventListener('change',calc)});
 document.getElementById('bkf').addEventListener('submit',function(e){e.preventDefault();calc();out.classList.add('show');out.scrollIntoView({block:'center',behavior:'smooth'})});
 calc();

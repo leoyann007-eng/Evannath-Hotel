@@ -11,7 +11,7 @@ et un tableau recapitulatif des sept categories cote a cote.
 import io
 import _schema
 from _chambres import CHAMBRES, FAMILLE
-from _chrome import page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV, SITE
+from _chrome import REMISE_JS, REMISE_CSS, page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV, SITE
 
 
 def fmt(n):
@@ -20,7 +20,7 @@ def fmt(n):
 
 FAM_NOM = {'chambre': 'Chambre', 'suite': 'Suite', 'famille': 'Famille'}
 
-CSS = """
+CSS = REMISE_CSS + """
 /* Une promotion en cours se signale sur la carte de la chambre visee.
    Le badge est pose apres coup, en JavaScript : la page est statique, la
    promotion ne l est pas. */
@@ -73,6 +73,11 @@ section{padding:88px 0}
   line-height:1;font-variant-numeric:tabular-nums;font-weight:400}
 .card .pr span{font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:600}
 .card .go{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--bronze);font-weight:700;white-space:nowrap}
+/* Le prix d avant, barre, au-dessus du prix remise. Au-dessus et non a cote :
+   les deux nombres cote a cote se lisent comme une fourchette. */
+.card .pr .avant{display:block;font-family:var(--f-body);font-size:12.5px;
+  margin:0 0 2px;line-height:1}
+td.num .avant{margin-right:.5em}
 .card:hover .go{color:var(--bronze-2)}
 .vide{display:none;text-align:center;color:var(--muted);padding:60px 0;font-style:italic}
 .vide.on{display:block}
@@ -214,9 +219,11 @@ b.append('''  </div>
         <tbody>''')
 
 for c in sorted(CHAMBRES, key=lambda x: x['prix']):
-    b.append('          <tr><th scope="row"><a href="%s.html">%s</a></th>'
+    b.append('          <tr data-slug="%s" data-prix="%d">'
+             '<th scope="row"><a href="%s.html">%s</a></th>'
              '<td>%s</td><td>%d</td><td>%s</td><td class="num">%s F</td></tr>'
-             % (c['slug'], c['nom'], FAM_NOM[FAMILLE[c['slug']]], c['pax'],
+             % (c['slug'], c['prix'], c['slug'], c['nom'],
+                FAM_NOM[FAMILLE[c['slug']]], c['pax'],
                 c['meta'].split('·')[-1].strip(), fmt(c['prix'])))
 
 b.append('''        </tbody>
@@ -301,40 +308,64 @@ LD = _schema.bloc(
     _schema.hotel(),
     _schema.fil([('Accueil', 'index'), ('Chambres &amp; Suites', None)]))
 
-JS += '''
+JS += REMISE_JS + '''
 
-/* Les promotions publiees depuis l administration posent un badge sur les
-   chambres visees. Le serveur ne renvoie que celles dont la periode court.
-   Si l API se tait, les cartes restent telles quelles : une promotion non
-   signalee vaut mieux qu une page qui ne s affiche pas. */
-fetch('/api/admin?a=public', { cache: 'no-store' })
-  .then(function(r){ return r.ok ? r.json() : null; })
-  .then(function(j){
-    if (!j || !j.promotions) return;
-    j.promotions.forEach(function(p){
-      if (p.pastille === false) return;
-      var r = p.remise || {};
-      if (!r.valeur) return;
-      var texte = r.type === 'montant'
-        ? '−' + Number(r.valeur).toLocaleString('fr-FR') + ' F'
-        : '−' + r.valeur + ' %';
-      var c = p.cible || {};
-      [].slice.call(document.querySelectorAll('.card[data-slug]'))
-        .forEach(function(carte){
-          var vise = c.toutes !== false
-            || (c.chambres || []).indexOf(carte.dataset.slug) >= 0;
-          if (!vise || carte.querySelector('.promo')) return;
-          var ph = carte.querySelector('.ph');
-          if (!ph) return;
-          var b = document.createElement('span');
-          b.className = 'promo';
-          b.textContent = texte;
-          b.title = p.titre || 'Promotion en cours';
-          ph.appendChild(b);
-        });
-    });
-  })
-  .catch(function(){});
+/* Une promotion en cours pose son etiquette sur la carte ET remplace le prix.
+   L etiquette seule laissait le client decouvrir le tarif plein a l etape
+   suivante : elle annoncait une remise que la page ne tenait pas.
+   Si l API se tait, tout reste au prix affiche — c est le bon sens du repli. */
+EVN_REMISE.quand(function (R) {
+  var fmt = function (n) { return Number(n).toLocaleString('fr-FR'); };
+  var etiquette = R.etiquette();
+
+  [].slice.call(document.querySelectorAll('.card[data-slug]')).forEach(function (carte) {
+    var p = R.pour(carte.dataset.slug);
+    if (!p) return;
+    var plein = Number(carte.dataset.prix) || 0;
+    var remise = R.prix(plein, carte.dataset.slug);
+    if (remise >= plein) return;
+
+    if (p.pastille !== false && !carte.querySelector('.promo')) {
+      var ph = carte.querySelector('.ph');
+      if (ph) {
+        var b = document.createElement('span');
+        b.className = 'promo';
+        b.textContent = etiquette;
+        b.title = R.titre();
+        ph.appendChild(b);
+      }
+    }
+
+    var pr = carte.querySelector('.pr b');
+    if (!pr) return;
+    var avant = document.createElement('s');
+    avant.className = 'avant';
+    avant.textContent = fmt(plein) + ' F';
+    pr.parentNode.insertBefore(avant, pr);
+    pr.textContent = fmt(remise);
+    pr.classList.add('apres');
+    /* Le lien de la carte annonce le tarif aux lecteurs d ecran : il doit
+       dire le meme prix que ce qui est affiche. */
+    var lien = carte.querySelector('a[aria-label]');
+    if (lien) {
+      lien.setAttribute('aria-label', lien.getAttribute('aria-label')
+        .replace(fmt(plein), fmt(remise)) + ', remise ' + etiquette);
+    }
+  });
+
+  /* Le comparateur affiche les memes prix que les cartes, sinon il devient
+     l endroit ou le client verifie et trouve autre chose. */
+  [].slice.call(document.querySelectorAll('tr[data-slug]')).forEach(function (tr) {
+    if (!R.pour(tr.dataset.slug)) return;
+    var plein = Number(tr.dataset.prix) || 0;
+    var remise = R.prix(plein, tr.dataset.slug);
+    if (remise >= plein) return;
+    var td = tr.querySelector('td.num');
+    if (!td) return;
+    td.innerHTML = '<s class="avant">' + fmt(plein) + '</s>'
+      + '<span class="apres">' + fmt(remise) + ' F</span>';
+  });
+});
 '''
 
 io.open('chambres.html', 'w', encoding='utf-8').write(page(

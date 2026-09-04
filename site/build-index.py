@@ -8,6 +8,7 @@ propre que les six valeurs de couleur qui lui sont specifiques.
 """
 import io
 NL_ = chr(10)
+from _chrome import REMISE_JS, REMISE_CSS
 from _chrome import (TOKENS, NAV_BASE, LANG_JS, dimensionner, responsive, versionner,
                      liens_nav, EN_NAV, WA, WA_TEXTE, MAIL)
 from _evenements import EVENEMENTS, EN as EV_EN
@@ -175,7 +176,8 @@ html = (html
         .replace('{{EN_NAV}}', EN_NAV + EN_BANDEAU)
         .replace('{{WA}}', WA)
         .replace('{{WA_TEXTE}}', WA_TEXTE)
-        .replace('{{TOKENS}}', TOKENS)
+        .replace('{{TOKENS}}', TOKENS + REMISE_CSS)
+        .replace('{{REMISE_JS}}', REMISE_JS)
         .replace('{{NAV_BASE}}', NAV_BASE)
         .replace('{{LANG_JS}}', LANG_JS)
         .replace('{{JSONLD}}', _schema.bloc(_schema.hotel(complet=True),

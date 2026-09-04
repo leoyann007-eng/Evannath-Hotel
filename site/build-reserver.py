@@ -8,6 +8,7 @@ le sejour, collecte les coordonnees et simule le paiement de l'acompte.
 import io, json
 from _chrome import PROSPECTION
 from _chrome import ENVOI_JS, PIEGE, secours
+from _chrome import REMISE_JS, REMISE_CSS
 from _chrome import (page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV, EN_SECOURS,
                      CONF_TITRE, CONF_TITRE_EN, CONF_GESTE, CONF_GESTE_EN,
                      ENVOI_WHATSAPP)
@@ -22,7 +23,7 @@ CHAMBRES = {
  'suite-arabe':          ('Suite Arabe', 280000, 6, 'sa-main'),
 }
 
-CSS = """
+CSS = REMISE_CSS + """
 .head{padding:150px 0 30px}
 .head h1{margin:10px 0 14px}
 .head p{max-width:56ch;font-size:1.04rem}
@@ -249,6 +250,9 @@ body = [header('index.html#chambres', 'Nos chambres', 'navch'), drawer('index.ht
       <div class="row"><span id="rnl">Nuits</span><span id="rn">—</span></div>
       <div class="row"><span data-t="rr3">Voyageurs</span><span id="rp">—</span></div>
       <div class="row"><span id="rul">Tarif</span><span id="ru">—</span></div>
+      <!-- Vide et masquee tant qu'aucune promotion ne court. -->
+      <div class="row" id="rrem" hidden><span id="rreml">Remise</span>
+        <span id="rremv" style="color:var(--palm)">—</span></div>
       <div class="row"><span data-t="rr4">Taxe de séjour</span><span id="rt">—</span></div>
       <div class="row"><span data-t="rr5">Petit-déjeuner</span><span style="color:var(--palm)" data-t="rr5v">Inclus</span></div>
       <div class="tot"><span data-t="rr6">Total séjour</span><b id="rtot">—</b></div>
@@ -260,7 +264,7 @@ body = [header('index.html#chambres', 'Nos chambres', 'navch'), drawer('index.ht
 
 ''' + FOOTER]
 
-JS = NAV_JS + ENVOI_JS + '''
+JS = NAV_JS + ENVOI_JS + REMISE_JS + '''
 
 var CH=''' + json.dumps(CHAMBRES, ensure_ascii=False) + ''';
 var TAX=1500; // taxe de séjour par personne et par nuit
@@ -268,9 +272,14 @@ var TAX=1500; // taxe de séjour par personne et par nuit
 var cat=document.getElementById('cat'),d1=document.getElementById('d1'),
     d2=document.getElementById('d2'),pax=document.getElementById('pax');
 
+function libelleCat(k){
+  var t=EVN_REMISE.prix(CH[k][1],k);
+  return CH[k][0]+' — '+fmt(t)+' FCFA'
+    +(t<CH[k][1]?' (au lieu de '+fmt(CH[k][1])+')':'');
+}
 Object.keys(CH).forEach(function(k){
   var o=document.createElement('option');
-  o.value=k; o.textContent=CH[k][0]+' — '+fmt(CH[k][1])+' FCFA';
+  o.value=k; o.textContent=libelleCat(k);
   cat.appendChild(o);
 });
 
@@ -320,7 +329,12 @@ function calc(){
   var n=Math.round((b-a)/864e5);
   if(!n||n<1){n=1;d2.value=iso(new Date(a.getTime()+864e5))}
   var c=CH[cat.value],p=+pax.value;
-  var sejour=c[1]*n, taxe=TAX*p*n, total=sejour+taxe, acc=Math.round(total*0.3);
+  /* PLEIN est le tarif de la grille, TARIF ce qu'on facture. Une promotion en
+     cours les separe. On calcule sur TARIF : afficher une remise sans la
+     deduire du total serait la pire des deux versions. */
+  var plein=c[1], tarif=EVN_REMISE.prix(plein, cat.value), remise=plein-tarif;
+  var brut=plein*n, sejour=tarif*n, taxe=TAX*p*n,
+      total=sejour+taxe, acc=Math.round(total*0.3);
 
   document.getElementById('rimg').src='img/opt/'+c[3]+'.jpg';
   document.getElementById('rimg').alt=c[0];
@@ -330,13 +344,37 @@ function calc(){
   document.getElementById('rnl').textContent=n>1?T[LG].nn:T[LG].n1;
   document.getElementById('rn').textContent=n;
   document.getElementById('rp').textContent=p+(p>1?T[LG].pp:T[LG].p1);
-  document.getElementById('rul').textContent=fmt(c[1])+' × '+n;
-  document.getElementById('ru').textContent=fmt(sejour);
+  /* La ligne de tarif reste au prix de la grille, et la remise se deduit en
+     dessous : c'est la seule presentation ou la colonne s'additionne. Un
+     sous-total deja remise suivi d'une ligne de remise se lit comme une
+     double deduction — le client additionne, et ne retombe pas sur le
+     total. */
+  document.getElementById('rul').textContent=fmt(plein)+' × '+n;
+  /* La ligne de remise dit combien elle retire, en francs : « −20 % » ne se
+     verifie pas de tete, « −26 800 F » se verifie. */
+  var lr=document.getElementById('rrem');
+  if(remise>0){
+    lr.hidden=false;
+    document.getElementById('rreml').textContent=EVN_REMISE.titre();
+    document.getElementById('rremv').textContent='−'+fmt(remise*n)+' FCFA';
+  }else{
+    lr.hidden=true;
+  }
+  document.getElementById('ru').textContent=fmt(brut);
   document.getElementById('rt').textContent=fmt(taxe);
   document.getElementById('rtot').textContent=fmt(total);
   document.getElementById('racc').textContent=fmt(acc)+' FCFA';
   document.getElementById('rsolde').textContent=fmt(total-acc)+' FCFA';
 }
+/* La remise arrive apres le premier calcul : on refait le menu et le
+   recapitulatif des qu'elle est la. Si l'API se tait, tout reste au tarif
+   plein — le repli sur. */
+EVN_REMISE.quand(function(R){
+  if(!R.pour(cat.value))return;
+  [].forEach.call(cat.options,function(o){o.textContent=libelleCat(o.value)});
+  calc();
+});
+
 cat.addEventListener('change',function(){remplirPax();calc()});
 [d1,d2,pax].forEach(function(e){e.addEventListener('change',calc)});
 calc();
@@ -398,6 +436,10 @@ document.getElementById('pay').onclick=function(){
          nuits:document.getElementById('rn').textContent, personnes:pax.value,
          total:document.getElementById('rtot').textContent+' FCFA',
          acompte:document.getElementById('racc').textContent,
+         /* Sans cette ligne, la reception recoit un total qui ne correspond
+            pas a sa grille et croit a une erreur du client. */
+         remise:EVN_REMISE.pour(cat.value)
+                ? EVN_REMISE.titre()+' ('+EVN_REMISE.etiquette()+')' : '',
          paiement:moyen,
          message:'Navette a\u00e9roport : '+navette
                  +(document.getElementById('note') && document.getElementById('note').value
@@ -408,6 +450,7 @@ document.getElementById('pay').onclick=function(){
       +'Nom : '+d.nom+N+'T\u00e9l\u00e9phone : '+d.tel+N+'E-mail : '+d.email+N+N
       +'Chambre : '+d.chambre+N+'Arriv\u00e9e : '+d.arrivee+N+'D\u00e9part : '+d.depart+N
       +'Nuits : '+d.nuits+N+'Personnes : '+d.personnes+N+N
+      +(d.remise?'Remise appliqu\u00e9e : '+d.remise+N:'')
       +'Total estim\u00e9 : '+d.total+N+'Acompte (30 %) : '+d.acompte+N
       +'Paiement souhait\u00e9 : '+d.paiement+N+d.message;
   }

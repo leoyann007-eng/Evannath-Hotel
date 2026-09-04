@@ -185,6 +185,11 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
 }
 
 
+.avant{text-decoration:line-through;text-decoration-thickness:1px;
+  color:var(--muted);font-weight:400;margin-right:.45em;
+  font-variant-numeric:tabular-nums}
+.apres{color:var(--bronze-2)}
+
 /* Une promotion en cours se signale sur la carte de la chambre visee.
    Le badge est pose apres coup, en JavaScript : la page est statique, la
    promotion ne l est pas. */
@@ -237,6 +242,11 @@ section{padding:88px 0}
   line-height:1;font-variant-numeric:tabular-nums;font-weight:400}
 .card .pr span{font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:600}
 .card .go{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--bronze);font-weight:700;white-space:nowrap}
+/* Le prix d avant, barre, au-dessus du prix remise. Au-dessus et non a cote :
+   les deux nombres cote a cote se lisent comme une fourchette. */
+.card .pr .avant{display:block;font-family:var(--f-body);font-size:12.5px;
+  margin:0 0 2px;line-height:1}
+td.num .avant{margin-right:.5em}
 .card:hover .go{color:var(--bronze-2)}
 .vide{display:none;text-align:center;color:var(--muted);padding:60px 0;font-style:italic}
 .vide.on{display:block}
@@ -486,13 +496,13 @@ caption{caption-side:bottom;padding:16px 4px 0;font-size:12.5px;color:var(--mute
           <th scope="col" data-t="h5">Tarif / nuit</th>
         </tr></thead>
         <tbody>
-          <tr><th scope="row"><a href="chambre-standard.html">Chambre Standard</a></th><td>Chambre</td><td>2</td><td>vue jardin</td><td class="num">67 000 F</td></tr>
-          <tr><th scope="row"><a href="deluxe-baldaquin.html">Deluxe · lits à baldaquin</a></th><td>Chambre</td><td>2</td><td>coin salon</td><td class="num">82 000 F</td></tr>
-          <tr><th scope="row"><a href="deluxe-superieure.html">Deluxe Supérieure</a></th><td>Chambre</td><td>3</td><td>salle à manger</td><td class="num">97 000 F</td></tr>
-          <tr><th scope="row"><a href="suite-anglaise.html">Suite Anglaise</a></th><td>Suite</td><td>2</td><td>le meilleur couchant</td><td class="num">107 000 F</td></tr>
-          <tr><th scope="row"><a href="chambre-mezzanine.html">Chambre en Mezzanine</a></th><td>Chambre</td><td>2</td><td>sous charpente</td><td class="num">127 000 F</td></tr>
-          <tr><th scope="row"><a href="mezzanine-superieure.html">Mezzanine Supérieure</a></th><td>Famille</td><td>4</td><td>coin salon</td><td class="num">142 000 F</td></tr>
-          <tr><th scope="row"><a href="suite-arabe.html">Suite Arabe</a></th><td>Famille</td><td>6</td><td>décor arabo-andalou</td><td class="num">280 000 F</td></tr>
+          <tr data-slug="chambre-standard" data-prix="67000"><th scope="row"><a href="chambre-standard.html">Chambre Standard</a></th><td>Chambre</td><td>2</td><td>vue jardin</td><td class="num">67 000 F</td></tr>
+          <tr data-slug="deluxe-baldaquin" data-prix="82000"><th scope="row"><a href="deluxe-baldaquin.html">Deluxe · lits à baldaquin</a></th><td>Chambre</td><td>2</td><td>coin salon</td><td class="num">82 000 F</td></tr>
+          <tr data-slug="deluxe-superieure" data-prix="97000"><th scope="row"><a href="deluxe-superieure.html">Deluxe Supérieure</a></th><td>Chambre</td><td>3</td><td>salle à manger</td><td class="num">97 000 F</td></tr>
+          <tr data-slug="suite-anglaise" data-prix="107000"><th scope="row"><a href="suite-anglaise.html">Suite Anglaise</a></th><td>Suite</td><td>2</td><td>le meilleur couchant</td><td class="num">107 000 F</td></tr>
+          <tr data-slug="chambre-mezzanine" data-prix="127000"><th scope="row"><a href="chambre-mezzanine.html">Chambre en Mezzanine</a></th><td>Chambre</td><td>2</td><td>sous charpente</td><td class="num">127 000 F</td></tr>
+          <tr data-slug="mezzanine-superieure" data-prix="142000"><th scope="row"><a href="mezzanine-superieure.html">Mezzanine Supérieure</a></th><td>Famille</td><td>4</td><td>coin salon</td><td class="num">142 000 F</td></tr>
+          <tr data-slug="suite-arabe" data-prix="280000"><th scope="row"><a href="suite-arabe.html">Suite Arabe</a></th><td>Famille</td><td>6</td><td>décor arabo-andalou</td><td class="num">280 000 F</td></tr>
         </tbody>
       </table>
     </div>
@@ -693,39 +703,131 @@ document.querySelectorAll('.lang button').forEach(function(b){b.onclick=function
      placeholder de champ, par exemple — declare window.EVN_LANG. */
   if(typeof EVN_LANG==='function')EVN_LANG(lg);
 }});
+window.EVN_REMISE = (function () {
+  var P = null;                  /* la promotion retenue, une fois chargee */
+  var attentes = [];
+  var pret = false;
 
-/* Les promotions publiees depuis l administration posent un badge sur les
-   chambres visees. Le serveur ne renvoie que celles dont la periode court.
-   Si l API se tait, les cartes restent telles quelles : une promotion non
-   signalee vaut mieux qu une page qui ne s affiche pas. */
-fetch('/api/admin?a=public', { cache: 'no-store' })
-  .then(function(r){ return r.ok ? r.json() : null; })
-  .then(function(j){
-    if (!j || !j.promotions) return;
-    j.promotions.forEach(function(p){
-      if (p.pastille === false) return;
+  function vise(p, slug) {
+    var c = p.cible || {};
+    if (c.toutes !== false) return true;
+    return (c.chambres || []).indexOf(slug) >= 0;
+  }
+
+  var API = {
+    /* La promotion applicable a cette chambre, ou null. */
+    pour: function (slug) {
+      return (P && vise(P, slug)) ? P : null;
+    },
+    /* Le prix apres remise. Rend le prix d origine si rien ne s applique :
+       aucun appelant n a besoin de savoir s il y a une promotion. */
+    prix: function (montant, slug) {
+      var p = API.pour(slug);
+      if (!p) return montant;
       var r = p.remise || {};
-      if (!r.valeur) return;
-      var texte = r.type === 'montant'
+      if (!r.valeur) return montant;
+      var n = r.type === 'montant'
+        ? montant - Number(r.valeur)
+        : Math.round(montant * (1 - r.valeur / 100));
+      /* Une remise qui depasse le prix rendrait un tarif nul ou negatif :
+         on garde le prix d origine plutot que d afficher une aberration. */
+      return n > 0 ? n : montant;
+    },
+    /* « −20 % » ou « −10 000 F », pour l etiquette. */
+    etiquette: function () {
+      if (!P) return '';
+      var r = P.remise || {};
+      if (!r.valeur) return '';
+      return r.type === 'montant'
         ? '−' + Number(r.valeur).toLocaleString('fr-FR') + ' F'
         : '−' + r.valeur + ' %';
-      var c = p.cible || {};
-      [].slice.call(document.querySelectorAll('.card[data-slug]'))
-        .forEach(function(carte){
-          var vise = c.toutes !== false
-            || (c.chambres || []).indexOf(carte.dataset.slug) >= 0;
-          if (!vise || carte.querySelector('.promo')) return;
-          var ph = carte.querySelector('.ph');
-          if (!ph) return;
-          var b = document.createElement('span');
-          b.className = 'promo';
-          b.textContent = texte;
-          b.title = p.titre || 'Promotion en cours';
-          ph.appendChild(b);
-        });
-    });
-  })
-  .catch(function(){});
+    },
+    titre: function () { return P ? (P.titre || 'Promotion en cours') : ''; },
+    /* Appelle f des que la reponse est la — tout de suite si elle l est deja.
+       Chaque page passe par ici : personne n attend le reseau a la main. */
+    quand: function (f) {
+      if (pret) { try { f(API); } catch (e) {} return; }
+      attentes.push(f);
+    }
+  };
+
+  function fini() {
+    pret = true;
+    attentes.forEach(function (f) { try { f(API); } catch (e) {} });
+    attentes = [];
+  }
+
+  fetch('/api/admin?a=public', { cache: 'no-store' })
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (j) {
+      /* Le serveur ne renvoie que les promotions dont la periode court. On
+         retient la premiere : deux remises cumulees sur une meme chambre
+         n auraient pas de sens, et personne ne saurait laquelle s applique. */
+      P = ((j && j.promotions) || [])[0] || null;
+    })
+    .catch(function () { P = null; })
+    .then(fini, fini);
+
+  return API;
+})();
+
+
+/* Une promotion en cours pose son etiquette sur la carte ET remplace le prix.
+   L etiquette seule laissait le client decouvrir le tarif plein a l etape
+   suivante : elle annoncait une remise que la page ne tenait pas.
+   Si l API se tait, tout reste au prix affiche — c est le bon sens du repli. */
+EVN_REMISE.quand(function (R) {
+  var fmt = function (n) { return Number(n).toLocaleString('fr-FR'); };
+  var etiquette = R.etiquette();
+
+  [].slice.call(document.querySelectorAll('.card[data-slug]')).forEach(function (carte) {
+    var p = R.pour(carte.dataset.slug);
+    if (!p) return;
+    var plein = Number(carte.dataset.prix) || 0;
+    var remise = R.prix(plein, carte.dataset.slug);
+    if (remise >= plein) return;
+
+    if (p.pastille !== false && !carte.querySelector('.promo')) {
+      var ph = carte.querySelector('.ph');
+      if (ph) {
+        var b = document.createElement('span');
+        b.className = 'promo';
+        b.textContent = etiquette;
+        b.title = R.titre();
+        ph.appendChild(b);
+      }
+    }
+
+    var pr = carte.querySelector('.pr b');
+    if (!pr) return;
+    var avant = document.createElement('s');
+    avant.className = 'avant';
+    avant.textContent = fmt(plein) + ' F';
+    pr.parentNode.insertBefore(avant, pr);
+    pr.textContent = fmt(remise);
+    pr.classList.add('apres');
+    /* Le lien de la carte annonce le tarif aux lecteurs d ecran : il doit
+       dire le meme prix que ce qui est affiche. */
+    var lien = carte.querySelector('a[aria-label]');
+    if (lien) {
+      lien.setAttribute('aria-label', lien.getAttribute('aria-label')
+        .replace(fmt(plein), fmt(remise)) + ', remise ' + etiquette);
+    }
+  });
+
+  /* Le comparateur affiche les memes prix que les cartes, sinon il devient
+     l endroit ou le client verifie et trouve autre chose. */
+  [].slice.call(document.querySelectorAll('tr[data-slug]')).forEach(function (tr) {
+    if (!R.pour(tr.dataset.slug)) return;
+    var plein = Number(tr.dataset.prix) || 0;
+    var remise = R.prix(plein, tr.dataset.slug);
+    if (remise >= plein) return;
+    var td = tr.querySelector('td.num');
+    if (!td) return;
+    td.innerHTML = '<s class="avant">' + fmt(plein) + '</s>'
+      + '<span class="apres">' + fmt(remise) + ' F</span>';
+  });
+});
 
 </script>
 </body>

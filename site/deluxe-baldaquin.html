@@ -185,6 +185,11 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
 }
 
 
+.avant{text-decoration:line-through;text-decoration-thickness:1px;
+  color:var(--muted);font-weight:400;margin-right:.45em;
+  font-variant-numeric:tabular-nums}
+.apres{color:var(--bronze-2)}
+
 .head{padding:150px 0 34px}
 .head-top{display:flex;justify-content:space-between;align-items:flex-end;gap:30px;flex-wrap:wrap}
 .head h1{margin:10px 0 0}
@@ -365,7 +370,7 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
         <span><b data-t="fv3">Jardin</b> <span data-t="fl3">terrasse</span></span>
       </div>
     </div>
-    <div class="head-price"><b>82 000</b><span data-t="pnuit">FCFA / nuit</span></div>
+    <div class="head-price" id="prix-tete"><b>82 000</b><span data-t="pnuit">FCFA / nuit</span></div>
   </div>
 </div>
 
@@ -439,7 +444,7 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
 
  <aside class="panel" id="reserver">
   <span class="from" data-t="apd">À partir de</span>
-  <div class="rate">82 000 <span style="font-size:1rem">FCFA</span></div>
+  <div class="rate" id="prix-panneau">82 000 <span style="font-size:1rem">FCFA</span></div>
   <div class="per" data-t="pern">par nuit, petit-déjeuner inclus</div>
 
   <form id="bkf">
@@ -624,8 +629,83 @@ if(!('IntersectionObserver' in window)||reduce){document.querySelectorAll('.reve
 else{var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.1});
  document.querySelectorAll('.reveal').forEach(function(el){io.observe(el)});
  setTimeout(function(){document.querySelectorAll('.reveal:not(.in)').forEach(function(el){if(el.getBoundingClientRect().top<innerHeight)el.classList.add('in')})},1200)}
+window.EVN_REMISE = (function () {
+  var P = null;                  /* la promotion retenue, une fois chargee */
+  var attentes = [];
+  var pret = false;
+
+  function vise(p, slug) {
+    var c = p.cible || {};
+    if (c.toutes !== false) return true;
+    return (c.chambres || []).indexOf(slug) >= 0;
+  }
+
+  var API = {
+    /* La promotion applicable a cette chambre, ou null. */
+    pour: function (slug) {
+      return (P && vise(P, slug)) ? P : null;
+    },
+    /* Le prix apres remise. Rend le prix d origine si rien ne s applique :
+       aucun appelant n a besoin de savoir s il y a une promotion. */
+    prix: function (montant, slug) {
+      var p = API.pour(slug);
+      if (!p) return montant;
+      var r = p.remise || {};
+      if (!r.valeur) return montant;
+      var n = r.type === 'montant'
+        ? montant - Number(r.valeur)
+        : Math.round(montant * (1 - r.valeur / 100));
+      /* Une remise qui depasse le prix rendrait un tarif nul ou negatif :
+         on garde le prix d origine plutot que d afficher une aberration. */
+      return n > 0 ? n : montant;
+    },
+    /* « −20 % » ou « −10 000 F », pour l etiquette. */
+    etiquette: function () {
+      if (!P) return '';
+      var r = P.remise || {};
+      if (!r.valeur) return '';
+      return r.type === 'montant'
+        ? '−' + Number(r.valeur).toLocaleString('fr-FR') + ' F'
+        : '−' + r.valeur + ' %';
+    },
+    titre: function () { return P ? (P.titre || 'Promotion en cours') : ''; },
+    /* Appelle f des que la reponse est la — tout de suite si elle l est deja.
+       Chaque page passe par ici : personne n attend le reseau a la main. */
+    quand: function (f) {
+      if (pret) { try { f(API); } catch (e) {} return; }
+      attentes.push(f);
+    }
+  };
+
+  function fini() {
+    pret = true;
+    attentes.forEach(function (f) { try { f(API); } catch (e) {} });
+    attentes = [];
+  }
+
+  fetch('/api/admin?a=public', { cache: 'no-store' })
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (j) {
+      /* Le serveur ne renvoie que les promotions dont la periode court. On
+         retient la premiere : deux remises cumulees sur une meme chambre
+         n auraient pas de sens, et personne ne saurait laquelle s applique. */
+      P = ((j && j.promotions) || [])[0] || null;
+    })
+    .catch(function () { P = null; })
+    .then(fini, fini);
+
+  return API;
+})();
+
 
 var RATE=82000, TAX=1500; // taxe de séjour par personne et par nuit
+/* PLEIN ne bouge jamais : c'est le tarif de la grille. RATE est ce qu'on
+   facture, et une promotion en cours le baisse. Les deux restent distincts
+   parce que le recapitulatif doit montrer l'un barre et l'autre applique.
+   Le slug se lit dans l'adresse — la fiche s'appelle du nom de sa chambre,
+   avec ou sans .html selon la reecriture d'URL. */
+var PLEIN=RATE;
+var SLUG=location.pathname.split('/').pop().split('.')[0];
 var d1=document.getElementById('d1'),d2=document.getElementById('d2'),pax=document.getElementById('pax');
 function iso(d){return new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10)}
 d1.value=iso(new Date(Date.now()+864e5));d2.value=iso(new Date(Date.now()+864e5*3));
@@ -648,12 +728,43 @@ function calc(){
   var a=new Date(d1.value),b=new Date(d2.value);
   var n=Math.round((b-a)/864e5); if(!n||n<1){n=1;d2.value=iso(new Date(a.getTime()+864e5))}
   var p=+pax.value, sejour=RATE*n, taxe=TAX*p*n, total=sejour+taxe;
-  document.getElementById('l1').textContent=fmt(RATE)+' FCFA × '+n+(n>1?MOTS[LG].nn:MOTS[LG].n1);
+  document.getElementById('l1').textContent=fmt(RATE)+' FCFA × '+n+(n>1?MOTS[LG].nn:MOTS[LG].n1)
+    +(RATE<PLEIN?' · '+EVN_REMISE.etiquette():'');
   document.getElementById('v1').textContent=fmt(sejour);
   document.getElementById('v2').textContent=fmt(taxe);
   document.getElementById('tt').textContent=fmt(total);
   document.getElementById('mb').textContent=fmt(total);
 }
+/* La remise arrive apres le premier calcul : on recalcule des qu'elle est la.
+   Si l'API se tait, la fiche garde le tarif plein — le repli sur.
+   Une remise affichee sur la carte et absente ici enverrait le client
+   decouvrir le prix reel au moment de payer. */
+EVN_REMISE.quand(function(R){
+  var applique=R.prix(PLEIN,SLUG);
+  if(applique>=PLEIN)return;
+  RATE=applique;
+
+  var tete=document.getElementById('prix-tete');
+  var b=tete&&tete.querySelector('b');
+  if(b){
+    var barre=document.createElement('s');
+    barre.className='avant';
+    barre.textContent=fmt(PLEIN);
+    tete.insertBefore(barre,b);
+    b.textContent=fmt(RATE);
+    b.className='apres';
+  }
+
+  var pan=document.getElementById('prix-panneau');
+  if(pan){
+    pan.innerHTML='<s class="avant">'+fmt(PLEIN)+'</s>'
+      +'<span class="apres">'+fmt(RATE)+'</span>'
+      +' <span style="font-size:1rem">FCFA</span>';
+  }
+
+  calc();
+});
+
 [d1,d2,pax].forEach(function(e){e.addEventListener('change',calc)});
 document.getElementById('bkf').addEventListener('submit',function(e){e.preventDefault();calc();
   var q='?chambre=deluxe-baldaquin&du='+d1.value+'&au='+d2.value+'&pax='+pax.value;

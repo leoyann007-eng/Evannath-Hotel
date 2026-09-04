@@ -38,6 +38,93 @@ PROSPECTION = True
 ENVOI_WHATSAPP = True
 
 # ---------------------------------------------------------------------------
+# La remise en cours, pour toutes les pages qui affichent un prix
+# ---------------------------------------------------------------------------
+# Une promotion publiee depuis l administration ne peut pas s appliquer a une
+# page et pas a la suivante : un prix barre sur la carte et intact sur la fiche
+# est pire que pas de remise du tout. Un seul module decide, toutes les
+# surfaces l interrogent — les cartes, le comparateur, les sept fiches et le
+# tunnel de reservation.
+REMISE_JS = r"""
+window.EVN_REMISE = (function () {
+  var P = null;                  /* la promotion retenue, une fois chargee */
+  var attentes = [];
+  var pret = false;
+
+  function vise(p, slug) {
+    var c = p.cible || {};
+    if (c.toutes !== false) return true;
+    return (c.chambres || []).indexOf(slug) >= 0;
+  }
+
+  var API = {
+    /* La promotion applicable a cette chambre, ou null. */
+    pour: function (slug) {
+      return (P && vise(P, slug)) ? P : null;
+    },
+    /* Le prix apres remise. Rend le prix d origine si rien ne s applique :
+       aucun appelant n a besoin de savoir s il y a une promotion. */
+    prix: function (montant, slug) {
+      var p = API.pour(slug);
+      if (!p) return montant;
+      var r = p.remise || {};
+      if (!r.valeur) return montant;
+      var n = r.type === 'montant'
+        ? montant - Number(r.valeur)
+        : Math.round(montant * (1 - r.valeur / 100));
+      /* Une remise qui depasse le prix rendrait un tarif nul ou negatif :
+         on garde le prix d origine plutot que d afficher une aberration. */
+      return n > 0 ? n : montant;
+    },
+    /* « −20 % » ou « −10 000 F », pour l etiquette. */
+    etiquette: function () {
+      if (!P) return '';
+      var r = P.remise || {};
+      if (!r.valeur) return '';
+      return r.type === 'montant'
+        ? '−' + Number(r.valeur).toLocaleString('fr-FR') + ' F'
+        : '−' + r.valeur + ' %';
+    },
+    titre: function () { return P ? (P.titre || 'Promotion en cours') : ''; },
+    /* Appelle f des que la reponse est la — tout de suite si elle l est deja.
+       Chaque page passe par ici : personne n attend le reseau a la main. */
+    quand: function (f) {
+      if (pret) { try { f(API); } catch (e) {} return; }
+      attentes.push(f);
+    }
+  };
+
+  function fini() {
+    pret = true;
+    attentes.forEach(function (f) { try { f(API); } catch (e) {} });
+    attentes = [];
+  }
+
+  fetch('/api/admin?a=public', { cache: 'no-store' })
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (j) {
+      /* Le serveur ne renvoie que les promotions dont la periode court. On
+         retient la premiere : deux remises cumulees sur une meme chambre
+         n auraient pas de sens, et personne ne saurait laquelle s applique. */
+      P = ((j && j.promotions) || [])[0] || null;
+    })
+    .catch(function () { P = null; })
+    .then(fini, fini);
+
+  return API;
+})();
+"""
+
+# Le prix barre, partout ou il s affiche. Les memes regles sur les quatre
+# surfaces : ce qui change, c est la taille du texte, pas la facon de dire.
+REMISE_CSS = """
+.avant{text-decoration:line-through;text-decoration-thickness:1px;
+  color:var(--muted);font-weight:400;margin-right:.45em;
+  font-variant-numeric:tabular-nums}
+.apres{color:var(--bronze-2)}
+"""
+
+# ---------------------------------------------------------------------------
 # Le numero WhatsApp
 # ---------------------------------------------------------------------------
 # Tant que WA_EN_TEST vaut True, TOUS les liens WhatsApp du site pointent sur

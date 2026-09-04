@@ -7,7 +7,8 @@ des hypotheses a faire confirmer — voir README.
 """
 import io
 import _schema
-from _chrome import page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV, WA
+from _chrome import (page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV, WA,
+                     REMISE_JS, REMISE_CSS)
 
 # slug, nom, prix, capacite, resume, accroche, 3 paragraphes, equipements+, photos
 from _chambres import CHAMBRES
@@ -35,7 +36,7 @@ INCL = [
  ('Wifi et parking','Gratuits sur tout le domaine.'),
 ]
 
-CSS = open('chambre-style.css', encoding='utf-8').read() if False else """
+CSS = REMISE_CSS + """
 .head{padding:150px 0 34px}
 .head-top{display:flex;justify-content:space-between;align-items:flex-end;gap:30px;flex-wrap:wrap}
 .head h1{margin:10px 0 0}
@@ -242,7 +243,7 @@ for c in CHAMBRES:
 
     b.append('''      </div>
     </div>
-    <div class="head-price"><b>%s</b><span data-t="pnuit">FCFA / nuit</span></div>
+    <div class="head-price" id="prix-tete"><b>%s</b><span data-t="pnuit">FCFA / nuit</span></div>
   </div>
 </div>
 
@@ -317,7 +318,7 @@ for c in CHAMBRES:
 
  <aside class="panel" id="reserver">
   <span class="from" data-t="apd">À partir de</span>
-  <div class="rate">%s <span style="font-size:1rem">FCFA</span></div>
+  <div class="rate" id="prix-panneau">%s <span style="font-size:1rem">FCFA</span></div>
   <div class="per" data-t="pern">par nuit, petit-déjeuner inclus</div>
 
   <form id="bkf">
@@ -376,9 +377,16 @@ for c in CHAMBRES:
   <div id="lbc"></div>
 </div>''')
 
-    JS = NAV_JS + '''
+    JS = NAV_JS + REMISE_JS + '''
 
 var RATE=%d, TAX=1500; // taxe de séjour par personne et par nuit
+/* PLEIN ne bouge jamais : c'est le tarif de la grille. RATE est ce qu'on
+   facture, et une promotion en cours le baisse. Les deux restent distincts
+   parce que le recapitulatif doit montrer l'un barre et l'autre applique.
+   Le slug se lit dans l'adresse — la fiche s'appelle du nom de sa chambre,
+   avec ou sans .html selon la reecriture d'URL. */
+var PLEIN=RATE;
+var SLUG=location.pathname.split('/').pop().split('.')[0];
 var d1=document.getElementById('d1'),d2=document.getElementById('d2'),pax=document.getElementById('pax');
 function iso(d){return new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10)}
 d1.value=iso(new Date(Date.now()+864e5));d2.value=iso(new Date(Date.now()+864e5*3));
@@ -401,12 +409,43 @@ function calc(){
   var a=new Date(d1.value),b=new Date(d2.value);
   var n=Math.round((b-a)/864e5); if(!n||n<1){n=1;d2.value=iso(new Date(a.getTime()+864e5))}
   var p=+pax.value, sejour=RATE*n, taxe=TAX*p*n, total=sejour+taxe;
-  document.getElementById('l1').textContent=fmt(RATE)+' FCFA × '+n+(n>1?MOTS[LG].nn:MOTS[LG].n1);
+  document.getElementById('l1').textContent=fmt(RATE)+' FCFA × '+n+(n>1?MOTS[LG].nn:MOTS[LG].n1)
+    +(RATE<PLEIN?' · '+EVN_REMISE.etiquette():'');
   document.getElementById('v1').textContent=fmt(sejour);
   document.getElementById('v2').textContent=fmt(taxe);
   document.getElementById('tt').textContent=fmt(total);
   document.getElementById('mb').textContent=fmt(total);
 }
+/* La remise arrive apres le premier calcul : on recalcule des qu'elle est la.
+   Si l'API se tait, la fiche garde le tarif plein — le repli sur.
+   Une remise affichee sur la carte et absente ici enverrait le client
+   decouvrir le prix reel au moment de payer. */
+EVN_REMISE.quand(function(R){
+  var applique=R.prix(PLEIN,SLUG);
+  if(applique>=PLEIN)return;
+  RATE=applique;
+
+  var tete=document.getElementById('prix-tete');
+  var b=tete&&tete.querySelector('b');
+  if(b){
+    var barre=document.createElement('s');
+    barre.className='avant';
+    barre.textContent=fmt(PLEIN);
+    tete.insertBefore(barre,b);
+    b.textContent=fmt(RATE);
+    b.className='apres';
+  }
+
+  var pan=document.getElementById('prix-panneau');
+  if(pan){
+    pan.innerHTML='<s class="avant">'+fmt(PLEIN)+'</s>'
+      +'<span class="apres">'+fmt(RATE)+'</span>'
+      +' <span style="font-size:1rem">FCFA</span>';
+  }
+
+  calc();
+});
+
 [d1,d2,pax].forEach(function(e){e.addEventListener('change',calc)});
 document.getElementById('bkf').addEventListener('submit',function(e){e.preventDefault();calc();
   var q='?chambre=%s&du='+d1.value+'&au='+d2.value+'&pax='+pax.value;

@@ -54,6 +54,11 @@
   --f-body:"Karla",system-ui,-apple-system,sans-serif;
 }
 
+.avant{text-decoration:line-through;text-decoration-thickness:1px;
+  color:var(--muted);font-weight:400;margin-right:.45em;
+  font-variant-numeric:tabular-nums}
+.apres{color:var(--bronze-2)}
+
 :root{
   /* L'accueil assume une teinte un peu plus chaude et profonde que le reste
      du site. Seules les valeurs qui different sont redeclarees ici ; tout le
@@ -480,13 +485,13 @@ footer{background:#0F0A06;border-top:1px solid var(--line);padding:74px 0 28px}
     </div>
     <div class="field"><label for="cat" data-t="cat">Catégorie</label>
       <select id="cat">
-        <option value="67000">Chambre Standard</option>
-        <option value="82000">Deluxe · lits à baldaquin</option>
-        <option value="97000">Deluxe Supérieure</option>
-        <option value="107000">Suite Anglaise</option>
-        <option value="127000">Chambre en Mezzanine</option>
-        <option value="142000">Mezzanine Supérieure</option>
-        <option value="280000">Suite Arabe</option>
+        <option value="67000" data-slug="chambre-standard">Chambre Standard</option>
+        <option value="82000" data-slug="deluxe-baldaquin">Deluxe · lits à baldaquin</option>
+        <option value="97000" data-slug="deluxe-superieure">Deluxe Supérieure</option>
+        <option value="107000" data-slug="suite-anglaise">Suite Anglaise</option>
+        <option value="127000" data-slug="chambre-mezzanine">Chambre en Mezzanine</option>
+        <option value="142000" data-slug="mezzanine-superieure">Mezzanine Supérieure</option>
+        <option value="280000" data-slug="suite-arabe">Suite Arabe</option>
       </select>
     </div>
     <button type="submit" class="btn btn-solid" data-t="check">Vérifier</button>
@@ -778,6 +783,75 @@ footer{background:#0F0A06;border-top:1px solid var(--line);padding:74px 0 28px}
 window.addEventListener('load',function(){document.getElementById('pre').classList.add('done')});
 setTimeout(function(){document.getElementById('pre').classList.add('done')},2600);
 
+
+window.EVN_REMISE = (function () {
+  var P = null;                  /* la promotion retenue, une fois chargee */
+  var attentes = [];
+  var pret = false;
+
+  function vise(p, slug) {
+    var c = p.cible || {};
+    if (c.toutes !== false) return true;
+    return (c.chambres || []).indexOf(slug) >= 0;
+  }
+
+  var API = {
+    /* La promotion applicable a cette chambre, ou null. */
+    pour: function (slug) {
+      return (P && vise(P, slug)) ? P : null;
+    },
+    /* Le prix apres remise. Rend le prix d origine si rien ne s applique :
+       aucun appelant n a besoin de savoir s il y a une promotion. */
+    prix: function (montant, slug) {
+      var p = API.pour(slug);
+      if (!p) return montant;
+      var r = p.remise || {};
+      if (!r.valeur) return montant;
+      var n = r.type === 'montant'
+        ? montant - Number(r.valeur)
+        : Math.round(montant * (1 - r.valeur / 100));
+      /* Une remise qui depasse le prix rendrait un tarif nul ou negatif :
+         on garde le prix d origine plutot que d afficher une aberration. */
+      return n > 0 ? n : montant;
+    },
+    /* « −20 % » ou « −10 000 F », pour l etiquette. */
+    etiquette: function () {
+      if (!P) return '';
+      var r = P.remise || {};
+      if (!r.valeur) return '';
+      return r.type === 'montant'
+        ? '−' + Number(r.valeur).toLocaleString('fr-FR') + ' F'
+        : '−' + r.valeur + ' %';
+    },
+    titre: function () { return P ? (P.titre || 'Promotion en cours') : ''; },
+    /* Appelle f des que la reponse est la — tout de suite si elle l est deja.
+       Chaque page passe par ici : personne n attend le reseau a la main. */
+    quand: function (f) {
+      if (pret) { try { f(API); } catch (e) {} return; }
+      attentes.push(f);
+    }
+  };
+
+  function fini() {
+    pret = true;
+    attentes.forEach(function (f) { try { f(API); } catch (e) {} });
+    attentes = [];
+  }
+
+  fetch('/api/admin?a=public', { cache: 'no-store' })
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (j) {
+      /* Le serveur ne renvoie que les promotions dont la periode court. On
+         retient la premiere : deux remises cumulees sur une meme chambre
+         n auraient pas de sens, et personne ne saurait laquelle s applique. */
+      P = ((j && j.promotions) || [])[0] || null;
+    })
+    .catch(function () { P = null; })
+    .then(fini, fini);
+
+  return API;
+})();
+
 var hd=document.getElementById('hd');
 addEventListener('scroll',function(){hd.classList.toggle('scrolled',scrollY>60)},{passive:true});
 
@@ -908,8 +982,31 @@ function calc(){
   var a=new Date(d1.value),b=new Date(d2.value);
   var n=Math.round((b-a)/864e5); if(!n||n<1)n=1;
   document.getElementById('nn').textContent=n;
-  document.getElementById('tt').textContent=fmt(n*+cat.value)+' FCFA';
+  /* Le tarif applique, pas celui de la grille : une estimation qui ignore la
+     promotion annoncee trois ecrans plus bas serait fausse des l'accueil. */
+  var o=cat.options[cat.selectedIndex];
+  var tarif=EVN_REMISE.prix(+cat.value, o ? o.dataset.slug : '');
+  document.getElementById('tt').textContent=fmt(n*tarif)+' FCFA';
 }
+EVN_REMISE.quand(function(R){
+  calc();
+  document.querySelectorAll('.room-foot').forEach(function(pied){
+    var lien=pied.querySelector('a[href$=".html"]');
+    var b=pied.querySelector('.price b');
+    if(!lien||!b)return;
+    var slug=lien.getAttribute('href').replace('.html','');
+    var plein=Number(b.textContent.replace(/[^0-9]/g,''))||0;
+    var tarif=R.prix(plein,slug);
+    if(!plein||tarif>=plein)return;
+    var barre=document.createElement('s');
+    barre.className='avant';
+    barre.textContent=fmt(plein);
+    b.parentNode.insertBefore(barre,b);
+    b.textContent=fmt(tarif);
+    b.className='apres';
+  });
+});
+
 [d1,d2,cat].forEach(function(e){e.addEventListener('change',calc)});
 document.getElementById('bkf').addEventListener('submit',function(e){e.preventDefault();calc();out.classList.add('show');out.scrollIntoView({block:'center',behavior:'smooth'})});
 calc();

@@ -184,6 +184,11 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
 }
 
 
+.avant{text-decoration:line-through;text-decoration-thickness:1px;
+  color:var(--muted);font-weight:400;margin-right:.45em;
+  font-variant-numeric:tabular-nums}
+.apres{color:var(--bronze-2)}
+
 .head{padding:150px 0 30px}
 .head h1{margin:10px 0 14px}
 .head p{max-width:56ch;font-size:1.04rem}
@@ -469,6 +474,9 @@ input::placeholder,textarea::placeholder{color:#6E6154}
       <div class="row"><span id="rnl">Nuits</span><span id="rn">—</span></div>
       <div class="row"><span data-t="rr3">Voyageurs</span><span id="rp">—</span></div>
       <div class="row"><span id="rul">Tarif</span><span id="ru">—</span></div>
+      <!-- Vide et masquee tant qu'aucune promotion ne court. -->
+      <div class="row" id="rrem" hidden><span id="rreml">Remise</span>
+        <span id="rremv" style="color:var(--palm)">—</span></div>
       <div class="row"><span data-t="rr4">Taxe de séjour</span><span id="rt">—</span></div>
       <div class="row"><span data-t="rr5">Petit-déjeuner</span><span style="color:var(--palm)" data-t="rr5v">Inclus</span></div>
       <div class="tot"><span data-t="rr6">Total séjour</span><b id="rtot">—</b></div>
@@ -712,6 +720,74 @@ var EVN = {
   }
 };
 
+window.EVN_REMISE = (function () {
+  var P = null;                  /* la promotion retenue, une fois chargee */
+  var attentes = [];
+  var pret = false;
+
+  function vise(p, slug) {
+    var c = p.cible || {};
+    if (c.toutes !== false) return true;
+    return (c.chambres || []).indexOf(slug) >= 0;
+  }
+
+  var API = {
+    /* La promotion applicable a cette chambre, ou null. */
+    pour: function (slug) {
+      return (P && vise(P, slug)) ? P : null;
+    },
+    /* Le prix apres remise. Rend le prix d origine si rien ne s applique :
+       aucun appelant n a besoin de savoir s il y a une promotion. */
+    prix: function (montant, slug) {
+      var p = API.pour(slug);
+      if (!p) return montant;
+      var r = p.remise || {};
+      if (!r.valeur) return montant;
+      var n = r.type === 'montant'
+        ? montant - Number(r.valeur)
+        : Math.round(montant * (1 - r.valeur / 100));
+      /* Une remise qui depasse le prix rendrait un tarif nul ou negatif :
+         on garde le prix d origine plutot que d afficher une aberration. */
+      return n > 0 ? n : montant;
+    },
+    /* « −20 % » ou « −10 000 F », pour l etiquette. */
+    etiquette: function () {
+      if (!P) return '';
+      var r = P.remise || {};
+      if (!r.valeur) return '';
+      return r.type === 'montant'
+        ? '−' + Number(r.valeur).toLocaleString('fr-FR') + ' F'
+        : '−' + r.valeur + ' %';
+    },
+    titre: function () { return P ? (P.titre || 'Promotion en cours') : ''; },
+    /* Appelle f des que la reponse est la — tout de suite si elle l est deja.
+       Chaque page passe par ici : personne n attend le reseau a la main. */
+    quand: function (f) {
+      if (pret) { try { f(API); } catch (e) {} return; }
+      attentes.push(f);
+    }
+  };
+
+  function fini() {
+    pret = true;
+    attentes.forEach(function (f) { try { f(API); } catch (e) {} });
+    attentes = [];
+  }
+
+  fetch('/api/admin?a=public', { cache: 'no-store' })
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (j) {
+      /* Le serveur ne renvoie que les promotions dont la periode court. On
+         retient la premiere : deux remises cumulees sur une meme chambre
+         n auraient pas de sens, et personne ne saurait laquelle s applique. */
+      P = ((j && j.promotions) || [])[0] || null;
+    })
+    .catch(function () { P = null; })
+    .then(fini, fini);
+
+  return API;
+})();
+
 
 var CH={"chambre-standard": ["Chambre Standard", 67000, 2, "r-standard"], "deluxe-baldaquin": ["Deluxe · lits à baldaquin", 82000, 2, "ig-baldaquin"], "deluxe-superieure": ["Deluxe Supérieure", 97000, 3, "r-wax"], "suite-anglaise": ["Suite Anglaise", 107000, 2, "r-anglaise"], "chambre-mezzanine": ["Chambre en Mezzanine", 127000, 2, "r-mezz2"], "mezzanine-superieure": ["Mezzanine Supérieure", 142000, 4, "r-mezzanine"], "suite-arabe": ["Suite Arabe", 280000, 6, "sa-main"]};
 var TAX=1500; // taxe de séjour par personne et par nuit
@@ -719,9 +795,14 @@ var TAX=1500; // taxe de séjour par personne et par nuit
 var cat=document.getElementById('cat'),d1=document.getElementById('d1'),
     d2=document.getElementById('d2'),pax=document.getElementById('pax');
 
+function libelleCat(k){
+  var t=EVN_REMISE.prix(CH[k][1],k);
+  return CH[k][0]+' — '+fmt(t)+' FCFA'
+    +(t<CH[k][1]?' (au lieu de '+fmt(CH[k][1])+')':'');
+}
 Object.keys(CH).forEach(function(k){
   var o=document.createElement('option');
-  o.value=k; o.textContent=CH[k][0]+' — '+fmt(CH[k][1])+' FCFA';
+  o.value=k; o.textContent=libelleCat(k);
   cat.appendChild(o);
 });
 
@@ -771,7 +852,12 @@ function calc(){
   var n=Math.round((b-a)/864e5);
   if(!n||n<1){n=1;d2.value=iso(new Date(a.getTime()+864e5))}
   var c=CH[cat.value],p=+pax.value;
-  var sejour=c[1]*n, taxe=TAX*p*n, total=sejour+taxe, acc=Math.round(total*0.3);
+  /* PLEIN est le tarif de la grille, TARIF ce qu'on facture. Une promotion en
+     cours les separe. On calcule sur TARIF : afficher une remise sans la
+     deduire du total serait la pire des deux versions. */
+  var plein=c[1], tarif=EVN_REMISE.prix(plein, cat.value), remise=plein-tarif;
+  var brut=plein*n, sejour=tarif*n, taxe=TAX*p*n,
+      total=sejour+taxe, acc=Math.round(total*0.3);
 
   document.getElementById('rimg').src='img/opt/'+c[3]+'.jpg';
   document.getElementById('rimg').alt=c[0];
@@ -781,13 +867,37 @@ function calc(){
   document.getElementById('rnl').textContent=n>1?T[LG].nn:T[LG].n1;
   document.getElementById('rn').textContent=n;
   document.getElementById('rp').textContent=p+(p>1?T[LG].pp:T[LG].p1);
-  document.getElementById('rul').textContent=fmt(c[1])+' × '+n;
-  document.getElementById('ru').textContent=fmt(sejour);
+  /* La ligne de tarif reste au prix de la grille, et la remise se deduit en
+     dessous : c'est la seule presentation ou la colonne s'additionne. Un
+     sous-total deja remise suivi d'une ligne de remise se lit comme une
+     double deduction — le client additionne, et ne retombe pas sur le
+     total. */
+  document.getElementById('rul').textContent=fmt(plein)+' × '+n;
+  /* La ligne de remise dit combien elle retire, en francs : « −20 % » ne se
+     verifie pas de tete, « −26 800 F » se verifie. */
+  var lr=document.getElementById('rrem');
+  if(remise>0){
+    lr.hidden=false;
+    document.getElementById('rreml').textContent=EVN_REMISE.titre();
+    document.getElementById('rremv').textContent='−'+fmt(remise*n)+' FCFA';
+  }else{
+    lr.hidden=true;
+  }
+  document.getElementById('ru').textContent=fmt(brut);
   document.getElementById('rt').textContent=fmt(taxe);
   document.getElementById('rtot').textContent=fmt(total);
   document.getElementById('racc').textContent=fmt(acc)+' FCFA';
   document.getElementById('rsolde').textContent=fmt(total-acc)+' FCFA';
 }
+/* La remise arrive apres le premier calcul : on refait le menu et le
+   recapitulatif des qu'elle est la. Si l'API se tait, tout reste au tarif
+   plein — le repli sur. */
+EVN_REMISE.quand(function(R){
+  if(!R.pour(cat.value))return;
+  [].forEach.call(cat.options,function(o){o.textContent=libelleCat(o.value)});
+  calc();
+});
+
 cat.addEventListener('change',function(){remplirPax();calc()});
 [d1,d2,pax].forEach(function(e){e.addEventListener('change',calc)});
 calc();
@@ -849,6 +959,10 @@ document.getElementById('pay').onclick=function(){
          nuits:document.getElementById('rn').textContent, personnes:pax.value,
          total:document.getElementById('rtot').textContent+' FCFA',
          acompte:document.getElementById('racc').textContent,
+         /* Sans cette ligne, la reception recoit un total qui ne correspond
+            pas a sa grille et croit a une erreur du client. */
+         remise:EVN_REMISE.pour(cat.value)
+                ? EVN_REMISE.titre()+' ('+EVN_REMISE.etiquette()+')' : '',
          paiement:moyen,
          message:'Navette aéroport : '+navette
                  +(document.getElementById('note') && document.getElementById('note').value
@@ -859,6 +973,7 @@ document.getElementById('pay').onclick=function(){
       +'Nom : '+d.nom+N+'Téléphone : '+d.tel+N+'E-mail : '+d.email+N+N
       +'Chambre : '+d.chambre+N+'Arrivée : '+d.arrivee+N+'Départ : '+d.depart+N
       +'Nuits : '+d.nuits+N+'Personnes : '+d.personnes+N+N
+      +(d.remise?'Remise appliquée : '+d.remise+N:'')
       +'Total estimé : '+d.total+N+'Acompte (30 %) : '+d.acompte+N
       +'Paiement souhaité : '+d.paiement+N+d.message;
   }

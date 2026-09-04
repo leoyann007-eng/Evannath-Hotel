@@ -4,10 +4,15 @@
  * ni attendre : impossible de photographier une page derriere un mot de passe.
  * Le protocole, lui, permet d'executer du JavaScript avant de declencher.
  *
- *   node .outils/capturer.js <url> <sortie.png> [largeur] [hauteur] [script.js]
+ *   node .outils/capturer.js <url> <sortie.png> [largeur] [hauteur] \
+ *        [apres.js] [amont.js]
  *
- * Le script optionnel est evalue dans la page avant la capture — c'est la
- * qu'on se connecte ou qu'on navigue.
+ * apres.js est evalue dans la page une fois chargee — c'est la qu'on se
+ * connecte, qu'on defile ou qu'on ouvre un menu.
+ *
+ * amont.js est injecte AVANT que la page n'execute la moindre ligne. C'est le
+ * seul moyen d'essayer en local une page qui interroge une API distante : on y
+ * remplace fetch, et la page consomme les donnees qu'on lui donne.
  */
 const { spawn } = require('child_process');
 const fs = require('fs');
@@ -19,10 +24,10 @@ const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 // Chrome deja ouverte, dont l'onglet montre une autre page.
 const PORT = 9000 + Math.floor(Math.random() * 900);
 
-const [url, sortie, larg, haut, avant] = process.argv.slice(2);
+const [url, sortie, larg, haut, avant, amont] = process.argv.slice(2);
 if (!url || !sortie) {
   console.error('usage : node .outils/capturer.js <url> <sortie.png>'
-    + ' [largeur] [hauteur] [script.js]');
+    + ' [largeur] [hauteur] [apres.js] [amont.js]');
   process.exit(2);
 }
 const L = Number(larg) || 1280;
@@ -75,6 +80,13 @@ async function cible() {
   await cmd('Emulation.setDeviceMetricsOverride', {
     width: L, height: H, deviceScaleFactor: 1, mobile: false,
   });
+  if (amont) {
+    // Pose le script avant toute navigation : il s'executera en tete de
+    // chaque document, donc avant le code de la page.
+    await cmd('Page.addScriptToEvaluateOnNewDocument', {
+      source: fs.readFileSync(amont, 'utf8'),
+    });
+  }
   await cmd('Page.navigate', { url });
   await dodo(2500);
   await cmd('Runtime.evaluate', { expression: 'document.fonts.ready', awaitPromise: true });
