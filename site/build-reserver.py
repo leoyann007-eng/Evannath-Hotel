@@ -373,7 +373,10 @@ function calc(){
    recapitulatif des qu'elle est la. Si l'API se tait, tout reste au tarif
    plein — le repli sur. */
 EVN_REMISE.quand(function(R){
-  if(!R.pour(cat.value))return;
+  /* On renomme TOUTES les options, pas seulement si la chambre affichee au
+     depart est ciblee : une promotion sur une seule chambre laissait sinon
+     son option au tarif plein, et le menu contredisait le recapitulatif.
+     libelleCat rend le libelle nu quand aucune remise ne s'applique. */
   [].forEach.call(cat.options,function(o){o.textContent=libelleCat(o.value)});
   calc();
 });
