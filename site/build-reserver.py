@@ -301,6 +301,9 @@ var T={fr:{loc:'fr-FR',p1:' personne',pp:' personnes',n1:'Nuit',nn:'Nuits',tarif
            solde:'The balance is settled on arrival, at the hotel.',
            nav1:'Your airport shuttle is noted (',nav2:'). The balance is settled on arrival.'}};
 function jour(v){return v?new Date(v).toLocaleDateString(T[LG].loc,{weekday:'long',day:'numeric',month:'long'}):'—'}
+/* Le recapitulatif a la place d'etre compact ; une demande relue en janvier
+   pour un sejour de decembre, non. Le message porte donc l'annee. */
+function jourAn(v){return v?new Date(v).toLocaleDateString(T[LG].loc,{weekday:'long',day:'numeric',month:'long',year:'numeric'}):'—'}
 function EVN_LANG(lg){ LG=T[lg]?lg:'fr'; remplirPax(); calc(); }
 
 // on reprend ce qui a été choisi sur la fiche chambre
@@ -429,17 +432,28 @@ document.getElementById('pay').onclick=function(){
   var nv=document.getElementById('nav').value;
   var navette = nv==='non' ? 'non' : (nv==='ar' ? 'aller et retour' : 'aller simple');
 
+  /* Le detail se lit dans le recapitulatif affiche, pas recalcule ici : le
+     message et l'ecran ne peuvent donc pas diverger. Un client qui lit
+     177 200 a l'ecran et 214 000 dans son message n'appelle pas pour
+     comprendre — il renonce. */
+  var lu=function(id){var e=document.getElementById(id);
+    return e?e.textContent.replace(/\s+/g,' ').trim():''};
+  var lrem=document.getElementById('rrem');
+
   var d={nom:document.getElementById('fn').value.trim()+' '+document.getElementById('ln').value.trim(),
          email:document.getElementById('em').value.trim(),
          tel:document.getElementById('tl').value.trim(),
-         chambre:c[0], arrivee:jour(d1.value), depart:jour(d2.value),
+         chambre:c[0], arrivee:jourAn(d1.value), depart:jourAn(d2.value),
+         tarif:lu('rul')+' = '+lu('ru')+' FCFA',
+         taxe:lu('rt')+' FCFA',
+         solde:lu('rsolde'),
          nuits:document.getElementById('rn').textContent, personnes:pax.value,
          total:document.getElementById('rtot').textContent+' FCFA',
          acompte:document.getElementById('racc').textContent,
          /* Sans cette ligne, la reception recoit un total qui ne correspond
             pas a sa grille et croit a une erreur du client. */
-         remise:EVN_REMISE.pour(cat.value)
-                ? EVN_REMISE.titre()+' ('+EVN_REMISE.etiquette()+')' : '',
+         remise:(lrem && !lrem.hidden)
+                ? lu('rreml')+' ('+EVN_REMISE.etiquette()+') — '+lu('rremv') : '',
          paiement:moyen,
          message:'Navette a\u00e9roport : '+navette
                  +(document.getElementById('note') && document.getElementById('note').value
@@ -450,8 +464,15 @@ document.getElementById('pay').onclick=function(){
       +'Nom : '+d.nom+N+'T\u00e9l\u00e9phone : '+d.tel+N+'E-mail : '+d.email+N+N
       +'Chambre : '+d.chambre+N+'Arriv\u00e9e : '+d.arrivee+N+'D\u00e9part : '+d.depart+N
       +'Nuits : '+d.nuits+N+'Personnes : '+d.personnes+N+N
-      +(d.remise?'Remise appliqu\u00e9e : '+d.remise+N:'')
-      +'Total estim\u00e9 : '+d.total+N+'Acompte (30 %) : '+d.acompte+N
+      +'Tarif : '+d.tarif+N
+      +(d.remise?'Remise : '+d.remise+N:'')
+      +'Taxe de s\u00e9jour : '+d.taxe+N
+      +'Total estim\u00e9 : '+d.total+N
+      +'Acompte (30 %) : '+d.acompte+N
+      /* Apostrophe typographique : ce bloc est une chaine Python normale,
+         elle interprete les echappements, et un \\' y deviendrait une
+         apostrophe nue qui fermerait la chaine JavaScript. */
+      +'Solde \u00e0 l\u2019arriv\u00e9e : '+d.solde+N+N
       +'Paiement souhait\u00e9 : '+d.paiement+N+d.message;
   }
   var CHAMP={nom:'fn',email:'em',tel:'tl'};
