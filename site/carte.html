@@ -69,6 +69,10 @@ p{color:#D6CBBB}
 main{display:block}
 header{position:fixed;top:0;left:0;right:0;z-index:100;transition:.45s;padding:22px 0}
 header.scrolled{padding:11px 0;background:rgba(16,11,6,.96);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
+/* Menu ouvert : l en-tete devient opaque, et de la couleur du tiroir. Sur
+   cette page il est transparent au repos — il flotte sur l image — donc le
+   menu qui defile dessous se voyait entierement au travers, logo compris. */
+header.menu{background:var(--night);backdrop-filter:none;border-bottom:1px solid var(--line)}
 .nav{display:flex;align-items:center;justify-content:space-between;gap:20px}
 .brand img{width:168px;transition:.45s}
 header.scrolled .brand img{width:132px}
