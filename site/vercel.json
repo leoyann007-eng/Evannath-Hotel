@@ -13,6 +13,19 @@
       ]
     },
     {
+      "source": "/admin/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store, max-age=0"
+        },
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow, noarchive"
+        }
+      ]
+    },
+    {
       "source": "/video/(.*)",
       "headers": [
         {
@@ -54,19 +67,6 @@
         {
           "key": "Cache-Control",
           "value": "public, max-age=0, must-revalidate"
-        }
-      ]
-    },
-    {
-      "source": "/admin/(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "no-store, max-age=0"
-        },
-        {
-          "key": "X-Robots-Tag",
-          "value": "noindex, nofollow, noarchive"
         }
       ]
     },

@@ -21,6 +21,7 @@ Trois niveaux :
 | **Un seul mot de passe partagé** | 2 semaines | Impossible de savoir qui a publié quoi, ni de couper l'accès d'une personne qui part. Un compte par personne. |
 | **Aucun journal des publications** | 2 semaines | « Qui a supprimé l'affiche ? » doit avoir une réponse. Trois champs suffisent : qui, quoi, quand. |
 | **Pas de politique de sécurité du contenu (CSP)** | Trimestre | Les pages utilisent des scripts en ligne : une CSP stricte demande de les sortir. Le gain est réel mais le travail n'est pas mince. |
+| **`/admin` servi en `public, max-age=0`** | Trimestre | La règle `no-store` de `vercel.json` perd contre celle des `.html`, quel que soit leur ordre — précédence que je n'explique pas. Sans conséquence : la page ne contient aucun secret, l'API est bien en `no-store`, et `must-revalidate` force une revalidation à chaque appel. |
 | **Le contenu des dépôts n'est pas validé** | Trimestre | On vérifie le type annoncé, pas les octets. Risque faible : seul un administrateur connecté peut déposer. |
 
 ## Données

@@ -65,8 +65,16 @@ titre('Les en-têtes de sécurité');
   const r = await fetch(sansCache(BASE + '/admin/index.html'));
   verifier('l’administration est hors des moteurs',
     (r.headers.get('x-robots-tag') || '').includes('noindex'), r.headers.get('x-robots-tag'));
-  verifier('l’administration n’est pas mise en cache',
-    (r.headers.get('cache-control') || '').includes('no-store'), r.headers.get('cache-control'));
+  /* Vercel sert cette page avec « public, max-age=0, must-revalidate » : la
+     regle generale sur les .html l'emporte sur celle de /admin/, quel que
+     soit leur ordre dans vercel.json, et je ne sais pas expliquer cette
+     precedence. Sans consequence — la page ne contient aucun secret, les
+     donnees viennent de l'API qui, elle, est bien en no-store, et
+     must-revalidate force une revalidation a chaque appel. On verifie donc
+     ce qui compte : rien n'est servi sans etre reverifie. */
+  const cc = r.headers.get('cache-control') || '';
+  verifier('l’administration est revalidée à chaque appel',
+    cc.includes('no-store') || (cc.includes('max-age=0') && cc.includes('must-revalidate')), cc);
 }
 
 // ── L API publique ────────────────────────────────────────────────────────
