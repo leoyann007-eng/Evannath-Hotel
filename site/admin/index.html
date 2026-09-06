@@ -466,7 +466,7 @@ function avertissement() {
   if (ETAT.panne) {
     return `<div class="alerte">
       <b>Le stockage ne répond pas</b>
-      <span>${ETAT.panne} Vos données ne sont pas perdues : elles sont dans le
+      <span>${ech(ETAT.panne)} Vos données ne sont pas perdues : elles sont dans le
       magasin, c'est l'accès qui est en défaut. N'enregistrez rien tant que ce
       message est là — vous écririez par-dessus.</span>
     </div>`;
@@ -557,7 +557,7 @@ function liste(type) {
       </div>
       ${(() => { const im = type === 'campagnes'
           ? (e.visuel || ((e.packs || [])[0] || {}).image) : e.fond;
-        return im ? `<img class="vig" src="${srcImage(im)}" alt="">`
+        return im ? `<img class="vig" src="${ech(srcImage(im))}" alt="">`
                   : '<div class="vig"></div>'; })()}
       <div class="txt">
         <b>${ech(e.titre)}
@@ -929,7 +929,7 @@ function formulairePromo() {
 
 function pas1(e) {
   const apercu = e.fond
-    ? `<img src="${srcImage(e.fond)}" alt="" style="max-width:180px;max-height:180px;
+    ? `<img src="${ech(srcImage(e.fond))}" alt="" style="max-width:180px;max-height:180px;
         object-fit:contain;background:var(--bark);border:1px solid var(--line)">`
     : '<p style="color:var(--muted);font-size:13.5px">Aucun visuel choisi.</p>';
   return `<label class="lb" for="f-titre">Titre</label>
@@ -1017,7 +1017,7 @@ function camp1(e) {
     <label class="lb">Visuel de la campagne (facultatif)</label>
     <div class="depot">
       <div id="apercu">${e.visuel
-        ? `<img src="${srcImage(e.visuel)}" alt="" style="max-width:260px;
+        ? `<img src="${ech(srcImage(e.visuel))}" alt="" style="max-width:260px;
             max-height:180px;object-fit:contain;background:var(--bark);
             border:1px solid var(--line)">`
         : '<p style="color:var(--muted);font-size:13.5px">Aucun visuel.</p>'}</div>
@@ -1041,7 +1041,7 @@ function camp1(e) {
 function camp2(e) {
   const l = (e.packs && e.packs.length) ? e.packs : [{}];
   const vign = (p) => p.image
-    ? `<img src="${srcImage(p.image)}" alt="">`
+    ? `<img src="${ech(srcImage(p.image))}" alt="">`
     : '<span>photo</span>';
   return `<p class="aide" style="margin-bottom:14px">Chaque pack devient une
       carte réservable sur le site, avec sa photo et son prix ferme.</p>
@@ -1101,7 +1101,7 @@ function camp4(e) {
     </div>
     <div class="apercu-client affiche">
       ${(() => { const im = e.visuel || ((e.packs || [])[0] || {}).image;
-        return im ? `<img src="${srcImage(im)}" alt="">`
+        return im ? `<img src="${ech(srcImage(im))}" alt="">`
                   : '<div class="vide"></div>'; })()}
       <div class="dessus">
         <span class="taux">Campagne en cours</span>
@@ -1179,7 +1179,7 @@ function pas5(e) {
            ? ' · badge sur les chambres' : ''))}
     </div>
     <div class="apercu-client${e.format === 'affiche' ? ' affiche' : ''}">
-      ${e.fond ? `<img src="${srcImage(e.fond)}" alt="">` : '<div class="vide"></div>'}
+      ${e.fond ? `<img src="${ech(srcImage(e.fond))}" alt="">` : '<div class="vide"></div>'}
       <div class="dessus">
         <span class="taux">${taux}</span>
         <b>${ech(e.titre || '')}</b>
@@ -1192,7 +1192,7 @@ function pas5(e) {
 function formulaire(type) {
   const e = EDITE || { infos: [], publie: true };
   const apercu = e.fond
-    ? `<img src="${srcImage(e.fond)}" alt="" style="max-width:210px;max-height:210px;
+    ? `<img src="${ech(srcImage(e.fond))}" alt="" style="max-width:210px;max-height:210px;
         object-fit:contain;background:var(--bark);border:1px solid var(--line)">`
     : '<p style="color:var(--muted);font-size:13.5px">Aucune affiche choisie.</p>';
   const puce = (k) => {
