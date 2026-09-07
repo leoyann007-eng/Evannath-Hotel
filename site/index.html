@@ -70,6 +70,10 @@
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
+/* L en-tete est fixe : sans ce decalage, un lien vers #reserver amene le haut
+   du bloc DERRIERE l en-tete, qui le recouvre. On croit alors que la page a
+   trop defile. --h-nav porte la hauteur reellement mesuree au chargement. */
+[id]{scroll-margin-top:calc(var(--h-nav) + 18px)}
 body{background:var(--bark);color:var(--cream);font-family:var(--f-body);font-size:16.5px;line-height:1.65;overflow-x:hidden;-webkit-font-smoothing:antialiased}
 img{max-width:100%;height:auto;display:block}
 a{color:inherit;text-decoration:none}
@@ -499,8 +503,8 @@ footer{background:#0F0A06;border-top:1px solid var(--line);padding:74px 0 28px}
       <span class="pill" data-t="avail">Disponible</span>
       <span><b id="nn">2</b> <span data-t="nights">nuits</span></span>
       <span data-t="total">Total estimé</span> <b id="tt">134 000 FCFA</b>
-      <span style="color:var(--muted);font-size:12.5px" data-t="note">Petit-déjeuner inclus · Navette aéroport offerte</span>
-      <a href="#" class="btn btn-solid" style="margin-left:auto" data-t="confirm">Confirmer</a>
+      <span style="color:var(--muted);font-size:12.5px" data-t="note">Petit-déjeuner inclus · Navette aéroport offerte · hors taxe de séjour</span>
+      <a href="reserver.html" id="confirmer" class="btn btn-solid" style="margin-left:auto" data-t="confirm">Confirmer</a>
     </div>
   </form>
 </div>
@@ -987,6 +991,15 @@ function calc(){
   var o=cat.options[cat.selectedIndex];
   var tarif=EVN_REMISE.prix(+cat.value, o ? o.dataset.slug : '');
   document.getElementById('tt').textContent=fmt(n*tarif)+' FCFA';
+  /* « Confirmer » etait un lien mort : href="#". Il emmene desormais sur la
+     page de reservation avec ce qui vient d etre choisi — chambre et dates.
+     On garde un vrai lien plutot qu un gestionnaire de clic : il s ouvre dans
+     un onglet, il se copie, et il fonctionne meme si le script casse. */
+  var lien=document.getElementById('confirmer');
+  if(lien&&o&&o.dataset.slug){
+    lien.href='reserver.html?chambre='+encodeURIComponent(o.dataset.slug)
+      +'&du='+encodeURIComponent(d1.value)+'&au='+encodeURIComponent(d2.value);
+  }
 }
 EVN_REMISE.quand(function(R){
   calc();
@@ -1045,7 +1058,7 @@ eb:"Assinie · PK 19 · Aby Lagoon",h1e:"African",
 lede:"46 rooms and suites, a wooden deck set out over the lagoon, and the quiet of the Comoé. Book direct — the rate is always best here.",
 cta1:"Book direct",cta2:"See the rooms",sc:"Scroll",
 in:"Check-in",out:"Check-out",guests:"Guests",cat:"Category",check:"Check",
-avail:"Available",nights:"nights",total:"Estimated total",note:"Breakfast included · Free airport shuttle",confirm:"Confirm",
+avail:"Available",nights:"nights",total:"Estimated total",note:"Breakfast included · Free airport shuttle · excluding tourist tax",confirm:"Confirm",
 s1:"Rooms",s2:"Categories",s3:"Facebook followers",s4:"Front desk",
 e2:"Accommodation",h2:"Seven categories,<br>seven moods",
 p2:"From the standard room to the two-bedroom Arabian Suite. Every category has its own decor, its own view and a rate shown up front — no surprises on arrival.",

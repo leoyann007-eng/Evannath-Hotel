@@ -239,6 +239,10 @@ TOKENS = """:root{
 HEAD_CSS = TOKENS + """
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
+/* L en-tete est fixe : sans ce decalage, un lien vers #reserver amene le haut
+   du bloc DERRIERE l en-tete, qui le recouvre. On croit alors que la page a
+   trop defile. --h-nav porte la hauteur reellement mesuree au chargement. */
+[id]{scroll-margin-top:calc(var(--h-nav) + 18px)}
 body{background:var(--bark);color:var(--cream);font-family:var(--f-body);font-size:16.5px;line-height:1.7;overflow-x:hidden;-webkit-font-smoothing:antialiased}
 img{max-width:100%;height:auto;display:block}
 a{color:inherit;text-decoration:none}
