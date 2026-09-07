@@ -11,8 +11,11 @@ Une diapositive par page : on tourne la feuille au rythme du support.
 import io
 import re
 
-SRC = 'script-oral.md'
-OUT = 'script-oral.html'
+# Le meme formatage sert a tout document qui distingue ce qui se dit de ce
+# qui se fait. On accepte donc une source en argument.
+import sys
+SRC = sys.argv[1] if len(sys.argv) > 1 else 'script-oral.md'
+OUT = sys.argv[2] if len(sys.argv) > 2 else SRC.replace('.md', '.html')
 
 # ── Formatage en ligne ─────────────────────────────────────────────────────
 
@@ -71,9 +74,19 @@ def rendre(md):
             i[0] += 1
             continue
 
-        if nu.startswith('# ') and not titre_pose[0]:
-            titre_pose[0] = True
-            out.append('<h1>%s</h1>' % enligne(nu[2:]))
+        if nu.startswith('# '):
+            # Le premier titre de niveau 1 ouvre le document. Les suivants
+            # separent des parties : ils demarrent une page, comme les
+            # sections. Sans ce cas, la ligne n etait reconnue nulle part et
+            # la boucle de paragraphe s arretait dessus sans avancer — le
+            # programme tournait alors sans fin.
+            if titre_pose[0]:
+                fermer()
+                section_ouverte[0] = True
+                out.append('<section><h1 class="partie">%s</h1>' % enligne(nu[2:]))
+            else:
+                titre_pose[0] = True
+                out.append('<h1>%s</h1>' % enligne(nu[2:]))
             i[0] += 1
             continue
 
@@ -178,6 +191,12 @@ def rendre(md):
                 break
             bloc.append(c)
             i[0] += 1
+        if not bloc:
+            # Une ligne qu aucun cas ne reconnait : on la consomme plutot que
+            # de tourner dessus indefiniment. Un formateur ne doit jamais se
+            # bloquer sur un document qu il ne comprend pas.
+            i[0] += 1
+            continue
         texte = ' '.join(bloc)
         cl = ' class="chapeau"' if texte.startswith('**Si elle') else ''
         out.append('<p%s>%s</p>' % (cl, enligne(texte)))
