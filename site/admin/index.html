@@ -567,6 +567,11 @@ function liste(type) {
           : ech(e.badge || e.quand || '—') + (e.fin ? ' · se termine le ' + ech(e.fin) : '')}</span>
       </div>
       ${etatDe(e, type)}
+      <!-- « Visible sur le site » existait deja, mais a cinq clics au fond de
+           l assistant, quand Supprimer etait sous la main. Cette asymetrie
+           poussait a supprimer ce qu on voulait seulement mettre de cote. -->
+      <button class="btn mince" data-bascule="${ech(e.id)}" data-type="${type}"
+        >${e.publie === false ? 'Afficher' : 'Masquer'}</button>
       <button class="btn mince" data-mod="${ech(e.id)}" data-type="${type}">Modifier</button>
       <button class="btn mince danger" data-sup="${ech(e.id)}" data-type="${type}">Supprimer</button>
     </div>`).join('');
@@ -1437,6 +1442,28 @@ document.addEventListener('click', async (e) => {
       return;
     }
     if (msg) msg.textContent = '';
+    return charger();
+  }
+
+  /* Masquer, c est retirer du site sans rien perdre : l entree reste dans
+     l administration, marquee Brouillon, et un clic la remet en ligne.
+     Aucune confirmation demandee — le geste est reversible, c est tout son
+     interet. */
+  const bas = e.target.closest('[data-bascule]');
+  if (bas) {
+    const type = bas.dataset.type;
+    const entree = (ETAT[type] || []).find((x) => x.id === bas.dataset.bascule);
+    if (!entree) return;
+    bas.disabled = true;
+    const copie = JSON.parse(JSON.stringify(entree));
+    copie.publie = entree.publie === false;
+    const r = await appel('enregistrer', { type: typeApi(type), entree: copie });
+    if (!r.ok) {
+      bas.disabled = false;
+      const m = $('#msgl');
+      if (m) m.textContent = r.message || 'Le changement n’a pas pu être enregistré.';
+      return;
+    }
     return charger();
   }
 
