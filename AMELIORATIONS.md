@@ -63,7 +63,8 @@ Trois niveaux :
 
 | | Quand | Pourquoi |
 |---|---|---|
-| **Les accès LWS** | Avant la mise en ligne | DNS, site et courrier sont chez LWS. Un `whois evannathhotel.com` donne la date d'expiration — c'est le seul point réellement urgent, un domaine expiré se perd. |
+| **Les accès LWS** | Avant la mise en ligne | DNS, site, courrier et enregistrement du domaine sont tous chez LWS : un seul compte à récupérer. Vérifié au registre le 8 septembre 2026 — le domaine est `active` et court jusqu'au **21 avril 2027**. Rien d'urgent, donc : perdre un mot de passe n'est pas perdre le domaine. |
+| **Le renouvellement tombe le 21 avril** | Chaque année | À porter au calendrier. C'est une des choses dont un prestataire se souvient à la place de son client. |
 | **Ne jamais toucher aux `MX` ni à `mail.`** | À la bascule | La messagerie @evannathhotel.com vit dessus, et Brevo est déclaré dans le SPF. Une bascule trop rapide coupe le courrier de l'hôtel. |
 | **Une modification à la fois** | À la bascule | Transfert de domaine, changement de DNS et mise en ligne la même semaine : on ne saurait pas laquelle a cassé quoi. |
 
