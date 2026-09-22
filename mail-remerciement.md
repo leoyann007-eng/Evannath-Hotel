@@ -1,42 +1,36 @@
 # Mail de remerciement et lien de réunion — Hôtel Evannath
 
-**Quand l'envoyer :** aujourd'hui, le 22 septembre. Un lien de réunion
-envoyé la veille au soir se retrouve enterré sous les messages du matin.
+**Destinataire :** Mme Josiane, direction de l'hôtel Evannath.
+**Quand :** aujourd'hui, le 22 septembre. Elle a demandé le lien à 16 h 18 ;
+il ne doit pas attendre demain matin.
+**Objet :** `Lien de notre réunion — demain 23 septembre, 10 h 30`
 
-**Comment :** en **réponse à son message**, dans le même fil — c'est là
-qu'elle retrouvera le contexte, et son adresse à elle plutôt que celle de
-la réception. *(Nos échanges partaient à `receptionhotelevannath@gmail.com` ;
-si elle a écrit depuis une autre adresse, c'est à celle-là qu'il faut
-répondre.)*
+Un objet qui porte le lien et la date se retrouve dans une boîte pleine.
 
-**Objet :** conserver celui du fil, en ajoutant simplement le lien en tête
-du message pour qu'il soit visible sans dérouler.
-
-> **Deux choses à compléter avant d'envoyer :**
-> - **[SON NOM]** — nos dossiers n'ont jamais eu que « Madame, Monsieur ».
-> - **[LE POINT QU'ELLE A SOULEVÉ]** — je ne sais pas ce qu'elle vous a
->   dit. Un remerciement qui ne nomme rien se lit comme une formule ;
->   celui qui reprend une phrase d'elle se lit comme une réponse. Si vous
->   préférez rester général, supprimez simplement la phrase.
+> **Ce que son message disait, et ce qu'il ne disait pas.** Elle a écrit
+> « j'ai bien reçu le site que tu as mis en ligne », puis a proposé
+> elle-même l'appel et l'horaire. C'est un accusé de réception et une
+> invitation — **pas encore un avis sur le travail.** Le mail remercie
+> donc de l'accueil et du créneau, sans faire semblant qu'elle ait commenté
+> quoi que ce soit. Son avis, c'est demain qu'on l'aura.
 
 ---
 
-Bonjour Madame **[SON NOM]**,
+Bonjour Madame Josiane,
 
-Merci beaucoup pour votre retour — et d'avoir pris le temps de regarder le
-travail d'aussi près. **[Votre remarque sur … m'a été particulièrement
-utile : j'y reviendrai demain avec ce qu'elle change concrètement.]**
+Merci pour votre message, et merci d'avoir proposé ce créneau.
 
-Comme convenu, voici le lien pour notre réunion de **demain, mercredi
-23 septembre, à 10 h 30** :
+Voici le lien de notre réunion de **demain, mercredi 23 septembre, à
+10 h 30** :
 
 **https://meet.google.com/uuc-ubau-bfu**
 
-Il s'ouvre depuis un ordinateur ou un téléphone, sans rien installer. Si
-l'horaire ne vous convient plus, dites-le-moi d'un mot : je m'adapte.
+Il s'ouvre depuis un ordinateur ou un téléphone, sans rien à installer.
 
-Je prévois une trentaine de minutes, et j'aurai le site sous les yeux pour
-vous montrer directement ce dont nous parlerons.
+Je prévois une trentaine de minutes et j'aurai le site sous les yeux : nous
+pourrons regarder ensemble ce qui vous semble juste et ce qui ne l'est pas.
+N'hésitez pas à noter d'ici là tout ce qui vous aura accroché — c'est ce
+qui m'intéresse le plus.
 
 À demain,
 
@@ -45,16 +39,27 @@ vous montrer directement ce dont nous parlerons.
 
 ---
 
-## Pourquoi c'est écrit comme ça
+## Le message WhatsApp
 
-**Le lien avant le reste.** C'est la seule chose qu'elle aura besoin de
-retrouver demain matin à 10 h 28. Il ne doit pas être à chercher.
+Vous lui avez dit « par mail et WhatsApp également ». Le WhatsApp doit être
+court : c'est le lien qu'elle y cherchera, pas un texte.
 
-**La date en toutes lettres, pas seulement « demain ».** Un mail se relit
-le lendemain, où « demain » ne veut plus dire la même chose.
+> Bonjour Madame Josiane,
+>
+> Voici le lien pour demain, mercredi 23 septembre à 10 h 30 :
+> https://meet.google.com/uuc-ubau-bfu
+>
+> Je vous l'ai aussi envoyé par mail. À demain !
 
-**Une porte de sortie sur l'horaire.** Proposer de s'adapter coûte une
-ligne et évite qu'un empêchement devienne une annulation.
+---
 
-**Pas de pièce jointe, pas de relance d'offre.** Ce mail-ci ne sert qu'à
-remercier et à confirmer. Tout le reste se dira de vive voix.
+## Trois choix d'écriture
+
+**Pas de « comme convenu ».** C'est elle qui a proposé l'heure ; le lui
+rappeler comme un accord serait raide.
+
+**Pas de porte de sortie sur l'horaire.** Le créneau vient d'elle. Proposer
+de le déplacer avant même qu'elle le demande sème le doute sur le mien.
+
+**La date en toutes lettres.** Un mail se relit le lendemain, où « demain »
+ne veut plus dire la même chose.
