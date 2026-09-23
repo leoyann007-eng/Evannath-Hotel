@@ -99,8 +99,8 @@ CSS = REMISE_CSS + """
 .calc .total span{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:700}
 .calc .total b{font-family:var(--f-display);font-size:1.85rem;color:var(--bronze-2);font-variant-numeric:tabular-nums;font-weight:400}
 .panel .btn{width:100%;margin-top:20px}
-.avail{display:flex;align-items:center;gap:9px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--palm);font-weight:700;margin-top:16px;justify-content:center}
-.avail i{width:7px;height:7px;border-radius:50%;background:var(--palm);display:inline-block}
+.avail{display:flex;align-items:center;gap:9px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-top:16px;justify-content:center}
+.avail i{width:7px;height:7px;border-radius:50%;background:var(--muted);display:inline-block}
 .panel .helpt{font-size:12.5px;color:var(--muted);text-align:center;margin-top:16px;line-height:1.5}
 .panel .helpt a{color:var(--bronze);border-bottom:1px solid var(--line)}
 .more{background:var(--bark-2);padding:88px 0}
@@ -336,7 +336,7 @@ for c in CHAMBRES:
     </div>
 
     <button type="submit" class="btn btn-solid" data-t="bkb">Réserver cette chambre</button>
-    <div class="avail"><i></i><span data-t="avl">Disponible à ces dates</span></div>
+    <div class="avail"><i></i><span data-t="avl">Disponibilité confirmée sous 24 h</span></div>
     <p class="helpt" data-t="hlp">Une question&nbsp;? Écrivez-nous sur <a href="https://wa.me/{{WA}}" target="_blank" rel="noopener">WhatsApp</a> ou appelez le +225 01 51 52 75 75.</p>
   </form>
  </aside>

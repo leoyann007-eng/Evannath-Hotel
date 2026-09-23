@@ -116,7 +116,7 @@ CHASSIS = {
  'apd': 'From', 'pern': 'per night, breakfast included',
  'la1': 'Check-in', 'la2': 'Check-out', 'lax': 'Guests',
  'rtx': 'Tourist tax', 'rpd': 'Breakfast', 'rin': 'Included', 'rtt': 'Total stay',
- 'bkb': 'Book this room', 'avl': 'Available on these dates',
+ 'bkb': 'Book this room', 'avl': 'Availability confirmed within 24 h',
  'hlp': 'A question? Write to us on <a href="https://wa.me/' + WA + '" target="_blank" rel="noopener">WhatsApp</a> or call +225 01 51 52 75 75.',
  'ebo': 'Other categories', 'hao': 'If this one is taken',
  'mbs': 'FCFA · total stay',
