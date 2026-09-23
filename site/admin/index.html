@@ -263,6 +263,26 @@ textarea{min-height:96px;resize:vertical}
    s affichait alors que le bouton proposait encore de l ouvrir. */
 .grille-img[hidden]{display:none}
 
+/* Les numeros de chambre, par categorie. Le coup d'oeil que la reception a
+   demande : avec trente chambres, la liste detaillee ne tient plus a l'ecran,
+   et on ne sait plus quelle 25 appartient a quoi. Celle-ci tient en dix
+   lignes, quel que soit le nombre de chambres. */
+.numeros{border:1px solid var(--line);margin-bottom:20px}
+.numeros > div{display:flex;gap:18px;align-items:baseline;padding:11px 16px;
+  border-bottom:1px solid var(--line)}
+.numeros > div:last-child{border-bottom:0}
+.numeros b{font-family:var(--f-t);font-weight:400;font-size:15px;flex:0 0 215px}
+.numeros .liste{color:var(--cream);font-size:14.5px;
+  font-variant-numeric:tabular-nums;letter-spacing:.03em;line-height:1.7}
+/* Un numero barre est hors service. La legende le dit en toutes lettres :
+   une couleur et un trait ne se lisent pas tout seuls. */
+.numeros s{color:var(--muted);text-decoration-thickness:1px}
+.numeros .rien{color:var(--muted)}
+@media(max-width:700px){
+  .numeros > div{flex-direction:column;gap:5px}
+  .numeros b{flex:none}
+}
+
 /* La case « Je la prends en ligne ». Sur un ecran etroit — la reception
    travaille au comptoir, souvent sur un telephone — elle ne peut pas rester
    a cote du nom : mesuree a 474 px, elle reduisait le texte a un mot par
@@ -1405,14 +1425,28 @@ function rendre() {
     const chambres = ETAT.chambres || [];
     const auj = AUJ();
 
+    /* Les numeros se trient comme on les lit : 2 avant 10, et B2 avant B10.
+       localeCompare seul range 10 avant 2, ce qui fait chercher longtemps
+       une chambre dans une liste de trente. */
+    const parNumero = (a, b) => String(a.numero).localeCompare(
+      String(b.numero), 'fr', { numeric: true, sensitivity: 'base' });
+
     /* Les chambres, rangees par categorie — c'est ainsi que la reception les
        a en tete, et ca rend visible la categorie qu'on a oublie de saisir. */
     const parCategorie = categories.map((c) => ({
       categorie: c,
-      siennes: chambres.filter((ch) => ch.categorie === c.slug),
+      siennes: chambres.filter((ch) => ch.categorie === c.slug).sort(parNumero),
     }));
+
+    /* Les numeros d'une categorie, sur une ligne. Un numero barre est hors
+       service ; la legende sous le tableau le dit en toutes lettres. */
+    const numerosDe = (siennes) => siennes.length
+      ? `<span class="liste">${siennes.map((ch) => ch.service === false
+          ? `<s title="Hors service">${ech(ch.numero)}</s>`
+          : ech(ch.numero)).join(' · ')}</span>`
+      : '<span class="liste rien">aucune chambre saisie</span>';
     const orphelines = chambres.filter(
-      (ch) => !categories.some((c) => c.slug === ch.categorie));
+      (ch) => !categories.some((c) => c.slug === ch.categorie)).sort(parNumero);
     const saisies = chambres.length;
     const servies = chambres.filter((ch) => ch.service !== false).length;
 
@@ -1495,6 +1529,19 @@ function rendre() {
             + 'donnez déjà.'
           : saisies + ' chambre' + (saisies > 1 ? 's' : '') + ' saisie'
             + (saisies > 1 ? 's' : '') + ', dont ' + servies + ' en service.'}</p>
+
+        ${saisies ? `<div class="numeros">
+          ${parCategorie.map((g) => `<div>
+            <b>${ech(g.categorie.nom)}</b>${numerosDe(g.siennes)}
+          </div>`).join('')}
+          ${orphelines.length ? `<div>
+            <b style="color:var(--err)">Catégorie disparue</b>${numerosDe(orphelines)}
+          </div>` : ''}
+        </div>
+        ${chambres.some((ch) => ch.service === false)
+          ? `<p class="aide" style="margin:-10px 0 20px">Les numéros
+             <s>barrés</s> sont hors service : ils ne comptent à aucune
+             date.</p>` : ''}` : ''}
 
         <div class="puces">
           <div><label for="cn-numero">Numéro</label>

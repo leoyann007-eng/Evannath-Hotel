@@ -511,6 +511,14 @@ de gestion.
 |---|---|
 | ses chambres, une à une, avec leur numéro et leur catégorie | « reste-t-il au moins une chambre de cette catégorie ces nuits-là ? » |
 
+L'écran s'ouvre donc sur **un récapitulatif : une ligne par catégorie, ses
+numéros à la suite.** Avec trente chambres, la liste détaillée ne tient plus
+à l'écran et on ne sait plus quelle 25 appartient à quoi ; ce tableau tient
+en dix lignes quel que soit le nombre de chambres. Les numéros s'y trient
+comme on les lit — 2 avant 10, B2 avant B10 — et les numéros barrés sont
+hors service, ce que la légende dit en toutes lettres plutôt que de laisser
+un trait s'expliquer tout seul.
+
 ### Quatre états
 
 | État | Quand | Ce que le site écrit |

@@ -38,8 +38,12 @@ reste ici, c'est **ce qu'une personne comprend** en ouvrant l'écran.
 - [ ] **Ni le motif, ni les numéros de chambre, ni le nombre restant** ne
       s'affichent sur le site public. Écrivez un mot reconnaissable dans un
       motif et cherchez-le dans la page.
+- [ ] **Le récapitulatif en haut** donne, pour chaque catégorie, la liste de
+      ses numéros. Saisissez une chambre « 2 » et une « 10 » : elles doivent
+      sortir dans cet ordre, pas 10 avant 2.
 - [ ] **Sur un vrai téléphone** : la case « En service » passe sous le nom de
-      la chambre, et rien ne déborde.
+      la chambre, le récapitulatif passe les numéros sous le nom de la
+      catégorie, et rien ne déborde.
 - [ ] **Faire saisir dix chambres par quelqu'un de la réception, sans
       l'aider.** S'il ne sait pas dire ce que le client verra, l'écran est
       raté — c'est ce qu'il explique en premier. Et si saisir dix chambres
