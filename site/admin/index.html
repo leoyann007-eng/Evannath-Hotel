@@ -1528,10 +1528,20 @@ document.addEventListener('click', async (e) => {
     const f = (ETAT.fermetures || []).find((x) => x.id === rouvre.dataset.rouvrir);
     if (!f) return;
     /* On nomme ce qu'on retire. « Voulez-vous vraiment ? » ne dit pas ce
-       qu'on s'apprête à rouvrir à la réservation. */
-    if (!confirm('Rouvrir ' + nomCible(f.cible).toLowerCase() + ' — '
-      + nuitsEnClair(f).toLowerCase() + ' ?\n\nLe site cessera d\'annoncer '
-      + 'complet sur ces nuits.')) return;
+       qu'on s'apprête à rouvrir à la réservation.
+
+       Et décliner la demande d'un client n'est pas rouvrir une fermeture
+       technique : on le dit avec son nom, sinon la réception croit annuler
+       des travaux. */
+    const demande = f.nature === 'client' && f.statut === 'attente';
+    if (!confirm(demande
+      ? 'Refuser la demande de ' + (f.client || 'ce client') + ' — '
+        + nuitsEnClair(f).toLowerCase() + ' ?\n\nLa chambre repart à la vente '
+        + 'immédiatement, et personne ne préviendra le client : c\'est à vous '
+        + 'de lui répondre.'
+      : 'Rouvrir ' + nomCible(f.cible).toLowerCase() + ' — '
+        + nuitsEnClair(f).toLowerCase() + ' ?\n\nLe site cessera d\'annoncer '
+        + 'complet sur ces nuits.')) return;
     const r = await appel('supprimer', { type: 'fermeture', id: f.id });
     if (!r.ok) { alert(r.message || "Ça n'a pas pu être retiré."); return; }
     ETAT.fermetures = (ETAT.fermetures || []).filter((x) => x.id !== f.id);

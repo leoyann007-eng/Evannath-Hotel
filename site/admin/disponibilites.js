@@ -337,14 +337,49 @@ function htmlDsp() {
     const att = g.f.statut === 'attente';
     return `<div class="dsp-resa"><div><b>${ech(g.f.client || '—')}</b>
       <span>${ech(nomCat(g.cat))} — ${g.n} chambre${g.n > 1 ? 's' : ''}</span>
-      <span class="quand">Arrivée ${jCourt(g.f.debut)} → Départ ${jCourt(jPlus(g.f.fin, 1))}</span></div>
+      <span class="quand">Arrivée ${jCourt(g.f.debut)} → Départ ${jCourt(jPlus(g.f.fin, 1))}</span>
       ${att && g.f.expire ? `<span class="quand" style="color:${retenueTombee(g.f)
         ? 'var(--err)' : 'var(--bronze-2)'}">${retenueTombee(g.f) ? 'retenue expirée'
         : 'gardée jusqu\'à ' + heureDe(g.f.expire)}</span>` : ''}</div>
       <span class="etat ${att ? 'attend' : 'vif'}">${att ? 'En attente' : 'Confirmée'}</span></div>`;
   }).join('');
 
-  return `<div class="dsp-chiffres-h">
+  /* ── Les demandes venues du site, en tete d'ecran ──────────────────
+     Elles passent AVANT les compteurs : une chambre gardee dont personne ne
+     s'occupe se remet en vente toute seule, et le client n'aura jamais de
+     reponse. C'est la seule chose de cet ecran qui ait une echeance. */
+  const aTraiter = (F || [])
+    .filter((x) => x.nature === 'client' && x.statut === 'attente' && x.expire)
+    .map((x) => ({ f: x, ch: chambres.find((c) => c.id === x.cible) }))
+    .filter((x) => x.ch)
+    .sort((a, b) => String(a.f.expire).localeCompare(String(b.f.expire)));
+
+  const demandes = !aTraiter.length ? '' : `<div class="carte dsp-traiter">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:10px">
+      <h2 class="bloc-t" style="margin-bottom:4px">${aTraiter.length} demande${
+        aTraiter.length > 1 ? 's' : ''} venue${aTraiter.length > 1 ? 's' : ''} du site</h2>
+    </div>
+    <p class="aide" style="margin:0 0 16px">La chambre leur est gardée jusqu'à
+      l'heure indiquée. Passé ce délai elle se remet en vente, et le client
+      n'aura pas de réponse. <strong>Confirmez celles que vous honorez.</strong></p>
+    ${aTraiter.map(({ f, ch }) => `<div class="dsp-dem">
+      <div style="flex:1;min-width:0">
+        <b>${ech(f.client)}</b>
+        <span>${ech(nomCat(ch.categorie))} · chambre ${ech(ch.numero)}</span>
+        <span class="quand">Arrivée ${jCourt(f.debut)} → Départ ${jCourt(jPlus(f.fin, 1))}${
+          f.motif ? ' · réf. ' + ech(f.motif) : ''}</span>
+        <span style="color:${retenueTombee(f) ? 'var(--err)' : 'var(--bronze-2)'};font-size:12.5px">${
+          retenueTombee(f) ? 'Retenue expirée — la chambre est redevenue disponible'
+            : 'Gardée jusqu\'à ' + heureDe(f.expire)}</span>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;flex:none">
+        <button class="btn mince plein" data-dsp-confirmer="${ech(f.id)}">Confirmer</button>
+        <button class="btn mince danger" data-rouvrir="${ech(f.id)}">Refuser</button>
+      </div>
+    </div>`).join('')}
+  </div>`;
+
+  return `${demandes}<div class="dsp-chiffres-h">
       ${CARTES.map(([l, n, c]) => `<div class="carte"${c ? ` style="--c:${c}"` : ''}>
         <b>${c ? '<span class="pt"></span>' : ''}${n}</b><span>${l}</span></div>`).join('')}
     </div>
@@ -421,6 +456,30 @@ function apresDsp() {
   if (DSP.vue === 'mois' && ajusterFenetre()) rendreDsp();
   else el.scrollLeft = 0;
 }
+
+/* ── Voir arriver les demandes ────────────────────────────────────────
+   Une retenue ne dure que deux heures. Une reception qui laisse l'onglet
+   ouvert — c'est ce qu'elle fait — ne verrait jamais une demande arriver, et
+   la chambre se remettrait en vente sans que personne n'ait rien vu.
+
+   On relit donc le magasin toutes les minutes, et on ne redessine QUE s'il a
+   change : redessiner pour rien ferait sauter le curseur de la recherche.
+   Et jamais pendant qu'un tiroir ou une fenetre est ouverte — on effacerait
+   ce que la reception est en train de saisir. */
+let DSP_VU = null;
+setInterval(async () => {
+  if (VUE !== 'disponibilites' || DSP.tiroir || DSP.modal) return;
+  if (document.hidden) return;
+  try {
+    const r = await appel('tout');
+    if (!r.ok || !r.donnees) return;
+    if (r.donnees.maj === DSP_VU) return;
+    DSP_VU = r.donnees.maj;
+    ETAT.chambres = r.donnees.chambres || [];
+    ETAT.fermetures = r.donnees.fermetures || [];
+    rendre();
+  } catch (e) { /* le reseau reviendra */ }
+}, 60000);
 
 let DSP_RT = null;
 window.addEventListener('resize', () => {
