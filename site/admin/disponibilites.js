@@ -262,6 +262,13 @@ function htmlDsp() {
         <div class="dsp-total"><span>Total des chambres</span><b>${chambres.length}</b></div>
         <p class="aide" style="margin-top:2px">${hs ? 'dont ' + hs + ' hors service jusqu’à nouvel ordre'
           : 'toutes en service'}</p>
+        <p class="aide" style="margin-top:16px;padding-top:14px;border-top:1px solid var(--line)">
+          <b style="color:var(--cream);font-weight:600">Ce que le client lit sur le site</b><br>
+          « Disponible à ces dates » s'il reste au moins deux chambres,
+          « Dernière chambre à ces dates » s'il n'en reste qu'une,
+          « Complet à ces dates » s'il n'en reste aucune. Tant qu'aucune chambre
+          n'est saisie dans une catégorie, le site ne promet rien :
+          « Disponibilité confirmée sous 24 h ».</p>
       </section>
     </div>
   </div>

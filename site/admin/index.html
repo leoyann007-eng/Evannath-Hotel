@@ -1497,133 +1497,70 @@ function rendre() {
       <div id="dsp-zone">${htmlDsp()}</div>
 
       <div class="carte">
-        <div class="bloc-t">Ce que le site répond, et quand</div>
-        <p class="aide" style="margin:-6px 0 16px">Le client choisit une
-        <strong>catégorie</strong> et des dates. Le site compte vos chambres de
-        cette catégorie qui restent libres ces nuits-là.</p>
-        <div class="ligne" style="margin:0"><div class="txt">
-          <b>Au moins deux chambres libres</b>
-          <span>« Disponible à ces dates », en vert.</span></div>
-          <span class="etat vif">Disponible</span></div>
-        <div class="ligne"><div class="txt">
-          <b>Exactement une</b>
-          <span>« Dernière chambre à ces dates ». C'est le seul chiffre que le
-          site laisse sortir — « il en reste sept » publierait votre taux
-          d'occupation.</span></div>
-          <span class="etat">Dernière</span></div>
-        <div class="ligne"><div class="txt">
-          <b>Aucune</b>
-          <span>« Complet à ces dates ». Le motif que vous saisissez reste
-          ici : le client ne le voit jamais.</span></div>
-          <span class="etat fini">Complet</span></div>
-        <div class="ligne"><div class="txt">
-          <b>Aucune chambre saisie dans cette catégorie</b>
-          <span>Le site n'annonce rien et redit que la réception confirme sous
-          24 h. C'est l'état de départ, et il n'a rien de gênant — mieux vaut
-          ne rien promettre que promettre à tort.</span></div>
-          <span class="etat dort">Rien d'annoncé</span></div>
-        <p class="aide" style="margin-top:14px"><strong>Les dates sont des
-        nuits.</strong> Fermer du 24 au 26 ferme les nuits du 24, du 25 et du
-        26. Un client qui arrive le 26 et repart le 27 dort la nuit du 26 : il
-        tombera sur « complet ».</p>
-      </div>
+        <details class="plus" style="border-top:0;margin-top:0;padding-top:0">
+          <summary>Gérer les chambres — ajouter, retirer, fermetures</summary>
 
-      <div class="carte">
-        <div class="bloc-t">Vos chambres</div>
-        <p class="aide" style="margin:-6px 0 18px">${saisies === 0
-          ? "Aucune chambre saisie : le site n'annonce aucune disponibilité. "
-            + 'Ajoutez vos chambres une à une, avec le numéro que vous leur '
-            + 'donnez déjà.'
-          : saisies + ' chambre' + (saisies > 1 ? 's' : '') + ' saisie'
-            + (saisies > 1 ? 's' : '') + ', dont ' + servies + ' en service.'}</p>
+          <p class="aide" style="margin:14px 0 18px">${saisies === 0
+            ? "Aucune chambre saisie : le site n'annonce aucune disponibilité. "
+              + 'Ajoutez vos chambres une à une, avec le numéro que vous leur '
+              + 'donnez déjà.'
+            : saisies + ' chambre' + (saisies > 1 ? 's' : '') + ' saisie'
+              + (saisies > 1 ? 's' : '') + ', dont ' + servies + ' en service.'}</p>
 
-        ${saisies ? `<div class="numeros">
-          ${parCategorie.map((g) => `<div>
-            <b>${ech(g.categorie.nom)}</b>${numerosDe(g.siennes)}
-          </div>`).join('')}
-          ${orphelines.length ? `<div>
-            <b style="color:var(--err)">Catégorie disparue</b>${numerosDe(orphelines)}
-          </div>` : ''}
-        </div>
-        ${chambres.some((ch) => ch.service === false)
-          ? `<p class="aide" style="margin:-10px 0 20px">Les numéros
-             <s>barrés</s> sont hors service : ils ne comptent à aucune
-             date.</p>` : ''}` : ''}
+          ${saisies ? `<div class="numeros">
+            ${parCategorie.map((g) => `<div>
+              <b>${ech(g.categorie.nom)}</b>${numerosDe(g.siennes)}
+            </div>`).join('')}
+            ${orphelines.length ? `<div>
+              <b style="color:var(--err)">Catégorie disparue</b>${numerosDe(orphelines)}
+            </div>` : ''}
+          </div>
+          ${chambres.some((ch) => ch.service === false)
+            ? `<p class="aide" style="margin:-10px 0 20px">Les numéros
+               <s>barrés</s> sont hors service : ils ne comptent à aucune
+               date.</p>` : ''}` : ''}
 
-        <div class="puces">
-          <div><label for="cn-numero">Numéro</label>
-            <input id="cn-numero" maxlength="20" placeholder="25"></div>
-          <div><label for="cn-cat">Catégorie</label>
-            <select id="cn-cat">
-              ${categories.map((c) => `<option value="${ech(c.slug)}">${ech(c.nom)}</option>`).join('')}
-            </select></div>
-          <button class="btn plein" id="cn-poser">Ajouter</button>
-        </div>
-        <p class="msg" id="cn-msg" style="margin-bottom:18px"></p>
+          <div class="puces">
+            <div><label for="cn-numero">Numéro</label>
+              <input id="cn-numero" maxlength="20" placeholder="25"></div>
+            <div><label for="cn-cat">Catégorie</label>
+              <select id="cn-cat">
+                ${categories.map((c) => `<option value="${ech(c.slug)}">${ech(c.nom)}</option>`).join('')}
+              </select></div>
+            <button class="btn plein" id="cn-poser">Ajouter</button>
+          </div>
+          <p class="msg" id="cn-msg" style="margin-bottom:18px"></p>
 
-        ${parCategorie.map((g) => `
-          <p class="aide" style="margin:18px 0 8px;color:var(--bronze)">
-            ${ech(g.categorie.nom)} — ${g.siennes.length === 0
-              ? "aucune chambre saisie, le site n'en dit rien"
-              : g.siennes.length + ' chambre' + (g.siennes.length > 1 ? 's' : '')}</p>
-          ${g.siennes.map(ligneChambre).join('')}`).join('')}
+          ${parCategorie.filter((g) => g.siennes.length).map((g) => `
+            <p class="aide" style="margin:18px 0 8px;color:var(--bronze)">
+              ${ech(g.categorie.nom)} — ${g.siennes.length} chambre${
+                g.siennes.length > 1 ? 's' : ''}</p>
+            ${g.siennes.map(ligneChambre).join('')}`).join('')}
 
-        ${orphelines.length ? `<p class="aide" style="margin:18px 0 8px;color:var(--err)">
-          ${orphelines.length} chambre(s) rattachée(s) à une catégorie qui
-          n'existe plus sur le site. Elles ne comptent nulle part.</p>
-          ${orphelines.map(ligneChambre).join('')}` : ''}
-      </div>
+          ${orphelines.length ? `<p class="aide" style="margin:18px 0 8px;color:var(--err)">
+            ${orphelines.length} chambre(s) rattachée(s) à une catégorie qui
+            n'existe plus sur le site. Elles ne comptent nulle part.</p>
+            ${orphelines.map(ligneChambre).join('')}` : ''}
 
-      <div class="carte">
-        <div class="bloc-t">Fermer des nuits</div>
-        ${saisies === 0 ? `<p class="aide">Ajoutez d'abord vos chambres : il
-          n'y a rien à fermer tant que le site n'en connaît aucune.</p>` : `
-        <div class="champ">
-          <label for="ff-cible">Quoi</label>
-          <select id="ff-cible">
-            ${parCategorie.filter((g) => g.siennes.length).map((g) => `
-              <optgroup label="${ech(g.categorie.nom)}">
-                ${g.siennes.map((ch) => `<option value="${ech(ch.id)}">Chambre ${ech(ch.numero)}</option>`).join('')}
-                <option value="${ech(g.categorie.slug)}">— toutes les ${ech(g.categorie.nom)}</option>
-              </optgroup>`).join('')}
-            <option value="*">— tout l'hôtel</option>
-          </select>
-        </div>
-        <div class="duo">
-          <div class="champ"><label for="ff-debut">Première nuit fermée</label>
-            <input type="date" id="ff-debut" min="${auj}"></div>
-          <div class="champ"><label for="ff-fin">Dernière nuit fermée</label>
-            <input type="date" id="ff-fin" min="${auj}">
-            <p class="aide">Vide = une seule nuit.</p></div>
-        </div>
-        <label class="prise" style="margin-bottom:18px">
-          <input type="checkbox" id="ff-sansfin"> Sans date de fin connue
-        </label>
-        <div class="champ">
-          <label for="ff-motif">Pourquoi — pour vous seuls</label>
-          <input id="ff-motif" maxlength="120" placeholder="Groupe séminaire, travaux…">
-          <p class="aide">Cette note ne quitte jamais cette page. Le site écrit
-          « Complet », et rien d'autre.</p>
-        </div>
-        <div class="pied">
-          <button class="btn plein" id="ff-poser">Fermer ces nuits</button>
-          <p class="msg" id="ff-msg"></p>
-        </div>`}
-      </div>
-
-      <div class="carte">
-        <div class="bloc-t">Les fermetures en cours et à venir</div>
-        ${vives.length ? vives.map(ligneFermeture).join('')
-          : `<p class="aide">Aucune. Toutes vos chambres en service comptent à
-             toutes les dates.</p>`}
-        ${passees.length ? `<details class="plus">
-          <summary>${passees.length} fermeture${passees.length > 1 ? 's' : ''} passée${
-            passees.length > 1 ? 's' : ''}</summary>
-          <p class="aide" style="margin:10px 0 14px">Elles n'ont plus d'effet sur
-          le site. Elles restent ici tant que vous ne les retirez pas.</p>
-          ${passees.map(ligneFermeture).join('')}
-        </details>` : ''}
+          <p class="aide" style="margin:26px 0 10px;color:var(--bronze)">Les
+            fermetures en cours et à venir</p>
+          <p class="aide" style="margin:0 0 12px">Le calendrier les montre
+            toutes. Celle-ci sert à retrouver une fermeture <strong>sans date de
+            fin</strong>, qui a pu commencer il y a des mois et n'apparaît donc
+            dans aucun mois affiché.</p>
+          ${vives.length ? vives.map(ligneFermeture).join('')
+            : `<p class="aide">Aucune. Toutes vos chambres en service comptent à
+               toutes les dates.</p>`}
+          ${passees.length ? `<details class="plus">
+            <summary>${passees.length} fermeture${passees.length > 1 ? 's' : ''} passée${
+              passees.length > 1 ? 's' : ''}</summary>
+            <p class="aide" style="margin:10px 0 14px">Elles n'ont plus d'effet sur
+            le site. Elles restent ici tant que vous ne les retirez pas.</p>
+            ${passees.map(ligneFermeture).join('')}
+          </details>` : ''}
+        </details>
       </div>`;
+
   } else if (VUE === 'parametres') {
     v.innerHTML = `<div class="entete"><div>
         <h1 class="t">Paramètres</h1>
@@ -1723,29 +1660,6 @@ document.addEventListener('click', async (e) => {
     if (!r.ok) { alert(r.message || "Ça n'a pas pu être retiré."); return; }
     ETAT.chambres = ETAT.chambres.filter((x) => x.id !== ch.id);
     return rendre();
-  }
-
-  /* Fermer des nuits. */
-  if (e.target.id === 'ff-poser') {
-    const msg = $('#ff-msg');
-    const dire = (t, mal) => { msg.textContent = t; msg.className = 'msg ' + (mal ? 'mal' : 'bon'); };
-    const debut = $('#ff-debut').value;
-    const sansFin = $('#ff-sansfin').checked;
-    const fin = $('#ff-fin').value;
-    if (!debut) return dire('Indiquez au moins la première nuit fermée.', true);
-    if (sansFin && fin) {
-      return dire('Choisissez : une dernière nuit, ou aucune date de fin. '
-        + 'Pas les deux.', true);
-    }
-    const entree = { cible: $('#ff-cible').value, debut, fin, sansFin,
-                     motif: $('#ff-motif').value };
-    dire('Enregistrement…');
-    const r = await appel('enregistrer', { type: 'fermeture', entree });
-    if (!r.ok) return dire(r.message || "Ça n'a pas pu être enregistré.", true);
-    ETAT.fermetures = (ETAT.fermetures || []).filter((x) => x.id !== r.entree.id);
-    ETAT.fermetures.push(r.entree);
-    rendre();
-    return;
   }
 
   const rouvre = e.target.closest('[data-rouvrir]');
