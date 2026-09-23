@@ -56,6 +56,12 @@
 .dsp-r .dsp-g{background:#1A120B;padding:9px 18px 9px 96px;align-items:center;justify-content:space-between;
   font-size:13.5px}
 .dsp-r .dsp-j{padding:6px 5px}
+/* Le numero de chambre ouvre sa fiche : il doit s'annoncer comme un bouton,
+   sans devenir un lien criard au milieu de trente. */
+.dsp-num{background:none;border:0;padding:0;text-align:left;cursor:pointer;
+  color:var(--cream);font:400 13.5px/1.35 var(--f-b);
+  border-bottom:1px solid transparent}
+.dsp-num:hover,.dsp-num:focus-visible{color:var(--bronze-2);border-bottom-color:var(--bronze-2)}
 .dsp-b{flex:1;padding:6px 3px;font:700 9px/1.2 var(--f-b);letter-spacing:.09em;text-transform:uppercase;
   white-space:nowrap;cursor:pointer;color:var(--c);transition:.2s;
   background:color-mix(in srgb,var(--c) 8%,transparent);border:1px solid color-mix(in srgb,var(--c) 40%,transparent)}

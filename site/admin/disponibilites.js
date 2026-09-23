@@ -18,7 +18,26 @@
    appel, ech, $, AUJ, jourIso et FCFA.
    ───────────────────────────────────────────────────────────────────────── */
 const DSP = { vue: 'mois', focus: null, ouvertes: {}, tiroir: null, modal: null,
-              voirTout: false, seuil: 0.3, defiler: true };
+              voirTout: false, seuil: 0.3, defiler: true, nbJours: 0 };
+
+/* Combien de colonnes de jour tiennent vraiment. La largeur du libelle et
+   celle d'une colonne sont dans la feuille de style ; les redire ici serait
+   une divergence de plus a surveiller, mais les lire coute un reflow par
+   rendu. On les fixe, et le test de largeur les verifie. */
+const DSP_COL = 96, DSP_LIB = 330;
+function combienDeJours() {
+  const el = document.querySelector('#dsp-defil');
+  /* Au premier rendu la zone n'existe pas encore : on estime, puis
+     apresDsp() remesure et redessine une fois si le compte a change. */
+  const l = el && el.clientWidth ? el.clientWidth : Math.max(520, window.innerWidth - 700);
+  return Math.max(5, Math.min(31, Math.floor((l - DSP_LIB) / DSP_COL)));
+}
+function ajusterFenetre() {
+  const n = combienDeJours();
+  if (n === DSP.nbJours) return false;
+  DSP.nbJours = n;
+  return true;
+}
 const DSP_IMG = { 'chambre-standard': 'r-standard-640', 'deluxe-baldaquin': 'gal-ch-wax-t360',
   'deluxe-superieure': 'g-chambre-t', 'suite-anglaise': 'gal-ch-salon-t360',
   'chambre-mezzanine': 'r-mezzanine-640', 'mezzanine-superieure': 'r-mezz2-640',
@@ -101,8 +120,10 @@ function joursDsp() {
     const a = jPlus(f, -((jDt(f).getDay() + 6) % 7));
     return [0, 1, 2, 3, 4, 5, 6].map((i) => jPlus(a, i));
   }
-  const o = []; let j = f.slice(0, 8) + '01';
-  while (j.slice(0, 7) === f.slice(0, 7)) { o.push(j); j = jPlus(j, 1); }
+  /* Autant de jours qu'il en tient, a partir du jour vise. */
+  if (!DSP.nbJours) DSP.nbJours = combienDeJours();
+  const o = [];
+  for (let i = 0; i < DSP.nbJours; i++) o.push(jPlus(f, i));
   return o;
 }
 
@@ -153,7 +174,9 @@ function htmlDsp() {
         ${x.total ? '' : 'disabled'}>${x.total ? x.libres + '/' + x.total + '<i></i>' : '—'}</button></div>`;
     }).join('');
     const rangs = !ouverte ? '' : siennes.map((ch) => `<div class="dsp-l dsp-r">
-      <div class="dsp-g"><span>Chambre ${ech(ch.numero)}</span>${ch.service === false
+      <div class="dsp-g"><button class="dsp-num" data-dsp-fiche="${ech(ch.id)}"
+        aria-label="Chambre ${ech(ch.numero)} — voir et modifier">Chambre ${
+        ech(ch.numero)}</button>${ch.service === false
         ? '<span class="aide" style="margin:0">hors service</span>' : ''}</div>
       ${jours.map((j) => {
         const e = calc.parChambre[ch.id][j], [teinte, mot] = DTON[e.k], det = detailSejour(e);
@@ -162,7 +185,11 @@ function htmlDsp() {
         return `<div class="${col(j)}"><button class="dsp-b" style="--c:${teinte}"
           data-dsp-ch="${ech(ch.id)}" data-nuit="${j}" aria-label="${aria}" title="${aria}">${mot}${
           DSP.vue === 'jour' && det ? '<small>' + ech(det) + '</small>' : ''}</button></div>`;
-      }).join('')}</div>`).join('');
+      }).join('')}</div>`).join('')
+      + `<div class="dsp-l dsp-r"><div class="dsp-g">
+          <button class="dsp-lien" style="padding:0" data-dsp-ajout="${ech(c.slug)}"
+            >+ Ajouter une chambre</button></div>
+          ${jours.map((j) => `<div class="${col(j)}"></div>`).join('')}</div>`;
     return `<div class="dsp-bloc"><div class="dsp-l">
       <div class="dsp-g dsp-cat">${vignette(c.slug)}<div style="flex:1;min-width:0">
         <b class="nom">${ech(c.nom)}</b>
@@ -192,7 +219,8 @@ function htmlDsp() {
     .map(([v, l]) => `<button class="opt ${DSP.vue === v ? 'on' : ''}" data-dsp-vue="${v}"
       aria-pressed="${DSP.vue === v}">${l}</button>`).join('');
   const periode = DSP.vue === 'semaine' ? 'Semaine du ' + jCourt(jours[0]) + ' au ' + jCourt(jours[6])
-    : DSP.vue === 'jour' ? jLong(DSP.focus) : '';
+    : DSP.vue === 'jour' ? jLong(DSP.focus)
+    : 'Du ' + jCourt(jours[0]) + ' au ' + jCourt(jours[jours.length - 1]);
 
   const apercu = cats.map((c) => {
     const x = calc.parCat[c.slug][auj];
@@ -304,14 +332,23 @@ function rendreDsp() {
   apresDsp();
 }
 
-/** Le mois s ouvre sur aujourd hui, pas sur le 1er. */
+/** Remesure la fenetre une fois la zone posee, et redessine si le compte a
+    change. La recursion s'arrete d'elle-meme : au second passage le compte
+    est celui qu'on vient d'employer. */
 function apresDsp() {
   const el = $('#dsp-defil');
-  if (!el || !DSP.defiler) return;
-  DSP.defiler = false;
-  const c = el.querySelector('[data-jour="' + AUJ() + '"]');
-  el.scrollLeft = c && DSP.vue === 'mois' ? Math.max(0, c.offsetLeft - 330 - 192) : 0;
+  if (!el) return;
+  if (DSP.vue === 'mois' && ajusterFenetre()) rendreDsp();
+  else el.scrollLeft = 0;
 }
+
+let DSP_RT = null;
+window.addEventListener('resize', () => {
+  clearTimeout(DSP_RT);
+  DSP_RT = setTimeout(() => {
+    if (DSP.vue === 'mois' && $('#dsp-defil') && ajusterFenetre()) rendreDsp();
+  }, 180);
+});
 
 function allerDsp(focus, vue) {
   DSP.focus = focus;
@@ -320,12 +357,11 @@ function allerDsp(focus, vue) {
   rendreDsp();
 }
 function decalerDsp(sens) {
-  const auj = AUJ();
   if (DSP.vue === 'jour') return allerDsp(jPlus(DSP.focus, sens));
   if (DSP.vue === 'semaine') return allerDsp(jPlus(DSP.focus, 7 * sens));
-  const d = jDt(DSP.focus.slice(0, 8) + '01'); d.setMonth(d.getMonth() + sens);
-  const m = jourIso(d);
-  allerDsp(m.slice(0, 7) === auj.slice(0, 7) ? auj : m);
+  /* On glisse d'une fenetre entiere : deux clics ne doivent pas reafficher
+     les memes jours. */
+  allerDsp(jPlus(DSP.focus, (DSP.nbJours || combienDeJours()) * sens));
 }
 
 /* ── Couche : tiroir, fenêtre, notification ─────────────────────────── */
@@ -419,6 +455,8 @@ function rendreTiroir() {
     }
   }
 
+  if (tr.mode === 'fiche') return rendreFiche(el, tr);
+
   el.innerHTML = `<div class="dsp-th"><h2>Modifier la disponibilité</h2>
       <button class="dsp-x" data-dsp-fermer aria-label="Fermer">×</button></div>
     <div class="dsp-tc">
@@ -440,6 +478,150 @@ function rendreTiroir() {
       <button class="btn plein" id="dsp-enreg" ${bloque ? 'disabled style="opacity:.4;cursor:default"' : ''}>
         Enregistrer les modifications</button>
     </div>`;
+}
+
+/* ── La fiche d'une chambre ───────────────────────────────────────────
+   On clique son NUMERO, et tout se fait la : reserver, bloquer, mettre hors
+   service, rouvrir, retirer. Avant, il fallait savoir que la case du
+   calendrier ouvrait un tiroir, que le bouton du haut ouvrait une fenetre, et
+   qu'un depliant en bas de page cachait le reste. Personne ne devinait. */
+function rendreFiche(el, tr) {
+  const ch = (ETAT.chambres || []).find((x) => x.id === tr.id);
+  if (!ch) { DSP.tiroir = null; el.classList.remove('on'); return; }
+  const cat = (ETAT.categories || []).find((c) => c.slug === ch.categorie) || { nom: '' };
+  const auj = AUJ();
+  const e = dspEtat(ch, auj, dspIndex(ETAT.fermetures, ETAT.chambres), auj);
+  const [teinte, mot] = DTON[e.k];
+
+  /* Ce qui est pose sur cette chambre, du plus proche au plus lointain. Les
+     fermetures passees ne servent plus a rien ici. */
+  const siennes = (ETAT.fermetures || [])
+    .filter((f) => f.debut && fVise(f, ch) && (!f.fin || f.fin >= auj)
+      && f.statut !== 'annulee')
+    .sort((a, b) => a.debut.localeCompare(b.debut));
+
+  const datee = tr.statut === 'reservee' || tr.statut === 'vente';
+  el.innerHTML = `<div class="dsp-th"><h2>Chambre ${ech(ch.numero)}</h2>
+      <button class="dsp-x" data-dsp-fermer aria-label="Fermer">×</button></div>
+    <div class="dsp-tc">
+      <div class="dsp-qui">${vignette(ch.categorie)}<div>
+        <b>Chambre ${ech(ch.numero)}</b><span>${ech(cat.nom)}</span></div></div>
+
+      <div class="dsp-chiffres"><div><span>Ce soir</span>
+        <span class="etat" style="color:${teinte};border-color:${teinte}">${mot}</span></div>
+        ${ch.service === false ? `<div><span style="color:#D6CBBB;font-size:13px">Hors
+          service${ch.note ? ' — ' + ech(ch.note) : ''}, jusqu'à nouvel ordre.</span></div>` : ''}
+      </div>
+
+      <span class="lb" style="margin-top:0">Que voulez-vous en faire&nbsp;?</span>
+      <div role="radiogroup" aria-label="Statut" style="margin-bottom:16px">${radio('dsp-fstatut', [
+        ['dispo', 'La rendre disponible', '#8FAE63'],
+        ['reservee', 'La réserver pour un client', '#E0A955'],
+        ['vente', 'La bloquer à la vente', '#E08A7B'],
+        ['hs', 'La mettre hors service', '#9C8B78']], tr.statut)}</div>
+
+      ${datee ? `<div class="duo">
+          <div class="champ"><label for="fi-d">Première nuit</label>
+            <input type="date" id="fi-d" data-dsp-fchamp="debut" value="${ech(tr.debut)}"></div>
+          <div class="champ"><label for="fi-f">Dernière nuit</label>
+            <input type="date" id="fi-f" data-dsp-fchamp="fin" value="${ech(tr.fin)}"></div>
+        </div>
+        <p class="aide" style="margin:-10px 0 16px">Ce sont des nuits : du 24 au 26,
+          le client repart le matin du 27.</p>` : ''}
+
+      ${tr.statut === 'reservee' ? `<div class="champ">
+          <label for="fi-c">Au nom de</label>
+          <input id="fi-c" maxlength="60" data-dsp-fchamp="client" placeholder="M. Koné"
+            value="${ech(tr.client)}"></div>` : ''}
+      ${tr.statut === 'vente' || tr.statut === 'hs' ? `<div class="champ">
+          <label for="fi-m">Pourquoi — pour vous seuls</label>
+          <input id="fi-m" maxlength="120" data-dsp-fchamp="motif"
+            placeholder="Maintenance, travaux, problème technique…" value="${ech(tr.motif)}">
+          <p class="aide">Le site écrit « Complet », jamais le motif.</p></div>` : ''}
+      ${tr.statut === 'hs' ? `<p class="aide" style="margin:-8px 0 16px">Sans dates :
+        la chambre ne compte plus, jusqu'à ce que vous la remettiez en service.</p>` : ''}
+
+      ${siennes.length ? `<span class="lb">Ce qui est posé sur cette chambre</span>
+        ${siennes.map((f) => `<div class="dsp-resa" style="padding:10px 0">
+          <div><b>${ech(f.client || f.motif || 'Fermeture')}</b>
+            <span class="quand">${ech(nuitsEnClair(f))}</span></div>
+          <button class="btn mince danger" data-rouvrir="${ech(f.id)}">Rouvrir</button>
+        </div>`).join('')}` : `<p class="aide">Rien n'est posé sur cette chambre :
+          elle compte à toutes les dates.</p>`}
+
+      ${tr.erreur ? `<p class="msg mal" role="alert" style="margin-top:14px">${ech(tr.erreur)}</p>` : ''}
+
+      <div style="margin-top:24px;padding-top:16px;border-top:1px solid var(--line)">
+        <button class="btn danger" data-oter="${ech(ch.id)}">Retirer cette chambre</button>
+        <p class="aide" style="margin-top:8px">Elle disparaît de l'inventaire. Pour une
+          panne, préférez « hors service » : la chambre reste chez vous.</p>
+      </div>
+    </div>
+    <div class="dsp-tp">
+      <button class="btn" data-dsp-fermer>Annuler</button>
+      <button class="btn plein" id="dsp-fenreg">Enregistrer</button>
+    </div>`;
+}
+
+function ouvrirFiche(id) {
+  const auj = AUJ();
+  const ch = (ETAT.chambres || []).find((x) => x.id === id);
+  if (!ch) return;
+  DSP.tiroir = { mode: 'fiche', id, statut: ch.service === false ? 'hs' : 'dispo',
+    debut: auj, fin: auj, client: '', motif: '', erreur: '' };
+  rendreTiroir();
+  setTimeout(() => { const b = $('#dsp-tiroir .dsp-x'); if (b) b.focus(); }, 60);
+}
+
+/** Enregistre la fiche. Chaque statut a son ecriture, et une seule. */
+async function enregistrerFiche() {
+  const tr = DSP.tiroir;
+  const ch = (ETAT.chambres || []).find((x) => x.id === tr.id);
+  if (!ch) return;
+  const dire = (t) => { tr.erreur = t; rendreTiroir(); };
+  const datee = tr.statut === 'reservee' || tr.statut === 'vente';
+  if (datee) {
+    if (!tr.debut || !tr.fin) return dire('Indiquez la première et la dernière nuit.');
+    if (tr.fin < tr.debut) return dire('La dernière nuit précède la première.');
+  }
+  if (tr.statut === 'reservee' && !tr.client.trim()) return dire('Au nom de qui ?');
+
+  const btn = $('#dsp-fenreg');
+  if (btn) { btn.disabled = true; btn.textContent = 'Enregistrement…'; }
+  try {
+    if (tr.statut === 'hs') {
+      const r = await appel('enregistrer', { type: 'chambre',
+        entree: Object.assign({}, ch, { service: false, note: tr.motif.trim() }) });
+      if (!r.ok) throw new Error(r.message);
+      ETAT.chambres = ETAT.chambres.map((x) => (x.id === ch.id ? r.entree : x));
+    } else if (tr.statut === 'dispo') {
+      if (ch.service === false) {
+        const r = await appel('enregistrer', { type: 'chambre',
+          entree: Object.assign({}, ch, { service: true }) });
+        if (!r.ok) throw new Error(r.message);
+        ETAT.chambres = ETAT.chambres.map((x) => (x.id === ch.id ? r.entree : x));
+      } else {
+        /* Rien de date a rendre disponible : on libere ce qui est pose
+           aujourd'hui, pas tout l'avenir — retirer une reservation se fait
+           par « Rouvrir », qui nomme ce qu'il retire. */
+        await libererF([ch.id], AUJ(), AUJ());
+      }
+    } else if (tr.statut === 'reservee') {
+      await poserF({ cible: ch.id, debut: tr.debut, fin: tr.fin, nature: 'client',
+        client: tr.client.trim(), statut: 'confirmee', motif: '' });
+    } else {
+      await poserF({ cible: ch.id, debut: tr.debut, fin: tr.fin, nature: 'vente',
+        motif: tr.motif.trim() || 'Fermée à la vente' });
+    }
+    DSP.tiroir = null;
+    rendreTiroir();
+    rendre();
+    notifier('Chambre ' + ch.numero + ' mise à jour');
+  } catch (err) {
+    if (err.message === 'session') return;
+    dire('Impossible d’enregistrer. ' + (err.message || ''));
+    rendre();
+  }
 }
 
 function ouvrirCat(slug, nuit) {
@@ -590,7 +772,21 @@ function rendreModal() {
       class="opt ${cur === v ? 'on' : ''}" data-dsp-opt="${cle}" data-v="${v}">${l}</button>`).join('')}</div>`;
   let titre, corps, pied;
 
-  if (m.type === 'resa') {
+  if (m.type === 'chambre') {
+    const cat = ETAT.categories.find((c) => c.slug === m.cat) || { nom: '' };
+    const siennes = (ETAT.chambres || []).filter((c) => c.categorie === m.cat).sort(parNum);
+    titre = 'Ajouter une chambre';
+    corps = `<div class="dsp-qui">${vignette(m.cat)}<div><b>${ech(cat.nom)}</b>
+        <span>${siennes.length ? siennes.length + ' chambre'
+          + (siennes.length > 1 ? 's' : '') + ' : ' + siennes.map((c) => ech(c.numero)).join(', ')
+          : 'aucune chambre saisie'}</span></div></div>
+      <div class="champ"><label for="ac-n">Numéro</label>
+        <input id="ac-n" maxlength="20" data-dsp-champ="numero" value="${ech(m.numero)}"
+          placeholder="25" autofocus>
+        <p class="aide">Le numéro que vous lui donnez déjà : 25, B12, Bungalow 3.</p></div>`;
+    pied = `<button class="btn" data-dsp-fermer>Annuler</button>
+      <button class="btn plein" id="dsp-valider">Ajouter</button>`;
+  } else if (m.type === 'resa') {
     const libres = libresResa();
     titre = 'Nouvelle réservation';
     corps = `<div class="champ"><label for="rs-cat">Catégorie</label>
@@ -677,6 +873,19 @@ function rendreModal() {
 async function validerModal() {
   const m = DSP.modal;
   const dire = (t) => { m.erreur = t; rendreModal(); };
+  if (m.type === 'chambre') {
+    if (!String(m.numero || '').trim()) return dire('Donnez-lui son numéro.');
+    const b0 = $('#dsp-valider');
+    if (b0) { b0.disabled = true; b0.textContent = 'Enregistrement…'; }
+    const r = await appel('enregistrer', { type: 'chambre',
+      entree: { numero: String(m.numero).trim(), categorie: m.cat } });
+    if (!r.ok) return dire(r.message || "Ça n'a pas pu être enregistré.");
+    ETAT.chambres = (ETAT.chambres || []).concat([r.entree]);
+    /* La categorie s'ouvre pour qu'on voie la chambre qu'on vient de poser. */
+    DSP.ouvertes[m.cat] = true;
+    DSP.modal = null; rendreModal(); rendre();
+    return notifier('Chambre ' + r.entree.numero + ' ajoutée');
+  }
   const echec = (err) => { if (err.message !== 'session') dire('Impossible d’enregistrer les modifications. '
     + 'Vérifiez votre connexion puis réessayez. ' + (err.message || '')); rendre(); };
   const btn = $('#dsp-valider');
@@ -735,6 +944,16 @@ function clicDsp(e) {
     DSP.ouvertes[s] = b.getAttribute('aria-expanded') !== 'true';
     rendreDsp(); return true;
   }
+  if ((b = q('[data-dsp-fiche]'))) { ouvrirFiche(b.dataset.dspFiche); return true; }
+  if ((b = q('[data-dsp-ajout]'))) {
+    DSP.modal = { type: 'chambre', cat: b.dataset.dspAjout, numero: '', erreur: '' };
+    rendreModal(); return true;
+  }
+  /* Retirer une chambre et rouvrir une fermeture passent par les
+     gestionnaires de la page, qui les portent deja. On ferme seulement le
+     tiroir avant, sinon il resterait ouvert sur une chambre disparue. */
+  if (q('[data-oter]') && DSP.tiroir) { DSP.tiroir = null; rendreTiroir(); return false; }
+  if (q('[data-rouvrir]') && DSP.tiroir) { DSP.tiroir = null; rendreTiroir(); return false; }
   if ((b = q('[data-dsp-cat]'))) { ouvrirCat(b.dataset.dspCat, b.dataset.nuit); return true; }
   if ((b = q('[data-dsp-ch]'))) { ouvrirChambre(b.dataset.dspCh, b.dataset.nuit); return true; }
   if (q('[data-dsp-voirtout]')) { DSP.voirTout = !DSP.voirTout; rendreDsp(); return true; }
@@ -747,6 +966,7 @@ function clicDsp(e) {
     rendreTiroir(); return true;
   }
   if (t.id === 'dsp-enreg') { enregistrerTiroir(); return true; }
+  if (t.id === 'dsp-fenreg') { enregistrerFiche(); return true; }
   if ((b = q('[data-dsp-opt]')) && DSP.modal) { DSP.modal[b.dataset.dspOpt] = b.dataset.v; DSP.modal.erreur = ''; rendreModal(); return true; }
   if (q('[data-dsp-toutes]') && DSP.modal) {
     const siennes = ETAT.chambres.filter((c) => c.categorie === DSP.modal.cat).map((c) => c.id);
@@ -760,6 +980,8 @@ function clicDsp(e) {
 
 document.addEventListener('input', (e) => {
   if (e.target.id === 'dsp-com' && DSP.tiroir) DSP.tiroir.commentaire = e.target.value;
+  const fc = e.target.dataset && e.target.dataset.dspFchamp;
+  if (fc && DSP.tiroir) { DSP.tiroir[fc] = e.target.value; DSP.tiroir.erreur = ''; }
   const k = e.target.dataset && e.target.dataset.dspChamp;
   if (k && DSP.modal && !e.target.hasAttribute('data-rerendre')) DSP.modal[k] = e.target.value;
 });
@@ -768,6 +990,14 @@ document.addEventListener('change', (e) => {
   if (t.id === 'dsp-mois') {
     const v = t.value, auj = AUJ();
     return allerDsp(v === auj.slice(0, 7) ? auj : v + '-01');
+  }
+  if (t.name === 'dsp-fstatut' && DSP.tiroir) {
+    DSP.tiroir.statut = t.value; DSP.tiroir.erreur = '';
+    return rendreTiroir();
+  }
+  if (t.dataset && t.dataset.dspFchamp && DSP.tiroir) {
+    DSP.tiroir[t.dataset.dspFchamp] = t.value;
+    return;
   }
   if (t.name === 'dsp-statut' && DSP.tiroir) {
     const tr = DSP.tiroir;
