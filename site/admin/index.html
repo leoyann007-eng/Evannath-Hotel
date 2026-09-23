@@ -263,6 +263,19 @@ textarea{min-height:96px;resize:vertical}
    s affichait alors que le bouton proposait encore de l ouvrir. */
 .grille-img[hidden]{display:none}
 
+/* La case « Je la prends en ligne ». Sur un ecran etroit — la reception
+   travaille au comptoir, souvent sur un telephone — elle ne peut pas rester
+   a cote du nom : mesuree a 474 px, elle reduisait le texte a un mot par
+   ligne. Elle passe alors dessous, sur toute la largeur. */
+.prise{display:flex;align-items:center;gap:9px;margin:0;text-transform:none;
+  letter-spacing:0;font-size:13px;color:var(--cream);font-weight:400;
+  white-space:nowrap}
+.prise input{width:auto}
+@media(max-width:700px){
+  .ligne.dispo{flex-wrap:wrap}
+  .ligne.dispo .txt{flex:1 1 100%}
+}
+
 .bloc-t{font-family:var(--f-t);font-weight:400;font-size:19px;margin-bottom:14px}
 .depot{display:flex;gap:22px;align-items:flex-start;flex-wrap:wrap;
   border:1px dashed var(--line);padding:20px;background:var(--bark)}
@@ -314,6 +327,7 @@ details.plus summary::marker{color:var(--bronze)}
     <nav id="menu">
       <button data-v="bord" class="on"><i>▦</i>Tableau de bord</button>
       <h2>Gestion</h2>
+      <button data-v="disponibilites"><i>▤</i>Disponibilités</button>
       <button data-v="evenements"><i>◆</i>Événements</button>
       <button data-v="promotions"><i>◉</i>Promotions</button>
       <button data-v="campagnes"><i>☀</i>Campagnes saisonnières</button>
@@ -379,6 +393,29 @@ const srcImage = (v) => (/^https?:/.test(v || '') ? v : '/img/opt/' + v + '.jpg'
 const ech = (s) => String(s == null ? '' : s)
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
+/* ── Disponibilites ────────────────────────────────────────────────────
+   Le jour courant, en heure locale. new Date().toISOString() rend le jour
+   UTC : a Abidjan les deux coincident, mais une console ouverte depuis
+   ailleurs verrait la mauvaise date, et « fermeture passee » se deciderait
+   sur le mauvais jour. */
+const jourIso = (d) =>
+  new Date(d.getTime() - d.getTimezoneOffset() * 6e4).toISOString().slice(0, 10);
+const AUJ = () => jourIso(new Date());
+
+/* Midi, et pas minuit : une date lue a minuit bascule d'un jour des que le
+   fuseau recule d'une heure, et la fermeture s'afficherait decalee. */
+const enClair = (j) => new Date(j + 'T12:00:00').toLocaleDateString('fr-FR',
+  { day: 'numeric', month: 'long', year: 'numeric' });
+
+const nomChambre = (slug) => slug === '*' ? "Tout l'hôtel"
+  : ((ETAT.chambres || []).find((c) => c.slug === slug) || {}).nom || slug;
+
+/** Les nuits d'une fermeture, dites comme la reception les dirait. */
+function nuitsEnClair(f) {
+  if (f.debut === f.fin) return 'La nuit du ' + enClair(f.debut);
+  return 'Du ' + enClair(f.debut) + ' au ' + enClair(f.fin) + ' inclus';
+}
+
 async function appel(action, corps, methode) {
   const o = { method: methode || (corps ? 'POST' : 'GET'), headers: {} };
   if (corps) { o.headers['Content-Type'] = 'application/json'; o.body = JSON.stringify(corps); }
@@ -429,6 +466,8 @@ async function charger() {
   ETAT.evenements = (tout.donnees && tout.donnees.evenements) || [];
   ETAT.promotions = (tout.donnees && tout.donnees.promotions) || [];
   ETAT.campagnes = (tout.donnees && tout.donnees.campagnes) || [];
+  ETAT.fermetures = (tout.donnees && tout.donnees.fermetures) || [];
+  ETAT.ouvertes = (tout.donnees && tout.donnees.ouvertes) || {};
   ETAT.version = etat.version || '';
   ETAT.panne = etat.panne || '';
   ETAT.fichiers = etat.fichiers || 0;
@@ -1344,6 +1383,125 @@ function rendre() {
             <img src="/img/opt/${ech(n)}.jpg" alt="${ech(n)}" loading="lazy"></button>`).join('')}
         </div>
       </div>`;
+  } else if (VUE === 'disponibilites') {
+    const chambres = ETAT.chambres || [];
+    const ouvertes = ETAT.ouvertes || {};
+    const combien = chambres.filter((c) => ouvertes[c.slug] === true).length;
+    const auj = AUJ();
+
+    /* Les fermetures, de la plus proche a la plus lointaine. Les passees
+       partent au fond, dans un depliant : elles ne servent plus a rien mais
+       les effacer toutes seules serait decider a la place de l'hotel. */
+    const toutes = (ETAT.fermetures || []).slice()
+      .sort((a, b) => String(a.debut).localeCompare(String(b.debut)));
+    const vives = toutes.filter((f) => String(f.fin) >= auj);
+    const passees = toutes.filter((f) => String(f.fin) < auj);
+
+    const ligneFermeture = (f) => {
+      const encours = String(f.debut) <= auj && String(f.fin) >= auj;
+      const finie = String(f.fin) < auj;
+      return `<div class="ligne dispo">
+        <div class="txt">
+          <b>${ech(nomChambre(f.chambre))}</b>
+          <span>${ech(nuitsEnClair(f))}${f.motif ? ' · ' + ech(f.motif) : ''}</span>
+        </div>
+        <span class="etat ${finie ? 'dort' : encours ? 'fini' : 'vif'}">${
+          finie ? 'Passée' : encours ? 'En cours' : 'À venir'}</span>
+        <button class="btn mince danger" data-rouvrir="${ech(f.id)}">Rouvrir</button>
+      </div>`;
+    };
+
+    v.innerHTML = `<div class="entete"><div>
+        <h1 class="t">Disponibilités</h1>
+        <p class="sous">Ce que le site répond quand un client choisit ses dates.</p>
+        </div></div>
+      ${avertissement()}
+
+      <div class="carte">
+        <div class="bloc-t">Le site ne dit que ce que vous lui dites</div>
+        <div class="ligne" style="margin:0"><div class="txt">
+          <b>Catégorie cochée, aucune fermeture sur ces nuits</b>
+          <span>Le site affiche « Disponible à ces dates », en vert.</span></div>
+          <span class="etat vif">Disponible</span></div>
+        <div class="ligne"><div class="txt">
+          <b>Une fermeture couvre ces nuits</b>
+          <span>Le site affiche « Complet à ces dates ». Le motif que vous
+          saisissez reste ici : le client ne le voit jamais.</span></div>
+          <span class="etat fini">Complet</span></div>
+        <div class="ligne"><div class="txt">
+          <b>Catégorie non cochée</b>
+          <span>Le site n'annonce rien et redit que la réception confirme sous
+          24 h. C'est l'état de départ, et il n'a rien de gênant — mieux vaut
+          ne rien promettre que promettre à tort.</span></div>
+          <span class="etat dort">Rien d'annoncé</span></div>
+        <p class="aide" style="margin-top:14px"><strong>Les dates sont des
+        nuits.</strong> Une fermeture du 24 au 26 ferme les nuits du 24, du 25
+        et du 26. Un client qui arrive le 26 et repart le 27 dort la nuit du
+        26 : il tombera sur « complet ».</p>
+      </div>
+
+      <div class="carte">
+        <div class="bloc-t">Les catégories que vous prenez en ligne</div>
+        <p class="aide" style="margin:-6px 0 16px">${combien === 0
+          ? "Aucune catégorie cochée : le site n'annonce aucune disponibilité. "
+            + 'Cochez celles dont vous tenez le calendrier.'
+          : combien + (combien > 1 ? ' catégories annoncées' : ' catégorie annoncée')
+            + ' comme disponibles, sauf aux dates que vous fermez ci-dessous.'}</p>
+        ${chambres.map((c) => `<div class="ligne dispo">
+          <div class="txt"><b>${ech(c.nom)}</b>
+            <span>${ouvertes[c.slug] === true
+              ? 'Annoncée disponible, hors fermetures.'
+              : "Le site ne dit rien de cette catégorie."}</span></div>
+          <label class="prise">
+            <input type="checkbox" data-ouvre="${ech(c.slug)}"
+              ${ouvertes[c.slug] === true ? 'checked' : ''}> Je la prends en ligne
+          </label>
+        </div>`).join('')}
+        ${chambres.length ? '' : `<p class="aide">La liste des catégories n'a pas
+          pu être lue. Rechargez la page.</p>`}
+      </div>
+
+      <div class="carte">
+        <div class="bloc-t">Fermer des nuits</div>
+        <div class="champ">
+          <label for="ff-chambre">Quoi</label>
+          <select id="ff-chambre">
+            ${chambres.map((c) => `<option value="${ech(c.slug)}">${ech(c.nom)}</option>`).join('')}
+            <option value="*">Tout l'hôtel</option>
+          </select>
+        </div>
+        <div class="duo">
+          <div class="champ"><label for="ff-debut">Première nuit fermée</label>
+            <input type="date" id="ff-debut" min="${auj}"></div>
+          <div class="champ"><label for="ff-fin">Dernière nuit fermée</label>
+            <input type="date" id="ff-fin" min="${auj}">
+            <p class="aide">Laissez vide pour ne fermer qu'une seule nuit.</p></div>
+        </div>
+        <div class="champ">
+          <label for="ff-motif">Pourquoi — pour vous seuls</label>
+          <input id="ff-motif" maxlength="120" placeholder="Groupe séminaire, travaux…">
+          <p class="aide">Cette note ne quitte jamais cette page. Le site écrit
+          « Complet », et rien d'autre.</p>
+        </div>
+        <div class="pied">
+          <button class="btn plein" id="ff-poser">Fermer ces nuits</button>
+          <p class="msg" id="ff-msg"></p>
+        </div>
+      </div>
+
+      <div class="carte">
+        <div class="bloc-t">Les fermetures en cours et à venir</div>
+        ${vives.length ? vives.map(ligneFermeture).join('')
+          : `<p class="aide">Aucune. Les catégories cochées plus haut sont
+             annoncées disponibles à toutes les dates.</p>`}
+        ${passees.length ? `<details class="plus">
+          <summary>${passees.length} fermeture${passees.length > 1 ? 's' : ''} passée${
+            passees.length > 1 ? 's' : ''}</summary>
+          <p class="aide" style="margin:10px 0 14px">Elles n'ont plus d'effet sur
+          le site. Elles restent ici tant que vous ne les retirez pas.</p>
+          ${passees.map(ligneFermeture).join('')}
+        </details>` : ''}
+      </div>`;
   } else if (VUE === 'parametres') {
     v.innerHTML = `<div class="entete"><div>
         <h1 class="t">Paramètres</h1>
@@ -1404,6 +1562,43 @@ function rendre() {
 /* ── Actions ───────────────────────────────────────────── */
 document.addEventListener('click', async (e) => {
   if (e.target.id === 'recharger') { location.reload(); return; }
+
+  /* ── Fermer des nuits ──────────────────────────────────── */
+  if (e.target.id === 'ff-poser') {
+    const msg = $('#ff-msg');
+    const dire = (t, mal) => { msg.textContent = t; msg.className = 'msg ' + (mal ? 'mal' : 'bon'); };
+    const debut = $('#ff-debut').value;
+    let fin = $('#ff-fin').value;
+    if (!debut) return dire('Indiquez au moins la première nuit fermée.', true);
+    // Une seule nuit se saisit en ne remplissant que le debut. Le serveur
+    // fait la meme chose ; on l'ecrit ici aussi pour que le recapitulatif
+    // affiche la bonne phrase avant l'envoi.
+    if (!fin) fin = debut;
+    const entree = { chambre: $('#ff-chambre').value, debut, fin,
+                     motif: $('#ff-motif').value };
+    dire('Enregistrement…');
+    const r = await appel('enregistrer', { type: 'fermeture', entree });
+    if (!r.ok) return dire(r.message || "Ça n'a pas pu être enregistré.", true);
+    ETAT.fermetures = (ETAT.fermetures || []).filter((x) => x.id !== r.entree.id);
+    ETAT.fermetures.push(r.entree);
+    rendre();
+    return;
+  }
+
+  const rouvre = e.target.closest('[data-rouvrir]');
+  if (rouvre) {
+    const f = (ETAT.fermetures || []).find((x) => x.id === rouvre.dataset.rouvrir);
+    if (!f) return;
+    /* On nomme ce qu'on retire. « Voulez-vous vraiment ? » ne dit pas ce
+       qu'on s'apprete a rouvrir a la reservation. */
+    if (!confirm('Rouvrir ' + nomChambre(f.chambre).toLowerCase() + ' — '
+      + nuitsEnClair(f).toLowerCase() + ' ?\n\nLe site cessera d\'annoncer '
+      + 'complet sur ces nuits.')) return;
+    const r = await appel('supprimer', { type: 'fermeture', id: f.id });
+    if (!r.ok) { alert(r.message || "Ça n'a pas pu être retiré."); return; }
+    ETAT.fermetures = (ETAT.fermetures || []).filter((x) => x.id !== f.id);
+    return rendre();
+  }
 
   const neuf = e.target.closest('[data-neuf]');
   if (neuf) {
@@ -1613,6 +1808,24 @@ function alleger(im, donnee, poids) {
 }
 
 document.addEventListener('change', async (ev) => {
+  /* Cocher une categorie : elle part tout de suite, sans bouton a presser.
+     Un reglage a un seul etat n'a pas besoin d'etre valide — mais il doit
+     revenir en arriere si le serveur refuse, sinon la case dit le contraire
+     de ce qui est enregistre. */
+  const boite = ev.target.closest('[data-ouvre]');
+  if (boite) {
+    const slug = boite.dataset.ouvre;
+    const voulu = boite.checked;
+    const r = await appel('ouvrir', { chambre: slug, ouverte: voulu });
+    if (!r.ok) {
+      boite.checked = !voulu;
+      alert(r.message || "Le réglage n'a pas pu être enregistré.");
+      return;
+    }
+    ETAT.ouvertes = r.ouvertes || {};
+    return rendre();
+  }
+
   if (ev.target.id !== 'f-fichier') return;
   const f = ev.target.files && ev.target.files[0];
   if (!f) return;
