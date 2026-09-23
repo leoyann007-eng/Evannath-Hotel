@@ -307,6 +307,8 @@ var T={fr:{loc:'fr-FR',p1:' personne',pp:' personnes',n1:'Nuit',nn:'Nuits',tarif
            part:"{{PART}}",
            solde:"Le solde se règle à l'arrivée, sur place.",
            dlibre:'<b>Disponible à ces dates.</b> La réception vous le confirmera par écrit.',
+           dderniere:"<b>Il ne reste qu'une chambre de cette catégorie sur ces nuits.</b> "
+                     +"Elle n'est pas retenue tant que la réception n'a pas confirmé.",
            dcomplet:"<b>Cette catégorie est complète sur ces nuits.</b> Changez de dates "
                     +"ou de catégorie ci-dessus. Vous pouvez aussi envoyer votre demande "
                     +"telle quelle : la réception vous dira ce qu'elle peut faire.",
@@ -317,6 +319,8 @@ var T={fr:{loc:'fr-FR',p1:' personne',pp:' personnes',n1:'Nuit',nn:'Nuits',tarif
            part:'{{PART_EN}}',
            solde:'The balance is settled on arrival, at the hotel.',
            dlibre:'<b>Available on these dates.</b> The front desk will confirm in writing.',
+           dderniere:'<b>Only one room left in this category on these nights.</b> '
+                     +'It is not held until the front desk confirms.',
            dcomplet:'<b>This category is fully booked on these nights.</b> Change your '
                     +'dates or category above. You may also send your request as it is: '
                     +'the front desk will tell you what it can do.',
@@ -337,9 +341,13 @@ var ETAT='inconnu';
 function peindre(){
   var n=document.getElementById('dnote');
   if(!n)return;
-  if(ETAT!=='libre'&&ETAT!=='complet'){n.hidden=true;return}
+  var cle={libre:'dlibre',derniere:'dderniere',complet:'dcomplet'}[ETAT];
+  /* `inconnu` ne montre rien : le tunnel dit deja, sur son ecran de
+     confirmation, que la reception repond sous 24 h. Une note qui repete
+     « on ne sait pas » a chaque changement de date n'apprend rien. */
+  if(!cle){n.hidden=true;return}
   n.hidden=false;
-  n.querySelector('span').innerHTML=T[LG][ETAT==='libre'?'dlibre':'dcomplet'];
+  n.querySelector('span').innerHTML=T[LG][cle];
   var c=EVN_DISPO.couleur(ETAT);
   n.style.borderColor=c;
   n.querySelector('i').style.background=c;

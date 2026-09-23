@@ -78,18 +78,28 @@ Le mécanisme existe et tourne. Ce qui a été fait :
 
 - les sept fiches chambres, l'accueil et le tunnel lisent désormais un
   verdict du serveur au lieu d'affirmer ;
-- un écran **Disponibilités** dans l'administration : la réception coche les
-  catégories qu'elle prend en ligne, et ferme les nuits prises ;
-- trois états, dont `inconnu`, qui ne promet rien ;
-- la règle des nuits, à un seul endroit, avec 39 vérifications automatiques ;
+- un écran **Disponibilités** dans l'administration, où la réception saisit
+  **ses chambres une à une**, avec leurs numéros — la 25, la 26 ;
+- une chambre se met **hors service** sans dates (panne, travaux), ou se
+  ferme sur des **nuits précises** ; une fermeture peut viser une chambre,
+  une catégorie entière ou tout l'hôtel ;
+- quatre états, dont `inconnu`, qui ne promet rien ;
+- la règle des nuits, à un seul endroit, avec 62 vérifications automatiques ;
 - un quinzième contrôle dans `verifier.py` qui refuse toute disponibilité
   écrite en dur dans une page.
 
+> **Corrigé après coup, et c'est la direction qui avait raison.** La première
+> version raisonnait par catégorie — « les Standards sont-elles ouvertes ? ».
+> Une réception tient un cahier de numéros : c'est la chambre 25 qui est
+> prise. En comptant des chambres, on obtient en prime **le stock**, que
+> j'avais écrit hors de portée sans logiciel de gestion. Le site va donc
+> jusqu'à « **dernière chambre à ces dates** », et c'est vrai.
+
 Voir `README.md`, section « Les disponibilités ».
 
-Ce qui **n'est pas** fait, et qui demande un logiciel de gestion : le nombre
-de chambres restantes, et le verrou qui empêche deux clients de prendre la
-même nuit à la seconde près.
+Ce qui **n'est pas** fait : le verrou empêchant deux clients de prendre la
+même nuit à la seconde près. Il n'a de sens qu'avec une réservation ferme —
+donc avec le paiement en ligne, et un logiciel de gestion.
 
 ### Ce qui se construit, et ce qui se promet
 

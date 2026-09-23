@@ -66,11 +66,11 @@ const PREFIXE = 'evannath/donnees';
 const GARDE = 10;
 let memoire = null;                          // mode demonstration
 
-/* `fermetures` et `ouvertes` portent le calendrier de disponibilite.
-   Voir nettoyerFermeture() pour ce que chacun veut dire, et pourquoi
-   l'absence des deux ne se lit jamais comme « libre ». */
+/* `chambres` et `fermetures` portent le calendrier de disponibilite.
+   `chambres`, ce sont les chambres PHYSIQUES — la 25, la 26 — chacune
+   rattachee a une categorie. Voir le bloc « Disponibilite » plus bas. */
 const VIDE = { evenements: [], promotions: [], campagnes: [], medias: [],
-               fermetures: [], ouvertes: {}, maj: null };
+               chambres: [], fermetures: [], maj: null };
 
 /* La derniere lecture en echec, en clair. Vide quand tout va bien.
    Sans elle, une lecture qui echoue rendait exactement la meme chose qu un
@@ -269,24 +269,35 @@ const LIMITES = {
 function collection(type) {
   return type === 'promotion' ? 'promotions'
     : type === 'campagne' ? 'campagnes'
-    : type === 'fermeture' ? 'fermetures' : 'evenements';
+    : type === 'fermeture' ? 'fermetures'
+    : type === 'chambre' ? 'chambres' : 'evenements';
 }
 
-// ── Disponibilite ──────────────────────────────────────────────────────────
-/* TROIS ETATS, ET LE TROISIEME EST LE PLUS IMPORTANT.
+// ── Disponibilite ───────────────────────────────────────────────
+/* ON RAISONNE PAR CHAMBRE PHYSIQUE, PAS PAR CATEGORIE.
  *
- *   complet   la reception a ferme cette categorie sur ces nuits.
- *   libre     la reception a declare la categorie ouverte, et aucune
- *             fermeture ne couvre le sejour.
- *   inconnu   personne n'a rien dit.
+ * C'est la facon de voir de la reception : elle a un cahier avec des
+ * numeros. « La 25 est prise du 24 au 26 », pas « les Standards sont
+ * pris ». Le site, lui, vend des CATEGORIES : il demande donc « reste-t-il
+ * au moins une chambre de cette categorie ces nuits-la ? ».
  *
- * `inconnu` n'est pas une panne, c'est l'etat par defaut, et il se dit :
- * le site repond alors « disponibilite confirmee sous 24 h », ce qu'il
- * faisait deja. Un calendrier vide ne doit RIEN promettre.
+ * QUATRE ETATS :
  *
- * La regle de secours, celle qui compte : tout ce qui rate — stockage muet,
- * jeton absent, date illisible — retombe sur `inconnu`, JAMAIS sur `libre`.
- * Annoncer libre a tort, c'est encaisser une chambre qui n'existe pas.
+ *   inconnu   aucune chambre de cette categorie n'a ete saisie. Le site ne
+ *             promet rien et redit que la reception confirme sous 24 h.
+ *   complet   toutes ses chambres sont prises ou hors service.
+ *   derniere  il en reste EXACTEMENT une.
+ *   libre     il en reste au moins deux.
+ *
+ * `derniere` est le seul chiffre qui sort d'ici. « Il reste sept chambres »
+ * publierait le taux d'occupation de l'hotel a qui sait lire du JSON ; « il
+ * en reste une » est utile au visiteur et ne dit rien de plus que ce qu'il
+ * va decouvrir en reservant.
+ *
+ * La regle de secours : tout ce qui rate — stockage muet, jeton absent,
+ * date illisible, categorie sans chambre — retombe sur `inconnu`, JAMAIS
+ * sur `libre`. Annoncer libre a tort, c'est vendre une chambre qui n'existe
+ * pas.
  *
  * LES DATES SONT DES NUITS. Une fermeture du 24 au 26 ferme les nuits du
  * 24, du 25 et du 26. Un sejour du 24 au 26 occupe les nuits du 24 et du
@@ -298,22 +309,66 @@ function jour(v) {
   return /^\d{4}-\d{2}-\d{2}$/.test(t) ? t : null;
 }
 
-/* Le slug d'une categorie, ou '*' pour l'hotel entier — travaux, fermeture
-   annuelle. On valide la FORME, pas une liste fermee : les slugs vivent dans
-   _chambres.py, et une liste recopiee ici divergerait au premier renommage.
-   Un slug inconnu ne presente aucun risque — il ne correspond a aucune
-   categorie, donc il ne ferme rien, et il ne s'affiche nulle part. */
+/* Le slug d'une categorie, ou '*' pour l'hotel entier. On valide la FORME,
+   pas une liste fermee : les slugs vivent dans _chambres.py, et une liste
+   recopiee ici divergerait au premier renommage. Un slug inconnu ne ferme
+   rien et ne s'affiche nulle part. */
 const slug = (v) => {
   const t = String(v || '').trim().toLowerCase();
   return t === '*' || /^[a-z0-9][a-z0-9-]{1,48}$/.test(t) ? t : '';
 };
 
-/** Une fermeture : une categorie, des nuits, et un motif qui reste interne. */
-function nettoyerFermeture(e) {
+/** Une chambre physique : un numero, une categorie, en service ou non. */
+function nettoyerChambre(e) {
   const o = {
     id: propre(e.id, 40) || crypto.randomUUID(),
-    chambre: slug(e.chambre),
+    /* Le numero tel que l'hotel l'ecrit : « 25 », « B12 »,
+       « Bungalow 3 ». On ne lui impose pas notre facon de numeroter. */
+    numero: propre(e.numero, 20),
+    categorie: slug(e.categorie),
+    /* HORS SERVICE : indisponible sans dates, jusqu'a nouvel ordre. Une
+       climatisation en panne n'a pas de date de fin connue, et obliger a en
+       inventer une ferait rouvrir la chambre toute seule ce jour-la. */
+    service: e.service !== false,
+    note: propre(e.note, 120),
+  };
+  const manque = [];
+  if (!o.numero) manque.push('numéro');
+  if (!o.categorie || o.categorie === '*') manque.push('catégorie');
+  return { objet: o, manque };
+}
+
+/** Le sejour [du, au[ touche-t-il les nuits [debut, fin] ?
+ *
+ *  Les quatre bornes sont des chaines 'AAAA-MM-JJ' : leur ordre
+ *  lexicographique EST leur ordre chronologique, aucune conversion en date
+ *  n'est necessaire — et aucun fuseau horaire ne vient s'en meler.
+ *
+ *  Le sejour occupe les nuits du .. au-1. Il chevauche donc la fermeture si
+ *  elle commence avant le depart ET se termine a l'arrivee ou apres.
+ *
+ *  `fin` a null vaut « sans date de fin » : la fermeture court indefiniment
+ *  a partir de son debut. */
+function chevauche(du, au, debut, fin) {
+  if (debut >= au) return false;
+  return fin === null || fin === undefined || fin >= du;
+}
+
+/** Une fermeture : ce qu'elle vise, des nuits, et un motif qui reste interne.
+ *
+ *  `cible` vaut l'un des trois :
+ *    - l'identifiant d'une chambre  — « la 25 est prise »
+ *    - le slug d'une categorie      — « toutes les Standards, travaux »
+ *    - '*'                          — l'hotel entier, fermeture annuelle
+ *  Les identifiants sont des UUID et les slugs sont en minuscules a tirets :
+ *  aucune confusion possible entre les deux. */
+function nettoyerFermeture(e) {
+  const brut = String(e.cible == null ? '' : e.cible).trim();
+  const o = {
+    id: propre(e.id, 40) || crypto.randomUUID(),
+    cible: /^[0-9a-f-]{36}$/i.test(brut) ? brut.toLowerCase() : slug(brut),
     debut: jour(e.debut),
+    /* null = sans date de fin. Voir chevauche(). */
     fin: jour(e.fin),
     /* Pourquoi c'est ferme. Jamais publie : « groupe Sonatel » ou
        « travaux salle de bain » regarde l'hotel, pas ses visiteurs. Le site
@@ -324,39 +379,39 @@ function nettoyerFermeture(e) {
   if (o.debut && o.fin && o.debut > o.fin) {
     const t = o.debut; o.debut = o.fin; o.fin = t;
   }
-  // Une seule nuit se saisit en ne remplissant que le debut.
-  if (o.debut && !o.fin) o.fin = o.debut;
+  // `sansFin` a vrai laisse fin a null ; sinon, une fin absente veut dire
+  // une seule nuit. Sans cette distinction, oublier la date de fin fermait
+  // la chambre pour toujours.
+  if (o.debut && !o.fin && e.sansFin !== true) o.fin = o.debut;
   const manque = [];
-  if (!o.chambre) manque.push('catégorie');
+  if (!o.cible) manque.push('chambre');
   if (!o.debut) manque.push('date de début');
   return { objet: o, manque };
 }
 
-/** Le sejour [du, au[ touche-t-il les nuits [debut, fin] ?
- *
- *  Les quatre bornes sont des chaines 'AAAA-MM-JJ' : leur ordre
- *  lexicographique EST leur ordre chronologique, aucune conversion en date
- *  n'est necessaire — et aucun fuseau horaire ne vient s'en meler.
- *
- *  Le sejour occupe les nuits du .. au-1. Il chevauche donc la fermeture
- *  si elle commence avant le depart ET se termine a l'arrivee ou apres. */
-function chevauche(du, au, debut, fin) {
-  return debut < au && fin >= du;
+/** Cette fermeture vise-t-elle cette chambre ? */
+function vise(f, ch) {
+  return f.cible === '*' || f.cible === ch.id || f.cible === ch.categorie;
 }
 
-/** L'etat d'une categorie sur un sejour. Voir le commentaire du bloc. */
-function etatDe(d, chambre, du, au) {
-  const fermetures = Array.isArray(d.fermetures) ? d.fermetures : [];
-  for (const f of fermetures) {
-    if (!f || !f.debut || !f.fin) continue;
-    if (f.chambre !== '*' && f.chambre !== chambre) continue;
-    if (chevauche(du, au, f.debut, f.fin)) return 'complet';
-  }
-  /* Une fermeture l'emporte TOUJOURS sur une ouverture — c'est pour ca
-     qu'on la cherche en premier et qu'on sort. Le contraire rouvrirait une
-     chambre fermee la veille par la reception. */
-  const ouvertes = (d.ouvertes && typeof d.ouvertes === 'object') ? d.ouvertes : {};
-  return ouvertes[chambre] === true ? 'libre' : 'inconnu';
+/** L'etat d'une CATEGORIE sur un sejour. Voir le commentaire du bloc. */
+function etatDe(d, categorie, du, au) {
+  const chambres = (Array.isArray(d.chambres) ? d.chambres : [])
+    .filter((c) => c && c.categorie === categorie);
+  // Categorie dont aucune chambre n'a ete saisie : on ne sait rien.
+  if (!chambres.length) return 'inconnu';
+
+  const fermetures = (Array.isArray(d.fermetures) ? d.fermetures : [])
+    .filter((f) => f && f.debut);
+
+  const libres = chambres.filter((ch) => {
+    // Hors service : indisponible, quelles que soient les dates.
+    if (ch.service === false) return false;
+    return !fermetures.some((f) => vise(f, ch) && chevauche(du, au, f.debut, f.fin));
+  }).length;
+
+  if (!libres) return 'complet';
+  return libres === 1 ? 'derniere' : 'libre';
 }
 
 /** Une campagne saisonniere : un titre, une periode, et les packs qu elle
@@ -538,10 +593,14 @@ module.exports = async function handler(req, res) {
     if (PANNE) {
       return res.status(200).json({ ok: true, du, au, etats: {}, raison: 'indisponible' });
     }
+    /* Le parametre s'appelle `chambre` et porte un slug de CATEGORIE : c'est
+       ce que le site vend, et ce que le visiteur choisit. Les chambres
+       physiques ne sortent jamais d'ici. */
     const demandee = slug(req.query.chambre);
     const slugs = demandee && demandee !== '*'
       ? [demandee]
-      : Object.keys((d.ouvertes && typeof d.ouvertes === 'object') ? d.ouvertes : {});
+      : [...new Set((Array.isArray(d.chambres) ? d.chambres : [])
+          .map((c) => c && c.categorie).filter(Boolean))];
     const etats = {};
     for (const s of slugs) etats[s] = etatDe(d, s, du, au);
     return res.status(200).json({ ok: true, du, au, etats });
@@ -600,8 +659,8 @@ module.exports = async function handler(req, res) {
       evenements: (d.evenements || []).length,
       promotions: (d.promotions || []).length,
       medias: (d.medias || []).length,
+      chambres: (d.chambres || []).length,
       fermetures: (d.fermetures || []).length,
-      ouvertes: Object.keys(d.ouvertes || {}).length,
       maj: d.maj,
     });
   }
@@ -655,6 +714,8 @@ module.exports = async function handler(req, res) {
       ? nettoyerCampagne(corps.entree || {})
       : corps.type === 'fermeture'
       ? nettoyerFermeture(corps.entree || {})
+      : corps.type === 'chambre'
+      ? nettoyerChambre(corps.entree || {})
       : nettoyer(corps.entree || {}, corps.type);
     if (manque.length) {
       return json(res, 422, { ok: false, champs: manque,
@@ -668,36 +729,21 @@ module.exports = async function handler(req, res) {
     if (PANNE) return json(res, 503, { ok: false, message: PANNE
       + ' Rien n a ete enregistre : ecrire maintenant effacerait le reste.' });
     d[type] = d[type] || [];
+    if (corps.type === 'chambre') {
+      const pareil = (v) => String(v || '').trim().toLowerCase();
+      const double = d.chambres.find((x) => x.id !== objet.id
+        && pareil(x.numero) === pareil(objet.numero));
+      if (double) {
+        return json(res, 409, { ok: false, champs: ['numéro'],
+          message: 'La chambre ' + objet.numero + ' existe déjà. Deux fois le '
+            + 'même numéro, et le site croirait que vous en avez deux.' });
+      }
+    }
     const i = d[type].findIndex((x) => x.id === objet.id);
     if (i >= 0) d[type][i] = objet; else d[type].push(objet);
     const w = await ecrire(d);
     if (!w.ok) return json(res, 502, { ok: false, message: w.message });
     return json(res, 200, { ok: true, entree: objet });
-  }
-
-  /* Declarer une categorie ouverte, ou revenir a « je ne sais pas ».
-     C'est la seule facon dont le site se met a ecrire « Disponible » : tant
-     que la reception n'a coche personne, il n'annonce rien. */
-  if (action === 'ouvrir') {
-    if (req.method !== 'POST') return json(res, 405, { ok: false });
-    let corps = req.body;
-    if (typeof corps === 'string') { try { corps = JSON.parse(corps); } catch { corps = {}; } }
-    const s = slug(corps.chambre);
-    if (!s || s === '*') {
-      return json(res, 422, { ok: false, message: 'Catégorie manquante.' });
-    }
-    const d = await lire();
-    if (PANNE) return json(res, 503, { ok: false, message: PANNE
-      + ' Rien n a ete enregistre : ecrire maintenant effacerait le reste.' });
-    d.ouvertes = (d.ouvertes && typeof d.ouvertes === 'object') ? d.ouvertes : {};
-    // On efface au lieu d'ecrire `false` : la cle absente et la cle a faux
-    // veulent dire la meme chose, et deux facons de dire « inconnu » finissent
-    // par diverger.
-    if (corps.ouverte === true) d.ouvertes[s] = true;
-    else delete d.ouvertes[s];
-    const w = await ecrire(d);
-    if (!w.ok) return json(res, 502, { ok: false, message: w.message });
-    return json(res, 200, { ok: true, ouvertes: d.ouvertes });
   }
 
   if (action === 'supprimer') {

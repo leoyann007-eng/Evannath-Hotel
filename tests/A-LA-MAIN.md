@@ -3,7 +3,7 @@
 Deux suites tournent toutes seules :
 
 ```bash
-node tests/dispo.test.mjs         # la règle des nuits, hors réseau
+node tests/dispo.test.mjs         # le décompte et la règle des nuits
 node tests/remise.test.mjs        # la logique de remise, hors réseau
 node tests/en-ligne.test.mjs      # le site déployé, sans navigateur
 node tests/envoyer.test.mjs       # l'envoi des formulaires
@@ -23,22 +23,27 @@ Cochez au fur et à mesure. Ce qui échoue se note avec la capture d'écran.
 Le mécanisme est testé de bout en bout par `tests/dispo.test.mjs`. Ce qui
 reste ici, c'est **ce qu'une personne comprend** en ouvrant l'écran.
 
-- [ ] **Cocher une catégorie**, puis ouvrir sa fiche sur le site : la pastille
-      passe au vert et dit « Disponible à ces dates ».
-- [ ] **Fermer une nuit**, puis choisir cette nuit sur la fiche : la pastille
-      passe au rouge et dit « Complet à ces dates ».
-- [ ] **La veille de cette nuit reste verte.** C'est le cas limite qui se
+- [ ] **Saisir deux chambres** d'une même catégorie, puis ouvrir sa fiche :
+      la pastille passe au vert et dit « Disponible à ces dates ».
+- [ ] **Fermer une des deux** sur ces nuits : la pastille passe au bronze et
+      dit « Dernière chambre à ces dates ».
+- [ ] **Fermer la seconde** : elle passe au rouge, « Complet à ces dates ».
+- [ ] **La veille de ces nuits reste verte.** C'est le cas limite qui se
       trompe le plus souvent.
-- [ ] **Décocher la catégorie** : la pastille redevient grise et dit
+- [ ] **Retirer les deux chambres** : la pastille redevient grise et dit
       « Disponibilité confirmée sous 24 h ». Rien n'est cassé — c'est l'état
       de départ.
-- [ ] **Le motif d'une fermeture ne s'affiche nulle part** sur le site public.
-      Écrivez-y un mot reconnaissable et cherchez-le dans la page.
-- [ ] **Sur un vrai téléphone** : la case « Je la prends en ligne » passe sous
-      le nom de la catégorie, et rien ne déborde.
-- [ ] **Faire remplir l'écran par quelqu'un de la réception, sans l'aider.**
-      S'il ne sait pas dire ce que le client verra, l'écran est raté — c'est
-      ce qu'il explique en premier.
+- [ ] **Hors service** : décocher « En service » retire la chambre du
+      décompte à **toutes** les dates, pas seulement aux prochaines.
+- [ ] **Ni le motif, ni les numéros de chambre, ni le nombre restant** ne
+      s'affichent sur le site public. Écrivez un mot reconnaissable dans un
+      motif et cherchez-le dans la page.
+- [ ] **Sur un vrai téléphone** : la case « En service » passe sous le nom de
+      la chambre, et rien ne déborde.
+- [ ] **Faire saisir dix chambres par quelqu'un de la réception, sans
+      l'aider.** S'il ne sait pas dire ce que le client verra, l'écran est
+      raté — c'est ce qu'il explique en premier. Et si saisir dix chambres
+      est pénible, la liste ne sera jamais tenue à jour.
 - [ ] **Un « complet » n'empêche pas d'envoyer la demande** : le tunnel le
       dit et laisse continuer. La réception a des annulations.
 

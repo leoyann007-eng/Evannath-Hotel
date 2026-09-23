@@ -65,7 +65,7 @@ Trois niveaux :
 | | Quand | Pourquoi |
 |---|---|---|
 | **Paiement en ligne** | Selon le contrat | CinetPay ou GeniusPay. C'est la seule question qui fait varier le chiffrage. |
-| **Disponibilité — le stock** | Formule Signature | ✅ Le mécanisme existe depuis le 23 septembre : la réception coche les catégories qu'elle prend en ligne et ferme les nuits prises. Ce qui manque encore : **le nombre** de chambres restantes, et le verrou qui empêche deux clients de prendre la même nuit à la seconde près. Cela demande un logiciel de gestion. |
+| **Disponibilité** | Formule Signature | ✅ Fait le 23 septembre. La réception saisit ses chambres une à une, les met hors service ou ferme des nuits ; le site compte ce qui reste et va jusqu'à « dernière chambre ». Ce qui manque : le **verrou** empêchant deux clients de prendre la même nuit à la seconde près — il n'a de sens qu'avec une réservation ferme, donc avec le paiement en ligne et un logiciel de gestion. |
 | **Synchronisation Booking / Airbnb** | Formule Performance | C'est ce qui apporterait la disponibilité à la seconde, et la seule chose qui l'apporte vraiment. |
 | **Surveillance automatique** | Trimestre | Un test qui tourne chaque nuit et prévient si le site ne répond plus ou si les données ne se lisent pas. `tests/en-ligne.test.mjs` fait déjà le travail : il ne manque que la planification. |
 

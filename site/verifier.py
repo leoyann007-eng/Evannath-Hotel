@@ -374,6 +374,7 @@ def controler():
         # dictionnaire anglais ont parfaitement le droit de contenir ces mots.
         sans_js = re.sub(r'<script[^>]*>.*?</script>', ' ', s, flags=re.S)
         for phrase in ('Disponible à ces dates', 'Available on these dates',
+                       'Dernière chambre à ces dates', 'Last room at these dates',
                        'Complet à ces dates', 'Fully booked on these dates'):
             if phrase in sans_js:
                 pb.append((f, 'disponibilite affirmee dans le balisage : « %s »'

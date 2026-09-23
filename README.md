@@ -494,24 +494,57 @@ et le fil d'Ariane devenait « La case » après un aller-retour de langue.
 
 Demandé par la direction le 23 septembre 2026. Le site affichait jusque-là,
 sur les sept fiches chambres, une pastille verte et « Disponible à ces
-dates » — quelles que soient les dates, sans que rien ne le vérifie. C'était
-la seule phrase du site que rien ne soutenait.
+dates » — quelles que soient les dates, sans que rien ne le vérifie.
 
-### Trois états, et le troisième porte tout le reste
+### On raisonne par chambre physique
+
+La première version raisonnait par catégorie : « les Standards sont-elles
+ouvertes ? ». La direction l'a repris, et elle avait raison : **une réception
+tient un cahier de numéros.** C'est la chambre 25 qui est prise, pas « les
+Standards ».
+
+Le gain n'est pas cosmétique. En comptant des chambres, on obtient **le
+stock** — ce que la première version déclarait hors de portée sans logiciel
+de gestion.
+
+| Ce que la réception saisit | Ce que le site demande |
+|---|---|
+| ses chambres, une à une, avec leur numéro et leur catégorie | « reste-t-il au moins une chambre de cette catégorie ces nuits-là ? » |
+
+### Quatre états
 
 | État | Quand | Ce que le site écrit |
 |---|---|---|
-| **libre** | la réception a coché la catégorie, et aucune fermeture ne couvre ces nuits | « Disponible à ces dates », en vert |
-| **complet** | une fermeture couvre ces nuits | « Complet à ces dates », en rouge |
-| **inconnu** | tout le reste | « Disponibilité confirmée sous 24 h », en gris |
+| **libre** | au moins deux chambres restent | « Disponible à ces dates », en vert |
+| **derniere** | exactement une | « Dernière chambre à ces dates », en bronze |
+| **complet** | aucune | « Complet à ces dates », en rouge |
+| **inconnu** | aucune chambre saisie dans cette catégorie | « Disponibilité confirmée sous 24 h », en gris |
 
 `inconnu` n'est pas une panne : c'est l'état de départ. Un calendrier vide ne
 promet rien, et le site redit simplement ce qu'il disait déjà.
 
-**Rien ne retombe jamais sur `libre`.** Calendrier vide, réseau coupé, API
-absente, réponse illisible, état inconnu renvoyé par le serveur : les cinq
-cas ont été provoqués dans le navigateur, les cinq donnent `inconnu`.
-Annoncer libre à tort, c'est vendre une chambre qui n'existe pas.
+**« Dernière chambre » est le seul chiffre qui sort du serveur.** « Il en
+reste sept » publierait le taux d'occupation de l'hôtel à qui sait lire du
+JSON ; « il en reste une » est utile au visiteur et ne lui apprend rien qu'il
+ne découvrirait en réservant.
+
+**Rien ne retombe jamais sur `libre`.** Réseau coupé, API absente, réponse
+illisible, réponse vide, état inconnu renvoyé par le serveur : les cinq cas
+ont été provoqués dans le navigateur, les cinq donnent `inconnu`. Annoncer
+libre à tort, c'est vendre une chambre qui n'existe pas.
+
+### Deux façons de retirer une chambre, et elles ne disent pas la même chose
+
+| | Ce que ça veut dire |
+|---|---|
+| **Hors service** | indisponible **sans dates**, jusqu'à nouvel ordre. Une climatisation en panne n'a pas de date de fin connue, et obliger à en inventer une rouvrirait la chambre toute seule ce jour-là. |
+| **Une fermeture** | des nuits précises. C'est la chambre prise par un client, ou par un groupe. |
+| **Retirer** | la chambre n'existe plus. L'écran le dit au moment de confirmer, et renvoie vers « hors service » pour une panne. |
+
+Une fermeture peut viser **une chambre**, **une catégorie entière** (peinture
+dans toute une aile) ou **tout l'hôtel** (fermeture annuelle). Elle peut aussi
+être **sans date de fin** — cochée explicitement, jamais par l'oubli du champ :
+une fin laissée vide ferme **une seule nuit**.
 
 ### Les dates sont des nuits
 
@@ -523,39 +556,49 @@ La règle vit à un seul endroit, `api/admin.js` :
 
 ```js
 function chevauche(du, au, debut, fin) {
-  return debut < au && fin >= du;
+  if (debut >= au) return false;
+  return fin === null || fin === undefined || fin >= du;
 }
 ```
 
-Les quatre bornes sont des chaînes `AAAA-MM-JJ` : leur ordre lexicographique
-**est** leur ordre chronologique, aucune conversion en `Date` n'est nécessaire
-— et aucun fuseau horaire ne vient s'en mêler.
+Les bornes sont des chaînes `AAAA-MM-JJ` : leur ordre lexicographique **est**
+leur ordre chronologique, aucune conversion en `Date` n'est nécessaire — et
+aucun fuseau horaire ne vient s'en mêler. `fin` à `null` vaut « sans date de
+fin ».
 
-`tests/dispo.test.mjs` couvre les huit cas limites. Les tests ont été prouvés
-en cassant la règle quatre fois : nuit du départ comptée, première nuit
-oubliée, fermeture perdant contre une ouverture, `inconnu` devenu `libre`.
-Les quatre sont vus.
+`tests/dispo.test.mjs` — 62 vérifications. Elles ont été prouvées en cassant
+la logique **huit fois** : nuit du départ comptée, première nuit oubliée,
+fermeture sans fin qui s'arrête, catégorie vide devenue libre, zéro chambre
+qui ne fait plus « complet », dernière chambre qui ne se dit plus, hors
+service ignoré, fermeture par catégorie qui n'atteint pas ses chambres. Les
+huit sont vues.
 
 ### Où ça vit
 
 | | |
 |---|---|
-| La règle et le verdict | `api/admin.js` — `chevauche()`, `etatDe()` |
-| La route publique | `/api/admin?a=dispo&chambre=&du=&au=` |
+| La règle et le décompte | `api/admin.js` — `chevauche()`, `vise()`, `etatDe()` |
+| La route publique | `/api/admin?a=dispo&chambre=<catégorie>&du=&au=` |
 | Le module client | `DISPO_JS` dans `_chrome.py` |
 | La saisie | `/admin`, écran **Disponibilités** |
 | Ce qui l'affiche | les 7 fiches chambres, l'accueil, le tunnel |
 
-La route publique rend **un verdict, pas le calendrier** : le taux
-d'occupation d'un hôtel ne se publie pas, et le motif d'une fermeture
-(« groupe séminaire », « travaux ») ne quitte jamais l'administration.
+La route publique rend **un verdict, pas le calendrier**. N'en sortent jamais :
+les numéros de chambre, le nombre de chambres restantes, et le motif d'une
+fermeture — « groupe séminaire », « travaux » regarde l'hôtel, pas ses
+visiteurs.
+
+⚠️ **Le paramètre s'appelle `chambre` et porte un slug de CATÉGORIE**, parce
+que c'est ce que le visiteur choisit. Dans le magasin de données, `chambres`
+désigne au contraire les chambres physiques. Dans `/admin`, `ETAT.categories`
+porte les catégories et `ETAT.chambres` les chambres.
 
 ### Ce que ça ne fait pas
 
-Il n'y a **pas de stock** : une catégorie est ouverte ou fermée, pas « il en
-reste deux ». Et deux clients peuvent réserver la même nuit à la seconde
-près sans que rien ne les en empêche — cela demande un logiciel de gestion,
-donc la synchronisation Booking / Airbnb de la formule Performance.
+Deux clients peuvent réserver la même nuit à la seconde près sans que rien ne
+les en empêche : il n'y a pas de verrou, parce qu'il n'y a pas de réservation
+ferme — le site produit une demande, la réception confirme. Le verrou viendra
+avec la synchronisation Booking / Airbnb, formule Performance.
 
 **Un calendrier que personne ne remplit est pire que pas de calendrier** : il
 transforme un silence honnête en promesse fausse. C'est pourquoi l'écran de

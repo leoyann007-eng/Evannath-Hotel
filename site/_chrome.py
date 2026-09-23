@@ -121,15 +121,16 @@ window.EVN_REMISE = (function () {
 # nuits ne doit exister qu'a un seul endroit. Ce module ne fait que demander,
 # retenir, et donner le mot juste.
 #
-# TROIS ETATS, ET LE TROISIEME EST LA REGLE DE SECOURS :
+# QUATRE ETATS, ET LE DERNIER EST LA REGLE DE SECOURS :
 #
-#   libre     la reception a declare la categorie ouverte, et aucune
-#             fermeture ne couvre ces nuits. C'est la SEULE facon dont
-#             « Disponible a ces dates » revient a l'ecran.
-#   complet   la reception a ferme ces nuits.
-#   inconnu   tout le reste — calendrier vide, reseau coupe, API absente,
-#             dates incompletes. Le site redit alors ce qu'il disait deja :
-#             la reception confirme sous 24 h.
+#   libre     il reste au moins deux chambres de cette categorie. C'est la
+#             SEULE facon dont « Disponible a ces dates » revient a l'ecran.
+#   derniere  il en reste exactement une. C'est le seul chiffre que le
+#             serveur laisse sortir, et il est vrai.
+#   complet   il n'en reste aucune.
+#   inconnu   tout le reste — aucune chambre saisie, reseau coupe, API
+#             absente, dates incompletes. Le site redit alors ce qu'il
+#             disait deja : la reception confirme sous 24 h.
 #
 # Rien ne retombe jamais sur `libre`. Un site qui annonce libre parce que le
 # reseau a hoquete vend une chambre qui n'existe pas.
@@ -145,18 +146,22 @@ window.EVN_DISPO = (function () {
   var DUREE = 60000;
 
   var MOTS = {
-    libre:   { fr: 'Disponible à ces dates',
-               en: 'Available on these dates' },
-    complet: { fr: 'Complet à ces dates',
-               en: 'Fully booked on these dates' },
-    inconnu: { fr: 'Disponibilité confirmée sous 24 h',
-               en: 'Availability confirmed within 24 h' }
+    libre:    { fr: 'Disponible à ces dates',
+                en: 'Available on these dates' },
+    derniere: { fr: 'Dernière chambre à ces dates',
+                en: 'Last room at these dates' },
+    complet:  { fr: 'Complet à ces dates',
+                en: 'Fully booked on these dates' },
+    inconnu:  { fr: 'Disponibilité confirmée sous 24 h',
+                en: 'Availability confirmed within 24 h' }
   };
 
   /* La couleur porte autant que le mot : une pastille verte dit « c'est
-     libre » a qui ne lit pas. Elle ne sort donc que pour `libre`. */
-  var COULEURS = { libre: 'var(--palm)', complet: 'var(--err)',
-                   inconnu: 'var(--muted)' };
+     libre » a qui ne lit pas. Elle ne sort donc que pour `libre`.
+     `derniere` prend l'accent chaud de la maison, pas le rouge : il reste
+     une chambre, ce n'est pas une alerte. */
+  var COULEURS = { libre: 'var(--palm)', derniere: 'var(--bronze-2)',
+                   complet: 'var(--err)', inconnu: 'var(--muted)' };
 
   var API = {
     libelle: function (etat, lg) {

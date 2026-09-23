@@ -728,18 +728,22 @@ window.EVN_DISPO = (function () {
   var DUREE = 60000;
 
   var MOTS = {
-    libre:   { fr: 'Disponible à ces dates',
-               en: 'Available on these dates' },
-    complet: { fr: 'Complet à ces dates',
-               en: 'Fully booked on these dates' },
-    inconnu: { fr: 'Disponibilité confirmée sous 24 h',
-               en: 'Availability confirmed within 24 h' }
+    libre:    { fr: 'Disponible à ces dates',
+                en: 'Available on these dates' },
+    derniere: { fr: 'Dernière chambre à ces dates',
+                en: 'Last room at these dates' },
+    complet:  { fr: 'Complet à ces dates',
+                en: 'Fully booked on these dates' },
+    inconnu:  { fr: 'Disponibilité confirmée sous 24 h',
+                en: 'Availability confirmed within 24 h' }
   };
 
   /* La couleur porte autant que le mot : une pastille verte dit « c'est
-     libre » a qui ne lit pas. Elle ne sort donc que pour `libre`. */
-  var COULEURS = { libre: 'var(--palm)', complet: 'var(--err)',
-                   inconnu: 'var(--muted)' };
+     libre » a qui ne lit pas. Elle ne sort donc que pour `libre`.
+     `derniere` prend l'accent chaud de la maison, pas le rouge : il reste
+     une chambre, ce n'est pas une alerte. */
+  var COULEURS = { libre: 'var(--palm)', derniere: 'var(--bronze-2)',
+                   complet: 'var(--err)', inconnu: 'var(--muted)' };
 
   var API = {
     libelle: function (etat, lg) {
