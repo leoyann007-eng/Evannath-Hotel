@@ -7,6 +7,7 @@
 <title>Administration — Hôtel Evannath</title>
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Karla:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/admin/disponibilites.css">
 <style>
 :root{
   --night:#100B06; --bark:#17100A; --bark-2:#1E150D; --bark-3:#2A1E13;
@@ -1462,7 +1463,7 @@ function rendre() {
       return `<div class="ligne dispo">
         <div class="txt">
           <b>${ech(nomCible(f.cible))}</b>
-          <span>${ech(nuitsEnClair(f))}${f.motif ? ' · ' + ech(f.motif) : ''}</span>
+          <span>${ech(nuitsEnClair(f))}${f.client ? ' · ' + ech(f.client) : ''}${f.motif ? ' · ' + ech(f.motif) : ''}</span>
         </div>
         <span class="etat ${finie ? 'dort' : encours ? 'fini' : 'vif'}">${
           finie ? 'Passée' : encours ? 'En cours' : 'À venir'}</span>
@@ -1484,10 +1485,16 @@ function rendre() {
     </div>`;
 
     v.innerHTML = `<div class="entete"><div>
-        <h1 class="t">Disponibilités</h1>
-        <p class="sous">Vos chambres, et celles qui sont prises.</p>
+        <h1 class="t">Disponibilités des chambres</h1>
+        <p class="sous">Gérez facilement la disponibilité de vos chambres par catégorie et par date.</p>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn plein" id="dsp-resa-btn">+ Nouvelle réservation</button>
+          <button class="btn" id="dsp-lot-btn">Modifier en lot</button>
         </div></div>
       ${avertissement()}
+
+      <div id="dsp-zone">${htmlDsp()}</div>
 
       <div class="carte">
         <div class="bloc-t">Ce que le site répond, et quand</div>
@@ -1672,11 +1679,18 @@ function rendre() {
   /* Le bandeau de page périmée passe devant tout le reste, sur toutes les
      vues. Le poser vue par vue en oubliait trois. */
   if (PERIMEE) v.insertAdjacentHTML("afterbegin", perimee());
+
+  /* Le calendrier a besoin de toute la largeur, et s ouvre sur aujourd hui. */
+  v.classList.toggle('large', VUE === 'disponibilites');
+  if (VUE === 'disponibilites') apresDsp();
 }
 
 /* ── Actions ───────────────────────────────────────────── */
 document.addEventListener('click', async (e) => {
   if (e.target.id === 'recharger') { location.reload(); return; }
+  /* Le calendrier des disponibilites a ses propres gestes : voir
+     disponibilites.js. */
+  if (typeof clicDsp === 'function' && clicDsp(e)) return;
 
   /* Ajouter une chambre. */
   if (e.target.id === 'cn-poser') {
@@ -2044,5 +2058,6 @@ document.addEventListener('change', async (ev) => {
 /* Au chargement : la session existe-t-elle deja ? */
 appel('etat').then((r) => { if (r.ok) montrerCadre(); }).catch(() => {});
 </script>
+<script src="/admin/disponibilites.js"></script>
 </body>
 </html>

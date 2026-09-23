@@ -295,6 +295,54 @@ for (const [du, au, quoi] of [
     etat(vide, 'chambre-standard') === 'inconnu', vide.json);
 }
 
+// ── La nature d'une fermeture, et la reservation annulee ───────────────────
+// Le calendrier de l'administration distingue un sejour client d'un blocage.
+// Ces trois champs vivent dans le magasin ; s'ils n'y survivaient pas, toute
+// reservation redeviendrait une fermeture anonyme au premier rechargement.
+{
+  const r = await poser('chambre', { numero: 'N1', categorie: 'deluxe-superieure' });
+  const ch = r.json.entree.id;
+
+  const resa = await poser('fermeture', { id: 'r1', cible: ch,
+    debut: '2027-07-10', fin: '2027-07-12',
+    nature: 'client', client: 'M. Koné', statut: 'confirmee' });
+  verifie('une reservation garde sa nature, son client et son statut',
+    resa.json.entree.nature === 'client' && resa.json.entree.client === 'M. Koné'
+      && resa.json.entree.statut === 'confirmee', resa.json);
+
+  const d = await dispo('2027-07-11', '2027-07-12', 'deluxe-superieure');
+  verifie('une reservation confirmee ferme bien la chambre',
+    etat(d, 'deluxe-superieure') === 'complet', d.json);
+
+  /* Annuler ne doit pas obliger a supprimer : la trace reste, la nuit se
+     rouvre. Supprimer perdrait qui avait reserve, et quand. */
+  await poser('fermeture', { id: 'r1', cible: ch, debut: '2027-07-10',
+    fin: '2027-07-12', nature: 'client', client: 'M. Koné', statut: 'annulee' });
+  const apres = await dispo('2027-07-11', '2027-07-12', 'deluxe-superieure');
+  verifie('une reservation annulee ne ferme plus rien',
+    etat(apres, 'deluxe-superieure') === 'derniere', apres.json);
+
+  /* Listes fermees : une valeur inventee par un appel exterieur ne doit pas
+     se retrouver dans le magasin, ou le calendrier la peindrait n'importe
+     comment. */
+  const faux = await poser('fermeture', { id: 'r2', cible: ch,
+    debut: '2027-08-01', nature: 'inventee', statut: 'bidon' });
+  verifie('une nature inventee est ecartee',
+    faux.json.entree.nature === '' && faux.json.entree.statut === '', faux.json);
+  const bloque = await dispo('2027-08-01', '2027-08-02', 'deluxe-superieure');
+  verifie('sans nature, la fermeture ferme quand meme',
+    etat(bloque, 'deluxe-superieure') === 'complet', bloque.json);
+
+  // Et rien de tout cela ne sort par la route publique.
+  const texte = JSON.stringify(bloque.json);
+  verifie('ni le client ni la nature ne sortent de l API publique',
+    !/Kon|client|nature|statut/.test(texte), texte);
+
+  await retirer('fermeture', 'r1');
+  await retirer('fermeture', 'r2');
+  await retirer('chambre', ch);
+}
+
 // ── La route publique reste publique, les ecritures non ────────────────────
 {
   const r = await appel({ a: 'dispo', du: '2027-09-01', au: '2027-09-03' },

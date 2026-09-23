@@ -374,6 +374,14 @@ function nettoyerFermeture(e) {
        « travaux salle de bain » regarde l'hotel, pas ses visiteurs. Le site
        ne dit que « complet ». */
     motif: propre(e.motif, 120),
+    /* Ce qu'est la fermeture : un sejour client, une chambre hors service,
+       ou des nuits retirees de la vente. Vide pour les fermetures d'avant :
+       elles restent des fermetures, et comptent comme telles. Listes
+       fermees — rien d'invente ne doit s'afficher. */
+    nature: ['client', 'hors-service', 'vente'].includes(e.nature) ? e.nature : '',
+    client: propre(e.client, 60),
+    statut: ['confirmee', 'attente', 'annulee', 'terminee'].includes(e.statut)
+      ? e.statut : '',
   };
   // Une periode a l'envers fermerait zero nuit sans le dire.
   if (o.debut && o.fin && o.debut > o.fin) {
@@ -401,8 +409,9 @@ function etatDe(d, categorie, du, au) {
   // Categorie dont aucune chambre n'a ete saisie : on ne sait rien.
   if (!chambres.length) return 'inconnu';
 
+  /* Une reservation annulee ne ferme plus rien. */
   const fermetures = (Array.isArray(d.fermetures) ? d.fermetures : [])
-    .filter((f) => f && f.debut);
+    .filter((f) => f && f.debut && f.statut !== 'annulee');
 
   const libres = chambres.filter((ch) => {
     // Hors service : indisponible, quelles que soient les dates.
