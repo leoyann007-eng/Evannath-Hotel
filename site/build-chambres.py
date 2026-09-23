@@ -8,7 +8,7 @@ des hypotheses a faire confirmer — voir README.
 import io
 import _schema
 from _chrome import (page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV, WA,
-                     REMISE_JS, REMISE_CSS)
+                     REMISE_JS, REMISE_CSS, DISPO_JS)
 
 # slug, nom, prix, capacite, resume, accroche, 3 paragraphes, equipements+, photos
 from _chambres import CHAMBRES
@@ -336,7 +336,7 @@ for c in CHAMBRES:
     </div>
 
     <button type="submit" class="btn btn-solid" data-t="bkb">Réserver cette chambre</button>
-    <div class="avail"><i></i><span data-t="avl">Disponibilité confirmée sous 24 h</span></div>
+    <div class="avail" id="avl"><i></i><span>Disponibilité confirmée sous 24 h</span></div>
     <p class="helpt" data-t="hlp">Une question&nbsp;? Écrivez-nous sur <a href="https://wa.me/{{WA}}" target="_blank" rel="noopener">WhatsApp</a> ou appelez le +225 01 51 52 75 75.</p>
   </form>
  </aside>
@@ -377,7 +377,7 @@ for c in CHAMBRES:
   <div id="lbc"></div>
 </div>''')
 
-    JS = NAV_JS + REMISE_JS + '''
+    JS = NAV_JS + REMISE_JS + DISPO_JS + '''
 
 var RATE=%d, TAX=1500; // taxe de séjour par personne et par nuit
 /* PLEIN ne bouge jamais : c'est le tarif de la grille. RATE est ce qu'on
@@ -404,6 +404,24 @@ function EVN_LANG(lg){
     var n=+o.value; o.textContent=n+(n>1?MOTS[LG].pp:MOTS[LG].p1);
   });
   calc();
+  peindre();
+}
+
+/* La disponibilite -----------------------------------------------------
+   ETAT vaut 'inconnu' tant que rien n'a repondu, et c'est l'etat juste :
+   la pastille dit alors « confirmee sous 24 h », ce que la reception fait
+   deja. Elle ne passe au vert que sur un 'libre' venu du serveur. */
+var ETAT='inconnu';
+var avl=document.getElementById('avl');
+function peindre(){
+  if(!avl)return;
+  var c=EVN_DISPO.couleur(ETAT);
+  avl.querySelector('span').textContent=EVN_DISPO.libelle(ETAT,LG);
+  avl.style.color=c;
+  avl.querySelector('i').style.background=c;
+}
+function interroger(){
+  EVN_DISPO.pour(SLUG,d1.value,d2.value,function(e){ETAT=e;peindre()});
 }
 function calc(){
   var a=new Date(d1.value),b=new Date(d2.value);
@@ -415,6 +433,7 @@ function calc(){
   document.getElementById('v2').textContent=fmt(taxe);
   document.getElementById('tt').textContent=fmt(total);
   document.getElementById('mb').textContent=fmt(total);
+  interroger();
 }
 /* La remise arrive apres le premier calcul : on recalcule des qu'elle est la.
    Si l'API se tait, la fiche garde le tarif plein — le repli sur.

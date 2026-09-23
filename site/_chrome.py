@@ -115,6 +115,85 @@ window.EVN_REMISE = (function () {
 })();
 """
 
+# La disponibilite, telle que le site la lit et la dit.
+#
+# Le verdict se calcule sur le serveur (api/admin.js, etatDe) : la regle des
+# nuits ne doit exister qu'a un seul endroit. Ce module ne fait que demander,
+# retenir, et donner le mot juste.
+#
+# TROIS ETATS, ET LE TROISIEME EST LA REGLE DE SECOURS :
+#
+#   libre     la reception a declare la categorie ouverte, et aucune
+#             fermeture ne couvre ces nuits. C'est la SEULE facon dont
+#             « Disponible a ces dates » revient a l'ecran.
+#   complet   la reception a ferme ces nuits.
+#   inconnu   tout le reste — calendrier vide, reseau coupe, API absente,
+#             dates incompletes. Le site redit alors ce qu'il disait deja :
+#             la reception confirme sous 24 h.
+#
+# Rien ne retombe jamais sur `libre`. Un site qui annonce libre parce que le
+# reseau a hoquete vend une chambre qui n'existe pas.
+DISPO_JS = r"""
+window.EVN_DISPO = (function () {
+  var cache = {};   /* 'slug|du|au' -> { etat, a } */
+  var rang = {};    /* par categorie : le numero du dernier appel emis */
+
+  /* Le cache existe pour absorber le va-et-vient du visiteur sur ses dates,
+     pas pour survivre a la journee. Une page laissee ouverte pendant que la
+     reception ferme la chambre afficherait sinon « Disponible » jusqu'au
+     rechargement — exactement le mensonge qu'on est en train de retirer. */
+  var DUREE = 60000;
+
+  var MOTS = {
+    libre:   { fr: 'Disponible à ces dates',
+               en: 'Available on these dates' },
+    complet: { fr: 'Complet à ces dates',
+               en: 'Fully booked on these dates' },
+    inconnu: { fr: 'Disponibilité confirmée sous 24 h',
+               en: 'Availability confirmed within 24 h' }
+  };
+
+  /* La couleur porte autant que le mot : une pastille verte dit « c'est
+     libre » a qui ne lit pas. Elle ne sort donc que pour `libre`. */
+  var COULEURS = { libre: 'var(--palm)', complet: 'var(--err)',
+                   inconnu: 'var(--muted)' };
+
+  var API = {
+    libelle: function (etat, lg) {
+      var m = MOTS[etat] || MOTS.inconnu;
+      return m[lg || document.documentElement.lang] || m.fr;
+    },
+    couleur: function (etat) { return COULEURS[etat] || COULEURS.inconnu; },
+
+    /* Demande l'etat d'une categorie sur un sejour, et appelle f(etat).
+       f est appele TOUT DE SUITE avec 'inconnu' si les dates ne disent rien
+       encore — l'affichage ne reste jamais vide en attendant le reseau. */
+    pour: function (slug, du, au, f) {
+      if (!slug || !du || !au || au <= du) { f('inconnu'); return; }
+      var cle = slug + '|' + du + '|' + au;
+      var vu = cache[cle];
+      if (vu && Date.now() - vu.a < DUREE) { f(vu.etat); return; }
+
+      /* Le visiteur change ses dates plus vite que le reseau ne repond. Sans
+         ce numero, une reponse partie en premier et arrivee en dernier
+         ecrasait l'etat des dates courantes par celui des precedentes. */
+      var n = (rang[slug] = (rang[slug] || 0) + 1);
+
+      fetch('/api/admin?a=dispo&chambre=' + encodeURIComponent(slug)
+            + '&du=' + du + '&au=' + au, { cache: 'no-store' })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (j) {
+          var e = (j && j.etats && j.etats[slug]) || 'inconnu';
+          cache[cle] = { etat: e, a: Date.now() };
+          if (n === rang[slug]) f(e);
+        })
+        .catch(function () { if (n === rang[slug]) f('inconnu'); });
+    }
+  };
+  return API;
+})();
+"""
+
 # Le prix barre, partout ou il s affiche. Les memes regles sur les quatre
 # surfaces : ce qui change, c est la taille du texte, pas la facon de dire.
 REMISE_CSS = """

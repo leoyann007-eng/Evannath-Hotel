@@ -474,7 +474,7 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
     </div>
 
     <button type="submit" class="btn btn-solid" data-t="bkb">Réserver cette chambre</button>
-    <div class="avail"><i></i><span data-t="avl">Disponibilité confirmée sous 24 h</span></div>
+    <div class="avail" id="avl"><i></i><span>Disponibilité confirmée sous 24 h</span></div>
     <p class="helpt" data-t="hlp">Une question&nbsp;? Écrivez-nous sur <a href="https://wa.me/2250758408079" target="_blank" rel="noopener">WhatsApp</a> ou appelez le +225 01 51 52 75 75.</p>
   </form>
  </aside>
@@ -709,6 +709,65 @@ window.EVN_REMISE = (function () {
   return API;
 })();
 
+window.EVN_DISPO = (function () {
+  var cache = {};   /* 'slug|du|au' -> { etat, a } */
+  var rang = {};    /* par categorie : le numero du dernier appel emis */
+
+  /* Le cache existe pour absorber le va-et-vient du visiteur sur ses dates,
+     pas pour survivre a la journee. Une page laissee ouverte pendant que la
+     reception ferme la chambre afficherait sinon « Disponible » jusqu'au
+     rechargement — exactement le mensonge qu'on est en train de retirer. */
+  var DUREE = 60000;
+
+  var MOTS = {
+    libre:   { fr: 'Disponible à ces dates',
+               en: 'Available on these dates' },
+    complet: { fr: 'Complet à ces dates',
+               en: 'Fully booked on these dates' },
+    inconnu: { fr: 'Disponibilité confirmée sous 24 h',
+               en: 'Availability confirmed within 24 h' }
+  };
+
+  /* La couleur porte autant que le mot : une pastille verte dit « c'est
+     libre » a qui ne lit pas. Elle ne sort donc que pour `libre`. */
+  var COULEURS = { libre: 'var(--palm)', complet: 'var(--err)',
+                   inconnu: 'var(--muted)' };
+
+  var API = {
+    libelle: function (etat, lg) {
+      var m = MOTS[etat] || MOTS.inconnu;
+      return m[lg || document.documentElement.lang] || m.fr;
+    },
+    couleur: function (etat) { return COULEURS[etat] || COULEURS.inconnu; },
+
+    /* Demande l'etat d'une categorie sur un sejour, et appelle f(etat).
+       f est appele TOUT DE SUITE avec 'inconnu' si les dates ne disent rien
+       encore — l'affichage ne reste jamais vide en attendant le reseau. */
+    pour: function (slug, du, au, f) {
+      if (!slug || !du || !au || au <= du) { f('inconnu'); return; }
+      var cle = slug + '|' + du + '|' + au;
+      var vu = cache[cle];
+      if (vu && Date.now() - vu.a < DUREE) { f(vu.etat); return; }
+
+      /* Le visiteur change ses dates plus vite que le reseau ne repond. Sans
+         ce numero, une reponse partie en premier et arrivee en dernier
+         ecrasait l'etat des dates courantes par celui des precedentes. */
+      var n = (rang[slug] = (rang[slug] || 0) + 1);
+
+      fetch('/api/admin?a=dispo&chambre=' + encodeURIComponent(slug)
+            + '&du=' + du + '&au=' + au, { cache: 'no-store' })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (j) {
+          var e = (j && j.etats && j.etats[slug]) || 'inconnu';
+          cache[cle] = { etat: e, a: Date.now() };
+          if (n === rang[slug]) f(e);
+        })
+        .catch(function () { if (n === rang[slug]) f('inconnu'); });
+    }
+  };
+  return API;
+})();
+
 
 var RATE=280000, TAX=1500; // taxe de séjour par personne et par nuit
 /* PLEIN ne bouge jamais : c'est le tarif de la grille. RATE est ce qu'on
@@ -735,6 +794,24 @@ function EVN_LANG(lg){
     var n=+o.value; o.textContent=n+(n>1?MOTS[LG].pp:MOTS[LG].p1);
   });
   calc();
+  peindre();
+}
+
+/* La disponibilite -----------------------------------------------------
+   ETAT vaut 'inconnu' tant que rien n'a repondu, et c'est l'etat juste :
+   la pastille dit alors « confirmee sous 24 h », ce que la reception fait
+   deja. Elle ne passe au vert que sur un 'libre' venu du serveur. */
+var ETAT='inconnu';
+var avl=document.getElementById('avl');
+function peindre(){
+  if(!avl)return;
+  var c=EVN_DISPO.couleur(ETAT);
+  avl.querySelector('span').textContent=EVN_DISPO.libelle(ETAT,LG);
+  avl.style.color=c;
+  avl.querySelector('i').style.background=c;
+}
+function interroger(){
+  EVN_DISPO.pour(SLUG,d1.value,d2.value,function(e){ETAT=e;peindre()});
 }
 function calc(){
   var a=new Date(d1.value),b=new Date(d2.value);
@@ -746,6 +823,7 @@ function calc(){
   document.getElementById('v2').textContent=fmt(taxe);
   document.getElementById('tt').textContent=fmt(total);
   document.getElementById('mb').textContent=fmt(total);
+  interroger();
 }
 /* La remise arrive apres le premier calcul : on recalcule des qu'elle est la.
    Si l'API se tait, la fiche garde le tarif plein — le repli sur.
@@ -795,7 +873,7 @@ lb.onclick=function(e){if(e.target===lb)hideLb()};
 addEventListener('keydown',function(e){if(!lb.classList.contains('on'))return;
  if(e.key==='Escape')hideLb();if(e.key==='ArrowRight')show(gi+1);if(e.key==='ArrowLeft')show(gi-1)});
 
-var EN={mn:"Menu",n1:"Rooms &amp; Suites",n2:"Experiences",n3:"The table",n4:"The spa",n5:"Offers &amp; Events",n6:"Meetings &amp; groups",n7:"Gallery",n8:"About",n9:"Useful information",n10:"Contact",n11:"Book",dr:"Reservations",am0:"Air conditioning",am1:"Free wifi",am2:"Smart TV",am3:"Private shower room",am4:"Hairdryer",am5:"Safe",am6:"Pool &amp; jacuzzi access",am7:"Breakfast included",apd:"From",avl:"Availability confirmed within 24 h",bkb:"Book this room",c1:"Home",c2:"Rooms &amp; Suites",cap0:"The suite",cap1:"The second bedroom",cap2:"The bathroom",cap3:"The lounge",cap4:"The terrace",cd1:"Check-in",cd1v:"from 2 pm",cd2:"Check-out",cd2v:"before noon",cd3:"Cancellation",cd3v:"free up to 48 h before",cd4:"Deposit",cd4v:"30 % on booking",cd5:"Pets",cd5v:"not allowed",cd6:"Payment",cd6v:"Wave · Orange Money · MTN · card",cdn:"Full details are on the <a href=\"informations-utiles.html#reserver\" style=\"color:var(--bronze)\">Useful information</a> page.",cta:"Book",eb0:"Signature",ebc:"Conditions",ebe:"Amenities",ebi:"Included",ebo:"Other categories",ebr:"The room",fl0:"bedrooms",fl1:"guests",fl2:"lounge",fl3:"decor",fv0:"2",fv1:"6",fv2:"Private",fv3:"Moorish",hac:"Good to know",hae:"In the room",hai:"Included in the rate",hao:"If this one is taken",hlp:"A question? Write to us on <a href=\"https://wa.me/2250758408079\" target=\"_blank\" rel=\"noopener\">WhatsApp</a> or call +225 01 51 52 75 75.",id0:"Served in the restaurant or on the terrace, fresh fruit and local produce.",id1:"Pick-up and drop-off at Félix-Houphouët-Boigny airport, free of charge, on request.",id2:"Open access from first light until dark.",id3:"Free across the estate.",it0:"Breakfast",it1:"Free airport shuttle",it2:"Pool, jacuzzi and gym",it3:"Wifi and parking",la1:"Check-in",la2:"Check-out",lax:"Guests",mbb:"Book",mbs:"FCFA · total stay",om0:"4 guests · private terrace · lounge area",om1:"2 guests · lagoon view · the finest sunset",om2:"3 guests · wax textiles · dining room",on0:"FCFA / night",on1:"FCFA / night",on2:"FCFA / night",pa1:"This is the largest of our seven categories, and the only one with two separate bedrooms. The Moorish decor — carved wood, arches, embroidered textiles — was composed piece by piece with local craftspeople, in the spirit that guides the whole property.",pa2:"Two couples, a family with older children, or a group of friends: the suite absorbs six guests without anyone getting in anyone's way. The private lounge serves as the shared living room, and each bedroom keeps its own shower room.",pa3:"It is the category most requested for honeymoons and birthdays. It goes quickly in the dry season — from December to March, book several weeks ahead.",pd0:"Each with its own shower room",pd1:"Shared living room",pd2:"On request",pern:"per night, breakfast included",pnuit:"FCFA / night",pt0:"Two separate bedrooms",pt1:"Private lounge",pt2:"Dedicated service",rin:"Included",rpd:"Breakfast",rtt:"Total stay",rtx:"Tourist tax",ttl:"Two bedrooms,<br>a lounge, a dedicated service"};
+var EN={mn:"Menu",n1:"Rooms &amp; Suites",n2:"Experiences",n3:"The table",n4:"The spa",n5:"Offers &amp; Events",n6:"Meetings &amp; groups",n7:"Gallery",n8:"About",n9:"Useful information",n10:"Contact",n11:"Book",dr:"Reservations",am0:"Air conditioning",am1:"Free wifi",am2:"Smart TV",am3:"Private shower room",am4:"Hairdryer",am5:"Safe",am6:"Pool &amp; jacuzzi access",am7:"Breakfast included",apd:"From",bkb:"Book this room",c1:"Home",c2:"Rooms &amp; Suites",cap0:"The suite",cap1:"The second bedroom",cap2:"The bathroom",cap3:"The lounge",cap4:"The terrace",cd1:"Check-in",cd1v:"from 2 pm",cd2:"Check-out",cd2v:"before noon",cd3:"Cancellation",cd3v:"free up to 48 h before",cd4:"Deposit",cd4v:"30 % on booking",cd5:"Pets",cd5v:"not allowed",cd6:"Payment",cd6v:"Wave · Orange Money · MTN · card",cdn:"Full details are on the <a href=\"informations-utiles.html#reserver\" style=\"color:var(--bronze)\">Useful information</a> page.",cta:"Book",eb0:"Signature",ebc:"Conditions",ebe:"Amenities",ebi:"Included",ebo:"Other categories",ebr:"The room",fl0:"bedrooms",fl1:"guests",fl2:"lounge",fl3:"decor",fv0:"2",fv1:"6",fv2:"Private",fv3:"Moorish",hac:"Good to know",hae:"In the room",hai:"Included in the rate",hao:"If this one is taken",hlp:"A question? Write to us on <a href=\"https://wa.me/2250758408079\" target=\"_blank\" rel=\"noopener\">WhatsApp</a> or call +225 01 51 52 75 75.",id0:"Served in the restaurant or on the terrace, fresh fruit and local produce.",id1:"Pick-up and drop-off at Félix-Houphouët-Boigny airport, free of charge, on request.",id2:"Open access from first light until dark.",id3:"Free across the estate.",it0:"Breakfast",it1:"Free airport shuttle",it2:"Pool, jacuzzi and gym",it3:"Wifi and parking",la1:"Check-in",la2:"Check-out",lax:"Guests",mbb:"Book",mbs:"FCFA · total stay",om0:"4 guests · private terrace · lounge area",om1:"2 guests · lagoon view · the finest sunset",om2:"3 guests · wax textiles · dining room",on0:"FCFA / night",on1:"FCFA / night",on2:"FCFA / night",pa1:"This is the largest of our seven categories, and the only one with two separate bedrooms. The Moorish decor — carved wood, arches, embroidered textiles — was composed piece by piece with local craftspeople, in the spirit that guides the whole property.",pa2:"Two couples, a family with older children, or a group of friends: the suite absorbs six guests without anyone getting in anyone's way. The private lounge serves as the shared living room, and each bedroom keeps its own shower room.",pa3:"It is the category most requested for honeymoons and birthdays. It goes quickly in the dry season — from December to March, book several weeks ahead.",pd0:"Each with its own shower room",pd1:"Shared living room",pd2:"On request",pern:"per night, breakfast included",pnuit:"FCFA / night",pt0:"Two separate bedrooms",pt1:"Private lounge",pt2:"Dedicated service",rin:"Included",rpd:"Breakfast",rtt:"Total stay",rtx:"Tourist tax",ttl:"Two bedrooms,<br>a lounge, a dedicated service"};
 
 var FR={};document.querySelectorAll('[data-t]').forEach(function(e){FR[e.dataset.t]=e.innerHTML});
 document.querySelectorAll('.lang button').forEach(function(b){b.onclick=function(){

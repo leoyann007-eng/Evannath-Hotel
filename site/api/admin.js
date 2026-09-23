@@ -66,8 +66,11 @@ const PREFIXE = 'evannath/donnees';
 const GARDE = 10;
 let memoire = null;                          // mode demonstration
 
+/* `fermetures` et `ouvertes` portent le calendrier de disponibilite.
+   Voir nettoyerFermeture() pour ce que chacun veut dire, et pourquoi
+   l'absence des deux ne se lit jamais comme « libre ». */
 const VIDE = { evenements: [], promotions: [], campagnes: [], medias: [],
-               maj: null };
+               fermetures: [], ouvertes: {}, maj: null };
 
 /* La derniere lecture en echec, en clair. Vide quand tout va bien.
    Sans elle, une lecture qui echoue rendait exactement la meme chose qu un
@@ -265,7 +268,95 @@ const LIMITES = {
     oublier un. */
 function collection(type) {
   return type === 'promotion' ? 'promotions'
-    : type === 'campagne' ? 'campagnes' : 'evenements';
+    : type === 'campagne' ? 'campagnes'
+    : type === 'fermeture' ? 'fermetures' : 'evenements';
+}
+
+// ── Disponibilite ──────────────────────────────────────────────────────────
+/* TROIS ETATS, ET LE TROISIEME EST LE PLUS IMPORTANT.
+ *
+ *   complet   la reception a ferme cette categorie sur ces nuits.
+ *   libre     la reception a declare la categorie ouverte, et aucune
+ *             fermeture ne couvre le sejour.
+ *   inconnu   personne n'a rien dit.
+ *
+ * `inconnu` n'est pas une panne, c'est l'etat par defaut, et il se dit :
+ * le site repond alors « disponibilite confirmee sous 24 h », ce qu'il
+ * faisait deja. Un calendrier vide ne doit RIEN promettre.
+ *
+ * La regle de secours, celle qui compte : tout ce qui rate — stockage muet,
+ * jeton absent, date illisible — retombe sur `inconnu`, JAMAIS sur `libre`.
+ * Annoncer libre a tort, c'est encaisser une chambre qui n'existe pas.
+ *
+ * LES DATES SONT DES NUITS. Une fermeture du 24 au 26 ferme les nuits du
+ * 24, du 25 et du 26. Un sejour du 24 au 26 occupe les nuits du 24 et du
+ * 25 — pas celle du 26, le client part ce matin-la. */
+
+/** Un jour 'AAAA-MM-JJ', ou null. */
+function jour(v) {
+  const t = String(v || '').trim();
+  return /^\d{4}-\d{2}-\d{2}$/.test(t) ? t : null;
+}
+
+/* Le slug d'une categorie, ou '*' pour l'hotel entier — travaux, fermeture
+   annuelle. On valide la FORME, pas une liste fermee : les slugs vivent dans
+   _chambres.py, et une liste recopiee ici divergerait au premier renommage.
+   Un slug inconnu ne presente aucun risque — il ne correspond a aucune
+   categorie, donc il ne ferme rien, et il ne s'affiche nulle part. */
+const slug = (v) => {
+  const t = String(v || '').trim().toLowerCase();
+  return t === '*' || /^[a-z0-9][a-z0-9-]{1,48}$/.test(t) ? t : '';
+};
+
+/** Une fermeture : une categorie, des nuits, et un motif qui reste interne. */
+function nettoyerFermeture(e) {
+  const o = {
+    id: propre(e.id, 40) || crypto.randomUUID(),
+    chambre: slug(e.chambre),
+    debut: jour(e.debut),
+    fin: jour(e.fin),
+    /* Pourquoi c'est ferme. Jamais publie : « groupe Sonatel » ou
+       « travaux salle de bain » regarde l'hotel, pas ses visiteurs. Le site
+       ne dit que « complet ». */
+    motif: propre(e.motif, 120),
+  };
+  // Une periode a l'envers fermerait zero nuit sans le dire.
+  if (o.debut && o.fin && o.debut > o.fin) {
+    const t = o.debut; o.debut = o.fin; o.fin = t;
+  }
+  // Une seule nuit se saisit en ne remplissant que le debut.
+  if (o.debut && !o.fin) o.fin = o.debut;
+  const manque = [];
+  if (!o.chambre) manque.push('catégorie');
+  if (!o.debut) manque.push('date de début');
+  return { objet: o, manque };
+}
+
+/** Le sejour [du, au[ touche-t-il les nuits [debut, fin] ?
+ *
+ *  Les quatre bornes sont des chaines 'AAAA-MM-JJ' : leur ordre
+ *  lexicographique EST leur ordre chronologique, aucune conversion en date
+ *  n'est necessaire — et aucun fuseau horaire ne vient s'en meler.
+ *
+ *  Le sejour occupe les nuits du .. au-1. Il chevauche donc la fermeture
+ *  si elle commence avant le depart ET se termine a l'arrivee ou apres. */
+function chevauche(du, au, debut, fin) {
+  return debut < au && fin >= du;
+}
+
+/** L'etat d'une categorie sur un sejour. Voir le commentaire du bloc. */
+function etatDe(d, chambre, du, au) {
+  const fermetures = Array.isArray(d.fermetures) ? d.fermetures : [];
+  for (const f of fermetures) {
+    if (!f || !f.debut || !f.fin) continue;
+    if (f.chambre !== '*' && f.chambre !== chambre) continue;
+    if (chevauche(du, au, f.debut, f.fin)) return 'complet';
+  }
+  /* Une fermeture l'emporte TOUJOURS sur une ouverture — c'est pour ca
+     qu'on la cherche en premier et qu'on sort. Le contraire rouvrirait une
+     chambre fermee la veille par la reception. */
+  const ouvertes = (d.ouvertes && typeof d.ouvertes === 'object') ? d.ouvertes : {};
+  return ouvertes[chambre] === true ? 'libre' : 'inconnu';
 }
 
 /** Une campagne saisonniere : un titre, une periode, et les packs qu elle
@@ -423,6 +514,39 @@ module.exports = async function handler(req, res) {
     });
   }
 
+  /* ── Disponibilite, en lecture publique ────────────────────────────────
+     On rend un VERDICT, pas le calendrier. Deux raisons :
+       - le taux d'occupation d'un hotel regarde l'hotel. Servir la liste
+         des fermetures, c'est publier son planning a qui sait lire du JSON ;
+       - la regle des nuits se decide une fois, ici, et pas dans chacune des
+         pages qui l'afficheraient chacune a sa facon.
+
+     Cette route ne demande PAS de session : c'est ce que le visiteur lit.
+     Le motif d'une fermeture n'en sort jamais. */
+  if (action === 'dispo') {
+    const du = jour(req.query.du);
+    const au = jour(req.query.au);
+    res.setHeader('Cache-Control', 'no-store, max-age=0');
+    // Des dates absentes ou a l'envers ne sont pas une erreur a signaler :
+    // le visiteur n'a simplement pas fini de choisir. On ne promet rien.
+    if (!du || !au || au <= du) {
+      return res.status(200).json({ ok: true, du, au, etats: {}, raison: 'dates' });
+    }
+    const d = await lire();
+    /* Le stockage muet ne vaut pas « tout est libre ». Il vaut « je ne sais
+       pas », et le site le dira comme il le dit deja. */
+    if (PANNE) {
+      return res.status(200).json({ ok: true, du, au, etats: {}, raison: 'indisponible' });
+    }
+    const demandee = slug(req.query.chambre);
+    const slugs = demandee && demandee !== '*'
+      ? [demandee]
+      : Object.keys((d.ouvertes && typeof d.ouvertes === 'object') ? d.ouvertes : {});
+    const etats = {};
+    for (const s of slugs) etats[s] = etatDe(d, s, du, au);
+    return res.status(200).json({ ok: true, du, au, etats });
+  }
+
   // ── Connexion ───────────────────────────────────────────────────────────
   if (action === 'entrer') {
     if (req.method !== 'POST') return json(res, 405, { ok: false });
@@ -476,6 +600,8 @@ module.exports = async function handler(req, res) {
       evenements: (d.evenements || []).length,
       promotions: (d.promotions || []).length,
       medias: (d.medias || []).length,
+      fermetures: (d.fermetures || []).length,
+      ouvertes: Object.keys(d.ouvertes || {}).length,
       maj: d.maj,
     });
   }
@@ -527,6 +653,8 @@ module.exports = async function handler(req, res) {
     const type = collection(corps.type);
     const { objet, manque, message } = corps.type === 'campagne'
       ? nettoyerCampagne(corps.entree || {})
+      : corps.type === 'fermeture'
+      ? nettoyerFermeture(corps.entree || {})
       : nettoyer(corps.entree || {}, corps.type);
     if (manque.length) {
       return json(res, 422, { ok: false, champs: manque,
@@ -545,6 +673,31 @@ module.exports = async function handler(req, res) {
     const w = await ecrire(d);
     if (!w.ok) return json(res, 502, { ok: false, message: w.message });
     return json(res, 200, { ok: true, entree: objet });
+  }
+
+  /* Declarer une categorie ouverte, ou revenir a « je ne sais pas ».
+     C'est la seule facon dont le site se met a ecrire « Disponible » : tant
+     que la reception n'a coche personne, il n'annonce rien. */
+  if (action === 'ouvrir') {
+    if (req.method !== 'POST') return json(res, 405, { ok: false });
+    let corps = req.body;
+    if (typeof corps === 'string') { try { corps = JSON.parse(corps); } catch { corps = {}; } }
+    const s = slug(corps.chambre);
+    if (!s || s === '*') {
+      return json(res, 422, { ok: false, message: 'Catégorie manquante.' });
+    }
+    const d = await lire();
+    if (PANNE) return json(res, 503, { ok: false, message: PANNE
+      + ' Rien n a ete enregistre : ecrire maintenant effacerait le reste.' });
+    d.ouvertes = (d.ouvertes && typeof d.ouvertes === 'object') ? d.ouvertes : {};
+    // On efface au lieu d'ecrire `false` : la cle absente et la cle a faux
+    // veulent dire la meme chose, et deux facons de dire « inconnu » finissent
+    // par diverger.
+    if (corps.ouverte === true) d.ouvertes[s] = true;
+    else delete d.ouvertes[s];
+    const w = await ecrire(d);
+    if (!w.ok) return json(res, 502, { ok: false, message: w.message });
+    return json(res, 200, { ok: true, ouvertes: d.ouvertes });
   }
 
   if (action === 'supprimer') {
