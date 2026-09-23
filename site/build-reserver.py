@@ -8,7 +8,7 @@ le sejour, collecte les coordonnees et simule le paiement de l'acompte.
 import io, json
 from _chrome import PROSPECTION
 from _chrome import ENVOI_JS, PIEGE, secours
-from _chrome import REMISE_JS, REMISE_CSS
+from _chrome import REMISE_JS, REMISE_CSS, DISPO_JS
 from _chrome import (page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV, EN_SECOURS,
                      CONF_TITRE, CONF_TITRE_EN, CONF_GESTE, CONF_GESTE_EN,
                      ENVOI_WHATSAPP)
@@ -55,6 +55,16 @@ CSS = REMISE_CSS + """
    le navigateur garde la taille intrinseque comme plancher. */
 .f input,.f select,.f textarea{width:100%}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+/* La disponibilite, dite la ou le visiteur choisit ses dates — et non
+   trois ecrans plus loin, apres qu'il a saisi son nom et son telephone.
+   `hidden` doit l'emporter sur `display:flex`, sinon la note reste a
+   l'ecran alors qu'on n'a rien a annoncer. */
+.dnote{display:flex;gap:11px;align-items:flex-start;border:1px solid var(--line);
+  padding:13px 15px;margin-bottom:18px;font-size:13.5px;line-height:1.55;
+  color:#CFC3B2}
+.dnote[hidden]{display:none}
+.dnote i{width:7px;height:7px;border-radius:50%;flex:0 0 auto;margin-top:6px}
+.dnote b{font-weight:600}
 label{font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--bronze);margin-bottom:8px;font-weight:700}
 input,select,textarea{min-height:48px;background:transparent;border:1px solid var(--line);color:var(--cream);
   font:400 15px/1.5 var(--f-body);padding:12px 14px;outline:none;transition:.3s;min-width:0;font-family:var(--f-body)}
@@ -153,6 +163,7 @@ body = [header('index.html#chambres', 'Nos chambres', 'navch'), drawer('index.ht
         <div class="f"><label for="d1" data-t="ld1">Arrivée</label><input type="date" id="d1"></div>
         <div class="f"><label for="d2" data-t="ld2">Départ</label><input type="date" id="d2"></div>
       </div>
+      <div class="dnote" id="dnote" hidden><i></i><span></span></div>
       <div class="f"><label for="pax" data-t="lpax">Voyageurs</label><select id="pax"></select></div>
       <div class="f"><label for="note" data-t="lnote">Une demande particulière&nbsp;? (facultatif)</label>
         <textarea id="note" placeholder="Heure d'arrivée tardive, lit d'appoint, occasion à fêter…"></textarea></div>
@@ -264,7 +275,7 @@ body = [header('index.html#chambres', 'Nos chambres', 'navch'), drawer('index.ht
 
 ''' + FOOTER]
 
-JS = NAV_JS + ENVOI_JS + REMISE_JS + '''
+JS = NAV_JS + ENVOI_JS + REMISE_JS + DISPO_JS + '''
 
 var CH=''' + json.dumps(CHAMBRES, ensure_ascii=False) + ''';
 var TAX=1500; // taxe de séjour par personne et par nuit
@@ -295,18 +306,48 @@ var T={fr:{loc:'fr-FR',p1:' personne',pp:' personnes',n1:'Nuit',nn:'Nuits',tarif
            merci:'{{CG}}Merci ',dem:'. Votre demande pour la ',du:' du ',au:' au ',
            part:"{{PART}}",
            solde:"Le solde se règle à l'arrivée, sur place.",
+           dlibre:'<b>Disponible à ces dates.</b> La réception vous le confirmera par écrit.',
+           dcomplet:"<b>Cette catégorie est complète sur ces nuits.</b> Changez de dates "
+                    +"ou de catégorie ci-dessus. Vous pouvez aussi envoyer votre demande "
+                    +"telle quelle : la réception vous dira ce qu'elle peut faire.",
            nav1:'Votre navette aéroport est notée (',nav2:"). Le solde se règle à l'arrivée."},
      en:{loc:'en-GB',p1:' guest',pp:' guests',n1:'Night',nn:'Nights',tarif:'Rate',
            aulieu:'instead of',
            merci:'{{CG_EN}}Thank you ',dem:'. Your request for the ',du:' from ',au:' to ',
            part:'{{PART_EN}}',
            solde:'The balance is settled on arrival, at the hotel.',
+           dlibre:'<b>Available on these dates.</b> The front desk will confirm in writing.',
+           dcomplet:'<b>This category is fully booked on these nights.</b> Change your '
+                    +'dates or category above. You may also send your request as it is: '
+                    +'the front desk will tell you what it can do.',
            nav1:'Your airport shuttle is noted (',nav2:'). The balance is settled on arrival.'}};
 function jour(v){return v?new Date(v).toLocaleDateString(T[LG].loc,{weekday:'long',day:'numeric',month:'long'}):'—'}
 /* Le recapitulatif a la place d'etre compact ; une demande relue en janvier
    pour un sejour de decembre, non. Le message porte donc l'annee. */
 function jourAn(v){return v?new Date(v).toLocaleDateString(T[LG].loc,{weekday:'long',day:'numeric',month:'long',year:'numeric'}):'—'}
-function EVN_LANG(lg){ LG=T[lg]?lg:'fr';
+/* La disponibilite ---------------------------------------------------
+   Elle se dit LA, sous les dates, et non trois ecrans plus loin : apprendre
+   que la chambre est prise apres avoir saisi son nom, son e-mail et son
+   telephone, c'est du travail perdu et un client de moins.
+
+   Rien n'empeche d'envoyer la demande malgre un « complet » : la reception
+   a des annulations, et une demande refusee par le site ne lui parvient
+   jamais. */
+var ETAT='inconnu';
+function peindre(){
+  var n=document.getElementById('dnote');
+  if(!n)return;
+  if(ETAT!=='libre'&&ETAT!=='complet'){n.hidden=true;return}
+  n.hidden=false;
+  n.querySelector('span').innerHTML=T[LG][ETAT==='libre'?'dlibre':'dcomplet'];
+  var c=EVN_DISPO.couleur(ETAT);
+  n.style.borderColor=c;
+  n.querySelector('i').style.background=c;
+}
+function interroger(){
+  EVN_DISPO.pour(cat.value,d1.value,d2.value,function(e){ETAT=e;peindre()});
+}
+function EVN_LANG(lg){ LG=T[lg]?lg:'fr'; peindre();
   /* Les libelles des categories sont ecrits par ce script : [data-t] ne
      les atteint pas, il faut les refaire a la main a chaque bascule. */
   [].forEach.call(cat.options,function(o){o.textContent=libelleCat(o.value)});
@@ -374,6 +415,9 @@ function calc(){
   document.getElementById('rtot').textContent=fmt(total);
   document.getElementById('racc').textContent=fmt(acc)+' FCFA';
   document.getElementById('rsolde').textContent=fmt(total-acc)+' FCFA';
+  /* calc() corrige parfois la date de depart : on interroge APRES, sinon on
+     demanderait l'etat de dates que le visiteur ne voit deja plus. */
+  interroger();
 }
 /* La remise arrive apres le premier calcul : on refait le menu et le
    recapitulatif des qu'elle est la. Si l'API se tait, tout reste au tarif

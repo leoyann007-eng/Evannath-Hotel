@@ -364,6 +364,21 @@ def controler():
         # Le controle 12 — rideau des barres collantes — a disparu avec le
         # mecanisme lui-meme : les barres de filtres ne sont plus collantes.
 
+        # 15. aucune page ne peut affirmer une disponibilite dans son balisage.
+        # Les sept fiches chambres ont porte pendant des mois une pastille
+        # verte et « Disponible a ces dates », ecrite en dur, affichee quelles
+        # que soient les dates choisies. C'etait la seule phrase du site que
+        # rien ne soutenait. Elle ne peut desormais venir que de DISPO_JS,
+        # a partir du verdict du serveur — donc d'un <script>, jamais du
+        # balisage. On retire les scripts avant de chercher : le module et le
+        # dictionnaire anglais ont parfaitement le droit de contenir ces mots.
+        sans_js = re.sub(r'<script[^>]*>.*?</script>', ' ', s, flags=re.S)
+        for phrase in ('Disponible à ces dates', 'Available on these dates',
+                       'Complet à ces dates', 'Fully booked on these dates'):
+            if phrase in sans_js:
+                pb.append((f, 'disponibilite affirmee dans le balisage : « %s »'
+                           ' — elle doit venir de DISPO_JS' % phrase))
+
     print('%d pages controlees' % len(pages))
     if pb:
         print('%d anomalie(s) :' % len(pb))

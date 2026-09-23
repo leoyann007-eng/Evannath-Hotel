@@ -14,6 +14,16 @@ Trois niveaux :
 
 ## Sécurité
 
+> **Ces quatre premières lignes ont changé de statut le 23 septembre 2026.**
+> Tant que l'administration ne publiait que des affiches, un mot de passe
+> partagé suffisait : au pire on publiait une affiche de travers. Elle
+> gouverne maintenant **les chambres qu'on annonce libres**, et demain elle
+> touchera à de l'argent. Le jour où une catégorie est fermée par erreur un
+> week-end de pont, la première question sera « qui l'a fait » — et il faut
+> pouvoir y répondre. Ce n'est plus « sous deux semaines », c'est
+> **préalable à la mise en ligne**.
+
+
 | | Quand | Pourquoi |
 |---|---|---|
 | **`ADMIN_SECRET` non défini** | 2 semaines | La clé qui signe les sessions retombe alors sur le mot de passe lui-même. Une longue chaîne aléatoire chez Vercel, deux minutes. |
@@ -55,8 +65,8 @@ Trois niveaux :
 | | Quand | Pourquoi |
 |---|---|---|
 | **Paiement en ligne** | Selon le contrat | CinetPay ou GeniusPay. C'est la seule question qui fait varier le chiffrage. |
-| **Disponibilité en temps réel** | Formule Signature | Aujourd'hui toute demande affiche « Disponible à ces dates ». C'est une promesse que rien ne vérifie. |
-| **Synchronisation Booking / Airbnb** | Formule Performance | — |
+| **Disponibilité — le stock** | Formule Signature | ✅ Le mécanisme existe depuis le 23 septembre : la réception coche les catégories qu'elle prend en ligne et ferme les nuits prises. Ce qui manque encore : **le nombre** de chambres restantes, et le verrou qui empêche deux clients de prendre la même nuit à la seconde près. Cela demande un logiciel de gestion. |
+| **Synchronisation Booking / Airbnb** | Formule Performance | C'est ce qui apporterait la disponibilité à la seconde, et la seule chose qui l'apporte vraiment. |
 | **Surveillance automatique** | Trimestre | Un test qui tourne chaque nuit et prévient si le site ne répond plus ou si les données ne se lisent pas. `tests/en-ligne.test.mjs` fait déjà le travail : il ne manque que la planification. |
 
 ## Le domaine

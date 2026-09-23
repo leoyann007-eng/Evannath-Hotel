@@ -193,7 +193,7 @@ header.scrolled .brand img{width:132px}
 .book-out.show{display:flex;animation:fade .5s}
 @keyframes fade{from{opacity:0;transform:translateY(-8px)}}
 .book-out b{color:var(--bronze-2);font-weight:700}
-.pill{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;border:1px solid rgba(143,174,99,.45);color:var(--palm);padding:6px 12px;font-weight:700}
+.pill{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;border:1px solid var(--line);color:var(--muted);padding:6px 12px;font-weight:700}
 
 section{padding:106px 0}
 .sec-head{max-width:640px;margin-bottom:52px}
@@ -500,7 +500,7 @@ footer{background:#0F0A06;border-top:1px solid var(--line);padding:74px 0 28px}
     </div>
     <button type="submit" class="btn btn-solid" data-t="check">Vérifier</button>
     <div class="book-out" id="out">
-      <span class="pill" data-t="avail">À confirmer</span>
+      <span class="pill" id="pdispo">À confirmer</span>
       <span><b id="nn">2</b> <span data-t="nights">nuits</span></span>
       <span data-t="total">Total estimé</span> <b id="tt">134 000 FCFA</b>
       <span style="color:var(--muted);font-size:12.5px" data-t="note">Petit-déjeuner inclus · Navette aéroport offerte · hors taxe de séjour</span>
@@ -856,6 +856,66 @@ window.EVN_REMISE = (function () {
   return API;
 })();
 
+
+window.EVN_DISPO = (function () {
+  var cache = {};   /* 'slug|du|au' -> { etat, a } */
+  var rang = {};    /* par categorie : le numero du dernier appel emis */
+
+  /* Le cache existe pour absorber le va-et-vient du visiteur sur ses dates,
+     pas pour survivre a la journee. Une page laissee ouverte pendant que la
+     reception ferme la chambre afficherait sinon « Disponible » jusqu'au
+     rechargement — exactement le mensonge qu'on est en train de retirer. */
+  var DUREE = 60000;
+
+  var MOTS = {
+    libre:   { fr: 'Disponible à ces dates',
+               en: 'Available on these dates' },
+    complet: { fr: 'Complet à ces dates',
+               en: 'Fully booked on these dates' },
+    inconnu: { fr: 'Disponibilité confirmée sous 24 h',
+               en: 'Availability confirmed within 24 h' }
+  };
+
+  /* La couleur porte autant que le mot : une pastille verte dit « c'est
+     libre » a qui ne lit pas. Elle ne sort donc que pour `libre`. */
+  var COULEURS = { libre: 'var(--palm)', complet: 'var(--err)',
+                   inconnu: 'var(--muted)' };
+
+  var API = {
+    libelle: function (etat, lg) {
+      var m = MOTS[etat] || MOTS.inconnu;
+      return m[lg || document.documentElement.lang] || m.fr;
+    },
+    couleur: function (etat) { return COULEURS[etat] || COULEURS.inconnu; },
+
+    /* Demande l'etat d'une categorie sur un sejour, et appelle f(etat).
+       f est appele TOUT DE SUITE avec 'inconnu' si les dates ne disent rien
+       encore — l'affichage ne reste jamais vide en attendant le reseau. */
+    pour: function (slug, du, au, f) {
+      if (!slug || !du || !au || au <= du) { f('inconnu'); return; }
+      var cle = slug + '|' + du + '|' + au;
+      var vu = cache[cle];
+      if (vu && Date.now() - vu.a < DUREE) { f(vu.etat); return; }
+
+      /* Le visiteur change ses dates plus vite que le reseau ne repond. Sans
+         ce numero, une reponse partie en premier et arrivee en dernier
+         ecrasait l'etat des dates courantes par celui des precedentes. */
+      var n = (rang[slug] = (rang[slug] || 0) + 1);
+
+      fetch('/api/admin?a=dispo&chambre=' + encodeURIComponent(slug)
+            + '&du=' + du + '&au=' + au, { cache: 'no-store' })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (j) {
+          var e = (j && j.etats && j.etats[slug]) || 'inconnu';
+          cache[cle] = { etat: e, a: Date.now() };
+          if (n === rang[slug]) f(e);
+        })
+        .catch(function () { if (n === rang[slug]) f('inconnu'); });
+    }
+  };
+  return API;
+})();
+
 var hd=document.getElementById('hd');
 addEventListener('scroll',function(){hd.classList.toggle('scrolled',scrollY>60)},{passive:true});
 
@@ -1000,7 +1060,27 @@ function calc(){
     lien.href='reserver.html?chambre='+encodeURIComponent(o.dataset.slug)
       +'&du='+encodeURIComponent(d1.value)+'&au='+encodeURIComponent(d2.value);
   }
+  interroger(o?o.dataset.slug:'');
 }
+
+/* La pastille du formulaire de recherche ------------------------------
+   Le bouton dit « Verifier ». Il ne verifiait rien : la pastille annoncait
+   « Disponible » quelles que soient les dates. Elle porte desormais ce que
+   le serveur repond, et « Disponibilite confirmee sous 24 h » tant qu il
+   n y a rien a dire. */
+var ETAT='inconnu';
+function peindre(){
+  var p=document.getElementById('pdispo');
+  if(!p)return;
+  p.textContent=EVN_DISPO.libelle(ETAT);
+  p.style.color=EVN_DISPO.couleur(ETAT);
+}
+function interroger(slug){
+  EVN_DISPO.pour(slug,d1.value,d2.value,function(e){ETAT=e;peindre()});
+}
+/* LANG_JS appelle ce point d extension a chaque bascule : la pastille est
+   ecrite par ce script, donc hors de portee de [data-t]. */
+function EVN_LANG(){peindre()}
 EVN_REMISE.quand(function(R){
   calc();
   document.querySelectorAll('.room-foot').forEach(function(pied){
@@ -1058,7 +1138,7 @@ eb:"Assinie · PK 19 · Aby Lagoon",h1e:"African",
 lede:"46 rooms and suites, a wooden deck set out over the lagoon, and the quiet of the Comoé. Book direct — the rate is always best here.",
 cta1:"Book direct",cta2:"See the rooms",sc:"Scroll",
 in:"Check-in",out:"Check-out",guests:"Guests",cat:"Category",check:"Check",
-avail:"To confirm",nights:"nights",total:"Estimated total",note:"Breakfast included · Free airport shuttle · excluding tourist tax",confirm:"Confirm",
+nights:"nights",total:"Estimated total",note:"Breakfast included · Free airport shuttle · excluding tourist tax",confirm:"Confirm",
 s1:"Rooms",s2:"Categories",s3:"Facebook followers",s4:"Front desk",
 e2:"Accommodation",h2:"Seven categories,<br>seven moods",
 p2:"From the standard room to the two-bedroom Arabian Suite. Every category has its own decor, its own view and a rate shown up front — no surprises on arrival.",

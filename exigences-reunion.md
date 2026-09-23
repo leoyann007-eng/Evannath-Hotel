@@ -72,6 +72,25 @@ tableur, un logiciel ? La réponse change tout :
 
 Dans les deux cas le mécanisme côté site est le même ; seule la source change.
 
+### ✅ Construit le 23 septembre
+
+Le mécanisme existe et tourne. Ce qui a été fait :
+
+- les sept fiches chambres, l'accueil et le tunnel lisent désormais un
+  verdict du serveur au lieu d'affirmer ;
+- un écran **Disponibilités** dans l'administration : la réception coche les
+  catégories qu'elle prend en ligne, et ferme les nuits prises ;
+- trois états, dont `inconnu`, qui ne promet rien ;
+- la règle des nuits, à un seul endroit, avec 39 vérifications automatiques ;
+- un quinzième contrôle dans `verifier.py` qui refuse toute disponibilité
+  écrite en dur dans une page.
+
+Voir `README.md`, section « Les disponibilités ».
+
+Ce qui **n'est pas** fait, et qui demande un logiciel de gestion : le nombre
+de chambres restantes, et le verrou qui empêche deux clients de prendre la
+même nuit à la seconde près.
+
 ### Ce qui se construit, et ce qui se promet
 
 Ce qu'on peut tenir : **le site ne montre plus comme libre une chambre que la

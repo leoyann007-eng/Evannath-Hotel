@@ -3,10 +3,11 @@
 Deux suites tournent toutes seules :
 
 ```bash
+node tests/dispo.test.mjs         # la règle des nuits, hors réseau
 node tests/remise.test.mjs        # la logique de remise, hors réseau
 node tests/en-ligne.test.mjs      # le site déployé, sans navigateur
 node tests/envoyer.test.mjs       # l'envoi des formulaires
-python site/verifier.py           # les 14 contrôles sur les pages générées
+python site/verifier.py           # les 15 contrôles sur les pages générées
 ```
 
 Ce fichier liste ce qui reste, et que seul un humain peut faire : ce qui passe
@@ -16,6 +17,30 @@ par le **formulaire du back-office**, par un **vrai navigateur**, ou par un
 Cochez au fur et à mesure. Ce qui échoue se note avec la capture d'écran.
 
 ---
+
+## 0. Les disponibilités
+
+Le mécanisme est testé de bout en bout par `tests/dispo.test.mjs`. Ce qui
+reste ici, c'est **ce qu'une personne comprend** en ouvrant l'écran.
+
+- [ ] **Cocher une catégorie**, puis ouvrir sa fiche sur le site : la pastille
+      passe au vert et dit « Disponible à ces dates ».
+- [ ] **Fermer une nuit**, puis choisir cette nuit sur la fiche : la pastille
+      passe au rouge et dit « Complet à ces dates ».
+- [ ] **La veille de cette nuit reste verte.** C'est le cas limite qui se
+      trompe le plus souvent.
+- [ ] **Décocher la catégorie** : la pastille redevient grise et dit
+      « Disponibilité confirmée sous 24 h ». Rien n'est cassé — c'est l'état
+      de départ.
+- [ ] **Le motif d'une fermeture ne s'affiche nulle part** sur le site public.
+      Écrivez-y un mot reconnaissable et cherchez-le dans la page.
+- [ ] **Sur un vrai téléphone** : la case « Je la prends en ligne » passe sous
+      le nom de la catégorie, et rien ne déborde.
+- [ ] **Faire remplir l'écran par quelqu'un de la réception, sans l'aider.**
+      S'il ne sait pas dire ce que le client verra, l'écran est raté — c'est
+      ce qu'il explique en premier.
+- [ ] **Un « complet » n'empêche pas d'envoyer la demande** : le tunnel le
+      dit et laisse continuer. La réception a des annulations.
 
 ## 1. Le back-office produit-il les bonnes données ?
 
