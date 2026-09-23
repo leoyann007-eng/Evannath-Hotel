@@ -66,6 +66,43 @@ const PREFIXE = 'evannath/donnees';
 const GARDE = 10;
 let memoire = null;                          // mode demonstration
 
+/* Combien de temps une demande venue du site retient une chambre.
+ *
+ * Deux heures, et pas davantage : une demande n'est PAS une reservation.
+ * Quelqu'un qui remplit le tunnel et n'envoie jamais son message ne doit pas
+ * condamner une chambre jusqu'a la fin des temps. Passe ce delai la retenue
+ * cesse de peser, mais reste visible — la demande a eu lieu, et l'effacer
+ * perdrait le nom du client et ses dates.
+ *
+ * La reception transforme la retenue en reservation d'un clic, et celle-la
+ * n'expire pas. */
+const RETENUE_MINUTES = 120;
+
+/* Le debit de la route publique qui ECRIT. Les autres ne font que lire.
+ *
+ * Le seuil est volontairement haut, pour la meme raison que dans
+ * envoyer.js : en Cote d'Ivoire une grande partie du trafic mobile passe par
+ * du NAT operateur, et des dizaines de visiteurs partagent une seule IP
+ * publique. Un seuil serre refuserait des clients legitimes, ce qui coute
+ * plus cher que le spam qu'il evite. La peremption fait le reste du travail :
+ * meme un flot de fausses demandes se vide tout seul en deux heures. */
+const DEMANDES = new Map();
+const FENETRE_DEMANDE = 60_000;
+const MAX_DEMANDES = 12;
+
+function tropDeDemandes(ip) {
+  const t = Date.now();
+  const liste = (DEMANDES.get(ip) || []).filter((x) => t - x < FENETRE_DEMANDE);
+  liste.push(t);
+  DEMANDES.set(ip, liste);
+  if (DEMANDES.size > 500) {
+    for (const [k, v] of DEMANDES) {
+      if (!v.some((x) => t - x < FENETRE_DEMANDE)) DEMANDES.delete(k);
+    }
+  }
+  return liste.length > MAX_DEMANDES;
+}
+
 /* `chambres` et `fermetures` portent le calendrier de disponibilite.
    `chambres`, ce sont les chambres PHYSIQUES — la 25, la 26 — chacune
    rattachee a une categorie. Voir le bloc « Disponibilite » plus bas. */
@@ -303,6 +340,14 @@ function collection(type) {
  * 24, du 25 et du 26. Un sejour du 24 au 26 occupe les nuits du 24 et du
  * 25 — pas celle du 26, le client part ce matin-la. */
 
+/** La veille d'un jour. On passe par midi UTC : a minuit, un decalage
+    d'une heure fait changer de date, et la nuit se decalerait d'un jour. */
+function veille(j) {
+  const d = new Date(j + 'T12:00:00Z');
+  d.setUTCDate(d.getUTCDate() - 1);
+  return d.toISOString().slice(0, 10);
+}
+
 /** Un jour 'AAAA-MM-JJ', ou null. */
 function jour(v) {
   const t = String(v || '').trim();
@@ -386,6 +431,11 @@ function nettoyerFermeture(e) {
     client: propre(e.client, 60),
     statut: ['confirmee', 'attente', 'annulee', 'terminee'].includes(e.statut)
       ? e.statut : '',
+    /* L'instant ou une retenue cesse de bloquer. Il n'existe que pour les
+       demandes venues du site, qui ne sont pas encore des reservations : on
+       ne peut pas condamner une chambre parce que quelqu'un a rempli un
+       formulaire. Une reservation confirmee par la reception n'en a pas. */
+    expire: instant(e.expire),
   };
   // Une periode a l'envers fermerait zero nuit sans le dire.
   if (o.debut && o.fin && o.debut > o.fin) {
@@ -406,6 +456,22 @@ function vise(f, ch) {
   return f.cible === '*' || f.cible === ch.id || f.cible === ch.categorie;
 }
 
+/** Cette fermeture compte-t-elle encore ?
+ *
+ *  Une retenue perimee cesse de bloquer AU MOMENT DE LA LECTURE, pas au
+ *  passage d'un menage nocturne : il n'y a pas de menage nocturne ici, et
+ *  une chambre qui resterait bloquee jusqu'au prochain deploiement serait
+ *  une chambre invendable sans que personne ne sache pourquoi.
+ *
+ *  Elle reste dans le magasin : la demande a bien eu lieu, et effacer
+ *  perdrait le nom du client et ses dates. Elle cesse simplement de peser. */
+function vivante(f, maintenant) {
+  if (!f || !f.debut) return false;
+  if (f.statut === 'annulee') return false;
+  if (f.expire && Date.parse(f.expire) < maintenant) return false;
+  return true;
+}
+
 /** L'etat d'une CATEGORIE sur un sejour. Voir le commentaire du bloc. */
 function etatDe(d, categorie, du, au) {
   const chambres = (Array.isArray(d.chambres) ? d.chambres : [])
@@ -413,9 +479,10 @@ function etatDe(d, categorie, du, au) {
   // Categorie dont aucune chambre n'a ete saisie : on ne sait rien.
   if (!chambres.length) return 'inconnu';
 
-  /* Une reservation annulee ne ferme plus rien. */
+  /* Une reservation annulee, et une retenue perimee, ne ferment plus rien. */
+  const maintenant = Date.now();
   const fermetures = (Array.isArray(d.fermetures) ? d.fermetures : [])
-    .filter((f) => f && f.debut && f.statut !== 'annulee');
+    .filter((f) => vivante(f, maintenant));
 
   const libres = chambres.filter((ch) => {
     // Hors service : indisponible, quelles que soient les dates.
@@ -425,6 +492,25 @@ function etatDe(d, categorie, du, au) {
 
   if (!libres) return 'complet';
   return libres === 1 ? 'derniere' : 'libre';
+}
+
+/** La premiere chambre libre d'une categorie sur ces nuits, ou null.
+ *
+ *  « La premiere » se decide sur le NUMERO, dans l'ordre ou un humain le
+ *  lit : 2 avant 10. Deux demandes simultanees tombent donc sur la meme
+ *  chambre libre — mais la seconde ne la trouvera plus libre, puisque la
+ *  premiere l'aura retenue. La reception peut deplacer la retenue ensuite.
+ */
+function premiereLibre(d, categorie, du, au) {
+  const maintenant = Date.now();
+  const fermetures = (Array.isArray(d.fermetures) ? d.fermetures : [])
+    .filter((f) => vivante(f, maintenant));
+  return (Array.isArray(d.chambres) ? d.chambres : [])
+    .filter((c) => c && c.categorie === categorie && c.service !== false)
+    .sort((a, b) => String(a.numero).localeCompare(String(b.numero), 'fr',
+      { numeric: true, sensitivity: 'base' }))
+    .find((ch) => !fermetures.some((f) => vise(f, ch) && chevauche(du, au, f.debut, f.fin)))
+    || null;
 }
 
 /** Une campagne saisonniere : un titre, une periode, et les packs qu elle
@@ -617,6 +703,66 @@ module.exports = async function handler(req, res) {
     const etats = {};
     for (const s of slugs) etats[s] = etatDe(d, s, du, au);
     return res.status(200).json({ ok: true, du, au, etats });
+  }
+
+  /* ── Une demande venue du site ─────────────────────────────────────────
+     C'est la SEULE route publique qui ecrive. Elle existe parce que sans
+     elle le serveur n'apprenait jamais qu'un client avait demande une
+     chambre : la demande partait sur le telephone de la reception, et si
+     celle-ci ne la recopiait pas, le site continuait d'annoncer la chambre
+     libre. Deux clients pouvaient demander la derniere.
+
+     Ce qu'elle NE REND PAS : le numero de la chambre retenue, le nombre de
+     chambres restantes, quoi que ce soit de l'inventaire. Le visiteur
+     apprend seulement qu'une chambre lui est gardee, ou non. */
+  if (action === 'demande') {
+    if (req.method !== 'POST') return json(res, 405, { ok: false });
+    res.setHeader('Cache-Control', 'no-store');
+
+    const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim()
+      || req.socket?.remoteAddress || 'inconnue';
+    if (tropDeDemandes(ip)) {
+      return json(res, 429, { ok: false, retenue: false, raison: 'debit' });
+    }
+
+    let corps = req.body;
+    if (typeof corps === 'string') { try { corps = JSON.parse(corps); } catch { corps = {}; } }
+    corps = corps || {};
+
+    const categorie = slug(corps.categorie);
+    const du = jour(corps.du);
+    const au = jour(corps.au);
+    const nom = propre(corps.nom, 60);
+    /* Sans nom, la reception verrait une chambre retenue par personne.
+       Sans dates lisibles, on ne sait pas quelles nuits garder. Dans les
+       deux cas on ne retient rien — et on ne fait pas echouer le formulaire
+       pour autant : la demande part quand meme vers la reception. */
+    if (!categorie || categorie === '*' || !du || !au || au <= du || !nom) {
+      return json(res, 200, { ok: true, retenue: false, raison: 'incomplet' });
+    }
+
+    const d = await lire();
+    if (PANNE) return json(res, 200, { ok: true, retenue: false, raison: 'indisponible' });
+
+    /* Les dates du client sont une ARRIVEE et un DEPART ; une fermeture se
+       compte en NUITS. Il dort du 24 au 26 : les nuits du 24 et du 25. */
+    const derniere = veille(au);
+    const ch = premiereLibre(d, categorie, du, au);
+    if (!ch) return json(res, 200, { ok: true, retenue: false, raison: 'complet' });
+
+    const entree = nettoyerFermeture({
+      cible: ch.id, debut: du, fin: derniere,
+      nature: 'client', statut: 'attente', client: nom,
+      expire: new Date(Date.now() + RETENUE_MINUTES * 60000).toISOString().slice(0, 16),
+      motif: propre(corps.reference, 40),
+    }).objet;
+
+    d.fermetures = d.fermetures || [];
+    d.fermetures.push(entree);
+    const w = await ecrire(d);
+    if (!w.ok) return json(res, 200, { ok: true, retenue: false, raison: 'ecriture' });
+
+    return json(res, 200, { ok: true, retenue: true, minutes: RETENUE_MINUTES });
   }
 
   // ── Connexion ───────────────────────────────────────────────────────────

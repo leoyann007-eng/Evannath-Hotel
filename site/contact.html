@@ -593,6 +593,30 @@ var EVN = {
     if (o.erreur) o.erreur.classList.remove('on');
     if (o.secours) o.secours.classList.remove('on');
 
+    /* La reference, generee ici pour que la retenue et le message portent la
+       MEME : la reception lit « EVN-EIMWJG » dans son WhatsApp et retrouve
+       la meme a cote du nom, dans le calendrier. */
+    var ref = EVN.reference();
+
+    /* Une demande de chambre previent le serveur, qui en retient une pendant
+       deux heures — le temps que la reception la voie. Sans ca, la demande
+       partait sur son telephone et le site continuait d'annoncer la chambre
+       libre : deux clients pouvaient demander la derniere.
+
+       Envoi SANS ATTENDRE la reponse, et l'echec est sans consequence : la
+       demande part de toute facon, elle n'a jamais dependu de ce serveur. Ce
+       qui compte pour le visiteur, c'est que son message arrive. */
+    if (o.retenue && window.fetch) {
+      try {
+        fetch('/api/admin?a=demande', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            categorie: o.retenue.categorie, du: o.retenue.du,
+            au: o.retenue.au, nom: o.retenue.nom, reference: ref })
+        }).catch(function () {});
+      } catch (e) { /* le formulaire continue */ }
+    }
+
     /* La demande part sur WhatsApp.
 
        On n'appelle PAS window.open : les navigateurs le bloquent largement,
@@ -606,7 +630,6 @@ var EVN = {
        La confirmation s'affiche juste apres ce clic — pas avant. Elle est
        donc derriere lui quand il revient de WhatsApp, avec sa reference. */
     if (EVN.parWhatsApp) {
-      var ref = EVN.reference();
       var texte = (o.resume ? o.resume() : 'Bonjour, je souhaite vous contacter.')
                 + SAUT + SAUT + 'Référence : ' + ref;
       var url = EVN.lienWhatsApp(texte);

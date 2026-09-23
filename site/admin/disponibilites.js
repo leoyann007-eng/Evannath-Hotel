@@ -54,6 +54,20 @@ const jDt = (j) => new Date(j + 'T12:00:00');
 const jPlus = (j, n) => { const d = jDt(j); d.setDate(d.getDate() + n); return jourIso(d); };
 const jMaj = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 const jCourt = (j) => jDt(j).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+/* L'instant ou une retenue tombe. On dit l'heure, pas « dans 118 minutes » :
+   la reception regarde sa pendule, pas un compte a rebours. */
+const heureDe = (t) => {
+  const d = new Date(t);
+  if (isNaN(d)) return '';
+  const auj = new Date();
+  const memeJour = d.toDateString() === auj.toDateString();
+  return (memeJour ? '' : jCourt(jourIso(d)) + ' a ')
+    + d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+};
+/* Pas `perimee` : index.html declare deja une fonction de ce nom — le
+   bandeau de page perimee. Deux scripts classiques partagent la meme
+   portee globale, et la collision ne se voit qu'au navigateur. */
+const retenueTombee = (f) => !!f.expire && Date.parse(f.expire) < Date.now();
 const jLong = (j) => jMaj(jDt(j).toLocaleDateString('fr-FR',
   { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }));
 const fCouvre = (f, n) => f.debut && f.debut <= n && (f.fin == null || f.fin >= n);
@@ -324,6 +338,9 @@ function htmlDsp() {
     return `<div class="dsp-resa"><div><b>${ech(g.f.client || '—')}</b>
       <span>${ech(nomCat(g.cat))} — ${g.n} chambre${g.n > 1 ? 's' : ''}</span>
       <span class="quand">Arrivée ${jCourt(g.f.debut)} → Départ ${jCourt(jPlus(g.f.fin, 1))}</span></div>
+      ${att && g.f.expire ? `<span class="quand" style="color:${retenueTombee(g.f)
+        ? 'var(--err)' : 'var(--bronze-2)'}">${retenueTombee(g.f) ? 'retenue expirée'
+        : 'gardée jusqu\'à ' + heureDe(g.f.expire)}</span>` : ''}</div>
       <span class="etat ${att ? 'attend' : 'vif'}">${att ? 'En attente' : 'Confirmée'}</span></div>`;
   }).join('');
 
@@ -607,8 +624,19 @@ function rendreFiche(el, tr) {
       ${siennes.length ? `<span class="lb">Ce qui est posé sur cette chambre</span>
         ${siennes.map((f) => `<div class="dsp-resa" style="padding:10px 0">
           <div><b>${ech(f.client || f.motif || 'Fermeture')}</b>
-            <span class="quand">${ech(nuitsEnClair(f))}</span></div>
-          <button class="btn mince danger" data-rouvrir="${ech(f.id)}">Rouvrir</button>
+            <span class="quand">${ech(nuitsEnClair(f))}</span>
+            ${f.statut === 'attente' && f.expire ? `<span style="color:${
+              retenueTombee(f) ? 'var(--err)' : 'var(--bronze-2)'};font-size:12.5px">${
+              retenueTombee(f)
+                ? 'Retenue expirée : la chambre est redevenue disponible.'
+                : 'Demande venue du site — la chambre lui est gardée jusqu\'à '
+                  + heureDe(f.expire) + '.'}</span>` : ''}</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;flex:none">
+            ${f.statut === 'attente'
+              ? `<button class="btn mince" data-dsp-confirmer="${ech(f.id)}"
+                  >Confirmer</button>` : ''}
+            <button class="btn mince danger" data-rouvrir="${ech(f.id)}">Rouvrir</button>
+          </div>
         </div>`).join('')}` : `<p class="aide">Rien n'est posé sur cette chambre :
           elle compte à toutes les dates.</p>`}
 
@@ -684,6 +712,25 @@ async function enregistrerFiche() {
     if (err.message === 'session') return;
     dire('Impossible d’enregistrer. ' + (err.message || ''));
     rendre();
+  }
+}
+
+/** Une retenue devient une reservation : elle perd sa peremption, donc elle
+    ne se rouvrira plus toute seule. C'est le geste que la reception fait en
+    reconnaissant la demande arrivee sur son WhatsApp — la reference est la
+    meme des deux cotes. */
+async function confirmerRetenue(id) {
+  const f = (ETAT.fermetures || []).find((x) => x.id === id);
+  if (!f) return;
+  try {
+    await poserF({ id: f.id, cible: f.cible, debut: f.debut, fin: f.fin,
+      nature: 'client', client: f.client, motif: f.motif, statut: 'confirmee' });
+    rendreTiroir();
+    rendre();
+    notifier('Réservation de ' + (f.client || 'ce client') + ' confirmée');
+  } catch (err) {
+    if (err.message === 'session') return;
+    notifier('Impossible de confirmer. ' + (err.message || ''), true);
   }
 }
 
@@ -1030,6 +1077,7 @@ function clicDsp(e) {
   }
   if (t.id === 'dsp-enreg') { enregistrerTiroir(); return true; }
   if (t.id === 'dsp-fenreg') { enregistrerFiche(); return true; }
+  if ((b = q('[data-dsp-confirmer]'))) { confirmerRetenue(b.dataset.dspConfirmer); return true; }
   if ((b = q('[data-dsp-opt]')) && DSP.modal) { DSP.modal[b.dataset.dspOpt] = b.dataset.v; DSP.modal.erreur = ''; rendreModal(); return true; }
   if (q('[data-dsp-toutes]') && DSP.modal) {
     const siennes = ETAT.chambres.filter((c) => c.categorie === DSP.modal.cat).map((c) => c.id);

@@ -601,6 +601,42 @@ que c'est ce que le visiteur choisit. Dans le magasin de données, `chambres`
 désigne au contraire les chambres physiques. Dans `/admin`, `ETAT.categories`
 porte les catégories et `ETAT.chambres` les chambres.
 
+### Du site au calendrier : la retenue
+
+Jusqu'au 23 septembre, une demande faite sur le site **n'atteignait jamais le
+serveur**. Elle partait sur le téléphone de la réception, et si celle-ci ne la
+recopiait pas dans le calendrier, le site continuait d'annoncer la chambre
+libre : deux clients pouvaient demander la dernière.
+
+Le tunnel prévient désormais le serveur, qui **retient une chambre**.
+
+| | |
+|---|---|
+| Quelle chambre | la première libre de la catégorie, dans l'ordre où un humain lit les numéros — 2 avant 10. Le client choisit une catégorie, jamais un numéro. |
+| Combien de temps | **deux heures**, puis la retenue cesse de peser |
+| Ce qu'en voit le visiteur | rien de l'inventaire : ni le numéro, ni combien il en reste |
+| Si rien n'est libre | aucune retenue, et **le formulaire n'échoue pas** — la demande part quand même |
+| Si le serveur ne répond pas | idem. L'envoi ne l'attend pas, et le message part de toute façon |
+
+**La péremption est vérifiée à la lecture**, pas par un ménage nocturne — il
+n'y en a pas. Une chambre bloquée jusqu'au prochain déploiement serait une
+chambre invendable sans que personne ne sache pourquoi.
+
+Une retenue périmée **reste dans le magasin** : la demande a eu lieu, et
+l'effacer perdrait le nom du client et ses dates. Elle cesse simplement de
+peser, et l'écran le dit — « Retenue expirée : la chambre est redevenue
+disponible. »
+
+**La référence est la même des deux côtés.** La réception lit
+« EVN-EIMWJG » dans son WhatsApp et retrouve la même à côté du nom, dans le
+calendrier. Un clic sur **Confirmer** transforme la retenue en réservation :
+elle perd sa péremption et ne se rouvrira plus toute seule.
+
+⚠️ C'est la **seule route publique qui écrive**. Elle est donc bornée : douze
+demandes par minute et par adresse — seuil volontairement haut, le trafic
+mobile ivoirien partageant des IP par NAT opérateur. La péremption fait le
+reste : même un flot de fausses demandes se vide en deux heures.
+
 ### Ce que ça ne fait pas
 
 Deux clients peuvent réserver la même nuit à la seconde près sans que rien ne

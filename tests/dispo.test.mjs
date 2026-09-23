@@ -24,12 +24,16 @@ const handler = (await import('../site/api/admin.js')).default;
 
 let cookie = '';
 
-function appel(query, { methode = 'GET', body = null, avecCookie = true } = {}) {
+function appel(query, { methode = 'GET', body = null, avecCookie = true, ip } = {}) {
   const req = {
     method: methode,
     query,
     body,
-    headers: avecCookie && cookie ? { cookie } : {},
+    headers: Object.assign({},
+      avecCookie && cookie ? { cookie } : {},
+      /* Le debit de la route publique se compte par IP : sans adresse
+         distincte, les tests se bloqueraient les uns les autres. */
+      ip ? { 'x-forwarded-for': ip } : {}),
   };
   const out = { entetes: {} };
   const res = {
@@ -341,6 +345,140 @@ for (const [du, au, quoi] of [
   await retirer('fermeture', 'r1');
   await retirer('fermeture', 'r2');
   await retirer('chambre', ch);
+}
+
+// ── Une demande venue du site retient une chambre ──────────────────────────
+// C'est le chainon qui manquait : sans lui, un client demandait une chambre,
+// la demande partait sur le telephone de la reception, et le site continuait
+// de la compter libre. Deux clients pouvaient demander la derniere.
+{
+  const demande = (corps, ip) =>
+    appel({ a: 'demande' }, { methode: 'POST', body: corps, avecCookie: false,
+      ip: ip || '10.0.0.' + Math.floor(Math.random() * 250) });
+
+  // Une categorie neuve, pour ne rien devoir a ce qui precede.
+  const NUM = {};
+  for (const n of ['10', '2', '3']) {
+    const r = await poser('chambre', { numero: n, categorie: 'deluxe-baldaquin' });
+    NUM[n] = r.json.entree.id;
+  }
+
+  const r = await demande({ categorie: 'deluxe-baldaquin', du: '2027-11-10',
+    au: '2027-11-13', nom: 'M. Konan' });
+  verifie('une demande retient une chambre',
+    r.code === 200 && r.json.ok && r.json.retenue === true, r.json);
+
+  /* La retenue tombe sur la PREMIERE chambre dans l'ordre ou un humain lit :
+     2, puis 3, puis 10. Pas l'ordre de saisie. */
+  const t = await appel({ a: 'tout' });
+  const posee = t.json.donnees.fermetures.find((f) => f.client === 'M. Konan');
+  verifie('elle tombe sur la premiere chambre, lue comme un humain lit',
+    posee && posee.cible === NUM['2'], posee);
+  verifie('elle porte les bonnes nuits — depart le 13, donc derniere nuit le 12',
+    posee && posee.debut === '2027-11-10' && posee.fin === '2027-11-12', posee);
+  verifie('elle est en attente, et elle a une peremption',
+    posee && posee.statut === 'attente' && !!posee.expire, posee);
+
+  // Ce que le visiteur recoit ne dit rien de l'inventaire.
+  const texte = JSON.stringify(r.json);
+  verifie('la reponse ne dit ni le numero, ni combien il en reste',
+    !/numero|cible|"2"|chambres|libres/.test(texte), texte);
+
+  // Et la chambre est bien retenue : il n'en reste que deux sur trois.
+  const d = await dispo('2027-11-11', '2027-11-12', 'deluxe-baldaquin');
+  verifie('la chambre retenue ne compte plus comme libre',
+    etat(d, 'deluxe-baldaquin') === 'libre', d.json);
+
+  // Deux demandes de plus : la categorie doit finir complete.
+  await demande({ categorie: 'deluxe-baldaquin', du: '2027-11-10', au: '2027-11-13',
+    nom: 'Mme Ba' });
+  const d2 = await dispo('2027-11-11', '2027-11-12', 'deluxe-baldaquin');
+  verifie('deux demandes : il ne reste qu une chambre',
+    etat(d2, 'deluxe-baldaquin') === 'derniere', d2.json);
+
+  await demande({ categorie: 'deluxe-baldaquin', du: '2027-11-10', au: '2027-11-13',
+    nom: 'M. Cisse' });
+  const d3 = await dispo('2027-11-11', '2027-11-12', 'deluxe-baldaquin');
+  verifie('trois demandes : complet', etat(d3, 'deluxe-baldaquin') === 'complet', d3.json);
+
+  // La quatrieme ne retient rien, et le dit — sans faire echouer le formulaire.
+  const q = await demande({ categorie: 'deluxe-baldaquin', du: '2027-11-10',
+    au: '2027-11-13', nom: 'M. Tard' });
+  verifie('plus rien de libre : aucune retenue, mais la demande n echoue pas',
+    q.code === 200 && q.json.ok === true && q.json.retenue === false
+      && q.json.raison === 'complet', q.json);
+  const apres = await appel({ a: 'tout' });
+  verifie('et rien n a ete ecrit pour elle',
+    !apres.json.donnees.fermetures.some((f) => f.client === 'M. Tard'), 'ecrit');
+}
+
+// ── Une retenue perimee cesse de peser, mais reste visible ─────────────────
+{
+  const r = await poser('chambre', { numero: 'P1', categorie: 'mezzanine-superieure' });
+  const id = r.json.entree.id;
+  /* Une peremption dans le passe : c'est la demande de quelqu'un qui a
+     rempli le tunnel il y a trois heures et n'a jamais envoye son message. */
+  await poser('fermeture', { id: 'perimee', cible: id, debut: '2027-12-01',
+    fin: '2027-12-05', nature: 'client', statut: 'attente', client: 'M. Oublie',
+    expire: '2020-01-01T00:00' });
+
+  const d = await dispo('2027-12-02', '2027-12-03', 'mezzanine-superieure');
+  verifie('une retenue perimee ne ferme plus la chambre',
+    etat(d, 'mezzanine-superieure') === 'derniere', d.json);
+
+  const t = await appel({ a: 'tout' });
+  verifie('mais elle reste dans le magasin, avec le nom et les dates',
+    t.json.donnees.fermetures.some((f) => f.id === 'perimee' && f.client === 'M. Oublie'),
+    'perdue');
+
+  /* La meme, pas encore perimee, ferme bien. */
+  await poser('fermeture', { id: 'perimee', cible: id, debut: '2027-12-01',
+    fin: '2027-12-05', nature: 'client', statut: 'attente', client: 'M. Oublie',
+    expire: '2099-01-01T00:00' });
+  const e = await dispo('2027-12-02', '2027-12-03', 'mezzanine-superieure');
+  verifie('la meme retenue, encore valable, ferme la chambre',
+    etat(e, 'mezzanine-superieure') === 'complet', e.json);
+
+  /* Confirmee par la reception, elle n'expire plus. */
+  await poser('fermeture', { id: 'perimee', cible: id, debut: '2027-12-01',
+    fin: '2027-12-05', nature: 'client', statut: 'confirmee', client: 'M. Oublie' });
+  const c = await appel({ a: 'tout' });
+  const f = c.json.donnees.fermetures.find((x) => x.id === 'perimee');
+  verifie('confirmee, elle perd sa peremption', f && !f.expire, f);
+  const g = await dispo('2027-12-02', '2027-12-03', 'mezzanine-superieure');
+  verifie('et elle ferme toujours', etat(g, 'mezzanine-superieure') === 'complet', g.json);
+}
+
+// ── Ce que la route publique refuse ────────────────────────────────────────
+{
+  const demande = (corps, ip) =>
+    appel({ a: 'demande' }, { methode: 'POST', body: corps, avecCookie: false,
+      ip: ip || '10.1.0.' + Math.floor(Math.random() * 250) });
+
+  const g = await appel({ a: 'demande' }, { methode: 'GET', avecCookie: false, ip: '10.2.0.1' });
+  verifie('en lecture : refuse (405)', g.code === 405, g.json);
+
+  for (const [corps, quoi] of [
+    [{ categorie: 'chambre-standard', du: '2027-05-01', au: '2027-05-03' }, 'sans nom'],
+    [{ categorie: '', du: '2027-05-01', au: '2027-05-03', nom: 'X' }, 'sans categorie'],
+    [{ categorie: 'chambre-standard', du: '2027-05-03', au: '2027-05-01', nom: 'X' }, 'dates a l envers'],
+    [{ categorie: 'chambre-standard', du: '2027-05-01', au: '2027-05-01', nom: 'X' }, 'zero nuit'],
+  ]) {
+    const r = await demande(corps);
+    verifie(`${quoi} : rien retenu, et le formulaire n echoue pas`,
+      r.code === 200 && r.json.ok === true && r.json.retenue === false, r.json);
+  }
+
+  /* Le debit. Une route publique qui ECRIT doit etre bornee : sans cela,
+     quelques milliers d'appels condamnent tout l'hotel. La peremption fait
+     le reste — meme un flot se vide en deux heures. */
+  let refus = 0;
+  for (let i = 0; i < 20; i++) {
+    const r = await demande({ categorie: 'suite-anglaise', du: '2027-06-01',
+      au: '2027-06-02', nom: 'Rafale ' + i }, '10.9.9.9');
+    if (r.code === 429) refus++;
+  }
+  verifie('une rafale depuis une seule adresse finit par etre refusee', refus > 0, refus);
 }
 
 // ── La route publique reste publique, les ecritures non ────────────────────
