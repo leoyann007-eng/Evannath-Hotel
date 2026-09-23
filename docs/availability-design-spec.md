@@ -1,10 +1,31 @@
 # EVANNATH HOTEL — AVAILABILITY DESIGN SPECIFICATION
 
+> ## ⚠️ REMPLACÉE — ne plus s'y référer
+>
+> **Statut : périmée le 23 septembre 2026.** La direction a validé une
+> nouvelle maquette, `docs/availability-reference-v2.webp`, qui remplace
+> celle-ci. Ce document est conservé pour l'historique, et pour les règles
+> d'UX qui restent valables (sections 3 et suivantes) — mais **sa maquette,
+> sa navigation et ses valeurs ne font plus foi.**
+>
+> Ce qui change : les lignes du calendrier sont des **chambres** et non des
+> catégories, le panneau de droite est **permanent** au lieu d'un tiroir, et
+> l'écran gagne des filtres et une recherche.
+>
+> Ce qui ne doit être repris d'**aucune** des deux maquettes : leurs chiffres.
+> Elles montrent des catégories, des tarifs et des numéros de chambre
+> inventés. Les vraies catégories et les vrais tarifs vivent dans
+> `site/donnees/chambres.json` ; **les numéros de chambre, l'hôtel ne nous
+> les a pas encore donnés.**
+>
+> Corriger aussi, dans toute maquette : « au cœur d'Abidjan ». L'hôtel est à
+> **Assinie PK 19**, à environ 80 km.
+
 > **Version:** 1.0  
-> **Statut:** DESIGN VALIDÉ — SOURCE OF TRUTH  
+> **Statut:** REMPLACÉE  
 > **Page:** Disponibilités des chambres  
 > **Application:** Back-office Evannath Hotel  
-> **Référence visuelle:** `docs/availability-reference.png`
+> **Référence visuelle:** `docs/availability-reference.png` (périmée)
 
 ---
 

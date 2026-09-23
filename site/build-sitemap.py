@@ -50,8 +50,13 @@ print('donnees/images.json     %d photos' % len(_photos))
 # La liste des chambres, pour l'administration : une promotion s'applique a
 # des chambres precises, et l'interface doit pouvoir les proposer avec leur
 # tarif sans que personne ne les ressaisisse.
+#
+# `pax` vient avec : la fiche d'une chambre, dans l'administration, dit sa
+# capacite. Le type de lit n'y est PAS — une seule des sept categories le
+# declare dans ses `facts`, et inventer les six autres serait afficher a la
+# reception une information que l'hotel n'a jamais donnee.
 import _chambres
-_ch = [dict(slug=c['slug'], nom=c['nom'], prix=c['prix'])
+_ch = [dict(slug=c['slug'], nom=c['nom'], prix=c['prix'], pax=c['pax'])
        for c in _chambres.CHAMBRES]
 io.open('donnees/chambres.json', 'w', encoding='utf-8').write(
     json.dumps(_ch, ensure_ascii=False))

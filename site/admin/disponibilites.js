@@ -18,7 +18,8 @@
    appel, ech, $, AUJ, jourIso et FCFA.
    ───────────────────────────────────────────────────────────────────────── */
 const DSP = { vue: 'mois', focus: null, ouvertes: {}, tiroir: null, modal: null,
-              voirTout: false, seuil: 0.3, defiler: true, nbJours: 0 };
+              voirTout: false, seuil: 0.3, defiler: true, nbJours: 0,
+              f: { texte: '', cat: '', statut: '', libres: false } };
 
 /* Combien de colonnes de jour tiennent vraiment. La largeur du libelle et
    celle d'une colonne sont dans la feuille de style ; les redire ici serait
@@ -138,7 +139,31 @@ function detailSejour(e) {
   return (e.f ? e.f.motif : e.motif) || '';
 }
 
-/* ── Rendu du calendrier et de ses panneaux ─────────────────────────── */
+/* ── Le calendrier ────────────────────────────────────────────────────
+   LES LIGNES SONT DES CHAMBRES, pas des categories.
+
+   La maquette precedente rangeait les chambres sous leur categorie,
+   repliees derriere un « Details » : il fallait deux clics pour voir la
+   chambre 25, et on ne voyait jamais deux categories a la fois. Une
+   reception tient un cahier de numeros — on lui rend son cahier.
+
+   Les categories ne disparaissent pas pour autant : chaque ligne porte la
+   sienne, et le filtre du haut permet de s'y ramener.
+
+   CE QU'ON NE REPREND PAS DE LA MAQUETTE, et pourquoi :
+
+     - ses numeros de chambre (101, 102, 201...) : L'HOTEL NE NOUS LES A PAS
+       ENCORE DONNES. L'ecran part donc vide, et le dit.
+     - ses categories (Standard, Deluxe, Suite, Executive) et ses tarifs
+       (45 000 F) : les vraies sont dans donnees/chambres.json, sept
+       categories de 67 000 a 280 000 F.
+     - « 1 lit king size » : une seule de nos sept categories declare son
+       type de lit. Afficher les six autres serait inventer.
+     - l'etage : personne ne nous l'a donne non plus. La colonne n'apparait
+       que si au moins une chambre en porte un.
+     - le statut « Nettoyage » : c'est de la gouvernante, un autre metier et
+       un autre rythme. Une chambre restee sur « Nettoyage » depuis mardi
+       dernier se vend comme indisponible sans que personne ne l'ait decide. */
 function htmlDsp() {
   const cats = ETAT.categories || [], chambres = ETAT.chambres || [];
   const F = ETAT.fermetures || [], auj = AUJ();
@@ -146,13 +171,89 @@ function htmlDsp() {
   if (!cats.length) {
     return `<div class="carte" style="text-align:center;padding:48px">
       <p class="bloc-t" style="margin-bottom:6px">Aucune catégorie de chambre</p>
-      <p class="aide">Commencez par créer une catégorie pour gérer ses disponibilités.
-      Les catégories viennent du site : elles se déclarent dans <code>_chambres.py</code>.</p></div>`;
+      <p class="aide">Les catégories viennent du site : elles se déclarent dans
+      <code>_chambres.py</code>.</p></div>`;
   }
   const jours = joursDsp();
   const calc = calculerDisponibilites(cats, chambres, F, jours.concat([auj]), auj, DSP.seuil);
   const col = (j) => 'dsp-j' + (j === auj ? ' auj' : '');
+  const nomCat = (slug) => (cats.find((c) => c.slug === slug) || {}).nom || slug;
 
+  /* ── L'inventaire n'existe pas encore ─────────────────────────────── */
+  if (!chambres.length) {
+    return `<div class="carte dsp-vide">
+      <h2 class="bloc-t" style="margin-bottom:6px">Commencez par saisir vos chambres</h2>
+      <p class="aide" style="margin-bottom:22px">Le calendrier affiche une ligne par
+      chambre. Tant qu'aucune n'est saisie, <strong>le site n'annonce aucune
+      disponibilité</strong> : il redit à chaque visiteur que la réception confirme
+      sous 24 h. Ajoutez-les avec les numéros que vous leur donnez déjà — 25, B12,
+      Bungalow 3.</p>
+      <div class="dsp-cats">
+        ${cats.map((c) => `<div>
+          <div class="v">${vignette(c.slug)}</div>
+          <div style="flex:1;min-width:0">
+            <b>${ech(c.nom)}</b>
+            <span>${FCFA(c.prix)} / nuit · jusqu'à ${c.pax || '?'} personne${
+              (c.pax || 0) > 1 ? 's' : ''}</span>
+            <span class="rien">aucune chambre saisie</span>
+          </div>
+          <button class="btn mince" data-dsp-ajout="${ech(c.slug)}">Ajouter</button>
+        </div>`).join('')}
+      </div></div>`;
+  }
+
+  /* ── Les compteurs, pour cette nuit ───────────────────────────────── */
+  const idx = dspIndex(F, chambres);
+  const etatsAuj = chambres.map((ch) => dspEtat(ch, auj, idx, auj).k);
+  const combien = (k) => etatsAuj.filter((x) => x === k).length;
+  const CARTES = [
+    ['Total chambres', chambres.length, '', 'lit'],
+    ['Disponibles', combien('libre'), '#8FAE63', 'ok'],
+    ['Occupées', combien('occ'), '#86A9C9', 'qui'],
+    ['Réservées', combien('res'), '#E0A955', 'cal'],
+    ['Indisponibles', combien('hs') + combien('vente'), '#9C8B78', 'cle'],
+  ];
+
+  /* ── Le filtre ────────────────────────────────────────────────────── */
+  const f = DSP.f;
+  const texte = f.texte.trim().toLowerCase();
+  const retenues = chambres.filter((ch) => {
+    if (f.cat && ch.categorie !== f.cat) return false;
+    /* Le numero d'abord, toujours. La categorie seulement a partir de trois
+       lettres : « B » rendait six chambres sur sept, parce que « Chambre
+       Standard » contient un b. On cherche une chambre, pas une lettre. */
+    if (texte && !(String(ch.numero).toLowerCase().includes(texte)
+      || (texte.length >= 3 && nomCat(ch.categorie).toLowerCase().includes(texte)))) return false;
+    const k = dspEtat(ch, DSP.focus, idx, auj).k;
+    if (f.libres && k !== 'libre') return false;
+    if (f.statut && k !== f.statut) return false;
+    return true;
+  }).sort((a, b) => (a.categorie === b.categorie
+    ? parNum(a, b)
+    : cats.findIndex((c) => c.slug === a.categorie)
+      - cats.findIndex((c) => c.slug === b.categorie)));
+
+  const avecEtage = chambres.some((ch) => ch.etage);
+
+  const filtres = `<div class="carte dsp-filtres">
+    <input id="dsp-q" class="fl" placeholder="Rechercher une chambre…"
+      value="${ech(f.texte)}" aria-label="Rechercher une chambre">
+    <select id="dsp-fcat" aria-label="Catégorie">
+      <option value="">Toutes les catégories</option>
+      ${cats.map((c) => `<option value="${ech(c.slug)}" ${c.slug === f.cat ? 'selected' : ''}
+        >${ech(c.nom)}</option>`).join('')}
+    </select>
+    <select id="dsp-fstat" aria-label="Statut">
+      <option value="">Tous les statuts</option>
+      ${[['libre', 'Libre'], ['res', 'Réservée'], ['occ', 'Occupée'],
+         ['vente', 'Bloquée'], ['hs', 'Hors service']].map(([v, l]) =>
+        `<option value="${v}" ${v === f.statut ? 'selected' : ''}>${l}</option>`).join('')}
+    </select>
+    <label class="prise"><input type="checkbox" id="dsp-flibres" ${f.libres ? 'checked' : ''}>
+      Uniquement les disponibles</label>
+  </div>`;
+
+  /* ── La grille ────────────────────────────────────────────────────── */
   const tete = jours.map((j) => {
     const d = jDt(j);
     return `<div class="${col(j)} dsp-t" data-jour="${j}">
@@ -160,51 +261,31 @@ function htmlDsp() {
       <b>${d.getDate()}</b></div>`;
   }).join('');
 
-  const premiere = cats.findIndex((c) => chambres.some((ch) => ch.categorie === c.slug));
-  const lignes = cats.map((c, ci) => {
-    const siennes = chambres.filter((ch) => ch.categorie === c.slug).sort(parNum);
-    const t = calc.parCat[c.slug][auj];
-    const ouverte = (DSP.ouvertes[c.slug] ?? ci === premiere) && siennes.length > 0;
+  const lignes = retenues.map((ch) => {
     const cases = jours.map((j) => {
-      const x = calc.parCat[c.slug][j], [teinte, mot] = DTON[x.etat];
-      const aria = ech(c.nom) + ', ' + jLong(j) + ' : ' + (x.total
-        ? x.libres + ' sur ' + x.total + ' disponibles — ' + mot : 'aucune chambre saisie');
-      return `<div class="${col(j)}"><button class="dsp-case" style="--c:${teinte}"
-        data-dsp-cat="${ech(c.slug)}" data-nuit="${j}" aria-label="${aria}" title="${aria}"
-        ${x.total ? '' : 'disabled'}>${x.total ? x.libres + '/' + x.total + '<i></i>' : '—'}</button></div>`;
+      const e = calc.parChambre[ch.id][j], [teinte, mot] = DTON[e.k], det = detailSejour(e);
+      const aria = 'Chambre ' + ech(ch.numero) + ', ' + jLong(j) + ' : ' + mot
+        + (det ? ' — ' + ech(det) : '');
+      return `<div class="${col(j)}"><button class="dsp-b" style="--c:${teinte}"
+        data-dsp-ch="${ech(ch.id)}" data-nuit="${j}" aria-label="${aria}" title="${aria}">${mot}${
+        det && DSP.vue !== 'mois' ? '<small>' + ech(det) + '</small>' : ''}</button></div>`;
     }).join('');
-    const rangs = !ouverte ? '' : siennes.map((ch) => `<div class="dsp-l dsp-r">
-      <div class="dsp-g"><button class="dsp-num" data-dsp-fiche="${ech(ch.id)}"
-        aria-label="Chambre ${ech(ch.numero)} — voir et modifier">Chambre ${
-        ech(ch.numero)}</button>${ch.service === false
-        ? '<span class="aide" style="margin:0">hors service</span>' : ''}</div>
-      ${jours.map((j) => {
-        const e = calc.parChambre[ch.id][j], [teinte, mot] = DTON[e.k], det = detailSejour(e);
-        const aria = 'Chambre ' + ech(ch.numero) + ', ' + jLong(j) + ' : ' + mot
-          + (det ? ' — ' + ech(det) : '');
-        return `<div class="${col(j)}"><button class="dsp-b" style="--c:${teinte}"
-          data-dsp-ch="${ech(ch.id)}" data-nuit="${j}" aria-label="${aria}" title="${aria}">${mot}${
-          DSP.vue === 'jour' && det ? '<small>' + ech(det) + '</small>' : ''}</button></div>`;
-      }).join('')}</div>`).join('')
-      + `<div class="dsp-l dsp-r"><div class="dsp-g">
-          <button class="dsp-lien" style="padding:0" data-dsp-ajout="${ech(c.slug)}"
-            >+ Ajouter une chambre</button></div>
-          ${jours.map((j) => `<div class="${col(j)}"></div>`).join('')}</div>`;
-    return `<div class="dsp-bloc"><div class="dsp-l">
-      <div class="dsp-g dsp-cat">${vignette(c.slug)}<div style="flex:1;min-width:0">
-        <b class="nom">${ech(c.nom)}</b>
-        <span class="prix">À partir de ${FCFA(c.prix)} / nuit</span>
-        ${siennes.length ? `<div class="dsp-stats">
-            <div><b>${t.total}</b><span>Total</span></div>
-            <div><b>${t.reserves}</b><span>Occupées</span></div>
-            <div><b style="color:var(--palm)">${t.libres}</b><span>Disponibles</span></div>
-          </div>
-          <button class="dsp-lien" data-dsp-ouvrir="${ech(c.slug)}" aria-expanded="${ouverte}">${
-            ouverte ? 'Masquer ▴' : 'Détails ▾'}</button>`
-        : `<p class="aide" style="margin-top:6px">Aucune chambre saisie : le site
-            n'annonce rien pour cette catégorie.</p>`}
-      </div></div>${cases}</div>${rangs}</div>`;
+    return `<div class="dsp-l dsp-r">
+      <div class="dsp-g dsp-ch">
+        <div style="flex:1;min-width:0">
+          <button class="dsp-num" data-dsp-fiche="${ech(ch.id)}"
+            aria-label="Chambre ${ech(ch.numero)} — voir et modifier">${ech(ch.numero)}</button>
+          <span class="sc">${ech(nomCat(ch.categorie))}${ch.service === false
+            ? ' · hors service' : ''}</span>
+        </div>
+        ${avecEtage ? `<span class="et">${ech(ch.etage || '—')}</span>` : ''}
+      </div>${cases}</div>`;
   }).join('');
+
+  /* Les categories dont aucune chambre n'est saisie : le site n'en dit rien,
+     et c'est le trou le plus couteux — invisible dans une liste de chambres
+     qui n'existent pas. */
+  const manquantes = cats.filter((c) => !chambres.some((ch) => ch.categorie === c.slug));
 
   const mois = [];
   for (let i = -3; i <= 9; i++) {
@@ -215,47 +296,35 @@ function htmlDsp() {
   const optMois = mois.sort().map((m) => `<option value="${m}" ${m === DSP.focus.slice(0, 7)
     ? 'selected' : ''}>${jMaj(jDt(m + '-01').toLocaleDateString('fr-FR',
       { month: 'long', year: 'numeric' }))}</option>`).join('');
-  const vues = [['mois', 'Vue mois'], ['semaine', 'Vue semaine'], ['jour', 'Vue jour']]
+  const vues = [['mois', 'Mois'], ['semaine', 'Semaine'], ['jour', 'Jour']]
     .map(([v, l]) => `<button class="opt ${DSP.vue === v ? 'on' : ''}" data-dsp-vue="${v}"
       aria-pressed="${DSP.vue === v}">${l}</button>`).join('');
-  const periode = DSP.vue === 'semaine' ? 'Semaine du ' + jCourt(jours[0]) + ' au ' + jCourt(jours[6])
-    : DSP.vue === 'jour' ? jLong(DSP.focus)
+  const periode = DSP.vue === 'jour' ? jLong(DSP.focus)
     : 'Du ' + jCourt(jours[0]) + ' au ' + jCourt(jours[jours.length - 1]);
 
-  const apercu = cats.map((c) => {
-    const x = calc.parCat[c.slug][auj];
-    const pct = x.total ? Math.round(x.libres / x.total * 100) : 0;
-    return `<div><b>${ech(c.nom)}</b><span>${x.total ? x.libres + ' / ' + x.total
-      + ' disponibles' : 'Aucune chambre saisie'}</span>
-      <div class="dsp-jauge" style="--c:${DTON[x.etat][0]}"><div role="progressbar"
-        aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"
-        aria-label="${ech(c.nom)} : ${pct} % disponibles"><i style="width:${pct}%"></i></div>${pct} %</div></div>`;
-  }).join('');
-
-  const aujCats = cats.map((c) => calc.parCat[c.slug][auj]).filter((x) => x.total);
-  const nb = (f) => aujCats.filter(f).length;
-  const hs = chambres.filter((c) => c.service === false).length;
-
-  /* Les prochaines arrivées. Plusieurs chambres au même nom, aux mêmes dates
-     et dans la même catégorie font une seule réservation. */
+  /* Les prochaines arrivees. Plusieurs chambres au meme nom, aux memes dates
+     et dans la meme categorie font une seule reservation. */
   const groupes = {};
-  F.filter((f) => f.nature === 'client' && f.statut !== 'annulee' && f.debut >= auj).forEach((f) => {
-    const ch = chambres.find((c) => c.id === f.cible);
+  F.filter((x) => x.nature === 'client' && x.statut !== 'annulee' && x.debut >= auj).forEach((x) => {
+    const ch = chambres.find((c) => c.id === x.cible);
     if (!ch) return;
-    const k = [f.client, f.debut, f.fin, ch.categorie].join('|');
-    (groupes[k] = groupes[k] || { f, cat: ch.categorie, n: 0 }).n++;
+    const k = [x.client, x.debut, x.fin, ch.categorie].join('|');
+    (groupes[k] = groupes[k] || { f: x, cat: ch.categorie, n: 0 }).n++;
   });
   const toutes = Object.values(groupes).sort((a, b) => a.f.debut.localeCompare(b.f.debut));
   const resas = toutes.slice(0, DSP.voirTout ? 40 : 4).map((g) => {
     const att = g.f.statut === 'attente';
-    const cat = cats.find((c) => c.slug === g.cat);
     return `<div class="dsp-resa"><div><b>${ech(g.f.client || '—')}</b>
-      <span>${ech(cat ? cat.nom : g.cat)} — ${g.n} chambre${g.n > 1 ? 's' : ''}</span>
+      <span>${ech(nomCat(g.cat))} — ${g.n} chambre${g.n > 1 ? 's' : ''}</span>
       <span class="quand">Arrivée ${jCourt(g.f.debut)} → Départ ${jCourt(jPlus(g.f.fin, 1))}</span></div>
       <span class="etat ${att ? 'attend' : 'vif'}">${att ? 'En attente' : 'Confirmée'}</span></div>`;
   }).join('');
 
-  return `<div class="dsp"><div style="min-width:0">
+  return `<div class="dsp-chiffres-h">
+      ${CARTES.map(([l, n, c]) => `<div class="carte"${c ? ` style="--c:${c}"` : ''}>
+        <b>${c ? '<span class="pt"></span>' : ''}${n}</b><span>${l}</span></div>`).join('')}
+    </div>
+    ${filtres}
     <section class="dsp-cal v-${DSP.vue}" aria-label="Calendrier des disponibilités">
       <div class="dsp-barre">
         <div class="dsp-nav">
@@ -267,62 +336,49 @@ function htmlDsp() {
         <div class="dsp-vues" role="group" aria-label="Vue du calendrier">${vues}</div>
       </div>
       <div class="dsp-defil" id="dsp-defil">
-        <div class="dsp-l dsp-tete"><div class="dsp-g"><span class="lb" style="margin:0">
-          Catégorie / Chambre</span></div>${tete}</div>
-        ${lignes}
+        <div class="dsp-l dsp-tete"><div class="dsp-g dsp-ch">
+          <span class="lb" style="margin:0;flex:1">Chambre / Catégorie</span>
+          ${avecEtage ? '<span class="lb" style="margin:0">Étage</span>' : ''}</div>${tete}</div>
+        ${lignes || `<div class="dsp-l dsp-r"><div class="dsp-g" style="flex:1;max-width:none">
+          <p class="aide" style="margin:0">Aucune chambre ne correspond à ce filtre.</p></div></div>`}
+      </div>
+      <div class="dsp-pied">
+        ${cats.map((c) => `<button class="dsp-lien" data-dsp-ajout="${ech(c.slug)}"
+          >+ ${ech(c.nom)}</button>`).join('')}
       </div>
     </section>
-    <div class="dsp-bas">
+    ${manquantes.length ? `<div class="alerte ambre" style="margin-top:18px">
+      <b>${manquantes.length} catégorie${manquantes.length > 1 ? 's' : ''} sans aucune chambre saisie</b>
+      <span>${manquantes.map((c) => ech(c.nom)).join(', ')} — le site n'annonce rien
+      pour ${manquantes.length > 1 ? 'ces catégories' : 'cette catégorie'} et redit que
+      la réception confirme sous 24 h.</span></div>` : ''}
+    <div class="dsp-bas" style="margin-top:20px">
       <section class="carte">
-        <h2 class="bloc-t" style="margin-bottom:2px">Vue d'ensemble rapide</h2>
-        <p class="aide" style="margin:0 0 16px">État de l'occupation pour aujourd'hui</p>
-        <div class="dsp-apercu">${apercu}</div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline">
+          <h2 class="bloc-t" style="margin-bottom:8px">Prochaines réservations</h2>
+          ${toutes.length > 4 ? `<button class="dsp-lien" style="padding:0" data-dsp-voirtout>${
+            DSP.voirTout ? 'Réduire' : 'Voir tout (' + toutes.length + ')'}</button>` : ''}
+        </div>
+        ${resas || '<p class="aide" style="padding:10px 0 4px">Aucune réservation à venir</p>'}
       </section>
       <section class="carte">
-        <h2 class="bloc-t">Statut des chambres</h2>
+        <h2 class="bloc-t">Ce que veut dire chaque couleur</h2>
         <ul class="dsp-legende">
-          <li><span class="pt" style="--c:#8FAE63"></span>Disponible</li>
-          <li><span class="pt" style="--c:#E0A955"></span>Peu de chambres
-            <span class="aide" style="margin:0">— ${Math.round(DSP.seuil * 100)} % ou moins</span></li>
-          <li><span class="pt" style="--c:#E08A7B"></span>Complet</li>
+          <li><span class="pt" style="--c:#8FAE63"></span>Libre</li>
+          <li><span class="pt" style="--c:#E0A955"></span>Réservée — le client arrive</li>
+          <li><span class="pt" style="--c:#86A9C9"></span>Occupée — le client est là</li>
+          <li><span class="pt" style="--c:#E08A7B"></span>Bloquée à la vente</li>
           <li><span class="pt" style="--c:#9C8B78"></span>Hors service</li>
         </ul>
-        <div class="dsp-total"><span>Total des chambres</span><b>${chambres.length}</b></div>
-        <p class="aide" style="margin-top:2px">${hs ? 'dont ' + hs + ' hors service jusqu’à nouvel ordre'
-          : 'toutes en service'}</p>
         <p class="aide" style="margin-top:16px;padding-top:14px;border-top:1px solid var(--line)">
           <b style="color:var(--cream);font-weight:600">Ce que le client lit sur le site</b><br>
           « Disponible à ces dates » s'il reste au moins deux chambres,
           « Dernière chambre à ces dates » s'il n'en reste qu'une,
           « Complet à ces dates » s'il n'en reste aucune. Tant qu'aucune chambre
           n'est saisie dans une catégorie, le site ne promet rien :
-          « Disponibilité confirmée sous 24 h ».</p>
+          « Disponibilité confirmée sous 24 h ».</p>
       </section>
-    </div>
-  </div>
-  <div class="dsp-cote">
-    <section class="carte">
-      <h2 class="bloc-t">Aujourd'hui — ${jDt(auj).toLocaleDateString('fr-FR',
-        { day: 'numeric', month: 'short', year: 'numeric' })}</h2>
-      <div class="dsp-auj">
-        <div><b><span class="pt" style="--c:#8FAE63;margin-right:8px;vertical-align:4px"></span>${
-          nb((x) => x.etat === 'dispo')}</b><span>Disponibles</span></div>
-        <div><b><span class="pt" style="--c:#E0A955;margin-right:8px;vertical-align:4px"></span>${
-          nb((x) => x.etat === 'faible')}</b><span>Peu de chambres</span></div>
-        <div><b><span class="pt" style="--c:#E08A7B;margin-right:8px;vertical-align:4px"></span>${
-          nb((x) => x.etat === 'complet' || x.etat === 'hs')}</b><span>Complet</span></div>
-      </div>
-      <p class="aide" style="margin-top:14px">Catégories, selon les chambres libres cette nuit.</p>
-    </section>
-    <section class="carte">
-      <div style="display:flex;justify-content:space-between;align-items:baseline">
-        <h2 class="bloc-t" style="margin-bottom:8px">Prochaines réservations</h2>
-        ${toutes.length > 4 ? `<button class="dsp-lien" style="padding:0" data-dsp-voirtout>${
-          DSP.voirTout ? 'Réduire' : 'Voir tout (' + toutes.length + ')'}</button>` : ''}
-      </div>
-      ${resas || '<p class="aide" style="padding:10px 0 4px">Aucune réservation à venir</p>'}
-    </section>
-  </div></div>`;
+    </div>`;
 }
 
 function rendreDsp() {
@@ -979,6 +1035,16 @@ function clicDsp(e) {
 }
 
 document.addEventListener('input', (e) => {
+  /* La recherche redessine a chaque frappe, mais le champ est recree par le
+     rendu : on lui rend le curseur, sinon on tape une lettre et on perd le
+     focus. */
+  if (e.target.id === 'dsp-q') {
+    DSP.f.texte = e.target.value;
+    rendreDsp();
+    const c = $('#dsp-q');
+    if (c) { c.focus(); c.setSelectionRange(c.value.length, c.value.length); }
+    return;
+  }
   if (e.target.id === 'dsp-com' && DSP.tiroir) DSP.tiroir.commentaire = e.target.value;
   const fc = e.target.dataset && e.target.dataset.dspFchamp;
   if (fc && DSP.tiroir) { DSP.tiroir[fc] = e.target.value; DSP.tiroir.erreur = ''; }
@@ -987,6 +1053,9 @@ document.addEventListener('input', (e) => {
 });
 document.addEventListener('change', (e) => {
   const t = e.target;
+  if (t.id === 'dsp-fcat') { DSP.f.cat = t.value; return rendreDsp(); }
+  if (t.id === 'dsp-fstat') { DSP.f.statut = t.value; return rendreDsp(); }
+  if (t.id === 'dsp-flibres') { DSP.f.libres = t.checked; return rendreDsp(); }
   if (t.id === 'dsp-mois') {
     const v = t.value, auj = AUJ();
     return allerDsp(v === auj.slice(0, 7) ? auj : v + '-01');
