@@ -637,6 +637,56 @@ demandes par minute et par adresse — seuil volontairement haut, le trafic
 mobile ivoirien partageant des IP par NAT opérateur. La péremption fait le
 reste : même un flot de fausses demandes se vide en deux heures.
 
+### Le client est prévenu quand la réception confirme
+
+Jusqu'au 23 septembre, un client qui demandait une chambre n'avait que sa
+référence. Rien ne lui disait que sa demande était acceptée : c'était à la
+réception de le rappeler, à la main, et si elle oubliait il restait sans
+nouvelles.
+
+Le passage d'une retenue de **« en attente » à « confirmée »** déclenche
+désormais un e-mail au client. Il est envoyé **après l'écriture** — une
+confirmation enregistrée vaut mieux qu'un e-mail parti pour une réservation
+qu'on n'a pas su écrire.
+
+**Son résultat remonte toujours**, et l'écran le dit :
+
+| | Ce que la réception lit |
+|---|---|
+| `envoye` | « le client est prévenu par e-mail » |
+| `sans-adresse` | « aucune adresse : prévenez-le vous-même » |
+| `non-configure` | « l'envoi d'e-mails n'est pas encore branché » |
+| `refuse` · `echec` | « l'e-mail n'est pas parti : prévenez-le vous-même » |
+
+Un e-mail qui échoue en silence, c'est un client que personne ne prévient
+pendant que la réception croit le contraire. Les quatre cas sortent donc en
+**alerte**, pas en message vert.
+
+**Ce que l'e-mail ne dit pas, et pourquoi :**
+
+- **ni montant, ni acompte, ni conditions d'annulation.** Le site affiche
+  « acompte de 30 % » et « annulation gratuite jusqu'à 48 h » — deux valeurs
+  plausibles **que j'ai écrites**, que l'hôtel n'a jamais validées. Les
+  répéter dans un e-mail de confirmation en ferait un engagement écrit.
+- **ni numéro de chambre.** Le client a demandé une catégorie ; la chambre
+  retenue peut changer d'ici son arrivée.
+
+Il dit donc : c'est confirmé, la catégorie, les dates, la référence, et que
+la réception recontacte pour le règlement.
+
+**Pour l'activer**, deux variables chez Vercel :
+
+| | |
+|---|---|
+| `RESEND_API_KEY` | la clé Resend |
+| `MAIL_EXP` | l'expéditeur, **vérifié chez Resend** — donc une adresse du domaine de l'hôtel |
+| `MAIL_DEST` | facultatif : l'adresse en réponse |
+
+Tant qu'elles manquent, tout le reste fonctionne et l'écran annonce
+`non-configure`. **Ce qui bloque n'est pas le code, c'est le domaine** :
+Resend exige un expéditeur vérifié, donc `evannathhotel.com`, donc la
+signature.
+
 ### Ce que ça ne fait pas
 
 Deux clients peuvent réserver la même nuit à la seconde près sans que rien ne

@@ -782,11 +782,24 @@ async function confirmerRetenue(id) {
   const f = (ETAT.fermetures || []).find((x) => x.id === id);
   if (!f) return;
   try {
-    await poserF({ id: f.id, cible: f.cible, debut: f.debut, fin: f.fin,
-      nature: 'client', client: f.client, motif: f.motif, statut: 'confirmee' });
+    const e = await poserF({ id: f.id, cible: f.cible, debut: f.debut, fin: f.fin,
+      nature: 'client', client: f.client, motif: f.motif,
+      courriel: f.courriel, statut: 'confirmee' });
     rendreTiroir();
     rendre();
-    notifier('Réservation de ' + (f.client || 'ce client') + ' confirmée');
+    /* Ce que le client a recu, ou pas. Une confirmation qui reussit pendant
+       que le courriel echoue en silence, c'est un client que personne ne
+       previent — et une reception qui croit le contraire. */
+    const dit = {
+      envoye: ' — le client est prévenu par e-mail',
+      'sans-adresse': ' — aucune adresse : prévenez-le vous-même',
+      'non-configure': " — l'envoi d'e-mails n'est pas encore branché :"
+        + ' prévenez-le vous-même',
+      refuse: " — l'e-mail a été refusé : prévenez-le vous-même",
+      echec: " — l'e-mail n'est pas parti : prévenez-le vous-même",
+    }[e.__courriel] || '';
+    notifier('Réservation de ' + (f.client || 'ce client') + ' confirmée' + dit,
+      e.__courriel !== 'envoye' && e.__courriel !== undefined);
   } catch (err) {
     if (err.message === 'session') return;
     notifier('Impossible de confirmer. ' + (err.message || ''), true);
@@ -821,6 +834,9 @@ async function poserF(f) {
   const r = await appel('enregistrer', { type: 'fermeture', entree });
   if (!r.ok) throw new Error(r.message || 'Échec de l’enregistrement.');
   ETAT.fermetures = (ETAT.fermetures || []).filter((x) => x.id !== r.entree.id).concat([r.entree]);
+  /* `courriel` ne remonte que sur une confirmation. On le colle a l'entree
+     pour que l'appelant puisse le dire — voir confirmerRetenue(). */
+  if (r.courriel) r.entree.__courriel = r.courriel;
   return r.entree;
 }
 async function oterF(id) {

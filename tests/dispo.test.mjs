@@ -481,6 +481,78 @@ for (const [du, au, quoi] of [
   verifie('une rafale depuis une seule adresse finit par etre refusee', refus > 0, refus);
 }
 
+// ── L'e-mail au client, quand la reception confirme ───────────────────────
+// Jusqu'ici le client n'avait que sa reference, et personne ne le prevenait.
+{
+  const demande = (corps) =>
+    appel({ a: 'demande' }, { methode: 'POST', body: corps, avecCookie: false,
+      ip: '10.5.0.' + Math.floor(Math.random() * 250) });
+
+  const r0 = await poser('chambre', { numero: 'C9', categorie: 'categorie-essai-mail' });
+  const ch = r0.json.entree.id;
+
+  const d = await demande({ categorie: 'categorie-essai-mail', du: '2028-03-10',
+    au: '2028-03-12', nom: 'Mme Adjoua', courriel: 'adjoua@exemple.com' });
+  verifie('la demande accepte une adresse', d.json.retenue === true, d.json);
+
+  const t = await appel({ a: 'tout' });
+  const f = t.json.donnees.fermetures.find((x) => x.client === 'Mme Adjoua');
+  verifie("l'adresse est conservee", f && f.courriel === 'adjoua@exemple.com', f);
+
+  /* Elle ne doit sortir par AUCUNE route publique. */
+  const pub = await dispo('2028-03-10', '2028-03-11', 'categorie-essai-mail');
+  verifie("l'adresse ne sort pas de la route publique",
+    !/adjoua|courriel/.test(JSON.stringify(pub.json)), pub.json);
+
+  /* Sans cle Resend, l'envoi ne peut pas se faire — et il le DIT. Une
+     confirmation qui reussit pendant que le courriel echoue en silence, c'est
+     un client que personne ne previent. */
+  delete process.env.RESEND_API_KEY;
+  const c = await poser('fermeture', { id: f.id, cible: f.cible, debut: f.debut,
+    fin: f.fin, nature: 'client', client: f.client, courriel: f.courriel,
+    statut: 'confirmee' });
+  verifie('la confirmation reussit meme sans envoi possible', c.code === 200, c.json);
+  verifie("et elle dit pourquoi le client n'a pas ete prevenu",
+    c.json.courriel === 'non-configure', c.json);
+
+  /* Une reservation sans adresse — celles que la reception saisit elle-meme. */
+  const r1 = await poser('chambre', { numero: 'C8', categorie: 'categorie-essai-mail' });
+  const s1 = await poser('fermeture', { id: 'sans-mail', cible: r1.json.entree.id,
+    debut: '2028-04-01', fin: '2028-04-02', nature: 'client', client: 'M. Sans',
+    statut: 'confirmee' });
+  verifie('sans adresse : la reception est invitee a prevenir elle-meme',
+    s1.json.courriel === 'sans-adresse', s1.json);
+
+  /* Reenregistrer une reservation DEJA confirmee ne renvoie pas un second
+     courriel : le client recevrait deux fois la meme chose a chaque
+     modification. */
+  const re = await poser('fermeture', { id: f.id, cible: f.cible, debut: f.debut,
+    fin: f.fin, nature: 'client', client: f.client, courriel: f.courriel,
+    statut: 'confirmee' });
+  verifie('une confirmation deja faite ne renvoie pas de courriel',
+    re.json.courriel === undefined, re.json);
+
+  /* Une adresse de travers n'est pas conservee : on n'ecrirait nulle part. */
+  const mauvaise = await poser('fermeture', { id: 'mauvaise', cible: f.cible,
+    debut: '2028-05-01', fin: '2028-05-02', nature: 'client', client: 'X',
+    courriel: 'pas-une-adresse', statut: 'attente' });
+  verifie('une adresse illisible est ecartee',
+    mauvaise.json.entree.courriel === '', mauvaise.json);
+
+  /* Une fermeture technique ne declenche rien. */
+  const tech = await poser('fermeture', { id: 'tech', cible: f.cible,
+    debut: '2028-06-01', fin: '2028-06-02', nature: 'vente', motif: 'travaux' });
+  verifie('une fermeture technique n envoie rien',
+    tech.json.courriel === undefined, tech.json);
+
+  await retirer('fermeture', f.id);
+  await retirer('fermeture', 'sans-mail');
+  await retirer('fermeture', 'mauvaise');
+  await retirer('fermeture', 'tech');
+  await retirer('chambre', ch);
+  await retirer('chambre', r1.json.entree.id);
+}
+
 // ── La route publique reste publique, les ecritures non ────────────────────
 {
   const r = await appel({ a: 'dispo', du: '2027-09-01', au: '2027-09-03' },

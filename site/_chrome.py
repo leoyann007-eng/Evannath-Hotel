@@ -754,7 +754,10 @@ var EVN = {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             categorie: o.retenue.categorie, du: o.retenue.du,
-            au: o.retenue.au, nom: o.retenue.nom, reference: ref })
+            au: o.retenue.au, nom: o.retenue.nom,
+            /* L'adresse sert a une seule chose : prevenir le client quand la
+               reception confirme. Elle ne ressort par aucune route publique. */
+            courriel: o.retenue.courriel, reference: ref })
         }).catch(function () {});
       } catch (e) { /* le formulaire continue */ }
     }

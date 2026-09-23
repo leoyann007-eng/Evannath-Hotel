@@ -23,6 +23,15 @@
 
 const crypto = require('crypto');
 
+/* Les categories, telles que le site les vend. On les lit au lieu de les
+   recopier : le courriel de confirmation doit dire « Chambre Standard », pas
+   « chambre-standard », et un nom recopie ici divergerait au premier
+   renommage. Le require est statique, donc Vercel embarque le fichier. */
+let CATEGORIES = [];
+try { CATEGORIES = require('../donnees/chambres.json'); } catch (e) { /* le slug fera */ }
+const nomDeCategorie = (slug) =>
+  (CATEGORIES.find((c) => c && c.slug === slug) || {}).nom || slug;
+
 /* La version du deploiement. Vercel la fournit ; en local elle est fixee au
    demarrage du serveur, ce qui suffit : redemarrer simule un deploiement.
 
@@ -340,6 +349,8 @@ function collection(type) {
  * 24, du 25 et du 26. Un sejour du 24 au 26 occupe les nuits du 24 et du
  * 25 — pas celle du 26, le client part ce matin-la. */
 
+const courrielValide = (v) => /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(String(v || ''));
+
 /** La veille d'un jour. On passe par midi UTC : a minuit, un decalage
     d'une heure fait changer de date, et la nuit se decalerait d'un jour. */
 function veille(j) {
@@ -429,6 +440,10 @@ function nettoyerFermeture(e) {
        fermees — rien d'invente ne doit s'afficher. */
     nature: ['client', 'hors-service', 'vente'].includes(e.nature) ? e.nature : '',
     client: propre(e.client, 60),
+    /* L'adresse du client, pour le prevenir quand la reception confirme.
+       Elle ne sort JAMAIS par la route publique — voir a=dispo, qui ne rend
+       que des verdicts. Seule l'administration la voit. */
+    courriel: courrielValide(propre(e.courriel, 160)) ? propre(e.courriel, 160) : '',
     statut: ['confirmee', 'attente', 'annulee', 'terminee'].includes(e.statut)
       ? e.statut : '',
     /* L'instant ou une retenue cesse de bloquer. Il n'existe que pour les
@@ -626,6 +641,76 @@ function nettoyer(e, type) {
   return { objet: o, manque };
 }
 
+/* ── L'e-mail de confirmation au client ────────────────────────────────
+   Le meme fournisseur que api/envoyer.js, mais un autre destinataire et un
+   autre texte : celui-la part a l'hotel, celui-ci au client. On ne partage
+   que dix lignes d'appel HTTP, et un module partage dans /api deviendrait
+   une fonction servie par Vercel.
+
+   Il rend TOUJOURS une raison. Une confirmation qui reussit pendant que le
+   courriel echoue en silence, c'est un client qui n'est prevenu par
+   personne — et la reception qui croit que si. */
+async function courrielAuClient(f, nomCategorie) {
+  if (!f.courriel) return 'sans-adresse';
+  const cle = process.env.RESEND_API_KEY;
+  const exp = process.env.MAIL_EXP;
+  if (!cle || !exp) return 'non-configure';
+
+  const d = (j) => {
+    try {
+      return new Date(j + 'T12:00:00Z').toLocaleDateString('fr-FR',
+        { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    } catch (e) { return j; }
+  };
+  /* Les nuits se recomptent en arrivee/depart : le client a demande a
+     partir le lendemain de sa derniere nuit. */
+  const depart = (() => {
+    const x = new Date(f.fin + 'T12:00:00Z');
+    x.setUTCDate(x.getUTCDate() + 1);
+    return x.toISOString().slice(0, 10);
+  })();
+
+  const lignes = [
+    ['Catégorie', nomCategorie],
+    ['Arrivée', d(f.debut)],
+    ['Départ', d(depart)],
+  ];
+  if (f.motif) lignes.push(['Référence', f.motif]);
+
+  const html = `<div style="font:400 15px/1.6 Georgia,serif;color:#1b1b1b;max-width:520px">
+    <p>Bonjour ${echappe(f.client)},</p>
+    <p><strong>Votre réservation à l'Hôtel Evannath est confirmée.</strong></p>
+    <table style="border-collapse:collapse;margin:18px 0">${lignes.map(
+      ([k, v]) => `<tr><td style="padding:6px 18px 6px 0;color:#8a7d6c;white-space:nowrap">${k}</td>`
+        + `<td style="padding:6px 0">${echappe(v)}</td></tr>`).join('')}</table>
+    <p>La réception vous recontacte pour les modalités de règlement.</p>
+    <p style="color:#8a7d6c;font-size:13.5px">Hôtel Evannath — Assinie PK 19,
+      Côte d'Ivoire<br>Pour toute question, répondez simplement à ce message.</p>
+  </div>`;
+
+  try {
+    const r = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${cle}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        from: `Hôtel Evannath <${exp}>`,
+        to: [f.courriel],
+        reply_to: process.env.MAIL_DEST || undefined,
+        subject: "Votre réservation à l'Hôtel Evannath est confirmée"
+          + (f.motif ? ' — ' + f.motif : ''),
+        html,
+      }),
+    });
+    return r.ok ? 'envoye' : 'refuse';
+  } catch (e) {
+    return 'echec';
+  }
+}
+
+const echappe = (v) => String(v == null ? '' : v)
+  .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+  .replace(/"/g, '&quot;');
+
 // ── Reponses ───────────────────────────────────────────────────────────────
 const json = (res, code, corps) => {
   res.setHeader('Cache-Control', 'no-store');
@@ -753,6 +838,7 @@ module.exports = async function handler(req, res) {
     const entree = nettoyerFermeture({
       cible: ch.id, debut: du, fin: derniere,
       nature: 'client', statut: 'attente', client: nom,
+      courriel: propre(corps.courriel, 160),
       expire: new Date(Date.now() + RETENUE_MINUTES * 60000).toISOString().slice(0, 16),
       motif: propre(corps.reference, 40),
     }).objet;
@@ -899,10 +985,28 @@ module.exports = async function handler(req, res) {
       }
     }
     const i = d[type].findIndex((x) => x.id === objet.id);
+    /* Une retenue qui passe de « attente » a « confirmee » : c'est LE moment
+       ou le client doit apprendre que sa demande est acceptee. Avant, il
+       n'avait que sa reference, et personne ne le prevenait. */
+    const avant = i >= 0 ? d[type][i] : null;
+    const aConfirmer = corps.type === 'fermeture' && objet.nature === 'client'
+      && objet.statut === 'confirmee'
+      && (!avant || avant.statut !== 'confirmee');
     if (i >= 0) d[type][i] = objet; else d[type].push(objet);
     const w = await ecrire(d);
     if (!w.ok) return json(res, 502, { ok: false, message: w.message });
-    return json(res, 200, { ok: true, entree: objet });
+
+    /* L'envoi vient APRES l'ecriture : une confirmation enregistree vaut
+       mieux qu'un courriel parti pour une reservation qu'on n'a pas su
+       ecrire. Et son resultat remonte toujours — un courriel qui echoue en
+       silence, c'est un client que personne ne previent pendant que la
+       reception croit le contraire. */
+    let courriel;
+    if (aConfirmer) {
+      const ch = (d.chambres || []).find((x) => x.id === objet.cible);
+      courriel = await courrielAuClient(objet, nomDeCategorie(ch && ch.categorie));
+    }
+    return json(res, 200, { ok: true, entree: objet, courriel });
   }
 
   if (action === 'supprimer') {

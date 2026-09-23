@@ -542,7 +542,8 @@ document.getElementById('pay').onclick=function(){
     /* Ce qu'il faut au serveur pour retenir une chambre : la CATEGORIE
        choisie (le client ne choisit jamais un numero), les dates brutes, et
        le nom. Le reste du message ne l'interesse pas. */
-    retenue:{categorie:cat.value, du:d1.value, au:d2.value, nom:d.nom},
+    retenue:{categorie:cat.value, du:d1.value, au:d2.value, nom:d.nom,
+             courriel:d.email},
     bouton:document.getElementById('pay'),
     secours:document.getElementById('sec'),
     erreur:document.getElementById('err'),
