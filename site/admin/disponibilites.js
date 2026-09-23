@@ -39,10 +39,12 @@ function ajusterFenetre() {
   DSP.nbJours = n;
   return true;
 }
-const DSP_IMG = { 'chambre-standard': 'r-standard-640', 'deluxe-baldaquin': 'gal-ch-wax-t360',
-  'deluxe-superieure': 'g-chambre-t', 'suite-anglaise': 'gal-ch-salon-t360',
-  'chambre-mezzanine': 'r-mezzanine-640', 'mezzanine-superieure': 'r-mezz2-640',
-  'suite-arabe': 'sa-chambre2-640' };
+/* La vignette d'une categorie vient de donnees/chambres.json, donc de
+   _chambres.py : c'est la premiere photo que le site montre sur sa fiche.
+   La carte ecrite a la main qu'il y avait ici se trompait sur SIX categories
+   sur sept — elle donnait a « Deluxe · lits a baldaquin » une photo de
+   textiles wax, qui est celle de la Deluxe Superieure, et intervertissait
+   les deux Mezzanines. Une carte recopiee diverge ; celle-ci se deduit. */
 const DTON = { dispo: ['#8FAE63', 'Disponible'], faible: ['#E0A955', 'Peu de chambres'],
   complet: ['#E08A7B', 'Complet'], hs: ['#9C8B78', 'Hors service'],
   inconnu: ['#9C8B78', 'Aucune chambre saisie'], libre: ['#8FAE63', 'Disponible'],
@@ -128,8 +130,12 @@ function joursDsp() {
   return o;
 }
 
-const vignette = (slug) => DSP_IMG[slug]
-  ? `<img class="vig" src="/img/opt/${DSP_IMG[slug]}.jpg" alt="">` : '<div class="vig"></div>';
+const vignette = (slug) => {
+  const c = (ETAT.categories || []).find((x) => x.slug === slug);
+  return c && c.photo
+    ? `<img class="vig" src="/img/opt/${c.photo}.jpg" alt="" loading="lazy">`
+    : '<div class="vig"></div>';
+};
 
 function detailSejour(e) {
   if (e.f && fClient(e.f)) {
@@ -187,7 +193,8 @@ function htmlDsp() {
       chambre. Tant qu'aucune n'est saisie, <strong>le site n'annonce aucune
       disponibilité</strong> : il redit à chaque visiteur que la réception confirme
       sous 24 h. Ajoutez-les avec les numéros que vous leur donnez déjà — 25, B12,
-      Bungalow 3.</p>
+      Bungalow 3.${ETAT.annoncees ? ` Votre site annonce <strong>${ETAT.annoncees}
+      chambres et suites</strong> : c'est le compte à atteindre.` : ''}</p>
       <div class="dsp-cats">
         ${cats.map((c) => `<div>
           <div class="v">${vignette(c.slug)}</div>

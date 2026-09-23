@@ -7,7 +7,7 @@ exclues du sitemap : elles n'ont rien a faire dans l'index de Google.
 """
 import io, os, glob, datetime, sys
 sys.path.insert(0, '.')
-from _chrome import SITE, PROSPECTION
+from _chrome import SITE, PROSPECTION, CHAMBRES_ANNONCEES
 
 # Priorite editoriale : ce que l'hotel veut voir remonter en premier.
 PRIORITE = {
@@ -56,11 +56,28 @@ print('donnees/images.json     %d photos' % len(_photos))
 # declare dans ses `facts`, et inventer les six autres serait afficher a la
 # reception une information que l'hotel n'a jamais donnee.
 import _chambres
-_ch = [dict(slug=c['slug'], nom=c['nom'], prix=c['prix'], pax=c['pax'])
+# `photo` : la PREMIERE photo declaree pour la categorie, celle que le site
+# montre en tete de sa fiche. La carte ecrite a la main dans le calendrier
+# se trompait sur six categories sur sept — elle donnait a « Deluxe · lits a
+# baldaquin » une photo de textiles wax, qui est celle de la Deluxe
+# Superieure, et intervertissait les deux Mezzanines. Une carte recopiee
+# diverge ; celle-ci se deduit.
+def _vignette(c):
+    nom = c['photos'][0][0]
+    return nom + '-640' if os.path.exists('img/opt/%s-640.jpg' % nom) else nom
+
+_ch = [dict(slug=c['slug'], nom=c['nom'], prix=c['prix'], pax=c['pax'],
+            photo=_vignette(c))
        for c in _chambres.CHAMBRES]
 io.open('donnees/chambres.json', 'w', encoding='utf-8').write(
     json.dumps(_ch, ensure_ascii=False))
 print('donnees/chambres.json   %d chambres' % len(_ch))
+
+# Ce que le site annonce, pour que l'administration puisse le comparer a ce
+# que la reception a reellement saisi.
+io.open('donnees/hotel.json', 'w', encoding='utf-8').write(
+    json.dumps({'chambres_annoncees': CHAMBRES_ANNONCEES}, ensure_ascii=False))
+print('donnees/hotel.json      %d chambres annoncees' % CHAMBRES_ANNONCEES)
 
 lignes = ['<?xml version="1.0" encoding="UTF-8"?>',
           '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']

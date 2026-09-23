@@ -21,6 +21,12 @@ SITE = "https://evannathhotel.vercel.app"
 #         X-Robots-Tag de vercel.json (elle est commentee sur place).
 PROSPECTION = True
 
+# Ce que le site annonce publiquement. Le chiffre est repete en clair dans
+# cinq fichiers ; celui-ci sert a l'administration, qui compare l'inventaire
+# saisi a ce qui est promis. A rassembler ici un jour, pour que « 46 » ne
+# vive qu'a un seul endroit.
+CHAMBRES_ANNONCEES = 46
+
 # ---------------------------------------------------------------------------
 # Ou partent les demandes des formulaires
 # ---------------------------------------------------------------------------

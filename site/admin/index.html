@@ -486,7 +486,7 @@ $('#sortir').addEventListener('click', async () => {
 
 /* ── Chargement ────────────────────────────────────────── */
 async function charger() {
-  const [etat, tout, images, categories] = await Promise.all([
+  const [etat, tout, images, categories, hotel] = await Promise.all([
     appel('etat'),
     appel('tout'),
     fetch('/donnees/images.json').then((r) => (r.ok ? r.json() : [])).catch(() => []),
@@ -495,6 +495,9 @@ async function charger() {
        A ne pas confondre avec ETAT.chambres, qui porte les chambres
        PHYSIQUES saisies par la reception — la 25, la 26. */
     fetch('/donnees/chambres.json').then((r) => (r.ok ? r.json() : [])).catch(() => []),
+    // Ce que le site annonce publiquement : l'ecran vide s'en sert pour dire
+    // combien de chambres il reste a saisir.
+    fetch('/donnees/hotel.json').then((r) => (r.ok ? r.json() : null)).catch(() => null),
   ]);
   ETAT.stockage = etat.stockage;
   ETAT.magasin = etat.magasin;
@@ -505,6 +508,7 @@ async function charger() {
   ETAT.campagnes = (tout.donnees && tout.donnees.campagnes) || [];
   /* Les chambres PHYSIQUES et les nuits fermees. */
   ETAT.chambres = (tout.donnees && tout.donnees.chambres) || [];
+  ETAT.annoncees = (hotel && hotel.chambres_annoncees) || 0;
   ETAT.fermetures = (tout.donnees && tout.donnees.fermetures) || [];
   ETAT.version = etat.version || '';
   ETAT.panne = etat.panne || '';
@@ -1424,7 +1428,8 @@ function rendre() {
   } else if (VUE === 'disponibilites') {
     v.innerHTML = `<div class="entete"><div>
         <h1 class="t">Disponibilités des chambres</h1>
-        <p class="sous">Gérez facilement la disponibilité de vos chambres par catégorie et par date.</p>
+        <p class="sous">Une ligne par chambre. L'état que vous saisissez ici est
+        celui que le site annonce.</p>
         </div>
         <div style="display:flex;gap:10px;flex-wrap:wrap">
           <button class="btn plein" id="dsp-resa-btn">+ Nouvelle réservation</button>
