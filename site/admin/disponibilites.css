@@ -59,7 +59,16 @@
 .dsp-pied .dsp-lien{padding:6px 10px;border:1px solid var(--line)}
 .dsp-pied .dsp-lien:hover{border-color:var(--bronze-2)}
 
-.dsp-defil{overflow-x:auto;position:relative}
+/* A quarante-six chambres la page fait quatre mille pixels : on perd
+   l'en-tete des jours des qu'on descend, et une case « Occupee » ne dit plus
+   quel jour elle occupe. La grille defile donc dans sa propre fenetre,
+   en-tete des jours fige en haut et colonne des chambres figee a gauche. */
+.dsp-defil{overflow:auto;position:relative;max-height:calc(100vh - 230px);
+  min-height:220px}
+.dsp-tete{position:sticky;top:0;z-index:3}
+.dsp-tete .dsp-g{z-index:4}
+.dsp-tete .dsp-j{background:var(--bark-2)}
+.dsp-tete .dsp-t.auj{background:#2A1E13}
 .dsp-l{display:flex;min-width:100%;width:max-content}
 .dsp-bloc{border-top:1px solid var(--line)}
 .dsp-g{flex:0 0 330px;width:330px;min-width:330px;max-width:330px;overflow:hidden;position:sticky;

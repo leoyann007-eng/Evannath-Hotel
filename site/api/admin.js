@@ -326,6 +326,10 @@ function nettoyerChambre(e) {
        « Bungalow 3 ». On ne lui impose pas notre facon de numeroter. */
     numero: propre(e.numero, 20),
     categorie: slug(e.categorie),
+    /* L'etage, tel que l'hotel le nomme : « 1 », « RDC », « Bungalows ».
+       Facultatif — personne ne nous l'a donne, et la colonne ne s'affiche
+       que si au moins une chambre en porte un. */
+    etage: propre(e.etage, 20),
     /* HORS SERVICE : indisponible sans dates, jusqu'a nouvel ordre. Une
        climatisation en panne n'a pas de date de fin connue, et obliger a en
        inventer une ferait rouvrir la chambre toute seule ce jour-la. */
