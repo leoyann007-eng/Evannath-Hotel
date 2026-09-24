@@ -975,7 +975,20 @@ module.exports = async function handler(req, res) {
         return json(res, 200, { ok: true, retenue: false, raison: 'indisponible' });
       }
       const ch = premiereLibre(d, categorie, du, au);
-      if (!ch) return json(res, 200, { ok: true, retenue: false, raison: 'complet' });
+      if (!ch) {
+        /* « Complet » est une AFFIRMATION : elle dit que l'hotel est plein.
+           Sans aucune chambre saisie dans cette categorie, on ne sait rien —
+           et `a=dispo` repond deja `inconnu` dans ce cas. Repondre `complet`
+           ici ferait dire deux choses differentes aux deux routes sur le
+           meme etat.
+
+           Sans consequence aujourd'hui : le tunnel n'attend pas la reponse.
+           Mais le paiement en ligne, lui, devra la lire avant d'encaisser. */
+        const saisies = (Array.isArray(d.chambres) ? d.chambres : [])
+          .some((c) => c && c.categorie === categorie);
+        return json(res, 200, { ok: true, retenue: false,
+          raison: saisies ? 'complet' : 'inconnu' });
+      }
 
       const entree = nettoyerFermeture({
         cible: ch.id, debut: du, fin: derniere,

@@ -266,5 +266,34 @@ console.log('\n── L instant de creation survit aux modifications ──');
   verifie('et elle est bien passee en confirmee', !!g && g.statut === 'confirmee');
 }
 
+// ── Les deux routes disent la meme chose ──────────────────────────────────
+// « Complet » est une AFFIRMATION : l'hotel est plein. Sans aucune chambre
+// saisie dans la categorie, on ne sait rien — et `a=dispo` repond deja
+// `inconnu`. Deux routes qui repondent differemment sur le meme etat sont
+// deux verites, et l'une des deux est fausse.
+
+console.log('\n── Sans chambre saisie, les deux routes s accordent ──');
+{
+  const vue = await appel({ a: 'dispo', du: '2028-01-01', au: '2028-01-03',
+    chambre: 'categorie-jamais-saisie' }, { avecCookie: false });
+  verifie('a=dispo ne sait rien',
+    vue.json.etats['categorie-jamais-saisie'] === 'inconnu',
+    vue.json.etats);
+
+  const d = await demande('Client F', 'categorie-jamais-saisie',
+    '2028-01-01', '2028-01-03', '10.0.4.1');
+  verifie('a=demande ne sait rien non plus, et n affirme pas « complet »',
+    d.json.retenue === false && d.json.raison === 'inconnu', d.json);
+}
+{
+  // Mais quand la categorie EXISTE et qu'elle est prise, « complet » est vrai.
+  await poserChambre('601', 'test-vraiment-pleine');
+  await demande('Occupant', 'test-vraiment-pleine', '2028-02-01', '2028-02-05', '10.0.5.1');
+  const d = await demande('Tardif', 'test-vraiment-pleine',
+    '2028-02-02', '2028-02-04', '10.0.5.2');
+  verifie('une categorie saisie et prise dit bien « complet »',
+    d.json.retenue === false && d.json.raison === 'complet', d.json);
+}
+
 console.log('\n%d verification(s) passee(s), %d en echec.', ok, ko);
 process.exit(ko ? 1 : 0);
