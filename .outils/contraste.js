@@ -76,12 +76,22 @@ const MESURE = `(function(){
     }
     return 'rgb(' + c.map(Math.round).join(', ') + ')';
   };
-  /* Un texte pose sur une image : sa lisibilite ne se calcule pas ici. */
+  /* Un texte pose sur une PHOTOGRAPHIE : sa lisibilite ne se calcule pas
+     ici. Mais un DEGRADE n'est pas une photographie, et les confondre a
+     coute cher : « .carte » porte un voile blanc a 2,4 %, et cette seule
+     ligne retirait du verdict chaque texte de chaque carte — 604 sur la
+     seule vue des disponibilites. Le verdict annoncait zero defaut sur ce
+     qu'il n'avait pas regarde.
+
+     On n'ecarte donc que sur url() : une image reference. Un degrade se
+     mesure contre la couleur composee du dessous. C'est une approximation
+     — un degrade franc la rendrait fausse — mais mesurer approximativement
+     vaut mieux que ne pas mesurer du tout. */
   var surImage = function (e) {
     var n = e;
     while (n && n !== document.documentElement) {
       var cs = getComputedStyle(n);
-      if (cs.backgroundImage && cs.backgroundImage !== 'none') return true;
+      if ((cs.backgroundImage || '').indexOf('url(') >= 0) return true;
       if (n.querySelector && n.matches('.hero, .bandeau, .lb, .mosaic, .slides')) return true;
       n = n.parentElement;
     }
