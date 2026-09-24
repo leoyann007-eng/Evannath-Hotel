@@ -128,7 +128,16 @@ let PANNE = '';
 let FICHIERS = 0;
 
 async function lire() {
-  if (!JETON_BLOB) return memoire || (memoire = structuredClone(VIDE));
+  /* Un INSTANTANE, pas la reference vivante. Le stockage durable en rend un
+     forcement : chaque ecriture cree un nouveau fichier, et la lecture prend
+     le plus recent. Rendre ici l'objet vivant faisait que deux requetes
+     simultanees partageaient la meme memoire, et se voyaient donc l'une
+     l'autre instantanement — la course a l'ecriture etait INVISIBLE en local
+     et en test, et n'apparaissait qu'en production. */
+  if (!JETON_BLOB) {
+    if (!memoire) memoire = structuredClone(VIDE);
+    return structuredClone(memoire);
+  }
   try {
     const { list } = await import('@vercel/blob');
     const { blobs } = await list({ prefix: PREFIXE, token: JETON_BLOB });
@@ -290,6 +299,14 @@ function nombre(v) {
 }
 
 /** Un instant 'AAAA-MM-JJTHH:MM', ou null. */
+/** Un instant complet, a la milliseconde. `instant()` tronque a la minute,
+ *  ce qui suffit a une echeance mais pas a departager deux demandes arrivees
+ *  dans la meme seconde. */
+function horodatage(v) {
+  const t = String(v || '').trim();
+  return /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(t) ? t : null;
+}
+
 function instant(v) {
   const t = String(v || '').trim();
   return /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(t) ? t : null;
@@ -451,6 +468,12 @@ function nettoyerFermeture(e) {
        ne peut pas condamner une chambre parce que quelqu'un a rempli un
        formulaire. Une reservation confirmee par la reception n'en a pas. */
     expire: instant(e.expire),
+    /* L'instant exact de la creation. Il ne sert qu'a une chose : departager
+       deux demandes tombees sur la meme chambre au meme moment. Le premier
+       arrive gagne, et cette regle doit rendre le MEME verdict des deux
+       cotes de la course. Preserve tel quel a chaque modification : le
+       remettre a jour ferait vieillir une demande a l'envers. */
+    cree: horodatage(e.cree) || new Date().toISOString(),
   };
   // Une periode a l'envers fermerait zero nuit sans le dire.
   if (o.debut && o.fin && o.debut > o.fin) {
@@ -507,6 +530,117 @@ function etatDe(d, categorie, du, au) {
 
   if (!libres) return 'complet';
   return libres === 1 ? 'derniere' : 'libre';
+}
+
+/* ── Le verrou anti-collision ───────────────────────────────────────────
+ *
+ * LE PROBLEME, ET IL EST PIRE QU'UN DOUBLE ENGAGEMENT.
+ *
+ * Le magasin n'a pas d'ecriture conditionnelle : chaque enregistrement ecrit
+ * le document ENTIER, et la lecture prend le plus recent. Deux demandes
+ * simultanees lisent donc le meme etat, choisissent la meme chambre — car
+ * premiereLibre() est deterministe et rend toujours le plus petit numero —
+ * puis ecrivent chacune SON instantane. La seconde ecriture ne contient pas
+ * la retenue de la premiere : elle l'efface.
+ *
+ * Deux clients s'entendent alors dire « une chambre vous est gardee », une
+ * seule retenue existe, et la reception ne voit jamais la demande perdue.
+ *
+ * CE QU'ON PEUT FAIRE, ET CE QU'ON NE PEUT PAS.
+ *
+ * On ne peut pas poser un vrai verrou : il faudrait un magasin qui sache
+ * comparer-et-echanger, ce que Blob ne sait pas faire. Un magasin
+ * transactionnel — Redis, Postgres — ou l'outil de gestion de l'hotel
+ * lui-meme, reste la seule reponse complete. C'est ecrit dans
+ * `notre-comprehension.md` et ca ne doit pas etre escamote.
+ *
+ * On peut en revanche tenir une garantie plus faible, mais SUFFISANTE tant
+ * qu'on n'encaisse pas : ne jamais dire « gardee » a un client dont la
+ * retenue n'a pas survecu. On ecrit, on RELIT, et on ne repond que sur ce
+ * que le magasin contient vraiment.
+ *
+ * LA REGLE QUI DEPARTAGE. Elle doit rendre le meme verdict des deux cotes de
+ * la course, sinon les deux se croient gagnantes ou les deux perdantes :
+ *   - une fermeture posee par la reception l'emporte TOUJOURS sur une
+ *     demande venue du site ;
+ *   - entre deux demandes, la plus ancienne gagne ;
+ *   - a egalite a la milliseconde, l'identifiant tranche.
+ */
+
+/** Deux fermetures touchent-elles une nuit commune ? `fin` a null vaut
+ *  « sans fin ». */
+function nuitsSeCroisent(a, b) {
+  const SANS_FIN = '9999-12-31';
+  const fa = a.fin == null ? SANS_FIN : a.fin;
+  const fb = b.fin == null ? SANS_FIN : b.fin;
+  return a.debut <= fb && b.debut <= fa;
+}
+
+/** Laquelle des deux a ete creee la premiere. Totalement ordonnee : deux
+ *  appels symetriques ne peuvent pas rendre « oui » tous les deux. */
+function plusAncienne(a, b) {
+  const ca = a.cree || '', cb = b.cree || '';
+  if (ca !== cb) return ca < cb;
+  return String(a.id) < String(b.id);
+}
+
+/** Tout ce qui, dans cet etat, disputerait cette chambre a cette retenue. */
+function concurrentes(d, entree, ch, maintenant) {
+  return (Array.isArray(d.fermetures) ? d.fermetures : []).filter(
+    (f) => f && f.id !== entree.id && vivante(f, maintenant)
+      && vise(f, ch) && nuitsSeCroisent(f, entree));
+}
+
+/** Notre retenue survit-elle a toutes ses concurrentes ? */
+function retenueGagne(entree, rivales) {
+  for (const f of rivales) {
+    // La reception decide ; le formulaire demande.
+    if (f.nature !== 'client') return false;
+    /* Une reservation CONFIRMEE est ferme. Elle l'emporte quelle que soit
+       son anciennete : la comparer par l'age reviendrait a laisser une
+       demande venue du site deloger un client dont la chambre est acquise. */
+    if (f.statut === 'confirmee') return false;
+    if (!plusAncienne(entree, f)) return false;
+  }
+  return true;
+}
+
+/** Retire une fermeture du magasin, sur l'etat le plus frais.
+ *
+ *  Au mieux. Si cette ecriture est a son tour ecrasee, la retenue perdante
+ *  reste — elle expire d'elle-meme en deux heures, et la reception la voit.
+ *  Mieux vaut une retenue de trop, visible et perissable, qu'un client a qui
+ *  on a promis une chambre qu'il n'a pas. */
+async function retirerFermeture(id) {
+  try {
+    const frais = await lire();
+    if (PANNE) return;
+    frais.fermetures = (frais.fermetures || []).filter((f) => f && f.id !== id);
+    await ecrire(frais);
+  } catch (e) { /* elle expirera */ }
+}
+
+/** Pose la retenue, puis verifie qu'elle a bien survecu. */
+async function poserRetenue(d, entree, ch) {
+  d.fermetures = Array.isArray(d.fermetures) ? d.fermetures : [];
+  d.fermetures.push(entree);
+  const w = await ecrire(d);
+  if (!w.ok) return { ok: false, raison: 'ecriture' };
+
+  /* On RELIT. Sans cette relecture, on repondrait sur ce qu'on croit avoir
+     ecrit, pas sur ce que le magasin contient. */
+  const apres = await lire();
+  if (PANNE) return { ok: false, raison: 'indisponible' };
+
+  const mienne = (apres.fermetures || []).find((f) => f && f.id === entree.id);
+  // Absente : une ecriture concurrente est passee par-dessus la notre.
+  if (!mienne) return { ok: false, raison: 'ecrasee' };
+
+  const rivales = concurrentes(apres, entree, ch, Date.now());
+  if (!rivales.length || retenueGagne(entree, rivales)) return { ok: true };
+
+  await retirerFermeture(entree.id);
+  return { ok: false, raison: 'perdue' };
 }
 
 /** La premiere chambre libre d'une categorie sur ces nuits, ou null.
@@ -826,29 +960,42 @@ module.exports = async function handler(req, res) {
       return json(res, 200, { ok: true, retenue: false, raison: 'incomplet' });
     }
 
-    const d = await lire();
-    if (PANNE) return json(res, 200, { ok: true, retenue: false, raison: 'indisponible' });
-
     /* Les dates du client sont une ARRIVEE et un DEPART ; une fermeture se
        compte en NUITS. Il dort du 24 au 26 : les nuits du 24 et du 25. */
     const derniere = veille(au);
-    const ch = premiereLibre(d, categorie, du, au);
-    if (!ch) return json(res, 200, { ok: true, retenue: false, raison: 'complet' });
 
-    const entree = nettoyerFermeture({
-      cible: ch.id, debut: du, fin: derniere,
-      nature: 'client', statut: 'attente', client: nom,
-      courriel: propre(corps.courriel, 160),
-      expire: new Date(Date.now() + RETENUE_MINUTES * 60000).toISOString().slice(0, 16),
-      motif: propre(corps.reference, 40),
-    }).objet;
+    /* Trois essais. Une collision n'est pas un echec : elle veut dire qu'une
+       autre demande a pris CETTE chambre. On relit, et la chambre apparait
+       alors occupee — on en propose une autre. Ce n'est qu'apres trois
+       collisions d'affilee qu'on renonce, et on dit alors « complet » plutot
+       que d'inventer une raison. */
+    for (let essai = 0; essai < 3; essai++) {
+      const d = await lire();
+      if (PANNE) {
+        return json(res, 200, { ok: true, retenue: false, raison: 'indisponible' });
+      }
+      const ch = premiereLibre(d, categorie, du, au);
+      if (!ch) return json(res, 200, { ok: true, retenue: false, raison: 'complet' });
 
-    d.fermetures = d.fermetures || [];
-    d.fermetures.push(entree);
-    const w = await ecrire(d);
-    if (!w.ok) return json(res, 200, { ok: true, retenue: false, raison: 'ecriture' });
+      const entree = nettoyerFermeture({
+        cible: ch.id, debut: du, fin: derniere,
+        nature: 'client', statut: 'attente', client: nom,
+        courriel: propre(corps.courriel, 160),
+        expire: new Date(Date.now() + RETENUE_MINUTES * 60000).toISOString().slice(0, 16),
+        motif: propre(corps.reference, 40),
+      }).objet;
 
-    return json(res, 200, { ok: true, retenue: true, minutes: RETENUE_MINUTES });
+      const r = await poserRetenue(d, entree, ch);
+      if (r.ok) {
+        return json(res, 200, { ok: true, retenue: true, minutes: RETENUE_MINUTES });
+      }
+      /* Une panne d'ecriture ne se retente pas : elle ne vient pas d'une
+         course, et reessayer l'aggraverait. */
+      if (r.raison === 'ecriture' || r.raison === 'indisponible') {
+        return json(res, 200, { ok: true, retenue: false, raison: r.raison });
+      }
+    }
+    return json(res, 200, { ok: true, retenue: false, raison: 'complet' });
   }
 
   // ── Connexion ───────────────────────────────────────────────────────────
@@ -989,6 +1136,11 @@ module.exports = async function handler(req, res) {
        ou le client doit apprendre que sa demande est acceptee. Avant, il
        n'avait que sa reference, et personne ne le prevenait. */
     const avant = i >= 0 ? d[type][i] : null;
+    /* `cree` date la DEMANDE, pas sa derniere modification. Le formulaire ne
+       le renvoie pas, et nettoyerFermeture en fabriquerait alors un neuf a
+       chaque enregistrement : une reservation confirmee rajeunirait, et
+       perdrait une course contre une demande venue du site. */
+    if (avant && avant.cree && objet.cree) objet.cree = avant.cree;
     const aConfirmer = corps.type === 'fermeture' && objet.nature === 'client'
       && objet.statut === 'confirmee'
       && (!avant || avant.statut !== 'confirmee');
@@ -1044,3 +1196,13 @@ module.exports = async function handler(req, res) {
 
   return json(res, 400, { ok: false, message: 'Action inconnue.' });
 };
+
+/* Les trois regles qui departagent une collision, exposees pour les tests.
+   Elles sont pures : meme entree, meme verdict, sans magasin ni reseau. Une
+   regle de course qui ne rend pas le MEME verdict des deux cotes laisse
+   passer deux gagnantes ou deux perdantes, et c'est precisement ce qu'un
+   test doit pouvoir eprouver directement.
+
+   Vercel ne lit que la fonction elle-meme ; ces proprietes ne le genent
+   pas. */
+module.exports.regles = { plusAncienne, nuitsSeCroisent, retenueGagne };

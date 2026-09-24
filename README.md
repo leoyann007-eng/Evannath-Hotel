@@ -743,12 +743,76 @@ Tant qu'elles manquent, tout le reste fonctionne et l'écran annonce
 Resend exige un expéditeur vérifié, donc `evannathhotel.com`, donc la
 signature.
 
-### Ce que ça ne fait pas
+### Le verrou anti-collision
 
-Deux clients peuvent réserver la même nuit à la seconde près sans que rien ne
-les en empêche : il n'y a pas de verrou, parce qu'il n'y a pas de réservation
-ferme — le site produit une demande, la réception confirme. Le verrou viendra
-avec la synchronisation Booking / Airbnb, formule Performance.
+**Le défaut était pire qu'un double engagement : c'était une perte
+d'écriture.** Le magasin n'a pas d'écriture conditionnelle — chaque
+enregistrement écrit le document entier, et la lecture prend le plus récent.
+Deux demandes simultanées lisaient donc le même état, choisissaient la
+**même** chambre (`premiereLibre()` rend toujours le plus petit numéro libre),
+puis écrivaient chacune son instantané. La seconde effaçait la retenue de la
+première.
+
+Deux clients s'entendaient dire « une chambre vous est gardée », une seule
+retenue existait, et la réception ne voyait **jamais** la demande perdue.
+
+**Il était invisible en local.** En mémoire, `lire()` rendait la référence
+vivante : deux requêtes partageaient le même objet et se voyaient l'une
+l'autre instantanément. `lire()` rend désormais une **copie** dans les deux
+modes — non pour corriger le défaut, mais pour le rendre reproductible.
+
+#### Ce qui est tenu, et ce qui ne l'est pas
+
+Ce n'est **pas** un vrai verrou. Il faudrait un magasin qui sache
+comparer-et-échanger ; Blob ne le sait pas. Un magasin transactionnel — Redis,
+Postgres — ou l'outil de gestion de l'hôtel reste la seule réponse complète.
+
+La garantie tenue est plus faible, et elle suffit tant qu'on n'encaisse pas :
+
+> **On ne dit jamais « gardée » à un client dont la retenue n'existe pas.**
+
+On écrit, puis on **relit**, et on ne répond que sur ce que le magasin
+contient vraiment. Trois essais : une collision n'est pas un échec, elle veut
+dire qu'une autre demande a pris cette chambre — on relit, elle apparaît
+occupée, on en propose une autre.
+
+#### La règle qui départage
+
+Elle doit rendre le **même verdict des deux côtés** de la course, sinon les
+deux se croient gagnantes ou les deux perdantes :
+
+| | |
+|---|---|
+| Une fermeture posée par la réception | l'emporte **toujours** — elle décide, le formulaire demande |
+| Une réservation **confirmée** | l'emporte toujours, quelle que soit son ancienneté |
+| Entre deux demandes en attente | la plus ancienne gagne (`cree`, à la milliseconde) |
+| À égalité exacte | l'identifiant tranche |
+
+`cree` date la **demande**, pas sa dernière modification : il est préservé à
+chaque enregistrement. Sans cela, confirmer une retenue depuis l'administration
+la ferait rajeunir, et perdre une course contre une demande venue du site.
+
+#### Éprouvé
+
+`tests/collision.test.mjs` — 30 vérifications. La règle est testée **seule**,
+sur 36 paires, pour prouver que l'ordre est total. La course est testée **pour
+de vrai**, par `Promise.all` sur la route publique.
+
+Quatre mutations délibérées le prouvent. La plus parlante : retirer la
+relecture fait échouer 5 vérifications, et la sortie montre exactement le
+défaut d'origine — deux clients à qui on répond `retenue: true`, une seule
+retenue en magasin.
+
+La cinquième mutation est la plus instructive : **avec le défaut réintroduit
+ET la référence vivante restaurée, les 30 vérifications passent au vert.**
+C'est l'aveuglement d'avant, mesuré.
+
+### Ce que ça ne fait pas encore
+
+La synchronisation Booking / Airbnb, formule Performance. Et un vrai verrou
+transactionnel, qui devient un **préalable** le jour du paiement en ligne :
+sans réception pour rattraper une collision, deux paiements simultanés sur la
+dernière chambre encaissent deux fois. Voir `notre-comprehension.md`.
 
 **Un calendrier que personne ne remplit est pire que pas de calendrier** : il
 transforme un silence honnête en promesse fausse. C'est pourquoi l'écran de
