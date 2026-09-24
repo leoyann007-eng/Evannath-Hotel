@@ -261,3 +261,61 @@ Courtes, et toutes bloquantes pour le devis :
 5. **Qui, à l'hôtel, tiendra le calendrier des disponibilités à jour ?**
 
 La cinquième est la plus importante, et c'est celle qu'on oublie de poser.
+
+---
+
+## Les réponses reçues — 24 septembre 2026
+
+### « Faut-il afficher “complet” quand tout est pris ? » — **oui**
+
+C'est déjà le comportement en place. Rien à changer dans le code.
+
+### « Qui tiendra le calendrier, et à quel rythme ? » — les réceptionnistes
+
+Réponse rapportée : *« les réceptionnistes, vu qu'ils ont une vue sur un outil
+hôtelier qui leur permet de gérer les réservations ».*
+
+**Ce n'est pas seulement une réponse, c'est un fait nouveau.** La question 1
+ci-dessus — *où notez-vous aujourd'hui les chambres prises ?* — vient d'être
+répondue au passage, et pas dans le sens que j'avais parié. J'écrivais plus
+haut que l'absence de logiciel était « le cas le plus probable ». C'est faux :
+**il y a déjà un outil hôtelier**, et les réservations y vivent.
+
+#### Ce que ça crée : une double saisie
+
+Si les réceptionnistes gèrent les réservations dans leur outil **et** doivent
+tenir notre calendrier, ils font deux fois le même geste. Or c'est exactement
+la condition qui fait mourir un calendrier — et un calendrier mort est pire
+qu'aucun calendrier, puisqu'il transforme un silence honnête en promesse
+fausse.
+
+La bonne volonté n'y suffira pas. Un soir de forte activité, c'est notre
+calendrier qu'on sautera, pas l'outil qui sert à encaisser.
+
+#### Ce que ça ouvre : lire l'outil au lieu de le recopier
+
+Si cet outil expose ses données — une interface, un export iCal par catégorie,
+un raccordement à un gestionnaire de canaux — alors notre calendrier n'a plus
+à être saisi : il se **lit**. La double saisie disparaît, et la disponibilité
+annoncée devient celle de l'hôtel, pas une copie de celle de l'hôtel.
+
+Le mécanisme côté site ne change pas d'une ligne : seule la SOURCE change.
+C'était déjà écrit plus haut, et c'est maintenant la branche qui compte.
+
+#### La question qui vaut toutes les autres
+
+> **Quel est le nom de cet outil ?**
+
+Tout découle de là. Une capture d'écran suffit — le nom est en haut de la
+page. Selon la réponse :
+
+| | |
+|---|---|
+| L'outil expose ses données | On s'y branche. Plus aucune saisie à faire. |
+| Il ne les expose pas | On garde la saisie, mais on la réduit au strict nécessaire — et on le dit franchement dans le devis, parce que c'est du travail quotidien pour la réception. |
+
+### Restée sans réponse
+
+« Quand il ne reste qu'une chambre, faut-il le dire au client ? » Le réglage
+en place répond **oui** — « Dernière chambre à ces dates » s'affiche. À
+reposer, sans urgence.
