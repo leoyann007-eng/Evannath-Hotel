@@ -347,6 +347,40 @@ TOKENS = """:root{
 }
 """
 
+# ---------------------------------------------------------------------------
+# Le pied de page
+# ---------------------------------------------------------------------------
+# Une brique a part, parce que DEUX pages ne consomment pas HEAD_CSS :
+# La table et Le spa surchargent des regles de base, et une fusion
+# complete avait ete tentee puis abandonnee — elle neutralisait
+# .btn-solid et rendait l'en-tete de La table opaque.
+#
+# Elles en portaient donc une COPIE, qui a diverge : le copyright y
+# etait a 3,1:1 deja sur le site noir, et le passage au creme l'a
+# laisse derriere. Une correction au chassis manquait ces deux pages,
+# en silence. Il n'y a plus qu'une source.
+#
+# Leur fond de pied reste plus profond que --bark-2 : elles
+# redeclarent cette seule ligne, chez elles, en clair.
+FOOTER_CSS = """
+footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 28px}
+.f-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1.2fr;gap:44px}
+.f-grid h4{font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--bronze);margin-bottom:20px;font-weight:700}
+.f-grid p{display:block;font-size:13.5px;color:var(--muted);margin-bottom:11px}
+.f-grid a{display:block;font-size:13.5px;color:var(--muted);padding:9px 0;transition:.3s}
+.f-grid a:hover{color:var(--bronze)}
+.f-bot{border-top:1px solid var(--line);margin-top:54px;padding-top:26px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:11.5px;color:var(--muted)}
+/* Bouton flottant. NE PAS reutiliser la classe .wa ailleurs : elle impose
+   position:fixed et 56x56 en rond. Le lien du panneau de repli la portait,
+   et se retrouvait donc arrache du panneau, en pastille au coin de l'ecran —
+   le bouton le plus utile du repli etait invisible. Il porte .wa-envoi. */
+.wa{position:fixed;right:22px;bottom:22px;z-index:90;width:56px;height:56px;border-radius:50%;background:#25D366;display:grid;place-items:center;box-shadow:0 10px 30px rgba(37,211,102,.35);transition:.35s}
+.wa:hover{transform:scale(1.09)}
+.wa svg{width:28px;height:28px;fill:#fff}
+@media(max-width:1080px){ .f-grid{grid-template-columns:repeat(2,1fr)} }
+@media(max-width:720px){ .f-grid{grid-template-columns:1fr} }
+"""
+
 HEAD_CSS = TOKENS + """
 /* ── TOUT HERO GARDE DU TEXTE CLAIR ─────────────────────────────────────
    Un hero est pose sur une PHOTOGRAPHIE, sombree par son propre voile —
@@ -478,20 +512,7 @@ main{display:block}
 .crumb a:hover{color:var(--bronze)}
 .crumb span{color:var(--bronze)}
 
-footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 28px}
-.f-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1.2fr;gap:44px}
-.f-grid h4{font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--bronze);margin-bottom:20px;font-weight:700}
-.f-grid p{display:block;font-size:13.5px;color:var(--muted);margin-bottom:11px}
-.f-grid a{display:block;font-size:13.5px;color:var(--muted);padding:9px 0;transition:.3s}
-.f-grid a:hover{color:var(--bronze)}
-.f-bot{border-top:1px solid var(--line);margin-top:54px;padding-top:26px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:11.5px;color:var(--muted)}
-/* Bouton flottant. NE PAS reutiliser la classe .wa ailleurs : elle impose
-   position:fixed et 56x56 en rond. Le lien du panneau de repli la portait,
-   et se retrouvait donc arrache du panneau, en pastille au coin de l'ecran —
-   le bouton le plus utile du repli etait invisible. Il porte .wa-envoi. */
-.wa{position:fixed;right:22px;bottom:22px;z-index:90;width:56px;height:56px;border-radius:50%;background:#25D366;display:grid;place-items:center;box-shadow:0 10px 30px rgba(37,211,102,.35);transition:.35s}
-.wa:hover{transform:scale(1.09)}
-.wa svg{width:28px;height:28px;fill:#fff}
+""" + FOOTER_CSS + """
 
 .js .reveal{opacity:0;transform:translateY(28px);transition:opacity .9s cubic-bezier(.2,.8,.2,1),transform .9s cubic-bezier(.2,.8,.2,1)}
 .js .reveal.in{opacity:1;transform:none}
@@ -500,13 +521,11 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
 @media(max-width:1080px){
   .dw-in{grid-template-columns:1fr;gap:40px;align-content:start}
   .dw-side .ph{display:none}
-  .f-grid{grid-template-columns:repeat(2,1fr)}
 }
 @media(max-width:720px){
   .burger .lbl{display:none}
   .nav-right .lang{display:none}
   .dw-in{padding:110px 24px 50px}
-  .f-grid{grid-template-columns:1fr}
 }
 """
 

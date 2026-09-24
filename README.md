@@ -215,8 +215,35 @@ carte-template.html   -> build-carte.py  -> carte.html
 spa-template.html     -> build-carte.py  -> spa.html
 ```
 
-Marqueurs disponibles : `{{TOKENS}}`, `{{HEAD_CSS}}`, `{{NAV_JS}}`,
-`{{NAV_BASE}}`, `{{LANG_JS}}`, `{{ENVOI}}`, `{{SECOURS}}`, `{{EN_SECOURS}}`.
+Marqueurs disponibles : `{{TOKENS}}`, `{{HEAD_CSS}}`, `{{FOOTER_CSS}}`,
+`{{NAV_JS}}`, `{{NAV_BASE}}`, `{{LANG_JS}}`, `{{ENVOI}}`, `{{SECOURS}}`,
+`{{EN_SECOURS}}`.
+
+### Le pied de page, et pourquoi il a fallu l'extraire
+
+Trois pages ne consomment pas `HEAD_CSS` : l'accueil, La table et Le spa.
+Elles portaient donc chacune **une copie du pied de page** — et une copie
+diverge.
+
+Celle-ci l'avait déjà fait. Le copyright des deux pages nocturnes était à
+**3,1:1**, en dessous du seuil, **déjà sur le site noir** ; le passage au
+crème les a laissées derrière parce que la correction portait sur le
+châssis. Personne ne l'avait vu, et rien ne pouvait le voir.
+
+`FOOTER_CSS` est donc une brique à part, consommée par `HEAD_CSS` **et** par
+les trois templates. Ce qui diffère vraiment reste chez elles : les pages
+nocturnes redéclarent une seule ligne, `footer{background:#0B0704}`, leur
+pied s'enfonçant un cran sous le fond du corps.
+
+⚠️ **Le reste de leur CSS n'est toujours pas fusionné**, et ne doit pas
+l'être : ces pages surchargent des règles de base, l'ordre de cascade compte,
+et une fusion complète a été mesurée puis abandonnée — elle neutralisait
+`.btn-solid` et rendait l'en-tête de La table opaque. Seul le pied, qui est
+un bloc autonome, a été extrait.
+
+Le **contrôle 16** exige que `FOOTER_CSS` se retrouve **au mot** dans chaque
+page. Recopier le bloc en le modifiant casse le contrôle — c'était exactement
+la façon dont la divergence était née.
 
 ⚠️ **Ne pas modifier `index.html`, `carte.html` ni `spa.html` directement** :
 ils sont regénérés depuis leur gabarit.
@@ -249,7 +276,7 @@ et écartés du verdict — ils se jugent sur capture. Lors du passage au crème
 l'outil annonçait zéro défaut sur 2 806 textes pendant que « Où vous allez
 dormir » disparaissait dans un canapé.
 
-Quinze contrôles sur les 21 pages : variables CSS déclarées, jetons partagés
+Seize contrôles sur les 21 pages : variables CSS déclarées, jetons partagés
 présents, JS de navigation non divergent, images dimensionnées, fichiers
 existants, liens valides, navigation complète, JSON-LD valide, JavaScript qui
 se parse, `srcset` effacé sur les images reconstruites, et aucune

@@ -195,6 +195,7 @@ main{display:block}
 .crumb a:hover{color:var(--bronze)}
 .crumb span{color:var(--bronze)}
 
+
 footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 28px}
 .f-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1.2fr;gap:44px}
 .f-grid h4{font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--bronze);margin-bottom:20px;font-weight:700}
@@ -209,6 +210,9 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
 .wa{position:fixed;right:22px;bottom:22px;z-index:90;width:56px;height:56px;border-radius:50%;background:#25D366;display:grid;place-items:center;box-shadow:0 10px 30px rgba(37,211,102,.35);transition:.35s}
 .wa:hover{transform:scale(1.09)}
 .wa svg{width:28px;height:28px;fill:#fff}
+@media(max-width:1080px){ .f-grid{grid-template-columns:repeat(2,1fr)} }
+@media(max-width:720px){ .f-grid{grid-template-columns:1fr} }
+
 
 .js .reveal{opacity:0;transform:translateY(28px);transition:opacity .9s cubic-bezier(.2,.8,.2,1),transform .9s cubic-bezier(.2,.8,.2,1)}
 .js .reveal.in{opacity:1;transform:none}
@@ -217,13 +221,11 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
 @media(max-width:1080px){
   .dw-in{grid-template-columns:1fr;gap:40px;align-content:start}
   .dw-side .ph{display:none}
-  .f-grid{grid-template-columns:repeat(2,1fr)}
 }
 @media(max-width:720px){
   .burger .lbl{display:none}
   .nav-right .lang{display:none}
   .dw-in{padding:110px 24px 50px}
-  .f-grid{grid-template-columns:1fr}
 }
 
 

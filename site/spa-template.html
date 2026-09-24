@@ -227,16 +227,10 @@ header.scrolled .brand img{width:132px}
 .hours span:first-child{color:var(--muted);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;font-weight:600}
 .hours .hi{color:var(--palm)}
 
-footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
-.f-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1.2fr;gap:44px}
-.f-grid h4{font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--bronze);margin-bottom:20px;font-weight:700}
-.f-grid p{display:block;font-size:13.5px;color:var(--muted);margin-bottom:11px}
-.f-grid a{display:block;font-size:13.5px;color:var(--muted);padding:9px 0;transition:.3s}
-.f-grid a:hover{color:var(--bronze)}
-.f-bot{border-top:1px solid var(--line);margin-top:54px;padding-top:26px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:11.5px;color:var(--muted)}
-.wa{position:fixed;right:22px;bottom:22px;z-index:90;width:56px;height:56px;border-radius:50%;background:#25D366;display:grid;place-items:center;box-shadow:0 10px 30px rgba(37,211,102,.35);transition:.35s}
-.wa:hover{transform:scale(1.09)}
-.wa svg{width:28px;height:28px;fill:#fff}
+{{FOOTER_CSS}}
+/* La seule chose qui differe vraiment : cette page est nocturne, et
+   son pied s'enfonce un cran sous le fond du corps. */
+footer{background:#0B0704}
 
 .js .reveal{opacity:0;transform:translateY(30px);transition:opacity 1s cubic-bezier(.2,.8,.2,1),transform 1s cubic-bezier(.2,.8,.2,1)}
 .js .reveal.in{opacity:1;transform:none}
@@ -247,7 +241,6 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
   .dw-side .ph{display:none}
   .mani .grid,.book .grid{grid-template-columns:1fr;gap:40px}
   .menu-list{column-count:1}
-  .f-grid{grid-template-columns:repeat(2,1fr)}
   .mosaic{grid-template-columns:repeat(2,1fr);grid-auto-rows:180px}
   .mosaic figure:nth-child(1),.mosaic figure:nth-child(4){grid-column:span 2;grid-row:span 1}
 }
@@ -262,7 +255,7 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
   .plate .n{font-size:1.5rem;opacity:1}
   .plate .pr small{text-align:left}
   .grp h3::before,.grp h3::after{width:8%}
-  .book form,.f-grid{grid-template-columns:1fr}
+  .book form{grid-template-columns:1fr}
   .band{height:44vh}
   .mosaic{grid-template-columns:1fr;grid-auto-rows:210px}
   .mosaic figure:nth-child(1),.mosaic figure:nth-child(4){grid-column:span 1}

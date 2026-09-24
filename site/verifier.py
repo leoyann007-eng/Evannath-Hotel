@@ -6,7 +6,7 @@ reellement survenu sur ce projet — ils sont la pour qu'il ne revienne pas.
 """
 import io, os, re, glob, json, sys, subprocess, tempfile
 sys.path.insert(0, '.')
-from _chrome import TOKENS, NAV_BASE, LANG_JS, empreinte, WA, MAIL
+from _chrome import TOKENS, NAV_BASE, LANG_JS, FOOTER_CSS, empreinte, WA, MAIL
 
 _cache = {}
 
@@ -363,6 +363,17 @@ def controler():
 
         # Le controle 12 — rideau des barres collantes — a disparu avec le
         # mecanisme lui-meme : les barres de filtres ne sont plus collantes.
+
+        # 16. le pied de page doit venir de la source partagee.
+        # La table et Le spa ne consomment pas HEAD_CSS — leur CSS surcharge
+        # des regles de base, et une fusion complete avait ete tentee puis
+        # abandonnee. Elles portaient donc une COPIE du pied, qui a diverge :
+        # le copyright y etait a 3,1:1 DEJA sur le site noir, et le passage au
+        # creme l'a laisse derriere. Une correction au chassis manquait ces
+        # deux pages, en silence. Le bloc doit donc se retrouver AU MOT dans
+        # chaque page : le recopier en le modifiant casse ce controle.
+        if FOOTER_CSS.strip() not in s:
+            pb.append((f, 'pied de page divergent de FOOTER_CSS'))
 
         # 15. aucune page ne peut affirmer une disponibilite dans son balisage.
         # Les sept fiches chambres ont porte pendant des mois une pastille

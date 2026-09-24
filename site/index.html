@@ -348,16 +348,24 @@ section{padding:106px 0}
 .loc-map{min-height:440px;background:var(--bark-2)}
 .loc-map iframe{width:100%;height:100%;border:0;filter:grayscale(.35) sepia(.25) contrast(.95)}
 
+
 footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 28px}
 .f-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1.2fr;gap:44px}
 .f-grid h4{font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--bronze);margin-bottom:20px;font-weight:700}
 .f-grid p{display:block;font-size:13.5px;color:var(--muted);margin-bottom:11px}
 .f-grid a{display:block;font-size:13.5px;color:var(--muted);padding:9px 0;transition:.3s}
 .f-grid a:hover{color:var(--bronze)}
-.f-bot{border-top:1px solid var(--line);margin-top:54px;padding-top:26px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:11.5px;color:#6E6154}
+.f-bot{border-top:1px solid var(--line);margin-top:54px;padding-top:26px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:11.5px;color:var(--muted)}
+/* Bouton flottant. NE PAS reutiliser la classe .wa ailleurs : elle impose
+   position:fixed et 56x56 en rond. Le lien du panneau de repli la portait,
+   et se retrouvait donc arrache du panneau, en pastille au coin de l'ecran —
+   le bouton le plus utile du repli etait invisible. Il porte .wa-envoi. */
 .wa{position:fixed;right:22px;bottom:22px;z-index:90;width:56px;height:56px;border-radius:50%;background:#25D366;display:grid;place-items:center;box-shadow:0 10px 30px rgba(37,211,102,.35);transition:.35s}
 .wa:hover{transform:scale(1.09)}
 .wa svg{width:28px;height:28px;fill:#fff}
+@media(max-width:1080px){ .f-grid{grid-template-columns:repeat(2,1fr)} }
+@media(max-width:720px){ .f-grid{grid-template-columns:1fr} }
+
 
 @media(max-width:1080px){
   .dw-in{grid-template-columns:1fr;gap:40px;align-content:start}
@@ -370,7 +378,6 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
   /* minmax(0,1fr) et non 1fr : un « 1fr » a pour plancher la taille
      min-content de son contenu, donc une colonne peut depasser sa grille. */
   .loc{grid-template-columns:minmax(0,1fr)}
-  .f-grid{grid-template-columns:repeat(2,1fr)}
   .gal{grid-template-columns:repeat(2,1fr)}
 }
 @media(max-width:720px){

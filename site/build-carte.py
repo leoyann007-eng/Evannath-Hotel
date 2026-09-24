@@ -7,7 +7,7 @@ remplacés par « Nous consulter » plutôt qu'inventés.
 """
 import io
 import _schema
-from _chrome import responsive, dimensionner, versionner, secours, liens_nav, EN_NAV, EN_SECOURS, CONF_TITRE, CONF_GESTE, CONF_VERBE, WA, WA_TEXTE, MAIL, ENVOI_JS, NAV_JS, TOKENS, HEAD_CSS, LANG_JS
+from _chrome import responsive, dimensionner, versionner, secours, liens_nav, EN_NAV, EN_SECOURS, CONF_TITRE, CONF_GESTE, CONF_VERBE, WA, WA_TEXTE, MAIL, ENVOI_JS, NAV_JS, TOKENS, HEAD_CSS, FOOTER_CSS, LANG_JS
 
 CUISINE = [
  ("Nos entrées", [
@@ -202,7 +202,7 @@ HTML = io.open('carte-template.html',encoding='utf-8').read()
 HTML = (HTML
   .replace('{{CUISINE}}',sections(CUISINE,'c'))
   .replace('{{BOISSONS}}',sections(BOISSONS,'b'))
-  .replace('{{WA}}', WA).replace('{{NAV_LINKS}}', liens_nav('carte.html')).replace('{{EN_NAV}}', EN_NAV).replace('{{WA_TEXTE}}', WA_TEXTE).replace('{{SECOURS}}', secours('sec')).replace('{{EN_SECOURS}}', EN_SECOURS).replace('{{CG}}', (CONF_GESTE or '').replace("'", "\\'")).replace('{{CV}}', CONF_VERBE).replace('{{CT}}', CONF_TITRE or 'Table demand\u00e9e').replace('{{ENVOI}}', ENVOI_JS).replace('{{NAV_JS}}', NAV_JS).replace('{{TOKENS}}', TOKENS).replace('{{LANG_JS}}', LANG_JS).replace('{{HEAD_CSS}}', HEAD_CSS)
+  .replace('{{WA}}', WA).replace('{{NAV_LINKS}}', liens_nav('carte.html')).replace('{{EN_NAV}}', EN_NAV).replace('{{WA_TEXTE}}', WA_TEXTE).replace('{{SECOURS}}', secours('sec')).replace('{{EN_SECOURS}}', EN_SECOURS).replace('{{CG}}', (CONF_GESTE or '').replace("'", "\\'")).replace('{{CV}}', CONF_VERBE).replace('{{CT}}', CONF_TITRE or 'Table demand\u00e9e').replace('{{ENVOI}}', ENVOI_JS).replace('{{NAV_JS}}', NAV_JS).replace('{{TOKENS}}', TOKENS).replace('{{LANG_JS}}', LANG_JS).replace('{{HEAD_CSS}}', HEAD_CSS).replace('{{FOOTER_CSS}}', FOOTER_CSS)
   .replace('{{TOTAL}}',str(total))
   .replace('{{LD}}', _schema.bloc(
       _schema.restaurant(nb_plats=total),
@@ -214,7 +214,7 @@ io.open('carte.html','w',encoding='utf-8').write(
 print('carte.html :', total, 'articles')
 
 SPAH = io.open('spa-template.html',encoding='utf-8').read()
-SPAH = (SPAH.replace('{{SPA}}',sections(SPA,'s')).replace('{{WA}}', WA).replace('{{NAV_LINKS}}', liens_nav('spa.html')).replace('{{EN_NAV}}', EN_NAV).replace('{{WA_TEXTE}}', WA_TEXTE).replace('{{SECOURS}}', secours('sec')).replace('{{EN_SECOURS}}', EN_SECOURS).replace('{{CG}}', (CONF_GESTE or '').replace("'", "\\'")).replace('{{CV}}', CONF_VERBE).replace('{{CT}}', CONF_TITRE or 'Cr\u00e9neau demand\u00e9').replace('{{ENVOI}}', ENVOI_JS).replace('{{NAV_JS}}', NAV_JS).replace('{{TOKENS}}', TOKENS).replace('{{LANG_JS}}', LANG_JS).replace('{{HEAD_CSS}}', HEAD_CSS).replace('{{TOTAL}}',str(total_spa))
+SPAH = (SPAH.replace('{{SPA}}',sections(SPA,'s')).replace('{{WA}}', WA).replace('{{NAV_LINKS}}', liens_nav('spa.html')).replace('{{EN_NAV}}', EN_NAV).replace('{{WA_TEXTE}}', WA_TEXTE).replace('{{SECOURS}}', secours('sec')).replace('{{EN_SECOURS}}', EN_SECOURS).replace('{{CG}}', (CONF_GESTE or '').replace("'", "\\'")).replace('{{CV}}', CONF_VERBE).replace('{{CT}}', CONF_TITRE or 'Cr\u00e9neau demand\u00e9').replace('{{ENVOI}}', ENVOI_JS).replace('{{NAV_JS}}', NAV_JS).replace('{{TOKENS}}', TOKENS).replace('{{LANG_JS}}', LANG_JS).replace('{{HEAD_CSS}}', HEAD_CSS).replace('{{FOOTER_CSS}}', FOOTER_CSS).replace('{{TOTAL}}',str(total_spa))
   .replace('{{LD}}', _schema.bloc(
       _schema.service('Spa et soins du corps',
                       "Massages, gommages, soins du visage, sauna et onglerie au spa de l'Hôtel Evannath, "
