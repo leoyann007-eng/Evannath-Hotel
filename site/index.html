@@ -60,12 +60,34 @@
 .apres{color:var(--bronze-2)}
 
 :root{
-  /* L'accueil assume une teinte un peu plus chaude et profonde que le reste
-     du site. Seules les valeurs qui different sont redeclarees ici ; tout le
-     reste vient de TOKENS, dans _chrome.py. */
-  --bark-2:#221810; --bark-3:#2F2218;
-  --bronze-2:#D9B37F; --bronze-deep:#84603C;
-  --muted:#A2907C;
+  /* ── PAGE D'ESSAI : l'accueil en creme chaud ────────────────────────
+     La direction n'aime pas le fond noir. On retourne CETTE page seule :
+     les jetons partages de _chrome.py ne bougent pas, les vingt autres
+     pages restent intactes, et La table et Le spa gardent leur nuit.
+
+     Ce qui ne change pas : le bronze, le bois, Marcellus et Karla, « Le
+     Reve Africain ». La palette vient de leur logo — c'est le FOND qui
+     change, pas l'identite.
+
+     --bronze est le point delicat : il sert vingt-quatre fois comme TEXTE
+     et seize fois comme FOND. Il lui faut donc etre assez sombre pour se
+     lire sur le creme, et assez sombre pour porter du texte clair.
+     #8A5F2B tient les deux — mesure dans les deux sens.
+
+     --night NE devient PAS clair : ce n'est pas « le fond le plus noir »,
+     c'est « ce qui contraste avec le bronze ». Les deux endroits qui s'en
+     servaient comme FOND sont repris plus bas, explicitement. */
+  --bark:#FBF7F0; --bark-2:#F4EDE1; --bark-3:#EDE3D4;
+  /* --cream garde son nom mais designe desormais le TEXTE principal :
+     le renommer voudrait dire toucher trente-neuf declarations dans onze
+     fichiers, pour un essai qu'on jettera peut-etre. */
+  --cream:#2A231E;
+  --muted:#6E6154;
+  /* Le corps de texte : plus doux que --cream, qui est fait pour les
+     titres. Mesure a 8,3:1 sur les cartes. */
+  --prose:#4C423B;
+  --bronze:#8A5F2B; --bronze-2:#6E4718; --bronze-deep:#84603C;
+  --line:rgba(138,95,43,.22); --line-2:rgba(138,95,43,.12);
   --line:rgba(185,138,80,.20);
 }
 *{box-sizing:border-box;margin:0;padding:0}
@@ -83,7 +105,7 @@ a{color:inherit;text-decoration:none}
 h1,h2,h3{font-family:var(--f-display);font-weight:400;line-height:1.1;letter-spacing:.005em;text-wrap:balance}
 h2{font-size:clamp(2rem,4.4vw,3.35rem)}
 h3{font-size:1.42rem}
-p{color:#DCD2C4}
+p{color:var(--prose)}
 .btn{display:inline-flex;align-items:center;gap:10px;padding:15px 30px;font-size:11.5px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;border:1px solid var(--bronze);color:var(--bronze);background:transparent;cursor:pointer;transition:.35s cubic-bezier(.2,.8,.2,1);font-family:var(--f-body)}
 .btn:hover{background:var(--bronze);color:var(--bark);transform:translateY(-2px)}
 .btn-solid{background:var(--bronze);color:var(--bark)}
@@ -95,16 +117,16 @@ p{color:#DCD2C4}
 @keyframes breathe{0%,100%{opacity:.3}50%{opacity:1}}
 
 /* ══ NAV : un seul élément ══ */
-.skip{position:absolute;left:-9999px;top:0;z-index:200;background:var(--bronze);color:var(--night);
+.skip{position:absolute;left:-9999px;top:0;z-index:200;background:var(--bronze);color:var(--bark);
   padding:14px 22px;font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase}
 .skip:focus{left:0}
 main{display:block}
 header{position:fixed;top:0;left:0;right:0;z-index:100;transition:.45s;padding:20px 0}
-header.scrolled{background:rgba(23,16,10,.94);backdrop-filter:blur(14px);padding:11px 0;border-bottom:1px solid var(--line)}
+header.scrolled{background:rgba(251,247,240,.94);backdrop-filter:blur(14px);padding:11px 0;border-bottom:1px solid var(--line)}
 /* Menu ouvert : l en-tete devient opaque, et de la couleur du tiroir. Sur
    cette page il est transparent au repos — il flotte sur l image — donc le
    menu qui defile dessous se voyait entierement au travers, logo compris. */
-header.menu{background:var(--night);backdrop-filter:none;border-bottom:1px solid var(--line)}
+header.menu{background:var(--bark);backdrop-filter:none;border-bottom:1px solid var(--line)}
 .nav{display:flex;align-items:center;justify-content:space-between;gap:20px}
 .brand img{width:168px;transition:.45s}
 header.scrolled .brand img{width:132px}
@@ -121,7 +143,7 @@ header.scrolled .brand img{width:132px}
 .burger.open .bars span:nth-child(2){opacity:0}
 .burger.open .bars span:nth-child(3){transform:translateY(-7.5px) rotate(-45deg)}
 
-.drawer{position:fixed;inset:0;background:var(--night);z-index:99;opacity:0;visibility:hidden;transition:.5s cubic-bezier(.2,.8,.2,1);overflow-y:auto}
+.drawer{position:fixed;inset:0;background:var(--bark);z-index:99;opacity:0;visibility:hidden;transition:.5s cubic-bezier(.2,.8,.2,1);overflow-y:auto}
 .drawer.open{opacity:1;visibility:visible}
 .dw-in{min-height:100svh;display:grid;grid-template-columns:1.25fr 1fr;align-items:center;gap:60px;max-width:var(--max);margin:0 auto;padding:130px 24px 60px}
 .dw-in nav{display:flex;flex-direction:column}
@@ -167,11 +189,36 @@ header.scrolled .brand img{width:132px}
 .slide{position:absolute;inset:0;opacity:0;transition:opacity 1.6s ease;background-size:cover;background-position:center}
 .slide.on{opacity:1;animation:kb 14s ease-out forwards}
 @keyframes kb{from{transform:scale(1.02)}to{transform:scale(1.13)}}
+/* Le voile vertical, garde tel quel : il pose le haut et le bas. */
 .hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(23,16,10,.74) 0%,rgba(23,16,10,.34) 42%,rgba(23,16,10,.96) 100%)}
+/* Un second voile, HORIZONTAL, derriere la seule colonne de texte.
+   Le carrousel alterne des photos sombres et des photos tres claires —
+   une chambre en plein jour, l'eau de la piscine. Le voile vertical n'y
+   suffit pas en son milieu, la ou tombe le paragraphe, et l'assombrir
+   assez pour la pire photo noircirait tout le hero : l'inverse de ce
+   qui est demande. Celui-ci ne sombre que la gauche, et laisse la photo
+   claire a droite. */
+.hero::before{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;
+  background:linear-gradient(95deg,rgba(23,16,10,.80) 0%,rgba(23,16,10,.66) 28%,
+    rgba(23,16,10,.30) 52%,rgba(23,16,10,.06) 66%,transparent 76%)}
+/* LE HERO GARDE DU TEXTE CLAIR. Il est pose sur une photo, sombree par
+   .hero::after — pas sur le fond de la page. Sans ces trois lignes le titre
+   suit --cream, devenu sombre, et devient illisible sur l'eau de la piscine.
+
+   C'est le defaut « Pas beau » d'un autre projet, au mot pres : un voile
+   cale pour un fond sombre, retourne en clair, fait atterrir du texte sombre
+   au milieu de la photo. Et la mesure de contraste ne le voit PAS : elle
+   compare a une couleur de fond, et une photo n'en est pas une. */
+.hero,.hero h1,.hero p,.hero .eyebrow,.hero .scroll-hint{color:#F6EEE2}
+.hero h1 em{color:#E2BE8C}
+.hero .btn{color:#F6EEE2;border-color:rgba(246,238,226,.5)}
+.hero .btn:hover{background:#F6EEE2;color:#2A231E;border-color:#F6EEE2}
+.hero .btn-solid{background:var(--bronze);border-color:var(--bronze);color:#FBF7F0}
+.hero .btn-solid:hover{background:#A2723A;border-color:#A2723A;color:#FBF7F0}
 .hero-in{position:relative;z-index:3;width:100%;padding-top:92px}
 .hero h1{font-size:clamp(2.7rem,7.6vw,6.2rem);margin:16px 0 22px;line-height:1.04}
 .hero h1 em{font-style:italic;color:var(--bronze-2)}
-.hero p{font-size:clamp(1rem,1.55vw,1.18rem);max-width:530px;color:#E8DFD1}
+.hero p{font-size:clamp(1rem,1.55vw,1.18rem);max-width:530px;color:var(--prose)}
 .hero-cta{display:flex;gap:14px;flex-wrap:wrap;margin-top:34px}
 .scroll-hint{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);z-index:3;font-size:9.5px;letter-spacing:.3em;text-transform:uppercase;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:10px}
 .scroll-hint i{width:1px;height:44px;background:linear-gradient(var(--bronze),transparent);animation:drop 2.2s infinite}
@@ -184,7 +231,7 @@ header.scrolled .brand img{width:132px}
 }
 
 .booking{position:relative;z-index:12;margin-top:-58px}
-.book-card{background:rgba(34,24,16,.97);backdrop-filter:blur(18px);border:1px solid var(--line);padding:22px;display:grid;grid-template-columns:repeat(4,1fr) auto;gap:16px;align-items:end;box-shadow:0 30px 70px rgba(0,0,0,.55)}
+.book-card{background:rgba(244,237,225,.97);backdrop-filter:blur(18px);border:1px solid var(--line);padding:22px;display:grid;grid-template-columns:repeat(4,1fr) auto;gap:16px;align-items:end;box-shadow:0 30px 70px rgba(0,0,0,.55)}
 .field label{display:block;font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--bronze);margin-bottom:7px;font-weight:700}
 .field input,.field select{width:100%;min-height:44px;background:transparent;border:0;border-bottom:1px solid var(--line);color:var(--cream);font:400 15px/1.4 var(--f-body);padding:8px 0;outline:none;transition:.3s}
 .field input:focus,.field select:focus{border-color:var(--bronze)}
@@ -197,7 +244,7 @@ header.scrolled .brand img{width:132px}
 
 section{padding:106px 0}
 .sec-head{max-width:640px;margin-bottom:52px}
-.sec-head p{margin-top:18px;color:#B7A894}
+.sec-head p{margin-top:18px;color:var(--muted)}
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line)}
 .stat{background:var(--bark);padding:36px 22px;text-align:center}
 .stat b{display:block;font-family:var(--f-display);font-size:2.9rem;color:var(--bronze);line-height:1;font-variant-numeric:tabular-nums}
@@ -213,7 +260,7 @@ section{padding:106px 0}
 .room-img{position:relative;aspect-ratio:4/3;overflow:hidden;background:var(--bark-3)}
 .room-img img{width:100%;height:100%;object-fit:cover;transition:1.1s cubic-bezier(.2,.8,.2,1)}
 .room:hover .room-img img{transform:scale(1.08)}
-.tag{position:absolute;top:14px;left:14px;background:rgba(23,16,10,.88);backdrop-filter:blur(6px);color:var(--bronze);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;padding:7px 12px;font-weight:700}
+.tag{position:absolute;top:14px;left:14px;background:rgba(23,16,10,.88);backdrop-filter:blur(6px);color:var(--bark);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;padding:7px 12px;font-weight:700}
 .room-body{padding:24px;display:flex;flex-direction:column;flex:1}
 .room-body h3{margin-bottom:8px}
 .room-body>p{font-size:14px;flex:1}
@@ -236,7 +283,7 @@ section{padding:106px 0}
 .offre:hover .offre-img img{transform:scale(1.08)}
 .offre-body{padding:24px;display:flex;flex-direction:column;flex:1}
 .offre-body h3{font-size:1.2rem;margin-bottom:8px}
-.offre-body>p{font-size:13.5px;color:#AA9B87}
+.offre-body>p{font-size:13.5px;color:var(--muted)}
 .offre ul{list-style:none;margin:16px 0 20px;flex:1}
 .offre li{font-size:12.5px;color:var(--muted);padding:5px 0 5px 18px;position:relative}
 .offre li::before{content:"✓";position:absolute;left:0;color:var(--bronze);font-size:11px}
@@ -250,7 +297,7 @@ section{padding:106px 0}
 .exp-i:hover{background:var(--bark-3)}
 .exp-i svg{width:26px;height:26px;stroke:var(--bronze);fill:none;stroke-width:1.2;margin-bottom:18px}
 .exp-i h3{font-size:1.14rem;margin-bottom:8px}
-.exp-i p{font-size:13.5px;color:#AA9B87}
+.exp-i p{font-size:13.5px;color:var(--muted)}
 
 .gal{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:188px;gap:12px}
 .gal figure{overflow:hidden;position:relative;cursor:pointer;background:var(--bark-2)}
@@ -288,11 +335,11 @@ section{padding:106px 0}
 .loc-map{min-height:440px;background:var(--bark-2)}
 .loc-map iframe{width:100%;height:100%;border:0;filter:grayscale(.35) sepia(.25) contrast(.95)}
 
-footer{background:#0F0A06;border-top:1px solid var(--line);padding:74px 0 28px}
+footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 28px}
 .f-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1.2fr;gap:44px}
 .f-grid h4{font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--bronze);margin-bottom:20px;font-weight:700}
-.f-grid p{display:block;font-size:13.5px;color:#AA9B87;margin-bottom:11px}
-.f-grid a{display:block;font-size:13.5px;color:#AA9B87;padding:9px 0;transition:.3s}
+.f-grid p{display:block;font-size:13.5px;color:var(--muted);margin-bottom:11px}
+.f-grid a{display:block;font-size:13.5px;color:var(--muted);padding:9px 0;transition:.3s}
 .f-grid a:hover{color:var(--bronze)}
 .f-bot{border-top:1px solid var(--line);margin-top:54px;padding-top:26px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:11.5px;color:#6E6154}
 .wa{position:fixed;right:22px;bottom:22px;z-index:90;width:56px;height:56px;border-radius:50%;background:#25D366;display:grid;place-items:center;box-shadow:0 10px 30px rgba(37,211,102,.35);transition:.35s}
@@ -341,7 +388,7 @@ footer{background:#0F0A06;border-top:1px solid var(--line);padding:74px 0 28px}
 .bandeau .quand{font-size:10px;letter-spacing:.26em;text-transform:uppercase;
   color:var(--bronze);font-weight:700;white-space:nowrap}
 .bandeau b{font-family:var(--f-display);font-weight:400;font-size:1.16rem;color:var(--cream)}
-.bandeau span.t{color:#B4A794;font-size:14px}
+.bandeau span.t{color:var(--muted);font-size:14px}
 .bandeau .fl{margin-left:auto;color:var(--bronze);white-space:nowrap;font-size:12px;
   letter-spacing:.18em;text-transform:uppercase;font-weight:700}
 
@@ -370,7 +417,7 @@ footer{background:#0F0A06;border-top:1px solid var(--line);padding:74px 0 28px}
   text-transform:uppercase;color:var(--muted);margin-left:7px}
 /* Une seule ligne : la hauteur du bandeau ne doit pas dependre de la longueur
    du texte saisi depuis l'administration. */
-.bandeau .accroche{color:#B4A794;font-size:13.5px;line-height:1.5;
+.bandeau .accroche{color:var(--muted);font-size:13.5px;line-height:1.5;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .bandeau .agir{flex:none;display:flex;flex-direction:column;align-items:flex-end;
   justify-content:center;gap:11px;padding:17px 22px 17px 0}
@@ -384,7 +431,7 @@ footer{background:#0F0A06;border-top:1px solid var(--line);padding:74px 0 28px}
 .bandeau .bouton{border:1px solid var(--bronze);color:var(--bronze-2);
   padding:10px 20px;font-size:11px;letter-spacing:.2em;text-transform:uppercase;
   font-weight:700;white-space:nowrap;transition:.3s}
-.bandeau.offre a:hover .bouton{background:var(--bronze);color:var(--night)}
+.bandeau.offre a:hover .bouton{background:var(--bronze);color:var(--bark)}
 @media(max-width:760px){
   .bandeau a{flex-wrap:wrap;gap:8px}
   .bandeau span.t,.bandeau .fl{display:none}
