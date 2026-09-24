@@ -1409,9 +1409,9 @@ Avant toute mise en production :
 
    **Et le délai de réponse « sous 24 h », qui manquait à cette liste.** Il
    est apparu le 23 août 2026 avec le tunnel de réservation, sans qu'aucune
-   source ne soit citée, et il s'affiche aujourd'hui sur la page Contact, dans
-   le tunnel, sur la 404, dans les devis séminaires — et sur **toutes** les
-   fiches chambres, puisque c'est le repli de l'état `inconnu`.
+   source ne soit citée. Il s'affiche **38 fois sur 14 pages** — Contact,
+   tunnel, 404, devis séminaires — et sur les sept fiches chambres dès
+   qu'aucune chambre n'est saisie, puisque c'est le repli de l'état `inconnu`.
 
    C'est la même famille que « acompte de 30 % » et « annulation gratuite
    jusqu'à 48 h » : une valeur plausible que j'ai écrite. L'ironie mérite
