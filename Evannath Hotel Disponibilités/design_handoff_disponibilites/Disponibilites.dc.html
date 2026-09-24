@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Cormorant+Garamond:wght@500;600&display=swap" rel="stylesheet">
+<script src="./image-slot.js"></script>
+<style>
+body{margin:0;background:#f4f6fa;font-family:'Outfit',sans-serif;color:#0f1e33}
+a{color:#b08a4f;text-decoration:none}a:hover{color:#8c6a36}
+*{box-sizing:border-box}
+</style>
+</helmet>
+<div style="display:grid;grid-template-columns:236px minmax(0,1fr);height:100vh;min-width:1280px;font-family:'Outfit',sans-serif">
+
+  <aside style="position:relative;overflow-y:auto;background:linear-gradient(180deg,#0f1e33 0%,#12233b 55%,#0b1626 100%);color:#e8ecf2;display:flex;flex-direction:column">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:22px 0 22px;border-bottom:1px solid rgba(255,255,255,.08)">
+      <div style="width:22px;height:22px;border:1.5px solid #c9a46a;transform:rotate(45deg);border-radius:3px;margin-bottom:8px"></div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:24px;letter-spacing:3px;color:#fff">EVANNATH</div>
+      <div style="font-size:10px;letter-spacing:4px;color:#c9a46a">HOTEL</div>
+    </div>
+    <nav style="display:flex;flex-direction:column;gap:4px;padding:22px 10px;position:relative;z-index:2;flex:none">
+      <sc-for list="{{ nav }}" as="n" hint-placeholder-count="9">
+        <div onClick="{{ n.go }}" style="display:flex;align-items:center;gap:16px;padding:11px 16px;border-radius:6px;font-size:14px;cursor:pointer;background:{{ n.bg }};color:#fff;font-weight:{{ n.w }}" style-hover="background:rgba(255,255,255,.06)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="{{ n.icon }}"></path></svg>
+          <span>{{ n.label }}</span>
+        </div>
+      </sc-for>
+    </nav>
+    <div style="position:relative;margin-top:auto;flex:1 1 auto;min-height:160px;max-height:420px">
+      <image-slot id="sidebar-hotel" shape="rect" placeholder="Photo façade hôtel"></image-slot>
+      <div style="position:absolute;inset:0;background:linear-gradient(180deg,#12233b 0%,rgba(18,35,59,.35) 45%,rgba(11,22,38,.85) 100%);pointer-events:none"></div>
+      <div style="position:absolute;left:0;right:0;bottom:56px;text-align:center;pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:14px">
+        <div style="font-size:14px;line-height:1.4;color:#fff"><span style="color:#c9a46a">Un séjour</span> d'exception<br>au cœur d'Abidjan</div>
+        <div style="width:40px;height:2px;background:#c9a46a"></div>
+      </div>
+    </div>
+  </aside>
+
+  <div style="display:flex;flex-direction:column;min-width:0;height:100vh">
+    <header style="height:74px;flex:none;background:#fff;border-bottom:1px solid #e8ecf2;display:flex;align-items:center;gap:24px;padding:0 28px">
+      <div style="flex:1;max-width:770px;display:flex;align-items:center;gap:12px;height:40px;padding:0 18px;border-radius:20px;background:#f1f3f7;color:#6b7686;font-size:13px">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+        <input placeholder="Rechercher une chambre, un client, une réservation…" style="border:0;background:transparent;outline:none;font:inherit;flex:1;color:#0f1e33">
+      </div>
+      <div style="flex:1"></div>
+      <div style="position:relative;color:#0f1e33;cursor:pointer">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M6 9a6 6 0 0 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9M10 20a2 2 0 0 0 4 0"></path></svg>
+        <div style="position:absolute;top:-6px;right:-7px;width:16px;height:16px;border-radius:8px;background:#e5484d;color:#fff;font-size:10px;font-weight:600;display:flex;align-items:center;justify-content:center">3</div>
+      </div>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0f1e33" stroke-width="1.7" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M3 10h18M8 3v4M16 3v4"></path></svg>
+      <div style="display:flex;align-items:center;gap:14px;padding-left:22px;border-left:1px solid #e8ecf2;height:74px">
+        <image-slot id="admin-avatar" shape="circle" placeholder="Avatar" style="width:38px;height:38px"></image-slot>
+        <div style="display:flex;flex-direction:column;gap:2px;min-width:120px">
+          <div style="font-size:14px;font-weight:600">Admin Hôtel</div>
+          <div style="font-size:12px;color:#7a8494">Administrateur</div>
+        </div>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0f1e33" stroke-width="2"><path d="M6 9l6 6 6-6"></path></svg>
+      </div>
+    </header>
+
+    <div style="flex:1;min-height:0;overflow:auto;padding:16px 16px 16px 28px;display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap">
+        <div style="flex:1;min-width:280px">
+          <h1 style="margin:0;font-size:34px;font-weight:600;letter-spacing:-.5px">Disponibilités</h1>
+          <div style="font-size:14px;color:#5b6576;margin-top:2px">Gérez l'état et la disponibilité de toutes vos chambres en temps réel.</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px;height:42px;padding:0 14px;background:#fff;border:1px solid #e1e5ec;border-radius:6px;font-size:13px;font-weight:500">
+          <span style="cursor:pointer">‹</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M3 10h18M8 3v4M16 3v4"></path></svg>
+          <span style="white-space:nowrap">25 sept. 2026 – 1 oct. 2026</span>
+          <span style="width:1px;height:22px;background:#e1e5ec"></span>
+          <span style="cursor:pointer">›</span>
+        </div>
+        <button style="height:42px;padding:0 24px;background:#fff;border:1px solid #e1e5ec;border-radius:6px;font:500 13px 'Outfit';color:#0f1e33;cursor:pointer">Aujourd'hui</button>
+        <button onClick="{{ newResa }}" style="height:42px;padding:0 26px;background:#b8925a;border:0;border-radius:6px;font:500 14px 'Outfit';color:#fff;cursor:pointer;display:flex;align-items:center;gap:10px" style-hover="background:#a57f48">
+          <span style="font-size:20px;font-weight:300;line-height:1">+</span>Nouvelle réservation
+        </button>
+      </div>
+
+      <div style="display:grid;grid-template-columns:minmax(0,1fr) {{ panelCol }};gap:14px;align-items:start">
+        <div style="display:flex;flex-direction:column;gap:14px;min-width:0">
+          <div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px">
+            <sc-for list="{{ stats }}" as="s" hint-placeholder-count="5">
+              <div style="background:#fff;border-radius:8px;border:1px solid #edf0f4;padding:16px 18px;display:flex;align-items:center;gap:16px">
+                <div style="width:44px;height:44px;border-radius:22px;flex:none;background:{{ s.soft }};color:{{ s.color }};display:flex;align-items:center;justify-content:center">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="0"><path d="{{ s.icon }}"></path></svg>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:2px">
+                  <div style="font-size:22px;font-weight:600">{{ s.n }}</div>
+                  <div style="font-size:12px;color:#5b6576">{{ s.label }}</div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="background:#fff;border-radius:8px;border:1px solid #edf0f4;padding:12px;display:flex;flex-direction:column;gap:12px;min-width:0">
+            <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">
+              <div style="flex:1.3;min-width:200px;display:flex;align-items:center;gap:10px;height:36px;padding:0 12px;border:1px solid #e1e5ec;border-radius:6px;font-size:12px;color:#6b7686">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+                <input value="{{ q }}" onInput="{{ setQ }}" placeholder="Rechercher une chambre…" style="border:0;outline:none;font:inherit;flex:1;color:#0f1e33;background:transparent">
+              </div>
+              <sc-for list="{{ selects }}" as="f" hint-placeholder-count="3">
+                <label style="flex:1;min-width:140px;display:flex;flex-direction:column;padding:4px 12px;border:1px solid #e1e5ec;border-radius:6px;position:relative">
+                  <span style="font-size:10px;color:#6b7686">{{ f.label }}</span>
+                  <select value="{{ f.value }}" onChange="{{ f.onChange }}" style="border:0;outline:none;font:500 13px 'Outfit';color:#0f1e33;background:transparent;padding:0;margin-left:-3px;cursor:pointer">
+                    <sc-for list="{{ f.options }}" as="o"><option value="{{ o.v }}">{{ o.t }}</option></sc-for>
+                  </select>
+                </label>
+              </sc-for>
+              <label style="display:flex;align-items:center;gap:10px;font-size:12px;cursor:pointer;padding:0 6px">
+                <input type="checkbox" checked="{{ onlyFree }}" onChange="{{ toggleFree }}" style="accent-color:#0f1e33;width:15px;height:15px;margin:0">
+                Afficher uniquement les disponibles
+              </label>
+            </div>
+
+            <div style="display:flex;align-items:center;gap:16px">
+              <div style="display:flex;border:1px solid #e1e5ec;border-radius:6px;overflow:hidden">
+                <sc-for list="{{ views }}" as="v" hint-placeholder-count="2">
+                  <div onClick="{{ v.go }}" style="white-space:nowrap;padding:9px 24px;font-size:12px;font-weight:500;cursor:pointer;background:{{ v.bg }};color:{{ v.fg }}">{{ v.label }}</div>
+                </sc-for>
+              </div>
+              <div style="flex:1;display:flex;align-items:center;justify-content:center;gap:24px;font-size:15px;font-weight:600;white-space:nowrap">
+                <span style="cursor:pointer;color:#5b6576">‹</span>25 sept. 2026 – 1 oct. 2026<span style="cursor:pointer;color:#5b6576">›</span>
+              </div>
+              <div style="display:flex;border:1px solid #e1e5ec;border-radius:6px;overflow:hidden">
+                <sc-for list="{{ ranges }}" as="r" hint-placeholder-count="3">
+                  <div onClick="{{ r.go }}" style="white-space:nowrap;padding:9px 16px;font-size:12px;font-weight:500;cursor:pointer;background:{{ r.bg }};color:{{ r.fg }}">{{ r.label }}</div>
+                </sc-for>
+              </div>
+            </div>
+
+            <sc-if value="{{ isCal }}" hint-placeholder-val="{{ true }}">
+              <div style="border:1px solid #e8ecf2;border-radius:6px;overflow:hidden">
+                <div style="display:grid;grid-template-columns:156px 52px repeat(7,minmax(0,1fr));border-bottom:1px solid #e8ecf2;font-size:12px">
+                  <div style="padding:18px 8px;font-weight:500">Chambre / Type</div>
+                  <div style="padding:18px 4px;font-weight:500;text-align:center;border-right:1px solid #e8ecf2">Étage</div>
+                  <sc-for list="{{ days }}" as="d" hint-placeholder-count="7">
+                    <div style="padding:10px 4px;text-align:center;display:flex;flex-direction:column;gap:4px;background:{{ d.bg }};color:{{ d.fg }};border-right:1px solid #eef1f5">
+                      <span style="font-weight:600">{{ d.d }}</span><span style="font-size:11px;opacity:.85">{{ d.n }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+                <div style="position:relative">
+                  <sc-if value="{{ highlightToday }}" hint-placeholder-val="{{ true }}">
+                    <div style="position:absolute;top:-58px;bottom:0;left:208px;width:calc((100% - 208px) / 7);border:1.5px solid #3f86e6;border-radius:3px;pointer-events:none;z-index:3"></div>
+                  </sc-if>
+                  <sc-for list="{{ rows }}" as="row" hint-placeholder-count="11">
+                    <div style="display:grid;grid-template-columns:156px 52px repeat(7,minmax(0,1fr));align-items:center;border-bottom:1px solid #eef1f5;min-height:{{ rowH }}">
+                      <div style="display:flex;align-items:center;gap:12px;padding:4px 8px">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0f1e33" stroke-width="1.7" stroke-linecap="round"><path d="M3 19V6M3 15h18v4M21 15v-3a3 3 0 0 0-3-3h-7v6M7 12.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3"></path></svg>
+                        <div style="display:flex;flex-direction:column;line-height:1.25">
+                          <span style="font-size:12px;font-weight:600">{{ row.num }}</span>
+                          <span style="font-size:11px">{{ row.type }}</span>
+                          <span style="font-size:9.5px;color:#6b7686">{{ row.bed }}</span>
+                        </div>
+                      </div>
+                      <div style="text-align:center;font-size:12px;border-right:1px solid #eef1f5;align-self:stretch;display:flex;align-items:center;justify-content:center">{{ row.floor }}</div>
+                      <sc-for list="{{ row.segs }}" as="s">
+                        <div onClick="{{ s.pick }}" style="grid-column:{{ s.col }};margin:3px;height:{{ cellH }};border-radius:3px;background:{{ s.bg }};color:{{ s.fg }};box-shadow:{{ s.ring }};display:flex;align-items:center;gap:8px;padding:0 10px;cursor:pointer;overflow:hidden;transition:filter .15s" style-hover="filter:brightness(.96)">
+                          <span style="flex:none;display:flex;color:{{ s.ic }}">
+                            <sc-if value="{{ s.isL }}"><svg width="14" height="14" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="currentColor"></circle><path d="M7 12.5l3.2 3L17 9" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path></svg></sc-if>
+                            <sc-if value="{{ s.isR }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M3 10h18M8 3v4M16 3v4"></path></svg></sc-if>
+                            <sc-if value="{{ s.isO }}"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="7.5" r="4.5"></circle><path d="M3 22c0-5 4-8.5 9-8.5s9 3.5 9 8.5z"></path></svg></sc-if>
+                            <sc-if value="{{ s.isM }}"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M14.7 2.3a6 6 0 0 0-5.9 8L2 17.2 6.8 22l6.9-6.8a6 6 0 0 0 8-5.9l-3.4 3.4-3.6-1-1-3.6z"></path></svg></sc-if>
+                            <sc-if value="{{ s.isN }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M10 2l1.9 5.6L17.5 9.5l-5.6 1.9L10 17l-1.9-5.6L2.5 9.5l5.6-1.9zM18.5 13l.9 2.6 2.6.9-2.6.9-.9 2.6-.9-2.6-2.6-.9 2.6-.9z"></path></svg></sc-if>
+                          </span>
+                          <div style="display:flex;flex-direction:column;min-width:0;line-height:1.3">
+                            <span style="font-size:11px;font-weight:500;white-space:nowrap">{{ s.label }}</span>
+                            <span style="font-size:9.5px;opacity:.9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ s.guest }}</span>
+                          </div>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </sc-for>
+                  <sc-if value="{{ noRows }}">
+                    <div style="padding:40px;text-align:center;font-size:13px;color:#6b7686">Aucune chambre ne correspond à ces filtres.</div>
+                  </sc-if>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ isList }}">
+              <div style="border:1px solid #e8ecf2;border-radius:6px;overflow:hidden;font-size:13px">
+                <div style="display:grid;grid-template-columns:90px 1.2fr 1.4fr 70px 1.2fr 1.4fr;gap:12px;padding:14px 16px;background:#f7f8fb;font-weight:500;font-size:12px;color:#5b6576">
+                  <span>Chambre</span><span>Type</span><span>Lits</span><span>Étage</span><span>Statut (25 sept.)</span><span>Client</span>
+                </div>
+                <sc-for list="{{ listRows }}" as="l" hint-placeholder-count="6">
+                  <div onClick="{{ l.pick }}" style="display:grid;grid-template-columns:90px 1.2fr 1.4fr 70px 1.2fr 1.4fr;gap:12px;padding:12px 16px;border-top:1px solid #eef1f5;align-items:center;cursor:pointer" style-hover="background:#fafbfd">
+                    <span style="font-weight:600">{{ l.num }}</span><span>{{ l.type }}</span><span style="color:#5b6576">{{ l.bed }}</span><span>{{ l.floor }}</span>
+                    <span><span style="display:inline-flex;padding:3px 10px;border-radius:10px;font-size:11px;font-weight:500;background:{{ l.bg }};color:{{ l.fg }}">{{ l.label }}</span></span>
+                    <span style="color:#5b6576">{{ l.guest }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+
+        <sc-if value="{{ panelOpen }}" hint-placeholder-val="{{ true }}">
+          <aside style="background:#fff;border-radius:8px;border:1px solid #edf0f4;padding:16px 14px;display:flex;flex-direction:column;gap:14px;position:sticky;top:0">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div style="font-size:18px;font-weight:600">Chambre {{ sel.num }}</div>
+              <span onClick="{{ closePanel }}" style="cursor:pointer;font-size:18px;color:#5b6576;line-height:1">×</span>
+            </div>
+            <div style="display:flex;gap:12px;align-items:center;padding-bottom:14px;border-bottom:1px solid #eef1f5">
+              <image-slot id="room-photo" shape="rounded" radius="4" placeholder="Photo chambre" style="width:84px;height:72px;flex:none"></image-slot>
+              <div style="display:flex;flex-direction:column;gap:6px;font-size:11px">
+                <span style="font-size:13px;font-weight:600">{{ sel.type }}</span>
+                <span>{{ sel.bed }}</span>
+                <span>Étage {{ sel.floor }}</span>
+              </div>
+            </div>
+
+            <div style="font-size:12px;font-weight:600">Détails de la réservation</div>
+            <div style="border:1px solid #eef1f5;border-radius:6px;padding:12px;display:flex;flex-direction:column;gap:12px;font-size:11px">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <span style="color:#6b7686">Statut</span>
+                <span style="padding:2px 8px;border-radius:9px;font-size:10px;font-weight:600;background:{{ sel.pillBg }};color:{{ sel.pillFg }}">{{ sel.statusLabel }}</span>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:2px"><span style="color:#6b7686;font-size:10px">Du</span><span>{{ sel.from }}</span></div>
+              <div style="display:flex;flex-direction:column;gap:2px"><span style="color:#6b7686;font-size:10px">Au</span><span>{{ sel.to }}</span></div>
+              <div style="display:flex;flex-direction:column;gap:2px"><span style="color:#6b7686;font-size:10px">Tarif par nuit</span><span>{{ sel.rate }}</span></div>
+              <div style="display:flex;flex-direction:column;gap:2px"><span style="color:#6b7686;font-size:10px">Client</span><span>{{ sel.guest }}</span></div>
+              <div style="display:flex;flex-direction:column;gap:2px"><span style="color:#6b7686;font-size:10px">Réservation n°</span><span>{{ sel.ref }}</span></div>
+            </div>
+
+            <div style="font-size:12px;font-weight:600;padding-top:4px">Changer le statut</div>
+            <div style="display:flex;flex-direction:column;gap:4px;padding-bottom:12px;border-bottom:1px solid #eef1f5">
+              <sc-for list="{{ statusOpts }}" as="o" hint-placeholder-count="5">
+                <div onClick="{{ o.set }}" style="display:flex;align-items:center;gap:12px;padding:6px 2px;font-size:11px;cursor:pointer;border-radius:4px" style-hover="background:#f7f8fb">
+                  <span style="width:15px;height:15px;border-radius:8px;flex:none;border:{{ o.ring }}"></span>
+                  <span style="width:10px;height:10px;border-radius:2px;background:{{ o.color }}"></span>
+                  <span>{{ o.label }}</span>
+                </div>
+              </sc-for>
+            </div>
+
+            <div style="font-size:12px;font-weight:600">Actions rapides</div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <button onClick="{{ createResa }}" style="height:32px;border:0;border-radius:4px;background:#0f1e33;color:#fff;font:500 11px 'Outfit';cursor:pointer;display:flex;align-items:center;gap:12px;padding:0 16px">Créer une réservation</button>
+              <button onClick="{{ blockRoom }}" style="height:32px;border:1px solid #e1e5ec;border-radius:4px;background:#f4f6fa;color:#0f1e33;font:500 11px 'Outfit';cursor:pointer;display:flex;align-items:center;gap:12px;padding:0 16px">Bloquer la chambre</button>
+              <button style="height:32px;border:1px solid #e1e5ec;border-radius:4px;background:#fff;color:#0f1e33;font:500 11px 'Outfit';cursor:pointer;display:flex;align-items:center;gap:12px;padding:0 16px">Modifier la réservation</button>
+            </div>
+
+            <div style="font-size:12px;font-weight:600;padding-top:6px">Notes</div>
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <textarea value="{{ note }}" onInput="{{ setNote }}" maxlength="200" placeholder="Ajouter une note…" style="height:56px;border:1px solid #e1e5ec;border-radius:4px;padding:8px 10px;font:11px 'Outfit';resize:vertical;outline:none;color:#0f1e33"></textarea>
+              <span style="font-size:9px;color:#7a8494;text-align:right">{{ noteCount }}/200</span>
+            </div>
+          </aside>
+        </sc-if>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;density&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;comfortable&quot;,&quot;compact&quot;],&quot;default&quot;:&quot;comfortable&quot;,&quot;tsType&quot;:&quot;'comfortable'|'compact'&quot;},&quot;highlightToday&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;}}">
+const ST = {
+  L: { label: 'Libre', pill: 'Disponible', bg: '#bfe8bb', fg: '#1f4f2a', ic: '#2f9e4f', color: '#2f9e4f' },
+  R: { label: 'Réservée', pill: 'Réservée', bg: '#fcc873', fg: '#6b3f00', ic: '#d9650a', color: '#e0850f' },
+  O: { label: 'Occupée', pill: 'Occupée', bg: '#3f86e6', fg: '#fff', ic: '#fff', color: '#3f86e6' },
+  M: { label: 'Maintenance', pill: 'Maintenance', bg: '#8e8e8e', fg: '#fff', ic: '#fff', color: '#7b7b7b' },
+  N: { label: 'Nettoyage', pill: 'Nettoyage', bg: '#9a6fe0', fg: '#fff', ic: '#fff', color: '#9a6fe0' },
+};
+const RATES = { Standard: 35000, Deluxe: 45000, Suite: 75000, Executive: 95000 };
+const DAYS = ['Ven','Sam','Dim','Lun','Mar','Mer','Jeu'];
+const dateOf = i => new Date(2026, 8, 25 + i);
+const fmt = d => d.getDate() + ' ' + ['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'][d.getMonth()] + ' ' + d.getFullYear();
+const shortFmt = i => { const d = dateOf(i); return d.getDate() + ' ' + (d.getMonth() === 8 ? 'sept.' : 'oct.'); };
+
+let uid = 70;
+const P = str => str.split('|').flatMap(tok => {
+  const [s, n = '1', g = '', late] = tok.split(':');
+  const id = s === 'L' ? null : ++uid;
+  return Array.from({ length: +n }, () => ({ s, g, id, late: !!late }));
+});
+const ROOMS = [
+  ['101','Standard','1 lit double',1,'L|L|R:2:M. Diarra|O:2:Mme Koné|L'],
+  ['102','Standard','2 lits simples',1,'O:1:M. Traoré:x|O:1:M. Traoré:x|O:1:M. Traoré:x|L|L|R:1:Mme Bamba|L'],
+  ['103','Deluxe','1 lit king size',1,'L|L|L|L|L|O:1:M. Kouamé|L'],
+  ['104','Deluxe','1 lit king size',1,'L|L|N|L|L|R:1:M. Koné|L'],
+  ['201','Suite','1 lit king size',2,'O:1:Mme Soro|O:1:Mme Soro|R:1:M. Diallo|O:2:M. Sissoko|L|L'],
+  ['202','Suite','1 lit king size',2,'M|M|L|L|L|R:1:M. Fofana|L'],
+  ['203','Suite','1 lit king size',2,'L|L|O:2:Mme Coulibaly|L|L|L'],
+  ['204','Suite','1 lit king size',2,'L|R:1:M. Touré|L|L|L|O:1:M. Yao|L'],
+  ['301','Executive','1 lit king size',3,'L|L|O:2:Mme Bah|L|L|L'],
+  ['302','Executive','1 lit king size',3,'L|O:2:M. Kéita:x|L|L|R:1:Mme N\'Guessan|L'],
+  ['303','Executive','1 lit king size',3,'L|L|N|L|L|L|L'],
+].map(([num, type, bed, floor, d]) => ({ num, type, bed, floor, days: P(d) }));
+
+const ICONS = {
+  home: 'M3 10.5L12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z',
+  bed: 'M3 19V6M3 15h18v4M21 15v-3a3 3 0 0 0-3-3h-7v6M7 12.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3',
+  cal: 'M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2zM3 10h18M8 3v4M16 3v4M8 14h2M14 14h2M8 17h2',
+  rooms: 'M4 4h16v16H4zM4 9h16M4 14h16M9 9v11M15 9v11',
+  tarif: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM15 9.5c-.5-1-1.6-1.5-3-1.5-1.7 0-3 .8-3 2s1.3 1.7 3 2 3 .8 3 2-1.3 2-3 2c-1.4 0-2.5-.5-3-1.5M12 6.5v11',
+  users: 'M9 11.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM2.5 20c0-3.5 3-6 6.5-6s6.5 2.5 6.5 6M16 4.5a3.5 3.5 0 0 1 0 7M18 14.2c2 .7 3.5 2.8 3.5 5.8',
+  serv: 'M4 7h16v13H4zM9 7V4h6v3M4 12h16M12 10v4',
+  report: 'M4 20V11M9.5 20V5M15 20v-6M20.5 20V9M3 20h18',
+  set: 'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-2.9-1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0-1.2-2.9H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.2-2.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 2.9-1.2V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 2.9 1.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0 1.2 2.9H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z',
+};
+const NAV = [['Dashboard','home'],['Réservations','bed'],['Disponibilités','cal'],['Chambres','rooms'],['Tarifs','tarif'],['Clients','users'],['Services','serv'],['Rapports','report'],['Paramètres','set']];
+const STAT_ICONS = {
+  bed: 'M2 19V9a3 3 0 0 1 3-3h14a3 3 0 0 1 3 3v10h-2.5v-2h-15v2zM5 12h5.5V9H5zM13.5 12H19V9h-5.5z',
+  ok: 'M12 2a10 10 0 1 1 0 20 10 10 0 0 1 0-20zm-1.2 13.6l6-6-1.5-1.5-4.5 4.5-2.1-2.1-1.5 1.5z',
+  user: 'M12 3a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9zM3 21c0-5 4-8 9-8s9 3 9 8z',
+  cal: 'M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2zm0 5v9h14v-9zM7 2h2v4H7zm8 0h2v4h-2zM7 12h4v3H7z',
+  wrench: 'M14.7 2.3a6 6 0 0 0-5.9 8L2 17.2 6.8 22l6.9-6.8a6 6 0 0 0 8-5.9l-3.4 3.4-3.6-1-1-3.6z',
+};
+
+class Component extends DCLogic {
+  state = { rooms: ROOMS, sel: { num: '103', day: 0 }, panel: true, view: 'cal', range: 'Semaine', q: '', type: 'Tous', floor: 'Tous', status: 'Tous', onlyFree: false, notes: {}, nav: 'Disponibilités' };
+
+  setDay(num, day, patch) {
+    this.setState(st => {
+      const rooms = st.rooms.map(r => {
+        if (r.num !== num) return r;
+        const gid = r.days[day].id;
+        const days = r.days.map((c, i) => (i === day || (gid && c.id === gid)) ? { ...c, ...patch(c) } : c);
+        return { ...r, days };
+      });
+      return { rooms };
+    });
+  }
+  setStatus(s) {
+    const { num, day } = this.state.sel;
+    this.setDay(num, day, c => s === 'L' ? { s, g: '', id: null, late: false } : { s, id: c.id || ++uid, late: s === 'O' ? c.late : false });
+  }
+
+  renderVals() {
+    const st = this.state, p = this.props;
+    const dense = p.density === 'compact';
+    const segsOf = r => {
+      const out = [];
+      r.days.forEach((c, i) => {
+        const last = out[out.length - 1];
+        if (last && c.id && last.id === c.id) { last.span++; last.days.push(i); }
+        else out.push({ ...c, span: 1, start: i, days: [i] });
+      });
+      return out;
+    };
+    const t0 = r => r.days[0].s;
+    const rows = st.rooms.filter(r =>
+      (!st.q || (r.num + ' ' + r.type).toLowerCase().includes(st.q.toLowerCase())) &&
+      (st.type === 'Tous' || r.type === st.type) &&
+      (st.floor === 'Tous' || String(r.floor) === st.floor) &&
+      (st.status === 'Tous' || t0(r) === st.status) &&
+      (!st.onlyFree || t0(r) === 'L'));
+
+    const selRoom = st.rooms.find(r => r.num === st.sel.num) || st.rooms[0];
+    const selSeg = segsOf(selRoom).find(s => s.days.includes(st.sel.day));
+    const m = ST[selSeg.s];
+    const nights = selSeg.span;
+    const sel = {
+      num: selRoom.num, type: selRoom.type, bed: selRoom.bed, floor: selRoom.floor,
+      statusLabel: m.pill, pillBg: m.bg, pillFg: m.fg,
+      from: fmt(dateOf(selSeg.start)),
+      to: fmt(dateOf(selSeg.start + nights)) + ' (' + nights + (nights > 1 ? ' nuits)' : ' nuit)'),
+      rate: RATES[selRoom.type].toLocaleString('fr-FR').replace(/\u202f|\u00a0/g, ' ') + ' FCFA',
+      guest: selSeg.g || '—',
+      ref: selSeg.id ? '#RES-2026-' + String(selSeg.id).padStart(3, '0') : '—',
+    };
+
+    const mkSeg = (r, s) => {
+      const mm = ST[s.s];
+      const isSel = r.num === st.sel.num && s.days.includes(st.sel.day);
+      return {
+        col: 'span ' + s.span, label: mm.label, guest: s.g,
+        bg: s.late ? '#e35d5d' : mm.bg, fg: mm.fg, ic: mm.ic,
+        ring: isSel ? '0 0 0 2px #0f1e33' : 'none',
+        isL: s.s === 'L', isR: s.s === 'R', isO: s.s === 'O', isM: s.s === 'M', isN: s.s === 'N',
+        pick: () => this.setState({ sel: { num: r.num, day: s.start }, panel: true }),
+      };
+    };
+
+    const cnt = k => st.rooms.filter(r => k.includes(t0(r))).length;
+    const opt = (arr) => arr.map(v => ({ v, t: v }));
+    const sel3 = (label, key, options) => ({ label, value: st[key], options, onChange: e => this.setState({ [key]: e.target.value }) });
+
+    return {
+      nav: NAV.map(([label, ic]) => ({ label, icon: ICONS[ic], bg: st.nav === label ? 'linear-gradient(90deg,#b8925a,#8f6f40)' : 'transparent', w: st.nav === label ? 600 : 400, go: () => this.setState({ nav: label }) })),
+      stats: [
+        { n: st.rooms.length, label: 'Total chambres', icon: STAT_ICONS.bed, soft: '#e6ecf6', color: '#1f3a66' },
+        { n: cnt('L'), label: 'Disponibles', icon: STAT_ICONS.ok, soft: '#dff3e2', color: '#2f9e4f' },
+        { n: cnt('O'), label: 'Occupées', icon: STAT_ICONS.user, soft: '#fde3e3', color: '#e0474c' },
+        { n: cnt('R'), label: 'Réservées', icon: STAT_ICONS.cal, soft: '#fdebd6', color: '#e0850f' },
+        { n: cnt('MN'), label: 'Indisponibles', icon: STAT_ICONS.wrench, soft: '#eceef2', color: '#3b4455' },
+      ],
+      q: st.q, setQ: e => this.setState({ q: e.target.value }),
+      selects: [
+        sel3('Type de chambre', 'type', opt(['Tous', 'Standard', 'Deluxe', 'Suite', 'Executive'])),
+        sel3('Étage', 'floor', opt(['Tous', '1', '2', '3'])),
+        sel3('Statut', 'status', [{ v: 'Tous', t: 'Tous' }, ...Object.keys(ST).map(k => ({ v: k, t: ST[k].label }))]),
+      ],
+      onlyFree: st.onlyFree, toggleFree: () => this.setState({ onlyFree: !st.onlyFree }),
+      views: [['cal', 'Vue calendrier'], ['list', 'Vue liste']].map(([k, label]) => ({ label, bg: st.view === k ? '#0f1e33' : '#fff', fg: st.view === k ? '#fff' : '#0f1e33', go: () => this.setState({ view: k }) })),
+      ranges: ['Jour', 'Semaine', 'Mois'].map(label => ({ label, bg: st.range === label ? '#0f1e33' : '#fff', fg: st.range === label ? '#fff' : '#0f1e33', go: () => this.setState({ range: label }) })),
+      isCal: st.view === 'cal', isList: st.view === 'list',
+      highlightToday: p.highlightToday ?? true,
+      days: DAYS.map((d, i) => ({ d, n: shortFmt(i), bg: i === 0 && (p.highlightToday ?? true) ? '#eef4fd' : '#fff', fg: i === 0 && (p.highlightToday ?? true) ? '#2563c9' : '#0f1e33' })),
+      rowH: dense ? '44px' : '54px', cellH: dense ? '34px' : '44px',
+      rows: rows.map(r => ({ num: r.num, type: r.type, bed: r.bed, floor: r.floor, segs: segsOf(r).map(s => mkSeg(r, s)) })),
+      noRows: rows.length === 0,
+      listRows: rows.map(r => { const c = r.days[0], mm = ST[c.s]; return { num: r.num, type: r.type, bed: r.bed, floor: r.floor, label: mm.label, bg: c.late ? '#e35d5d' : mm.bg, fg: mm.fg, guest: c.g || '—', pick: () => this.setState({ sel: { num: r.num, day: 0 }, panel: true }) }; }),
+      panelOpen: st.panel, panelCol: st.panel ? '244px' : '0px',
+      closePanel: () => this.setState({ panel: false }),
+      sel,
+      statusOpts: Object.keys(ST).map(k => ({ label: ST[k].pill, color: ST[k].color, ring: selSeg.s === k ? '4.5px solid #2f9e4f' : '1.5px solid #c9cfd8', set: () => this.setStatus(k) })),
+      createResa: () => { this.setStatus('R'); this.setDay(st.sel.num, st.sel.day, c => ({ g: c.g || 'Nouveau client' })); },
+      newResa: () => this.setState({ panel: true }),
+      blockRoom: () => this.setStatus('M'),
+      note: st.notes[selRoom.num] || '', noteCount: (st.notes[selRoom.num] || '').length,
+      setNote: e => this.setState({ notes: { ...st.notes, [selRoom.num]: e.target.value } }),
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -570,5 +570,37 @@ for (const [du, au, quoi] of [
   verifie('enregistrer une fermeture demande une session', f.code === 401, f.json);
 }
 
+// ── Le nettoyage : un blocage qui n'est ni une panne ni une vente ─────────
+// Une chambre en cours de remise en etat n'est pas vendable, mais elle se
+// reloue ce soir — la confondre avec « hors service », qui attend un
+// reparateur, faisait perdre a la reception la seule information qui
+// l'interesse. Cote client, la difference ne se voit pas : une chambre
+// indisponible est indisponible.
+{
+  /* Ses propres chambres : les Standard du debut ont ete retirees en route
+     par les tests de suppression, et un test qui depend de l'ordre des
+     autres finit toujours par mentir. */
+  const A = (await poser('chambre', { numero: 'N1', categorie: 'categorie-essai-nettoyage' })).json.entree.id;
+  await poser('chambre', { numero: 'N2', categorie: 'categorie-essai-nettoyage' });
+
+  const r = await poser('fermeture', { cible: A, debut: '2027-11-10',
+    fin: '2027-11-10', nature: 'nettoyage', motif: 'Remise en etat' });
+  verifie('une fermeture de nature « nettoyage » est acceptee',
+    r.code === 200 && r.json.entree.nature === 'nettoyage', r.json);
+
+  const d = await dispo('2027-11-10', '2027-11-11', 'categorie-essai-nettoyage');
+  verifie('elle retire bien la chambre de la vente cette nuit-la',
+    etat(d, 'categorie-essai-nettoyage') === 'derniere', d.json);
+
+  const apres = await dispo('2027-11-11', '2027-11-12', 'categorie-essai-nettoyage');
+  verifie('et seulement cette nuit-la',
+    etat(apres, 'categorie-essai-nettoyage') === 'libre', apres.json);
+
+  const faux = await poser('fermeture', { cible: A, debut: '2028-01-01',
+    nature: 'menage' });
+  verifie('une nature inventee est refusee, pas enregistree telle quelle',
+    faux.code === 200 && faux.json.entree.nature === '', faux.json);
+}
+
 console.log(`\n${ok} verification(s) passee(s), ${ko} en echec.`);
 if (ko) process.exit(1);

@@ -455,7 +455,12 @@ function nettoyerFermeture(e) {
        ou des nuits retirees de la vente. Vide pour les fermetures d'avant :
        elles restent des fermetures, et comptent comme telles. Listes
        fermees — rien d'invente ne doit s'afficher. */
-    nature: ['client', 'hors-service', 'vente'].includes(e.nature) ? e.nature : '',
+    /* `nettoyage` a rejoint la liste : une chambre en cours de remise en
+       etat n'est ni vendable ni en panne, et la confondre avec l'un des deux
+       faisait perdre l'information qui compte a la reception — celle-la se
+       relouera ce soir, l'autre dans trois semaines. */
+    nature: ['client', 'hors-service', 'vente', 'nettoyage'].includes(e.nature)
+      ? e.nature : '',
     client: propre(e.client, 60),
     /* L'adresse du client, pour le prevenir quand la reception confirme.
        Elle ne sort JAMAIS par la route publique — voir a=dispo, qui ne rend

@@ -17,7 +17,8 @@
    Ce fichier se charge après le script de la page, dont il emploie ETAT,
    appel, ech, $, AUJ, jourIso et FCFA.
    ───────────────────────────────────────────────────────────────────────── */
-const DSP = { vue: 'mois', focus: null, ouvertes: {}, tiroir: null, modal: null,
+const DSP = { vue: 'mois', mode: 'calendrier', focus: null, ouvertes: {},
+              tiroir: null, modal: null,
               voirTout: false, seuil: 0.3, defiler: true, nbJours: 0,
               f: { texte: '', cat: '', statut: '', libres: false } };
 
@@ -26,6 +27,12 @@ const DSP = { vue: 'mois', focus: null, ouvertes: {}, tiroir: null, modal: null,
    une divergence de plus a surveiller, mais les lire coute un reflow par
    rendu. On les fixe, et le test de largeur les verifie. */
 const DSP_COL = 96, DSP_LIB = 330;
+
+/* Les glyphes des compteurs. Des caracteres, pas des images : le reste de
+   l'administration fait deja ainsi, et une icone qui ne se telecharge pas
+   laisse un carre vide au milieu d'un chiffre. */
+const ICONES = { lit: '▤', ok: '✓', qui: '●', cal: '◱',
+                 cle: '⚒', net: '✦' };
 function combienDeJours() {
   const el = document.querySelector('#dsp-defil');
   /* Au premier rendu la zone n'existe pas encore : on estime, puis
@@ -48,7 +55,8 @@ function ajusterFenetre() {
 const DTON = { dispo: ['var(--et-libre)', 'Disponible'], faible: ['var(--et-res)', 'Peu de chambres'],
   complet: ['var(--et-bloq)', 'Complet'], hs: ['var(--et-hs)', 'Hors service'],
   inconnu: ['var(--et-hs)', 'Aucune chambre saisie'], libre: ['var(--et-libre)', 'Disponible'],
-  occ: ['var(--et-occ)', 'Occupée'], res: ['var(--et-res)', 'Réservée'], vente: ['var(--et-bloq)', 'Bloquée'] };
+  occ: ['var(--et-occ)', 'Occupée'], res: ['var(--et-res)', 'Réservée'],
+  vente: ['var(--et-bloq)', 'Bloquée'], net: ['var(--et-net)', 'Nettoyage'] };
 
 const jDt = (j) => new Date(j + 'T12:00:00');
 const jPlus = (j, n) => { const d = jDt(j); d.setDate(d.getDate() + n); return jourIso(d); };
@@ -103,7 +111,14 @@ function dspEtat(ch, n, idx, auj) {
     }
     bloc = bloc || f;
   }
-  return bloc ? { k: bloc.nature === 'vente' ? 'vente' : 'hs', f: bloc } : { k: 'libre' };
+  if (!bloc) return { k: 'libre' };
+  /* Trois blocages qui ne se valent pas : une chambre bloquee a la vente se
+     rouvre d'un clic, une chambre en nettoyage se reloue ce soir, une chambre
+     hors service attend un reparateur. Les confondre faisait perdre a la
+     reception la seule information qui l'interesse. */
+  const k = bloc.nature === 'vente' ? 'vente'
+    : bloc.nature === 'nettoyage' ? 'net' : 'hs';
+  return { k, f: bloc };
 }
 
 /** Disponibles = chambres saisies − réservées − bloquées, par catégorie et
@@ -187,6 +202,36 @@ function detailSejour(e) {
      - le statut « Nettoyage » : c'est de la gouvernante, un autre metier et
        un autre rythme. Une chambre restee sur « Nettoyage » depuis mardi
        dernier se vend comme indisponible sans que personne ne l'ait decide. */
+/** Les nuits d'une chambre, regroupees en BLOCS.
+ *
+ *  Un sejour de trois nuits est UN sejour, pas trois cases identiques posees
+ *  cote a cote. On relie donc les nuits consecutives qui portent la MEME
+ *  fermeture, et on en fait un seul bloc qui porte le nom du client une fois.
+ *
+ *  Les nuits LIBRES restent distinctes : il n'y a rien a relier, et deux
+ *  nuits libres cote a cote ne forment pas un evenement. C'est aussi ce qui
+ *  permet de cliquer une nuit precise pour la reserver.
+ *
+ *  `n` est le nombre de nuits couvertes. La grille etant en flex, un bloc de
+ *  n nuits prend n fois la base d'une case — voir --n dans la feuille. */
+function blocsDe(ch, jours, calc) {
+  const out = [];
+  for (let i = 0; i < jours.length; i++) {
+    const e = calc.parChambre[ch.id][jours[i]];
+    let n = 1;
+    if (e && e.f && e.f.id) {
+      while (i + n < jours.length) {
+        const suite = calc.parChambre[ch.id][jours[i + n]];
+        if (!suite || !suite.f || suite.f.id !== e.f.id) break;
+        n++;
+      }
+    }
+    out.push({ e, jour: jours[i], n });
+    i += n - 1;
+  }
+  return out;
+}
+
 function htmlDsp() {
   const cats = ETAT.categories || [], chambres = ETAT.chambres || [];
   const F = ETAT.fermetures || [], auj = AUJ();
@@ -270,7 +315,7 @@ function htmlDsp() {
     <select id="dsp-fstat" aria-label="Statut">
       <option value="">Tous les statuts</option>
       ${[['libre', 'Libre'], ['res', 'Réservée'], ['occ', 'Occupée'],
-         ['vente', 'Bloquée'], ['hs', 'Hors service']].map(([v, l]) =>
+         ['vente', 'Bloquée'], ['net', 'Nettoyage'], ['hs', 'Hors service']].map(([v, l]) =>
         `<option value="${v}" ${v === f.statut ? 'selected' : ''}>${l}</option>`).join('')}
     </select>
     <label class="prise"><input type="checkbox" id="dsp-flibres" ${f.libres ? 'checked' : ''}>
@@ -286,12 +331,19 @@ function htmlDsp() {
   }).join('');
 
   const lignes = retenues.map((ch) => {
-    const cases = jours.map((j) => {
-      const e = calc.parChambre[ch.id][j], [teinte, mot] = DTON[e.k], det = detailSejour(e);
-      const aria = 'Chambre ' + ech(ch.numero) + ', ' + jLong(j) + ' : ' + mot
+    const cases = blocsDe(ch, jours, calc).map(({ e, jour: j, n }) => {
+      const [teinte, mot] = DTON[e.k], det = detailSejour(e);
+      /* Un bloc qui couvre aujourd'hui porte la teinte du jour : la colonne
+         entiere ne peut pas etre encadree quand les cases se chevauchent. */
+      const dedans = n === 1 ? j === auj : (j <= auj && jours[jours.indexOf(j) + n - 1] >= auj);
+      const nuits = n === 1 ? jLong(j)
+        : 'du ' + jCourt(j) + ' au ' + jCourt(jours[jours.indexOf(j) + n - 1])
+          + ' (' + n + ' nuits)';
+      const aria = 'Chambre ' + ech(ch.numero) + ', ' + nuits + ' : ' + mot
         + (det ? ' — ' + ech(det) : '');
-      return `<div class="${col(j)}"><button class="dsp-b" style="--c:${teinte}"
-        data-dsp-ch="${ech(ch.id)}" data-nuit="${j}" aria-label="${aria}" title="${aria}">${mot}${
+      return `<div class="dsp-j${dedans ? ' auj' : ''}"${n > 1 ? ` style="--n:${n}"` : ''}
+        ><button class="dsp-b" style="--c:${teinte}" data-dsp-ch="${ech(ch.id)}"
+        data-nuit="${j}" aria-label="${aria}" title="${aria}">${mot}${
         det && DSP.vue !== 'mois' ? '<small>' + ech(det) + '</small>' : ''}</button></div>`;
     }).join('');
     return `<div class="dsp-l dsp-r">
@@ -382,28 +434,58 @@ function htmlDsp() {
     </div>`).join('')}
   </div>`;
 
+  /* La vue liste : la meme selection de chambres, mais l'etat d'UN jour —
+     celui sur lequel la periode est posee. Elle sert a lire vite, pas a
+     naviguer dans le temps : le calendrier est la pour ca. */
+  const liste = `<table class="dsp-liste">
+    <thead><tr>
+      <th>Chambre</th><th>Catégorie</th>${avecEtage ? '<th>Étage</th>' : ''}
+      <th>État ${DSP.focus === auj ? 'ce soir' : 'le ' + jCourt(DSP.focus)}</th><th>Client</th>
+    </tr></thead>
+    <tbody>${retenues.length ? retenues.map((ch) => {
+      const e = dspEtat(ch, DSP.focus, idx, auj), [teinte, mot] = DTON[e.k];
+      const qui = e.f && e.f.nature === 'client' ? (e.f.client || '—')
+        : e.f && e.f.motif ? e.f.motif : '—';
+      return `<tr data-dsp-ch="${ech(ch.id)}" data-nuit="${DSP.focus}" tabindex="0"
+        aria-label="Chambre ${ech(ch.numero)} : ${mot}">
+        <td><b>${ech(ch.numero)}</b></td>
+        <td>${ech(nomCat(ch.categorie))}</td>
+        ${avecEtage ? `<td>${ech(ch.etage || '—')}</td>` : ''}
+        <td><span class="etat" style="color:${teinte};border-color:${teinte}">${mot}</span></td>
+        <td>${ech(qui)}</td></tr>`;
+    }).join('') : `<tr><td colspan="${avecEtage ? 5 : 4}">
+      <p class="aide" style="margin:0">Aucune chambre ne correspond à ce filtre.</p></td></tr>`}
+    </tbody></table>`;
+
   return `${demandes}<div class="dsp-chiffres-h">
-      ${CARTES.map(([l, n, c]) => `<div class="carte"${c ? ` style="--c:${c}"` : ''}>
-        <b>${c ? '<span class="pt"></span>' : ''}${n}</b><span>${l}</span></div>`).join('')}
+      ${CARTES.map(([l, n, c, ic]) => `<div class="carte"${c ? ` style="--c:${c}"` : ''}>
+        <i class="rond">${ICONES[ic] || ''}</i>
+        <div><b>${n}</b><span>${l}</span></div></div>`).join('')}
     </div>
     ${filtres}
     <section class="dsp-cal v-${DSP.vue}" aria-label="Calendrier des disponibilités">
       <div class="dsp-barre">
+        <div class="dsp-vues" role="group" aria-label="Affichage">
+          ${[['calendrier', 'Vue calendrier'], ['liste', 'Vue liste']].map(([v, l]) =>
+            `<button class="opt ${DSP.mode === v ? 'on' : ''}" data-dsp-mode="${v}"
+              aria-pressed="${DSP.mode === v}">${l}</button>`).join('')}
+        </div>
         <div class="dsp-nav">
           <button class="fl2" data-dsp-pas="-1" aria-label="Période précédente">‹</button>
           <button class="fl2" data-dsp-pas="1" aria-label="Période suivante">›</button>
+          <button class="btn mince" data-dsp-auj="1">Aujourd'hui</button>
           <select id="dsp-mois" class="dsp-mois" aria-label="Mois affiché">${optMois}</select>
           <span class="aide" style="margin:0 0 0 6px">${periode}</span>
         </div>
         <div class="dsp-vues" role="group" aria-label="Vue du calendrier">${vues}</div>
       </div>
-      <div class="dsp-defil" id="dsp-defil">
+      ${DSP.mode === 'liste' ? liste : `<div class="dsp-defil" id="dsp-defil">
         <div class="dsp-l dsp-tete"><div class="dsp-g dsp-ch">
           <span class="lb" style="margin:0;flex:1">Chambre / Catégorie</span>
           ${avecEtage ? '<span class="lb" style="margin:0">Étage</span>' : ''}</div>${tete}</div>
         ${lignes || `<div class="dsp-l dsp-r"><div class="dsp-g" style="flex:1;max-width:none">
           <p class="aide" style="margin:0">Aucune chambre ne correspond à ce filtre.</p></div></div>`}
-      </div>
+      </div>`}
       <div class="dsp-pied">
         ${cats.map((c) => `<button class="dsp-lien" data-dsp-ajout="${ech(c.slug)}"
           >+ ${ech(c.nom)}</button>`).join('')}
@@ -430,6 +512,7 @@ function htmlDsp() {
           <li><span class="pt" style="--c:var(--et-res)"></span>Réservée — le client arrive</li>
           <li><span class="pt" style="--c:var(--et-occ)"></span>Occupée — le client est là</li>
           <li><span class="pt" style="--c:var(--et-bloq)"></span>Bloquée à la vente</li>
+          <li><span class="pt" style="--c:var(--et-net)"></span>Nettoyage</li>
           <li><span class="pt" style="--c:var(--et-hs)"></span>Hors service</li>
         </ul>
         <p class="aide" style="margin-top:16px;padding-top:14px;border-top:1px solid var(--line)">
@@ -581,14 +664,16 @@ function rendreTiroir() {
     const det = client
       ? (e.f.client || 'Fermeture') + ' — arrivée ' + jCourt(e.f.debut) + ', départ '
         + jCourt(jPlus(e.f.fin, 1)) + ' · ' + (e.f.statut === 'attente' ? 'en attente' : 'confirmée') + '.'
-      : e.k === 'hs' || e.k === 'vente' ? (e.f ? e.f.motif + ' — ' + nuitsEnClair(e.f).toLowerCase() + '.'
+      : e.k === 'hs' || e.k === 'vente' || e.k === 'net' ? (e.f ? e.f.motif + ' — ' + nuitsEnClair(e.f).toLowerCase() + '.'
         : (e.motif || '') + ' — sans date de fin.') : '';
     qui = [vignette(ch.categorie), 'Chambre ' + ch.numero + (c.nom ? ' · ' + c.nom : '')];
     corps = `<div class="dsp-chiffres"><div><span>État cette nuit</span>
         <span class="etat" style="color:${teinte};border-color:${teinte}">${mot}</span></div>
         ${det ? `<div><span style="color:var(--prose);font-size:13px">${ech(det)}</span></div>` : ''}</div>`;
     statuts = radio('dsp-statut', [['dispo', 'Disponible', 'var(--et-libre)'],
-      ['complet', 'Bloquée à la vente', 'var(--et-bloq)'], ['hs', 'Hors service', 'var(--et-hs)']], tr.statut);
+      ['complet', 'Bloquée à la vente', 'var(--et-bloq)'],
+      ['nettoyage', 'Nettoyage', 'var(--et-net)'],
+      ['hs', 'Hors service', 'var(--et-hs)']], tr.statut);
     if (client && tr.statut === 'hs') {
       bloque = true;
       avert = 'Cette chambre possède une réservation ' + (e.f.statut === 'attente' ? 'en attente'
@@ -642,7 +727,8 @@ function rendreFiche(el, tr) {
       && f.statut !== 'annulee')
     .sort((a, b) => a.debut.localeCompare(b.debut));
 
-  const datee = tr.statut === 'reservee' || tr.statut === 'vente';
+  const datee = tr.statut === 'reservee' || tr.statut === 'vente'
+    || tr.statut === 'nettoyage';
   el.innerHTML = `<div class="dsp-th"><h2>Chambre ${ech(ch.numero)}</h2>
       <button class="dsp-x" data-dsp-fermer aria-label="Fermer">×</button></div>
     <div class="dsp-tc">
@@ -660,6 +746,7 @@ function rendreFiche(el, tr) {
         ['dispo', 'La rendre disponible', 'var(--et-libre)'],
         ['reservee', 'La réserver pour un client', 'var(--et-res)'],
         ['vente', 'La bloquer à la vente', 'var(--et-bloq)'],
+        ['nettoyage', 'La mettre en nettoyage', 'var(--et-net)'],
         ['hs', 'La mettre hors service', 'var(--et-hs)']], tr.statut)}</div>
 
       ${datee ? `<div class="duo">
@@ -732,7 +819,8 @@ async function enregistrerFiche() {
   const ch = (ETAT.chambres || []).find((x) => x.id === tr.id);
   if (!ch) return;
   const dire = (t) => { tr.erreur = t; rendreTiroir(); };
-  const datee = tr.statut === 'reservee' || tr.statut === 'vente';
+  const datee = tr.statut === 'reservee' || tr.statut === 'vente'
+    || tr.statut === 'nettoyage';
   if (datee) {
     if (!tr.debut || !tr.fin) return dire('Indiquez la première et la dernière nuit.');
     if (tr.fin < tr.debut) return dire('La dernière nuit précède la première.');
@@ -762,6 +850,9 @@ async function enregistrerFiche() {
     } else if (tr.statut === 'reservee') {
       await poserF({ cible: ch.id, debut: tr.debut, fin: tr.fin, nature: 'client',
         client: tr.client.trim(), statut: 'confirmee', motif: '' });
+    } else if (tr.statut === 'nettoyage') {
+      await poserF({ cible: ch.id, debut: tr.debut, fin: tr.fin, nature: 'nettoyage',
+        motif: tr.motif.trim() || 'Nettoyage' });
     } else {
       await poserF({ cible: ch.id, debut: tr.debut, fin: tr.fin, nature: 'vente',
         motif: tr.motif.trim() || 'Fermée à la vente' });
@@ -1127,6 +1218,8 @@ function clicDsp(e) {
   if ((b = q('[data-dsp-fermer]'))) { DSP.tiroir = null; DSP.modal = null; rendreTiroir(); rendreModal(); return true; }
   if ((b = q('[data-dsp-pas]'))) { decalerDsp(Number(b.dataset.dspPas)); return true; }
   if ((b = q('[data-dsp-vue]'))) { allerDsp(DSP.focus, b.dataset.dspVue); return true; }
+  if ((b = q('[data-dsp-auj]'))) { allerDsp(AUJ()); return true; }
+  if ((b = q('[data-dsp-mode]'))) { DSP.mode = b.dataset.dspMode; rendreDsp(); return true; }
   if ((b = q('[data-dsp-ouvrir]'))) {
     const s = b.dataset.dspOuvrir;
     DSP.ouvertes[s] = b.getAttribute('aria-expanded') !== 'true';
