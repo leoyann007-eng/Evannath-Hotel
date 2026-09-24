@@ -18,27 +18,33 @@ h1{font-family:var(--f-t);font-size:31px;line-height:1.15;font-weight:400;
 h1.partie{font-size:24px;margin-bottom:10px}
 h2{font-family:var(--f-t);font-size:21px;font-weight:400;margin:0 0 12px;
    padding-bottom:7px;border-bottom:1px solid var(--line)}
-h3{font-family:var(--f-t);font-size:16.5px;font-weight:400;margin:20px 0 2px}
 p{margin:8px 0}
 strong{font-weight:700}
 em{font-style:italic}
 
 .chapeau{color:var(--muted);font-size:12.5px;margin-bottom:22px}
-
-/* Ce que le client lit, mot pour mot. Encadre, parce que ce sont les seules
-   phrases de ce document qui seront reellement vues par un client. */
-.mot{border-left:3px solid var(--bronze);padding:3px 0 3px 16px;margin:10px 0;
-     font-family:var(--f-t);font-size:15px}
-
 .note{color:var(--muted);font-style:italic;font-size:12.5px;margin:6px 0 14px}
 
+/* La matinee racontee. L'heure a gauche, ce qui se passe a droite : on
+   suit la journee comme on la vit, pas comme on la programme. */
+.heures{margin:14px 0}
+.h{display:flex;gap:18px;padding:11px 0;border-bottom:1px solid var(--line)}
+.h:last-child{border-bottom:0}
+.h time{flex:none;width:68px;font-family:var(--f-t);font-size:15px;
+        color:var(--bronze);padding-top:1px;white-space:nowrap}
+.h div{flex:1}
+.h p{margin:0 0 5px}
+.h p:last-child{margin-bottom:0}
+.h .ecran{font-family:var(--f-t);font-size:14.5px;color:var(--ink);
+  border-left:3px solid var(--bronze-2);padding:2px 0 2px 13px;margin:7px 0}
+
 .encadre{background:var(--sable);border:1px solid var(--line);
-         padding:14px 18px;margin:14px 0}
+         padding:14px 18px;margin:16px 0}
 .encadre p:first-child{margin-top:0}
 .encadre p:last-child{margin-bottom:0}
 
 .avert{border-left:3px solid var(--rouge);background:#FBF2F0;
-       padding:12px 16px;margin:14px 0}
+       padding:12px 16px;margin:16px 0}
 
 table{width:100%;border-collapse:collapse;margin:12px 0 4px;font-size:12.5px}
 th{text-align:left;font-size:10px;letter-spacing:.13em;text-transform:uppercase;
@@ -52,7 +58,6 @@ td.quand{white-space:nowrap;color:var(--muted)}
 ul,ol{margin:8px 0;padding-left:24px}
 li{margin:5px 0}
 
-/* Les decisions : numerotees, et chacune porte son reglage actuel. */
 ol.choix{list-style:none;padding-left:0;counter-reset:c}
 ol.choix li{counter-increment:c;position:relative;padding-left:40px;
             margin:16px 0}
@@ -74,7 +79,7 @@ section{margin-bottom:30px}
   @page{margin:14mm 12mm}
   .page{max-width:none;padding:0}
   h1,h2,h3{break-after:avoid}
-  .encadre,.avert,.mot,tr,li{break-inside:avoid}
+  .encadre,.avert,.h,tr,li{break-inside:avoid}
   section{break-inside:auto}
 }
 </style>
@@ -82,123 +87,155 @@ section{margin-bottom:30px}
 
 <h1>Les disponibilités en ligne</h1>
 <p class="chapeau">Hôtel Evannath — septembre 2026<br>
-Ce que fait le système, décrit en comportement et non en technique.</p>
+Ce que fait le système, raconté comme une journée de travail.</p>
 
 <p>Vous avez demandé que le site mette en ligne les chambres disponibles.
-C'est construit. Ce document décrit <strong>ce qui se passera réellement</strong>,
-du côté de votre client comme du côté de votre réception.</p>
+C'est construit. Plutôt que de vous décrire un mécanisme, voici
+<strong>une matinée ordinaire</strong>, telle qu'elle se déroulera une fois vos
+chambres saisies.</p>
 
 <p>Il est fait pour être contredit. À la fin, <strong>six décisions vous
 appartiennent</strong> — j'ai pris un parti sur chacune pour que le système
-fonctionne, mais aucun n'est définitif. Lisez en vous demandant simplement :
+tourne, mais aucun n'est définitif. Lisez en vous demandant simplement :
 <em>est-ce ainsi que je veux que ça se passe ?</em></p>
 
-<section>
-<h2>Le principe, en une phrase</h2>
-
-<p><strong>Le site n'annonce jamais une disponibilité de lui-même.</strong> Il
-répète ce que votre réception a saisi. Et quand elle n'a rien saisi, il ne
-promet rien.</p>
-
-<p class="note">C'est le contraire de ce que fait le site aujourd'hui, et
-c'était le seul endroit où il vous exposait : sous chaque chambre s'affichait
-une pastille verte « Disponible à ces dates », quelles que soient les dates
-choisies, sans que rien ne le vérifie.</p>
-</section>
+<p class="note">Les numéros de chambre employés ci-dessous sont des exemples,
+choisis pour rendre le récit lisible. Les vôtres les remplaceront.</p>
 
 <section>
-<h2>Ce que voit votre client</h2>
+<h2>Une matinée, racontée</h2>
 
-<p>Quand il choisit des dates, la page lui répond l'une de ces quatre
-phrases — et rien d'autre :</p>
+<p>Nous sommes un jeudi. Supposons qu'il vous reste, ce matin, trois Chambres
+Standard libres pour le week-end du 24 au 26.</p>
 
-<table>
-<tr><th>Ce qu'il lit</th><th>Quand</th></tr>
-<tr>
-  <td><strong>Disponible à ces dates</strong></td>
-  <td class="quand">Il reste au moins deux chambres de cette catégorie</td>
-</tr>
-<tr>
-  <td><strong>Dernière chambre à ces dates</strong></td>
-  <td class="quand">Il en reste exactement une</td>
-</tr>
-<tr>
-  <td><strong>Complet à ces dates</strong></td>
-  <td class="quand">Il n'en reste aucune</td>
-</tr>
-<tr>
-  <td><strong>Disponibilité confirmée sous 24 h</strong></td>
-  <td class="quand">Vos chambres ne sont pas saisies, ou le système ne peut pas
-      répondre</td>
-</tr>
-</table>
+<div class="heures">
 
-<p>La quatrième est la plus importante, et c'est celle qui s'affiche
-aujourd'hui, partout. <strong>Rien ne retombe jamais sur « Disponible ».</strong>
-Panne, réseau coupé, dates incomplètes : tout revient à « confirmée sous
-24 h », qui ne promet rien. Un site qui annonce une chambre libre parce qu'il
-n'a pas pu vérifier ment à votre place.</p>
+<div class="h"><time>9 h 12</time><div>
+<p>Un client ouvre votre site, choisit la Chambre Standard et ses dates.
+La page lui répond :</p>
+<p class="ecran">Disponible à ces dates</p>
+<p>Il ne voit ni numéro, ni combien il vous en reste. Seulement qu'il peut
+réserver.</p>
+</div></div>
 
-<p><strong>Votre client ne voit jamais un numéro de chambre, ni combien il
-vous en reste.</strong> Il apprend seulement s'il peut réserver.</p>
-</section>
+<div class="h"><time>9 h 14</time><div>
+<p>Il valide. À cet instant, sans que personne n'intervienne :</p>
+<p>le système lui attribue la <strong>chambre 104</strong> — la plus petite
+libre de la catégorie — et la <strong>retire de la vente jusqu'à 11 h 14</strong>.
+Le client lit « une chambre vous est gardée », sans le numéro.</p>
+<p>La demande apparaît <strong>immédiatement</strong> en tête du tableau de bord
+de votre réception, avec son heure limite.</p>
+</div></div>
 
-<section>
-<h2>Quand un client demande une chambre</h2>
+<div class="h"><time>9 h 31</time><div>
+<p>Un deuxième client demande les mêmes dates. Il en reste deux :</p>
+<p class="ecran">Disponible à ces dates</p>
+<p>Il réserve à son tour. La <strong>chambre 105</strong> lui est gardée
+jusqu'à 11 h 31.</p>
+</div></div>
 
-<p>Il choisit ses dates et une catégorie, puis valide. À cet instant :</p>
+<div class="h"><time>9 h 40</time><div>
+<p>Votre réceptionniste prend son poste, voit la demande de 9 h 14 et
+<strong>confirme</strong>. Trois choses se produisent :</p>
+<p>le client reçoit <strong>automatiquement son e-mail de confirmation</strong> ;
+la chambre 104 cesse d'expirer, elle est ferme ; et elle reste occupée les
+nuits du 24 et du 25 — le client part le 26 au matin, cette nuit-là est de
+nouveau vendable.</p>
+</div></div>
 
-<ul>
-<li>le système <strong>choisit lui-même une chambre libre</strong> de cette
-    catégorie — le plus petit numéro d'abord ;</li>
-<li>il la <strong>retire de la vente pendant deux heures</strong> ;</li>
-<li>le client lit : <em>une chambre vous est gardée</em>, sans le numéro ;</li>
-<li>la demande apparaît immédiatement dans votre espace d'administration,
-    avec l'heure limite.</li>
-</ul>
+<div class="h"><time>10 h 05</time><div>
+<p>Un troisième client. Il n'en reste plus qu'une :</p>
+<p class="ecran">Dernière chambre à ces dates</p>
+<p>C'est le seul chiffre que le site laisse deviner, et seulement celui-là.</p>
+</div></div>
+
+<div class="h"><time>10 h 22</time><div>
+<p>Il réserve. Un quatrième client arrive :</p>
+<p class="ecran">Complet à ces dates</p>
+<p>Il ne vous appellera pas pour rien, et vous ne perdrez pas un quart d'heure
+à lui expliquer.</p>
+</div></div>
+
+<div class="h"><time>11 h 30</time><div>
+<p>La climatisation de la <strong>chambre 108</strong> lâche. Votre
+réceptionniste la met <strong>hors service</strong> en deux clics —
+<strong>sans date de fin</strong>, puisqu'on ne sait pas quand elle sera
+réparée.</p>
+<p>La 108 sort de la vente à la seconde, pour toutes les dates, et
+<strong>aucune échéance ne la fera revenir toute seule</strong>. Elle reviendra
+le jour où quelqu'un la remettra en service, à la main.</p>
+</div></div>
+
+<div class="h"><time>16 h 00</time><div>
+<p>Une nouvelle demande arrive du site, pour la semaine suivante : la
+<strong>chambre 106</strong> est gardée jusqu'à 18 h 00.</p>
+</div></div>
+
+<div class="h"><time>18 h 01</time><div>
+<p>Personne ne l'a traitée. La 106 <strong>repart à la vente</strong> — mais la
+demande <strong>reste affichée</strong>, marquée « expirée » en rouge, avec le
+nom du client et ses dates.</p>
+<p>Quelqu'un a voulu cette chambre et n'a pas eu de réponse. Votre réception
+doit pouvoir le voir, et rappeler.</p>
+</div></div>
+
+</div>
 
 <div class="encadre">
-<p><strong>Pourquoi cette retenue de deux heures.</strong> Sans elle, la
-demande partait sur le téléphone de la réception et le site continuait
-d'annoncer la chambre libre tant que personne ne l'avait recopiée. Deux
-clients pouvaient demander la dernière chambre, et l'un des deux allait être
-déçu.</p>
-<p>Une demande venue du site <strong>n'est pas une réservation</strong> : c'est
-pourquoi elle ne bloque pas indéfiniment. Passé deux heures sans réponse, la
-chambre repart à la vente — mais la demande <strong>reste visible</strong>,
-marquée « expirée », avec le nom du client et ses dates. Quelqu'un a voulu
-cette chambre et n'a pas eu de réponse : votre réception doit pouvoir le
-voir.</p>
+<p><strong>Pourquoi une retenue, et pourquoi elle expire.</strong> Sans elle,
+la demande partait sur le téléphone de la réception et le site continuait
+d'annoncer la chambre libre tant que personne ne l'avait recopiée : deux
+clients pouvaient demander la dernière, et l'un des deux allait être déçu.</p>
+<p>Mais une demande venue du site <strong>n'est pas une réservation</strong>.
+On ne peut pas condamner une chambre parce que quelqu'un a rempli un
+formulaire. D'où les deux heures — assez pour que votre réception réponde,
+trop peu pour qu'un formulaire abandonné vous coûte une nuit.</p>
 </div>
 </section>
 
 <section>
-<h2>Ce que fait votre réception</h2>
+<h2>Les quatre phrases que lit votre client</h2>
 
-<p>Elle ouvre son espace d'administration et voit, en tête de page, les
-demandes à traiter avec leur heure limite. Pour chacune : <strong>confirmer</strong>
-ou <strong>refuser</strong>.</p>
+<table>
+<tr><th>Ce qu'il lit</th><th>Quand</th></tr>
+<tr><td><strong>Disponible à ces dates</strong></td>
+    <td class="quand">Il reste au moins deux chambres de la catégorie</td></tr>
+<tr><td><strong>Dernière chambre à ces dates</strong></td>
+    <td class="quand">Il en reste exactement une</td></tr>
+<tr><td><strong>Complet à ces dates</strong></td>
+    <td class="quand">Il n'en reste aucune</td></tr>
+<tr><td><strong>Disponibilité confirmée sous 24 h</strong></td>
+    <td class="quand">Le système ne peut pas répondre</td></tr>
+</table>
 
-<p>Si elle confirme, <strong>le client reçoit automatiquement un e-mail de
-confirmation</strong> et la réservation cesse d'expirer : elle est ferme.</p>
+<p>La quatrième mérite une explication, parce que c'est elle qui vous protège.
+<strong>Rien ne retombe jamais sur « Disponible ».</strong> Panne, réseau
+coupé, chambres non saisies, dates incomplètes : tout revient à « confirmée
+sous 24 h », qui ne promet rien.</p>
 
-<p class="note">L'envoi automatique est construit. Il s'activera le jour où
-l'adresse d'expédition de l'hôtel sera raccordée — c'est une formalité
-technique de quelques minutes, mais elle demande une adresse à votre nom de
-domaine.</p>
+<p class="note">C'est exactement ce qui s'affiche aujourd'hui, partout, tant
+que vos chambres ne sont pas saisies — un silence honnête, et non une
+promesse en l'air.</p>
+</section>
 
-<p>En dehors des demandes venues du site, la réception peut à tout moment :</p>
+<section>
+<h2>Ce que votre réception fait, en dehors des demandes</h2>
+
+<p>Au-delà de confirmer ou refuser, elle peut à tout moment :</p>
 
 <ul>
-<li>fermer <strong>une chambre</strong> sur des nuits précises — la 25, du 12
-    au 15 ;</li>
+<li>fermer <strong>une chambre</strong> sur des nuits précises — la 122, du 12
+    au 15, parce qu'un client a réservé par téléphone ;</li>
 <li>fermer <strong>une catégorie entière</strong>, ou <strong>tout
-    l'hôtel</strong> — un événement privé, une fermeture annuelle ;</li>
-<li>mettre une chambre <strong>hors service</strong>, sans dates : travaux,
-    climatisation en panne, chambre de service. Elle sort de la vente jusqu'à
-    ce qu'on l'y remette à la main, et aucune date ne la fera revenir toute
-    seule.</li>
+    l'hôtel</strong> — un séminaire qui privatise, une fermeture annuelle ;</li>
+<li>mettre une chambre <strong>hors service</strong>, sans dates, comme la 108
+    de ce matin.</li>
 </ul>
+
+<p>Et le matin, en ouvrant, elle voit sur une seule page : les demandes à
+traiter avec leur échéance, puis <strong>combien de chambres sont libres ce
+soir, combien de clients arrivent, combien partent, et combien sont hors
+service</strong>.</p>
 </section>
 
 <section>
@@ -208,15 +245,12 @@ domaine.</p>
 que ces situations soient impossibles.</p>
 
 <ul>
-<li>Le site ne peut pas annoncer libre une chambre que votre réception a
-    fermée.</li>
-<li>Il ne peut pas vendre une chambre marquée hors service, quelles que
+<li>Il ne peut pas annoncer libre une chambre que votre réception a fermée.</li>
+<li>Il ne peut pas vendre la 108 tant qu'elle est hors service, quelles que
     soient les dates demandées.</li>
-<li>Il ne peut pas envoyer deux fois le même e-mail de confirmation à un
-    client — rouvrir une fiche pour corriger une faute de frappe ne renvoie
-    rien.</li>
-<li>Il ne peut pas annoncer « disponible » quand il ne sait pas. Il dit
-    « confirmée sous 24 h ».</li>
+<li>Il ne peut pas envoyer deux fois le même e-mail de confirmation — rouvrir
+    une fiche pour corriger une faute de frappe ne renvoie rien.</li>
+<li>Il ne peut pas annoncer « disponible » quand il ne sait pas.</li>
 </ul>
 </section>
 
@@ -235,11 +269,10 @@ vendez aussi vos chambres, les deux inventaires restent séparés.</p>
 
 <div class="avert">
 <p><strong>Et surtout : il ne vaut que ce que vaut sa tenue à jour.</strong></p>
-<p>Un calendrier que personne ne remplit est <em>pire</em> qu'aucun
-calendrier. Aujourd'hui, sans chambres saisies, le site dit « disponibilité
-confirmée sous 24 h » : un silence honnête. Le jour où vos chambres seront
-saisies mais que le calendrier ne sera plus tenu, ce silence deviendra une
-promesse fausse — et c'est votre nom qui sera engagé, pas le mien.</p>
+<p>Toute la matinée ci-dessus repose sur une chose — que quelqu'un, à
+l'hôtel, tienne ce calendrier. Un calendrier que personne ne remplit est
+<em>pire</em> qu'aucun calendrier : il transforme un silence honnête en
+promesse fausse.</p>
 <p>C'est la raison d'être de la cinquième question ci-dessous. Elle compte
 plus que les quatre autres.</p>
 </div>
@@ -254,36 +287,37 @@ répondre revient à valider le réglage en place.</p>
 <ol class="choix">
 
 <li>
-<b>Faut-il annoncer « Dernière chambre à ces dates » ?</b>
+<b>Faut-il annoncer « Dernière chambre à ces dates » ?</b>
 <span class="actuel">Aujourd'hui : oui</span>
-<p>Cette mention crée un sentiment d'urgence et fait réserver plus vite. Elle
-révèle aussi que votre hôtel est presque vide le reste du temps. Certains
-établissements la veulent, d'autres pas.</p>
+<p>C'est ce qui s'est affiché à 10 h 05. Cette mention crée un sentiment
+d'urgence et fait réserver plus vite. Elle révèle aussi que votre hôtel est
+presque vide le reste du temps. Certains établissements la veulent, d'autres
+pas.</p>
 </li>
 
 <li>
-<b>Faut-il dire « Complet à ces dates » ?</b>
+<b>Faut-il dire « Complet à ces dates » ?</b>
 <span class="actuel">Aujourd'hui : oui</span>
-<p>C'est honnête, et ça évite un appel pour rien. Mais ça renvoie le client
-ailleurs. L'alternative serait de lui proposer les autres catégories encore
-libres, ou d'autres dates.</p>
+<p>C'est ce qu'a lu le client de 10 h 22. C'est honnête, et ça vous évite un
+appel pour rien. Mais ça le renvoie ailleurs. L'alternative serait de lui
+proposer les autres catégories encore libres, ou d'autres dates.</p>
 </li>
 
 <li>
 <b>Deux heures de retenue, est-ce la bonne durée ?</b>
 <span class="actuel">Aujourd'hui : 2 heures</span>
-<p>Plus long, une chambre reste bloquée par une demande qui n'aboutira pas.
-Plus court, un client qui écrit à 22 h voit sa chambre repartir avant que
-votre réception n'ouvre. La bonne durée dépend de vos heures de réponse
-réelles — voir la question 5.</p>
+<p>C'est ce qui a fait expirer la demande de 16 h. Plus long, une chambre
+reste bloquée par une demande qui n'aboutira pas. Plus court, un client qui
+écrit à 22 h voit sa chambre repartir avant que votre réception n'ouvre. La
+bonne durée dépend de vos heures de réponse réelles — voir la question 5.</p>
 </li>
 
 <li>
 <b>Faut-il dire au client quelle chambre lui est gardée ?</b>
 <span class="actuel">Aujourd'hui : non</span>
-<p>Le garder secret vous laisse libre de le déplacer sans avoir à vous
-expliquer. Le dire rassure certains clients, mais vous engage sur un numéro
-précis.</p>
+<p>À 9 h 14, le client n'a pas su qu'il s'agissait de la 104. Le taire vous
+laisse libre de le déplacer sans avoir à vous expliquer. Le dire rassure
+certains clients, mais vous engage sur un numéro précis.</p>
 </li>
 
 <li>
@@ -291,15 +325,15 @@ précis.</p>
 journée ?</b>
 <span class="actuel">Aujourd'hui : à définir</span>
 <p>C'est la question la plus importante du document, et celle qu'on oublie de
-poser. Un nom, et un rythme — « à chaque prise de poste », « deux fois par
-jour ». La formation de la personne fait partie du travail, pas du service
+poser. Un nom, et un rythme — « à chaque prise de poste », « deux fois par
+jour ». La formation de cette personne fait partie du travail, pas du service
 après-vente.</p>
 </li>
 
 <li>
 <b>Quelles chambres sont durablement hors service ?</b>
 <span class="actuel">Aujourd'hui : aucune connue</span>
-<p>Vos 46 chambres sont l'inventaire théorique. Si trois sont en travaux et
+<p>Vos 46 chambres sont l'inventaire théorique. Si trois sont en travaux et
 qu'on les saisit comme vendables, le site annoncera dès le premier jour plus
 de disponibilité que vous ne pouvez honorer.</p>
 </li>
@@ -308,7 +342,7 @@ de disponibilité que vous ne pouvez honorer.</p>
 </section>
 
 <section>
-<h2>Ce qu'il me faut pour l'allumer</h2>
+<h2>Ce qu'il me faut pour que cette matinée devienne la vôtre</h2>
 
 <p>Une seule chose, et elle ne dépend que de vous : <strong>la liste de vos
 chambres</strong> — pour chacune, son numéro, sa catégorie et son étage.</p>

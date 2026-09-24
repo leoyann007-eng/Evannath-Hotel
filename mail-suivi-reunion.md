@@ -4,8 +4,12 @@
 **Quand :** aujourd'hui ou demain. Plus tard, ce n'est plus un compte rendu.
 **Objet :** `Suite à notre réunion d'hier — et une liste dont j'ai besoin`
 
-**Pièce jointe :** `Disponibilites-Evannath.pdf` — quatre pages décrivant le
-comportement du système, et six décisions qu'elle seule peut trancher. Le
+**Pièce jointe :** `Disponibilites-Evannath.pdf` — cinq pages. Le système y
+est raconté comme une matinée de travail, avec des heures et des numéros de
+chambre, plutôt que décrit comme un mécanisme : une démonstration se retient,
+une description non. Les numéros sont signalés comme des exemples dès la
+première page, pour qu'elle ne croie pas qu'on a déjà ses chambres. Suivent
+six décisions qu'elle seule peut trancher. Le
 document dit explicitement que ne pas répondre vaut acceptation des réglages
 actuels : sans cela, il devient un formulaire de plus à remplir, et il
 retarderait la seule chose qui presse — la liste des chambres.
@@ -46,10 +50,10 @@ Nous n'en avons pas parlé hier et je ne vous l'ai jamais montré — je le
 ferai volontiers en un quart d'heure, quand vous voudrez. J'y ai ajouté un
 écran *Disponibilités*, où la réception suit chaque chambre une par une.
 
-**Ci-joint quatre pages** qui décrivent ce que le système fera concrètement,
-chez votre client comme à votre réception. Elles se terminent par six
-décisions qui vous appartiennent — ne rien répondre revient à valider les
-réglages en place.
+**Ci-joint, une matinée racontée heure par heure** : ce que lit votre client,
+ce que voit votre réception, et ce qui se passe quand personne ne répond. Le
+document se termine par six décisions qui vous appartiennent — ne rien
+répondre revient à valider les réglages en place.
 
 À cet écran, il ne manque que **vos chambres**. Pour chacune : **son numéro, sa
 catégorie et son étage.** Vos sept catégories, telles que votre site les
