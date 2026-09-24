@@ -46,7 +46,7 @@ CSS = REMISE_CSS + """
 .pane{display:none}
 .pane.on{display:block}
 .pane h2{margin-bottom:8px}
-.pane>p.sub{color:#B4A794;margin-bottom:30px}
+.pane>p.sub{color:var(--muted);margin-bottom:30px}
 
 .f{display:flex;flex-direction:column;margin-bottom:18px}
 /* Largeur explicite : sans elle, un <select> reclame la largeur de son
@@ -61,7 +61,7 @@ CSS = REMISE_CSS + """
    l'ecran alors qu'on n'a rien a annoncer. */
 .dnote{display:flex;gap:11px;align-items:flex-start;border:1px solid var(--line);
   padding:13px 15px;margin-bottom:18px;font-size:13.5px;line-height:1.55;
-  color:#CFC3B2}
+  color:var(--prose)}
 .dnote[hidden]{display:none}
 .dnote i{width:7px;height:7px;border-radius:50%;flex:0 0 auto;margin-top:6px}
 .dnote b{font-weight:600}
@@ -96,7 +96,7 @@ input::placeholder,textarea::placeholder{color:#6E6154}
 .recap h3{font-size:1.35rem;margin-bottom:4px}
 .recap .cat{font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--bronze);font-weight:700;margin-bottom:20px}
 .recap .row{display:flex;justify-content:space-between;gap:14px;font-size:14px;color:var(--muted);padding:10px 0;border-bottom:1px solid var(--line-2)}
-.recap .row span:last-child{color:#CFC3B2;text-align:right;font-variant-numeric:tabular-nums}
+.recap .row span:last-child{color:var(--prose);text-align:right;font-variant-numeric:tabular-nums}
 .recap .tot{display:flex;justify-content:space-between;align-items:baseline;gap:14px;margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}
 .recap .tot span{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:700}
 .recap .tot b{font-family:var(--f-display);font-size:1.9rem;color:var(--bronze-2);font-variant-numeric:tabular-nums;font-weight:400}
@@ -113,7 +113,7 @@ input::placeholder,textarea::placeholder{color:#6E6154}
   font-family:var(--f-display);font-size:1.3rem;color:var(--bronze-2);letter-spacing:.1em}
 .done-box .g{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:34px}
 .next-steps{border:1px solid var(--line);margin-top:44px;text-align:left;max-width:560px;margin-inline:auto}
-.next-steps div{padding:16px 22px;border-bottom:1px solid var(--line);display:flex;gap:16px;font-size:14.5px;color:#CFC3B2}
+.next-steps div{padding:16px 22px;border-bottom:1px solid var(--line);display:flex;gap:16px;font-size:14.5px;color:var(--prose)}
 .next-steps div:last-child{border-bottom:0}
 .next-steps i{font-style:normal;color:var(--bronze);font-weight:700;flex:0 0 auto}
 
@@ -268,7 +268,7 @@ body = [header('index.html#chambres', 'Nos chambres', 'navch'), drawer('index.ht
       <div class="row"><span data-t="rr5">Petit-déjeuner</span><span style="color:var(--palm)" data-t="rr5v">Inclus</span></div>
       <div class="tot"><span data-t="rr6">Total séjour</span><b id="rtot">—</b></div>
       <div class="acompte"><span data-t="rac">Acompte à régler aujourd'hui :</span> <b id="racc">—</b><br>
-        <span style="font-size:12px"><span data-t="rso">Solde à l'arrivée :</span> <b id="rsolde" style="color:#CFC3B2;font-weight:600">—</b></span></div>
+        <span style="font-size:12px"><span data-t="rso">Solde à l'arrivée :</span> <b id="rsolde" style="color:var(--prose);font-weight:600">—</b></span></div>
     </div>
   </aside>
 </div>

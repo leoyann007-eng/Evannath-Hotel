@@ -80,7 +80,7 @@ CSS = """
 
 section{padding:104px 0}
 .head{text-align:center;margin-bottom:60px}
-.head p{max-width:54ch;margin:18px auto 0;color:#B4A794}
+.head p{max-width:54ch;margin:18px auto 0;color:var(--muted)}
 
 /* sur le domaine */
 .dom{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
@@ -91,12 +91,21 @@ section{padding:104px 0}
 .card:hover .ph img{transform:scale(1.07)}
 .card .when{position:absolute;top:13px;left:13px;background:rgba(23,16,10,.88);backdrop-filter:blur(6px);
   color:var(--bronze);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;padding:7px 12px;font-weight:700}
+/* Ce voile est pose sur une PHOTO : il garde sa nuit, quelle que soit la
+   couleur de la page. Mais tout ce qu'il contient heritait des jetons
+   devenus sombres — « Dès 20 h » tombait a 1,22:1 sur son propre
+   fond. Il redeclare donc des jetons clairs pour son interieur :
+   une regle, plutot que la chasse a chaque couleur. */
+.card .when{--cream:#F6EEE2;--prose:#D7CBBA;--muted:#E0D6C8;
+  --bronze:#DFBB84;--bronze-2:#E8CDA3;--bark:#17100A;
+  color:var(--cream)}
+
 .card .in{padding:24px;display:flex;flex-direction:column;flex:1}
 .card h3{margin-bottom:10px;font-weight:400}
 .card p{font-size:14px;flex:1}
 .card a{display:inline-block;margin-top:18px;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;
   color:var(--bronze);border:1px solid var(--bronze);padding:13px 18px;font-weight:700;transition:.3s;width:max-content}
-.card a:hover{background:var(--bronze);color:var(--night)}
+.card a:hover{background:var(--bronze);color:var(--bark)}
 
 /* sur l'eau */
 .eau-sec{background:var(--bark);border-block:1px solid var(--line)}
@@ -108,7 +117,7 @@ section{padding:104px 0}
   font-variant-numeric:tabular-nums;transition:.45s}
 .plate:hover .n{opacity:1}
 .plate h3{font-size:clamp(1.3rem,2.3vw,1.8rem);margin-bottom:10px;font-weight:400}
-.plate p{font-size:14.5px;color:#B4A794;max-width:56ch}
+.plate p{font-size:14.5px;color:var(--muted);max-width:56ch}
 .plate .q{font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:700;white-space:nowrap}
 
 /* autour */
@@ -116,7 +125,7 @@ section{padding:104px 0}
 .autour div{background:var(--bark-2);padding:34px 30px;transition:.4s}
 .autour div:hover{background:var(--bark-3)}
 .autour h3{font-size:1.3rem;margin-bottom:10px;font-weight:400}
-.autour p{font-size:14px;color:#A9997F}
+.autour p{font-size:14px;color:var(--muted)}
 .note{border-left:2px solid var(--bronze);padding:8px 0 8px 22px;margin-top:34px;font-size:14px;
   color:var(--muted);font-style:italic;max-width:62ch}
 

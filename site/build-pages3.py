@@ -40,7 +40,7 @@ CSS_INFO = """
 .acc .in p{font-size:14.5px;padding-bottom:8px}
 .acc .in p:last-child{padding-bottom:24px}
 .acc .in ul{list-style:none;padding-bottom:24px}
-.acc .in li{font-size:14.5px;color:#CFC3B2;padding:7px 0 7px 20px;position:relative}
+.acc .in li{font-size:14.5px;color:var(--prose);padding:7px 0 7px 20px;position:relative}
 .acc .in li::before{content:"";position:absolute;left:0;top:15px;width:6px;height:6px;background:var(--bronze);opacity:.7}
 .acc .in .kv{display:flex;justify-content:space-between;gap:18px;padding:11px 0;border-bottom:1px solid rgba(185,138,80,.1);font-size:14.5px}
 .acc .in .kv:last-of-type{border-bottom:0;margin-bottom:18px}

@@ -34,7 +34,7 @@ section{padding:100px 0}
 .why div:hover{background:var(--bark-3)}
 .why svg{width:24px;height:24px;stroke:var(--bronze);fill:none;stroke-width:1.3;margin-bottom:18px}
 .why h3{margin-bottom:9px;font-size:1.12rem}
-.why p{font-size:13.5px;color:#A9997F}
+.why p{font-size:13.5px;color:var(--muted)}
 .space{display:grid;grid-template-columns:1fr 1fr;align-items:center;border:1px solid var(--line);margin-bottom:24px;background:var(--bark-2)}
 .space:nth-child(even) .ph{order:2}
 .space .ph{overflow:hidden;min-height:340px}
@@ -44,7 +44,7 @@ section{padding:100px 0}
 .space .tx h3{font-size:1.6rem;margin:12px 0 14px}
 .space .tx p{font-size:14.5px}
 .space .tx a{display:inline-block;margin-top:16px;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--bronze);border:1px solid var(--bronze);padding:14px 20px;font-weight:700;transition:.3s}
-.space .tx a:hover{background:var(--bronze);color:var(--night)}
+.space .tx a:hover{background:var(--bronze);color:var(--bark)}
 /* Video de presentation ---------------------------------------------------
    preload="none" : rien ne part tant que le visiteur n'a pas clique. Le
    fichier est en fast-start (index en tete), donc la lecture demarre sans
@@ -60,7 +60,7 @@ section{padding:100px 0}
 
 .eq-sec{background:var(--bark-2)}
 .eq{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-top:40px}
-.eq div{background:var(--bark-2);padding:22px 20px;display:flex;align-items:center;gap:13px;font-size:14px;color:#CFC3B2}
+.eq div{background:var(--bark-2);padding:22px 20px;display:flex;align-items:center;gap:13px;font-size:14px;color:var(--prose)}
 .eq svg{width:18px;height:18px;stroke:var(--bronze);fill:none;stroke-width:1.4;flex:0 0 auto}
 .cta{border:1px solid var(--bronze);padding:56px;text-align:center;margin:0 0 100px}
 .cta h2{margin-bottom:14px}
@@ -203,7 +203,7 @@ body.append('''</section>
   <div class="wrap">
     <span class="eyebrow" data-t="ef">En trois minutes</span>
     <h2 style="margin-top:14px" data-t="hf">Le film de la maison</h2>
-    <p style="max-width:56ch;margin-top:16px;color:#B4A794" data-t="pf">Le domaine, la lagune, les chambres et la table, filmés sur place. La lecture ne démarre qu'à votre demande.</p>
+    <p style="max-width:56ch;margin-top:16px;color:var(--muted)" data-t="pf">Le domaine, la lagune, les chambres et la table, filmés sur place. La lecture ne démarre qu'à votre demande.</p>
     <div class="film">
       <video controls preload="none" playsinline
              poster="img/opt/gal-dom-aerien-1024.jpg"

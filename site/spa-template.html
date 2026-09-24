@@ -29,6 +29,21 @@
 <link rel="preload" as="image" href="img/opt/gal-spa-couchant.webp" type="image/webp">
 <style>
 {{TOKENS}}
+/* ── Cette page reste nocturne ───────────────────────────────────────
+   Le site est passe au creme le 24 septembre. Un restaurant et un spa se
+   montrent en lumiere basse : c'est un parti pris, pas un oubli. Les
+   jetons de fond et de texte sont donc remis a leurs valeurs sombres,
+   juste apres TOKENS — le reste du site n'en sait rien.
+
+   --bronze retrouve sa valeur claire : sur du noir, #8A5F2B ne se lit
+   plus. C'est le meme probleme qu'a l'endroit, dans l'autre sens. */
+:root{
+  --bark:#17100A; --bark-2:#1E150D; --bark-3:#2A1E13;
+  --bronze:#B98A50; --bronze-2:#DFBB84;
+  --cream:#F6EEE2; --prose:#D7CBBA; --muted:#9C8B78;
+  --palm:#8FAE63; --err:#E08A7B;
+  --line:rgba(185,138,80,.18); --line-2:rgba(185,138,80,.10);
+}
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
 body{background:var(--night);color:var(--cream);font-family:var(--f-body);font-size:16.5px;line-height:1.7;overflow-x:hidden;-webkit-font-smoothing:antialiased}
@@ -215,10 +230,10 @@ header.scrolled .brand img{width:132px}
 footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
 .f-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1.2fr;gap:44px}
 .f-grid h4{font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--bronze);margin-bottom:20px;font-weight:700}
-.f-grid p{display:block;font-size:13.5px;color:#9C8B78;margin-bottom:11px}
-.f-grid a{display:block;font-size:13.5px;color:#9C8B78;padding:9px 0;transition:.3s}
+.f-grid p{display:block;font-size:13.5px;color:var(--muted);margin-bottom:11px}
+.f-grid a{display:block;font-size:13.5px;color:var(--muted);padding:9px 0;transition:.3s}
 .f-grid a:hover{color:var(--bronze)}
-.f-bot{border-top:1px solid var(--line);margin-top:54px;padding-top:26px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:11.5px;color:#6A5C4C}
+.f-bot{border-top:1px solid var(--line);margin-top:54px;padding-top:26px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:11.5px;color:var(--muted)}
 .wa{position:fixed;right:22px;bottom:22px;z-index:90;width:56px;height:56px;border-radius:50%;background:#25D366;display:grid;place-items:center;box-shadow:0 10px 30px rgba(37,211,102,.35);transition:.35s}
 .wa:hover{transform:scale(1.09)}
 .wa svg{width:28px;height:28px;fill:#fff}

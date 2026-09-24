@@ -63,8 +63,25 @@ bronze, bois, écorce. La signature **« Le Rêve Africain »**, présente dans 
 logo mais absente du site d'origine, structure le discours.
 
 - Typographies : **Marcellus** (titres) et **Karla** (texte), via Google Fonts
-- Fond : `#17100A` — `#100B06` sur les pages nocturnes (La table, Le spa)
-- Accent : `#B98A50`
+- Fond : **`#FBF7F0`**, un crème chaud — `#100B06` sur les pages nocturnes
+  (La table, Le spa), qui gardent leur nuit
+- Accent : `#7F5524`
+
+> **Le site est passé du noir au crème le 24 septembre 2026**, à la demande de
+> la direction. Ce qui n'a pas changé : le bronze, le bois, les typographies
+> et « Le Rêve Africain ». La palette vient toujours du logo — c'est le
+> **fond** qui a changé, pas l'identité.
+>
+> Trois pièges, tous rencontrés :
+>
+> 1. **`--night` n'est pas « le fond le plus noir »**, c'est *ce qui contraste
+>    avec le bronze*. Il sert au texte posé sur un aplat bronze et aux voiles
+>    posés sur les photos : il reste sombre.
+> 2. **`--bronze` sert de texte ET de fond.** Il lui faut être assez sombre
+>    pour se lire sur le crème, et assez sombre pour porter du texte clair.
+> 3. **Redéclarer un jeton ne suffit pas.** `body{color:var(--cream)}` se
+>    résout au `body` : les descendants héritent d'une couleur déjà calculée.
+>    Tout voile qui redéclare ses jetons doit réaffirmer `color`.
 - Navigation : un seul élément, menu plein écran
 
 Bilingue français / anglais sur toutes les pages, sans rechargement.
@@ -218,7 +235,19 @@ exemple — elle déclare `EVN_LANG(lg)`, que `LANG_JS` appelle à chaque bascul
 
 ```bash
 cd site && python verifier.py
+node .outils/contraste.js          # le contraste de chaque texte, chaque page
 ```
+
+`contraste.js` ouvre les 21 pages dans un vrai navigateur et mesure chaque
+texte contre le fond qu'il a réellement — les couches translucides sont
+**composées**, sans quoi un fond à 6 % d'opacité passe pour opaque et invente
+dix-huit défauts.
+
+⚠️ **Il ne voit pas le texte posé sur une photographie** : il compare à une
+*couleur* de fond, et une image n'en est pas une. Ces textes-là sont comptés
+et écartés du verdict — ils se jugent sur capture. Lors du passage au crème,
+l'outil annonçait zéro défaut sur 2 806 textes pendant que « Où vous allez
+dormir » disparaissait dans un canapé.
 
 Quinze contrôles sur les 21 pages : variables CSS déclarées, jetons partagés
 présents, JS de navigation non divergent, images dimensionnées, fichiers

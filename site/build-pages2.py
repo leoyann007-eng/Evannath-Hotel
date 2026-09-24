@@ -56,6 +56,15 @@ CSS_CONTACT = """
 .map iframe{width:100%;height:480px;border:0;display:block;filter:grayscale(.35) sepia(.25) contrast(.95)}
 .map .over{position:absolute;top:34px;left:0;right:0;pointer-events:none}
 .map .card{pointer-events:auto;background:rgba(23,16,10,.95);backdrop-filter:blur(12px);border:1px solid var(--line);padding:26px 28px;max-width:340px}
+/* Ce voile est pose sur une PHOTO : il garde sa nuit, quelle que soit la
+   couleur de la page. Mais tout ce qu'il contient heritait des jetons
+   devenus sombres — « Dès 20 h » tombait a 1,22:1 sur son propre
+   fond. Il redeclare donc des jetons clairs pour son interieur :
+   une regle, plutot que la chasse a chaque couleur. */
+.map .card{--cream:#F6EEE2;--prose:#D7CBBA;--muted:#E0D6C8;
+  --bronze:#DFBB84;--bronze-2:#E8CDA3;--bark:#17100A;
+  color:var(--cream)}
+
 .map .card h3{margin-bottom:10px}
 .map .card p{font-size:14px;margin-bottom:16px}
 .route{background:var(--bark-2);padding:80px 0;border-top:1px solid var(--line)}
@@ -173,7 +182,7 @@ b.append('''  </div>
     </div>
     <div class="box">
       <h3 data-t="b2">Adresse</h3>
-      <p style="padding:12px 24px 8px;color:#D6CBBB;font-size:15px">Hôtel Evannath<br>Assinie PK 19<br>Comoé, Côte d'Ivoire</p>
+      <p style="padding:12px 24px 8px;color:var(--prose);font-size:15px">Hôtel Evannath<br>Assinie PK 19<br>Comoé, Côte d'Ivoire</p>
       <div style="padding:0 24px 24px"><a href="https://www.google.com/maps/search/Assinie+PK+19" target="_blank" rel="noopener" class="btn" style="width:100%" data-t="b2c">Ouvrir dans Maps</a></div>
     </div>
     <div class="box" style="padding:22px 24px">

@@ -27,7 +27,7 @@ CSS = REMISE_CSS + """
 .card .ph{position:relative}
 .card .promo{position:absolute;top:12px;right:12px;z-index:2;
   padding:5px 11px;font-size:12px;font-weight:700;letter-spacing:.04em;
-  background:var(--bronze-2);color:var(--night)}
+  background:var(--bronze-2);color:var(--bark)}
 
 /* L'en-tete est fixe : le hero doit lui reserver sa hauteur, comme le font
    les pages sans hero avec leur padding de 150px. Sans cela, sur un ecran
@@ -44,13 +44,13 @@ section{padding:88px 0}
 /* barre de tri */
 .bar{display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap;
   padding:20px 0;border-block:1px solid var(--line);
-  background:rgba(23,16,10,.96);backdrop-filter:blur(12px)}
+  background:rgba(251,247,240,.96);backdrop-filter:blur(12px)}
 .grp{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .grp b{font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-right:6px}
-.chip{background:none;border:1px solid var(--line);color:#B4A794;font:600 11px/1 var(--f-body);
+.chip{background:none;border:1px solid var(--line);color:var(--muted);font:600 11px/1 var(--f-body);
   letter-spacing:.14em;text-transform:uppercase;padding:11px 16px;cursor:pointer;transition:.3s;font-family:var(--f-body)}
 .chip:hover{border-color:var(--bronze);color:var(--bronze-2)}
-.chip.on{background:var(--bronze);border-color:var(--bronze);color:var(--night)}
+.chip.on{background:var(--bronze);border-color:var(--bronze);color:var(--bark)}
 .compte{font-size:12.5px;color:var(--muted)}
 
 /* cartes */
@@ -61,12 +61,12 @@ section{padding:88px 0}
 .card .ph{position:relative;aspect-ratio:4/3;overflow:hidden;background:var(--bark-3)}
 .card .ph img{width:100%;height:100%;object-fit:cover;transition:1.1s cubic-bezier(.2,.8,.2,1)}
 .card:hover .ph img{transform:scale(1.05)}
-.card .tag{position:absolute;top:14px;left:14px;background:var(--bronze);color:var(--night);
+.card .tag{position:absolute;top:14px;left:14px;background:var(--bronze);color:var(--bark);
   font-size:9px;letter-spacing:.18em;text-transform:uppercase;font-weight:700;padding:7px 11px}
 .card .tx{padding:26px 24px 28px;display:flex;flex-direction:column;flex:1}
 .card h2{font-size:1.32rem;margin-bottom:7px;font-weight:400}
 .card .meta{font-size:12.5px;color:var(--muted);margin-bottom:14px}
-.card p{font-size:13.5px;color:#AA9B87;flex:1}
+.card p{font-size:13.5px;color:var(--muted);flex:1}
 .card .bas{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;
   margin-top:22px;padding-top:18px;border-top:1px solid var(--line-2)}
 .card .pr b{display:block;font-family:var(--f-display);font-size:1.6rem;color:var(--bronze);
@@ -93,7 +93,7 @@ tbody tr{transition:.3s}
 tbody tr:hover{background:rgba(185,138,80,.05)}
 tbody th{font-family:var(--f-display);font-size:1.02rem;font-weight:400;color:var(--cream);white-space:nowrap}
 tbody th a:hover{color:var(--bronze-2)}
-td{color:#B4A794}
+td{color:var(--muted)}
 td.num{font-variant-numeric:tabular-nums;color:var(--bronze);white-space:nowrap}
 caption{caption-side:bottom;padding:16px 4px 0;font-size:12.5px;color:var(--muted);text-align:left;font-style:italic}
 
@@ -104,10 +104,10 @@ caption{caption-side:bottom;padding:16px 4px 0;font-size:12.5px;color:var(--mute
 .inc div{background:var(--bark);padding:26px 22px}
 .inc svg{width:21px;height:21px;stroke:var(--bronze);fill:none;stroke-width:1.3;margin-bottom:14px}
 .inc b{display:block;font-size:14px;color:var(--cream);font-weight:600;margin-bottom:4px}
-.inc span{font-size:12.5px;color:#A9997F}
+.inc span{font-size:12.5px;color:var(--muted)}
 
 .fin{text-align:center;padding:88px 0 100px;border-top:1px solid var(--line)}
-.fin p{max-width:52ch;margin:16px auto 28px;color:#B4A794}
+.fin p{max-width:52ch;margin:16px auto 28px;color:var(--muted)}
 
 @media(max-width:1080px){.rooms{grid-template-columns:repeat(2,1fr)}.inc{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:720px){

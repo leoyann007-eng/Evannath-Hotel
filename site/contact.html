@@ -28,10 +28,31 @@
 <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":["Hotel","LodgingBusiness"],"@id":"https://evannathhotel.vercel.app/#hotel","name":"Hôtel Evannath","alternateName":"Evannath — Le Rêve Africain","slogan":"Le Rêve Africain","description":"Hôtel de 46 chambres et suites à Assinie PK 19, en Côte d'Ivoire, face à la lagune Aby : paillote sur pilotis, piscine, spa, restaurant et salle de séminaire. Navette aéroport offerte.","url":"https://evannathhotel.vercel.app/","logo":"https://evannathhotel.vercel.app/img/opt/logo-blanc.png","image":["https://evannathhotel.vercel.app/img/opt/gal-lag-ponton.jpg","https://evannathhotel.vercel.app/img/opt/hero-aerien.jpg","https://evannathhotel.vercel.app/img/opt/hero-chambre-wax.jpg","https://evannathhotel.vercel.app/img/opt/g-resto.jpg"],"address":{"@type":"PostalAddress","streetAddress":"Assinie PK 19","addressLocality":"Assinie-Mafia","addressRegion":"Comoé","addressCountry":"CI"},"telephone":"+225 27 21 73 12 65","email":"receptionhotelevannath@gmail.com","sameAs":["https://www.facebook.com/evannathhotel","https://www.instagram.com/evannathhotel"],"priceRange":"67 000 – 280 000 XOF","currenciesAccepted":"XOF","paymentAccepted":"Espèces, Wave, Orange Money, MTN Mobile Money, carte bancaire","numberOfRooms":{"@type":"QuantitativeValue","value":46},"petsAllowed":false,"amenityFeature":[{"@type":"LocationFeatureSpecification","name":"Piscine exterieure","value":true},{"@type":"LocationFeatureSpecification","name":"Spa","value":true},{"@type":"LocationFeatureSpecification","name":"Sauna","value":true},{"@type":"LocationFeatureSpecification","name":"Restaurant","value":true},{"@type":"LocationFeatureSpecification","name":"Bar","value":true},{"@type":"LocationFeatureSpecification","name":"Wifi gratuit","value":true},{"@type":"LocationFeatureSpecification","name":"Parking gratuit","value":true},{"@type":"LocationFeatureSpecification","name":"Navette aeroport gratuite","value":true},{"@type":"LocationFeatureSpecification","name":"Salle de conference","value":true},{"@type":"LocationFeatureSpecification","name":"Climatisation","value":true},{"@type":"LocationFeatureSpecification","name":"Reception 24h/24","value":true},{"@type":"LocationFeatureSpecification","name":"Petit-dejeuner inclus","value":true},{"@type":"LocationFeatureSpecification","name":"Acces lagune","value":true}],"checkinTime":"14:00","checkoutTime":"12:00","contactPoint":[{"@type":"ContactPoint","contactType":"reservations","telephone":"+225 27 21 73 12 65","email":"receptionhotelevannath@gmail.com","availableLanguage":["fr","en"]},{"@type":"ContactPoint","contactType":"reservations","telephone":"+225 01 51 52 75 75","email":"receptionhotelevannath@gmail.com","availableLanguage":["fr","en"]}],"hasMap":"https://www.google.com/maps/search/Assinie+PK+19","containsPlace":{"@id":"https://evannathhotel.vercel.app/#restaurant"}},{"@type":"WebSite","@id":"https://evannathhotel.vercel.app/#website","url":"https://evannathhotel.vercel.app/","name":"Hôtel Evannath","inLanguage":"fr-CI","publisher":{"@id":"https://evannathhotel.vercel.app/#hotel"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Accueil","item":"https://evannathhotel.vercel.app/"},{"@type":"ListItem","position":2,"name":"Contact"}]}]}</script>
 <style>
 :root{
-  --night:#100B06; --bark:#17100A; --bark-2:#1E150D; --bark-3:#2A1E13;
-  --bronze:#B98A50; --bronze-2:#DFBB84;
-  --cream:#F6EEE2; --muted:#9C8B78; --palm:#8FAE63; --err:#E08A7B;
-  --line:rgba(185,138,80,.18); --line-2:rgba(185,138,80,.10);
+  /* ── Creme chaud ────────────────────────────────────────────────────
+     La direction n'aimait pas le fond noir. Le site est passe au creme le
+     24 septembre 2026, apres validation de l'accueil.
+
+     Ce qui n'a PAS change : le bronze, le bois, Marcellus et Karla, « Le
+     Reve Africain ». La palette vient toujours de leur logo — c'est le
+     FOND qui a change, pas l'identite.
+
+     --night ne devient PAS clair : ce n'est pas « le fond le plus noir »,
+     c'est CE QUI CONTRASTE AVEC LE BRONZE. Il sert au texte pose sur un
+     aplat bronze, et aux voiles poses sur les photos.
+
+     --bronze sert de TEXTE et de FOND. Il lui faut donc etre assez sombre
+     pour se lire sur le creme, et assez sombre pour porter du texte clair :
+     #8A5F2B tient les deux. Mesure dans les deux sens.
+
+     La table et Le spa redeclarent leur nuit : un restaurant et un spa se
+     montrent en lumiere basse, c'est un parti pris. */
+  --night:#100B06; --bark:#FBF7F0; --bark-2:#F4EDE1; --bark-3:#EDE3D4;
+  --bronze:#7F5524; --bronze-2:#653F13;
+  /* --cream garde son nom et designe le TEXTE principal. Le renommer
+     voudrait dire toucher trente-neuf declarations dans onze fichiers. */
+  --cream:#2A231E; --prose:#4C423B; --muted:#6E6154;
+  --palm:#4F6B32; --err:#A63A25;
+  --line:rgba(138,95,43,.22); --line-2:rgba(138,95,43,.12);
   --max:1240px;
   /* Hauteur de l'en-tete fixe une fois compacte. Cette valeur n'est qu'un REPLI : devinee a 83 px alors que
      l'en-tete compacte en fait 75 a 77 selon la page, la bordure basse de
@@ -43,6 +64,24 @@
   --f-display:"Marcellus",Georgia,"Times New Roman",serif;
   --f-body:"Karla",system-ui,-apple-system,sans-serif;
 }
+
+/* ── TOUT HERO GARDE DU TEXTE CLAIR ─────────────────────────────────────
+   Un hero est pose sur une PHOTOGRAPHIE, sombree par son propre voile —
+   pas sur le fond de la page. Le site est passe au creme le 24 septembre :
+   sans cette regle, le titre suit --cream, devenu sombre, et disparait dans
+   l image.
+
+   LA MESURE DE CONTRASTE NE LE VOIT PAS. .outils/contraste.js compare a une
+   couleur de fond, et une photo n en est pas une : il annonçait zero defaut
+   sur les 2 806 textes du site pendant que « Ou vous allez dormir »
+   s effaçait dans un canape. Ces textes-la se jugent sur capture.
+
+   Une seule regle : les huit heros du site ont le meme defaut, donc la meme
+   correction. Les jetons sont redeclares POUR L INTERIEUR du hero, et
+   `color` reaffirme — sans quoi la couleur heritee de body, deja calculee,
+   ne suit pas. --bark y redevient « ce qui contraste » : sombre. */
+.hero{--cream:#F6EEE2;--prose:#D7CBBA;--muted:#C8BAA8;
+  --bronze:#DFBB84;--bronze-2:#E8CDA3;--bark:#17100A;color:var(--cream)}
 
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
@@ -70,21 +109,21 @@ h1,h2,h3{font-family:var(--f-display);font-weight:400;line-height:1.1;text-wrap:
 h1{font-size:clamp(2.4rem,5.4vw,4rem)}
 h2{font-size:clamp(1.7rem,3.2vw,2.5rem)}
 h3{font-size:1.2rem}
-p{color:#D6CBBB}
+p{color:var(--prose)}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:16px 32px;font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;border:1px solid var(--bronze);color:var(--bronze);background:transparent;cursor:pointer;transition:.4s cubic-bezier(.2,.8,.2,1);font-family:var(--f-body)}
-.btn:hover{background:var(--bronze);color:var(--night);transform:translateY(-2px)}
-.btn-solid{background:var(--bronze);color:var(--night)}
+.btn:hover{background:var(--bronze);color:var(--bark);transform:translateY(-2px)}
+.btn-solid{background:var(--bronze);color:var(--bark)}
 .btn-solid:hover{background:var(--bronze-2);border-color:var(--bronze-2)}
 
 /* NAV : un seul element */
-header{position:fixed;top:0;left:0;right:0;z-index:100;transition:.45s;padding:22px 0;background:rgba(23,16,10,.9);backdrop-filter:blur(14px)}
-header.scrolled{padding:11px 0;background:rgba(23,16,10,.97);border-bottom:1px solid var(--line)}
+header{position:fixed;top:0;left:0;right:0;z-index:100;transition:.45s;padding:22px 0;background:rgba(251,247,240,.90);backdrop-filter:blur(14px)}
+header.scrolled{padding:11px 0;background:rgba(251,247,240,.97);border-bottom:1px solid var(--line)}
 /* Menu ouvert : l en-tete devient opaque, et de la couleur du tiroir.
    Sinon le contenu du menu defile DESSOUS et transparait par les 10 pour cent
    qui restent — le logo se melangeait au premier lien. La page, elle, ne
    defile plus quand le menu est ouvert : l en-tete ne passait donc jamais en
    mode defile, et gardait son fond translucide. */
-header.menu{background:var(--night);backdrop-filter:none;border-bottom:1px solid var(--line)}
+header.menu{background:var(--bark);backdrop-filter:none;border-bottom:1px solid var(--line)}
 .nav{display:flex;align-items:center;justify-content:space-between;gap:20px}
 .brand img{width:168px;transition:.45s}
 header.scrolled .brand img{width:132px}
@@ -92,7 +131,7 @@ header.scrolled .brand img{width:132px}
 .nav-right{display:flex;align-items:center;gap:18px}
 .lang{display:flex;border:1px solid var(--line)}
 .lang button{background:none;border:0;color:var(--muted);font:700 10.5px/1 var(--f-body);letter-spacing:.12em;padding:9px 11px;cursor:pointer;transition:.3s}
-.lang button.on{background:var(--bronze);color:var(--night)}
+.lang button.on{background:var(--bronze);color:var(--bark)}
 .burger{display:flex;align-items:center;gap:12px;background:none;border:0;cursor:pointer;padding:10px 4px;position:relative;z-index:101}
 .burger .bars{display:block;width:26px}
 .burger .bars span{display:block;height:1.5px;background:var(--cream);margin:6px 0;transition:.35s}
@@ -100,7 +139,7 @@ header.scrolled .brand img{width:132px}
 .burger.open .bars span:nth-child(1){transform:translateY(7.5px) rotate(45deg)}
 .burger.open .bars span:nth-child(2){opacity:0}
 .burger.open .bars span:nth-child(3){transform:translateY(-7.5px) rotate(-45deg)}
-.drawer{position:fixed;inset:0;background:var(--night);z-index:99;opacity:0;visibility:hidden;transition:.5s cubic-bezier(.2,.8,.2,1);overflow-y:auto}
+.drawer{position:fixed;inset:0;background:var(--bark);z-index:99;opacity:0;visibility:hidden;transition:.5s cubic-bezier(.2,.8,.2,1);overflow-y:auto}
 .drawer.open{opacity:1;visibility:visible}
 .dw-in{min-height:100svh;display:grid;grid-template-columns:1.25fr 1fr;align-items:center;gap:60px;max-width:var(--max);margin:0 auto;padding:130px 24px 60px}
 .dw-in nav{display:flex;flex-direction:column}
@@ -146,7 +185,7 @@ button[aria-busy="true"]{opacity:.62;cursor:progress}
    de 0,45 s. Supprime plutot que reparé une quatrieme fois : une barre qui
    defile avec la page ne peut pas laisser d'intervalle. */
 
-.skip{position:absolute;left:-9999px;top:0;z-index:200;background:var(--bronze);color:var(--night);
+.skip{position:absolute;left:-9999px;top:0;z-index:200;background:var(--bronze);color:var(--bark);
   padding:14px 22px;font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase}
 .skip:focus{left:0}
 main{display:block}
@@ -156,13 +195,13 @@ main{display:block}
 .crumb a:hover{color:var(--bronze)}
 .crumb span{color:var(--bronze)}
 
-footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
+footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 28px}
 .f-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1.2fr;gap:44px}
 .f-grid h4{font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--bronze);margin-bottom:20px;font-weight:700}
-.f-grid p{display:block;font-size:13.5px;color:#9C8B78;margin-bottom:11px}
-.f-grid a{display:block;font-size:13.5px;color:#9C8B78;padding:9px 0;transition:.3s}
+.f-grid p{display:block;font-size:13.5px;color:var(--muted);margin-bottom:11px}
+.f-grid a{display:block;font-size:13.5px;color:var(--muted);padding:9px 0;transition:.3s}
 .f-grid a:hover{color:var(--bronze)}
-.f-bot{border-top:1px solid var(--line);margin-top:54px;padding-top:26px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:11.5px;color:#A2907C}
+.f-bot{border-top:1px solid var(--line);margin-top:54px;padding-top:26px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:11.5px;color:var(--muted)}
 /* Bouton flottant. NE PAS reutiliser la classe .wa ailleurs : elle impose
    position:fixed et 56x56 en rond. Le lien du panneau de repli la portait,
    et se retrouvait donc arrache du panneau, en pastille au coin de l'ecran —
@@ -236,6 +275,15 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
 .map iframe{width:100%;height:480px;border:0;display:block;filter:grayscale(.35) sepia(.25) contrast(.95)}
 .map .over{position:absolute;top:34px;left:0;right:0;pointer-events:none}
 .map .card{pointer-events:auto;background:rgba(23,16,10,.95);backdrop-filter:blur(12px);border:1px solid var(--line);padding:26px 28px;max-width:340px}
+/* Ce voile est pose sur une PHOTO : il garde sa nuit, quelle que soit la
+   couleur de la page. Mais tout ce qu'il contient heritait des jetons
+   devenus sombres — « Dès 20 h » tombait a 1,22:1 sur son propre
+   fond. Il redeclare donc des jetons clairs pour son interieur :
+   une regle, plutot que la chasse a chaque couleur. */
+.map .card{--cream:#F6EEE2;--prose:#D7CBBA;--muted:#E0D6C8;
+  --bronze:#DFBB84;--bronze-2:#E8CDA3;--bark:#17100A;
+  color:var(--cream)}
+
 .map .card h3{margin-bottom:10px}
 .map .card p{font-size:14px;margin-bottom:16px}
 .route{background:var(--bark-2);padding:80px 0;border-top:1px solid var(--line)}
@@ -401,7 +449,7 @@ footer{background:#0B0704;border-top:1px solid var(--line);padding:74px 0 28px}
     </div>
     <div class="box">
       <h3 data-t="b2">Adresse</h3>
-      <p style="padding:12px 24px 8px;color:#D6CBBB;font-size:15px">Hôtel Evannath<br>Assinie PK 19<br>Comoé, Côte d'Ivoire</p>
+      <p style="padding:12px 24px 8px;color:var(--prose);font-size:15px">Hôtel Evannath<br>Assinie PK 19<br>Comoé, Côte d'Ivoire</p>
       <div style="padding:0 24px 24px"><a href="https://www.google.com/maps/search/Assinie+PK+19" target="_blank" rel="noopener" class="btn" style="width:100%" data-t="b2c">Ouvrir dans Maps</a></div>
     </div>
     <div class="box" style="padding:22px 24px">
@@ -612,7 +660,10 @@ var EVN = {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             categorie: o.retenue.categorie, du: o.retenue.du,
-            au: o.retenue.au, nom: o.retenue.nom, reference: ref })
+            au: o.retenue.au, nom: o.retenue.nom,
+            /* L'adresse sert a une seule chose : prevenir le client quand la
+               reception confirme. Elle ne ressort par aucune route publique. */
+            courriel: o.retenue.courriel, reference: ref })
         }).catch(function () {});
       } catch (e) { /* le formulaire continue */ }
     }

@@ -24,7 +24,7 @@ article h2::before{content:counter(art,decimal-leading-zero);font-size:.62em;col
 article h3{margin:26px 0 10px;color:var(--bronze-2);font-size:1.08rem}
 article p{font-size:15.5px;margin-bottom:14px}
 article ul{margin:0 0 16px}
-article li{list-style:none;font-size:15px;color:#CFC3B2;padding:6px 0 6px 20px;position:relative}
+article li{list-style:none;font-size:15px;color:var(--prose);padding:6px 0 6px 20px;position:relative}
 article li::before{content:"";position:absolute;left:0;top:15px;width:6px;height:6px;background:var(--bronze);opacity:.65}
 article a{color:var(--bronze);border-bottom:1px solid var(--line)}
 article a:hover{border-color:var(--bronze)}

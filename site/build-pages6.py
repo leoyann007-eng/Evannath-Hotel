@@ -12,7 +12,7 @@ CSS = """
 /* Les intertitres qui separent les quatre parties de la page. */
 .sect{margin:86px 0 34px;max-width:70ch}
 .sect h2{font-size:clamp(1.9rem,3.4vw,2.6rem);margin:10px 0 12px}
-.sect p{color:#B4A794}
+.sect p{color:var(--muted)}
 
 /* L'agenda : un evenement a la fois, photo plein cadre.
    Le carrousel reste dans la largeur du contenu. Un debordement plein ecran
@@ -41,6 +41,15 @@ CSS = """
 .infos{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:30px}
 .infos span{display:flex;flex-direction:column;gap:3px;background:rgba(23,16,10,.72);
   border:1px solid var(--line);padding:11px 16px;min-width:100px}
+/* Ce voile est pose sur une PHOTO : il garde sa nuit, quelle que soit la
+   couleur de la page. Mais tout ce qu'il contient heritait des jetons
+   devenus sombres — « Dès 20 h » tombait a 1,22:1 sur son propre
+   fond. Il redeclare donc des jetons clairs pour son interieur :
+   une regle, plutot que la chasse a chaque couleur. */
+.infos span,.pilote button,.diapo .voile,.c .tag{--cream:#F6EEE2;--prose:#D7CBBA;--muted:#E0D6C8;
+  --bronze:#DFBB84;--bronze-2:#E8CDA3;--bark:#17100A;
+  color:var(--cream)}
+
 .infos b{font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);
   font-weight:700}
 .infos i{font-style:normal;font-family:var(--f-display);font-size:1.02rem;color:var(--cream)}
@@ -62,7 +71,7 @@ CSS = """
 .pilote button{width:42px;height:42px;border:1px solid var(--line);background:rgba(23,16,10,.7);
   color:var(--bronze-2);font-size:20px;line-height:1;cursor:pointer;transition:.3s;
   font-family:var(--f-body)}
-.pilote button:hover{border-color:var(--bronze);background:var(--bronze);color:var(--night)}
+.pilote button:hover{border-color:var(--bronze);background:var(--bronze);color:var(--bark)}
 .cpt{font-size:12px;letter-spacing:.16em;color:var(--muted);display:flex;gap:5px}
 .cpt b{color:var(--cream);font-weight:700}
 .cpt i{font-style:normal}
@@ -112,7 +121,7 @@ CSS = """
 .remise .haut{display:flex;align-items:center;gap:12px;flex-wrap:wrap;
   margin-bottom:10px}
 .remise .taux{display:inline-block;padding:5px 12px;font-size:15px;
-  font-weight:700;background:var(--bronze-2);color:var(--night);
+  font-weight:700;background:var(--bronze-2);color:var(--bark);
   letter-spacing:.02em}
 .remise .jusqua{font-size:11px;letter-spacing:.14em;text-transform:uppercase;
   color:var(--muted);font-weight:700}
@@ -155,11 +164,11 @@ CSS = """
 .star{display:grid;grid-template-columns:1.15fr 1fr;border:1px solid var(--line);margin-bottom:64px;background:var(--bark-2)}
 .star .ph{position:relative;overflow:hidden;min-height:420px}
 .star .ph img{width:100%;height:100%;object-fit:cover}
-.star .badge{position:absolute;top:20px;left:20px;background:var(--bronze);color:var(--night);font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;padding:8px 14px}
+.star .badge{position:absolute;top:20px;left:20px;background:var(--bronze);color:var(--bark);font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;padding:8px 14px}
 .star .txt{padding:48px}
 .star h2{margin:12px 0 16px}
 .star .incl{list-style:none;margin:24px 0}
-.star .incl li{padding:11px 0;border-bottom:1px solid var(--line);font-size:14.5px;color:#CFC3B2;display:flex;gap:13px}
+.star .incl li{padding:11px 0;border-bottom:1px solid var(--line);font-size:14.5px;color:var(--prose);display:flex;gap:13px}
 .star .incl i{color:var(--palm);font-style:normal}
 .star .foot{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-top:28px}
 .star .pr b{font-family:var(--f-display);font-size:2.7rem;color:var(--bronze);display:block;line-height:1;font-variant-numeric:tabular-nums;font-weight:400}
@@ -178,13 +187,13 @@ CSS = """
 .c .in{padding:24px;display:flex;flex-direction:column;flex:1}
 .c h3{margin-bottom:12px}
 .c ul{list-style:none;margin:0 0 20px;flex:1}
-.c li{font-size:13.5px;color:#B7A894;padding:6px 0 6px 18px;position:relative}
+.c li{font-size:13.5px;color:var(--muted);padding:6px 0 6px 18px;position:relative}
 .c li::before{content:"";position:absolute;left:0;top:14px;width:6px;height:6px;background:var(--bronze);opacity:.65}
 .c .foot{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;border-top:1px solid var(--line);padding-top:16px}
 .c .pr b{font-family:var(--f-display);font-size:1.7rem;color:var(--bronze);display:block;line-height:1;font-variant-numeric:tabular-nums;font-weight:400}
 .c .pr span{font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600}
 .pick{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--bronze);border:1px solid var(--bronze);padding:13px 16px;cursor:pointer;background:none;font-family:var(--f-body);font-weight:700;white-space:nowrap;transition:.3s}
-.pick:hover{background:var(--bronze);color:var(--night)}
+.pick:hover{background:var(--bronze);color:var(--bark)}
 .weekly{margin:78px 0;border:1px solid var(--line);display:grid;grid-template-columns:1fr 1.3fr;background:var(--bark-2)}
 .weekly .ph{overflow:hidden;min-height:280px}
 .weekly .ph img{width:100%;height:100%;object-fit:cover}
@@ -192,7 +201,7 @@ CSS = """
 .weekly .when{display:inline-flex;align-items:center;gap:10px;border:1px solid var(--line);padding:9px 15px;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--bronze);font-weight:700;margin-bottom:20px}
 .weekly .when i{width:7px;height:7px;border-radius:50%;background:var(--palm);display:inline-block}
 .weekly h2{margin-bottom:14px}
-.weekly .perks{display:flex;gap:26px;flex-wrap:wrap;margin-top:24px;font-size:14px;color:#CFC3B2}
+.weekly .perks{display:flex;gap:26px;flex-wrap:wrap;margin-top:24px;font-size:14px;color:var(--prose)}
 .weekly .perks span{display:flex;gap:9px;align-items:center}
 .weekly .perks em{color:var(--palm);font-style:normal}
 .req{background:var(--bark-2);padding:88px 0;border-top:1px solid var(--line)}
@@ -207,7 +216,7 @@ CSS = """
 .recap{background:var(--bark);border:1px solid var(--line);padding:28px;position:sticky;top:110px}
 .recap h3{margin-bottom:18px}
 .recap .row{display:flex;justify-content:space-between;gap:14px;font-size:14px;color:var(--muted);padding:9px 0;border-bottom:1px solid var(--line)}
-.recap .row span:last-child{color:#CFC3B2;text-align:right;font-variant-numeric:tabular-nums}
+.recap .row span:last-child{color:var(--prose);text-align:right;font-variant-numeric:tabular-nums}
 .recap .tot{display:flex;justify-content:space-between;align-items:baseline;gap:14px;margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}
 .recap .tot span{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:700}
 .recap .tot b{font-family:var(--f-display);font-size:1.9rem;color:var(--bronze-2);font-variant-numeric:tabular-nums;font-weight:400}

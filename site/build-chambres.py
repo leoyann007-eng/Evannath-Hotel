@@ -67,7 +67,7 @@ CSS = REMISE_CSS + """
 .block h2{margin-bottom:18px}
 .block p+p{margin-top:16px}
 .amen{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-top:24px}
-.amen div{background:var(--bark);padding:16px 18px;font-size:14px;display:flex;align-items:center;gap:12px;color:#CFC3B2}
+.amen div{background:var(--bark);padding:16px 18px;font-size:14px;display:flex;align-items:center;gap:12px;color:var(--prose)}
 .amen svg{width:17px;height:17px;stroke:var(--bronze);fill:none;stroke-width:1.4;flex:0 0 auto}
 .amen div.hi{background:var(--bark-2)}
 .amen div.hi svg{stroke:var(--bronze-2)}
@@ -94,7 +94,7 @@ CSS = REMISE_CSS + """
 .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .calc{border-top:1px solid var(--line);margin-top:22px;padding-top:18px}
 .calc .row{display:flex;justify-content:space-between;gap:14px;font-size:14px;color:var(--muted);padding:7px 0}
-.calc .row span:last-child{color:#CFC3B2;font-variant-numeric:tabular-nums}
+.calc .row span:last-child{color:var(--prose);font-variant-numeric:tabular-nums}
 .calc .total{border-top:1px solid var(--line);margin-top:10px;padding-top:14px;display:flex;justify-content:space-between;align-items:baseline;gap:14px}
 .calc .total span{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:700}
 .calc .total b{font-family:var(--f-display);font-size:1.85rem;color:var(--bronze-2);font-variant-numeric:tabular-nums;font-weight:400}

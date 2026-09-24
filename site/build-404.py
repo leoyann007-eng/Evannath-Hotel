@@ -5,7 +5,7 @@ from _chrome import PROSPECTION
 from _chrome import page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV, WA
 
 CSS = """
-body{background:var(--night)}
+body{background:var(--bark)}
 /* Padding symetrique : l'en-tete fixe ne peut plus recouvrir le contenu,
    et le centre optique reste exactement ou il etait sur un ecran normal. */
 .err{position:relative;min-height:100svh;display:flex;align-items:center;overflow:hidden;padding:150px 0}
@@ -19,13 +19,13 @@ body{background:var(--night)}
   opacity:.32;letter-spacing:.02em;font-variant-numeric:tabular-nums}
 .err h1{font-size:clamp(2rem,5.4vw,3.6rem);margin:-8px 0 20px}
 .err h1 em{font-style:italic;color:var(--bronze-2)}
-.err .lede{max-width:46ch;margin:0 auto;font-size:1.06rem;color:#E3D9C9}
+.err .lede{max-width:46ch;margin:0 auto;font-size:1.06rem;color:var(--prose)}
 .err .cta{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:36px}
 .rule{width:1px;height:44px;background:linear-gradient(var(--bronze),transparent);margin:34px auto 0}
 
 .ways{background:var(--bark);padding:100px 0;border-top:1px solid var(--line)}
 .ways .head{text-align:center;margin-bottom:54px}
-.ways .head p{max-width:50ch;margin:16px auto 0;color:#B4A794}
+.ways .head p{max-width:50ch;margin:16px auto 0;color:var(--muted)}
 .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
 .card{border:1px solid var(--line);background:var(--bark-2);overflow:hidden;transition:.45s;display:block}
 .card:hover{transform:translateY(-6px);border-color:rgba(185,138,80,.55)}
@@ -34,7 +34,7 @@ body{background:var(--night)}
 .card:hover .ph img{transform:scale(1.07)}
 .card .in{padding:22px}
 .card h3{font-size:1.15rem;margin-bottom:8px;font-weight:400}
-.card p{font-size:13.5px;color:#A9997F}
+.card p{font-size:13.5px;color:var(--muted)}
 
 .helpline{border:1px solid var(--bronze);padding:44px;text-align:center;margin:90px 0 100px}
 .helpline h2{margin-bottom:12px}
