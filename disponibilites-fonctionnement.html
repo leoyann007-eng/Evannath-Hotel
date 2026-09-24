@@ -1,0 +1,325 @@
+<meta charset="utf-8">
+<title>Les disponibilités en ligne — Hôtel Evannath</title>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Karla:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#2A1E13; --muted:#7A6A58; --line:#E6DED2;
+  --bronze:#8A6534; --bronze-2:#B98A50; --sable:#F7F3EC;
+  --rouge:#A6412F; --vert:#4F6B32;
+  --f-t:"Marcellus",Georgia,serif; --f-b:"Karla",Calibri,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--f-b);font-size:13.5px;line-height:1.6;color:var(--ink);
+     background:#fff;-webkit-font-smoothing:antialiased}
+.page{max-width:760px;margin:0 auto;padding:30px 38px 44px}
+
+h1{font-family:var(--f-t);font-size:31px;line-height:1.15;font-weight:400;
+   margin:0 0 4px}
+h1.partie{font-size:24px;margin-bottom:10px}
+h2{font-family:var(--f-t);font-size:21px;font-weight:400;margin:0 0 12px;
+   padding-bottom:7px;border-bottom:1px solid var(--line)}
+h3{font-family:var(--f-t);font-size:16.5px;font-weight:400;margin:20px 0 2px}
+p{margin:8px 0}
+strong{font-weight:700}
+em{font-style:italic}
+
+.chapeau{color:var(--muted);font-size:12.5px;margin-bottom:22px}
+
+/* Ce que le client lit, mot pour mot. Encadre, parce que ce sont les seules
+   phrases de ce document qui seront reellement vues par un client. */
+.mot{border-left:3px solid var(--bronze);padding:3px 0 3px 16px;margin:10px 0;
+     font-family:var(--f-t);font-size:15px}
+
+.note{color:var(--muted);font-style:italic;font-size:12.5px;margin:6px 0 14px}
+
+.encadre{background:var(--sable);border:1px solid var(--line);
+         padding:14px 18px;margin:14px 0}
+.encadre p:first-child{margin-top:0}
+.encadre p:last-child{margin-bottom:0}
+
+.avert{border-left:3px solid var(--rouge);background:#FBF2F0;
+       padding:12px 16px;margin:14px 0}
+
+table{width:100%;border-collapse:collapse;margin:12px 0 4px;font-size:12.5px}
+th{text-align:left;font-size:10px;letter-spacing:.13em;text-transform:uppercase;
+   color:var(--muted);font-weight:700;padding:0 12px 6px 0;
+   border-bottom:1px solid var(--line)}
+td{padding:9px 12px 9px 0;border-bottom:1px solid var(--line);
+   vertical-align:top}
+tr:last-child td{border-bottom:0}
+td.quand{white-space:nowrap;color:var(--muted)}
+
+ul,ol{margin:8px 0;padding-left:24px}
+li{margin:5px 0}
+
+/* Les decisions : numerotees, et chacune porte son reglage actuel. */
+ol.choix{list-style:none;padding-left:0;counter-reset:c}
+ol.choix li{counter-increment:c;position:relative;padding-left:40px;
+            margin:16px 0}
+ol.choix li:before{content:counter(c);position:absolute;left:0;top:1px;
+  width:26px;height:26px;border:1px solid var(--bronze-2);border-radius:50%;
+  font-family:var(--f-t);font-size:14px;line-height:25px;text-align:center;
+  color:var(--bronze)}
+ol.choix b{display:block;font-size:14px}
+ol.choix .actuel{display:inline-block;font-size:10px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--bronze);border:1px solid var(--line);
+  background:var(--sable);padding:2px 8px;margin-top:4px}
+
+.foot{margin-top:34px;padding-top:14px;border-top:1px solid var(--line);
+      color:var(--muted);font-size:12px}
+
+section{margin-bottom:30px}
+
+@media print{
+  @page{margin:14mm 12mm}
+  .page{max-width:none;padding:0}
+  h1,h2,h3{break-after:avoid}
+  .encadre,.avert,.mot,tr,li{break-inside:avoid}
+  section{break-inside:auto}
+}
+</style>
+<div class="page">
+
+<h1>Les disponibilités en ligne</h1>
+<p class="chapeau">Hôtel Evannath — septembre 2026<br>
+Ce que fait le système, décrit en comportement et non en technique.</p>
+
+<p>Vous avez demandé que le site mette en ligne les chambres disponibles.
+C'est construit. Ce document décrit <strong>ce qui se passera réellement</strong>,
+du côté de votre client comme du côté de votre réception.</p>
+
+<p>Il est fait pour être contredit. À la fin, <strong>six décisions vous
+appartiennent</strong> — j'ai pris un parti sur chacune pour que le système
+fonctionne, mais aucun n'est définitif. Lisez en vous demandant simplement :
+<em>est-ce ainsi que je veux que ça se passe ?</em></p>
+
+<section>
+<h2>Le principe, en une phrase</h2>
+
+<p><strong>Le site n'annonce jamais une disponibilité de lui-même.</strong> Il
+répète ce que votre réception a saisi. Et quand elle n'a rien saisi, il ne
+promet rien.</p>
+
+<p class="note">C'est le contraire de ce que fait le site aujourd'hui, et
+c'était le seul endroit où il vous exposait : sous chaque chambre s'affichait
+une pastille verte « Disponible à ces dates », quelles que soient les dates
+choisies, sans que rien ne le vérifie.</p>
+</section>
+
+<section>
+<h2>Ce que voit votre client</h2>
+
+<p>Quand il choisit des dates, la page lui répond l'une de ces quatre
+phrases — et rien d'autre :</p>
+
+<table>
+<tr><th>Ce qu'il lit</th><th>Quand</th></tr>
+<tr>
+  <td><strong>Disponible à ces dates</strong></td>
+  <td class="quand">Il reste au moins deux chambres de cette catégorie</td>
+</tr>
+<tr>
+  <td><strong>Dernière chambre à ces dates</strong></td>
+  <td class="quand">Il en reste exactement une</td>
+</tr>
+<tr>
+  <td><strong>Complet à ces dates</strong></td>
+  <td class="quand">Il n'en reste aucune</td>
+</tr>
+<tr>
+  <td><strong>Disponibilité confirmée sous 24 h</strong></td>
+  <td class="quand">Vos chambres ne sont pas saisies, ou le système ne peut pas
+      répondre</td>
+</tr>
+</table>
+
+<p>La quatrième est la plus importante, et c'est celle qui s'affiche
+aujourd'hui, partout. <strong>Rien ne retombe jamais sur « Disponible ».</strong>
+Panne, réseau coupé, dates incomplètes : tout revient à « confirmée sous
+24 h », qui ne promet rien. Un site qui annonce une chambre libre parce qu'il
+n'a pas pu vérifier ment à votre place.</p>
+
+<p><strong>Votre client ne voit jamais un numéro de chambre, ni combien il
+vous en reste.</strong> Il apprend seulement s'il peut réserver.</p>
+</section>
+
+<section>
+<h2>Quand un client demande une chambre</h2>
+
+<p>Il choisit ses dates et une catégorie, puis valide. À cet instant :</p>
+
+<ul>
+<li>le système <strong>choisit lui-même une chambre libre</strong> de cette
+    catégorie — le plus petit numéro d'abord ;</li>
+<li>il la <strong>retire de la vente pendant deux heures</strong> ;</li>
+<li>le client lit : <em>une chambre vous est gardée</em>, sans le numéro ;</li>
+<li>la demande apparaît immédiatement dans votre espace d'administration,
+    avec l'heure limite.</li>
+</ul>
+
+<div class="encadre">
+<p><strong>Pourquoi cette retenue de deux heures.</strong> Sans elle, la
+demande partait sur le téléphone de la réception et le site continuait
+d'annoncer la chambre libre tant que personne ne l'avait recopiée. Deux
+clients pouvaient demander la dernière chambre, et l'un des deux allait être
+déçu.</p>
+<p>Une demande venue du site <strong>n'est pas une réservation</strong> : c'est
+pourquoi elle ne bloque pas indéfiniment. Passé deux heures sans réponse, la
+chambre repart à la vente — mais la demande <strong>reste visible</strong>,
+marquée « expirée », avec le nom du client et ses dates. Quelqu'un a voulu
+cette chambre et n'a pas eu de réponse : votre réception doit pouvoir le
+voir.</p>
+</div>
+</section>
+
+<section>
+<h2>Ce que fait votre réception</h2>
+
+<p>Elle ouvre son espace d'administration et voit, en tête de page, les
+demandes à traiter avec leur heure limite. Pour chacune : <strong>confirmer</strong>
+ou <strong>refuser</strong>.</p>
+
+<p>Si elle confirme, <strong>le client reçoit automatiquement un e-mail de
+confirmation</strong> et la réservation cesse d'expirer : elle est ferme.</p>
+
+<p class="note">L'envoi automatique est construit. Il s'activera le jour où
+l'adresse d'expédition de l'hôtel sera raccordée — c'est une formalité
+technique de quelques minutes, mais elle demande une adresse à votre nom de
+domaine.</p>
+
+<p>En dehors des demandes venues du site, la réception peut à tout moment :</p>
+
+<ul>
+<li>fermer <strong>une chambre</strong> sur des nuits précises — la 25, du 12
+    au 15 ;</li>
+<li>fermer <strong>une catégorie entière</strong>, ou <strong>tout
+    l'hôtel</strong> — un événement privé, une fermeture annuelle ;</li>
+<li>mettre une chambre <strong>hors service</strong>, sans dates : travaux,
+    climatisation en panne, chambre de service. Elle sort de la vente jusqu'à
+    ce qu'on l'y remette à la main, et aucune date ne la fera revenir toute
+    seule.</li>
+</ul>
+</section>
+
+<section>
+<h2>Ce qui ne peut pas arriver</h2>
+
+<p>Ce sont des garanties, pas des intentions : le système est construit pour
+que ces situations soient impossibles.</p>
+
+<ul>
+<li>Le site ne peut pas annoncer libre une chambre que votre réception a
+    fermée.</li>
+<li>Il ne peut pas vendre une chambre marquée hors service, quelles que
+    soient les dates demandées.</li>
+<li>Il ne peut pas envoyer deux fois le même e-mail de confirmation à un
+    client — rouvrir une fiche pour corriger une faute de frappe ne renvoie
+    rien.</li>
+<li>Il ne peut pas annoncer « disponible » quand il ne sait pas. Il dit
+    « confirmée sous 24 h ».</li>
+</ul>
+</section>
+
+<section>
+<h2>Ce que le système ne fait pas</h2>
+
+<p>Il vaut mieux le lire ici que le découvrir plus tard.</p>
+
+<p><strong>Il ne verrouille pas à la seconde près.</strong> Si deux clients
+valident exactement au même instant, ils peuvent tomber sur la même chambre ;
+votre réception en déplace une. Un vrai verrou n'a de sens qu'avec une
+réservation ferme — donc avec le paiement en ligne, qui viendra après.</p>
+
+<p><strong>Il ne se synchronise pas avec Booking ou Airbnb.</strong> Si vous y
+vendez aussi vos chambres, les deux inventaires restent séparés.</p>
+
+<div class="avert">
+<p><strong>Et surtout : il ne vaut que ce que vaut sa tenue à jour.</strong></p>
+<p>Un calendrier que personne ne remplit est <em>pire</em> qu'aucun
+calendrier. Aujourd'hui, sans chambres saisies, le site dit « disponibilité
+confirmée sous 24 h » : un silence honnête. Le jour où vos chambres seront
+saisies mais que le calendrier ne sera plus tenu, ce silence deviendra une
+promesse fausse — et c'est votre nom qui sera engagé, pas le mien.</p>
+<p>C'est la raison d'être de la cinquième question ci-dessous. Elle compte
+plus que les quatre autres.</p>
+</div>
+</section>
+
+<section>
+<h1 class="partie">Six décisions qui vous appartiennent</h1>
+
+<p>Chacune porte le réglage actuel. Répondre d'un mot suffit — et ne rien
+répondre revient à valider le réglage en place.</p>
+
+<ol class="choix">
+
+<li>
+<b>Faut-il annoncer « Dernière chambre à ces dates » ?</b>
+<span class="actuel">Aujourd'hui : oui</span>
+<p>Cette mention crée un sentiment d'urgence et fait réserver plus vite. Elle
+révèle aussi que votre hôtel est presque vide le reste du temps. Certains
+établissements la veulent, d'autres pas.</p>
+</li>
+
+<li>
+<b>Faut-il dire « Complet à ces dates » ?</b>
+<span class="actuel">Aujourd'hui : oui</span>
+<p>C'est honnête, et ça évite un appel pour rien. Mais ça renvoie le client
+ailleurs. L'alternative serait de lui proposer les autres catégories encore
+libres, ou d'autres dates.</p>
+</li>
+
+<li>
+<b>Deux heures de retenue, est-ce la bonne durée ?</b>
+<span class="actuel">Aujourd'hui : 2 heures</span>
+<p>Plus long, une chambre reste bloquée par une demande qui n'aboutira pas.
+Plus court, un client qui écrit à 22 h voit sa chambre repartir avant que
+votre réception n'ouvre. La bonne durée dépend de vos heures de réponse
+réelles — voir la question 5.</p>
+</li>
+
+<li>
+<b>Faut-il dire au client quelle chambre lui est gardée ?</b>
+<span class="actuel">Aujourd'hui : non</span>
+<p>Le garder secret vous laisse libre de le déplacer sans avoir à vous
+expliquer. Le dire rassure certains clients, mais vous engage sur un numéro
+précis.</p>
+</li>
+
+<li>
+<b>Qui, à l'hôtel, tiendra ce calendrier à jour — et à quels moments de la
+journée ?</b>
+<span class="actuel">Aujourd'hui : à définir</span>
+<p>C'est la question la plus importante du document, et celle qu'on oublie de
+poser. Un nom, et un rythme — « à chaque prise de poste », « deux fois par
+jour ». La formation de la personne fait partie du travail, pas du service
+après-vente.</p>
+</li>
+
+<li>
+<b>Quelles chambres sont durablement hors service ?</b>
+<span class="actuel">Aujourd'hui : aucune connue</span>
+<p>Vos 46 chambres sont l'inventaire théorique. Si trois sont en travaux et
+qu'on les saisit comme vendables, le site annoncera dès le premier jour plus
+de disponibilité que vous ne pouvez honorer.</p>
+</li>
+
+</ol>
+</section>
+
+<section>
+<h2>Ce qu'il me faut pour l'allumer</h2>
+
+<p>Une seule chose, et elle ne dépend que de vous : <strong>la liste de vos
+chambres</strong> — pour chacune, son numéro, sa catégorie et son étage.</p>
+
+<p>Le format n'a aucune importance. Une photo de la liste affichée à la
+réception me suffit.</p>
+</section>
+
+<p class="foot">
+<strong>Léonardo Yann Axel HOUANSOU</strong><br>
++225 07 58 40 80 79 · houansouyannaxel@gmail.com
+</p>
+
+</div>
