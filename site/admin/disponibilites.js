@@ -58,6 +58,15 @@ const DTON = { dispo: ['var(--et-libre)', 'Disponible'], faible: ['var(--et-res)
   occ: ['var(--et-occ)', 'Occupée'], res: ['var(--et-res)', 'Réservée'],
   vente: ['var(--et-bloq)', 'Bloquée'], net: ['var(--et-net)', 'Nettoyage'] };
 
+/* DTON donne la couleur du TEXTE : elle sert aux pastilles, aux legendes et
+   aux listes de choix, ou la couleur se pose sur le creme. DAPLAT donne le
+   couple fond/texte des CASES du calendrier, qui sont des aplats pleins.
+   Deux usages, deux tables — les melanger rendait l'un des deux illisible. */
+const DAPLAT = { libre: ['var(--f-libre)', 'var(--t-libre)'],
+  res: ['var(--f-res)', 'var(--t-res)'], occ: ['var(--f-occ)', 'var(--t-occ)'],
+  vente: ['var(--f-bloq)', 'var(--t-bloq)'], net: ['var(--f-net)', 'var(--t-net)'],
+  hs: ['var(--f-hs)', 'var(--t-hs)'], inconnu: ['var(--f-hs)', 'var(--t-hs)'] };
+
 const jDt = (j) => new Date(j + 'T12:00:00');
 const jPlus = (j, n) => { const d = jDt(j); d.setDate(d.getDate() + n); return jourIso(d); };
 const jMaj = (s) => s.charAt(0).toUpperCase() + s.slice(1);
@@ -332,7 +341,8 @@ function htmlDsp() {
 
   const lignes = retenues.map((ch) => {
     const cases = blocsDe(ch, jours, calc).map(({ e, jour: j, n }) => {
-      const [teinte, mot] = DTON[e.k], det = detailSejour(e);
+      const [, mot] = DTON[e.k], det = detailSejour(e);
+      const [fond, encre] = DAPLAT[e.k] || DAPLAT.hs;
       /* Un bloc qui couvre aujourd'hui porte la teinte du jour : la colonne
          entiere ne peut pas etre encadree quand les cases se chevauchent. */
       const dedans = n === 1 ? j === auj : (j <= auj && jours[jours.indexOf(j) + n - 1] >= auj);
@@ -342,7 +352,7 @@ function htmlDsp() {
       const aria = 'Chambre ' + ech(ch.numero) + ', ' + nuits + ' : ' + mot
         + (det ? ' — ' + ech(det) : '');
       return `<div class="dsp-j${dedans ? ' auj' : ''}"${n > 1 ? ` style="--n:${n}"` : ''}
-        ><button class="dsp-b" style="--c:${teinte}" data-dsp-ch="${ech(ch.id)}"
+        ><button class="dsp-b" style="--f:${fond};--t:${encre}" data-dsp-ch="${ech(ch.id)}"
         data-nuit="${j}" aria-label="${aria}" title="${aria}">${mot}${
         det && DSP.vue !== 'mois' ? '<small>' + ech(det) + '</small>' : ''}</button></div>`;
     }).join('');

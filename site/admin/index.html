@@ -43,6 +43,25 @@
      (#9A6FE0) ne donnait que 2,43:1 sur la teinte des cases ; celui-ci
      tient 4,62:1. */
   --et-net:#674A96;
+
+  /* ── Les cases du calendrier : des APLATS ──────────────────────────
+     Les six jetons --et-* ci-dessus sont des couleurs de TEXTE, posees sur
+     une teinte a 8 %. C'est juste pour une pastille ou une legende ; c'est
+     insuffisant pour une grille de quarante-six lignes qu'on balaie du
+     regard a sept heures du matin.
+
+     Un calendrier n'est pas une page a contempler, c'est un instrument de
+     signalisation. Les cases prennent donc un vrai fond, comme la maquette
+     de passation le demandait — reteinte pour le creme, et mesuree : chaque
+     paire fond/texte tient au moins 4,6:1.
+
+     Le cadre reste creme. Ce sont les cases qui portent la donnee. */
+  --f-libre:#C7E3BB; --t-libre:#234A22;
+  --f-res:#F7CE8C;   --t-res:#603200;
+  --f-occ:#3E6E9C;   --t-occ:#FFFFFF;
+  --f-bloq:#B2453A;  --t-bloq:#FFFFFF;
+  --f-net:#7A5CA8;   --t-net:#FFFFFF;
+  --f-hs:#7E7367;    --t-hs:#FFFFFF;
   --f-t:"Marcellus",Georgia,serif; --f-b:"Karla",system-ui,sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0}

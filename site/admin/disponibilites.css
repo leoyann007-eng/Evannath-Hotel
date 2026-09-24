@@ -148,12 +148,17 @@
   color:var(--cream);font:400 13.5px/1.35 var(--f-b);
   border-bottom:1px solid transparent}
 .dsp-num:hover,.dsp-num:focus-visible{color:var(--bronze-2);border-bottom-color:var(--bronze-2)}
+/* Un APLAT, pas une teinte : --f porte le fond, --t le texte. Voir le bloc
+   « Les cases du calendrier » dans index.html pour le pourquoi. */
 .dsp-b{flex:1;padding:6px 3px;font:700 9px/1.2 var(--f-b);letter-spacing:.09em;text-transform:uppercase;
-  white-space:nowrap;cursor:pointer;color:var(--c);transition:.2s;
-  background:color-mix(in srgb,var(--c) 8%,transparent);border:1px solid color-mix(in srgb,var(--c) 40%,transparent)}
-.dsp-b:hover{border-color:var(--bronze-2)}
+  white-space:nowrap;cursor:pointer;color:var(--t);transition:.2s;
+  background:var(--f);border:1px solid color-mix(in srgb,var(--t) 22%,var(--f))}
+/* Au survol, la maquette baisse simplement la luminosite. Changer la bordure
+   ne se voyait plus une fois le fond plein. */
+.dsp-b:hover{filter:brightness(.94)}
+.dsp-b:focus-visible{outline:2px solid var(--cream);outline-offset:-2px}
 .dsp-b small{display:block;font-weight:400;text-transform:none;letter-spacing:0;font-size:11.5px;
-  color:var(--prose);white-space:normal;margin-top:3px}
+  color:var(--t);opacity:.88;white-space:normal;margin-top:3px}
 
 .dsp-bas{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:20px}
 @media(max-width:900px){.dsp-bas{grid-template-columns:1fr}}
