@@ -64,7 +64,8 @@ def hotel(complet=False):
                         "face à la lagune Aby : paillote sur pilotis, piscine, spa, restaurant "
                         "et salle de séminaire. Navette aéroport offerte."),
         'url': SITE + '/',
-        'logo': SITE + '/img/opt/logo-blanc.png',
+        # Le logo que les moteurs affichent se pose sur leur fond, qui est clair.
+        'logo': SITE + '/img/opt/logo-bronze.png',
         'image': [SITE + '/img/opt/' + n + '.jpg'
                   for n in ('gal-lag-ponton', 'hero-aerien', 'hero-chambre-wax', 'g-resto')],
         'address': ADRESSE,

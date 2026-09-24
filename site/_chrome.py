@@ -554,12 +554,17 @@ LINKS = [
  ('11','reserver.html','n11','Réserver'),
 ]
 
+# Le logo BRONZE, pas le blanc. L'en-tete est rgba(251,247,240,.90) a
+# toutes les hauteurs de defilement, et le pied est --bark-2 : deux fonds
+# clairs. Le logo blanc y avait disparu depuis le passage au creme — un
+# fantome sur l'accueil, rien du tout sur les dix-huit autres pages.
+# La table et Le spa gardent le blanc : leurs deux fonds restent nocturnes.
 def header(cta_href, cta_label, cta_key='cta'):
     return '''<a class="skip" href="#contenu">Aller au contenu</a>
 <header id="hd">
   <div class="wrap nav">
     <a href="index.html" class="brand" aria-label="Hôtel Evannath, accueil">
-      <img src="img/opt/logo-blanc.png" alt="Hôtel Evannath" width="729" height="176">
+      <img src="img/opt/logo-bronze.png" alt="Hôtel Evannath" width="729" height="176">
       <small>LE RÊVE AFRICAIN</small>
     </a>
     <div class="nav-right">
@@ -620,7 +625,7 @@ FOOTER = '''</main>
   <div class="wrap">
     <div class="f-grid">
       <div>
-        <img src="img/opt/logo-blanc.png" alt="Hôtel Evannath" width="729" height="176" style="width:180px;margin-bottom:8px">
+        <img src="img/opt/logo-bronze.png" alt="Hôtel Evannath" width="729" height="176" style="width:180px;margin-bottom:8px">
         <p style="font-size:8.5px;letter-spacing:.42em;color:var(--bronze);font-weight:700;margin-bottom:18px">LE RÊVE AFRICAIN</p>
         <p style="max-width:300px">46 chambres et suites face à la lagune Aby, à Assinie. Réservation directe, meilleur tarif garanti, réception ouverte 24 h/24.</p>
       </div>

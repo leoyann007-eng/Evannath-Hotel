@@ -45,10 +45,10 @@ function ajusterFenetre() {
    sur sept — elle donnait a « Deluxe · lits a baldaquin » une photo de
    textiles wax, qui est celle de la Deluxe Superieure, et intervertissait
    les deux Mezzanines. Une carte recopiee diverge ; celle-ci se deduit. */
-const DTON = { dispo: ['#8FAE63', 'Disponible'], faible: ['#E0A955', 'Peu de chambres'],
-  complet: ['#E08A7B', 'Complet'], hs: ['#9C8B78', 'Hors service'],
-  inconnu: ['#9C8B78', 'Aucune chambre saisie'], libre: ['#8FAE63', 'Disponible'],
-  occ: ['#86A9C9', 'Occupée'], res: ['#E0A955', 'Réservée'], vente: ['#E08A7B', 'Bloquée'] };
+const DTON = { dispo: ['var(--et-libre)', 'Disponible'], faible: ['var(--et-res)', 'Peu de chambres'],
+  complet: ['var(--et-bloq)', 'Complet'], hs: ['var(--et-hs)', 'Hors service'],
+  inconnu: ['var(--et-hs)', 'Aucune chambre saisie'], libre: ['var(--et-libre)', 'Disponible'],
+  occ: ['var(--et-occ)', 'Occupée'], res: ['var(--et-res)', 'Réservée'], vente: ['var(--et-bloq)', 'Bloquée'] };
 
 const jDt = (j) => new Date(j + 'T12:00:00');
 const jPlus = (j, n) => { const d = jDt(j); d.setDate(d.getDate() + n); return jourIso(d); };
@@ -232,10 +232,10 @@ function htmlDsp() {
   const combien = (k) => etatsAuj.filter((x) => x === k).length;
   const CARTES = [
     ['Total chambres', chambres.length, '', 'lit'],
-    ['Disponibles', combien('libre'), '#8FAE63', 'ok'],
-    ['Occupées', combien('occ'), '#86A9C9', 'qui'],
-    ['Réservées', combien('res'), '#E0A955', 'cal'],
-    ['Indisponibles', combien('hs') + combien('vente'), '#9C8B78', 'cle'],
+    ['Disponibles', combien('libre'), 'var(--et-libre)', 'ok'],
+    ['Occupées', combien('occ'), 'var(--et-occ)', 'qui'],
+    ['Réservées', combien('res'), 'var(--et-res)', 'cal'],
+    ['Indisponibles', combien('hs') + combien('vente'), 'var(--et-hs)', 'cle'],
   ];
 
   /* ── Le filtre ────────────────────────────────────────────────────── */
@@ -342,7 +342,7 @@ function htmlDsp() {
       <span>${ech(nomCat(g.cat))} — ${g.n} chambre${g.n > 1 ? 's' : ''}</span>
       <span class="quand">Arrivée ${jCourt(g.f.debut)} → Départ ${jCourt(jPlus(g.f.fin, 1))}</span>
       ${att && g.f.expire ? `<span class="quand" style="color:${retenueTombee(g.f)
-        ? 'var(--err)' : 'var(--bronze-2)'}">${retenueTombee(g.f) ? 'retenue expirée'
+        ? 'var(--et-bloq)' : 'var(--bronze-2)'}">${retenueTombee(g.f) ? 'retenue expirée'
         : 'gardée jusqu\'à ' + heureDe(g.f.expire)}</span>` : ''}</div>
       <span class="etat ${att ? 'attend' : 'vif'}">${att ? 'En attente' : 'Confirmée'}</span></div>`;
   }).join('');
@@ -371,7 +371,7 @@ function htmlDsp() {
         <span>${ech(nomCat(ch.categorie))} · chambre ${ech(ch.numero)}</span>
         <span class="quand">Arrivée ${jCourt(f.debut)} → Départ ${jCourt(jPlus(f.fin, 1))}${
           f.motif ? ' · réf. ' + ech(f.motif) : ''}</span>
-        <span style="color:${retenueTombee(f) ? 'var(--err)' : 'var(--bronze-2)'};font-size:12.5px">${
+        <span style="color:${retenueTombee(f) ? 'var(--et-bloq)' : 'var(--bronze-2)'};font-size:12.5px">${
           retenueTombee(f) ? 'Retenue expirée — la chambre est redevenue disponible'
             : 'Gardée jusqu\'à ' + heureDe(f.expire)}</span>
       </div>
@@ -426,11 +426,11 @@ function htmlDsp() {
       <section class="carte">
         <h2 class="bloc-t">Ce que veut dire chaque couleur</h2>
         <ul class="dsp-legende">
-          <li><span class="pt" style="--c:#8FAE63"></span>Libre</li>
-          <li><span class="pt" style="--c:#E0A955"></span>Réservée — le client arrive</li>
-          <li><span class="pt" style="--c:#86A9C9"></span>Occupée — le client est là</li>
-          <li><span class="pt" style="--c:#E08A7B"></span>Bloquée à la vente</li>
-          <li><span class="pt" style="--c:#9C8B78"></span>Hors service</li>
+          <li><span class="pt" style="--c:var(--et-libre)"></span>Libre</li>
+          <li><span class="pt" style="--c:var(--et-res)"></span>Réservée — le client arrive</li>
+          <li><span class="pt" style="--c:var(--et-occ)"></span>Occupée — le client est là</li>
+          <li><span class="pt" style="--c:var(--et-bloq)"></span>Bloquée à la vente</li>
+          <li><span class="pt" style="--c:var(--et-hs)"></span>Hors service</li>
         </ul>
         <p class="aide" style="margin-top:16px;padding-top:14px;border-top:1px solid var(--line)">
           <b style="color:var(--cream);font-weight:600">Ce que le client lit sur le site</b><br>
@@ -566,8 +566,8 @@ function rendreTiroir() {
         </div></div>
       <p class="aide" style="margin:0 0 20px">Entre 0 et ${max} : les chambres réservées${perm
         ? ' et hors service' : ''} ne se libèrent pas ici.</p>`;
-    statuts = radio('dsp-statut', [['dispo', 'Disponible', '#8FAE63'], ['complet', 'Complet', '#E08A7B'],
-      ['hs', 'Hors service', '#9C8B78']], tr.statut);
+    statuts = radio('dsp-statut', [['dispo', 'Disponible', 'var(--et-libre)'], ['complet', 'Complet', 'var(--et-bloq)'],
+      ['hs', 'Hors service', 'var(--et-hs)']], tr.statut);
     if (tr.statut === 'hs' && x.reserves > 0) {
       avert = x.reserves + (x.reserves > 1 ? ' chambres sont réservées' : ' chambre est réservée')
         + ' cette nuit. Seules les chambres libres seront mises hors service : pour les autres, '
@@ -586,9 +586,9 @@ function rendreTiroir() {
     qui = [vignette(ch.categorie), 'Chambre ' + ch.numero + (c.nom ? ' · ' + c.nom : '')];
     corps = `<div class="dsp-chiffres"><div><span>État cette nuit</span>
         <span class="etat" style="color:${teinte};border-color:${teinte}">${mot}</span></div>
-        ${det ? `<div><span style="color:#D6CBBB;font-size:13px">${ech(det)}</span></div>` : ''}</div>`;
-    statuts = radio('dsp-statut', [['dispo', 'Disponible', '#8FAE63'],
-      ['complet', 'Bloquée à la vente', '#E08A7B'], ['hs', 'Hors service', '#9C8B78']], tr.statut);
+        ${det ? `<div><span style="color:var(--prose);font-size:13px">${ech(det)}</span></div>` : ''}</div>`;
+    statuts = radio('dsp-statut', [['dispo', 'Disponible', 'var(--et-libre)'],
+      ['complet', 'Bloquée à la vente', 'var(--et-bloq)'], ['hs', 'Hors service', 'var(--et-hs)']], tr.statut);
     if (client && tr.statut === 'hs') {
       bloque = true;
       avert = 'Cette chambre possède une réservation ' + (e.f.statut === 'attente' ? 'en attente'
@@ -651,16 +651,16 @@ function rendreFiche(el, tr) {
 
       <div class="dsp-chiffres"><div><span>Ce soir</span>
         <span class="etat" style="color:${teinte};border-color:${teinte}">${mot}</span></div>
-        ${ch.service === false ? `<div><span style="color:#D6CBBB;font-size:13px">Hors
+        ${ch.service === false ? `<div><span style="color:var(--prose);font-size:13px">Hors
           service${ch.note ? ' — ' + ech(ch.note) : ''}, jusqu'à nouvel ordre.</span></div>` : ''}
       </div>
 
       <span class="lb" style="margin-top:0">Que voulez-vous en faire&nbsp;?</span>
       <div role="radiogroup" aria-label="Statut" style="margin-bottom:16px">${radio('dsp-fstatut', [
-        ['dispo', 'La rendre disponible', '#8FAE63'],
-        ['reservee', 'La réserver pour un client', '#E0A955'],
-        ['vente', 'La bloquer à la vente', '#E08A7B'],
-        ['hs', 'La mettre hors service', '#9C8B78']], tr.statut)}</div>
+        ['dispo', 'La rendre disponible', 'var(--et-libre)'],
+        ['reservee', 'La réserver pour un client', 'var(--et-res)'],
+        ['vente', 'La bloquer à la vente', 'var(--et-bloq)'],
+        ['hs', 'La mettre hors service', 'var(--et-hs)']], tr.statut)}</div>
 
       ${datee ? `<div class="duo">
           <div class="champ"><label for="fi-d">Première nuit</label>
@@ -688,7 +688,7 @@ function rendreFiche(el, tr) {
           <div><b>${ech(f.client || f.motif || 'Fermeture')}</b>
             <span class="quand">${ech(nuitsEnClair(f))}</span>
             ${f.statut === 'attente' && f.expire ? `<span style="color:${
-              retenueTombee(f) ? 'var(--err)' : 'var(--bronze-2)'};font-size:12.5px">${
+              retenueTombee(f) ? 'var(--et-bloq)' : 'var(--bronze-2)'};font-size:12.5px">${
               retenueTombee(f)
                 ? 'Retenue expirée : la chambre est redevenue disponible.'
                 : 'Demande venue du site — la chambre lui est gardée jusqu\'à '

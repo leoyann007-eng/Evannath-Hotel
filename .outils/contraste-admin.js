@@ -207,7 +207,19 @@ const chrome = spawn(CHROME, [
   })()`);
   if (!entre) throw new Error('Le mot de passe a ete refuse.');
   await cmd('Page.navigate', { url: BASE + '/admin/' });
-  await dodo(2200);
+
+  /* On attend que l'application soit PRETE, pas un delai au jugé. Un delai
+     fixe de 2,2 s avait suffi une fois puis plus jamais : le magasin ayant
+     grossi, les cinq premieres vues etaient mesurees avant le chargement
+     des donnees. L'outil annoncait « ok, 5 textes » sur des vues qu'il
+     n'avait pas vues. */
+  let pret = false;
+  for (let i = 0; i < 40 && !pret; i++) {
+    await dodo(300);
+    pret = await evaluer(`!!document.querySelector('#menu button[data-v]')
+      && !!document.querySelector('#vue .entete h1')`);
+  }
+  if (!pret) throw new Error("L'administration ne s'est pas chargee en 12 s.");
 
   const vues = await evaluer(
     "[...document.querySelectorAll('#menu button[data-v]')].map((b) => b.dataset.v)");
@@ -250,6 +262,11 @@ const chrome = spawn(CHROME, [
     const r = await evaluer(e.aller);
     if (r === 'absent') { absentes.push(e.nom); continue; }
     const v = await evaluer(MESURE);
+    /* Une vue qui ne montre presque rien n'a pas ete mesuree : elle a ete
+       photographiee pendant qu'elle se peignait. La compter « ok » est le
+       pire des deux mensonges possibles. Le seuil est bas — la plus maigre
+       des vues reelles en compte vingt-deux. */
+    if (v.mesures < 12) { absentes.push(e.nom + ' (' + v.mesures + ' textes)'); continue; }
     total += v.mesures;
     surPhoto += v.ecartes;
     pb += v.defauts.length;
@@ -283,7 +300,9 @@ const chrome = spawn(CHROME, [
      tiroir n'existe pas — et ses couleurs n'ont ete mesurees par personne. */
   if (absentes.length) {
     console.log('\n  %d etape(s) NON MESUREE(S) : %s', absentes.length, absentes.join(', '));
-    console.log('  Semez des chambres (node .outils/semer-chambres.js) et relancez.');
+    console.log(absentes.some((x) => /tiroir|fenetre/.test(x))
+      ? '  Semez des chambres (node .outils/semer-chambres.js) et relancez.'
+      : '  Ces vues se sont peintes trop tard, ou ne peignent plus rien.');
   }
 
   ws.close();

@@ -412,6 +412,28 @@ def controler():
                     pb.append((admin, 'le menu mene a « %s », mais rendre() '
                                "n'a pas de branche pour cette vue" % v))
 
+    # 18. le logo doit contraster avec le fond sur lequel il est pose.
+    # Le site est passe au creme, l'en-tete est devenu creme a 90 % et le
+    # pied --bark-2 ; le logo, lui, est reste blanc. Sur l'accueil on en
+    # devinait un fantome a travers la transparence, sur les dix-huit autres
+    # pages claires il n'y avait plus rien. Aucun outil ne l'a vu : le
+    # balayage de contraste ne mesure que du TEXTE, et un logo est une image.
+    #
+    # La regle se verifie pourtant sans regarder un pixel : une page claire
+    # reference le logo bronze, une page nocturne le logo blanc. La table et
+    # Le spa sont les deux seules nocturnes, et elles se reconnaissent a leur
+    # fond de pied ecrit en clair.
+    for f in pages:
+        s = io.open(f, encoding='utf-8').read()
+        nocturne = 'footer{background:#0B0704}' in s
+        attendu = 'logo-blanc.png' if nocturne else 'logo-bronze.png'
+        refuse = 'logo-bronze.png' if nocturne else 'logo-blanc.png'
+        if refuse in s:
+            pb.append((f, 'page %s : le logo %s y est pose sur son propre fond'
+                       % ('nocturne' if nocturne else 'claire', refuse)))
+        elif attendu not in s:
+            pb.append((f, 'aucun logo : %s est attendu' % attendu))
+
     print('%d pages controlees' % len(pages))
     if pb:
         print('%d anomalie(s) :' % len(pb))

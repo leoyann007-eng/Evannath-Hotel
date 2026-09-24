@@ -10,9 +10,35 @@
 <link rel="stylesheet" href="/admin/disponibilites.css">
 <style>
 :root{
-  --night:#100B06; --bark:#17100A; --bark-2:#1E150D; --bark-3:#2A1E13;
-  --bronze:#B98A50; --bronze-2:#DFBB84; --cream:#F6EEE2; --muted:#9C8B78;
-  --line:rgba(185,138,80,.18); --palm:#8FAE63; --err:#E08A7B;
+  /* Creme chaud, comme le site depuis le 24 septembre 2026. Les valeurs
+     sont celles de TOKENS dans _chrome.py : le back-office n'est pas
+     genere, il les porte donc en clair — et le controle 18 verifie
+     qu'elles n'ont pas diverge.
+
+     --night ne devient PAS clair : ce n'est pas « le fond le plus noir »,
+     c'est CE QUI CONTRASTE AVEC LE BRONZE, pour le texte sur aplat bronze.
+     --cream garde son nom et designe le TEXTE principal. */
+  --night:#100B06; --bark:#FBF7F0; --bark-2:#F4EDE1; --bark-3:#EDE3D4;
+  --bronze:#7F5524; --bronze-2:#653F13;
+  --cream:#2A231E; --prose:#4C423B; --muted:#6E6154;
+  --palm:#4F6B32; --err:#A63A25;
+  --line:rgba(138,95,43,.22); --line-2:rgba(138,95,43,.12);
+  /* L'ambre des alertes. Il etait ecrit en dur, clair, prevu pour un fond
+     sombre : sur le creme il tombait a 1,9:1. */
+  --ambre:#8A5A12;
+  /* ── Les cinq etats du calendrier ───────────────────────────────────
+     Une case du calendrier ecrit le nom de son etat DANS sa propre
+     couleur, sur un fond qui est cette meme couleur a 8 %, lui-meme pose
+     sur un voile bronze a 7 %. Le fond compose descend a #DAD1C3, et le
+     texte fait 9 px gras : il lui faut 4,5:1.
+
+     Les couleurs partagees avec le site n'y suffisaient pas — --palm
+     donnait 3,99:1, --muted 3,97:1. Elles ne sont pas modifiees pour
+     autant : le site les utilise sur du creme franc, ou elles tiennent.
+     Ces cinq-la leur sont propres, assombries du strict necessaire, et
+     ne servent qu'aux etats. */
+  --et-libre:#47602D; --et-res:#7B5010; --et-occ:#375C7D;
+  --et-bloq:#9C3723;  --et-hs:#63574C;
   --f-t:"Marcellus",Georgia,serif; --f-b:"Karla",system-ui,sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0}
@@ -24,11 +50,11 @@ a{color:var(--bronze-2);text-decoration:none}
 /* Une lueur bronze derriere la carte : la page de connexion est la premiere
    chose que l hotel voit chaque matin, autant qu elle ait un visage. */
 #porte{min-height:100vh;display:grid;place-items:center;padding:24px;
-  background:radial-gradient(1000px 520px at 50% 12%,rgba(185,138,80,.10),
+  background:radial-gradient(1000px 520px at 50% 12%,rgba(138,95,43,.10),
     transparent 62%),var(--bark)}
 #porte form{width:100%;max-width:400px;background:var(--bark-2);
   border:1px solid var(--line);padding:40px 36px 36px;text-align:left;
-  box-shadow:0 24px 60px rgba(0,0,0,.45)}
+  box-shadow:0 24px 60px rgba(90,62,28,.16)}
 #porte .logo{display:block;height:44px;width:auto;margin-bottom:14px}
 #porte .devise{font-size:9.5px;letter-spacing:.26em;text-transform:uppercase;
   color:var(--bronze);margin-bottom:24px}
@@ -38,7 +64,10 @@ a{color:var(--bronze-2);text-decoration:none}
 /* ── Cadre ─────────────────────────────────────────────── */
 #cadre{display:none;min-height:100vh;grid-template-columns:250px 1fr}
 #cadre.on{display:grid}
-aside{background:var(--night);border-right:1px solid var(--line);padding:26px 0;
+/* La barre passe au creme avec le reste. Elle etait restee a --night :
+   son texte, devenu sombre, tombait a 1,27:1 — le menu ne se lisait
+   plus du tout. */
+aside{background:var(--bark-2);border-right:1px solid var(--line);padding:26px 0;
   position:sticky;top:0;height:100vh;overflow:auto}
 .marque{padding:0 22px 24px;border-bottom:1px solid var(--line);margin-bottom:18px}
 .marque img{display:block;height:34px;width:auto;margin-bottom:10px}
@@ -50,7 +79,7 @@ nav button{display:flex;align-items:center;gap:12px;width:100%;background:none;b
   text-align:left;border-left:2px solid transparent;transition:.18s}
 nav button:hover{background:var(--bark-2);color:var(--bronze-2)}
 nav button:hover i{color:var(--bronze)}
-nav button.on{background:linear-gradient(90deg,rgba(185,138,80,.14),transparent 78%);
+nav button.on{background:linear-gradient(90deg,rgba(138,95,43,.14),transparent 78%);
   border-left-color:var(--bronze);color:var(--bronze-2)}
 nav button.on i{color:var(--bronze-2)}
 nav button i{font-style:normal;font-size:15px;width:20px;text-align:center;
@@ -68,22 +97,21 @@ h1.t:after{content:"";display:block;width:44px;height:2px;background:var(--bronz
 /* ── Blocs ─────────────────────────────────────────────── */
 /* Un filet clair en haut du bloc, comme une lumiere rasante : il detache la
    carte du fond sans ombre lourde. */
-.carte{background:linear-gradient(180deg,rgba(255,255,255,.022),transparent 120px),
-  var(--bark-2);border:1px solid var(--line);padding:24px 26px;margin-bottom:20px}
+.carte{background:var(--bark-2);border:1px solid var(--line);padding:24px 26px;margin-bottom:20px}
 .chiffres{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:24px}
 .chiffre{position:relative;background:var(--bark-2);border:1px solid var(--line);
   padding:22px 24px;overflow:hidden;transition:.25s}
 /* Un trait bronze en tete du chiffre : l oeil sait ou commencer. */
 .chiffre:before{content:"";position:absolute;top:0;left:0;width:38px;height:2px;
   background:var(--bronze)}
-.chiffre:hover{border-color:rgba(185,138,80,.36)}
+.chiffre:hover{border-color:rgba(138,95,43,.36)}
 .chiffre b{font-family:var(--f-t);font-size:34px;color:var(--bronze);display:block;line-height:1}
 .chiffre span{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
   font-weight:700;display:block;margin-top:8px}
 
-.alerte{border-left:3px solid var(--err);background:rgba(224,138,123,.07);padding:16px 20px;margin-bottom:22px}
+.alerte{border-left:3px solid var(--err);background:rgba(166,58,37,.07);padding:16px 20px;margin-bottom:22px}
 .alerte b{color:var(--err);display:block;margin-bottom:4px}
-.alerte span{font-size:13.5px;color:#D6CBBB}
+.alerte span{font-size:13.5px;color:var(--prose)}
 
 /* ── Listes ────────────────────────────────────────────── */
 .ligne{display:flex;align-items:center;gap:16px;background:var(--bark-2);
@@ -94,16 +122,16 @@ h1.t:after{content:"";display:block;width:44px;height:2px;background:var(--bronz
 .ligne .txt span{font-size:12.5px;color:var(--muted)}
 .etat{font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;font-weight:700;
   padding:5px 10px;border:1px solid var(--line);white-space:nowrap}
-.etat.vif{color:var(--palm);border-color:rgba(143,174,99,.45)}
+.etat.vif{color:var(--palm);border-color:rgba(79,107,50,.45)}
 .etat.dort{color:var(--muted)}
-.etat.fini{color:var(--err);border-color:rgba(224,138,123,.4)}
+.etat.fini{color:var(--err);border-color:rgba(166,58,37,.4)}
 
 /* ── Boutons et champs ─────────────────────────────────── */
 .btn{display:inline-flex;align-items:center;gap:9px;border:1px solid var(--bronze);
   background:none;color:var(--bronze);font:700 11px/1 var(--f-b);letter-spacing:.18em;
   text-transform:uppercase;padding:14px 24px;cursor:pointer;transition:.3s;font-family:var(--f-b)}
-.btn:hover{background:var(--bronze);color:var(--night)}
-.btn.plein{background:var(--bronze);color:var(--night)}
+.btn:hover{background:var(--bronze);color:var(--bark)}
+.btn.plein{background:var(--bronze);color:var(--bark)}
 .btn.plein:hover{background:var(--bronze-2);border-color:var(--bronze-2)}
 .btn.mince{padding:9px 15px;font-size:10px;letter-spacing:.14em}
 .rang{display:flex;flex-direction:column;gap:3px;flex:none}
@@ -114,10 +142,10 @@ h1.t:after{content:"";display:block;width:44px;height:2px;background:var(--bronz
 
 /* Le bandeau de page perimee : il doit se voir, pas se deviner. */
 .perimee{display:flex;align-items:center;gap:16px;flex-wrap:wrap;
-  padding:16px 20px;margin-bottom:20px;background:rgba(224,138,123,.10);
+  padding:16px 20px;margin-bottom:20px;background:rgba(166,58,37,.10);
   border:1px solid var(--err)}
 .perimee b{color:var(--err);flex:none}
-.perimee span{flex:1;min-width:220px;font-size:13px;color:var(--sand)}
+.perimee span{flex:1;min-width:220px;font-size:13px;color:var(--bronze-2)}
 
 /* Le fil des etapes : ou l on en est, ce qui reste, et le retour en
    arriere sur ce qui est deja franchi. */
@@ -130,12 +158,12 @@ h1.t:after{content:"";display:block;width:44px;height:2px;background:var(--bronz
   width:22px;height:22px;font-style:normal;font-size:11px;font-weight:700;
   border-radius:50%;background:var(--bark-3);color:var(--muted);
   border:1px solid var(--line);flex:none}
-.fil li.ici{color:var(--sand);font-weight:600}
-.fil li.ici i{background:var(--bronze-2);color:var(--night);
+.fil li.ici{color:var(--bronze-2);font-weight:600}
+.fil li.ici i{background:var(--bronze-2);color:var(--bark);
   border-color:var(--bronze-2)}
 .fil li.fait{color:var(--bronze-2);cursor:pointer}
-.fil li.fait i{color:var(--bronze-2);border-color:rgba(185,138,80,.5)}
-.fil li.fait:hover{color:var(--sand)}
+.fil li.fait i{color:var(--bronze-2);border-color:rgba(138,95,43,.5)}
+.fil li.fait:hover{color:var(--bronze-2)}
 
 /* Le recapitulatif : a gauche ce qui a ete decide, a droite ce que verra
    le client. */
@@ -145,7 +173,7 @@ h1.t:after{content:"";display:block;width:44px;height:2px;background:var(--bronz
 .recap-l span{flex:none;width:112px;font-size:10.5px;letter-spacing:.13em;
   text-transform:uppercase;color:var(--muted);font-weight:700;padding-top:2px}
 .recap-l b{font-weight:400;font-size:13.5px}
-.apercu-client{position:relative;background:var(--night);
+.apercu-client{position:relative;background:var(--bark-3);
   border:1px solid var(--line);min-height:230px;overflow:hidden}
 .apercu-client img{width:100%;height:100%;object-fit:cover;position:absolute;
   inset:0;opacity:.55}
@@ -162,13 +190,13 @@ h1.t:after{content:"";display:block;width:44px;height:2px;background:var(--bronz
 .apercu-client.affiche .dessus{min-height:0;padding:14px 16px;
   justify-content:flex-start;gap:8px}
 .apercu-client .taux{padding:4px 10px;font-size:13px;font-weight:700;
-  background:var(--bronze-2);color:var(--night)}
-.apercu-client b{font-family:var(--f-display);font-size:20px;font-weight:400;
+  background:var(--bronze-2);color:var(--bark)}
+.apercu-client b{font-family:var(--f-t);font-size:20px;font-weight:400;
   color:var(--cream);line-height:1.2}
 @media (max-width:820px){ .recap{grid-template-columns:1fr} }
 .bloc-t i{display:inline-flex;align-items:center;justify-content:center;
   width:22px;height:22px;margin-right:9px;font-style:normal;font-size:11px;
-  font-weight:700;background:var(--bronze-2);color:var(--night);
+  font-weight:700;background:var(--bronze-2);color:var(--bark);
   border-radius:50%;vertical-align:2px}
 .lb{display:block;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
   color:var(--muted);font-weight:700;margin:16px 0 6px}
@@ -197,10 +225,10 @@ h1.t:after{content:"";display:block;width:44px;height:2px;background:var(--bronz
   .choix.trois{grid-template-columns:1fr}
 }
 .opt{padding:14px 16px;text-align:left;font-size:13px;cursor:pointer;
-  background:var(--bark-3);color:var(--sand);border:1px solid var(--line);
+  background:var(--bark-3);color:var(--bronze-2);border:1px solid var(--line);
   transition:.2s}
 .opt:hover{border-color:var(--bronze-2)}
-.opt.on{border-color:var(--bronze-2);background:rgba(185,138,80,.12);
+.opt.on{border-color:var(--bronze-2);background:rgba(138,95,43,.12);
   color:var(--bronze-2);font-weight:600}
 
 .suffixe{display:flex;align-items:stretch}
@@ -214,7 +242,7 @@ h1.t:after{content:"";display:block;width:44px;height:2px;background:var(--bronz
 .vitrine s{color:var(--muted)}
 .vitrine .prix{color:var(--bronze-2);font-size:16px;margin-left:6px}
 .vitrine .etiq{display:inline-block;margin-left:8px;padding:2px 8px;
-  font-size:11px;font-weight:700;background:var(--bronze-2);color:var(--night)}
+  font-size:11px;font-weight:700;background:var(--bronze-2);color:var(--bark)}
 
 .radio,.bascule{display:flex;align-items:center;gap:10px;margin:9px 0;
   font-size:13.5px;cursor:pointer}
@@ -229,19 +257,19 @@ h1.t:after{content:"";display:block;width:44px;height:2px;background:var(--bronz
 .paire input{margin-bottom:8px}
 
 /* Programmee : ni en ligne, ni terminee. Elle attend son heure. */
-.etat.attend{color:var(--bronze-2);border-color:rgba(185,138,80,.45)}
+.etat.attend{color:var(--bronze-2);border-color:rgba(138,95,43,.45)}
 
 @media (max-width:640px){
   .choix,.paire{grid-template-columns:1fr}
 }
 .fl{width:26px;height:21px;line-height:1;font-size:9px;cursor:pointer;
-  background:var(--bark-3);color:var(--sand);border:1px solid var(--line);
+  background:var(--bark-3);color:var(--bronze-2);border:1px solid var(--line);
   transition:.2s}
-.fl:hover:not([disabled]){background:var(--bronze-2);color:var(--night);
+.fl:hover:not([disabled]){background:var(--bronze-2);color:var(--bark);
   border-color:var(--bronze-2)}
 .fl[disabled]{opacity:.28;cursor:default}
-.btn.danger{border-color:rgba(224,138,123,.5);color:var(--err)}
-.btn.danger:hover{background:var(--err);color:var(--night)}
+.btn.danger{border-color:rgba(166,58,37,.5);color:var(--err)}
+.btn.danger:hover{background:var(--err);color:var(--bark)}
 
 label{display:block;font-size:10px;letter-spacing:.18em;text-transform:uppercase;
   color:var(--muted);font-weight:700;margin-bottom:7px}
@@ -325,7 +353,7 @@ details.plus summary::marker{color:var(--bronze)}
 <!-- ── Connexion ─────────────────────────────────────────── -->
 <div id="porte">
   <form id="fporte">
-    <img class="logo" src="/img/opt/logo-blanc.png" alt="Hôtel Evannath">
+    <img class="logo" src="/img/opt/logo-bronze.png" alt="Hôtel Evannath">
     <p class="devise">Le rêve africain</p>
     <h1>Espace d'administration</h1>
     <p>Publiez vos événements, vos promotions et vos campagnes.</p>
@@ -342,7 +370,7 @@ details.plus summary::marker{color:var(--bronze)}
 <div id="cadre">
   <aside>
     <div class="marque">
-      <img src="/img/opt/logo-blanc.png" alt="Hôtel Evannath">
+      <img src="/img/opt/logo-bronze.png" alt="Hôtel Evannath">
       <span>Administration</span>
     </div>
     <nav id="menu">
@@ -1440,10 +1468,10 @@ function rendre() {
 
       ${chambres.length ? `<p class="lb" style="margin:0 0 12px">Ce soir</p>
         <div class="dsp-chiffres-h">
-          ${chiffre(libres === null ? '—' : libres, 'Chambres libres', '#8FAE63')}
-          ${chiffre(arrivees, 'Arrivées aujourd\'hui', '#E0A955')}
-          ${chiffre(departs, 'Départs aujourd\'hui', '#86A9C9')}
-          ${chiffre(horsService, 'Hors service', '#9C8B78')}
+          ${chiffre(libres === null ? '—' : libres, 'Chambres libres', 'var(--et-libre)')}
+          ${chiffre(arrivees, 'Arrivées aujourd\'hui', 'var(--ambre)')}
+          ${chiffre(departs, 'Départs aujourd\'hui', 'var(--ciel)')}
+          ${chiffre(horsService, 'Hors service', 'var(--et-hs)')}
         </div>`
       : `<div class="carte" style="border-left:3px solid var(--bronze)">
           <div class="bloc-t" style="margin-bottom:6px">Vos chambres ne sont pas encore saisies</div>
@@ -1536,7 +1564,7 @@ function rendre() {
           <span>Celle du déploiement en cours. Si votre page en affichait
           une autre, elle serait périmée et vos réglages pourraient se
           perdre.</span></div>
-          <code style="font-size:12px;color:var(--sand)">${ETAT.version
+          <code style="font-size:12px;color:var(--bronze-2)">${ETAT.version
             || 'inconnue'}</code></div>
         <div class="ligne"><div class="txt">
           <b>Stockage</b><span>${ETAT.stockage === 'durable'
@@ -1547,16 +1575,16 @@ function rendre() {
         ${ETAT.magasin ? `<div class="ligne"><div class="txt">
           <b>Magasin visé</b><span>Comparez cet identifiant à celui du magasin
           Blob dans Vercel. S'ils diffèrent, le jeton pointe ailleurs.</span></div>
-          <code style="font-size:12px;color:var(--sand)">${ETAT.magasin}</code>
+          <code style="font-size:12px;color:var(--bronze-2)">${ETAT.magasin}</code>
           </div>
 
         <div class="ligne"><div class="txt"><b>Sauvegardes</b>
           <span>Exemplaires du fichier de données conservés. Chaque publication
           en ajoute un ; les dix plus récents sont gardés.</span></div>
-          <code style="font-size:12px;color:var(--sand)">${ETAT.fichiers || 0}</code></div>
+          <code style="font-size:12px;color:var(--bronze-2)">${ETAT.fichiers || 0}</code></div>
         <div class="ligne"><div class="txt"><b>Variable lue</b>
           <span>Le nom de la variable d'environnement d'où vient le jeton.</span>
-          </div><code style="font-size:12px;color:var(--sand)">${
+          </div><code style="font-size:12px;color:var(--bronze-2)">${
           ETAT.variable}</code></div>` : ''}
       </div>
       <div class="carte">
@@ -1843,7 +1871,7 @@ function alleger(im, donnee, poids) {
   c.height = Math.round(im.height * f);
   const ctx = c.getContext('2d');
   /* Un PNG transparent deviendrait noir : on pose le fond du site dessous. */
-  ctx.fillStyle = '#17100A';
+  ctx.fillStyle = 'var(--bark)';
   ctx.fillRect(0, 0, c.width, c.height);
   ctx.drawImage(im, 0, 0, c.width, c.height);
   const reduit = c.toDataURL('image/jpeg', 0.85);
