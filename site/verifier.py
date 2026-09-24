@@ -391,6 +391,27 @@ def controler():
                 pb.append((f, 'disponibilite affirmee dans le balisage : « %s »'
                            ' — elle doit venir de DISPO_JS' % phrase))
 
+    # 17. chaque entree du menu du back-office doit peindre quelque chose.
+    # Un decoupage du tableau de bord, ancre sur la branche suivante, a emporte
+    # les trois branches qui vivaient entre les deux : evenements, promotions,
+    # campagnes et galerie. Le fichier se parsait, aucune erreur en console,
+    # et le menu s'allumait bien. Mais rendre() n'ecrivait plus rien : on
+    # cliquait « Evenements » et la vue precedente restait a l'ecran. Un
+    # defaut muet, que seul un clic sur les huit entrees pouvait trouver.
+    admin = 'admin/index.html'
+    if os.path.exists(admin):
+        a = io.open(admin, encoding='utf-8').read()
+        # Le corps de rendre(), du mot-cle jusqu'a l'accolade de la marge.
+        m = re.search(r'function rendre\(\) \{(.*?)\n\}', a, re.S)
+        if not m:
+            pb.append((admin, 'rendre() est introuvable'))
+        else:
+            corps = m.group(1)
+            for v in sorted(set(re.findall(r'data-v="([\w-]+)"', a))):
+                if ("VUE === '%s'" % v) not in corps:
+                    pb.append((admin, 'le menu mene a « %s », mais rendre() '
+                               "n'a pas de branche pour cette vue" % v))
+
     print('%d pages controlees' % len(pages))
     if pb:
         print('%d anomalie(s) :' % len(pb))

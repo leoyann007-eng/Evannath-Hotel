@@ -53,7 +53,10 @@ const DTON = { dispo: ['#8FAE63', 'Disponible'], faible: ['#E0A955', 'Peu de cha
 const jDt = (j) => new Date(j + 'T12:00:00');
 const jPlus = (j, n) => { const d = jDt(j); d.setDate(d.getDate() + n); return jourIso(d); };
 const jMaj = (s) => s.charAt(0).toUpperCase() + s.slice(1);
-const jCourt = (j) => jDt(j).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+/* « 1 janvier » n'existe pas en francais : le premier du mois prend son
+   rang. Le navigateur ne le sait pas, nous si. */
+const rang = (t) => t.replace(/(^|\s)1(\s)/, '$11er$2');
+const jCourt = (j) => rang(jDt(j).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }));
 /* L'instant ou une retenue tombe. On dit l'heure, pas « dans 118 minutes » :
    la reception regarde sa pendule, pas un compte a rebours. */
 const heureDe = (t) => {
@@ -68,8 +71,8 @@ const heureDe = (t) => {
    bandeau de page perimee. Deux scripts classiques partagent la meme
    portee globale, et la collision ne se voit qu'au navigateur. */
 const retenueTombee = (f) => !!f.expire && Date.parse(f.expire) < Date.now();
-const jLong = (j) => jMaj(jDt(j).toLocaleDateString('fr-FR',
-  { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }));
+const jLong = (j) => jMaj(rang(jDt(j).toLocaleDateString('fr-FR',
+  { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })));
 const fCouvre = (f, n) => f.debut && f.debut <= n && (f.fin == null || f.fin >= n);
 const fChevauche = (f, a, b) => f.debut && f.debut <= b && (f.fin == null || f.fin >= a);
 const fVise = (f, ch) => f.cible === '*' || f.cible === ch.id || f.cible === ch.categorie;

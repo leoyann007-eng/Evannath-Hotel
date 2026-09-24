@@ -425,8 +425,10 @@ const AUJ = () => jourIso(new Date());
 
 /* Midi, et pas minuit : une date lue a minuit bascule d'un jour des que le
    fuseau recule d'une heure, et la fermeture s'afficherait decalee. */
+/* « 1 janvier » n'existe pas en francais : le premier du mois prend son
+   rang. Le navigateur ne le sait pas, nous si. */
 const enClair = (j) => new Date(j + 'T12:00:00').toLocaleDateString('fr-FR',
-  { day: 'numeric', month: 'long', year: 'numeric' });
+  { day: 'numeric', month: 'long', year: 'numeric' }).replace(/^1 /, '1er ');
 
 /** Ce que vise une fermeture : une chambre, une categorie, ou l'hotel. */
 function nomCible(cible) {
@@ -645,7 +647,7 @@ function liste(type) {
           ${e.accent ? '<em style="color:var(--bronze-2)">' + ech(e.accent) + '</em>' : ''}</b>
         <span>${type === 'campagnes' ? resumeCampagne(e)
           : type === 'promotions' ? resumePromo(e)
-          : ech(e.badge || e.quand || '—') + (e.fin ? ' · se termine le ' + ech(e.fin) : '')}</span>
+          : ech(e.badge || e.quand || '—') + (e.fin ? ' · se termine le ' + ech(enClair(e.fin)) : '')}</span>
       </div>
       ${etatDe(e, type)}
       <!-- « Visible sur le site » existait deja, mais a cinq clics au fond de
@@ -1364,21 +1366,105 @@ function formulaire(type) {
 function rendre() {
   const v = $('#vue');
   if (VUE === 'bord') {
+    /* La page du matin. Elle parlait d'evenements, de promotions et de
+       « 90 photos disponibles » — rien du travail de la reception. Elle
+       parle d'abord, desormais, de ce qui a une echeance : une demande
+       venue du site garde une chambre deux heures, et si personne ne la
+       voit le client n'aura pas de reponse. */
+    const auj = typeof AUJ === 'function' ? AUJ() : '';
+    const chambres = ETAT.chambres || [];
+    const F = ETAT.fermetures || [];
+
+    const jour = new Date().toLocaleDateString('fr-FR',
+      { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+      .replace(/(^|\s)1(\s)/, '$11er$2');
+
+    /* Les demandes que la reception doit traiter, la plus pressee d'abord. */
+    const aTraiter = F.filter((f) => f.nature === 'client'
+      && f.statut === 'attente' && f.expire && chambres.some((c) => c.id === f.cible))
+      .sort((a, b) => String(a.expire).localeCompare(String(b.expire)));
+
+    /* Ce soir : on compte chambre par chambre, avec la meme regle que le
+       calendrier. Si le module n'est pas encore charge, on ne devine pas. */
+    let libres = null, arrivees = 0, departs = 0;
+    if (typeof dspEtat === 'function' && typeof dspIndex === 'function' && auj) {
+      const idx = dspIndex(F, chambres);
+      libres = chambres.filter((ch) => dspEtat(ch, auj, idx, auj).k === 'libre').length;
+      arrivees = F.filter((f) => f.nature === 'client' && f.statut !== 'annulee'
+        && f.debut === auj).length;
+      /* Le client part le lendemain de sa derniere nuit. */
+      departs = F.filter((f) => f.nature === 'client' && f.statut !== 'annulee'
+        && f.fin && jPlus(f.fin, 1) === auj).length;
+    }
+    const horsService = chambres.filter((ch) => ch.service === false).length;
+
     const actifs = ETAT.evenements.filter((e) => e.publie !== false && !expire(e)).length;
+    const promosActives = (ETAT.promotions || [])
+      .filter((p) => p.publie !== false && statutPromo(p).mot === 'Active').length;
+
+    const chiffre = (n, l, c) => `<div class="carte"${c ? ` style="--c:${c}"` : ''}>
+      <b>${c ? '<span class="pt"></span>' : ''}${n}</b><span>${l}</span></div>`;
+
     v.innerHTML = `<div class="entete"><div>
         <h1 class="t">Tableau de bord</h1>
-        <p class="sous">${ETAT.maj ? 'Dernière modification le ' + new Date(ETAT.maj).toLocaleString('fr-FR') : 'Aucune modification enregistrée.'}</p>
+        <p class="sous">${jour.charAt(0).toUpperCase() + jour.slice(1)}${
+          ETAT.maj ? ' · dernière modification à ' + new Date(ETAT.maj).toLocaleTimeString(
+            'fr-FR', { hour: '2-digit', minute: '2-digit' }) : ''}</p>
       </div></div>
       ${avertissement()}
-      <div class="chiffres">
-        <div class="chiffre"><b>${actifs}</b><span>Événements en ligne</span></div>
-        <div class="chiffre"><b>${ETAT.evenements.length}</b><span>Événements au total</span></div>
-        <div class="chiffre"><b>${ETAT.promotions.length}</b><span>Promotions</span></div>
-        <div class="chiffre"><b>${ETAT.images.length}</b><span>Photos disponibles</span></div>
+
+      ${aTraiter.length ? `<div class="carte dsp-traiter">
+        <h2 class="bloc-t" style="margin-bottom:4px">${aTraiter.length} demande${
+          aTraiter.length > 1 ? 's' : ''} venue${aTraiter.length > 1 ? 's' : ''} du site</h2>
+        <p class="aide" style="margin:0 0 14px">Une chambre leur est gardée jusqu'à
+          l'heure indiquée. Passé ce délai elle repart à la vente, et le client
+          n'aura pas de réponse.</p>
+        ${aTraiter.slice(0, 3).map((f) => {
+          const ch = chambres.find((c) => c.id === f.cible) || {};
+          return `<div class="dsp-dem">
+            <div style="flex:1;min-width:0">
+              <b>${ech(f.client)}</b>
+              <span>chambre ${ech(ch.numero || '?')} · arrivée ${
+                typeof jCourt === 'function' ? jCourt(f.debut) : ech(f.debut)}</span>
+            </div>
+            <span style="color:${typeof retenueTombee === 'function' && retenueTombee(f)
+              ? 'var(--err)' : 'var(--bronze-2)'};font-size:12.5px;flex:none">${
+              typeof retenueTombee === 'function' && retenueTombee(f) ? 'expirée'
+                : 'jusqu\'à ' + (typeof heureDe === 'function' ? heureDe(f.expire) : '')}</span>
+          </div>`; }).join('')}
+        <div class="pied"><button class="btn plein" data-aller="disponibilites"
+          >Les traiter</button>${aTraiter.length > 3
+            ? `<span class="aide">et ${aTraiter.length - 3} autre${
+                aTraiter.length > 4 ? 's' : ''}</span>` : ''}</div>
+      </div>` : ''}
+
+      ${chambres.length ? `<p class="lb" style="margin:0 0 12px">Ce soir</p>
+        <div class="dsp-chiffres-h">
+          ${chiffre(libres === null ? '—' : libres, 'Chambres libres', '#8FAE63')}
+          ${chiffre(arrivees, 'Arrivées aujourd\'hui', '#E0A955')}
+          ${chiffre(departs, 'Départs aujourd\'hui', '#86A9C9')}
+          ${chiffre(horsService, 'Hors service', '#9C8B78')}
+        </div>`
+      : `<div class="carte" style="border-left:3px solid var(--bronze)">
+          <div class="bloc-t" style="margin-bottom:6px">Vos chambres ne sont pas encore saisies</div>
+          <p class="aide" style="margin-bottom:16px">Tant qu'aucune chambre n'est
+            saisie, <strong>le site n'annonce aucune disponibilité</strong> : il redit
+            à chaque visiteur que la réception confirme sous 24 h.${
+              ETAT.annoncees ? ` Votre site annonce ${ETAT.annoncees} chambres
+              et suites.` : ''}</p>
+          <button class="btn plein" data-aller="disponibilites">Saisir les chambres</button>
+        </div>`}
+
+      <p class="lb" style="margin:26px 0 12px">En ligne sur le site</p>
+      <div class="dsp-chiffres-h">
+        ${chiffre(actifs, 'Événements en ligne')}
+        ${chiffre(promosActives, 'Promotions actives')}
+        ${chiffre(ETAT.images.length, 'Photos disponibles')}
       </div>
+
       <div class="carte">
-        <h2 style="font-family:var(--f-t);font-weight:400;font-size:20px;margin-bottom:10px">Publier une affiche</h2>
-        <p style="color:var(--muted);margin-bottom:18px">Un événement daté disparaît du site
+        <div class="bloc-t" style="margin-bottom:10px">Publier une affiche</div>
+        <p class="aide" style="margin-bottom:18px">Un événement daté disparaît du site
         tout seul le lendemain de sa date de fin. Vous n'avez rien à décrocher.</p>
         <button class="btn plein" data-neuf="evenements">Nouvel événement</button>
       </div>`;
@@ -1545,6 +1631,16 @@ document.addEventListener('click', async (e) => {
     const r = await appel('supprimer', { type: 'fermeture', id: f.id });
     if (!r.ok) { alert(r.message || "Ça n'a pas pu être retiré."); return; }
     ETAT.fermetures = (ETAT.fermetures || []).filter((x) => x.id !== f.id);
+    return rendre();
+  }
+
+  /* Le tableau de bord renvoie vers la vue qui traite : « Les traiter »
+     doit mener aux disponibilites, pas ouvrir un formulaire. */
+  const aller = e.target.closest('[data-aller]');
+  if (aller) {
+    VUE = aller.dataset.aller; EDITE = null;
+    [...$('#menu').querySelectorAll('button[data-v]')].forEach(
+      (x) => x.classList.toggle('on', x.dataset.v === VUE));
     return rendre();
   }
 
