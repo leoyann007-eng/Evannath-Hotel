@@ -57,6 +57,11 @@ ferai volontiers en un quart d'heure, quand vous voudrez. J'y ai ajouté un
 demande, pour que vous puissiez me corriger avant que quoi que ce soit ne
 parte en ligne.
 
+Vous m'avez dit que vos réceptionnistes gèrent déjà les réservations dans un
+outil hôtelier. **Quel est le nom de cet outil ?** S'il peut partager ses
+disponibilités, le site les lira directement et personne n'aura rien à saisir
+deux fois. Une capture d'écran suffit.
+
 À cet écran, il ne manque que **vos chambres**. Pour chacune : **son numéro, sa
 catégorie et son étage.** Vos sept catégories, telles que votre site les
 nomme : Standard, Deluxe (lits à baldaquin), Deluxe Supérieure, Suite

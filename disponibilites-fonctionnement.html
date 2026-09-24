@@ -8,7 +8,7 @@
   --f-t:"Marcellus",Georgia,serif; --f-b:"Karla",Calibri,sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:var(--f-b);font-size:14px;line-height:1.62;color:var(--ink);
+body{font-family:var(--f-b);font-size:14px;line-height:1.6;color:var(--ink);
      background:#fff;-webkit-font-smoothing:antialiased}
 .page{max-width:720px;margin:0 auto;padding:26px 38px 30px}
 
@@ -28,26 +28,22 @@ ul.points li{position:relative;padding-left:30px;margin:8px 0}
 ul.points li:before{content:"";position:absolute;left:0;top:5px;
   width:13px;height:13px;border:1.5px solid var(--bronze-2)}
 
-ol.q{list-style:none;padding-left:0;counter-reset:c;margin:11px 0}
-ol.q li{counter-increment:c;position:relative;padding-left:36px;margin:10px 0}
-ol.q li:before{content:counter(c);position:absolute;left:0;top:0;
-  width:24px;height:24px;border:1px solid var(--bronze-2);border-radius:50%;
-  font-family:var(--f-t);font-size:13px;line-height:23px;text-align:center;
-  color:var(--bronze)}
-ol.q b{display:block}
-ol.q p{margin:3px 0 0;color:var(--muted);font-size:13px}
+ul.puces{margin:8px 0 8px 22px;padding:0}
+ul.puces li{margin:5px 0}
 
 .encadre{background:var(--sable);border:1px solid var(--line);
-         padding:13px 18px;margin:14px 0}
+         padding:13px 18px;margin:13px 0}
 .encadre p:first-child{margin-top:0}
 .encadre p:last-child{margin-bottom:0}
 
-.foot{margin-top:14px;padding-top:10px;border-top:1px solid var(--line);
+.foot{margin-top:8px;padding-top:9px;border-top:1px solid var(--line);
       color:var(--muted);font-size:12px}
-section{margin-bottom:13px}
+section{margin-bottom:14px}
 
 @media print{
-  @page{margin:12mm 12mm}
+  /* A4 explicite : sans cette ligne, Chrome imprime en Letter — 18 mm de
+     moins en hauteur, et le document passait a deux pages. */
+  @page{size:A4;margin:12mm 12mm}
   .page{max-width:none;padding:0}
   h1,h2{break-after:avoid}
   .encadre,li{break-inside:avoid}
@@ -59,8 +55,8 @@ section{margin-bottom:13px}
 <p class="chapeau">Hôtel Evannath — les chambres disponibles en ligne</p>
 
 <p>Vous m'avez demandé de <strong>mettre en ligne les chambres
-disponibles</strong>. Avant d'aller plus loin, je préfère vous dire ce que j'ai
-compris — et vous laisser me corriger.</p>
+disponibles</strong>. Voici ce que j'ai compris — et une question qui décide de
+la suite.</p>
 
 <section>
 <h2>Ce que le site fera</h2>
@@ -68,49 +64,58 @@ compris — et vous laisser me corriger.</p>
 <ul class="points">
 <li>Quand un client choisit ses dates, il <strong>saura tout de suite</strong>
     si une chambre est libre, au lieu de vous appeler pour le demander.</li>
-<li>Cette réponse <strong>viendra de vous</strong>. Le site ne devine rien : il
-    répète ce que votre réception a saisi.</li>
-<li>Quand votre réception n'a rien saisi, <strong>le site ne promet
-    rien</strong>. Il dit, comme aujourd'hui, que vous confirmez sous 24&nbsp;h.</li>
+<li>Cette réponse <strong>viendra de vous</strong>. Le site ne devine rien.</li>
+<li>Tant qu'il n'a rien reçu de votre part, <strong>il ne promet rien</strong> :
+    il dit, comme aujourd'hui, que vous confirmez sous 24&nbsp;h.</li>
 <li>Votre client ne verra <strong>ni numéro de chambre, ni combien il vous en
     reste</strong>. Seulement s'il peut réserver.</li>
-<li>Quand un client réserve en ligne, <strong>la chambre lui est gardée deux
+<li>Quand il réserve en ligne, <strong>la chambre lui est gardée deux
     heures</strong>, le temps que votre réception confirme. Ce n'est pas encore
     une réservation : c'est vous qui la validez.</li>
 </ul>
 </section>
 
 <section>
-<h2>Ce que ça demande de votre côté</h2>
+<h2>La question qui décide de la suite</h2>
+
+<p>Vous m'avez dit que vos réceptionnistes gèrent déjà les réservations dans
+un <strong>outil hôtelier</strong>. C'est une bonne nouvelle, et ça pose la
+seule vraie question qu'il me reste.</p>
 
 <div class="encadre">
-<p>Une seule chose, mais elle est réelle : <strong>quelqu'un, à l'hôtel, doit
-tenir ce calendrier à jour.</strong></p>
-<p>C'est la contrepartie, et je préfère la dire maintenant plutôt qu'après.
-Un calendrier que personne ne remplit est pire que pas de calendrier : il
-transformerait le silence prudent d'aujourd'hui en promesse fausse.</p>
+<p><strong>Si cet outil peut partager ses disponibilités</strong>, le site les
+lit directement. Personne ne saisit rien deux fois, et ce que le site annonce
+est exactement ce que votre outil sait.</p>
+<p><strong>S'il ne le peut pas</strong>, votre réception devra tenir un second
+calendrier, chez nous, en plus du sien. C'est faisable — mais c'est un geste
+de plus, tous les jours, et je préfère vous le dire avant plutôt qu'après.</p>
 </div>
+
+<p>Pour trancher, il me faut peu de chose :</p>
+
+<ul class="puces">
+<li><strong>Le nom de cet outil.</strong> Une capture d'écran suffit : il est
+    écrit en haut de la page.</li>
+<li>Et, si vous le savez, <strong>s'il propose un export, ou une connexion
+    vers Booking et Airbnb.</strong> Sinon ne cherchez pas : le nom me suffira
+    pour le vérifier moi-même.</li>
+</ul>
 </section>
 
 <section>
-<h2>Trois choses que je ne peux pas décider à votre place</h2>
+<h2>Ce que vous m'avez déjà répondu</h2>
 
-<ol class="q">
-<li><b>Qui tiendra ce calendrier, et à quel rythme&nbsp;?</b>
-<p>Un nom, et un rythme. C'est la plus importante des trois.</p></li>
-
-<li><b>Quand il ne reste qu'une chambre, faut-il le dire au client&nbsp;?</b>
-<p>«&nbsp;Dernière chambre à ces dates&nbsp;» fait réserver plus vite, mais
-laisse entendre que l'hôtel est souvent peu rempli.</p></li>
-
-<li><b>Quand tout est pris, faut-il afficher «&nbsp;complet&nbsp;»&nbsp;?</b>
-<p>C'est honnête et ça vous évite un appel pour rien — mais ça renvoie le
-client ailleurs.</p></li>
-</ol>
+<ul class="puces">
+<li><strong>Afficher « complet » quand tout est pris : oui.</strong> C'est
+    déjà le comportement en place.</li>
+<li><strong>Ce sont les réceptionnistes qui tiendront le calendrier.</strong>
+    C'est noté — et c'est précisément pourquoi la question de l'outil compte :
+    autant qu'ils n'aient pas à le faire deux fois.</li>
+</ul>
 </section>
 
-<p><strong>Si j'ai mal compris quelque chose, un mot suffit.</strong> Il vaut
-mieux le corriger maintenant, tant que rien n'est en ligne.</p>
+<p><strong>Si j'ai mal compris quelque chose, un mot suffit</strong>
+— mieux vaut le corriger maintenant, tant que rien n'est en ligne.</p>
 
 <p class="foot">
 <strong>Léonardo Yann Axel HOUANSOU</strong><br>

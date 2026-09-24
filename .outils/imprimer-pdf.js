@@ -96,6 +96,11 @@ async function cible() {
     expression: 'document.body.innerText.length', returnByValue: true });
   console.log('page chargee : %d caracteres', t.result.value);
 
+  /* ATTENTION AU FORMAT. Sans paperWidth/paperHeight, printToPDF imprime en
+     LETTER — 279 mm de haut, dix-huit de moins qu'un A4. Un document mesure
+     pour tenir sur une page A4 en ressort sur deux, sans rien signaler.
+     preferCSSPageSize laisse la page decider : declarez « @page{size:A4} »
+     dans la feuille du document, et la mesure et l'impression s'accordent. */
   const r = await cmd('Page.printToPDF', {
     printBackground: true,
     displayHeaderFooter: false,      // le point de tout l'exercice
