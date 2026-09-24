@@ -4,12 +4,15 @@
 **Quand :** aujourd'hui ou demain. Plus tard, ce n'est plus un compte rendu.
 **Objet :** `Suite à notre réunion d'hier — et une liste dont j'ai besoin`
 
-**Pièce jointe :** `Disponibilites-Evannath.pdf` — cinq pages. Le système y
-est raconté comme une matinée de travail, avec des heures et des numéros de
-chambre, plutôt que décrit comme un mécanisme : une démonstration se retient,
-une description non. Les numéros sont signalés comme des exemples dès la
-première page, pour qu'elle ne croie pas qu'on a déjà ses chambres. Suivent
-six décisions qu'elle seule peut trancher. Le
+**Pièce jointe :** `Disponibilites-Evannath.pdf` — une page. Son titre dit son
+but : « Ce que j'ai compris de votre demande ». Ce n'est pas une
+documentation, c'est une vérification — cinq phrases qu'elle peut valider ou
+contredire, la contrepartie dite franchement (quelqu'un doit tenir le
+calendrier), et trois questions dont la réponse ne m'appartient pas.
+
+Elle se termine par « si j'ai mal compris, un mot suffit ». C'est la phrase
+qui justifie l'envoi : un malentendu se corrige à ce stade pour rien, et
+coûte cher une fois en ligne. Le
 document dit explicitement que ne pas répondre vaut acceptation des réglages
 actuels : sans cela, il devient un formulaire de plus à remplir, et il
 retarderait la seule chose qui presse — la liste des chambres.
@@ -50,10 +53,9 @@ Nous n'en avons pas parlé hier et je ne vous l'ai jamais montré — je le
 ferai volontiers en un quart d'heure, quand vous voudrez. J'y ai ajouté un
 écran *Disponibilités*, où la réception suit chaque chambre une par une.
 
-**Ci-joint, une matinée racontée heure par heure** : ce que lit votre client,
-ce que voit votre réception, et ce qui se passe quand personne ne répond. Le
-document se termine par six décisions qui vous appartiennent — ne rien
-répondre revient à valider les réglages en place.
+**Ci-joint une page** où j'ai mis noir sur blanc ce que j'ai compris de votre
+demande, pour que vous puissiez me corriger avant que quoi que ce soit ne
+parte en ligne.
 
 À cet écran, il ne manque que **vos chambres**. Pour chacune : **son numéro, sa
 catégorie et son étage.** Vos sept catégories, telles que votre site les
