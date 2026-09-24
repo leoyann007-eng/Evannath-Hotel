@@ -1406,6 +1406,22 @@ Avant toute mise en production :
 
 1. **Conditions réelles** — arrivée, départ, annulation, acompte, taxe de
    séjour, animaux. Toutes les valeurs actuelles sont des hypothèses.
+
+   **Et le délai de réponse « sous 24 h », qui manquait à cette liste.** Il
+   est apparu le 23 août 2026 avec le tunnel de réservation, sans qu'aucune
+   source ne soit citée, et il s'affiche aujourd'hui sur la page Contact, dans
+   le tunnel, sur la 404, dans les devis séminaires — et sur **toutes** les
+   fiches chambres, puisque c'est le repli de l'état `inconnu`.
+
+   C'est la même famille que « acompte de 30 % » et « annulation gratuite
+   jusqu'à 48 h » : une valeur plausible que j'ai écrite. L'ironie mérite
+   d'être nommée — le mécanisme de disponibilité a été construit pour que le
+   site cesse d'affirmer ce que rien ne soutient, et **son repli est
+   lui-même une promesse que l'hôtel n'a jamais faite**.
+
+   À distinguer de « **réception ouverte 24 h/24** », qui est un horaire et
+   non un engagement de réponse. Aucune source n'est consignée ici pour
+   celui-là non plus : à confirmer également.
 2. **Quatre erreurs relevées sur la carte d'origine** — un plat affiché
    « FREE », une casserole à 95 000 F dans une section à 14 000 F, un sourcil à
    20 000 F quand la jambe entière est à 2 000 F, et un onglet « Vins » qui ne
