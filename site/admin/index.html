@@ -99,32 +99,40 @@ a{color:var(--bronze-2);text-decoration:none}
    frole le bord gauche est insupportable : la colonne de grille reste donc
    a 64 px, et c'est la barre qui flotte par-dessus.
 
-   :focus-within fait le meme travail au clavier. Sans lui, quelqu'un qui
-   tabule dans le menu verrait le focus se deplacer dans des libelles
-   invisibles. */
+   POURQUOI UNE CLASSE, ET NON :hover ET :focus-within. C'etait ecrit avec
+   ces deux pseudo-classes, et le deploiement ne se refermait pas apres un
+   clic : le bouton gardait le focus, :focus-within tenait, et il fallait
+   aller cliquer dans le vide pour recuperer son calendrier. :hover tenait
+   de son cote tant que la souris n'avait pas bouge. Aucune des deux ne se
+   revoque depuis le JavaScript — c'est le navigateur qui les pose.
+
+   La classe, elle, se retire. Elle est posee a l'entree du pointeur et au
+   focus clavier, retiree a la sortie, et retiree AUSSI au clic : la barre
+   se referme sur l'onglet qu'on vient de choisir, sans qu'on ait rien a
+   faire. Elle ne revient qu'au prochain passage du pointeur, qui ne peut
+   pas se produire sans etre sorti d'abord. */
 /* La barre RESTE dans la grille — en la passant en position:fixed elle en
    sortait, et `main` glissait dans la premiere colonne de 64 px. Elle garde
    donc sa place, et c'est sa LARGEUR qui deborde par-dessus le contenu :
    la piste fait 64 px, l'element peut en faire 250. */
 #cadre.replie aside{width:64px;z-index:30;padding:18px 0;transition:width .18s}
-#cadre.replie aside:hover,
-#cadre.replie aside:focus-within{width:250px;box-shadow:6px 0 26px rgba(15,30,51,.22)}
+#cadre.replie aside.deploye{width:250px;box-shadow:6px 0 26px rgba(15,30,51,.22)}
 
-/* Tout ce qui disparait quand elle est repliee ET qu'on ne la survole pas.
-   Ecrit dans ce sens, le survol n'a rien a defaire. */
-#cadre.replie aside:not(:hover):not(:focus-within) .marque{padding:0 0 16px;text-align:center}
+/* Tout ce qui disparait quand elle est repliee ET non deployee.
+   Ecrit dans ce sens, le deploiement n'a rien a defaire. */
+#cadre.replie aside:not(.deploye) .marque{padding:0 0 16px;text-align:center}
 /* Le logo est un LOGOTYPE : la marque, puis le mot. Dans 64 px le mot ne
    rentre pas, et le laisser tel quel le coupait en plein milieu. On le
    recadre sur sa marque — object-fit:cover ancre a gauche montre le
    monogramme et rien d'autre. */
-#cadre.replie aside:not(:hover):not(:focus-within) .marque img{width:30px;height:28px;
+#cadre.replie aside:not(.deploye) .marque img{width:30px;height:28px;
   object-fit:cover;object-position:left center;margin:0 auto}
-#cadre.replie aside:not(:hover):not(:focus-within) .marque span,
-#cadre.replie aside:not(:hover):not(:focus-within) nav h2,
-#cadre.replie aside:not(:hover):not(:focus-within) nav button span{display:none}
-#cadre.replie aside:not(:hover):not(:focus-within) nav button{justify-content:center;
+#cadre.replie aside:not(.deploye) .marque span,
+#cadre.replie aside:not(.deploye) nav h2,
+#cadre.replie aside:not(.deploye) nav button span{display:none}
+#cadre.replie aside:not(.deploye) nav button{justify-content:center;
   padding:12px 0;gap:0}
-#cadre.replie aside:not(:hover):not(:focus-within) nav button i{width:auto}
+#cadre.replie aside:not(.deploye) nav button i{width:auto}
 
 /* Le controle MANUEL. Ce n'est plus le mecanisme principal — la barre se
    replie d'elle-meme quand la place manque — mais un secours. D'ou un carre
@@ -151,7 +159,7 @@ a{color:var(--bronze-2);text-decoration:none}
    bouton reste le seul chemin, et il doit donc rester atteignable. */
 @media(hover:none){
   #cadre.replie aside{position:sticky}
-  #cadre.replie aside:hover{width:64px;box-shadow:none}
+  #cadre.replie aside.deploye{width:64px;box-shadow:none}
 }
 
 /* La barre bouge toute seule : celui qui a demande moins de mouvement ne
@@ -674,6 +682,11 @@ $('#menu').addEventListener('click', (e) => {
   if (!b) return;
   VUE = b.dataset.v; EDITE = null;
   [...$('#menu').querySelectorAll('button')].forEach((x) => x.classList.toggle('on', x === b));
+  /* Le choix est fait : la barre se referme sur lui. e.detail vaut 0 quand
+     le clic vient du clavier — la, on ne referme pas, sinon quelqu'un qui
+     navigue a la touche Entree verrait sa position disparaitre sous ses
+     doigts. */
+  if (e.detail > 0) deployer(false);
   rendre();
 });
 
@@ -744,12 +757,35 @@ function placeUtile() {
 let MENU_EPINGLE = null;
 let MENU_PLACE = 0;
 
+/* Le deploiement en surimpression d'une barre repliee. Voir la feuille de
+   style pour la raison d'etre de cette classe : une pseudo-classe ne se
+   revoque pas, celle-ci si. */
+function deployer(etat) {
+  const a = $('#cadre aside');
+  if (a) a.classList.toggle('deploye', etat && $('#cadre').classList.contains('replie'));
+}
+(function brancherDeploiement() {
+  const a = $('#cadre aside');
+  if (!a) return;
+  a.addEventListener('pointerenter', () => deployer(true));
+  a.addEventListener('pointerleave', () => deployer(false));
+  /* Le clavier : sans cela, quelqu'un qui tabule dans le menu verrait le
+     focus se deplacer dans des libelles invisibles. */
+  a.addEventListener('focusin', () => deployer(true));
+  a.addEventListener('focusout', (e) => {
+    if (!a.contains(e.relatedTarget)) deployer(false);
+  });
+}());
+
 function poserMenu(replie) {
   const c = $('#cadre'), epingle = MENU_EPINGLE !== null;
   if (c.classList.contains('replie') === replie
       && c.classList.contains('epingle') === epingle) return;
   c.classList.toggle('replie', replie);
   c.classList.toggle('epingle', epingle);
+  /* Une barre qui n'est plus repliee n'est plus deployee non plus : sans
+     cela la classe survivrait et se rappellerait au prochain repli. */
+  if (!replie) { const a = $('#cadre aside'); if (a) a.classList.remove('deploye'); }
   const b = $('#replier');
   if (b) {
     b.setAttribute('aria-expanded', replie ? 'false' : 'true');
