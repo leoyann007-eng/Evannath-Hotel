@@ -475,6 +475,44 @@ def controler():
         elif attendu not in s:
             pb.append((f, 'aucun logo : %s est attendu' % attendu))
 
+    # 21. le seuil de repli de la barre doit suivre la feuille de style.
+    # La barre laterale se replie d'elle-meme quand la vue courante ne tient
+    # plus. Pour le mois, « ne tient plus » a un sens precis : une case perd
+    # sa seconde colonne de compteurs. Ce chiffre vient de .m-g et de .m-c,
+    # pas du JavaScript — deux fois 64 px de piste, la gouttiere, les deux
+    # marges interieures et le filet.
+    #
+    # Le calcul precedent valait 140 + 31 x 34 px : la largeur du PLANNING
+    # mensuel, qui n'existe plus depuis que le mois est devenu un calendrier.
+    # Il tombait juste a 60 px pres, par accident, et personne ne pouvait le
+    # voir — la barre se repliait a peu pres au bon moment. Le prochain
+    # accident ne tombera pas juste : on relie donc les deux bouts.
+    css, adm = 'admin/disponibilites.css', 'admin/index.html'
+    if os.path.exists(css) and os.path.exists(adm):
+        c = io.open(css, encoding='utf-8').read()
+        a = io.open(adm, encoding='utf-8').read()
+        mg = re.search(r'\.m-g\{[^}]*?minmax\((\d+)px[^}]*?gap:\s*\d+px\s+(\d+)px', c, re.S)
+        mc = re.search(r'\.m-c\{[^}]*?padding:\s*\d+px\s+(\d+)px', c, re.S)
+        js = re.search(r'MENU_CASE_MOIS\s*=\s*(\d+)', a)
+        if not (mg and mc):
+            pb.append((css, 'le gabarit d une case du mois est introuvable : '
+                       'le controle 21 ne peut plus rien affirmer'))
+        elif not js:
+            pb.append((adm, 'MENU_CASE_MOIS est introuvable : la barre ne sait '
+                       'plus a quelle largeur le mois cesse de tenir'))
+        else:
+            attendu = 2 * int(mg.group(1)) + int(mg.group(2)) + 2 * int(mc.group(1)) + 1
+            if int(js.group(1)) != attendu:
+                pb.append((adm, 'MENU_CASE_MOIS vaut %s, la feuille de style en '
+                           'demande %d : la barre se replie au mauvais moment'
+                           % (js.group(1), attendu)))
+        # Et le mois ne peut pas se mesurer en colonnes de planning : ce
+        # gabarit-la appartient a la semaine.
+        besoin = re.search(r'function besoinContenu\(\)\s*\{(.*?)\n\}', a, re.S)
+        if besoin and 'DSP_COL' in besoin.group(1):
+            pb.append((adm, 'besoinContenu() se sert de DSP_COL : c est la '
+                       'colonne du PLANNING, le mois est un calendrier'))
+
     print('%d pages controlees' % len(pages))
     if pb:
         print('%d anomalie(s) :' % len(pb))

@@ -718,6 +718,9 @@ function rendreDsp() {
     change. La recursion s'arrete d'elle-meme : au second passage le compte
     est celui qu'on vient d'employer. */
 function apresDsp() {
+  /* Mois, semaine et jour ne demandent pas la meme largeur : passer de l'un
+     a l'autre peut donc replier la barre, ou la rouvrir. */
+  ajusterMenu();
   const el = $('#dsp-defil');
   if (!el) return;
   el.scrollLeft = 0;
@@ -813,6 +816,9 @@ function rendreTiroir() {
 
   const cote = !!tr && window.matchMedia('(min-width:1200px)').matches;
   document.body.classList.toggle('dsp-cote', cote);
+  /* Ancre, le panneau prend 320 px au calendrier : c'est souvent lui, et non
+     la fenetre, qui decide que la barre doit se replier. */
+  ajusterMenu();
   if (cote) el.removeAttribute('aria-modal');
   else el.setAttribute('aria-modal', 'true');
   if (!tr) return;

@@ -125,13 +125,39 @@ a{color:var(--bronze-2);text-decoration:none}
 #cadre.replie aside:not(:hover):not(:focus-within) nav button{justify-content:center;
   padding:12px 0;gap:0}
 #cadre.replie aside:not(:hover):not(:focus-within) nav button i{width:auto}
-#cadre.replie #replier{transform:scaleX(-1)}
+
+/* Le controle MANUEL. Ce n'est plus le mecanisme principal — la barre se
+   replie d'elle-meme quand la place manque — mais un secours. D'ou un carre
+   de 36 px et l'icone seule : le pave « Replier le menu » qu'il y avait ici
+   annoncait une commande qu'on n'a plus a donner, et il occupait toute la
+   largeur de la barre pour cela.
+
+   Le libelle ne disparait pas, il se cache : un bouton dont le seul contenu
+   est « ☰ » ne s'annonce pas a un lecteur d'ecran. */
+#replier{width:36px;height:36px;flex:none;margin:10px auto 0;padding:0;
+  position:relative;justify-content:center;gap:0;border-radius:9px;
+  border:1px solid rgba(255,255,255,.14);border-left-width:1px;
+  background:rgba(255,255,255,.04);font-size:14px}
+#replier span{position:absolute;width:1px;height:1px;overflow:hidden;
+  clip-path:inset(50%);white-space:nowrap}
+#replier:hover{background:rgba(255,255,255,.10);border-color:#C9A46A}
+#replier i{width:auto}
+/* Epinglee a la main, la barre le dit : sans ce repere, on ne sait plus si
+   l'etat courant vient de la place disponible ou de son propre clic. */
+#cadre.epingle #replier{border-color:#C9A46A;background:rgba(201,164,106,.16)}
+#cadre.epingle #replier i{color:#C9A46A}
 
 /* Sans survol — un ecran tactile — la barre ne se deploierait jamais. Le
    bouton reste le seul chemin, et il doit donc rester atteignable. */
 @media(hover:none){
   #cadre.replie aside{position:sticky}
   #cadre.replie aside:hover{width:64px;box-shadow:none}
+}
+
+/* La barre bouge toute seule : celui qui a demande moins de mouvement ne
+   doit pas voir 186 px glisser sous ses yeux a chaque redimensionnement. */
+@media(prefers-reduced-motion:reduce){
+  #cadre,#cadre.replie aside{transition:none}
 }
 #cadre.on{display:grid}
 /* La barre passe au creme avec le reste. Elle etait restee a --night :
@@ -480,7 +506,7 @@ details.plus summary::marker{color:var(--bronze)}
       <h2>&nbsp;</h2>
       <button id="sortir" title="Se déconnecter"><i>↩</i><span>Se déconnecter</span></button>
       <button id="replier" title="Replier le menu" aria-expanded="true"
-        aria-controls="menu"><i>«</i><span>Replier le menu</span></button>
+        aria-controls="menu"><i>☰</i><span>Replier le menu</span></button>
     </nav>
   </aside>
   <main id="vue"></main>
@@ -651,26 +677,132 @@ $('#menu').addEventListener('click', (e) => {
   rendre();
 });
 
-/* La barre se replie. Le calendrier est le seul ecran qui manque de
-   largeur, et lui rendre 186 px vaut deux jours de plus en vue semaine.
-   Le choix se garde d'une session a l'autre : quelqu'un qui replie sa
-   barre ne veut pas le refaire a chaque connexion. */
-function replier(etat) {
-  $('#cadre').classList.toggle('replie', etat);
+/* ── La barre se replie d'elle-meme ───────────────────────────────────
+   Elle se repliait sur un clic, et le choix se gardait d'une session a
+   l'autre. C'etait une preference, pas une adaptation : sur un ecran large
+   la barre restait etroite sans raison, et sur un ecran juste elle restait
+   large jusqu'a ce qu'on pense a la replier. Personne n'y pense.
+
+   Elle mesure donc la place, et se replie quand la vue courante ne tient
+   pas autrement. Le clic reste, en secours.
+
+   LE PIEGE, et la raison pour laquelle on mesure la FENETRE et non `main` :
+   replier la barre elargit `main`. Decider d'apres `main` serait une boucle
+   — replier, donc plus de place, donc rouvrir, donc moins de place. La
+   fenetre ne bouge pas quand la barre bouge. */
+const MENU_LARGE = 250;
+/* Les 80 px de gouttiere de `main` (40 de chaque cote) et les 320 px que
+   prend le panneau lorsqu'il est ancre a droite — voir `body.dsp-cote`. */
+const MENU_GOUTTIERE = 80, MENU_PANNEAU = 320;
+/* Les vues autres que le calendrier sont plafonnees a 1100 px par `main` :
+   leur rendre 186 px ne ferait qu'une marge vide plus large. On ne les
+   replie donc que lorsque la barre gene pour de bon. */
+const MENU_SEUIL_BAS = 1180;
+/* La bande d'hysteresis. On replie au seuil, on ne rouvre que 40 px plus
+   haut : sans cet ecart, un redimensionnement lent fait vibrer la barre sur
+   un pixel de large. */
+const MENU_BANDE = 40;
+
+/* Ce que la vue courante ne peut pas montrer en moins. Deux vues seulement
+   ont un plancher ; les autres se replient d'elles-memes et retournent 0,
+   « rien a gagner » — elles s'en remettent au seuil bas.
+
+   MOIS. Sept colonnes, et dans chaque case deux colonnes de compteurs :
+   2 × 64 px (le minmax de .m-g) + 8 px de gouttiere + 20 px de marge
+   interieure + 1 px de filet = 157 px par case. Sous cette largeur les
+   compteurs passent a une colonne et la case double de hauteur.
+   Mesure : la seconde colonne tient a 161 px, tombe a 155 px.
+
+   SEMAINE. Un planning, lui : la colonne gelee des chambres et sept
+   colonnes de 112 px. En dessous, il defile horizontalement.
+
+   Le mois calculait auparavant 140 + 31 × 34 px — la largeur du planning
+   mensuel, qui n'existe plus depuis que le mois est un calendrier. Le
+   chiffre tombait juste par accident, a 60 px pres. */
+const MENU_CASE_MOIS = 157;
+function besoinContenu() {
+  if (VUE !== 'disponibilites') return 0;
+  /* disponibilites.js se charge apres cette page : au premier appel ses
+     constantes peuvent ne pas exister encore. */
+  if (typeof DSP === 'undefined' || !DSP.focus) return 0;
+  /* La liste est un tableau, le jour des cartes : les deux se replient. */
+  if (DSP.mode === 'liste' || DSP.vue === 'jour') return 0;
+  if (DSP.vue === 'semaine') return DSP_LIB + 7 * 112;
+  return 7 * MENU_CASE_MOIS;
+}
+
+/* La place dont `main` disposerait, barre mise a part. */
+function placeUtile() {
+  const panneau = document.body.classList.contains('dsp-cote') ? MENU_PANNEAU : 0;
+  return document.documentElement.clientWidth - panneau - MENU_GOUTTIERE;
+}
+
+/* Un clic gagne tout de suite, et l'automatique reprend la main des que la
+   place change assez pour que la question se pose autrement — 60 px, soit
+   deux colonnes de calendrier. Rien n'est ecrit sur le disque : un choix
+   fait pour un ecran ne vaut pas pour le suivant. */
+let MENU_EPINGLE = null;
+let MENU_PLACE = 0;
+
+function poserMenu(replie) {
+  const c = $('#cadre'), epingle = MENU_EPINGLE !== null;
+  if (c.classList.contains('replie') === replie
+      && c.classList.contains('epingle') === epingle) return;
+  c.classList.toggle('replie', replie);
+  c.classList.toggle('epingle', epingle);
   const b = $('#replier');
   if (b) {
-    b.setAttribute('aria-expanded', etat ? 'false' : 'true');
-    b.title = etat ? 'Garder le menu ouvert' : 'Replier le menu';
+    b.setAttribute('aria-expanded', replie ? 'false' : 'true');
+    b.title = (replie ? 'Déployer le menu' : 'Replier le menu')
+      + (epingle ? ' — choix maintenu' : '');
     b.querySelector('span').textContent = b.title;
   }
-  try { localStorage.setItem('evn-menu-replie', etat ? '1' : ''); } catch (e) { /* tant pis */ }
 }
-document.addEventListener('click', (e) => {
-  if (e.target.closest('#replier')) {
-    replier(!$('#cadre').classList.contains('replie'));
+
+function ajusterMenu() {
+  /* Sous 860 px la grille passe a une colonne et la barre se met au-dessus
+     du contenu : l'apparence repliee n'y a plus de sens, elle donnerait une
+     bande pleine largeur avec des icones au milieu. */
+  if (document.documentElement.clientWidth <= 860) { poserMenu(false); return; }
+
+  const place = placeUtile();
+  if (MENU_EPINGLE !== null) {
+    if (Math.abs(place - MENU_PLACE) < 60) { poserMenu(MENU_EPINGLE); return; }
+    MENU_EPINGLE = null;
   }
+
+  /* Deux raisons de replier, et il suffit d'une : le plancher de la vue, et
+     le seuil bas. `marge` est ce qui reste au-dessus de la plus serree des
+     deux — negative, la barre gene. */
+  const besoin = besoinContenu();
+  const marge = Math.min(
+    besoin ? place - MENU_LARGE - besoin : Infinity,
+    place - MENU_SEUIL_BAS);
+  /* La bande ne s'applique qu'a la REOUVERTURE : sans cela il faudrait 40 px
+     de trop pour replier, et la barre resterait large au moment ou elle
+     gene. */
+  const deja = $('#cadre').classList.contains('replie');
+  poserMenu(deja ? marge < MENU_BANDE : marge < 0);
+}
+
+/* Une image par redimensionnement, pas une par pixel parcouru. */
+let MENU_T = 0;
+function planifierMenu() {
+  cancelAnimationFrame(MENU_T);
+  MENU_T = requestAnimationFrame(ajusterMenu);
+}
+/* ResizeObserver plutot que `resize` : il voit aussi ce qui change la
+   largeur utile sans toucher a la fenetre — une barre de defilement qui
+   apparait, un zoom. */
+if (window.ResizeObserver) new ResizeObserver(planifierMenu).observe(document.documentElement);
+else window.addEventListener('resize', planifierMenu);
+
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('#replier')) return;
+  MENU_EPINGLE = !$('#cadre').classList.contains('replie');
+  MENU_PLACE = placeUtile();
+  poserMenu(MENU_EPINGLE);
 });
-try { if (localStorage.getItem('evn-menu-replie')) replier(true); } catch (e) { /* tant pis */ }
 
 /* ── Rendu ─────────────────────────────────────────────── */
 /* Un bandeau franc plutot qu une note discrete : tant qu on ne recharge pas,
@@ -1728,6 +1860,9 @@ function rendre() {
   /* Le calendrier a besoin de toute la largeur, et s ouvre sur aujourd hui. */
   v.classList.toggle('large', VUE === 'disponibilites');
   if (VUE === 'disponibilites') apresDsp();
+  /* Chaque vue n'a pas le meme besoin de largeur : le calendrier en veut
+     tout, une fiche d'evenement s'arrete a 1100 px. */
+  ajusterMenu();
 }
 
 /* ── Actions ───────────────────────────────────────────── */
