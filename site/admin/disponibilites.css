@@ -69,7 +69,7 @@
 .m-jn{padding:10px 12px;font:700 10px/1 var(--f-b);letter-spacing:.14em;
   text-transform:uppercase;color:var(--muted)}
 .m-grille{display:grid;grid-template-columns:repeat(7,1fr)}
-.m-c{min-height:104px;border-right:1px solid var(--line-2);border-bottom:1px solid var(--line-2);
+.m-c{min-height:104px;min-width:0;border-right:1px solid var(--line-2);border-bottom:1px solid var(--line-2);
   padding:9px 10px 11px;background:var(--bark-2);text-align:left;font:inherit;
   color:var(--cream);cursor:pointer;display:block;width:100%;transition:.15s}
 .m-c:nth-child(7n){border-right:0}
@@ -86,15 +86,19 @@
 /* La barre empilee : occupees, reservees, indisponibles. Le reste est libre. */
 .m-b{display:flex;height:6px;background:var(--line-2);overflow:hidden;margin-bottom:9px}
 .m-b i{display:block;height:100%}
-.m-g{display:grid;grid-template-columns:1fr 1fr;gap:3px 8px}
+/* Les compteurs se replient d'eux-memes : deux colonnes quand la case est
+   large, une quand elle ne l'est plus. Fixer « 1fr 1fr » les rendait
+   irreductibles, et les sept colonnes du mois poussaient alors la page
+   entiere — de 142 px sur un ecran de 1180. La CASE decide, pas la
+   fenetre : un point de rupture sur la largeur de l'ecran se serait
+   trompe des que le panneau de detail s'ouvre. */
+.m-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(64px,1fr));gap:3px 8px}
 .m-g span{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--prose);
   white-space:nowrap}
 .m-g i{flex:none;width:8px;height:8px;border-radius:2px}
 .m-note{margin:14px 18px 16px}
 @media(max-width:900px){
   .m-c{min-height:88px;padding:7px 8px 9px}
-  .m-g{grid-template-columns:1fr}
-  .m-g span:nth-child(n+3){display:none}
 }
 
 /* ── La vue liste ─────────────────────────────────────────────────────

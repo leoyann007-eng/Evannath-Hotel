@@ -86,7 +86,27 @@ a{color:var(--bronze-2);text-decoration:none}
 #porte p{color:var(--muted);font-size:13.5px;margin-bottom:26px}
 
 /* ── Cadre ─────────────────────────────────────────────── */
-#cadre{display:none;min-height:100vh;grid-template-columns:250px 1fr}
+#cadre{display:none;min-height:100vh;grid-template-columns:250px 1fr;transition:grid-template-columns .2s}
+/* ── La barre repliee ──────────────────────────────────────────────
+   Le calendrier est le seul ecran qui manque de largeur : replier la
+   barre lui rend 186 px, soit deux jours de plus en semaine. Les icones
+   restent — on ne navigue pas a l'aveugle — et leur libelle passe en
+   infobulle. */
+#cadre.replie{grid-template-columns:64px 1fr}
+#cadre.replie aside{padding:18px 0}
+#cadre.replie .marque{padding:0 0 16px;text-align:center}
+/* Le logo est un LOGOTYPE : la marque, puis le mot. Dans 64 px le mot ne
+   rentre pas, et le laisser tel quel le coupait en plein milieu. On le
+   recadre donc sur sa marque — object-fit:cover avec l'ancrage a gauche
+   montre le monogramme et rien d'autre. */
+#cadre.replie .marque img{width:30px;height:28px;object-fit:cover;
+  object-position:left center;margin:0 auto}
+#cadre.replie .marque span,
+#cadre.replie nav h2,
+#cadre.replie nav button span{display:none}
+#cadre.replie nav button{justify-content:center;padding:12px 0;gap:0}
+#cadre.replie nav button i{width:auto}
+#cadre.replie #replier{transform:scaleX(-1)}
 #cadre.on{display:grid}
 /* La barre passe au creme avec le reste. Elle etait restee a --night :
    son texte, devenu sombre, tombait a 1,27:1 — le menu ne se lisait
@@ -122,7 +142,16 @@ nav button.on i{color:var(--bronze-2)}
 nav button i{font-style:normal;font-size:15px;width:20px;text-align:center;
   color:var(--muted);transition:.18s}
 
-main{padding:34px 40px 60px;max-width:1100px}
+/* min-width:0 — la ligne qui empeche la page de deborder.
+   Un element de grille vaut par defaut min-width:auto : il refuse de
+   descendre sous la largeur de son contenu. Le planning, qui est en
+   width:max-content dans une zone a defilement, poussait donc la colonne
+   au-dela de la fenetre, et le defilement de la zone ne s'engageait
+   jamais. La page entiere debordait de 83 px a 1280.
+
+   Ce n'etait PAS le calendrier : les coupables mesures etaient l'en-tete,
+   un bouton et le bandeau d'alerte — tous entraines par la colonne. */
+main{padding:34px 40px 60px;max-width:1100px;min-width:0}
 .entete{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;
   flex-wrap:wrap;margin-bottom:26px}
 h1.t{font-family:var(--f-t);font-size:30px;font-weight:400;line-height:1.15}
@@ -378,7 +407,7 @@ details.plus summary::marker{color:var(--bronze)}
 .msg.mal{color:var(--err)}
 
 @media(max-width:860px){
-  #cadre.on{grid-template-columns:1fr}
+  #cadre.on,#cadre.on.replie{grid-template-columns:1fr}
   aside{position:static;height:auto}
   main{padding:24px 20px 50px}
   .duo,.puces{grid-template-columns:1fr}
@@ -411,19 +440,21 @@ details.plus summary::marker{color:var(--bronze)}
       <span>Administration</span>
     </div>
     <nav id="menu">
-      <button data-v="bord" class="on"><i>▦</i>Tableau de bord</button>
+      <button data-v="bord" class="on" title="Tableau de bord"><i>▦</i><span>Tableau de bord</span></button>
       <h2>Gestion</h2>
-      <button data-v="disponibilites"><i>▤</i>Disponibilités</button>
-      <button data-v="evenements"><i>◆</i>Événements</button>
-      <button data-v="promotions"><i>◉</i>Promotions</button>
-      <button data-v="campagnes"><i>☀</i>Campagnes saisonnières</button>
+      <button data-v="disponibilites" title="Disponibilités"><i>▤</i><span>Disponibilités</span></button>
+      <button data-v="evenements" title="Événements"><i>◆</i><span>Événements</span></button>
+      <button data-v="promotions" title="Promotions"><i>◉</i><span>Promotions</span></button>
+      <button data-v="campagnes" title="Campagnes saisonnières"><i>☀</i><span>Campagnes saisonnières</span></button>
       <h2>Médias</h2>
-      <button data-v="galerie"><i>▣</i>Galerie</button>
+      <button data-v="galerie" title="Galerie"><i>▣</i><span>Galerie</span></button>
       <h2>Administration</h2>
-      <button data-v="parametres"><i>⚙</i>Paramètres</button>
-      <button data-v="utilisateurs"><i>◐</i>Utilisateurs</button>
+      <button data-v="parametres" title="Paramètres"><i>⚙</i><span>Paramètres</span></button>
+      <button data-v="utilisateurs" title="Utilisateurs"><i>◐</i><span>Utilisateurs</span></button>
       <h2>&nbsp;</h2>
-      <button id="sortir"><i>↩</i>Se déconnecter</button>
+      <button id="sortir" title="Se déconnecter"><i>↩</i><span>Se déconnecter</span></button>
+      <button id="replier" title="Replier le menu" aria-expanded="true"
+        aria-controls="menu"><i>«</i><span>Replier le menu</span></button>
     </nav>
   </aside>
   <main id="vue"></main>
@@ -593,6 +624,27 @@ $('#menu').addEventListener('click', (e) => {
   [...$('#menu').querySelectorAll('button')].forEach((x) => x.classList.toggle('on', x === b));
   rendre();
 });
+
+/* La barre se replie. Le calendrier est le seul ecran qui manque de
+   largeur, et lui rendre 186 px vaut deux jours de plus en vue semaine.
+   Le choix se garde d'une session a l'autre : quelqu'un qui replie sa
+   barre ne veut pas le refaire a chaque connexion. */
+function replier(etat) {
+  $('#cadre').classList.toggle('replie', etat);
+  const b = $('#replier');
+  if (b) {
+    b.setAttribute('aria-expanded', etat ? 'false' : 'true');
+    b.title = etat ? 'Déplier le menu' : 'Replier le menu';
+    b.querySelector('span').textContent = b.title;
+  }
+  try { localStorage.setItem('evn-menu-replie', etat ? '1' : ''); } catch (e) { /* tant pis */ }
+}
+document.addEventListener('click', (e) => {
+  if (e.target.closest('#replier')) {
+    replier(!$('#cadre').classList.contains('replie'));
+  }
+});
+try { if (localStorage.getItem('evn-menu-replie')) replier(true); } catch (e) { /* tant pis */ }
 
 /* ── Rendu ─────────────────────────────────────────────── */
 /* Un bandeau franc plutot qu une note discrete : tant qu on ne recharge pas,
