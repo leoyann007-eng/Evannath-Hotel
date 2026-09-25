@@ -84,6 +84,17 @@ Thumbs.db
 desktop.ini
 .DS_Store
 
+# ── Captures de travail ───────────────────────────────────────
+# Les images produites par .outils/capturer.js pour montrer un ecran en
+# cours de construction. Cinq d'entre elles sont parties dans un commit
+# avant d'etre remarquees : elles ne documentent rien, elles se refont
+# d'une commande, et elles pesent plus que le code qu'elles illustrent.
+apercu-*.png
+maquette-*.png
+vue-*.png
+bo-*.png
+verif-*.png
+
 # ── Images écartées ───────────────────────────────────────────
 # Fichiers devenus orphelins, déplacés plutôt que supprimés : une fois déjà,
 # des variantes dont le chemin était construit en JavaScript ont failli être
