@@ -93,20 +93,46 @@ a{color:var(--bronze-2);text-decoration:none}
    restent — on ne navigue pas a l'aveugle — et leur libelle passe en
    infobulle. */
 #cadre.replie{grid-template-columns:64px 1fr}
-#cadre.replie aside{padding:18px 0}
-#cadre.replie .marque{padding:0 0 16px;text-align:center}
+
+/* Repliee, la barre se deploie AU SURVOL — et en surimpression, sans
+   pousser le contenu. Une mise en page qui saute chaque fois que la souris
+   frole le bord gauche est insupportable : la colonne de grille reste donc
+   a 64 px, et c'est la barre qui flotte par-dessus.
+
+   :focus-within fait le meme travail au clavier. Sans lui, quelqu'un qui
+   tabule dans le menu verrait le focus se deplacer dans des libelles
+   invisibles. */
+/* La barre RESTE dans la grille — en la passant en position:fixed elle en
+   sortait, et `main` glissait dans la premiere colonne de 64 px. Elle garde
+   donc sa place, et c'est sa LARGEUR qui deborde par-dessus le contenu :
+   la piste fait 64 px, l'element peut en faire 250. */
+#cadre.replie aside{width:64px;z-index:30;padding:18px 0;transition:width .18s}
+#cadre.replie aside:hover,
+#cadre.replie aside:focus-within{width:250px;box-shadow:6px 0 26px rgba(15,30,51,.22)}
+
+/* Tout ce qui disparait quand elle est repliee ET qu'on ne la survole pas.
+   Ecrit dans ce sens, le survol n'a rien a defaire. */
+#cadre.replie aside:not(:hover):not(:focus-within) .marque{padding:0 0 16px;text-align:center}
 /* Le logo est un LOGOTYPE : la marque, puis le mot. Dans 64 px le mot ne
    rentre pas, et le laisser tel quel le coupait en plein milieu. On le
-   recadre donc sur sa marque — object-fit:cover avec l'ancrage a gauche
-   montre le monogramme et rien d'autre. */
-#cadre.replie .marque img{width:30px;height:28px;object-fit:cover;
-  object-position:left center;margin:0 auto}
-#cadre.replie .marque span,
-#cadre.replie nav h2,
-#cadre.replie nav button span{display:none}
-#cadre.replie nav button{justify-content:center;padding:12px 0;gap:0}
-#cadre.replie nav button i{width:auto}
+   recadre sur sa marque — object-fit:cover ancre a gauche montre le
+   monogramme et rien d'autre. */
+#cadre.replie aside:not(:hover):not(:focus-within) .marque img{width:30px;height:28px;
+  object-fit:cover;object-position:left center;margin:0 auto}
+#cadre.replie aside:not(:hover):not(:focus-within) .marque span,
+#cadre.replie aside:not(:hover):not(:focus-within) nav h2,
+#cadre.replie aside:not(:hover):not(:focus-within) nav button span{display:none}
+#cadre.replie aside:not(:hover):not(:focus-within) nav button{justify-content:center;
+  padding:12px 0;gap:0}
+#cadre.replie aside:not(:hover):not(:focus-within) nav button i{width:auto}
 #cadre.replie #replier{transform:scaleX(-1)}
+
+/* Sans survol — un ecran tactile — la barre ne se deploierait jamais. Le
+   bouton reste le seul chemin, et il doit donc rester atteignable. */
+@media(hover:none){
+  #cadre.replie aside{position:sticky}
+  #cadre.replie aside:hover{width:64px;box-shadow:none}
+}
 #cadre.on{display:grid}
 /* La barre passe au creme avec le reste. Elle etait restee a --night :
    son texte, devenu sombre, tombait a 1,27:1 — le menu ne se lisait
@@ -634,7 +660,7 @@ function replier(etat) {
   const b = $('#replier');
   if (b) {
     b.setAttribute('aria-expanded', etat ? 'false' : 'true');
-    b.title = etat ? 'Déplier le menu' : 'Replier le menu';
+    b.title = etat ? 'Garder le menu ouvert' : 'Replier le menu';
     b.querySelector('span').textContent = b.title;
   }
   try { localStorage.setItem('evn-menu-replie', etat ? '1' : ''); } catch (e) { /* tant pis */ }
