@@ -232,6 +232,147 @@ function blocsDe(ch, jours, calc) {
   return out;
 }
 
+/** LE MOIS : un calendrier mensuel, pas un planning.
+ *
+ *  A l'echelle du mois on ne cherche pas une chambre, on cherche un JOUR —
+ *  « suis-je plein le 14 ? ». Une grille de quarante-six lignes ne repond
+ *  pas a cette question : il faut la lire ligne a ligne et compter.
+ *
+ *  Chaque case porte donc le compte de la journee entiere : le taux
+ *  d'occupation, une barre empilee, et les quatre etats. Les filtres
+ *  s'appliquent aux compteurs — filtrer sur un etage montre le taux DE CET
+ *  ETAGE, ce qui est exactement ce qu'on veut savoir.
+ *
+ *  Un clic sur un jour bascule en mode Jour sur cette date. */
+function htmlMois(retenues, idx, auj) {
+  const f = DSP.focus, d = jDt(f);
+  const premier = new Date(d.getFullYear(), d.getMonth(), 1);
+  const combien = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+  const moisVise = jourIso(premier).slice(0, 7);
+
+  /* Les semaines vont du LUNDI au dimanche : on recule jusqu'au lundi qui
+     precede ou ouvre le mois, et on avance par sept jusqu'a l'avoir couvert. */
+  const debut = jPlus(jourIso(premier), -((premier.getDay() + 6) % 7));
+  const dernier = jPlus(jourIso(premier), combien - 1);
+  const cases = [];
+  for (let j = debut; ; j = jPlus(j, 1)) {
+    cases.push(j);
+    if (j >= dernier && cases.length % 7 === 0) break;
+    if (cases.length > 42) break;
+  }
+
+  const total = retenues.length;
+  const jours = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
+    .map((n) => `<div class="m-jn">${n}</div>`).join('');
+
+  const corps = cases.map((j) => {
+    const dedans = j.slice(0, 7) === moisVise;
+    const n = jDt(j).getDate();
+    if (!dedans) return `<div class="m-c hors"><span class="m-n">${n}</span></div>`;
+
+    let libres = 0, occ = 0, res = 0, indisp = 0;
+    retenues.forEach((ch) => {
+      const k = dspEtat(ch, j, idx, auj).k;
+      if (k === 'libre') libres++;
+      else if (k === 'occ') occ++;
+      else if (k === 'res') res++;
+      else indisp++;
+    });
+    const taux = total ? Math.round(((occ + res) / total) * 100) : 0;
+    const pc = (v) => (total ? (v / total) * 100 : 0);
+
+    return `<button class="m-c${j === auj ? ' auj' : ''}" data-dsp-jour="${j}"
+      aria-label="${jLong(j)} : ${taux} % d'occupation, ${libres} libre${
+        libres > 1 ? 's' : ''}">
+      <div class="m-h"><span class="m-n">${n}</span><span class="m-t">${taux}&nbsp;%</span></div>
+      <div class="m-b"><i style="width:${pc(occ)}%;background:var(--f-occ)"></i
+        ><i style="width:${pc(res)}%;background:var(--f-res)"></i
+        ><i style="width:${pc(indisp)}%;background:var(--f-hs)"></i></div>
+      <div class="m-g">
+        <span><i style="background:var(--f-libre)"></i>${libres} libres</span>
+        <span><i style="background:var(--f-occ)"></i>${occ} occ.</span>
+        <span><i style="background:var(--f-res)"></i>${res} rés.</span>
+        <span><i style="background:var(--f-hs)"></i>${indisp} indisp.</span>
+      </div></button>`;
+  }).join('');
+
+  return `<div class="dsp-mois">
+      <div class="m-tete">${jours}</div>
+      <div class="m-grille">${corps}</div>
+      <p class="aide m-note">Le pourcentage est le taux d'occupation
+        — occupées et réservées rapportées au total.
+        <strong>Cliquez sur un jour pour l'ouvrir.</strong>${
+        total ? '' : ' Aucune chambre ne correspond à ce filtre.'}</p>
+    </div>`;
+}
+
+/** LE JOUR : des cartes, groupees par etage.
+ *
+ *  Une seule colonne de quarante-six lignes gaspillait toute la largeur de
+ *  l'ecran. A l'echelle d'une journee on ne compare pas des dates : on fait
+ *  le tour de l'hotel, etage par etage, comme la reception le fait a pied.
+ *
+ *  Chaque carte porte son etat en bandeau, et les deux echeances du jour —
+ *  qui arrive, qui part demain. */
+function htmlJour(retenues, idx, auj) {
+  const j = DSP.focus;
+  const nomCat = (slug) => ((ETAT.categories || []).find((c) => c.slug === slug) || {}).nom || slug;
+
+  /* Par etage, dans l'ordre ou un humain les lit. Les chambres sans etage
+     saisi se rassemblent a la fin plutot que de disparaitre. */
+  const groupes = {};
+  retenues.forEach((ch) => {
+    const e = String(ch.etage || '');
+    (groupes[e] = groupes[e] || []).push(ch);
+  });
+  const ordre = Object.keys(groupes).sort((a, b) => {
+    if (!a) return 1;
+    if (!b) return -1;
+    return a.localeCompare(b, 'fr', { numeric: true });
+  });
+
+  if (!ordre.length) {
+    return `<p class="aide" style="padding:28px 18px;margin:0">Aucune chambre ne
+      correspond à ce filtre.</p>`;
+  }
+
+  return `<div class="dsp-jour">${ordre.map((et) => {
+    const lot = groupes[et];
+    const libres = lot.filter((ch) => dspEtat(ch, j, idx, auj).k === 'libre').length;
+    return `<div class="j-groupe">
+      <div class="j-tete"><span class="lb" style="margin:0">${
+        et ? 'Étage ' + ech(et) : 'Étage non renseigné'}</span>
+        <span class="aide" style="margin:0">${libres} libre${libres > 1 ? 's' : ''}
+          sur ${lot.length}</span></div>
+      <div class="j-cartes">${lot.map((ch) => {
+        const e = dspEtat(ch, j, idx, auj);
+        const [fond, encre] = DAPLAT[e.k] || DAPLAT.hs;
+        const [, mot] = DTON[e.k];
+        const f = e.f;
+        /* Les nuits que couvre ce qui est pose, et les deux echeances du
+           jour : une arrivee se prepare, un depart libere une chambre. */
+        const nuits = f && f.debut
+          ? (f.fin ? Math.round((jDt(f.fin) - jDt(f.debut)) / 86400000) + 1 : null)
+          : null;
+        const arrive = !!(f && f.nature === 'client' && f.debut === j);
+        const part = !!(f && f.nature === 'client' && f.fin === j);
+        const client = f && f.nature === 'client' ? (f.client || '—') : '';
+        return `<button class="j-c" data-dsp-ch="${ech(ch.id)}" data-nuit="${j}"
+          aria-label="Chambre ${ech(ch.numero)} : ${mot}">
+          <span class="j-b" style="background:${fond};color:${encre}">${mot}${
+            nuits ? `<em>${nuits} nuit${nuits > 1 ? 's' : ''}</em>` : ''}</span>
+          <span class="j-n">${ech(ch.numero)}</span>
+          <span class="j-cat">${ech(nomCat(ch.categorie))}</span>
+          <span class="j-qui">${client ? ech(client) : 'Aucun client'}</span>
+          ${f && f.debut ? `<span class="j-d">${jCourt(f.debut)}${
+            f.fin ? ' → ' + jCourt(jPlus(f.fin, 1)) : ''}</span>` : ''}
+          ${arrive ? '<span class="j-badge arrive">Arrivée aujourd\'hui</span>' : ''}
+          ${part ? '<span class="j-badge part">Départ demain</span>' : ''}
+        </button>`;
+      }).join('')}</div></div>`;
+  }).join('')}</div>`;
+}
+
 function htmlDsp() {
   const cats = ETAT.categories || [], chambres = ETAT.chambres || [];
   const F = ETAT.fermetures || [], auj = AUJ();
@@ -408,8 +549,11 @@ function htmlDsp() {
   const vues = [['jour', 'Jour'], ['semaine', 'Semaine'], ['mois', 'Mois']]
     .map(([v, l]) => `<button class="opt ${DSP.vue === v ? 'on' : ''}" data-dsp-vue="${v}"
       aria-pressed="${DSP.vue === v}">${l}</button>`).join('');
+  /* Un libelle par mode, comme le document le demande. */
   const periode = DSP.vue === 'jour' ? jLong(DSP.focus)
-    : 'Du ' + jCourt(jours[0]) + ' au ' + jCourt(jours[jours.length - 1]);
+    : DSP.vue === 'mois'
+      ? jMaj(jDt(DSP.focus).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' }))
+      : 'Du ' + jCourt(jours[0]) + ' au ' + jCourt(jours[jours.length - 1]);
 
   /* Les prochaines arrivees. Plusieurs chambres au meme nom, aux memes dates
      et dans la meme categorie font une seule reservation. */
@@ -508,11 +652,15 @@ function htmlDsp() {
           <button class="fl2" data-dsp-pas="1" aria-label="Période suivante">›</button>
           <button class="btn mince" data-dsp-auj="1">Aujourd'hui</button>
           <select id="dsp-mois" class="dsp-mois" aria-label="Mois affiché">${optMois}</select>
-          <span class="aide" style="margin:0 0 0 6px">${periode}</span>
+          ${DSP.vue === 'mois' ? '' : `<span class="aide" style="margin:0 0 0 6px"
+            >${periode}</span>`}
         </div>
         <div class="dsp-vues" role="group" aria-label="Vue du calendrier">${vues}</div>
       </div>
-      ${DSP.mode === 'liste' ? liste : `<div class="dsp-defil" id="dsp-defil">
+      ${DSP.mode === 'liste' ? liste
+        : DSP.vue === 'mois' ? htmlMois(retenues, idx, auj)
+        : DSP.vue === 'jour' ? htmlJour(retenues, idx, auj)
+        : `<div class="dsp-defil" id="dsp-defil">
         <div class="dsp-l dsp-tete"><div class="dsp-g dsp-ch">
           <span class="lb" style="margin:0;flex:1">Chambre</span>
           ${avecEtage ? '<span class="lb" style="margin:0">Étage</span>' : ''}</div>${tete}</div>
@@ -1265,6 +1413,7 @@ function clicDsp(e) {
   if ((b = q('[data-dsp-pas]'))) { decalerDsp(Number(b.dataset.dspPas)); return true; }
   if ((b = q('[data-dsp-vue]'))) { allerDsp(DSP.focus, b.dataset.dspVue); return true; }
   if ((b = q('[data-dsp-auj]'))) { allerDsp(AUJ()); return true; }
+  if ((b = q('[data-dsp-jour]'))) { allerDsp(b.dataset.dspJour, 'jour'); return true; }
   if ((b = q('[data-dsp-mode]'))) { DSP.mode = b.dataset.dspMode; rendreDsp(); return true; }
   if ((b = q('[data-dsp-ouvrir]'))) {
     const s = b.dataset.dspOuvrir;

@@ -232,11 +232,31 @@ const chrome = spawn(CHROME, [
     aller: `(async () => { document.querySelector('#menu button[data-v="${v}"]').click();
       await new Promise((r) => setTimeout(r, 700)); return true; })()`,
   }));
+  /* Les trois vues des disponibilites sont TROIS ECRANS : un calendrier
+     mensuel, un planning hebdomadaire, des cartes par etage. Chacun a ses
+     couleurs — n'en mesurer qu'un laissait les deux autres sans verdict. */
+  ['semaine', 'jour'].forEach((v) => etapes.push({
+    nom: 'disponibilites · ' + v,
+    aller: `(async () => {
+      document.querySelector('#menu button[data-v="disponibilites"]').click();
+      await new Promise((r) => setTimeout(r, 700));
+      const b = document.querySelector('[data-dsp-vue="${v}"]');
+      if (!b) return 'absent';
+      b.click();
+      await new Promise((r) => setTimeout(r, 900));
+      return true;
+    })()`,
+  }));
+
   etapes.push({
     nom: 'disponibilites + tiroir',
     aller: `(async () => {
       document.querySelector('#menu button[data-v="disponibilites"]').click();
       await new Promise((r) => setTimeout(r, 700));
+      /* La vue par defaut est le MOIS, qui est un calendrier : il n'y a pas
+         de case chambre a ouvrir. On passe en semaine, ou le planning existe. */
+      const sem = document.querySelector('[data-dsp-vue="semaine"]');
+      if (sem) { sem.click(); await new Promise((r) => setTimeout(r, 900)); }
       const c = document.querySelector('#dsp-zone [data-dsp-ch]');
       if (!c) return 'absent';
       c.click();

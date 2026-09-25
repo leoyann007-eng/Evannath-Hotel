@@ -30,6 +30,73 @@
 .dsp-dem span{display:block;font-size:12.5px;color:var(--muted)}
 .dsp-dem .quand{color:var(--prose)}
 
+/* ── Le jour : des cartes, groupees par etage ─────────────────────────
+   Une seule colonne de quarante-six lignes gaspillait toute la largeur.
+   A l'echelle d'une journee on fait le tour de l'hotel etage par etage,
+   comme la reception le fait a pied. */
+.dsp-jour{padding:18px}
+.j-groupe + .j-groupe{margin-top:24px}
+.j-tete{display:flex;align-items:baseline;justify-content:space-between;gap:12px;
+  padding-bottom:8px;margin-bottom:12px;border-bottom:1px solid var(--line)}
+.j-cartes{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px}
+.j-c{display:block;width:100%;text-align:left;background:var(--bark-2);
+  border:1px solid var(--line);padding:0 0 12px;cursor:pointer;font:inherit;
+  color:var(--cream);transition:.15s;overflow:hidden}
+.j-c:hover{border-color:var(--bronze)}
+.j-c:focus-visible{outline:2px solid var(--bronze);outline-offset:-2px}
+/* Le bandeau porte l'etat, et a droite le nombre de nuits. */
+.j-b{display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:7px 11px;margin-bottom:11px;
+  font:700 10px/1.3 var(--f-b);letter-spacing:.09em;text-transform:uppercase}
+.j-b em{font:400 10px/1 var(--f-b);font-style:normal;letter-spacing:.04em;
+  text-transform:none;opacity:.9;white-space:nowrap}
+.j-n{display:block;padding:0 12px;font-family:var(--f-t);font-size:20px;line-height:1.1}
+.j-cat{display:block;padding:2px 12px 0;font-size:12px;color:var(--muted)}
+.j-qui{display:block;padding:8px 12px 0;font-size:13px}
+.j-d{display:block;padding:2px 12px 0;font-size:12px;color:var(--prose)}
+.j-badge{display:inline-block;margin:9px 12px 0;padding:3px 9px;
+  font:700 9.5px/1.4 var(--f-b);letter-spacing:.1em;text-transform:uppercase}
+.j-badge.arrive{background:#E6ECF6;color:#1F3A66}
+.j-badge.part{background:#FDEBD6;color:#7A4100}
+
+/* ── Le mois : un calendrier, pas un planning ─────────────────────────
+   A l'echelle du mois on cherche un JOUR, pas une chambre — « suis-je
+   plein le 14 ? ». Chaque case porte donc le compte de la journee entiere
+   plutot qu'une ligne par chambre. */
+.dsp-mois{padding:0}
+.m-tete{display:grid;grid-template-columns:repeat(7,1fr);background:var(--bark-3);
+  border-bottom:1px solid var(--line)}
+.m-jn{padding:10px 12px;font:700 10px/1 var(--f-b);letter-spacing:.14em;
+  text-transform:uppercase;color:var(--muted)}
+.m-grille{display:grid;grid-template-columns:repeat(7,1fr)}
+.m-c{min-height:104px;border-right:1px solid var(--line-2);border-bottom:1px solid var(--line-2);
+  padding:9px 10px 11px;background:var(--bark-2);text-align:left;font:inherit;
+  color:var(--cream);cursor:pointer;display:block;width:100%;transition:.15s}
+.m-c:nth-child(7n){border-right:0}
+.m-c:hover{background:var(--bark-3)}
+.m-c:focus-visible{outline:2px solid var(--bronze);outline-offset:-2px}
+/* Les jours qui debordent du mois : presents pour que les semaines soient
+   completes, mais sans chiffres et sans prise. */
+.m-c.hors{background:var(--bark);opacity:.4;cursor:default;pointer-events:none}
+.m-h{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+.m-n{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;
+  font-family:var(--f-t);font-size:15px;line-height:1}
+.m-c.auj .m-n{background:var(--f-occ);color:var(--t-occ)}
+.m-t{font:700 12px/1 var(--f-b);color:var(--prose)}
+/* La barre empilee : occupees, reservees, indisponibles. Le reste est libre. */
+.m-b{display:flex;height:6px;background:var(--line-2);overflow:hidden;margin-bottom:9px}
+.m-b i{display:block;height:100%}
+.m-g{display:grid;grid-template-columns:1fr 1fr;gap:3px 8px}
+.m-g span{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--prose);
+  white-space:nowrap}
+.m-g i{flex:none;width:8px;height:8px;border-radius:2px}
+.m-note{margin:14px 18px 16px}
+@media(max-width:900px){
+  .m-c{min-height:88px;padding:7px 8px 9px}
+  .m-g{grid-template-columns:1fr}
+  .m-g span:nth-child(n+3){display:none}
+}
+
 /* ── La vue liste ─────────────────────────────────────────────────────
    Le meme choix de chambres que le calendrier, mais l'etat d'UN jour. Elle
    sert a lire vite ; le calendrier sert a naviguer dans le temps. */
