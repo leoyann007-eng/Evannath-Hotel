@@ -475,6 +475,44 @@ def controler():
         elif attendu not in s:
             pb.append((f, 'aucun logo : %s est attendu' % attendu))
 
+    # 22. vercel.json n'accepte aucune cle de confort.
+    # J'avais ajoute un « _pourquoi » dans une regle d'en-tetes, pour
+    # expliquer le correctif a cote du correctif. JSON n'a pas de
+    # commentaires, et le schema de Vercel pose additionalProperties:false :
+    # le deploiement a ete REFUSE A LA VALIDATION, avant de construire quoi
+    # que ce soit. Pendant cinq heures le site a servi l'avant-derniere
+    # version pendant que trois commits attendaient, et rien dans le depot
+    # ne pouvait le dire — les tests passaient, le verificateur aussi.
+    #
+    # Les cles autorisees viennent de openapi.vercel.sh/vercel.json. Une
+    # explication se met dans le message de commit ou dans le README, ou
+    # elle ne coute rien.
+    if os.path.exists('vercel.json'):
+        brut = io.open('vercel.json', encoding='utf-8').read()
+        try:
+            conf = json.loads(brut)
+        except ValueError as e:
+            conf = None
+            pb.append(('vercel.json', 'JSON illisible : %s' % e))
+        if conf is not None:
+            HAUT = {'$schema', 'buildCommand', 'cleanUrls', 'crons', 'devCommand',
+                    'framework', 'functions', 'git', 'headers', 'ignoreCommand',
+                    'images', 'installCommand', 'outputDirectory', 'public',
+                    'redirects', 'regions', 'rewrites', 'routes', 'trailingSlash'}
+            REGLE = {'source', 'headers', 'has', 'missing'}
+            for cle in sorted(set(conf) - HAUT):
+                pb.append(('vercel.json', 'cle « %s » inconnue de Vercel : le '
+                           'deploiement sera refuse a la validation' % cle))
+            for i, regle in enumerate(conf.get('headers', [])):
+                for cle in sorted(set(regle) - REGLE):
+                    pb.append(('vercel.json', 'headers[%d] : cle « %s » interdite '
+                               '— le schema pose additionalProperties:false, et '
+                               'JSON n a pas de commentaires' % (i, cle)))
+                for j, h in enumerate(regle.get('headers', [])):
+                    for cle in sorted(set(h) - {'key', 'value'}):
+                        pb.append(('vercel.json', 'headers[%d].headers[%d] : cle '
+                                   '« %s » interdite' % (i, j, cle)))
+
     # 21. le seuil de repli de la barre doit suivre la feuille de style.
     # La barre laterale se replie d'elle-meme quand la vue courante ne tient
     # plus. Pour le mois, « ne tient plus » a un sens precis : une case perd
