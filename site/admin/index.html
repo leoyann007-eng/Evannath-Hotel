@@ -10,60 +10,61 @@
 <link rel="stylesheet" href="/admin/disponibilites.css">
 <style>
 :root{
-  /* Creme chaud, comme le site depuis le 24 septembre 2026. Les valeurs
-     sont celles de TOKENS dans _chrome.py : le back-office n'est pas
-     genere, il les porte donc en clair — et le controle 18 verifie
-     qu'elles n'ont pas diverge.
+  /* ── Marine, or et blanc ────────────────────────────────────────────
+     Le SITE est creme : la direction n'aimait pas le fond noir, et c'est
+     elle que le client voit. Le back-office est un OUTIL, pas une vitrine,
+     et il suit la maquette de passation — marine, or, blanc.
 
-     --night ne devient PAS clair : ce n'est pas « le fond le plus noir »,
-     c'est CE QUI CONTRASTE AVEC LE BRONZE, pour le texte sur aplat bronze.
-     --cream garde son nom et designe le TEXTE principal. */
-  --night:#100B06; --bark:#FBF7F0; --bark-2:#F4EDE1; --bark-3:#EDE3D4;
-  --bronze:#7F5524; --bronze-2:#653F13;
-  --cream:#2A231E; --prose:#4C423B; --muted:#6E6154;
-  --palm:#4F6B32; --err:#A63A25;
-  --line:rgba(138,95,43,.22); --line-2:rgba(138,95,43,.12);
-  /* L'ambre des alertes. Il etait ecrit en dur, clair, prevu pour un fond
-     sombre : sur le creme il tombait a 1,9:1. */
+     Les noms des jetons ne changent pas. C'est ce qui avait permis de
+     passer le site du noir au creme sans toucher onze fichiers, et c'est
+     ce qui permet l'inverse ici.
+
+     Les valeurs de la maquette sont reprises SAUF quand la mesure les
+     refuse : elle pose du blanc sur un or clair (#B8925A), ce qui donne
+     2,6:1. L'or du projet est donc plus sombre — c'est le meme or, assez
+     fonce pour porter du texte. */
+  --night:#0F1E33;   /* marine : barre laterale, texte sur or */
+  --bark:#F4F6FA;    /* le fond de l'application */
+  --bark-2:#FFFFFF;  /* les cartes */
+  --bark-3:#EDF0F4;  /* les surfaces creusees */
+  /* L'or. Il sert de TEXTE (libelles, intertitres) et de FOND (boutons) :
+     il lui faut donc tenir dans les deux sens. A #8A6A33 l'intertitre
+     tombait a 4,38:1 sur la surface creusee ; celui-ci donne 4,68:1, et
+     5,35:1 pour du blanc pose dessus. */
+  --bronze:#846631;
+  --bronze-2:#6B5124;
+  /* --cream garde son nom et designe le TEXTE principal. Le renommer
+     voudrait dire toucher trente-neuf declarations. */
+  --cream:#0F1E33; --prose:#465061; --muted:#5B6576;
+  --palm:#2F6B44; --err:#A3342C;
+  --line:#E1E5EC; --line-2:#EEF1F5;
+  /* L'ambre des alertes. */
   --ambre:#8A5A12;
-  /* ── Les cinq etats du calendrier ───────────────────────────────────
-     Une case du calendrier ecrit le nom de son etat DANS sa propre
-     couleur, sur un fond qui est cette meme couleur a 8 %, lui-meme pose
-     sur un voile bronze a 7 %. Le fond compose descend a #DAD1C3, et le
-     texte fait 9 px gras : il lui faut 4,5:1.
 
-     Les couleurs partagees avec le site n'y suffisaient pas — --palm
-     donnait 3,99:1, --muted 3,97:1. Elles ne sont pas modifiees pour
-     autant : le site les utilise sur du creme franc, ou elles tiennent.
-     Ces cinq-la leur sont propres, assombries du strict necessaire, et
-     ne servent qu'aux etats. */
-  --et-libre:#47602D; --et-res:#7B5010; --et-occ:#375C7D;
-  --et-bloq:#9C3723;  --et-hs:#63574C;
-  /* Le nettoyage : ni vendable ni en panne. Le violet de la maquette
-     (#9A6FE0) ne donnait que 2,43:1 sur la teinte des cases ; celui-ci
-     tient 4,62:1. */
-  --et-net:#674A96;
+  /* ── Les cinq etats du calendrier, en pastille ──────────────────────
+     Couleurs de TEXTE, pour les legendes et les listes de choix. Les
+     CASES, elles, sont des aplats : voir --f-* / --t-* plus bas. */
+  --et-libre:#2F6B44; --et-res:#8A5A12; --et-occ:#28558A;
+  --et-bloq:#A3342C;  --et-hs:#4E5867;  --et-net:#5B4494;
 
   /* ── Les cases du calendrier : des APLATS ──────────────────────────
-     Les six jetons --et-* ci-dessus sont des couleurs de TEXTE, posees sur
-     une teinte a 8 %. C'est juste pour une pastille ou une legende ; c'est
-     insuffisant pour une grille de quarante-six lignes qu'on balaie du
-     regard a sept heures du matin.
-
      Un calendrier n'est pas une page a contempler, c'est un instrument de
-     signalisation. Les cases prennent donc un vrai fond, comme la maquette
-     de passation le demandait — reteinte pour le creme, et mesuree : chaque
-     paire fond/texte tient au moins 4,6:1.
+     signalisation : quarante-six lignes se balaient du regard. Les valeurs
+     viennent de la maquette, ajustees quand la mesure les refusait — le
+     bleu de l'occupation donnait 3,64:1 avec du texte blanc, le violet du
+     nettoyage 3,94:1, le rouge 4,38:1. Les trois sont assombris du strict
+     necessaire — meme teinte, assez foncee pour porter du blanc. Chaque
+     paire fond/texte tient au moins 4,6:1. */
+  --f-libre:#BFE8BB; --t-libre:#1F4F2A;
+  --f-res:#FCC873;   --t-res:#6B3F00;
+  --f-occ:#3775C9;   --t-occ:#FFFFFF;
+  --f-bloq:#CB4848;  --t-bloq:#FFFFFF;
+  --f-net:#8165BD;   --t-net:#FFFFFF;
+  --f-hs:#767676;    --t-hs:#FFFFFF;
 
-     Le cadre reste creme. Ce sont les cases qui portent la donnee. */
-  --f-libre:#C7E3BB; --t-libre:#234A22;
-  --f-res:#F7CE8C;   --t-res:#603200;
-  --f-occ:#3E6E9C;   --t-occ:#FFFFFF;
-  --f-bloq:#B2453A;  --t-bloq:#FFFFFF;
-  --f-net:#7A5CA8;   --t-net:#FFFFFF;
-  --f-hs:#7E7367;    --t-hs:#FFFFFF;
   --f-t:"Marcellus",Georgia,serif; --f-b:"Karla",system-ui,sans-serif;
 }
+
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bark);color:var(--cream);font-family:var(--f-b);font-size:15px;line-height:1.6}
 a{color:var(--bronze-2);text-decoration:none}
@@ -90,8 +91,21 @@ a{color:var(--bronze-2);text-decoration:none}
 /* La barre passe au creme avec le reste. Elle etait restee a --night :
    son texte, devenu sombre, tombait a 1,27:1 — le menu ne se lisait
    plus du tout. */
-aside{background:var(--bark-2);border-right:1px solid var(--line);padding:26px 0;
+/* La barre laterale est MARINE, comme la maquette. Son texte ne peut donc
+   pas heriter de --cream, qui designe le texte principal et vaut le marine
+   lui-meme : chaque couleur y est redite en clair. */
+aside{background:var(--night);border-right:1px solid rgba(255,255,255,.08);padding:26px 0;
   position:sticky;top:0;height:100vh;overflow:auto}
+aside .marque{border-bottom-color:rgba(255,255,255,.10)}
+aside .marque span{color:#C9A46A}
+aside nav h2{color:#8FA0B8}
+aside nav button{color:#E6ECF6}
+aside nav button i{color:#8FA0B8}
+aside nav button:hover{background:rgba(255,255,255,.06);color:#fff}
+aside nav button:hover i{color:#C9A46A}
+aside nav button.on{background:linear-gradient(90deg,rgba(201,164,106,.18),transparent 78%);
+  border-left-color:#C9A46A;color:#fff}
+aside nav button.on i{color:#C9A46A}
 .marque{padding:0 22px 24px;border-bottom:1px solid var(--line);margin-bottom:18px}
 .marque img{display:block;height:34px;width:auto;margin-bottom:10px}
 .marque span{font-size:9.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--bronze)}
@@ -393,7 +407,7 @@ details.plus summary::marker{color:var(--bronze)}
 <div id="cadre">
   <aside>
     <div class="marque">
-      <img src="/img/opt/logo-bronze.png" alt="Hôtel Evannath">
+      <img src="/img/opt/logo-blanc.png" alt="Hôtel Evannath">
       <span>Administration</span>
     </div>
     <nav id="menu">

@@ -391,6 +391,27 @@ def controler():
                 pb.append((f, 'disponibilite affirmee dans le balisage : « %s »'
                            ' — elle doit venir de DISPO_JS' % phrase))
 
+    # 19. le back-office a DEUX fonds, donc deux logos.
+    # Le controle 18 verifie les 21 pages du site. Le back-office y echappait,
+    # et le defaut s'y est reproduit tel quel : sa barre laterale est passee au
+    # marine, et le logo bronze y est tombe a 2,57:1 — invisible. La regle est
+    # la meme, la mesure aussi : un logo est une image, et le balayage de
+    # contraste ne voit que du texte.
+    #
+    # L'ecran de connexion est clair (--bark), la barre laterale est sombre
+    # (--night). Chacun son logo, et c'est verifiable sans regarder un pixel.
+    admin = 'admin/index.html'
+    if os.path.exists(admin):
+        a = io.open(admin, encoding='utf-8').read()
+        porte = re.search(r'<div id="porte">(.*?)</div>\s*<!--', a, re.S)             or re.search(r'<div id="porte">(.*?)</form>', a, re.S)
+        barre = re.search(r'<div class="marque">(.*?)</div>', a, re.S)
+        if porte and 'logo-bronze.png' not in porte.group(1):
+            pb.append((admin, 'ecran de connexion : fond clair, le logo bronze '
+                       'est attendu'))
+        if barre and 'logo-blanc.png' not in barre.group(1):
+            pb.append((admin, 'barre laterale : fond marine, le logo blanc '
+                       'est attendu'))
+
     # 17. chaque entree du menu du back-office doit peindre quelque chose.
     # Un decoupage du tableau de bord, ancre sur la branche suivante, a emporte
     # les trois branches qui vivaient entre les deux : evenements, promotions,
