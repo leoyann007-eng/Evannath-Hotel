@@ -103,18 +103,41 @@
 .dsp-tete .dsp-t.auj{background:var(--bark-3)}
 .dsp-l{display:flex;min-width:100%;width:max-content}
 .dsp-bloc{border-top:1px solid var(--line)}
-.dsp-g{flex:0 0 330px;width:330px;min-width:330px;max-width:330px;overflow:hidden;position:sticky;
-  left:0;z-index:2;background:var(--bark-2);border-right:1px solid var(--line);padding:16px 18px;
-  display:flex;gap:14px}
-.dsp-tete .dsp-g{align-items:flex-end;padding:14px 18px}
+/* Le bloc gele de gauche : le numero et l'etage, rien de plus. La categorie
+   s'ecrit une fois par groupe, en intertitre — voir .dsp-cat. Elle occupait
+   202 de ces 330 px, et c'est elle qui empechait un mois de tenir a
+   l'ecran. */
+.dsp-g{flex:0 0 140px;width:140px;min-width:140px;max-width:140px;overflow:hidden;position:sticky;
+  left:0;z-index:2;background:var(--bark-2);border-right:1px solid var(--line);padding:14px 16px;
+  display:flex;gap:10px;justify-content:space-between;align-items:center}
+
+/* L'intertitre d'une categorie. Il glisse SOUS l'en-tete des jours : d'ou un
+   z-index inferieur au sien, sans quoi il l'effleurait en defilant. */
+.dsp-cat{display:flex;min-width:100%;width:max-content;background:var(--bark-3);
+  border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.dsp-cat b{position:sticky;left:0;z-index:1;background:var(--bark-3);padding:8px 16px;
+  font:700 10px/1.6 var(--f-b);letter-spacing:.16em;text-transform:uppercase;
+  color:var(--bronze);white-space:nowrap}
+.dsp-tete .dsp-g{align-items:flex-end;padding:12px 16px}
 /* --n : le nombre de nuits que la case couvre. Un sejour de trois nuits est
    UN bloc, et prend donc trois fois la base d'une case — largeur ET facteur
    de croissance, sans quoi il ne se calerait plus sur les colonnes voisines
    quand la grille s'etire. */
-.dsp-j{flex:0 0 calc(var(--n,1) * 96px);border-left:1px solid rgba(138,95,43,.10);
-  padding:12px 6px;display:flex}
-.v-semaine .dsp-j{flex:var(--n,1) 0 calc(var(--n,1) * 112px)}
-.v-jour .dsp-j{flex:var(--n,1) 0 calc(var(--n,1) * 280px)}
+/* Trois vues, trois outils.
+
+   MOIS : le mois entier, trente et une colonnes de 34 px. A cette largeur
+   aucun mot ne rentre — la COULEUR est l'information, et on lit les trous.
+   Les noms sont l'affaire de la semaine.
+   SEMAINE : sept colonnes qui s'etirent, l'etat et le client.
+   JOUR : une colonne large, tout le detail. */
+.dsp-j{flex:0 0 calc(var(--n,1) * 34px);border-left:1px solid rgba(138,95,43,.10);
+  padding:5px 2px;display:flex}
+.v-semaine .dsp-j{flex:var(--n,1) 0 calc(var(--n,1) * 112px);padding:12px 6px}
+.v-jour .dsp-j{flex:var(--n,1) 0 calc(var(--n,1) * 280px);padding:12px 6px}
+.v-mois .dsp-b{font-size:0;padding:0;min-height:26px}
+.v-mois .dsp-tete .dsp-j{padding:9px 2px}
+.v-mois .dsp-tete .dsp-j span{display:none}
+.v-mois .dsp-tete .dsp-j b{font-size:12px;font-weight:400}
 .dsp-j.auj{background:rgba(138,95,43,.07)}
 .dsp-t{flex-direction:column;align-items:center;padding:10px 4px 9px}
 .dsp-t span{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
@@ -200,6 +223,20 @@
   border-left:1px solid rgba(138,95,43,.28);box-shadow:-24px 0 60px rgba(90,62,28,.16);z-index:41;
   display:flex;flex-direction:column;transform:translateX(104%);transition:transform .28s ease;visibility:hidden}
 #dsp-tiroir.on{transform:none;visibility:visible}
+
+/* ── Le panneau de detail, a cote plutot que par-dessus ───────────────
+   Sur un ecran large il devient une COLONNE : le voile disparait, le
+   contenu se decale, et le calendrier reste visible et cliquable pendant
+   qu'on modifie une chambre. C'est le point du panneau — on clique une
+   chambre apres l'autre sans fermer a chaque fois.
+
+   Sous 1200 px il redevient un tiroir glissant : une colonne de 320 px
+   prise sur 900 px de large ne laisserait plus rien au calendrier. */
+@media(min-width:1200px){
+  #dsp-tiroir{width:320px;box-shadow:none;border-left:1px solid var(--line)}
+  body.dsp-cote #cadre{padding-right:320px}
+  body.dsp-cote #dsp-voile{display:none}
+}
 .dsp-th{display:flex;justify-content:space-between;align-items:center;padding:18px 22px;background:var(--bark-3);
   border-bottom:1px solid var(--line)}
 .dsp-th h2{font-family:var(--f-t);font-weight:400;font-size:19px}

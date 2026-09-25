@@ -19,33 +19,20 @@
    ───────────────────────────────────────────────────────────────────────── */
 const DSP = { vue: 'mois', mode: 'calendrier', focus: null, ouvertes: {},
               tiroir: null, modal: null,
-              voirTout: false, seuil: 0.3, defiler: true, nbJours: 0,
-              f: { texte: '', cat: '', statut: '', libres: false } };
+              voirTout: false, seuil: 0.3, defiler: true,
+              f: { texte: '', cat: '', etage: '', statut: '', libres: false } };
 
-/* Combien de colonnes de jour tiennent vraiment. La largeur du libelle et
-   celle d'une colonne sont dans la feuille de style ; les redire ici serait
-   une divergence de plus a surveiller, mais les lire coute un reflow par
-   rendu. On les fixe, et le test de largeur les verifie. */
-const DSP_COL = 96, DSP_LIB = 330;
+/* La colonne d'une case et le bloc de gauche, tels que la feuille de style
+   les pose. Ils ne servent plus a decider combien de jours afficher — le
+   mois montre le mois, la semaine sept jours, le jour un — mais le test de
+   largeur les verifie toujours. */
+const DSP_COL = 34, DSP_LIB = 140;
 
 /* Les glyphes des compteurs. Des caracteres, pas des images : le reste de
    l'administration fait deja ainsi, et une icone qui ne se telecharge pas
    laisse un carre vide au milieu d'un chiffre. */
 const ICONES = { lit: '▤', ok: '✓', qui: '●', cal: '◱',
                  cle: '⚒', net: '✦' };
-function combienDeJours() {
-  const el = document.querySelector('#dsp-defil');
-  /* Au premier rendu la zone n'existe pas encore : on estime, puis
-     apresDsp() remesure et redessine une fois si le compte a change. */
-  const l = el && el.clientWidth ? el.clientWidth : Math.max(520, window.innerWidth - 700);
-  return Math.max(5, Math.min(31, Math.floor((l - DSP_LIB) / DSP_COL)));
-}
-function ajusterFenetre() {
-  const n = combienDeJours();
-  if (n === DSP.nbJours) return false;
-  DSP.nbJours = n;
-  return true;
-}
 /* La vignette d'une categorie vient de donnees/chambres.json, donc de
    _chambres.py : c'est la premiere photo que le site montre sur sa fiche.
    La carte ecrite a la main qu'il y avait ici se trompait sur SIX categories
@@ -164,11 +151,15 @@ function joursDsp() {
     const a = jPlus(f, -((jDt(f).getDay() + 6) % 7));
     return [0, 1, 2, 3, 4, 5, 6].map((i) => jPlus(a, i));
   }
-  /* Autant de jours qu'il en tient, a partir du jour vise. */
-  if (!DSP.nbJours) DSP.nbJours = combienDeJours();
-  const o = [];
-  for (let i = 0; i < DSP.nbJours; i++) o.push(jPlus(f, i));
-  return o;
+  /* LE MOIS ENTIER, du premier au dernier jour.
+     Avant, « mois » n'etait pas un mois : c'etait une fenetre glissante
+     d'autant de jours qu'il en tenait a l'ecran — neuf ici, treize ailleurs,
+     a partir du jour vise. On ne voyait donc jamais un mois, et le nombre de
+     colonnes dependait de la largeur de la fenetre. */
+  const d = jDt(f);
+  const premier = jourIso(new Date(d.getFullYear(), d.getMonth(), 1));
+  const combien = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+  return Array.from({ length: combien }, (_, i) => jPlus(premier, i));
 }
 
 const vignette = (slug) => {
@@ -297,6 +288,7 @@ function htmlDsp() {
   const texte = f.texte.trim().toLowerCase();
   const retenues = chambres.filter((ch) => {
     if (f.cat && ch.categorie !== f.cat) return false;
+    if (f.etage && String(ch.etage || '') !== f.etage) return false;
     /* Le numero d'abord, toujours. La categorie seulement a partir de trois
        lettres : « B » rendait six chambres sur sept, parce que « Chambre
        Standard » contient un b. On cherche une chambre, pas une lettre. */
@@ -312,6 +304,9 @@ function htmlDsp() {
       - cats.findIndex((c) => c.slug === b.categorie)));
 
   const avecEtage = chambres.some((ch) => ch.etage);
+  /* Les etages reellement saisis, dans l'ordre ou un humain les lit. */
+  const etages = [...new Set(chambres.map((ch) => String(ch.etage || '')).filter(Boolean))]
+    .sort((a, b) => String(a).localeCompare(String(b), 'fr', { numeric: true }));
 
   const filtres = `<div class="carte dsp-filtres">
     <input id="dsp-q" class="fl" placeholder="Rechercher une chambre…"
@@ -321,6 +316,11 @@ function htmlDsp() {
       ${cats.map((c) => `<option value="${ech(c.slug)}" ${c.slug === f.cat ? 'selected' : ''}
         >${ech(c.nom)}</option>`).join('')}
     </select>
+    ${etages.length ? `<select id="dsp-fetage" aria-label="Étage">
+      <option value="">Tous les étages</option>
+      ${etages.map((e) => `<option value="${ech(e)}" ${e === f.etage ? 'selected' : ''}
+        >Étage ${ech(e)}</option>`).join('')}
+    </select>` : ''}
     <select id="dsp-fstat" aria-label="Statut">
       <option value="">Tous les statuts</option>
       ${[['libre', 'Libre'], ['res', 'Réservée'], ['occ', 'Occupée'],
@@ -339,7 +339,19 @@ function htmlDsp() {
       <b>${d.getDate()}</b></div>`;
   }).join('');
 
+  /* La categorie s'ecrit UNE FOIS par groupe, en intertitre, au lieu d'etre
+     repetee sur chacune des quarante-six lignes. Elle occupait 202 des
+     330 px du bloc gele de gauche — c'est elle qui empechait le mois de
+     tenir a l'ecran.
+     Le tri place deja les chambres par categorie puis par numero : les
+     groupes sont donc contigus, filtres compris. */
+  let groupe = null;
   const lignes = retenues.map((ch) => {
+    let tete = '';
+    if (ch.categorie !== groupe) {
+      groupe = ch.categorie;
+      tete = `<div class="dsp-cat"><b>${ech(nomCat(ch.categorie))}</b></div>`;
+    }
     const cases = blocsDe(ch, jours, calc).map(({ e, jour: j, n }) => {
       const [, mot] = DTON[e.k], det = detailSejour(e);
       const [fond, encre] = DAPLAT[e.k] || DAPLAT.hs;
@@ -356,13 +368,13 @@ function htmlDsp() {
         data-nuit="${j}" aria-label="${aria}" title="${aria}">${mot}${
         det && DSP.vue !== 'mois' ? '<small>' + ech(det) + '</small>' : ''}</button></div>`;
     }).join('');
-    return `<div class="dsp-l dsp-r">
+    return `${tete}<div class="dsp-l dsp-r">
       <div class="dsp-g dsp-ch">
-        <div style="flex:1;min-width:0">
+        <div style="min-width:0">
           <button class="dsp-num" data-dsp-fiche="${ech(ch.id)}"
-            aria-label="Chambre ${ech(ch.numero)} — voir et modifier">${ech(ch.numero)}</button>
-          <span class="sc">${ech(nomCat(ch.categorie))}${ch.service === false
-            ? ' · hors service' : ''}</span>
+            aria-label="Chambre ${ech(ch.numero)}, ${ech(nomCat(ch.categorie))} — voir et modifier"
+            >${ech(ch.numero)}</button>
+          ${ch.service === false ? '<span class="sc">hors service</span>' : ''}
         </div>
         ${avecEtage ? `<span class="et">${ech(ch.etage || '—')}</span>` : ''}
       </div>${cases}</div>`;
@@ -491,7 +503,7 @@ function htmlDsp() {
       </div>
       ${DSP.mode === 'liste' ? liste : `<div class="dsp-defil" id="dsp-defil">
         <div class="dsp-l dsp-tete"><div class="dsp-g dsp-ch">
-          <span class="lb" style="margin:0;flex:1">Chambre / Catégorie</span>
+          <span class="lb" style="margin:0;flex:1">Chambre</span>
           ${avecEtage ? '<span class="lb" style="margin:0">Étage</span>' : ''}</div>${tete}</div>
         ${lignes || `<div class="dsp-l dsp-r"><div class="dsp-g" style="flex:1;max-width:none">
           <p class="aide" style="margin:0">Aucune chambre ne correspond à ce filtre.</p></div></div>`}
@@ -549,8 +561,7 @@ function rendreDsp() {
 function apresDsp() {
   const el = $('#dsp-defil');
   if (!el) return;
-  if (DSP.vue === 'mois' && ajusterFenetre()) rendreDsp();
-  else el.scrollLeft = 0;
+  el.scrollLeft = 0;
 }
 
 /* ── Voir arriver les demandes ────────────────────────────────────────
@@ -577,13 +588,6 @@ setInterval(async () => {
   } catch (e) { /* le reseau reviendra */ }
 }, 60000);
 
-let DSP_RT = null;
-window.addEventListener('resize', () => {
-  clearTimeout(DSP_RT);
-  DSP_RT = setTimeout(() => {
-    if (DSP.vue === 'mois' && $('#dsp-defil') && ajusterFenetre()) rendreDsp();
-  }, 180);
-});
 
 function allerDsp(focus, vue) {
   DSP.focus = focus;
@@ -594,9 +598,11 @@ function allerDsp(focus, vue) {
 function decalerDsp(sens) {
   if (DSP.vue === 'jour') return allerDsp(jPlus(DSP.focus, sens));
   if (DSP.vue === 'semaine') return allerDsp(jPlus(DSP.focus, 7 * sens));
-  /* On glisse d'une fenetre entiere : deux clics ne doivent pas reafficher
-     les memes jours. */
-  allerDsp(jPlus(DSP.focus, (DSP.nbJours || combienDeJours()) * sens));
+  /* Un MOIS, pas une fenetre : « suivant » depuis septembre donne octobre,
+     et non « trente jours plus loin » — ce qui tombait au milieu du mois
+     suivant et decalait un peu plus a chaque clic. */
+  const d = jDt(DSP.focus);
+  allerDsp(jourIso(new Date(d.getFullYear(), d.getMonth() + sens, 1)));
 }
 
 /* ── Couche : tiroir, fenêtre, notification ─────────────────────────── */
@@ -633,6 +639,14 @@ function rendreTiroir() {
   $('#dsp-voile').classList.toggle('on', !!tr);
   el.classList.toggle('on', !!tr);
   el.setAttribute('aria-hidden', tr ? 'false' : 'true');
+  /* A cote, et non par-dessus, quand l'ecran le permet. La feuille decide
+     du seuil ; on se contente de dire que le panneau est ouvert, et
+     `aria-modal` tombe : ce n'est plus une boite de dialogue qui capture,
+     c'est un panneau a cote de son contenu. */
+  const cote = !!tr && window.matchMedia('(min-width:1200px)').matches;
+  document.body.classList.toggle('dsp-cote', cote);
+  if (cote) el.removeAttribute('aria-modal');
+  else el.setAttribute('aria-modal', 'true');
   if (!tr) return;
   const chambres = ETAT.chambres || [], F = ETAT.fermetures || [], auj = AUJ();
   let qui, corps, statuts, avert = '', bloque = false;
@@ -679,7 +693,9 @@ function rendreTiroir() {
     qui = [vignette(ch.categorie), 'Chambre ' + ch.numero + (c.nom ? ' · ' + c.nom : '')];
     corps = `<div class="dsp-chiffres"><div><span>État cette nuit</span>
         <span class="etat" style="color:${teinte};border-color:${teinte}">${mot}</span></div>
-        ${det ? `<div><span style="color:var(--prose);font-size:13px">${ech(det)}</span></div>` : ''}</div>`;
+        ${det ? `<div><span style="color:var(--prose);font-size:13px">${ech(det)}</span></div>` : ''}
+        ${c.prix ? `<div><span>Tarif par nuit</span><b>${FCFA(c.prix)} FCFA</b></div>` : ''}
+        ${ch.etage ? `<div><span>Étage</span><b>${ech(ch.etage)}</b></div>` : ''}</div>`;
     statuts = radio('dsp-statut', [['dispo', 'Disponible', 'var(--et-libre)'],
       ['complet', 'Bloquée à la vente', 'var(--et-bloq)'],
       ['nettoyage', 'Nettoyage', 'var(--et-net)'],
@@ -1290,6 +1306,7 @@ document.addEventListener('input', (e) => {
 document.addEventListener('change', (e) => {
   const t = e.target;
   if (t.id === 'dsp-fcat') { DSP.f.cat = t.value; return rendreDsp(); }
+  if (t.id === 'dsp-fetage') { DSP.f.etage = t.value; return rendreDsp(); }
   if (t.id === 'dsp-fstat') { DSP.f.statut = t.value; return rendreDsp(); }
   if (t.id === 'dsp-flibres') { DSP.f.libres = t.checked; return rendreDsp(); }
   if (t.id === 'dsp-mois') {

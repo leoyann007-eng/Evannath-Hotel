@@ -20,7 +20,7 @@ a{color:#b08a4f;text-decoration:none}a:hover{color:#8c6a36}
 <div style="display:grid;grid-template-columns:236px minmax(0,1fr);height:100vh;min-width:1280px;font-family:'Outfit',sans-serif">
 
   <aside style="position:relative;overflow-y:auto;background:linear-gradient(180deg,#0f1e33 0%,#12233b 55%,#0b1626 100%);color:#e8ecf2;display:flex;flex-direction:column">
-    <div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:22px 0 22px;border-bottom:1px solid rgba(255,255,255,.08)">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:22px 0 22px;border-bottom:1px solid rgba(255,255,255,.08);flex:none">
       <div style="width:22px;height:22px;border:1.5px solid #c9a46a;transform:rotate(45deg);border-radius:3px;margin-bottom:8px"></div>
       <div style="font-family:'Cormorant Garamond',serif;font-size:24px;letter-spacing:3px;color:#fff">EVANNATH</div>
       <div style="font-size:10px;letter-spacing:4px;color:#c9a46a">HOTEL</div>
@@ -72,13 +72,13 @@ a{color:#b08a4f;text-decoration:none}a:hover{color:#8c6a36}
           <div style="font-size:14px;color:#5b6576;margin-top:2px">Gérez l'état et la disponibilité de toutes vos chambres en temps réel.</div>
         </div>
         <div style="display:flex;align-items:center;gap:14px;height:42px;padding:0 14px;background:#fff;border:1px solid #e1e5ec;border-radius:6px;font-size:13px;font-weight:500">
-          <span style="cursor:pointer">‹</span>
+          <span onClick="{{ prev }}" style="cursor:pointer;opacity:{{ prevOp }};padding:0 2px">‹</span>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M3 10h18M8 3v4M16 3v4"></path></svg>
-          <span style="white-space:nowrap">25 sept. 2026 – 1 oct. 2026</span>
+          <span style="white-space:nowrap">{{ periodLabel }}</span>
           <span style="width:1px;height:22px;background:#e1e5ec"></span>
-          <span style="cursor:pointer">›</span>
+          <span onClick="{{ next }}" style="cursor:pointer;opacity:{{ nextOp }};padding:0 2px">›</span>
         </div>
-        <button style="height:42px;padding:0 24px;background:#fff;border:1px solid #e1e5ec;border-radius:6px;font:500 13px 'Outfit';color:#0f1e33;cursor:pointer">Aujourd'hui</button>
+        <button onClick="{{ goToday }}" style="height:42px;padding:0 24px;background:#fff;border:1px solid #e1e5ec;border-radius:6px;font:500 13px 'Outfit';color:#0f1e33;cursor:pointer">Aujourd'hui</button>
         <button onClick="{{ newResa }}" style="height:42px;padding:0 26px;background:#b8925a;border:0;border-radius:6px;font:500 14px 'Outfit';color:#fff;cursor:pointer;display:flex;align-items:center;gap:10px" style-hover="background:#a57f48">
           <span style="font-size:20px;font-weight:300;line-height:1">+</span>Nouvelle réservation
         </button>
@@ -90,7 +90,7 @@ a{color:#b08a4f;text-decoration:none}a:hover{color:#8c6a36}
             <sc-for list="{{ stats }}" as="s" hint-placeholder-count="5">
               <div style="background:#fff;border-radius:8px;border:1px solid #edf0f4;padding:16px 18px;display:flex;align-items:center;gap:16px">
                 <div style="width:44px;height:44px;border-radius:22px;flex:none;background:{{ s.soft }};color:{{ s.color }};display:flex;align-items:center;justify-content:center">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="0"><path d="{{ s.icon }}"></path></svg>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="{{ s.icon }}"></path></svg>
                 </div>
                 <div style="display:flex;flex-direction:column;gap:2px">
                   <div style="font-size:22px;font-weight:600">{{ s.n }}</div>
@@ -127,7 +127,7 @@ a{color:#b08a4f;text-decoration:none}a:hover{color:#8c6a36}
                 </sc-for>
               </div>
               <div style="flex:1;display:flex;align-items:center;justify-content:center;gap:24px;font-size:15px;font-weight:600;white-space:nowrap">
-                <span style="cursor:pointer;color:#5b6576">‹</span>25 sept. 2026 – 1 oct. 2026<span style="cursor:pointer;color:#5b6576">›</span>
+                <span onClick="{{ prev }}" style="cursor:pointer;color:#5b6576;opacity:{{ prevOp }};padding:0 6px">‹</span>{{ periodLabel }}<span onClick="{{ next }}" style="cursor:pointer;color:#5b6576;opacity:{{ nextOp }};padding:0 6px">›</span>
               </div>
               <div style="display:flex;border:1px solid #e1e5ec;border-radius:6px;overflow:hidden">
                 <sc-for list="{{ ranges }}" as="r" hint-placeholder-count="3">
@@ -136,20 +136,20 @@ a{color:#b08a4f;text-decoration:none}a:hover{color:#8c6a36}
               </div>
             </div>
 
-            <sc-if value="{{ isCal }}" hint-placeholder-val="{{ true }}">
+            <sc-if value="{{ isWeek }}" hint-placeholder-val="{{ true }}">
               <div style="border:1px solid #e8ecf2;border-radius:6px;overflow:hidden">
                 <div style="display:grid;grid-template-columns:156px 52px repeat(7,minmax(0,1fr));border-bottom:1px solid #e8ecf2;font-size:12px">
                   <div style="padding:18px 8px;font-weight:500">Chambre / Type</div>
                   <div style="padding:18px 4px;font-weight:500;text-align:center;border-right:1px solid #e8ecf2">Étage</div>
                   <sc-for list="{{ days }}" as="d" hint-placeholder-count="7">
-                    <div style="padding:10px 4px;text-align:center;display:flex;flex-direction:column;gap:4px;background:{{ d.bg }};color:{{ d.fg }};border-right:1px solid #eef1f5">
+                    <div onClick="{{ d.open }}" style="padding:10px 4px;text-align:center;display:flex;flex-direction:column;gap:4px;background:{{ d.bg }};color:{{ d.fg }};border-right:1px solid #eef1f5;cursor:pointer" style-hover="text-decoration:underline">
                       <span style="font-weight:600">{{ d.d }}</span><span style="font-size:11px;opacity:.85">{{ d.n }}</span>
                     </div>
                   </sc-for>
                 </div>
                 <div style="position:relative">
-                  <sc-if value="{{ highlightToday }}" hint-placeholder-val="{{ true }}">
-                    <div style="position:absolute;top:-58px;bottom:0;left:208px;width:calc((100% - 208px) / 7);border:1.5px solid #3f86e6;border-radius:3px;pointer-events:none;z-index:3"></div>
+                  <sc-if value="{{ showTodayCol }}" hint-placeholder-val="{{ true }}">
+                    <div style="position:absolute;top:-58px;bottom:0;left:{{ todayLeft }};width:calc((100% - 208px) / 7);border:1.5px solid #3f86e6;border-radius:3px;pointer-events:none;z-index:3"></div>
                   </sc-if>
                   <sc-for list="{{ rows }}" as="row" hint-placeholder-count="11">
                     <div style="display:grid;grid-template-columns:156px 52px repeat(7,minmax(0,1fr));align-items:center;border-bottom:1px solid #eef1f5;min-height:{{ rowH }}">
@@ -164,13 +164,7 @@ a{color:#b08a4f;text-decoration:none}a:hover{color:#8c6a36}
                       <div style="text-align:center;font-size:12px;border-right:1px solid #eef1f5;align-self:stretch;display:flex;align-items:center;justify-content:center">{{ row.floor }}</div>
                       <sc-for list="{{ row.segs }}" as="s">
                         <div onClick="{{ s.pick }}" style="grid-column:{{ s.col }};margin:3px;height:{{ cellH }};border-radius:3px;background:{{ s.bg }};color:{{ s.fg }};box-shadow:{{ s.ring }};display:flex;align-items:center;gap:8px;padding:0 10px;cursor:pointer;overflow:hidden;transition:filter .15s" style-hover="filter:brightness(.96)">
-                          <span style="flex:none;display:flex;color:{{ s.ic }}">
-                            <sc-if value="{{ s.isL }}"><svg width="14" height="14" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="currentColor"></circle><path d="M7 12.5l3.2 3L17 9" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path></svg></sc-if>
-                            <sc-if value="{{ s.isR }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M3 10h18M8 3v4M16 3v4"></path></svg></sc-if>
-                            <sc-if value="{{ s.isO }}"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="7.5" r="4.5"></circle><path d="M3 22c0-5 4-8.5 9-8.5s9 3.5 9 8.5z"></path></svg></sc-if>
-                            <sc-if value="{{ s.isM }}"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M14.7 2.3a6 6 0 0 0-5.9 8L2 17.2 6.8 22l6.9-6.8a6 6 0 0 0 8-5.9l-3.4 3.4-3.6-1-1-3.6z"></path></svg></sc-if>
-                            <sc-if value="{{ s.isN }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M10 2l1.9 5.6L17.5 9.5l-5.6 1.9L10 17l-1.9-5.6L2.5 9.5l5.6-1.9zM18.5 13l.9 2.6 2.6.9-2.6.9-.9 2.6-.9-2.6-2.6-.9 2.6-.9z"></path></svg></sc-if>
-                          </span>
+                          <span style="flex:none;display:flex;color:{{ s.ic }}"><svg width="14" height="14" viewBox="0 0 24 24"><path d="{{ s.ico }}" fill="currentColor" fill-rule="evenodd"></path></svg></span>
                           <div style="display:flex;flex-direction:column;min-width:0;line-height:1.3">
                             <span style="font-size:11px;font-weight:500;white-space:nowrap">{{ s.label }}</span>
                             <span style="font-size:9.5px;opacity:.9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ s.guest }}</span>
@@ -186,10 +180,82 @@ a{color:#b08a4f;text-decoration:none}a:hover{color:#8c6a36}
               </div>
             </sc-if>
 
+            <sc-if value="{{ isDay }}">
+              <div style="display:flex;flex-direction:column;gap:16px">
+                <sc-for list="{{ dayFloors }}" as="g">
+                  <div style="display:flex;flex-direction:column;gap:10px">
+                    <div style="display:flex;align-items:center;gap:12px;font-size:12px;font-weight:600;color:#5b6576">{{ g.label }}<span style="flex:1;height:1px;background:#eef1f5"></span><span style="font-weight:400">{{ g.summary }}</span></div>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px">
+                      <sc-for list="{{ g.rooms }}" as="c">
+                        <div onClick="{{ c.pick }}" style="border:1px solid #e8ecf2;border-radius:6px;overflow:hidden;cursor:pointer;box-shadow:{{ c.ring }};display:flex;flex-direction:column;background:#fff" style-hover="border-color:#c9cfd8">
+                          <div style="background:{{ c.bg }};color:{{ c.fg }};padding:8px 12px;display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600">
+                            <span style="display:flex;color:{{ c.ic }}"><svg width="14" height="14" viewBox="0 0 24 24"><path d="{{ c.ico }}" fill="currentColor" fill-rule="evenodd"></path></svg></span>
+                            <span>{{ c.label }}</span>
+                            <span style="margin-left:auto;font-size:11px;font-weight:500">{{ c.nights }}</span>
+                          </div>
+                          <div style="padding:10px 12px 12px;display:flex;flex-direction:column;gap:3px">
+                            <div style="display:flex;align-items:baseline;gap:8px"><span style="font-size:18px;font-weight:600">{{ c.num }}</span><span style="font-size:12px">{{ c.type }}</span></div>
+                            <span style="font-size:11px;color:#6b7686">{{ c.bed }}</span>
+                            <span style="font-size:12px;font-weight:500;margin-top:6px">{{ c.guest }}</span>
+                            <span style="font-size:11px;color:#5b6576">{{ c.dates }}</span>
+                            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">
+                              <sc-if value="{{ c.arrive }}"><span style="font-size:10px;font-weight:500;padding:2px 8px;border-radius:9px;background:#e6ecf6;color:#1f3a66">Arrivée aujourd'hui</span></sc-if>
+                              <sc-if value="{{ c.last }}"><span style="font-size:10px;font-weight:500;padding:2px 8px;border-radius:9px;background:#fdebd6;color:#8a4b00">Départ demain</span></sc-if>
+                            </div>
+                          </div>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </div>
+                </sc-for>
+                <sc-if value="{{ noRows }}">
+                  <div style="padding:40px;text-align:center;font-size:13px;color:#6b7686">Aucune chambre ne correspond à ces filtres.</div>
+                </sc-if>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ isMonth }}">
+              <div style="display:flex;flex-direction:column;gap:10px">
+                <div style="border:1px solid #e8ecf2;border-radius:6px;overflow:hidden">
+                  <div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));background:#f7f8fb;border-bottom:1px solid #e8ecf2">
+                    <sc-for list="{{ weekdays }}" as="w">
+                      <div style="padding:10px 12px;font-size:12px;font-weight:600;color:#5b6576">{{ w }}</div>
+                    </sc-for>
+                  </div>
+                  <div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr))">
+                    <sc-for list="{{ cells }}" as="c">
+                      <div onClick="{{ c.open }}" style="min-height:{{ monthCellH }};padding:8px 10px;border-right:1px solid #eef1f5;border-bottom:1px solid #eef1f5;display:flex;flex-direction:column;gap:7px;cursor:{{ c.cursor }};background:{{ c.bg }};opacity:{{ c.op }};box-shadow:{{ c.ring }}" style-hover="background:#f7f9fc">
+                        <div style="display:flex;align-items:center;justify-content:space-between">
+                          <span style="width:26px;height:26px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;background:{{ c.numBg }};color:{{ c.numFg }}">{{ c.num }}</span>
+                          <sc-if value="{{ c.inM }}"><span style="font-size:12px;font-weight:600;color:#0f1e33">{{ c.pct }}</span></sc-if>
+                        </div>
+                        <sc-if value="{{ c.inM }}">
+                          <div style="display:flex;height:6px;border-radius:3px;overflow:hidden;background:#eef1f5">
+                            <sc-for list="{{ c.bar }}" as="b"><div style="width:{{ b.w }};background:{{ b.color }}"></div></sc-for>
+                          </div>
+                          <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px 8px;font-size:10.5px;color:#3b4455">
+                            <sc-for list="{{ c.counts }}" as="k">
+                              <span style="display:flex;align-items:center;gap:5px;white-space:nowrap"><span style="width:7px;height:7px;border-radius:2px;background:{{ k.color }};flex:none"></span>{{ k.n }} {{ k.t }}</span>
+                            </sc-for>
+                          </div>
+                        </sc-if>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+                <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;font-size:11px;color:#5b6576">
+                  <sc-for list="{{ legend }}" as="l">
+                    <span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:2px;background:{{ l.color }}"></span>{{ l.t }}</span>
+                  </sc-for>
+                  <span style="margin-left:auto">Pourcentage = taux d'occupation (occupées + réservées) · Cliquez sur un jour pour l'ouvrir</span>
+                </div>
+              </div>
+            </sc-if>
+
             <sc-if value="{{ isList }}">
               <div style="border:1px solid #e8ecf2;border-radius:6px;overflow:hidden;font-size:13px">
                 <div style="display:grid;grid-template-columns:90px 1.2fr 1.4fr 70px 1.2fr 1.4fr;gap:12px;padding:14px 16px;background:#f7f8fb;font-weight:500;font-size:12px;color:#5b6576">
-                  <span>Chambre</span><span>Type</span><span>Lits</span><span>Étage</span><span>Statut (25 sept.)</span><span>Client</span>
+                  <span>Chambre</span><span>Type</span><span>Lits</span><span>Étage</span><span>Statut ({{ focusShort }})</span><span>Client</span>
                 </div>
                 <sc-for list="{{ listRows }}" as="l" hint-placeholder-count="6">
                   <div onClick="{{ l.pick }}" style="display:grid;grid-template-columns:90px 1.2fr 1.4fr 70px 1.2fr 1.4fr;gap:12px;padding:12px 16px;border-top:1px solid #eef1f5;align-items:center;cursor:pointer" style-hover="background:#fafbfd">
@@ -217,7 +283,6 @@ a{color:#b08a4f;text-decoration:none}a:hover{color:#8c6a36}
                 <span>Étage {{ sel.floor }}</span>
               </div>
             </div>
-
             <div style="font-size:12px;font-weight:600">Détails de la réservation</div>
             <div style="border:1px solid #eef1f5;border-radius:6px;padding:12px;display:flex;flex-direction:column;gap:12px;font-size:11px">
               <div style="display:flex;justify-content:space-between;align-items:center">
@@ -230,7 +295,6 @@ a{color:#b08a4f;text-decoration:none}a:hover{color:#8c6a36}
               <div style="display:flex;flex-direction:column;gap:2px"><span style="color:#6b7686;font-size:10px">Client</span><span>{{ sel.guest }}</span></div>
               <div style="display:flex;flex-direction:column;gap:2px"><span style="color:#6b7686;font-size:10px">Réservation n°</span><span>{{ sel.ref }}</span></div>
             </div>
-
             <div style="font-size:12px;font-weight:600;padding-top:4px">Changer le statut</div>
             <div style="display:flex;flex-direction:column;gap:4px;padding-bottom:12px;border-bottom:1px solid #eef1f5">
               <sc-for list="{{ statusOpts }}" as="o" hint-placeholder-count="5">
@@ -241,14 +305,12 @@ a{color:#b08a4f;text-decoration:none}a:hover{color:#8c6a36}
                 </div>
               </sc-for>
             </div>
-
             <div style="font-size:12px;font-weight:600">Actions rapides</div>
             <div style="display:flex;flex-direction:column;gap:8px">
               <button onClick="{{ createResa }}" style="height:32px;border:0;border-radius:4px;background:#0f1e33;color:#fff;font:500 11px 'Outfit';cursor:pointer;display:flex;align-items:center;gap:12px;padding:0 16px">Créer une réservation</button>
               <button onClick="{{ blockRoom }}" style="height:32px;border:1px solid #e1e5ec;border-radius:4px;background:#f4f6fa;color:#0f1e33;font:500 11px 'Outfit';cursor:pointer;display:flex;align-items:center;gap:12px;padding:0 16px">Bloquer la chambre</button>
               <button style="height:32px;border:1px solid #e1e5ec;border-radius:4px;background:#fff;color:#0f1e33;font:500 11px 'Outfit';cursor:pointer;display:flex;align-items:center;gap:12px;padding:0 16px">Modifier la réservation</button>
             </div>
-
             <div style="font-size:12px;font-weight:600;padding-top:6px">Notes</div>
             <div style="display:flex;flex-direction:column;gap:4px">
               <textarea value="{{ note }}" onInput="{{ setNote }}" maxlength="200" placeholder="Ajouter une note…" style="height:56px;border:1px solid #e1e5ec;border-radius:4px;padding:8px 10px;font:11px 'Outfit';resize:vertical;outline:none;color:#0f1e33"></textarea>
@@ -269,31 +331,69 @@ const ST = {
   M: { label: 'Maintenance', pill: 'Maintenance', bg: '#8e8e8e', fg: '#fff', ic: '#fff', color: '#7b7b7b' },
   N: { label: 'Nettoyage', pill: 'Nettoyage', bg: '#9a6fe0', fg: '#fff', ic: '#fff', color: '#9a6fe0' },
 };
+const SI = {
+  L: 'M12 1a11 11 0 1 1 0 22 11 11 0 0 1 0-22zm-1.6 15.3l7-7-1.6-1.6-5.4 5.4-2.6-2.6-1.6 1.6z',
+  R: 'M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2zm0 5v9h14v-9zM7 2h2v4H7zm8 0h2v4h-2z',
+  O: 'M12 2.5a4.8 4.8 0 1 1 0 9.6 4.8 4.8 0 0 1 0-9.6zM3 22c0-5 4-8.5 9-8.5s9 3.5 9 8.5z',
+  M: 'M14.7 2.3a6 6 0 0 0-5.9 8L2 17.2 6.8 22l6.9-6.8a6 6 0 0 0 8-5.9l-3.4 3.4-3.6-1-1-3.6z',
+  N: 'M10 2l1.9 5.6 5.6 1.9-5.6 1.9L10 17l-1.9-5.6-5.6-1.9 5.6-1.9zM18.5 13l.9 2.6 2.6.9-2.6.9-.9 2.6-.9-2.6-2.6-.9 2.6-.9z',
+};
 const RATES = { Standard: 35000, Deluxe: 45000, Suite: 75000, Executive: 95000 };
-const DAYS = ['Ven','Sam','Dim','Lun','Mar','Mer','Jeu'];
-const dateOf = i => new Date(2026, 8, 25 + i);
-const fmt = d => d.getDate() + ' ' + ['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'][d.getMonth()] + ' ' + d.getFullYear();
-const shortFmt = i => { const d = dateOf(i); return d.getDate() + ' ' + (d.getMonth() === 8 ? 'sept.' : 'oct.'); };
+const DOW = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
+const DOW_FULL = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+const MON = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
+const MON_FULL = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
+const BASE = new Date(2026, 8, 1);
+const N = 91, TODAY = 24;
+const dateOf = i => new Date(2026, 8, 1 + i);
+const idxOf = d => Math.round((d - BASE) / 864e5);
+const fmt = i => { const d = dateOf(i); return d.getDate() + ' ' + MON[d.getMonth()] + ' ' + d.getFullYear(); };
+const short = i => { const d = dateOf(i); return d.getDate() + ' ' + MON[d.getMonth()]; };
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 
-let uid = 70;
+let uid = 0;
+const NAMES = ['M. Diarra', 'Mme Koné', 'M. Traoré', 'Mme Bamba', 'M. Kouamé', 'Mme Soro', 'M. Diallo', 'M. Sissoko', 'M. Fofana', 'Mme Coulibaly', 'M. Touré', 'M. Yao', 'Mme Bah', 'M. Kéita', "Mme N'Guessan", 'M. Ouattara', 'Mme Kaboré', 'M. Mensah', 'Mme Adjoua', 'M. Konan', 'Mme Tanoh', 'M. Brou', 'Mme Camara', 'M. Dembélé'];
+let seed = 11;
+const rnd = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
+const ri = (a, b) => a + Math.floor(rnd() * (b - a + 1));
+const gen = () => {
+  const days = [];
+  while (days.length < N) {
+    const r = rnd();
+    if (r < 0.34) { for (let k = ri(1, 3); k--;) days.push({ s: 'L', g: '', id: null }); }
+    else if (r > 0.965) { const id = ++uid; for (let k = ri(1, 2); k--;) days.push({ s: 'M', g: '', id }); }
+    else {
+      const id = ++uid, len = ri(1, 5), start = days.length, g = NAMES[ri(0, NAMES.length - 1)];
+      const s = start > TODAY ? 'R' : 'O';
+      for (let k = 0; k < len; k++) days.push({ s, g, id });
+      if (rnd() < 0.15) days.push({ s: 'N', g: '', id: ++uid });
+    }
+  }
+  return days.slice(0, N);
+};
 const P = str => str.split('|').flatMap(tok => {
   const [s, n = '1', g = '', late] = tok.split(':');
   const id = s === 'L' ? null : ++uid;
   return Array.from({ length: +n }, () => ({ s, g, id, late: !!late }));
 });
 const ROOMS = [
-  ['101','Standard','1 lit double',1,'L|L|R:2:M. Diarra|O:2:Mme Koné|L'],
-  ['102','Standard','2 lits simples',1,'O:1:M. Traoré:x|O:1:M. Traoré:x|O:1:M. Traoré:x|L|L|R:1:Mme Bamba|L'],
-  ['103','Deluxe','1 lit king size',1,'L|L|L|L|L|O:1:M. Kouamé|L'],
-  ['104','Deluxe','1 lit king size',1,'L|L|N|L|L|R:1:M. Koné|L'],
-  ['201','Suite','1 lit king size',2,'O:1:Mme Soro|O:1:Mme Soro|R:1:M. Diallo|O:2:M. Sissoko|L|L'],
-  ['202','Suite','1 lit king size',2,'M|M|L|L|L|R:1:M. Fofana|L'],
-  ['203','Suite','1 lit king size',2,'L|L|O:2:Mme Coulibaly|L|L|L'],
-  ['204','Suite','1 lit king size',2,'L|R:1:M. Touré|L|L|L|O:1:M. Yao|L'],
-  ['301','Executive','1 lit king size',3,'L|L|O:2:Mme Bah|L|L|L'],
-  ['302','Executive','1 lit king size',3,'L|O:2:M. Kéita:x|L|L|R:1:Mme N\'Guessan|L'],
-  ['303','Executive','1 lit king size',3,'L|L|N|L|L|L|L'],
-].map(([num, type, bed, floor, d]) => ({ num, type, bed, floor, days: P(d) }));
+  ['101', 'Standard', '1 lit double', 1, 'L|L|R:2:M. Diarra|O:2:Mme Koné|L'],
+  ['102', 'Standard', '2 lits simples', 1, 'O:3:M. Traoré:x|L|L|R:1:Mme Bamba|L'],
+  ['103', 'Deluxe', '1 lit king size', 1, 'L|L|L|L|L|O:1:M. Kouamé|L'],
+  ['104', 'Deluxe', '1 lit king size', 1, 'L|L|N|L|L|R:1:M. Koné|L'],
+  ['201', 'Suite', '1 lit king size', 2, 'O:2:Mme Soro|R:1:M. Diallo|O:2:M. Sissoko|L|L'],
+  ['202', 'Suite', '1 lit king size', 2, 'M:2|L|L|L|R:1:M. Fofana|L'],
+  ['203', 'Suite', '1 lit king size', 2, 'L|L|O:2:Mme Coulibaly|L|L|L'],
+  ['204', 'Suite', '1 lit king size', 2, 'L|R:1:M. Touré|L|L|L|O:1:M. Yao|L'],
+  ['301', 'Executive', '1 lit king size', 3, 'L|L|O:2:Mme Bah|L|L|L'],
+  ['302', 'Executive', '1 lit king size', 3, "L|O:2:M. Kéita:x|L|L|R:1:Mme N'Guessan|L"],
+  ['303', 'Executive', '1 lit king size', 3, 'L|L|N|L|L|L|L'],
+].map(([num, type, bed, floor, d]) => {
+  const days = gen();
+  P(d).forEach((c, i) => { days[TODAY + i] = c; });
+  if (days[TODAY - 1].id && days[TODAY].id !== days[TODAY - 1].id) {}
+  return { num, type, bed, floor, days };
+});
 
 const ICONS = {
   home: 'M3 10.5L12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z',
@@ -306,92 +406,172 @@ const ICONS = {
   report: 'M4 20V11M9.5 20V5M15 20v-6M20.5 20V9M3 20h18',
   set: 'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-2.9-1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0-1.2-2.9H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.2-2.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 2.9-1.2V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 2.9 1.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0 1.2 2.9H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z',
 };
-const NAV = [['Dashboard','home'],['Réservations','bed'],['Disponibilités','cal'],['Chambres','rooms'],['Tarifs','tarif'],['Clients','users'],['Services','serv'],['Rapports','report'],['Paramètres','set']];
+const NAV = [['Dashboard', 'home'], ['Réservations', 'bed'], ['Disponibilités', 'cal'], ['Chambres', 'rooms'], ['Tarifs', 'tarif'], ['Clients', 'users'], ['Services', 'serv'], ['Rapports', 'report'], ['Paramètres', 'set']];
 const STAT_ICONS = {
   bed: 'M2 19V9a3 3 0 0 1 3-3h14a3 3 0 0 1 3 3v10h-2.5v-2h-15v2zM5 12h5.5V9H5zM13.5 12H19V9h-5.5z',
-  ok: 'M12 2a10 10 0 1 1 0 20 10 10 0 0 1 0-20zm-1.2 13.6l6-6-1.5-1.5-4.5 4.5-2.1-2.1-1.5 1.5z',
-  user: 'M12 3a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9zM3 21c0-5 4-8 9-8s9 3 9 8z',
-  cal: 'M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2zm0 5v9h14v-9zM7 2h2v4H7zm8 0h2v4h-2zM7 12h4v3H7z',
-  wrench: 'M14.7 2.3a6 6 0 0 0-5.9 8L2 17.2 6.8 22l6.9-6.8a6 6 0 0 0 8-5.9l-3.4 3.4-3.6-1-1-3.6z',
+  ok: SI.L, user: SI.O, cal: SI.R, wrench: SI.M,
 };
 
 class Component extends DCLogic {
-  state = { rooms: ROOMS, sel: { num: '103', day: 0 }, panel: true, view: 'cal', range: 'Semaine', q: '', type: 'Tous', floor: 'Tous', status: 'Tous', onlyFree: false, notes: {}, nav: 'Disponibilités' };
+  state = { rooms: ROOMS, sel: { num: '103', day: TODAY + 5 }, panel: true, view: 'cal', range: 'Semaine', anchor: TODAY, q: '', type: 'Tous', floor: 'Tous', status: 'Tous', onlyFree: false, notes: {}, nav: 'Disponibilités' };
 
-  setDay(num, day, patch) {
-    this.setState(st => {
-      const rooms = st.rooms.map(r => {
-        if (r.num !== num) return r;
-        const gid = r.days[day].id;
-        const days = r.days.map((c, i) => (i === day || (gid && c.id === gid)) ? { ...c, ...patch(c) } : c);
-        return { ...r, days };
-      });
-      return { rooms };
-    });
+  runOf(r, d) {
+    const key = c => c.id ?? (c.s === 'L' ? 'L' : null);
+    const k = key(r.days[d]);
+    let a = d, b = d + 1;
+    if (r.days[d].id) {
+      while (a > 0 && key(r.days[a - 1]) === k) a--;
+      while (b < N && key(r.days[b]) === k) b++;
+    } else {
+      while (b < N && key(r.days[b]) === k) b++;
+    }
+    return { start: a, end: b };
   }
   setStatus(s) {
     const { num, day } = this.state.sel;
-    this.setDay(num, day, c => s === 'L' ? { s, g: '', id: null, late: false } : { s, id: c.id || ++uid, late: s === 'O' ? c.late : false });
+    this.setState(st => ({
+      rooms: st.rooms.map(r => {
+        if (r.num !== num) return r;
+        const gid = r.days[day].id;
+        return { ...r, days: r.days.map((c, i) => (i === day || (gid && c.id === gid)) ? (s === 'L' ? { s, g: '', id: null } : { ...c, s, id: c.id || (gid || ++uid), late: s === 'O' ? c.late : false }) : c) };
+      }),
+    }));
+  }
+  monthInfo(a) {
+    const m = dateOf(a).getMonth();
+    const first = idxOf(new Date(2026, m, 1));
+    const dim = new Date(2026, m + 1, 0).getDate();
+    return { m, first, dim };
+  }
+  nav(dir) {
+    this.setState(st => {
+      let a = st.anchor;
+      if (st.range === 'Jour') a = clamp(a + dir, 0, N - 1);
+      else if (st.range === 'Semaine') a = clamp(a + 7 * dir, 0, N - 7);
+      else { const m = dateOf(a).getMonth() + dir; if (m < 8 || m > 10) return null; a = idxOf(new Date(2026, m, 1)); }
+      return { anchor: a };
+    });
+  }
+  setRange(r) {
+    this.setState(st => {
+      if (r === st.range) return null;
+      let a = st.anchor;
+      if (st.range === 'Mois') { const { first, dim } = this.monthInfo(a); a = TODAY >= first && TODAY < first + dim ? TODAY : first; }
+      if (r === 'Semaine') a = clamp(a, 0, N - 7);
+      return { range: r, anchor: a, view: 'cal' };
+    });
   }
 
   renderVals() {
+    if (!this.state.rooms || this.state.rooms[0].days.length !== N || this.state.anchor == null) {
+      this.state = { rooms: ROOMS, sel: { num: '103', day: TODAY + 5 }, panel: true, view: 'cal', range: 'Semaine', anchor: TODAY, q: '', type: 'Tous', floor: 'Tous', status: 'Tous', onlyFree: false, notes: {}, nav: 'Disponibilités' };
+    }
     const st = this.state, p = this.props;
     const dense = p.density === 'compact';
-    const segsOf = r => {
-      const out = [];
-      r.days.forEach((c, i) => {
-        const last = out[out.length - 1];
-        if (last && c.id && last.id === c.id) { last.span++; last.days.push(i); }
-        else out.push({ ...c, span: 1, start: i, days: [i] });
-      });
-      return out;
-    };
-    const t0 = r => r.days[0].s;
-    const rows = st.rooms.filter(r =>
+    const hl = p.highlightToday ?? true;
+    const a = st.anchor, range = st.range;
+    const { m, first, dim } = this.monthInfo(a);
+    const focus = range === 'Mois' ? (TODAY >= first && TODAY < first + dim ? TODAY : first) : a;
+
+    const baseRooms = st.rooms.filter(r =>
       (!st.q || (r.num + ' ' + r.type).toLowerCase().includes(st.q.toLowerCase())) &&
       (st.type === 'Tous' || r.type === st.type) &&
-      (st.floor === 'Tous' || String(r.floor) === st.floor) &&
-      (st.status === 'Tous' || t0(r) === st.status) &&
-      (!st.onlyFree || t0(r) === 'L'));
+      (st.floor === 'Tous' || String(r.floor) === st.floor));
+    const rows = baseRooms.filter(r =>
+      (st.status === 'Tous' || r.days[focus].s === st.status) &&
+      (!st.onlyFree || r.days[focus].s === 'L'));
 
-    const selRoom = st.rooms.find(r => r.num === st.sel.num) || st.rooms[0];
-    const selSeg = segsOf(selRoom).find(s => s.days.includes(st.sel.day));
-    const m = ST[selSeg.s];
-    const nights = selSeg.span;
-    const sel = {
-      num: selRoom.num, type: selRoom.type, bed: selRoom.bed, floor: selRoom.floor,
-      statusLabel: m.pill, pillBg: m.bg, pillFg: m.fg,
-      from: fmt(dateOf(selSeg.start)),
-      to: fmt(dateOf(selSeg.start + nights)) + ' (' + nights + (nights > 1 ? ' nuits)' : ' nuit)'),
-      rate: RATES[selRoom.type].toLocaleString('fr-FR').replace(/\u202f|\u00a0/g, ' ') + ' FCFA',
-      guest: selSeg.g || '—',
-      ref: selSeg.id ? '#RES-2026-' + String(selSeg.id).padStart(3, '0') : '—',
+    const isSel = (r, days) => r.num === st.sel.num && days.includes(st.sel.day);
+    const segsOf = (r, from, to) => {
+      const out = [];
+      for (let i = from; i < to; i++) {
+        const c = r.days[i], last = out[out.length - 1];
+        if (last && c.id && last.id === c.id) { last.span++; last.days.push(i); }
+        else out.push({ ...c, span: 1, start: i, days: [i] });
+      }
+      return out;
     };
-
     const mkSeg = (r, s) => {
       const mm = ST[s.s];
-      const isSel = r.num === st.sel.num && s.days.includes(st.sel.day);
       return {
-        col: 'span ' + s.span, label: mm.label, guest: s.g,
+        col: 'span ' + s.span, label: mm.label, guest: s.g, ico: SI[s.s],
         bg: s.late ? '#e35d5d' : mm.bg, fg: mm.fg, ic: mm.ic,
-        ring: isSel ? '0 0 0 2px #0f1e33' : 'none',
-        isL: s.s === 'L', isR: s.s === 'R', isO: s.s === 'O', isM: s.s === 'M', isN: s.s === 'N',
+        ring: isSel(r, s.days) ? '0 0 0 2px #0f1e33' : 'none',
         pick: () => this.setState({ sel: { num: r.num, day: s.start }, panel: true }),
       };
     };
 
-    const cnt = k => st.rooms.filter(r => k.includes(t0(r))).length;
-    const opt = (arr) => arr.map(v => ({ v, t: v }));
+    const selRoom = st.rooms.find(r => r.num === st.sel.num) || st.rooms[0];
+    const sc = selRoom.days[st.sel.day];
+    const run = sc.s === 'L' ? { start: st.sel.day, end: st.sel.day + 1 } : this.runOf(selRoom, st.sel.day);
+    const nights = run.end - run.start;
+    const mS = ST[sc.s];
+    const sel = {
+      num: selRoom.num, type: selRoom.type, bed: selRoom.bed, floor: selRoom.floor,
+      statusLabel: mS.pill, pillBg: sc.late ? '#e35d5d' : mS.bg, pillFg: mS.fg,
+      from: fmt(run.start), to: fmt(run.end) + ' (' + nights + (nights > 1 ? ' nuits)' : ' nuit)'),
+      rate: RATES[selRoom.type].toLocaleString('fr-FR').replace(/\u202f|\u00a0/g, ' ') + ' FCFA',
+      guest: sc.g || '—', ref: sc.id && (sc.s === 'R' || sc.s === 'O') ? '#RES-2026-' + String(sc.id).padStart(3, '0') : '—',
+    };
+
+    let periodLabel, canPrev, canNext;
+    if (range === 'Jour') { periodLabel = DOW_FULL[dateOf(a).getDay()] + ' ' + fmt(a); canPrev = a > 0; canNext = a < N - 1; }
+    else if (range === 'Semaine') { periodLabel = fmt(a) + ' – ' + fmt(a + 6); canPrev = a > 0; canNext = a < N - 7; }
+    else { periodLabel = MON_FULL[m] + ' 2026'; canPrev = m > 8; canNext = m < 10; }
+
+    const cnt = (list, d, k) => list.filter(r => k.includes(r.days[d].s)).length;
+    const opt = arr => arr.map(v => ({ v, t: v }));
     const sel3 = (label, key, options) => ({ label, value: st[key], options, onChange: e => this.setState({ [key]: e.target.value }) });
+    const tab = (on) => ({ bg: on ? '#0f1e33' : '#fff', fg: on ? '#fff' : '#0f1e33' });
+    const openDay = i => () => this.setState({ range: 'Jour', anchor: i, view: 'cal' });
+
+    const todayK = TODAY - a;
+    const showTodayCol = hl && range === 'Semaine' && todayK >= 0 && todayK < 7;
+
+    const cardOf = r => {
+      const c = r.days[a], mm = ST[c.s];
+      const rn = c.s === 'L' ? this.runOf(r, a) : this.runOf(r, a);
+      const n = rn.end - rn.start;
+      const booked = c.s === 'R' || c.s === 'O';
+      return {
+        num: r.num, type: r.type, bed: r.bed, label: mm.label, ico: SI[c.s],
+        bg: c.late ? '#e35d5d' : mm.bg, fg: mm.fg, ic: mm.ic,
+        nights: booked ? n + (n > 1 ? ' nuits' : ' nuit') : '',
+        guest: c.g || (c.s === 'L' ? 'Aucun client' : mm.label + ' en cours'),
+        dates: c.s === 'L' ? (rn.end >= N ? 'Disponible' : 'Disponible jusqu\'au ' + short(rn.end)) : short(rn.start) + ' → ' + short(rn.end),
+        arrive: booked && rn.start === a, last: booked && rn.end === a + 1 && n > 1,
+        ring: isSel(r, [a]) ? '0 0 0 2px #0f1e33' : 'none',
+        pick: () => this.setState({ sel: { num: r.num, day: a }, panel: true }),
+      };
+    };
+
+    const off = (new Date(2026, m, 1).getDay() + 6) % 7;
+    const total = Math.ceil((off + dim) / 7) * 7;
+    const cells = Array.from({ length: total }, (_, k) => {
+      const idx = first - off + k, inM = k >= off && k < off + dim;
+      const d = dateOf(idx), T = baseRooms.length || 1;
+      const L = inM ? cnt(baseRooms, idx, 'L') : 0, O = inM ? cnt(baseRooms, idx, 'O') : 0, R = inM ? cnt(baseRooms, idx, 'R') : 0, U = inM ? cnt(baseRooms, idx, 'MN') : 0;
+      const isT = idx === TODAY && hl;
+      const selDay = range === 'Mois' && st.sel.day === idx;
+      return {
+        num: d.getDate(), inM, op: inM ? 1 : 0.4, cursor: inM ? 'pointer' : 'default',
+        bg: inM ? '#fff' : '#fafbfc', ring: selDay ? 'inset 0 0 0 2px #0f1e33' : 'none',
+        numBg: isT ? '#3f86e6' : 'transparent', numFg: isT ? '#fff' : '#0f1e33',
+        pct: Math.round((O + R) / T * 100) + ' %',
+        bar: [[O, ST.O.color], [R, ST.R.color], [U, ST.M.color]].map(([v, color]) => ({ w: (v / T * 100) + '%', color })),
+        counts: [[L, 'libres', ST.L.color], [O, 'occ.', ST.O.color], [R, 'rés.', ST.R.color], [U, 'indisp.', ST.M.color]].map(([n, t, color]) => ({ n, t, color })),
+        open: inM ? openDay(idx) : undefined,
+      };
+    });
 
     return {
       nav: NAV.map(([label, ic]) => ({ label, icon: ICONS[ic], bg: st.nav === label ? 'linear-gradient(90deg,#b8925a,#8f6f40)' : 'transparent', w: st.nav === label ? 600 : 400, go: () => this.setState({ nav: label }) })),
       stats: [
         { n: st.rooms.length, label: 'Total chambres', icon: STAT_ICONS.bed, soft: '#e6ecf6', color: '#1f3a66' },
-        { n: cnt('L'), label: 'Disponibles', icon: STAT_ICONS.ok, soft: '#dff3e2', color: '#2f9e4f' },
-        { n: cnt('O'), label: 'Occupées', icon: STAT_ICONS.user, soft: '#fde3e3', color: '#e0474c' },
-        { n: cnt('R'), label: 'Réservées', icon: STAT_ICONS.cal, soft: '#fdebd6', color: '#e0850f' },
-        { n: cnt('MN'), label: 'Indisponibles', icon: STAT_ICONS.wrench, soft: '#eceef2', color: '#3b4455' },
+        { n: cnt(st.rooms, focus, 'L'), label: 'Disponibles', icon: STAT_ICONS.ok, soft: '#dff3e2', color: '#2f9e4f' },
+        { n: cnt(st.rooms, focus, 'O'), label: 'Occupées', icon: STAT_ICONS.user, soft: '#fde3e3', color: '#e0474c' },
+        { n: cnt(st.rooms, focus, 'R'), label: 'Réservées', icon: STAT_ICONS.cal, soft: '#fdebd6', color: '#e0850f' },
+        { n: cnt(st.rooms, focus, 'MN'), label: 'Indisponibles', icon: STAT_ICONS.wrench, soft: '#eceef2', color: '#3b4455' },
       ],
       q: st.q, setQ: e => this.setState({ q: e.target.value }),
       selects: [
@@ -400,20 +580,34 @@ class Component extends DCLogic {
         sel3('Statut', 'status', [{ v: 'Tous', t: 'Tous' }, ...Object.keys(ST).map(k => ({ v: k, t: ST[k].label }))]),
       ],
       onlyFree: st.onlyFree, toggleFree: () => this.setState({ onlyFree: !st.onlyFree }),
-      views: [['cal', 'Vue calendrier'], ['list', 'Vue liste']].map(([k, label]) => ({ label, bg: st.view === k ? '#0f1e33' : '#fff', fg: st.view === k ? '#fff' : '#0f1e33', go: () => this.setState({ view: k }) })),
-      ranges: ['Jour', 'Semaine', 'Mois'].map(label => ({ label, bg: st.range === label ? '#0f1e33' : '#fff', fg: st.range === label ? '#fff' : '#0f1e33', go: () => this.setState({ range: label }) })),
-      isCal: st.view === 'cal', isList: st.view === 'list',
-      highlightToday: p.highlightToday ?? true,
-      days: DAYS.map((d, i) => ({ d, n: shortFmt(i), bg: i === 0 && (p.highlightToday ?? true) ? '#eef4fd' : '#fff', fg: i === 0 && (p.highlightToday ?? true) ? '#2563c9' : '#0f1e33' })),
-      rowH: dense ? '44px' : '54px', cellH: dense ? '34px' : '44px',
-      rows: rows.map(r => ({ num: r.num, type: r.type, bed: r.bed, floor: r.floor, segs: segsOf(r).map(s => mkSeg(r, s)) })),
-      noRows: rows.length === 0,
-      listRows: rows.map(r => { const c = r.days[0], mm = ST[c.s]; return { num: r.num, type: r.type, bed: r.bed, floor: r.floor, label: mm.label, bg: c.late ? '#e35d5d' : mm.bg, fg: mm.fg, guest: c.g || '—', pick: () => this.setState({ sel: { num: r.num, day: 0 }, panel: true }) }; }),
+      views: [['cal', 'Vue calendrier'], ['list', 'Vue liste']].map(([k, label]) => ({ label, ...tab(st.view === k), go: () => this.setState({ view: k }) })),
+      ranges: ['Jour', 'Semaine', 'Mois'].map(label => ({ label, ...tab(range === label), go: () => this.setRange(label) })),
+      periodLabel, prev: () => this.nav(-1), next: () => this.nav(1),
+      prevOp: canPrev ? 1 : 0.3, nextOp: canNext ? 1 : 0.3,
+      goToday: () => this.setState({ anchor: TODAY }),
+      isWeek: st.view === 'cal' && range === 'Semaine',
+      isDay: st.view === 'cal' && range === 'Jour',
+      isMonth: st.view === 'cal' && range === 'Mois',
+      isList: st.view === 'list',
+      showTodayCol, todayLeft: 'calc(208px + (100% - 208px) * ' + todayK + ' / 7)',
+      days: Array.from({ length: 7 }, (_, k) => { const i = a + k, t = hl && i === TODAY; return { d: DOW[dateOf(i).getDay()], n: short(i), bg: t ? '#eef4fd' : '#fff', fg: t ? '#2563c9' : '#0f1e33', open: openDay(i) }; }),
+      rowH: dense ? '44px' : '54px', cellH: dense ? '34px' : '44px', monthCellH: dense ? '84px' : '104px',
+      rows: range === 'Semaine' ? rows.map(r => ({ num: r.num, type: r.type, bed: r.bed, floor: r.floor, segs: segsOf(r, a, a + 7).map(s => mkSeg(r, s)) })) : [],
+      noRows: rows.length === 0 && range !== 'Mois',
+      dayFloors: range === 'Jour' ? [1, 2, 3].map(f => {
+        const rs = rows.filter(r => r.floor === f);
+        return { label: 'Étage ' + f, summary: cnt(rs, a, 'L') + ' libre(s) sur ' + rs.length, rooms: rs.map(cardOf) };
+      }).filter(g => g.rooms.length) : [],
+      weekdays: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
+      cells: range === 'Mois' ? cells : [],
+      legend: [['Occupées', ST.O.color], ['Réservées', ST.R.color], ['Indisponibles', ST.M.color], ['Libres', ST.L.color]].map(([t, color]) => ({ t, color })),
+      focusShort: short(focus),
+      listRows: rows.map(r => { const c = r.days[focus], mm = ST[c.s]; return { num: r.num, type: r.type, bed: r.bed, floor: r.floor, label: mm.label, bg: c.late ? '#e35d5d' : mm.bg, fg: mm.fg, guest: c.g || '—', pick: () => this.setState({ sel: { num: r.num, day: focus }, panel: true }) }; }),
       panelOpen: st.panel, panelCol: st.panel ? '244px' : '0px',
       closePanel: () => this.setState({ panel: false }),
       sel,
-      statusOpts: Object.keys(ST).map(k => ({ label: ST[k].pill, color: ST[k].color, ring: selSeg.s === k ? '4.5px solid #2f9e4f' : '1.5px solid #c9cfd8', set: () => this.setStatus(k) })),
-      createResa: () => { this.setStatus('R'); this.setDay(st.sel.num, st.sel.day, c => ({ g: c.g || 'Nouveau client' })); },
+      statusOpts: Object.keys(ST).map(k => ({ label: ST[k].pill, color: ST[k].color, ring: sc.s === k ? '4.5px solid #2f9e4f' : '1.5px solid #c9cfd8', set: () => this.setStatus(k) })),
+      createResa: () => { this.setStatus('R'); this.setState(s2 => ({ rooms: s2.rooms.map(r => r.num !== s2.sel.num ? r : { ...r, days: r.days.map((c, i) => i === s2.sel.day && !c.g ? { ...c, g: 'Nouveau client' } : c) }) })); },
       newResa: () => this.setState({ panel: true }),
       blockRoom: () => this.setStatus('M'),
       note: st.notes[selRoom.num] || '', noteCount: (st.notes[selRoom.num] || '').length,

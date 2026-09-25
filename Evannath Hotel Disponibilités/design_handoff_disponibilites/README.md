@@ -1,7 +1,9 @@
 # Handoff : Page « Disponibilités » — Evannath Hotel (back-office)
 
 ## Instruction principale pour Claude Code
-**Respecte le design system déjà présent dans le projet Evannath Hotel.** Réutilise les composants existants (layout, sidebar, header, boutons, inputs, selects, cards, badges, icônes), les tokens (couleurs, polices, rayons, ombres, espacements) et les conventions (routing, state, appels API) du code. Les valeurs ci-dessous sont des références : si un token équivalent existe dans le projet, **utilise le token du projet**, pas la valeur hex.
+**Respecte le design system déjà présent dans le projet Evannath Hotel** : réutilise les composants existants (layout, sidebar, header, boutons, inputs, selects, cards, badges, icônes), les polices, rayons, espacements et les conventions (routing, state, appels API) du code.
+
+**⚠ Couleurs : garder EXACTEMENT celles de cette maquette.** Les valeurs hex listées dans ce document (statuts, KPI, marine, or, fonds, bordures, textes) sont définitives. Si le projet a déjà des tokens avec ces valeurs, utilise-les ; sinon, ajoute ces couleurs comme nouveaux tokens (ex. `--status-libre`, `--status-reservee`…) plutôt que de les remplacer par des couleurs approchantes.
 
 La sidebar et le header existent probablement déjà : ne les recrée pas, ajoute seulement l'entrée de menu « Disponibilités » (active) et la nouvelle page.
 
@@ -9,7 +11,7 @@ La sidebar et le header existent probablement déjà : ne les recrée pas, ajout
 `Disponibilites.dc.html` est une **maquette HTML de référence** (prototype interactif), pas du code de production. Il faut recréer cette page dans la stack du projet.
 
 ## Fidélité
-Haute fidélité pour la structure, le contenu, les états et les interactions. Style visuel : aligner sur le design system existant.
+Haute fidélité pour la structure, le contenu, les états, les interactions **et les couleurs**. Composants et typographie : ceux du design system existant.
 
 ---
 
@@ -50,7 +52,7 @@ Valeurs calculées à partir des données (statut du jour courant).
 ### 4. Barre de vue
 - Gauche : segmented « Vue calendrier » / « Vue liste » (actif = fond bleu marine #0f1e33, texte blanc).
 - Centre : `‹ 25 sept. 2026 – 1 oct. 2026 ›` (15px semi-bold).
-- Droite : segmented « Jour / Semaine / Mois » (Semaine actif par défaut).
+- Droite : segmented « Jour / Semaine / Mois » (Semaine actif par défaut) — change complètement l'affichage (voir 5, 5c, 5d).
 - Tout le texte des segmented reste sur une ligne (`white-space: nowrap`).
 
 ### 5. Planning (Vue calendrier)
@@ -70,6 +72,27 @@ Grille : `156px (Chambre/Type) | 52px (Étage) | 7 × 1fr (jours)`.
 | Nettoyage | #9a6fe0 | #fff | étincelles |
 
 État vide : « Aucune chambre ne correspond à ces filtres. »
+
+### 5c. Mode Jour (Vue calendrier + « Jour »)
+- Cartes chambres regroupées par étage. Titre de groupe « Étage 1 » + ligne séparatrice + résumé « X libre(s) sur Y ».
+- Grille `repeat(auto-fill, minmax(190px, 1fr))`, gap 10px.
+- Carte : bandeau haut coloré selon le statut (couleurs du tableau ci-dessus) avec icône + libellé + « N nuits » à droite ; corps : numéro (18px gras) + type, literie (gris), client (ou « Aucun client »), dates « 24 sept. → 27 sept. » (ou « Disponible jusqu'au … »).
+- Badges : « Arrivée aujourd'hui » (fond #e6ecf6, texte #1f3a66) si la réservation commence ce jour ; « Départ demain » (fond #fdebd6, texte #8a4b00) si c'est la dernière nuit.
+- Clic → sélection + panneau. Flèches ‹ › = ±1 jour.
+
+### 5d. Mode Mois (Vue calendrier + « Mois »)
+- Calendrier mensuel complet, semaines du **lundi au dimanche**, 5 ou 6 lignes. En-tête des jours sur fond #f7f8fb.
+- Case (min-height 104px) : numéro du jour (pastille ronde 26px ; aujourd'hui = fond #3f86e6, texte blanc), taux d'occupation à droite (« 64 % » = (occupées + réservées) / total), barre empilée 6px (occupées #3f86e6, réservées #e0850f, indisponibles #7b7b7b sur fond #eef1f5), puis 4 compteurs en grille 2×2 avec carré de couleur : « X libres » (#2f9e4f), « X occ. », « X rés. », « X indisp. ».
+- Jours hors mois : affichés estompés (opacité 0.4), sans statistiques, non cliquables.
+- Clic sur un jour → bascule en mode Jour sur cette date. Survol : fond #f7f9fc.
+- Légende sous la grille + note « Pourcentage = taux d'occupation (occupées + réservées) · Cliquez sur un jour pour l'ouvrir ».
+- Filtres type/étage/recherche appliqués aux compteurs. Flèches ‹ › = mois précédent/suivant.
+
+### Libellé de période (en-tête de page ET barre de vue, synchronisés)
+- Jour : « Vendredi 25 sept. 2026 » · Semaine : « 25 sept. 2026 – 1 oct. 2026 » · Mois : « Septembre 2026 ».
+- « Aujourd'hui » ramène à la date du jour dans le mode courant.
+- En mode Semaine, clic sur un en-tête de jour → mode Jour sur cette date.
+- Les KPI et le filtre de statut portent sur le jour affiché (mode Jour), le premier jour de la semaine (mode Semaine), ou aujourd'hui / le 1er du mois (mode Mois).
 
 ### 5b. Vue liste
 Tableau : Chambre | Type | Lits | Étage | Statut (jour courant, en badge coloré) | Client. Un clic sur une ligne ouvre le panneau.
@@ -91,7 +114,7 @@ Tableau : Chambre | Type | Lits | Étage | Statut (jour courant, en badge color�
 - « Bloquer la chambre » → statut Maintenance.
 - « Modifier la réservation » → ouvre l'édition existante de la réservation.
 - « Nouvelle réservation » (en-tête) → même formulaire, sans préremplissage.
-- Flèches ‹ › → semaine précédente / suivante ; « Aujourd'hui » → semaine courante ; Jour / Semaine / Mois → nombre de colonnes (1 / 7 / jours du mois, avec scroll horizontal).
+- Flèches ‹ › → période précédente / suivante selon le mode ; « Aujourd'hui » → date du jour ; Jour / Semaine / Mois → change d'affichage (cartes / planning / calendrier mensuel).
 - Filtres et recherche → filtrent les lignes en direct ; les KPI restent sur l'ensemble de l'hôtel.
 - Notes → enregistrées par chambre.
 - Survol d'une cellule : légère baisse de luminosité (`filter: brightness(.96)`, 150ms).
@@ -106,15 +129,15 @@ UI state : period {start, mode}, view 'calendar'|'list', filters {q, type, floor
 ```
 Endpoints à brancher sur l'API existante : liste des chambres, réservations / blocages sur la période, mise à jour du statut, notes de chambre. Les jours sans réservation ni blocage sont « Libre ».
 
-## Tokens de référence (à remplacer par ceux du projet)
+## Couleurs (à conserver telles quelles)
 - Bleu marine (sidebar, primaire foncé) : #0f1e33 · Or (accent, CTA) : #b8925a (hover #a57f48), or clair #c9a46a
 - Fond app #f4f6fa · Cartes #fff, bordure #edf0f4 · Bordures inputs #e1e5ec · Séparateurs #eef1f5
 - Texte #0f1e33 · Texte secondaire #5b6576 / #6b7686
 - Rayons : cartes 8px, inputs/boutons 6px, cellules 3px
-- Police du prototype : Outfit (UI) et Cormorant Garamond (logo) → **utiliser celles du projet**
+- Police du prototype : Outfit (UI) et Cormorant Garamond (logo) → utiliser celles du projet si elles diffèrent
 
 ## Données d'exemple utilisées
-11 chambres (101–104 Standard/Deluxe à l'étage 1, 201–204 Suite à l'étage 2, 301–303 Executive à l'étage 3), semaine du 25 sept. au 1 oct. 2026. Tarifs : Standard 35 000, Deluxe 45 000, Suite 75 000, Executive 95 000 FCFA.
+Du 1er sept. au 30 nov. 2026, aujourd'hui = 25 sept. 11 chambres (101–104 Standard/Deluxe à l'étage 1, 201–204 Suite à l'étage 2, 301–303 Executive à l'étage 3), semaine du 25 sept. au 1 oct. 2026. Tarifs : Standard 35 000, Deluxe 45 000, Suite 75 000, Executive 95 000 FCFA.
 
 ## Fichiers
 - `Disponibilites.dc.html` : prototype de référence (logique et données dans la classe `Component` en bas du fichier).
