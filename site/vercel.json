@@ -13,6 +13,20 @@
       ]
     },
     {
+      "_pourquoi": "/admin/(.*) exige quelque chose APRES la barre : il couvrait disponibilites.css et .js, mais pas /admin lui-meme. La page qui porte toute l'interface, derriere mot de passe, etait donc marquee publique et stockable pendant que ses fichiers etaient proteges.",
+      "source": "/admin",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store, max-age=0"
+        },
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow, noarchive"
+        }
+      ]
+    },
+    {
       "source": "/admin/(.*)",
       "headers": [
         {

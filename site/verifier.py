@@ -391,6 +391,26 @@ def controler():
                 pb.append((f, 'disponibilite affirmee dans le balisage : « %s »'
                            ' — elle doit venir de DISPO_JS' % phrase))
 
+    # 20. tout ce qui est sous /admin doit etre en no-store, /admin COMPRIS.
+    # La regle « /admin/(.*) » exige quelque chose APRES la barre : elle
+    # couvrait disponibilites.css et .js, mais pas /admin lui-meme. La page
+    # qui porte toute l'interface, derriere mot de passe, etait donc marquee
+    # « public, must-revalidate » et stockable, pendant que ses fichiers
+    # etaient proteges. Un motif qui a l'air complet et qui laisse passer sa
+    # propre racine : la prochaine regle de ce genre fera pareil.
+    if os.path.exists('vercel.json'):
+        conf = json.loads(io.open('vercel.json', encoding='utf-8').read())
+        sans_cache = set()
+        for regle in conf.get('headers', []):
+            for h in regle.get('headers', []):
+                if h.get('key', '').lower() == 'cache-control'                         and 'no-store' in h.get('value', ''):
+                    sans_cache.add(regle.get('source'))
+        for attendu in ('/admin', '/admin/(.*)'):
+            if attendu not in sans_cache:
+                pb.append(('vercel.json', 'aucune regle no-store pour « %s » : '
+                           "une page derriere mot de passe ne doit pas etre stockee"
+                           % attendu))
+
     # 19. le back-office a DEUX fonds, donc deux logos.
     # Le controle 18 verifie les 21 pages du site. Le back-office y echappait,
     # et le defaut s'y est reproduit tel quel : sa barre laterale est passee au
