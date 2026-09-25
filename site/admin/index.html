@@ -120,7 +120,10 @@ a{color:var(--bronze-2);text-decoration:none}
 
 /* Tout ce qui disparait quand elle est repliee ET non deployee.
    Ecrit dans ce sens, le deploiement n'a rien a defaire. */
-#cadre.replie aside:not(.deploye) .marque{padding:0 0 16px;text-align:center}
+/* Repliee, la marque s'empile : le monogramme, puis le burger sous lui.
+   Cote a cote, 30 px de logo et 36 px de bouton ne tiennent pas dans 64. */
+#cadre.replie aside:not(.deploye) .marque{padding:0 0 16px;text-align:center;
+  flex-direction:column;align-items:center;gap:10px}
 /* Le logo est un LOGOTYPE : la marque, puis le mot. Dans 64 px le mot ne
    rentre pas, et le laisser tel quel le coupait en plein milieu. On le
    recadre sur sa marque — object-fit:cover ancre a gauche montre le
@@ -134,22 +137,25 @@ a{color:var(--bronze-2);text-decoration:none}
   padding:12px 0;gap:0}
 #cadre.replie aside:not(.deploye) nav button i{width:auto}
 
-/* Le controle MANUEL. Ce n'est plus le mecanisme principal — la barre se
-   replie d'elle-meme quand la place manque — mais un secours. D'ou un carre
-   de 36 px et l'icone seule : le pave « Replier le menu » qu'il y avait ici
-   annoncait une commande qu'on n'a plus a donner, et il occupait toute la
-   largeur de la barre pour cela.
+/* Le controle MANUEL, en haut, a cote du logo — la ou on cherche un
+   burger. Il etait en bas du menu, sous « Se deconnecter » : un reglage de
+   mise en page range parmi les destinations, et personne n'allait l'y
+   chercher.
 
-   Le libelle ne disparait pas, il se cache : un bouton dont le seul contenu
-   est « ☰ » ne s'annonce pas a un lecteur d'ecran. */
-#replier{width:36px;height:36px;flex:none;margin:10px auto 0;padding:0;
-  position:relative;justify-content:center;gap:0;border-radius:9px;
-  border:1px solid rgba(255,255,255,.14);border-left-width:1px;
-  background:rgba(255,255,255,.04);font-size:14px}
+   Il n'appartient plus a <nav>, donc il n'herite plus de `nav button` : son
+   style est ici en entier. Le libelle ne disparait pas, il se cache — un
+   bouton dont le seul contenu est « ☰ » ne s'annonce pas a un lecteur
+   d'ecran. */
+#replier{display:flex;align-items:center;justify-content:center;
+  width:36px;height:36px;flex:none;padding:0;position:relative;
+  border-radius:9px;border:1px solid rgba(255,255,255,.14);
+  background:rgba(255,255,255,.04);color:#E6ECF6;
+  font:400 14px/1 var(--f-b);cursor:pointer;transition:.18s}
+#replier i{font-style:normal;color:#8FA0B8;transition:.18s}
 #replier span{position:absolute;width:1px;height:1px;overflow:hidden;
   clip-path:inset(50%);white-space:nowrap}
 #replier:hover{background:rgba(255,255,255,.10);border-color:#C9A46A}
-#replier i{width:auto}
+#replier:hover i{color:#C9A46A}
 /* Epinglee a la main, la barre le dit : sans ce repere, on ne sait plus si
    l'etat courant vient de la place disponible ou de son propre clic. */
 #cadre.epingle #replier{border-color:#C9A46A;background:rgba(201,164,106,.16)}
@@ -186,7 +192,10 @@ aside nav button:hover i{color:#C9A46A}
 aside nav button.on{background:linear-gradient(90deg,rgba(201,164,106,.18),transparent 78%);
   border-left-color:#C9A46A;color:#fff}
 aside nav button.on i{color:#C9A46A}
-.marque{padding:0 22px 24px;border-bottom:1px solid var(--line);margin-bottom:18px}
+/* Le logo d'un cote, le burger de l'autre. */
+.marque{padding:0 22px 24px;border-bottom:1px solid var(--line);margin-bottom:18px;
+  display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.marque .mq{min-width:0}
 .marque img{display:block;height:34px;width:auto;margin-bottom:10px}
 .marque span{font-size:9.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--bronze)}
 nav h2{font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);
@@ -496,8 +505,12 @@ details.plus summary::marker{color:var(--bronze)}
 <div id="cadre">
   <aside>
     <div class="marque">
-      <img src="/img/opt/logo-blanc.png" alt="Hôtel Evannath">
-      <span>Administration</span>
+      <div class="mq">
+        <img src="/img/opt/logo-blanc.png" alt="Hôtel Evannath">
+        <span>Administration</span>
+      </div>
+      <button id="replier" title="Replier le menu" aria-expanded="true"
+        aria-controls="menu"><i>☰</i><span>Replier le menu</span></button>
     </div>
     <nav id="menu">
       <button data-v="bord" class="on" title="Tableau de bord"><i>▦</i><span>Tableau de bord</span></button>
@@ -513,8 +526,6 @@ details.plus summary::marker{color:var(--bronze)}
       <button data-v="utilisateurs" title="Utilisateurs"><i>◐</i><span>Utilisateurs</span></button>
       <h2>&nbsp;</h2>
       <button id="sortir" title="Se déconnecter"><i>↩</i><span>Se déconnecter</span></button>
-      <button id="replier" title="Replier le menu" aria-expanded="true"
-        aria-controls="menu"><i>☰</i><span>Replier le menu</span></button>
     </nav>
   </aside>
   <main id="vue"></main>
@@ -716,33 +727,17 @@ const MENU_SEUIL_BAS = 1180;
    un pixel de large. */
 const MENU_BANDE = 40;
 
-/* Ce que la vue courante ne peut pas montrer en moins. Deux vues seulement
-   ont un plancher ; les autres se replient d'elles-memes et retournent 0,
-   « rien a gagner » — elles s'en remettent au seuil bas.
+/* Le plancher par vue a disparu avec la regle qui s'en servait. Il
+   calculait ce que le mois et la semaine ne peuvent pas montrer en moins
+   — 7 x 157 px pour une case de calendrier qui garde ses deux colonnes de
+   compteurs, 140 + 7 x 112 pour le planning — afin de replier la barre au
+   moment precis ou ca ne tenait plus.
 
-   MOIS. Sept colonnes, et dans chaque case deux colonnes de compteurs :
-   2 × 64 px (le minmax de .m-g) + 8 px de gouttiere + 20 px de marge
-   interieure + 1 px de filet = 157 px par case. Sous cette largeur les
-   compteurs passent a une colonne et la case double de hauteur.
-   Mesure : la seconde colonne tient a 161 px, tombe a 155 px.
-
-   SEMAINE. Un planning, lui : la colonne gelee des chambres et sept
-   colonnes de 112 px. En dessous, il defile horizontalement.
-
-   Le mois calculait auparavant 140 + 31 × 34 px — la largeur du planning
-   mensuel, qui n'existe plus depuis que le mois est un calendrier. Le
-   chiffre tombait juste par accident, a 60 px pres. */
-const MENU_CASE_MOIS = 157;
-function besoinContenu() {
-  if (VUE !== 'disponibilites') return 0;
-  /* disponibilites.js se charge apres cette page : au premier appel ses
-     constantes peuvent ne pas exister encore. */
-  if (typeof DSP === 'undefined' || !DSP.focus) return 0;
-  /* La liste est un tableau, le jour des cartes : les deux se replient. */
-  if (DSP.mode === 'liste' || DSP.vue === 'jour') return 0;
-  if (DSP.vue === 'semaine') return DSP_LIB + 7 * 112;
-  return 7 * MENU_CASE_MOIS;
-}
+   Le calendrier etant desormais replie d'office, ce calcul n'etait plus
+   jamais atteint. Le garder aurait laisse du code mort, et le controle 21
+   aurait surveille une regle que plus personne n'applique : une confiance
+   sans objet est pire qu'aucun controle. Le raisonnement reste dans le
+   message de 7064807 si la question revient.
 
 /* La place dont `main` disposerait, barre mise a part. */
 function placeUtile() {
@@ -752,10 +747,34 @@ function placeUtile() {
 
 /* Un clic gagne tout de suite, et l'automatique reprend la main des que la
    place change assez pour que la question se pose autrement — 60 px, soit
-   deux colonnes de calendrier. Rien n'est ecrit sur le disque : un choix
-   fait pour un ecran ne vaut pas pour le suivant. */
+   deux colonnes de calendrier.
+
+   Le choix SURVIT AU RECHARGEMENT. Il ne survivait pas, et c'etait une
+   erreur de ma part : « un choix fait pour un ecran ne vaut pas pour le
+   suivant » est vrai, mais quelqu'un qui travaille toujours au meme poste
+   devait recliquer a chaque connexion — le bouton avait l'air de ne servir
+   a rien. On garde donc aussi la place qu'il y avait au moment du clic :
+   c'est elle qui dit, au retour, si l'ecran est toujours le meme. */
 let MENU_EPINGLE = null;
 let MENU_PLACE = 0;
+try {
+  const g = localStorage.getItem('evn-menu-epingle');
+  if (g === '1' || g === '0') {
+    MENU_EPINGLE = g === '1';
+    MENU_PLACE = Number(localStorage.getItem('evn-menu-place')) || 0;
+  }
+} catch (e) { /* tant pis */ }
+function garderEpingle() {
+  try {
+    if (MENU_EPINGLE === null) {
+      localStorage.removeItem('evn-menu-epingle');
+      localStorage.removeItem('evn-menu-place');
+    } else {
+      localStorage.setItem('evn-menu-epingle', MENU_EPINGLE ? '1' : '0');
+      localStorage.setItem('evn-menu-place', String(MENU_PLACE));
+    }
+  } catch (e) { /* tant pis */ }
+}
 
 /* Le deploiement en surimpression d'une barre repliee. Voir la feuille de
    style pour la raison d'etre de cette classe : une pseudo-classe ne se
@@ -805,15 +824,23 @@ function ajusterMenu() {
   if (MENU_EPINGLE !== null) {
     if (Math.abs(place - MENU_PLACE) < 60) { poserMenu(MENU_EPINGLE); return; }
     MENU_EPINGLE = null;
+    garderEpingle();
   }
 
-  /* Deux raisons de replier, et il suffit d'une : le plancher de la vue, et
-     le seuil bas. `marge` est ce qui reste au-dessus de la plus serree des
-     deux — negative, la barre gene. */
-  const besoin = besoinContenu();
-  const marge = Math.min(
-    besoin ? place - MENU_LARGE - besoin : Infinity,
-    place - MENU_SEUIL_BAS);
+  /* LE CALENDRIER EST REPLIE D'OFFICE, quelle que soit la place. C'est
+     l'ecran ou chaque colonne compte, et c'est le seul ou le survol
+     remplace vraiment les libelles. Le laisser decider de la place avait
+     une consequence qu'on n'avait pas vue : sur un ecran large tout tient,
+     la barre reste donc ouverte, et le deploiement au survol — qui n'existe
+     que repliee — devenait inatteignable sans passer par le bouton.
+     L'epinglage, lui, passe avant : il est teste plus haut. */
+  if (VUE === 'disponibilites') { poserMenu(true); return; }
+
+  /* Ailleurs, la place decide, et elle seule. Ces vues sont plafonnees a
+     1100 px par `main` : leur rendre 186 px ne ferait qu'une marge vide
+     plus large, on ne les replie donc que lorsque la barre gene pour de
+     bon. `marge` est ce qui reste au-dessus du seuil — negative, ca gene. */
+  const marge = place - MENU_SEUIL_BAS;
   /* La bande ne s'applique qu'a la REOUVERTURE : sans cela il faudrait 40 px
      de trop pour replier, et la barre resterait large au moment ou elle
      gene. */
@@ -837,6 +864,7 @@ document.addEventListener('click', (e) => {
   if (!e.target.closest('#replier')) return;
   MENU_EPINGLE = !$('#cadre').classList.contains('replie');
   MENU_PLACE = placeUtile();
+  garderEpingle();
   poserMenu(MENU_EPINGLE);
 });
 
