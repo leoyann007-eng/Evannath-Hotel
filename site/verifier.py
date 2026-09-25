@@ -513,6 +513,27 @@ def controler():
                         pb.append(('vercel.json', 'headers[%d].headers[%d] : cle '
                                    '« %s » interdite' % (i, j, cle)))
 
+    # 21. depuis la vue LISTE, on doit pouvoir ouvrir la fiche d'une chambre.
+    # La liste est l'ecran d'inventaire : c'est la qu'on va pour voir ses
+    # chambres. C'etait pourtant le seul endroit d'ou l'on ne pouvait pas en
+    # retirer une — ses lignes ouvrent la nuit, et « Retirer cette chambre »
+    # ne vit que dans la fiche. Il fallait deviner qu'il fallait passer par
+    # la vue Semaine et viser un numero plutot qu'une case.
+    #
+    # Huit chambres d'essai sont restees en production a cause de ca, et le
+    # site a annonce « Derniere chambre » sur six fiches sur sept.
+    dsp = 'admin/disponibilites.js'
+    if os.path.exists(dsp):
+        j = io.open(dsp, encoding='utf-8').read()
+        m = re.search(r'const liste = `(.*?)`;', j, re.S)
+        if not m:
+            pb.append((dsp, 'la vue liste est introuvable : le controle 21 ne '
+                       'peut plus rien affirmer'))
+        elif 'data-dsp-fiche' not in m.group(1):
+            pb.append((dsp, "la vue liste n'ouvre pas la fiche d'une chambre : "
+                       'on ne peut donc pas en retirer une depuis l ecran qui '
+                       'sert a les regarder'))
+
     print('%d pages controlees' % len(pages))
     if pb:
         print('%d anomalie(s) :' % len(pb))

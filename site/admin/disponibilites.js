@@ -625,7 +625,9 @@ function htmlDsp() {
         : e.f && e.f.motif ? e.f.motif : '—';
       return `<tr data-dsp-ch="${ech(ch.id)}" data-nuit="${DSP.focus}" tabindex="0"
         aria-label="Chambre ${ech(ch.numero)} : ${mot}">
-        <td><b>${ech(ch.numero)}</b></td>
+        <td><button class="dsp-num" data-dsp-fiche="${ech(ch.id)}"
+          aria-label="Chambre ${ech(ch.numero)}, ${ech(nomCat(ch.categorie))} — voir et modifier"
+          >${ech(ch.numero)}</button></td>
         <td>${ech(nomCat(ch.categorie))}</td>
         ${avecEtage ? `<td>${ech(ch.etage || '—')}</td>` : ''}
         <td><span class="etat" style="color:${teinte};border-color:${teinte}">${mot}</span></td>

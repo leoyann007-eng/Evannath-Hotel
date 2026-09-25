@@ -113,6 +113,12 @@
 .dsp-liste tbody tr:hover{background:rgba(138,95,43,.07)}
 .dsp-liste tbody tr:focus-visible{outline:2px solid var(--bronze-2);outline-offset:-2px}
 .dsp-liste b{font-family:var(--f-t);font-weight:400;font-size:16px}
+/* Le numero ouvre la FICHE de la chambre, la ou la ligne ouvre la nuit.
+   La liste est l'ecran d'inventaire : c'est la qu'on vient pour voir ses
+   chambres, et c'etait le seul endroit d'ou l'on ne pouvait pas en retirer
+   une. Il fallait deviner qu'il fallait passer par la vue Semaine et viser
+   un numero plutot qu'une case. */
+.dsp-liste .dsp-num{font-family:var(--f-t);font-size:16px}
 
 /* Le glyphe cercle des compteurs. */
 .dsp-chiffres-h .carte{display:flex;align-items:center;gap:13px}
