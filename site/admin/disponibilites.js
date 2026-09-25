@@ -334,9 +334,15 @@ function htmlDsp() {
   /* ── La grille ────────────────────────────────────────────────────── */
   const tete = jours.map((j) => {
     const d = jDt(j);
+    /* Le mois, sauf en vue mois ou il n'y a ni la place ni le besoin : la
+       periode le dit deja, et toutes les colonnes sont du meme mois. Une
+       semaine a cheval sur deux mois montrait « 30 » puis « 1 » sans dire
+       de quoi. */
+    const mois = DSP.vue === 'mois' ? ''
+      : d.toLocaleDateString('fr-FR', { month: 'short' }).replace(/\.$/, '');
     return `<div class="${col(j)} dsp-t" data-jour="${j}">
       <span>${jMaj(d.toLocaleDateString('fr-FR', { weekday: 'short' }).replace('.', ''))}</span>
-      <b>${d.getDate()}</b></div>`;
+      <b>${d.getDate()}${mois ? ` <i>${mois}</i>` : ''}</b></div>`;
   }).join('');
 
   /* La categorie s'ecrit UNE FOIS par groupe, en intertitre, au lieu d'etre
@@ -363,8 +369,13 @@ function htmlDsp() {
           + ' (' + n + ' nuits)';
       const aria = 'Chambre ' + ech(ch.numero) + ', ' + nuits + ' : ' + mot
         + (det ? ' — ' + ech(det) : '');
+      /* La case ouverte dans le panneau porte un contour. Tant que le
+         panneau recouvrait le calendrier, on savait forcement laquelle on
+         modifiait ; a cote, plus rien ne le disait. */
+      const ouverte = !!(DSP.tiroir && DSP.tiroir.id === ch.id && DSP.tiroir.nuit === j);
       return `<div class="dsp-j${dedans ? ' auj' : ''}"${n > 1 ? ` style="--n:${n}"` : ''}
-        ><button class="dsp-b" style="--f:${fond};--t:${encre}" data-dsp-ch="${ech(ch.id)}"
+        ><button class="dsp-b${ouverte ? ' sel' : ''}" style="--f:${fond};--t:${encre}"
+        aria-current="${ouverte ? 'true' : 'false'}" data-dsp-ch="${ech(ch.id)}"
         data-nuit="${j}" aria-label="${aria}" title="${aria}">${mot}${
         det && DSP.vue !== 'mois' ? '<small>' + ech(det) + '</small>' : ''}</button></div>`;
     }).join('');
@@ -394,7 +405,7 @@ function htmlDsp() {
   const optMois = mois.sort().map((m) => `<option value="${m}" ${m === DSP.focus.slice(0, 7)
     ? 'selected' : ''}>${jMaj(jDt(m + '-01').toLocaleDateString('fr-FR',
       { month: 'long', year: 'numeric' }))}</option>`).join('');
-  const vues = [['mois', 'Mois'], ['semaine', 'Semaine'], ['jour', 'Jour']]
+  const vues = [['jour', 'Jour'], ['semaine', 'Semaine'], ['mois', 'Mois']]
     .map(([v, l]) => `<button class="opt ${DSP.vue === v ? 'on' : ''}" data-dsp-vue="${v}"
       aria-pressed="${DSP.vue === v}">${l}</button>`).join('');
   const periode = DSP.vue === 'jour' ? jLong(DSP.focus)
@@ -643,6 +654,15 @@ function rendreTiroir() {
      du seuil ; on se contente de dire que le panneau est ouvert, et
      `aria-modal` tombe : ce n'est plus une boite de dialogue qui capture,
      c'est un panneau a cote de son contenu. */
+  document.querySelectorAll('.dsp-b.sel').forEach((b) => {
+    b.classList.remove('sel'); b.setAttribute('aria-current', 'false');
+  });
+  if (tr && tr.id && tr.nuit) {
+    const cible = document.querySelector('.dsp-b[data-dsp-ch="' + tr.id
+      + '"][data-nuit="' + tr.nuit + '"]');
+    if (cible) { cible.classList.add('sel'); cible.setAttribute('aria-current', 'true'); }
+  }
+
   const cote = !!tr && window.matchMedia('(min-width:1200px)').matches;
   document.body.classList.toggle('dsp-cote', cote);
   if (cote) el.removeAttribute('aria-modal');
