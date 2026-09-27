@@ -116,7 +116,7 @@ function tropDeDemandes(ip) {
    `chambres`, ce sont les chambres PHYSIQUES — la 25, la 26 — chacune
    rattachee a une categorie. Voir le bloc « Disponibilite » plus bas. */
 const VIDE = { evenements: [], promotions: [], campagnes: [], medias: [],
-               chambres: [], fermetures: [], maj: null };
+               chambres: [], fermetures: [], emplois: [], maj: null };
 
 /* La derniere lecture en echec, en clair. Vide quand tout va bien.
    Sans elle, une lecture qui echoue rendait exactement la meme chose qu un
@@ -333,7 +333,59 @@ function collection(type) {
   return type === 'promotion' ? 'promotions'
     : type === 'campagne' ? 'campagnes'
     : type === 'fermeture' ? 'fermetures'
-    : type === 'chambre' ? 'chambres' : 'evenements';
+    : type === 'chambre' ? 'chambres'
+    : type === 'emploi' ? 'emplois' : 'evenements';
+}
+
+/* ── Une offre d'emploi ────────────────────────────────────────────────
+   Elle a la forme d'un evenement — datee, publiee ou non, elle expire —
+   mais aucun de ses champs : ni affiche, ni bouton d'appel, ni pastilles.
+   D'ou un nettoyeur a part plutot qu'un evenement avec des trous.
+
+   `postuler` est LIBRE, et c'est voulu. On ne sait pas par quel chemin
+   l'hotel veut recevoir les candidatures : une adresse de recrutement, un
+   numero, « deposez votre CV a la reception ». Proposer une liste fermee
+   reviendrait a decider a sa place. Rien n'est stocke ici : le site affiche
+   ce que l'hotel a ecrit, et la candidature ne passe pas par nous.
+
+   `fin` : passe cette date l'offre disparait d'elle-meme, comme une affiche
+   perimee. Un poste pourvu qui reste en ligne fait perdre son temps a tout
+   le monde, et personne ne pense a retirer une annonce. */
+const LIMITES_EMPLOI = { titre: 90, contrat: 40, departement: 60, postuler: 200 };
+function nettoyerEmploi(e) {
+  const o = {
+    id: propre(e.id, 40) || crypto.randomUUID(),
+    titre: propre(e.titre, LIMITES_EMPLOI.titre),
+    /* CDI, CDD, Stage, Extra... texte libre : les usages varient, et une
+       liste fermee refuserait un intitule parfaitement valable. */
+    contrat: propre(e.contrat, LIMITES_EMPLOI.contrat),
+    departement: propre(e.departement, LIMITES_EMPLOI.departement),
+    /* La description et le profil gardent leurs retours a la ligne : une
+       offre s'ecrit en liste, pas en pave. */
+    texte: texteLong(e.texte),
+    profil: texteLong(e.profil),
+    postuler: propre(e.postuler, LIMITES_EMPLOI.postuler),
+    fin: /^\d{4}-\d{2}-\d{2}$/.test(e.fin || '') ? e.fin : null,
+    publie: e.publie !== false,
+    cree: propre(e.cree, 40) || new Date().toISOString(),
+  };
+  const manque = [];
+  if (!o.titre) manque.push('titre');
+  if (!o.texte) manque.push('descriptif');
+  /* Les memes bornes que partout : on REFUSE plutot que de tronquer en
+     silence. Une offre amputee de sa fin est pire qu'une offre refusee. */
+  let message = '';
+  if (o.texte.length > 2000) {
+    manque.push('descriptif');
+    message = 'Le descriptif dépasse 2 000 caractères. Raccourcissez-le : '
+      + 'rien n’a été enregistré.';
+  }
+  if (o.profil.length > 1200) {
+    manque.push('profil');
+    message = 'Le profil recherché dépasse 1 200 caractères. Raccourcissez-le : '
+      + 'rien n’a été enregistré.';
+  }
+  return { objet: o, manque, message };
 }
 
 // ── Disponibilite ───────────────────────────────────────────────
@@ -884,10 +936,21 @@ module.exports = async function handler(req, res) {
       if (d2 && maintenant > d2) return false;
       return true;
     };
+    /* Une offre d'emploi expiree ne sort pas d'ici — pas meme pour etre
+       masquee par le navigateur. Un poste pourvu dont l'annonce reste
+       lisible par qui sait ouvrir du JSON fait perdre son temps a des
+       candidats, et l'hotel ne pense pas a retirer une annonce.
+
+       Abidjan est a UTC+0 : la date ISO du serveur EST la date ici. Le jour
+       de la date de fin, l'offre est encore visible — « jusqu'au 15 » veut
+       dire le 15 inclus. */
+    const aujourdhui = new Date().toISOString().slice(0, 10);
+    const ouverte = (o) => !o.fin || o.fin >= aujourdhui;
     return res.status(200).json({
       evenements: (d.evenements || []).filter(visible),
       promotions: (d.promotions || []).filter(visible).filter(enCours),
       campagnes: (d.campagnes || []).filter(visible).filter(enCours),
+      emplois: (d.emplois || []).filter(visible).filter(ouverte),
       maj: d.maj,
     });
   }
@@ -1126,6 +1189,8 @@ module.exports = async function handler(req, res) {
       ? nettoyerFermeture(corps.entree || {})
       : corps.type === 'chambre'
       ? nettoyerChambre(corps.entree || {})
+      : corps.type === 'emploi'
+      ? nettoyerEmploi(corps.entree || {})
       : nettoyer(corps.entree || {}, corps.type);
     if (manque.length) {
       return json(res, 422, { ok: false, champs: manque,

@@ -319,3 +319,77 @@ page. Selon la réponse :
 « Quand il ne reste qu'une chambre, faut-il le dire au client ? » Le réglage
 en place répond **oui** — « Dernière chambre à ces dates » s'affiche. À
 reposer, sans urgence.
+
+---
+
+## Une quatrième demande — hors réunion, rapportée le 27 septembre 2026
+
+> **Un moyen de publier des offres d'emploi sur le site.**
+
+Elle ne figurait pas dans les trois notées le 23. Elle est consignée ici pour
+la même raison que les autres : une demande qu'on ne met pas par écrit se
+déforme, et celle-ci arrive par un autre canal que la réunion.
+
+### C'est la moins chère des quatre, et de loin
+
+Le site sait déjà publier des choses datées qui expirent toutes seules : les
+événements, les promotions, les campagnes saisonnières. Une offre d'emploi a
+exactement cette forme — un titre, un texte, une date de fin, un état publié
+ou non. L'administration porte déjà le mécanisme, `api/admin.js` porte déjà
+les collections, et une affiche périmée disparaît déjà d'elle-même.
+
+Ajouter `emplois` suit un chemin qui existe. Aucune donnée ne manque : c'est
+elle qui écrit ses annonces.
+
+### La vraie question, et elle n'est pas technique
+
+**Publier une annonce, ou recevoir des candidatures ?** Ce sont deux projets
+différents.
+
+| | Ce que ça demande |
+|---|---|
+| Publier l'annonce seule | Un écran de saisie, une page, un bouton « postuler » qui ouvre un e-mail ou WhatsApp. |
+| Recevoir les candidatures | Un formulaire, le dépôt d'un CV, le **stockage de données personnelles**, et quelqu'un qui les lit. |
+
+### Si on reçoit des candidatures : ce qu'il faut trancher AVANT
+
+Un CV n'est pas une demande de réservation. Il porte un nom, une adresse, un
+téléphone, parfois une photo. Le recevoir, c'est **traiter des données
+personnelles**, et ce n'est pas un détail de confort :
+
+1. **Où arrivent les candidatures ?** Le formulaire actuel écrit à la
+   réception. Un CV qui atterrit dans la boîte des réservations est un
+   problème, pas une fonctionnalité. Il faut une adresse distincte, et
+   savoir qui y a accès.
+2. **Combien de temps les garde-t-on, et qui les efface ?** Une candidature
+   gardée trois ans dans une boîte partagée n'est pas une archive, c'est un
+   risque.
+3. **Quelles sont les obligations en Côte d'Ivoire ?** La collecte de
+   données personnelles y est encadrée. **À VÉRIFIER — je n'ai pas la
+   réponse**, et il faut l'avoir avant de mettre un formulaire en ligne,
+   pas après.
+4. **Qui répond aux candidats, et sous quel délai ?** Même question que pour
+   le chatbot. Un accusé de réception qui promet une réponse qui ne vient
+   jamais vaut moins que rien.
+
+**Recommandation : commencer par l'annonce seule**, avec un bouton qui ouvre
+un e-mail vers une adresse de recrutement. Les offres sont en ligne tout de
+suite, on ne stocke rien, et le formulaire s'ajoute quand les quatre points
+ci-dessus ont une réponse.
+
+### Le point qu'on aurait raté
+
+**Une offre d'emploi est le contenu qui dépend le plus de Google** — c'est là
+qu'on cherche du travail. Or le site est aujourd'hui en **mode prospection,
+volontairement invisible des moteurs** : `X-Robots-Tag: noindex` sur toutes
+les pages, voir `README.md`.
+
+Publier des offres maintenant, c'est les publier là où personne ne les
+trouvera. Ça ne rend pas le travail inutile — l'hôtel peut partager le lien,
+et les offres seront prêtes le jour J — mais il faut le dire, et ça lie cette
+demande au jour où le site devient public.
+
+### Une conséquence heureuse
+
+Le chatbot lira le site comme source. Le jour où les offres y sont, il saura
+répondre à « vous recrutez ? » sans qu'on écrive une ligne de plus.

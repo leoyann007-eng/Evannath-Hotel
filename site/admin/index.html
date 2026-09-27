@@ -519,6 +519,7 @@ details.plus summary::marker{color:var(--bronze)}
       <button data-v="evenements" title="Événements"><i>◆</i><span>Événements</span></button>
       <button data-v="promotions" title="Promotions"><i>◉</i><span>Promotions</span></button>
       <button data-v="campagnes" title="Campagnes saisonnières"><i>☀</i><span>Campagnes saisonnières</span></button>
+      <button data-v="emplois" title="Offres d'emploi"><i>✎</i><span>Offres d'emploi</span></button>
       <h2>Médias</h2>
       <button data-v="galerie" title="Galerie"><i>▣</i><span>Galerie</span></button>
       <h2>Administration</h2>
@@ -538,7 +539,8 @@ details.plus summary::marker{color:var(--bronze)}
    ───────────────────────────────────────────────────────────────────────── */
 const API = '/api/admin';
 let ETAT = { stockage: '', magasin: '', variable: '', evenements: [],
-             promotions: [], campagnes: [], images: [], chambres: [] };
+             promotions: [], campagnes: [], images: [], chambres: [],
+             emplois: [] };
 /* Quand on choisit la photo d un pack, il faut savoir DE QUEL pack : la
    grille de photos est unique, les packs sont plusieurs. */
 let PHOTO_POUR = null;
@@ -675,6 +677,7 @@ async function charger() {
   ETAT.evenements = (tout.donnees && tout.donnees.evenements) || [];
   ETAT.promotions = (tout.donnees && tout.donnees.promotions) || [];
   ETAT.campagnes = (tout.donnees && tout.donnees.campagnes) || [];
+  ETAT.emplois = (tout.donnees && tout.donnees.emplois) || [];
   /* Les chambres PHYSIQUES et les nuits fermees. */
   ETAT.chambres = (tout.donnees && tout.donnees.chambres) || [];
   ETAT.annoncees = (hotel && hotel.chambres_annoncees) || 0;
@@ -912,7 +915,10 @@ function etatDe(e, type) {
     return '<span class="etat ' + st.cl + '">' + st.mot + '</span>';
   }
   if (e.publie === false) return '<span class="etat dort">Brouillon</span>';
-  if (expire(e)) return '<span class="etat fini">Terminé</span>';
+  // Une offre est feminine, un evenement masculin. « Aucun promotion »
+  // avait traine des mois : on ne refait pas la meme.
+  if (expire(e)) return '<span class="etat fini">Termin'
+    + (type === 'emplois' ? 'ée' : 'é') + '</span>';
   return '<span class="etat vif">En ligne</span>';
 }
 
@@ -920,7 +926,103 @@ function etatDe(e, type) {
 /** Le nom que l API attend pour une collection. */
 function typeApi(vue) {
   return vue === 'promotions' ? 'promotion'
-    : vue === 'campagnes' ? 'campagne' : 'evenement';
+    : vue === 'campagnes' ? 'campagne'
+    : vue === 'emplois' ? 'emploi' : 'evenement';
+}
+
+/* ── Les offres d'emploi ───────────────────────────────────────────────
+   Pas de vignette, pas de fleches d'ordre : une offre n'est pas une
+   diapositive de carrousel. Les plus recentes en tete, et c'est tout.
+
+   La date de fin porte ici plus qu'ailleurs : personne ne pense a retirer
+   une annonce pourvue, et un candidat qui prepare un dossier pour un poste
+   deja pris perd sa soiree. Passee cette date, le serveur cesse de la
+   servir — voir la route publique. */
+function listeEmplois() {
+  const src = (ETAT.emplois || []).slice().sort(
+    (a, b) => String(b.cree || '').localeCompare(String(a.cree || '')));
+  if (!src.length) {
+    return `<div class="carte" style="text-align:center;padding:44px">
+      <p style="color:var(--muted)">Aucune offre d'emploi pour le moment.</p>
+      <button class="btn plein" style="margin-top:18px" data-neuf="emplois"
+        >Publier la première</button>
+    </div>`;
+  }
+  return src.map((e) => `<div class="ligne">
+      <div class="txt">
+        <b>${ech(e.titre)}</b>
+        <span>${[e.contrat, e.departement].filter(Boolean).map(ech).join(' · ')
+          || 'Ni contrat ni service précisé'}${e.fin
+          ? ' · ' + (expire(e) ? 'terminée le ' : "jusqu'au ") + ech(enClair(e.fin)) : ''}</span>
+      </div>
+      ${etatDe(e, 'emplois')}
+      <button class="btn mince" data-bascule="${ech(e.id)}" data-type="emplois"
+        >${e.publie === false ? 'Afficher' : 'Masquer'}</button>
+      <button class="btn mince" data-mod="${ech(e.id)}" data-type="emplois">Modifier</button>
+      <button class="btn mince danger" data-sup="${ech(e.id)}" data-type="emplois"
+        >Supprimer</button>
+    </div>`).join('');
+}
+
+/* Le champ « Comment postuler » est LIBRE, et rien n'est stocke chez nous.
+   On ne sait pas par quel chemin l'hotel veut recevoir les candidatures, et
+   un formulaire de depot de CV est un tout autre sujet : des donnees
+   personnelles, une duree de conservation, quelqu'un qui les lit. Tant que
+   ces questions n'ont pas de reponse, le site affiche le chemin que l'hotel
+   a ecrit, et la candidature ne passe pas par nous. */
+function formulaireEmploi() {
+  const e = EDITE || { publie: true };
+  return `<div class="carte">
+    <h2 class="bloc-t">Le poste</h2>
+    <div class="champ"><label for="f-e-titre">Intitulé</label>
+      <input id="f-e-titre" value="${ech(e.titre)}" placeholder="Réceptionniste de nuit"></div>
+    <div class="duo">
+      <div class="champ"><label for="f-e-contrat">Contrat</label>
+        <input id="f-e-contrat" value="${ech(e.contrat)}" list="contrats"
+          placeholder="CDI">
+        <datalist id="contrats">
+          <option value="CDI"></option><option value="CDD"></option>
+          <option value="Stage"></option><option value="Extra"></option>
+          <option value="Saisonnier"></option>
+        </datalist></div>
+      <div class="champ"><label for="f-e-dep">Service</label>
+        <input id="f-e-dep" value="${ech(e.departement)}" placeholder="Réception"></div>
+    </div>
+    <div class="champ"><label for="f-e-texte">Descriptif</label>
+      <textarea id="f-e-texte" style="min-height:150px"
+        placeholder="Les missions, une par ligne.">${ech(e.texte)}</textarea>
+      <p class="aide">2 000 caractères au maximum. Les retours à la ligne sont conservés.</p></div>
+    <div class="champ"><label for="f-e-profil">Profil recherché — facultatif</label>
+      <textarea id="f-e-profil" style="min-height:110px"
+        placeholder="Expérience, langues, disponibilité.">${ech(e.profil)}</textarea></div>
+
+    <h2 class="bloc-t" style="margin-top:28px">La suite</h2>
+    <div class="duo">
+      <div class="champ"><label for="f-e-post">Comment postuler</label>
+        <input id="f-e-post" value="${ech(e.postuler)}"
+          placeholder="recrutement@evannathhotel.com">
+        <p class="aide">Une adresse, un numéro, ou une consigne — « déposez votre CV
+        à la réception ». C'est ce que le site affichera, tel quel.</p></div>
+      <div class="champ"><label for="f-e-fin">Retirer du site après le</label>
+        <input type="date" id="f-e-fin" value="${ech(e.fin)}">
+        <p class="aide">Passée cette date, l'offre disparaît d'elle-même. Laissez
+        vide si le poste reste ouvert.</p></div>
+    </div>
+
+    <div class="champ" style="margin-top:18px">
+      <label style="display:flex;align-items:center;gap:10px;text-transform:none;
+        letter-spacing:0;font-size:14.5px;color:var(--cream)">
+        <input type="checkbox" id="f-e-publie" style="width:auto" ${e.publie !== false ? 'checked' : ''}>
+        Visible sur le site
+      </label>
+    </div>
+
+    <div class="pied">
+      <button class="btn plein" id="enreg">Enregistrer</button>
+      <button class="btn" id="annuler">Annuler</button>
+      <span class="msg" id="msgf"></span>
+    </div>
+  </div>`;
 }
 
 function resumeCampagne(c) {
@@ -1836,6 +1938,16 @@ function rendre() {
       <p class="msg mal" id="msgl"></p>
       ${EDITE ? formulairePromo() : liste('campagnes')}`;
     if (EDITE) brancherPromo();
+  } else if (VUE === 'emplois') {
+    v.innerHTML = `<div class="entete">
+        <div><h1 class="t">Offres d'emploi</h1>
+        <p class="sous">Les postes ouverts. Une offre datée disparaît d'elle-même
+        le jour venu.</p></div>
+        ${EDITE ? '' : '<button class="btn plein" data-neuf="emplois">Ajouter</button>'}
+      </div>
+      ${avertissement()}
+      <p class="msg mal" id="msgl"></p>
+      ${EDITE ? formulaireEmploi() : listeEmplois()}`;
   } else if (VUE === 'galerie') {
     v.innerHTML = `<div class="entete"><div>
         <h1 class="t">Galerie</h1>
@@ -1996,7 +2108,8 @@ document.addEventListener('click', async (e) => {
   const mod = e.target.closest('[data-mod]');
   if (mod) {
     const src = mod.dataset.type === 'promotions' ? ETAT.promotions
-      : mod.dataset.type === 'campagnes' ? ETAT.campagnes : ETAT.evenements;
+      : mod.dataset.type === 'campagnes' ? ETAT.campagnes
+      : mod.dataset.type === 'emplois' ? ETAT.emplois : ETAT.evenements;
     EDITE = JSON.parse(JSON.stringify(src.find((x) => x.id === mod.dataset.mod)));
     ETAPE = 1;
     EDITE.infos = EDITE.infos || [];
@@ -2145,6 +2258,24 @@ document.addEventListener('click', async (e) => {
     const val = (id) => { const el = $('#' + id); return el ? el.value.trim() : ''; };
     if (VUE === 'campagnes') return enregistrerCampagne();
     if (VUE === 'promotions') return enregistrerPromo();
+    if (VUE === 'emplois') {
+      /* Les deux textes gardent leurs retours a la ligne : val() les
+         ecraserait, et une offre ecrite en liste reviendrait en pave. */
+      const brut = (id) => { const el = $('#' + id); return el ? el.value : ''; };
+      const entree = {
+        id: EDITE && EDITE.id, cree: EDITE && EDITE.cree,
+        titre: val('f-e-titre'), contrat: val('f-e-contrat'),
+        departement: val('f-e-dep'), texte: brut('f-e-texte'),
+        profil: brut('f-e-profil'), postuler: val('f-e-post'),
+        fin: val('f-e-fin') || null, publie: $('#f-e-publie').checked,
+      };
+      const m = $('#msgf');
+      const r = await appel('enregistrer', { type: 'emploi', entree });
+      if (!r.ok) { m.className = 'msg mal'; m.textContent = r.message || 'Échec.'; return; }
+      m.className = 'msg bon'; m.textContent = 'Enregistré.';
+      EDITE = null;
+      return void setTimeout(charger, 400);
+    }
     const infos = [0, 1, 2, 3].map((i) => {
       const l = $('[data-il="' + i + '"]'), v = $('[data-iv="' + i + '"]');
       return [l ? l.value.trim() : '', v ? v.value.trim() : ''];
