@@ -205,10 +205,22 @@ header.sans-transition,header.sans-transition *{transition:none!important}
    menu qui defile dessous se voyait entierement au travers, logo compris. */
 header.menu .hd-fond{background:var(--night);backdrop-filter:none;box-shadow:0 1px 0 var(--line)}
 .nav{display:flex;align-items:center;justify-content:space-between;gap:20px}
-.brand img{width:168px;transform-origin:left center;transition:transform .8s var(--ease-out)}
+/* 08 · Au defilement, le logo se reduit a l'EMBLEME — maquette « Motion
+   design I » : le logo n'est ni agrandi ni reduit, il est RECADRE par la
+   droite, de 177 a 66 px (37 %), en .9 s --ease-out. Le nom s'efface en
+   glissant vers la gauche et l'embleme reste, a sa place exacte.
+
+   L'embleme est pris DANS le logo, pas dans un second fichier : superpose
+   (embleme.svg en masque), il ne tombait jamais pile, et parut tronque.
+   Mesure sur le logo bronze comme sur le blanc (729 px) : les
+   quatre pieces vont de 0 a 264 px, le nom commence a 285. On coupe au
+   milieu du blanc, a 274 px : 62,4 % masques a droite.
+
+   clip-path et non largeur : la regle « pas d'animation de dimensions ». */
+.brand img{width:168px;clip-path:inset(0 0 0 0);transition:clip-path .9s var(--ease-out)}
+header.scrolled .brand img{clip-path:inset(0 62.4% 0 0)}
 .brand small{transition:opacity .8s ease}
 header.scrolled .brand small{opacity:0}
-header.scrolled .brand img{transform:scale(.8)}
 .brand small{display:block;font-size:8px;letter-spacing:.42em;color:var(--bronze);margin-top:6px;padding-left:2px;font-weight:700}
 .nav-right{display:flex;align-items:center;gap:18px}
 /* 51 · La pastille glisse d'une langue a l'autre (maquette « Motion
