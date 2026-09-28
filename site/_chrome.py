@@ -865,6 +865,39 @@ EVN_AU_SCROLL('.pagne-med:not(.dw-med),.pagne-damas,.pagne-galon','vu');
 }());
 """
 
+
+# ── 33 · La confirmation se dessine ─────────────────────────────────────
+# Un cercle se trace, puis la coche, puis le message arrive. Timings de la
+# maquette « Motion design II » : cercle 1,2 s --ease-inout des .2 s, coche
+# .7 s --ease-out a 1,2 s, message en fondu et 10 px de montee a 1,7 s.
+#
+# Pose UNE fois ici, employe par le tunnel, le contact et les seminaires.
+# Les textes ne changent pas — CONF_TITRE et CONF_GESTE restent ce qu'ils
+# sont, en particulier en mode WhatsApp : seul le dessin s'ajoute.
+CONF_SVG = ('<svg class="conf-trait" viewBox="0 0 80 80" aria-hidden="true" focusable="false">'
+            '<circle cx="40" cy="40" r="38" pathLength="1"/>'
+            '<path d="M26 41L36 51L55 30" pathLength="1"/></svg>')
+CONF_CSS = """
+/* 33 · Des @keyframes et non des transitions, pour deux raisons :
+   - l'ecran de confirmation passe de display:none a visible, et une
+     transition ne part pas d'un element qui n'etait pas rendu ;
+   - l'etat de BASE est l'etat final. Sous « reduire les animations », la
+     garde pose animation:none, et l'on voit directement le cercle ferme,
+     la coche et le message — sans rien a attendre. */
+.conf-trait{display:block;width:72px;height:72px;margin:0 auto 26px;fill:none;
+  stroke:var(--bronze);stroke-width:1.2;stroke-linecap:round;stroke-linejoin:round}
+.conf-trait circle{stroke-dasharray:1;transform:rotate(-90deg);transform-origin:40px 40px;
+  animation:conf-trace 1.2s var(--ease-inout) .2s both}
+.conf-trait path{stroke-dasharray:1;animation:conf-trace .7s var(--ease-out) 1.2s both}
+/* Dans l'encadre du contact et des seminaires, le dessin se fait plus
+   petit et s'aligne sur le texte, a gauche. */
+.sent .conf-trait{width:52px;height:52px;margin:0 0 14px}
+.conf-msg{animation:conf-apparait 1s ease 1.7s both,conf-monte 1s var(--ease-out) 1.7s both}
+@keyframes conf-trace{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
+@keyframes conf-apparait{from{opacity:0}}
+@keyframes conf-monte{from{transform:translateY(10px)}}
+"""
+
 # ── Les medaillons de la signature textile ───────────────────────────────
 # Ils sont INLINES, et non poses en <img>, parce que leur trait est en
 # currentColor : c'est ce qui leur permet de prendre l'or des motifs a un

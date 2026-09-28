@@ -9,6 +9,7 @@ import io, json
 from _chrome import PROSPECTION
 from _chrome import ENVOI_JS, PIEGE, secours
 from _chrome import REMISE_JS, REMISE_CSS, DISPO_JS
+from _chrome import CONF_SVG, CONF_CSS
 from _chrome import (page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV, EN_SECOURS,
                      CONF_TITRE, CONF_TITRE_EN, CONF_GESTE, CONF_GESTE_EN,
                      ENVOI_WHATSAPP)
@@ -23,21 +24,35 @@ CHAMBRES = {
  'suite-arabe':          ('Suite Arabe', 280000, 6, 'sa-main'),
 }
 
-CSS = REMISE_CSS + """
+CSS = REMISE_CSS + CONF_CSS + """
 .head{padding:150px 0 30px}
 .head h1{margin:10px 0 14px}
 .head p{max-width:56ch;font-size:1.04rem}
 
 /* fil des etapes */
-.steps{display:flex;gap:0;border:1px solid var(--line);margin-bottom:48px}
-.steps div{flex:1;padding:18px 20px;border-right:1px solid var(--line);display:flex;gap:14px;align-items:center;transition:.4s}
+.steps{display:flex;gap:0;border:1px solid var(--line);margin-bottom:48px;position:relative}
+.steps div{flex:1 1 0;min-width:0;padding:18px 20px;border-right:1px solid var(--line);display:flex;gap:14px;align-items:center;transition:.4s}
 .steps div:last-child{border-right:0}
 .steps div.on{background:var(--bark-2)}
 .steps div.done{background:rgba(143,174,99,.07)}
 .steps i{font-style:normal;width:26px;height:26px;border:1px solid var(--line);display:grid;place-items:center;
-  font-size:11px;font-weight:700;color:var(--muted);flex:0 0 auto;transition:.4s}
-.steps div.on i{border-color:var(--bronze);color:var(--bronze)}
-.steps div.done i{border-color:var(--palm);color:var(--palm)}
+  font-size:11px;font-weight:700;color:var(--muted);flex:0 0 auto;
+  transition:background-color .5s ease,border-color .5s ease,color .5s ease}
+/* 47 · Le fil des etapes (maquette « Motion design III »). Sous la barre,
+   un galon pagne avance jusqu'a la pastille de l'etape atteinte, en 1,1 s ;
+   la pastille se remplit de bois a son arrivee (.9 s). Au retour, le galon
+   recule et la pastille se vide tout de suite : le delai n'est porte QUE
+   par l'etat atteint — une transition prend les reglages de sa destination.
+   La pointe est calee sur le centre des pastilles : 20 px de marge de
+   cellule + 13 px de demi-pastille + 1 px de bordure = 34 px, dans des
+   cellules rendues strictement egales (flex:1 1 0 ; min-width:0). */
+.steps div.on i,.steps div.done i{background:var(--bronze);border-color:var(--bronze);color:#fff;transition-delay:.9s}
+.steps .fil{position:absolute;left:-1px;right:-1px;top:calc(100% + 1px);height:12px;background:var(--bark-3);pointer-events:none}
+.steps .fil::before{content:"";position:absolute;inset:0;background:url(img/pagne/galon-pagne.svg) repeat-x left center;
+  background-size:29px 12px;clip-path:inset(0 calc(100% - 34px) 0 0);transition:clip-path 1.1s var(--ease-inout)}
+.steps[data-n="2"] .fil::before{clip-path:inset(0 calc(66.667% - 34px) 0 0)}
+.steps[data-n="3"] .fil::before{clip-path:inset(0 calc(33.333% - 34px) 0 0)}
+.steps[data-n="4"] .fil::before{clip-path:inset(0)}
 .steps b{font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:var(--muted)}
 .steps div.on b{color:var(--cream)}
 .steps div.done b{color:var(--palm)}
@@ -105,10 +120,8 @@ input::placeholder,textarea::placeholder{color:#6E6154}
 
 /* confirmation */
 .done-box{text-align:center;padding:20px 0 60px}
-.done-box .tick{width:72px;height:72px;border:1px solid var(--palm);border-radius:50%;display:grid;place-items:center;
-  margin:0 auto 28px;color:var(--palm);font-size:32px}
 .done-box h2{margin-bottom:14px}
-.done-box>p{max-width:50ch;margin:0 auto 12px}
+.done-box .conf-msg>p{max-width:50ch;margin:0 auto 12px}
 .ref{display:inline-block;margin-top:20px;border:1px solid var(--line);padding:14px 22px;
   font-family:var(--f-display);font-size:1.3rem;color:var(--bronze-2);letter-spacing:.1em}
 .done-box .g{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:34px}
@@ -126,6 +139,9 @@ input::placeholder,textarea::placeholder{color:#6E6154}
   .steps{flex-direction:column}
   .steps div{border-right:0;border-bottom:1px solid var(--line)}
   .steps div:last-child{border-bottom:0}
+  /* Les etapes s'empilent : un galon horizontal n'y dit plus rien. Les
+     pastilles, elles, continuent de se remplir. */
+  .steps .fil{display:none}
   .two,.pay{grid-template-columns:minmax(0,1fr)}
 }
 """
@@ -143,7 +159,8 @@ body = [header('index.html#chambres', 'Nos chambres', 'navch'), drawer('index.ht
 </div>
 
 <div class="wrap">
-  <div class="steps" id="steps">
+  <div class="steps" id="steps" data-n="1">
+    <span class="fil" aria-hidden="true"></span>
     <div class="on" data-s="1"><i>1</i><b data-t="st1">Votre séjour</b></div>
     <div data-s="2"><i>2</i><b data-t="st2">Vos coordonnées</b></div>
     <div data-s="3"><i>3</i><b data-t="st3">Acompte</b></div>
@@ -229,7 +246,8 @@ body = [header('index.html#chambres', 'Nos chambres', 'navch'), drawer('index.ht
     <!-- 4 ─────────────────────────────────────── -->
     <section class="pane" id="p4">
       <div class="done-box">
-        <div class="tick">✓</div>
+        ''' + CONF_SVG + '''
+        <div class="conf-msg">
         <h2 data-t="h2d">{{CT}}</h2>
         <p id="dm">{{CG}}</p>
         <p style="color:var(--muted);font-size:14px" data-t="refn">Notez cette référence : elle identifie votre dossier.</p>
@@ -244,6 +262,7 @@ body = [header('index.html#chambres', 'Nos chambres', 'navch'), drawer('index.ht
         <div class="g">
           <a href="index.html" class="btn btn-solid" data-t="fb1">Retour à l'accueil</a>
           <a href="circuits.html" class="btn" data-t="fb2">Ajouter une expérience</a>
+        </div>
         </div>
       </div>
     </section>
@@ -449,6 +468,7 @@ function etape(n){
     var p=document.getElementById('p'+i);
     if(p)p.classList.toggle('on',i===n);
   });
+  document.getElementById('steps').setAttribute('data-n',n);
   [].slice.call(document.querySelectorAll('#steps div')).forEach(function(d){
     var s=+d.dataset.s;
     d.classList.toggle('on',s===n);

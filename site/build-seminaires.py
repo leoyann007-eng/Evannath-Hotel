@@ -13,7 +13,7 @@ production — voir la section « A valider » du README.
 import io
 import _schema
 from _chrome import (page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV, EN_SECOURS, CONF_TITRE, CONF_TITRE_EN, CONF_GESTE, CONF_GESTE_EN, CONF_VERBE, CONF_VERBE_EN,
-                     ENVOI_JS, PIEGE, secours)
+                     ENVOI_JS, PIEGE, secours, CONF_SVG, CONF_CSS)
 
 CONFIGS = [
  ('Théâtre',    '60', 'Chaises en rangées face à l\'écran. Pour une présentation, un lancement, une assemblée.'),
@@ -53,7 +53,7 @@ EQUIP = [
  ('Navette aéroport', "Offerte, aller et retour, pour le groupe", '<path d="M2 16l20-7-8 12-2-5-5-2z"/><path d="M4 20h7"/>'),
 ]
 
-CSS = """
+CSS = CONF_CSS + """
 /* L'en-tete est fixe : le hero doit lui reserver sa hauteur, comme le font
    les pages sans hero avec leur padding de 150px. Sans cela, sur un ecran
    court, le contenu aligne en bas remonte et passe sous l'en-tete. */
@@ -316,10 +316,10 @@ b.append('''    </div>
         ''' + PIEGE + '''
         <button type="submit" class="btn btn-solid" id="envoi" data-t="env">Envoyer la demande</button>
         <p class="err-envoi" id="err" role="alert"></p>''' + secours('sec') + '''
-        <div class="sent" id="ok" role="status">
+        <div class="sent" id="ok" role="status">''' + CONF_SVG + '''<div class="conf-msg">
           <b data-t="okt">{{CT}}</b>
           <p id="okm">Merci. Le service commercial revient vers vous sous 24 h avec un devis détaillé.</p>
-        </div>
+        </div></div>
       </form>
 
       <aside class="aside-box">

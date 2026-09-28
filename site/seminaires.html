@@ -377,6 +377,25 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
 }
 
 
+/* 33 · Des @keyframes et non des transitions, pour deux raisons :
+   - l'ecran de confirmation passe de display:none a visible, et une
+     transition ne part pas d'un element qui n'etait pas rendu ;
+   - l'etat de BASE est l'etat final. Sous « reduire les animations », la
+     garde pose animation:none, et l'on voit directement le cercle ferme,
+     la coche et le message — sans rien a attendre. */
+.conf-trait{display:block;width:72px;height:72px;margin:0 auto 26px;fill:none;
+  stroke:var(--bronze);stroke-width:1.2;stroke-linecap:round;stroke-linejoin:round}
+.conf-trait circle{stroke-dasharray:1;transform:rotate(-90deg);transform-origin:40px 40px;
+  animation:conf-trace 1.2s var(--ease-inout) .2s both}
+.conf-trait path{stroke-dasharray:1;animation:conf-trace .7s var(--ease-out) 1.2s both}
+/* Dans l'encadre du contact et des seminaires, le dessin se fait plus
+   petit et s'aligne sur le texte, a gauche. */
+.sent .conf-trait{width:52px;height:52px;margin:0 0 14px}
+.conf-msg{animation:conf-apparait 1s ease 1.7s both,conf-monte 1s var(--ease-out) 1.7s both}
+@keyframes conf-trace{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
+@keyframes conf-apparait{from{opacity:0}}
+@keyframes conf-monte{from{transform:translateY(10px)}}
+
 /* L'en-tete est fixe : le hero doit lui reserver sa hauteur, comme le font
    les pages sans hero avec leur padding de 150px. Sans cela, sur un ecran
    court, le contenu aligne en bas remonte et passe sous l'en-tete. */
@@ -715,10 +734,10 @@ input::placeholder,textarea::placeholder{color:#6E6154}
     <a data-t="sc5" href="mailto:receptionhotelevannath@gmail.com">Écrire un e-mail</a>
   </div>
 </div>
-        <div class="sent" id="ok" role="status">
+        <div class="sent" id="ok" role="status"><svg class="conf-trait" viewBox="0 0 80 80" aria-hidden="true" focusable="false"><circle cx="40" cy="40" r="38" pathLength="1"/><path d="M26 41L36 51L55 30" pathLength="1"/></svg><div class="conf-msg">
           <b data-t="okt">Votre demande vous attend dans WhatsApp</b>
           <p id="okm">Merci. Le service commercial revient vers vous sous 24 h avec un devis détaillé.</p>
-        </div>
+        </div></div>
       </form>
 
       <aside class="aside-box">

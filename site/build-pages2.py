@@ -4,10 +4,10 @@ import io
 import _schema
 from _chrome import ENVOI_JS, PIEGE, secours
 from _chrome import (page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV, EN_SECOURS, WA, WA_TEXTE,
-                     CONF_TITRE, CONF_TITRE_EN, CONF_GESTE, CONF_GESTE_EN)
+                     CONF_TITRE, CONF_TITRE_EN, CONF_GESTE, CONF_GESTE_EN, CONF_SVG, CONF_CSS)
 
 # ═══════════════════════════════ CONTACT ═══════════════════════════════
-CSS_CONTACT = """
+CSS_CONTACT = CONF_CSS + """
 .head{padding:150px 0 40px}
 .head h1{margin:10px 0 18px}
 .head p{max-width:58ch;font-size:1.08rem}
@@ -164,10 +164,10 @@ b.append('''  </div>
     ''' + PIEGE + '''
     <button type="submit" class="btn btn-solid" id="envoi" data-t="l8">Envoyer le message</button>
     <p class="err-envoi" id="err" role="alert"></p>''' + secours('sec') + '''
-    <div class="sent" id="ok" role="status">
+    <div class="sent" id="ok" role="status">''' + CONF_SVG + '''<div class="conf-msg">
       <b data-t="s1">''' + (CONF_TITRE or 'Message envoyé') + '''</b>
       <p data-t="s2">''' + (CONF_GESTE or 'Merci. ') + '''La réception vous répond sous 24 h. Pour une demande urgente, WhatsApp reste le plus rapide.</p>
-    </div>
+    </div></div>
   </form>
 
   <aside class="aside reveal">
