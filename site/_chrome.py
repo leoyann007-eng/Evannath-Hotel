@@ -541,9 +541,17 @@ header.scrolled .brand small{opacity:0}
 
 .brand small{display:block;font-size:8px;letter-spacing:.42em;color:var(--bronze);margin-top:6px;padding-left:2px;font-weight:700}
 .nav-right{display:flex;align-items:center;gap:18px}
-.lang{display:flex;border:1px solid var(--line)}
-.lang button{background:none;border:0;color:var(--muted);font:700 10.5px/1 var(--f-body);letter-spacing:.12em;padding:9px 11px;cursor:pointer;transition:.3s}
-.lang button.on{background:var(--bronze);color:var(--bark)}
+/* 51 · La pastille glisse d'une langue a l'autre (maquette « Motion
+   design III » : .6 s, la courbe --ease-inout). Elle est UN calque, pose
+   sous les deux boutons, qui se deplace par transform ; les boutons ne
+   portent plus de fond. La grille 1fr 1fr rend FR et EN strictement egaux :
+   la pastille fait 50 %, elle doit tomber pile sur chacun. */
+.lang{display:grid;grid-template-columns:1fr 1fr;position:relative;border:1px solid var(--line)}
+.lang::before{content:"";position:absolute;top:0;bottom:0;left:0;width:50%;background:var(--bronze);
+  transition:transform .6s var(--ease-inout)}
+.lang.en::before{transform:translateX(100%)}
+.lang button{position:relative;background:none;border:0;color:var(--muted);font:700 10.5px/1 var(--f-body);letter-spacing:.12em;padding:9px 11px;cursor:pointer;transition:color .3s}
+.lang button.on{color:var(--bark)}
 .burger{display:flex;align-items:center;gap:12px;background:none;border:0;cursor:pointer;padding:10px 4px;position:relative;z-index:101}
 .burger .bars{display:block;width:26px}
 .burger .bars span{display:block;height:1.5px;background:var(--cream);margin:6px 0;transition:.35s}
@@ -684,11 +692,110 @@ main{display:block}
 }
 """
 
+# ── 18 · Le logo se construit ────────────────────────────────────────────
+# L'ecran de chargement, une fois par session. Timings de la maquette
+# « Motion design I » : les quatre pieces de l'embleme montent une a une
+# (translateY 18 % -> 0, 1,1 s --ease-out ; opacite .9 s ; .16 s d'ecart),
+# puis le nom se devoile en clip-path (1,3 s --ease-inout). La signature
+# « Le reve africain » suit en fondu. La maquette va jusqu'a 3,1 s ; la
+# remise plafonne l'ecran a 2,5 s. Le nom part donc a .7 s (maquette .8),
+# la signature a 1,4 s pour .6 s : tout est pose a 2 s, l'ecran s'efface
+# en .3 s. Le navigateur demarre les animations 0,1 a 0,15 s apres avoir
+# peint l'ecran quand la page charge encore : ce dixieme gagne les absorbe.
+#
+# Il ne joue PAS :
+#   - apres la premiere page de la session (sessionStorage) ;
+#   - sous « reduire les animations » : l'etat final d'un ecran de
+#     chargement, c'est pas d'ecran du tout ;
+#   - sur un retour arriere ou un rechargement : la page est deja connue ;
+#   - si la page a fini de charger avant que le logo n'arrive.
+#
+# Le logo (104 Ko) n'est telecharge que s'il doit jouer : l'integrer a
+# chaque page l'aurait fait payer a toutes les visites, pour une seule.
+# S'il n'est pas la en 900 ms, on n'attend pas. Un clic, un toucher ou une
+# touche levent l'ecran tout de suite.
+#
+# Tant que le logo n'est pas arrive, un simple aplat (html.intro::after)
+# cache la page, pour qu'on ne la voie pas surgir PUIS disparaitre. Si le
+# script casse, cet aplat se retire seul a 3 s : on ne bloque jamais la
+# page derriere un ecran fige. Les calques sont animes par un <g> parent,
+# qui n'ecrase pas le transform que chaque trace porte deja.
+INTRO = """<style>
+html.intro::after{content:"";position:fixed;inset:0;z-index:1000;background:var(--bark);animation:intro-secours 0s linear 3s forwards}
+@keyframes intro-secours{to{visibility:hidden}}
+.intro-ecran{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;background:var(--bark);color:var(--bronze);transition:opacity .3s ease}
+.intro-ecran.part{opacity:0;pointer-events:none}
+.intro-ecran svg{width:min(480px,76vw);height:auto;overflow:visible}
+.intro-ecran .i0,.intro-ecran .i1,.intro-ecran .i2,.intro-ecran .i3{animation:intro-monte 1.1s var(--ease-out) both,intro-parait .9s ease both}
+.intro-ecran .i1{animation-delay:.16s}.intro-ecran .i2{animation-delay:.32s}.intro-ecran .i3{animation-delay:.48s}
+.intro-ecran .i4{animation:intro-devoile 1.3s var(--ease-inout) .7s both}
+.intro-ecran .i5{animation:intro-signe .6s var(--ease-out) 1.4s both,intro-parait .6s ease 1.4s both}
+@keyframes intro-monte{from{transform:translateY(18%)}}
+@keyframes intro-signe{from{transform:translateY(30%)}}
+@keyframes intro-parait{from{opacity:0}}
+@keyframes intro-devoile{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0)}}
+</style>
+<script>(function(){
+var d=document,h=d.documentElement;
+try{
+  if(sessionStorage.getItem('evn-intro'))return;
+  if(!window.fetch||!window.matchMedia||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  var nav=performance.getEntriesByType?performance.getEntriesByType('navigation')[0]:null;
+  if(nav&&nav.type&&nav.type!=='navigate')return;
+  if(d.readyState==='complete')return;
+  sessionStorage.setItem('evn-intro','1');
+}catch(e){return}
+h.classList.add('intro');
+var fini=false;
+function lever(){if(!fini){fini=true;h.classList.remove('intro')}}
+var limite=setTimeout(lever,900);
+fetch('img/logo-calques.svg').then(function(r){return r.ok?r.text():Promise.reject(r.status)}).then(function(svg){
+  function poser(){
+    if(fini)return;
+    clearTimeout(limite);
+    if(d.readyState==='complete'){lever();return}
+    fini=true;
+    var e=d.createElement('div');
+    e.className='intro-ecran';
+    e.setAttribute('aria-hidden','true');
+    e.innerHTML=svg;
+    ['pilier-1','traverse','pilier-2','pilier-3','nom','signature'].forEach(function(id,i){
+      var p=e.querySelector('#'+id);if(!p)return;
+      p.removeAttribute('id');
+      var g=d.createElementNS('http://www.w3.org/2000/svg','g');
+      g.setAttribute('class','i'+i);
+      p.parentNode.insertBefore(g,p);g.appendChild(p);
+    });
+    var s=e.querySelector('svg');if(s){s.removeAttribute('role');s.removeAttribute('aria-label')}
+    d.body.appendChild(e);
+    h.classList.remove('intro');
+    /* Le depart suit la FIN de l'animation, pas une minuterie : le
+       navigateur ne peint rien avant d'avoir ses polices, et les
+       animations attendent cette premiere image. Une minuterie partie a
+       l'insertion coupait le logo a mi-construction. Deux filets : 2,2 s
+       apres la premiere image peinte (2,5 s fondu compris, quoi qu'il
+       arrive), et 3,5 s si l'onglet est en arriere-plan et ne peint rien. */
+    var parti=false,t=setTimeout(partir,3500);
+    requestAnimationFrame(function(){if(!parti){clearTimeout(t);t=setTimeout(partir,2200)}});
+    var sig=e.querySelector('.i5');if(sig)sig.addEventListener('animationend',partir);
+    function partir(){
+      if(parti)return;parti=true;clearTimeout(t);
+      e.classList.add('part');
+      setTimeout(function(){if(e.parentNode)e.parentNode.removeChild(e)},300);
+    }
+    e.addEventListener('pointerdown',partir);
+    d.addEventListener('keydown',partir,{once:true});
+  }
+  if(d.body)poser();else d.addEventListener('DOMContentLoaded',poser);
+}).catch(lever);
+})();</script>"""
+
 # Garde-fou : voir « Le contenu ne depend pas du JavaScript » dans le README.
 HEAD = """<script>document.documentElement.className+=" js";setTimeout(function(){if(!window.__reveal){document.querySelectorAll(".reveal").forEach(function(e){e.classList.add("in")})}},3000)</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Karla:wght@300;400;500;600;700&display=swap" rel="stylesheet">"""
+HEAD += '\n' + INTRO
 
 NL_ = chr(10)
 
@@ -1207,11 +1314,67 @@ NAV_JS = NAV_BASE + '\n\n' + REVEAL_JS
 
 
 LANG_JS = """var FR={};document.querySelectorAll('[data-t]').forEach(function(e){FR[e.dataset.t]=e.innerHTML});
+/* 51 · Les titres VISIBLES roulent vers leur traduction : l'ancien texte
+   sort vers le haut, le nouveau entre par le bas, .7 s, --ease-inout. Le
+   reste du texte change sans animation.
+
+   Les noeuds du nouveau titre sont DEPLACES dans une couche, jamais
+   recrees : ce qu'un autre script tient en main reste le meme noeud. La
+   copie de l'ancien est muette (aria-hidden, sans id ni data-t). Un clic
+   pendant un roulement termine d'abord celui-ci. */
+var ROULEMENTS=[];
+function EVN_TITRES(){
+  ROULEMENTS.slice().forEach(function(f){f()});
+  if(!window.matchMedia||matchMedia('(prefers-reduced-motion: reduce)').matches||!Element.prototype.animate)return [];
+  var h=innerHeight,out=[];
+  document.querySelectorAll('h1,h2').forEach(function(e){
+    if(!(e.matches('[data-t]')||e.querySelector('[data-t]')))return;
+    var r=e.getBoundingClientRect();
+    if(r.width&&r.bottom>0&&r.top<h)out.push([e,e.innerHTML]);
+  });
+  return out;
+}
+function EVN_ROULER(liste){
+  liste.forEach(function(p){
+    var e=p[0],avant=p[1];
+    if(e.innerHTML===avant)return;
+    var cs=getComputedStyle(e),entre=document.createElement('span'),sort=document.createElement('span');
+    /* La couche reprend la mise en page du titre : certains sont en flex. */
+    [entre,sort].forEach(function(c){
+      c.style.cssText='display:'+(cs.display.indexOf('flex')>-1?'flex':'block')+';gap:'+cs.gap+
+        ';align-items:'+cs.alignItems+';justify-content:'+cs.justifyContent+';flex-wrap:'+cs.flexWrap+';width:100%';
+    });
+    while(e.firstChild)entre.appendChild(e.firstChild);
+    sort.innerHTML=avant;
+    sort.setAttribute('aria-hidden','true');
+    [].slice.call(sort.querySelectorAll('[id],[data-t]')).forEach(function(x){x.removeAttribute('id');x.removeAttribute('data-t')});
+    sort.style.position='absolute';sort.style.left='0';sort.style.top='0';
+    var pos=e.style.position,clip=e.style.clipPath;
+    if(cs.position==='static')e.style.position='relative';
+    e.style.clipPath='inset(0 -1em)';
+    e.appendChild(entre);e.appendChild(sort);
+    var o={duration:700,easing:'cubic-bezier(.6,0,.2,1)'};
+    var a1=entre.animate([{transform:'translateY(100%)'},{transform:'none'}],o);
+    var a2=sort.animate([{transform:'none'},{transform:'translateY(-100%)'}],o);
+    function fin(){
+      var i=ROULEMENTS.indexOf(fin);if(i<0)return;ROULEMENTS.splice(i,1);
+      a1.cancel();a2.cancel();
+      if(sort.parentNode)sort.parentNode.removeChild(sort);
+      while(entre.firstChild)e.insertBefore(entre.firstChild,entre);
+      if(entre.parentNode)entre.parentNode.removeChild(entre);
+      e.style.position=pos;e.style.clipPath=clip;
+    }
+    ROULEMENTS.push(fin);a1.onfinish=fin;
+  });
+}
 document.querySelectorAll('.lang button').forEach(function(b){b.onclick=function(){
   var lg=b.dataset.lang;
   document.querySelectorAll('.lang button').forEach(function(x){x.classList.toggle('on',x.dataset.lang===lg)});
+  document.querySelectorAll('.lang').forEach(function(l){l.classList.toggle('en',lg==='en')});
+  var titres=EVN_TITRES();
   var dict=lg==='en'?EN:FR;
   document.querySelectorAll('[data-t]').forEach(function(e){if(dict[e.dataset.t])e.innerHTML=dict[e.dataset.t]});
+  EVN_ROULER(titres);
   document.documentElement.lang=lg;
   /* Point d'extension : une page qui a du texte hors [data-t] — un
      placeholder de champ, par exemple — declare window.EVN_LANG. */

@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+{{INTRO}}
 <!-- prospection:robots -->
 <meta name="robots" content="noindex, nofollow">
 <meta name="googlebot" content="noindex, nofollow">
@@ -95,9 +96,17 @@ header.scrolled .brand small{opacity:0}
 header.scrolled .brand img{transform:scale(.8)}
 .brand small{display:block;font-size:8px;letter-spacing:.42em;color:var(--bronze);margin-top:6px;padding-left:2px;font-weight:700}
 .nav-right{display:flex;align-items:center;gap:18px}
-.lang{display:flex;border:1px solid var(--line)}
-.lang button{background:none;border:0;color:var(--muted);font:700 10.5px/1 var(--f-body);letter-spacing:.12em;padding:9px 11px;cursor:pointer;transition:.3s}
-.lang button.on{background:var(--bronze);color:var(--night)}
+/* 51 · La pastille glisse d'une langue a l'autre (maquette « Motion
+   design III » : .6 s, la courbe --ease-inout). Elle est UN calque, pose
+   sous les deux boutons, qui se deplace par transform ; les boutons ne
+   portent plus de fond. La grille 1fr 1fr rend FR et EN strictement egaux :
+   la pastille fait 50 %, elle doit tomber pile sur chacun. */
+.lang{display:grid;grid-template-columns:1fr 1fr;position:relative;border:1px solid var(--line)}
+.lang::before{content:"";position:absolute;top:0;bottom:0;left:0;width:50%;background:var(--bronze);
+  transition:transform .6s var(--ease-inout)}
+.lang.en::before{transform:translateX(100%)}
+.lang button{position:relative;background:none;border:0;color:var(--muted);font:700 10.5px/1 var(--f-body);letter-spacing:.12em;padding:9px 11px;cursor:pointer;transition:color .3s}
+.lang button.on{color:var(--night)}
 .burger{display:flex;align-items:center;gap:12px;background:none;border:0;cursor:pointer;padding:10px 4px;position:relative;z-index:101}
 .burger .bars{display:block;width:26px}
 .burger .bars span{display:block;height:1.5px;background:var(--cream);margin:6px 0;transition:.35s}

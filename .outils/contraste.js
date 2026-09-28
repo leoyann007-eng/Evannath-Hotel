@@ -72,6 +72,19 @@ const MESURE = `(function(){
           if (a >= 0.999) return pile;
         }
       }
+      /* Le bouton de langue ACTIF n'a pas de fond a lui : il est pose sur la
+         pastille, un ::before du .lang qui glisse sous lui (effet 51). Un
+         pseudo-element n'est pas un parent, la remontee ne le verrait pas —
+         elle lisait « FR » creme sur creme. La pastille couvre exactement
+         le bouton actif (mesure dans mesurer-51.js) : c'est elle, le fond. */
+      if (n.matches && n.matches('.lang > button.on')) {
+        var p = (getComputedStyle(n.parentElement, '::before').backgroundColor || '').match(/[\\d.]+/g);
+        if (p && (p.length < 4 || Number(p[3]) > 0.004)) {
+          var ap = p.length > 3 ? Number(p[3]) : 1;
+          pile.push([Number(p[0]), Number(p[1]), Number(p[2]), ap]);
+          if (ap >= 0.999) return pile;
+        }
+      }
       n = n.parentElement;
     }
     var r = (getComputedStyle(document.documentElement).backgroundColor || '').match(/[\\d.]+/g);
