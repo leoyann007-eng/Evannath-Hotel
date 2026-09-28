@@ -390,7 +390,22 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
 .count{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:700}
 .grid{columns:4;column-gap:14px;padding-bottom:100px}
 .grid figure{break-inside:avoid;margin:0 0 14px;position:relative;overflow:hidden;cursor:pointer;background:var(--bark-2)}
-.grid figure.hide{display:none}
+/* 25 · Les filtres recomposent la grille. On ne CACHE plus rien : une
+   photo ecartee s'efface en gris, une photo retenue s'avance un peu. La
+   grille ne se recompose pas en sautant, elle se nuance — et l'on voit ce
+   qu'on a ecarte. Valeurs et durees de la maquette « Motion design II ».
+
+   Une photo ecartee ne s'ouvre pas au clic : pointer-events:none. Elle est
+   la pour situer, pas pour etre regardee. */
+.grid figure{transition:opacity .7s ease,filter .7s ease,transform .8s var(--ease-out)}
+.grid figure.ecartee{opacity:.22;filter:grayscale(.9);transform:scale(.97);pointer-events:none}
+.grid figure.retenue{transform:scale(1.02)}
+/* Le point or du filtre VERROUILLE. Pose en absolu dans la marge du bouton :
+   present sur tous a opacite zero, il ne deplace aucun libelle. */
+.filters button{position:relative}
+.filters button::before{content:"";position:absolute;left:7px;top:50%;width:5px;height:5px;
+  margin-top:-2.5px;border-radius:50%;background:#C9A46A;opacity:0;transition:opacity .4s}
+.filters button.verrou::before{opacity:1}
 /* Les deux paliers de vignette n'ont pas exactement le meme rapport une
    fois arrondis (620x440 contre 360x255). Sans cette regle, la hauteur
    rendue change selon le palier charge et la grille bouge de quelques
@@ -1036,21 +1051,60 @@ else{var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.is
 var figs=[].slice.call(document.querySelectorAll('#gl figure'));
 var n=document.getElementById('n'),empty=document.getElementById('empty');
 
-document.querySelectorAll('.filters button').forEach(function(b){b.onclick=function(){
-  document.querySelectorAll('.filters button').forEach(function(x){x.classList.remove('on')});
-  b.classList.add('on');
-  var f=b.dataset.f,c=0;
+/* 25 · Survoler un filtre, c'est un APERCU. Cliquer, c'est le GARDER.
+
+   - survol ou focus : la grille montre la categorie, sans rien decider ;
+   - la souris quitte la barre : retour au filtre verrouille, sinon a tout ;
+   - clic : verrouille (point or, aria-pressed) ; tant qu'un filtre est
+     verrouille, survoler les autres ne change rien ;
+   - clic sur un autre : il prend le verrou ; reclic sur le verrouille, ou
+     « Tout voir » : on deverrouille ;
+   - sur un ecran tactile il n'y a pas d'apercu — un effleurement n'est pas
+     un survol — et le tap verrouille directement.
+
+   Le compteur et la visionneuse suivent le filtre VERROUILLE, jamais
+   l'apercu : un apercu ne doit rien changer d'autre que ce qu'on voit. */
+var btns=[].slice.call(document.querySelectorAll('.filters button'));
+var barre=document.querySelector('.filters'),verrou=null;
+function montrer(k){
+  var tout=(k==='all');
   figs.forEach(function(fig){
-    var ok=(f==='all'||fig.dataset.cat===f);
-    fig.classList.toggle('hide',!ok);
-    if(ok)c++;
+    var ok=tout||fig.dataset.cat===k;
+    fig.classList.toggle('ecartee',!ok);
+    fig.classList.toggle('retenue',ok&&!tout);
   });
+  btns.forEach(function(b){b.classList.toggle('on',b.dataset.f===k)});
+}
+function compter(){
+  var k=verrou||'all',c=0;
+  figs.forEach(function(f){if(k==='all'||f.dataset.cat===k)c++});
   n.textContent=c;
   empty.classList.toggle('on',c===0);
-}});
+}
+function marquer(){
+  btns.forEach(function(b){
+    var v=(verrou!==null&&b.dataset.f===verrou);
+    b.classList.toggle('verrou',v);
+    b.setAttribute('aria-pressed',v?'true':'false');
+  });
+}
+function apercu(k){if(verrou===null)montrer(k)}
+function retour(){montrer(verrou||'all')}
+btns.forEach(function(b){
+  b.addEventListener('pointerenter',function(e){if(e.pointerType==='mouse')apercu(b.dataset.f)});
+  b.addEventListener('focus',function(){apercu(b.dataset.f)});
+  b.addEventListener('click',function(){
+    var k=b.dataset.f;
+    verrou=(k==='all'||verrou===k)?null:k;
+    marquer();montrer(verrou||'all');compter();
+  });
+});
+barre.addEventListener('pointerleave',function(e){if(e.pointerType==='mouse')retour()});
+barre.addEventListener('focusout',function(e){if(!barre.contains(e.relatedTarget))retour()});
+marquer();
 
-// la visionneuse ne parcourt que les photos actuellement affichées
-function visibles(){return figs.filter(function(f){return !f.classList.contains('hide')})}
+// la visionneuse ne parcourt que les photos du filtre verrouille
+function visibles(){var k=verrou||'all';return figs.filter(function(f){return k==='all'||f.dataset.cat===k})}
 var lb=document.getElementById('lb'),lbi=document.getElementById('lbi'),lbc=document.getElementById('lbc'),gi=0;
 function show(i){
   var v=visibles(); if(!v.length)return;

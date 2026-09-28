@@ -69,8 +69,27 @@ section{padding:88px 0}
   transition:.5s cubic-bezier(.2,.8,.2,1)}
 .card:hover{border-color:var(--line);transform:translateY(-4px)}
 .card .ph{position:relative;aspect-ratio:4/3;overflow:hidden;background:var(--bark-3)}
-.card .ph img{width:100%;height:100%;object-fit:cover;transition:1.1s cubic-bezier(.2,.8,.2,1)}
-.card:hover .ph img{transform:scale(1.05)}
+/* 06 · Les cartes au survol. La photo s'approche en 1,4 s et un filet or
+   se trace sous le titre, de gauche a droite, en .9 s — timings de la
+   maquette « Motion design I ».
+
+   Sous (hover:hover) seulement : sur un ecran tactile le « survol » est un
+   effleurement qui reste colle apres le doigt, et la carte suivante
+   s'ouvrirait avec la photo de la precedente encore agrandie.
+
+   Le filet est POSE en absolu, dans la marge du titre : present sur toutes
+   les cartes a l'echelle zero, il ne pousse rien. Un bloc ajoute sous le
+   titre aurait decale le texte de toutes les cartes de 9 px. */
+.card .ph img{width:100%;height:100%;object-fit:cover}
+.card h2{position:relative}
+.card h2::after{content:"";position:absolute;left:0;bottom:-5px;width:120px;height:1px;
+  background:#A88560;transform:scaleX(0);transform-origin:left}
+@media(hover:hover){
+  .card .ph img{transition:transform 1.4s var(--ease-out)}
+  .card:hover .ph img{transform:scale(1.05)}
+  .card h2::after{transition:transform .9s var(--ease-out)}
+  .card:hover h2::after{transform:scaleX(1)}
+}
 .card .tag{position:absolute;top:14px;left:14px;background:var(--bronze);color:var(--bark);
   font-size:9px;letter-spacing:.18em;text-transform:uppercase;font-weight:700;padding:7px 11px}
 .card .tx{padding:26px 24px 28px;display:flex;flex-direction:column;flex:1}

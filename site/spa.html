@@ -113,15 +113,33 @@ p{color:#D6CBBB}
   padding:14px 22px;font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase}
 .skip:focus{left:0}
 main{display:block}
-header{position:fixed;top:0;left:0;right:0;z-index:100;transition:.45s;padding:22px 0}
-header.scrolled{padding:11px 0;background:rgba(16,11,6,.96);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
+/* 08 · A3 — le meme mecanisme que le chassis : hauteur fixe, et c'est un
+   calque de fond qui se contracte par transform. Version de NUIT : le
+   calque est transparent sur le hero, et devient nuit opaque une fois la
+   page defilee. La table et Le spa ne consomment pas HEAD_CSS ; ce bloc
+   en est la traduction nocturne, pas une variante — voir _chrome.py. */
+header{position:fixed;top:0;left:0;right:0;z-index:100;height:104px;
+  display:flex;align-items:center}
+.hd-fond{position:absolute;left:0;top:0;right:0;height:104px;z-index:0;
+  transform-origin:top;background:transparent;
+  transition:transform .8s var(--ease-out),background-color .8s ease,
+             box-shadow .8s ease,backdrop-filter .8s ease}
+header.scrolled .hd-fond{transform:scaleY(.75);background:rgba(16,11,6,.96);
+  backdrop-filter:blur(16px);box-shadow:0 1px 0 var(--line)}
+.nav{position:relative;z-index:1;width:100%;
+  transition:transform .8s var(--ease-out)}
+header.scrolled .nav{transform:translateY(-13px)}
+header.sans-transition,header.sans-transition *{transition:none!important}
+
 /* Menu ouvert : l en-tete devient opaque, et de la couleur du tiroir. Sur
    cette page il est transparent au repos — il flotte sur l image — donc le
    menu qui defile dessous se voyait entierement au travers, logo compris. */
-header.menu{background:var(--night);backdrop-filter:none;border-bottom:1px solid var(--line)}
+header.menu .hd-fond{background:var(--night);backdrop-filter:none;box-shadow:0 1px 0 var(--line)}
 .nav{display:flex;align-items:center;justify-content:space-between;gap:20px}
-.brand img{width:168px;transition:.45s}
-header.scrolled .brand img{width:132px}
+.brand img{width:168px;transform-origin:left center;transition:transform .8s var(--ease-out)}
+.brand small{transition:opacity .8s ease}
+header.scrolled .brand small{opacity:0}
+header.scrolled .brand img{transform:scale(.8)}
 .brand small{display:block;font-size:8px;letter-spacing:.42em;color:var(--bronze);margin-top:6px;padding-left:2px;font-weight:700}
 .nav-right{display:flex;align-items:center;gap:18px}
 .lang{display:flex;border:1px solid var(--line)}
@@ -135,19 +153,66 @@ header.scrolled .brand img{width:132px}
 .burger.open .bars span:nth-child(2){opacity:0}
 .burger.open .bars span:nth-child(3){transform:translateY(-7.5px) rotate(-45deg)}
 
-.drawer{position:fixed;inset:0;background:var(--night);z-index:99;opacity:0;visibility:hidden;transition:.5s cubic-bezier(.2,.8,.2,1);overflow-y:auto}
-.drawer.open{opacity:1;visibility:visible}
+/* 07 · Le menu s'ouvre comme un rideau.
+   Le panneau DESCEND — translateY(-101% -> 0) — au lieu d'apparaitre en
+   fondu. Les 101 % plutot que 100 : a 100 le bord haut du panneau reste
+   sur la ligne de l'ecran et laisse un liseré d'un pixel selon l'arrondi.
+
+   Timings releves dans la maquette, pas devines :
+     panneau     transform .9s cubic-bezier(.7,0,.2,1)
+     rubriques   transform 1s --ease-out, delai .5s + .07s par rang
+     colonne     opacity 1s ease, delai 1s
+   La fermeture est plus rapide et sans delai : on ne fait pas attendre
+   quelqu'un qui veut partir. */
+.drawer{position:fixed;inset:0;background:var(--night);z-index:99;
+  visibility:hidden;overflow-y:auto;
+  transform:translateY(-101%);
+  transition:transform .55s cubic-bezier(.7,0,.2,1),visibility 0s .55s}
+.drawer.open{visibility:visible;transform:translateY(0);
+  transition:transform .9s cubic-bezier(.7,0,.2,1),visibility 0s}
 .dw-in{min-height:100svh;display:grid;grid-template-columns:1.25fr 1fr;align-items:center;gap:60px;max-width:var(--max);margin:0 auto;padding:130px 24px 60px}
 .dw-in nav{display:flex;flex-direction:column}
+/* A2 · Chaque rubrique monte derriere SA PROPRE fenetre.
+   Le masque etait pose sur le <nav> entier : les liens glissaient les uns
+   sur les autres au lieu de surgir chacun de sa ligne, et la bordure du
+   dernier coupait le mouvement des autres. C'est donc le lien qui masque,
+   et son CONTENU qui translate — la bordure, elle, reste en place. */
 .dw-in nav a{
   display:flex;align-items:baseline;gap:22px;padding:16px 0;border-bottom:1px solid var(--line-2);
   font-family:var(--f-display);font-size:clamp(1.45rem,3.2vw,2.4rem);color:var(--cream);
-  opacity:0;transform:translateY(18px);transition:color .3s,opacity .6s,transform .6s
+  overflow:hidden;transition:color .3s
 }
-.drawer.open .dw-in nav a{opacity:1;transform:none}
+.dw-in nav a>*{display:inline-block;transform:translateY(110%);
+  transition:transform .5s var(--ease-out)}
+.drawer.open .dw-in nav a>*{transform:none;transition:transform 1s var(--ease-out)}
 .dw-in nav a:hover,.dw-in nav a.on{color:var(--bronze-2)}
 .dw-in nav a i{font-style:normal;font-family:var(--f-body);font-size:10px;letter-spacing:.2em;color:var(--bronze);font-weight:700;flex:0 0 auto;opacity:.7}
-.dw-side{display:flex;flex-direction:column;gap:26px}
+/* A2 · Le medaillon se trace a l'ouverture du tiroir — la mecanique de
+   l'effet 01, avec les delais de la maquette 07 : les filets d'abord a
+   1,2 s, le losange a 1,7 s, le signe en fondu a 2,2 s. Le panneau a fini
+   de descendre a .9 s : le dessin commence donc apres, pas pendant.
+
+   stroke-dasharray:1 avec pathLength="1" veut dire « un tiret long comme
+   tout le trace ». L'offset le pousse hors du cadre, et le ramener a zero
+   dessine le trait. */
+.dw-med{grid-column:1/-1;width:360px;max-width:100%;margin:0 auto;
+  color:var(--bronze);opacity:.85}
+/* Les delais ne vivent que dans l'etat OUVERT. Une transition prend les
+   reglages de l'etat d'ARRIVEE : poses sur l'etat de repos, les 1,2 s de
+   delai jouaient aussi a la fermeture, et un menu rouvert dans la seconde
+   retrouvait son medaillon deja trace, sans le voir se dessiner. */
+.dw-med [pathLength]{stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset .3s ease}
+.dw-med g g [pathLength]{stroke-dashoffset:0}
+.dw-med>svg>g>circle,.dw-med>svg>g>g{opacity:0;transition:opacity .3s ease}
+.drawer.open .dw-med>svg>g>path{stroke-dashoffset:0}
+.drawer.open .dw-med>svg>g>path:nth-last-of-type(2){transition:stroke-dashoffset 1.2s var(--ease-draw) 1.2s}
+.drawer.open .dw-med>svg>g>path:nth-last-of-type(1){transition:stroke-dashoffset 1s var(--ease-draw) 1.7s}
+.drawer.open .dw-med>svg>g>circle{opacity:1;transition:opacity 1.2s ease 1.2s}
+.drawer.open .dw-med>svg>g>g{opacity:1;transition:opacity 1s ease 2.2s}
+
+.dw-side{display:flex;flex-direction:column;gap:26px;
+  opacity:0;transition:opacity .3s ease}
+.drawer.open .dw-side{opacity:1;transition:opacity 1s ease 1s}
 .dw-side .ph{aspect-ratio:4/3;overflow:hidden;background:var(--bark-2)}
 .dw-side .ph img{width:100%;height:100%;object-fit:cover}
 .dw-side b{display:block;font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--bronze);font-weight:700;margin-bottom:12px}
@@ -327,7 +392,7 @@ footer{background:#0B0704}
 
 .js .reveal{opacity:0;transform:translateY(30px);transition:opacity 1s cubic-bezier(.2,.8,.2,1),transform 1s cubic-bezier(.2,.8,.2,1)}
 .js .reveal.in{opacity:1;transform:none}
-@media(prefers-reduced-motion:reduce){*{animation:none!important;transition-duration:.01ms!important}.js .reveal,.dw-in nav a{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition-duration:.01ms!important;transition-delay:0s!important}.js .reveal,.dw-in nav a{opacity:1;transform:none}}
 
 @media(max-width:1080px){
   .dw-in{grid-template-columns:1fr;gap:40px;align-content:start}
@@ -361,6 +426,7 @@ footer{background:#0B0704}
 
 <a class="skip" href="#contenu">Aller au contenu</a>
 <header id="hd">
+  <div class="hd-fond" aria-hidden="true"></div>
   <div class="wrap nav">
     <a href="index.html" class="brand" aria-label="Hôtel Evannath, accueil">
       <img width="729" height="176" src="img/opt/logo-blanc.png" alt="Hôtel Evannath">
@@ -392,6 +458,7 @@ footer{background:#0B0704}
       <a href="contact.html"><i>10</i><span data-t="n10">Contact</span></a>
       <a href="reserver.html"><i>11</i><span data-t="n11">Réserver</span></a>
     </nav>
+    <span class="pagne pagne-med dw-med" aria-hidden="true"><svg focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 40"><g fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path pathLength="1" d="M0 20H148M212 20H360" stroke-width="1"></path><circle cx="148" cy="20" r="1.6" fill="currentColor" stroke="none"></circle><circle cx="212" cy="20" r="1.6" fill="currentColor" stroke="none"></circle><path pathLength="1" d="M180 1L199 20L180 39L161 20Z" stroke-width="1"></path><g transform="translate(169.5 9.5) scale(.35)" stroke-width="3.4"><path pathLength="1" d="M8 52V8H52V52H16V16H44V44H24V24H36V36H30"></path></g></g></svg></span>
     <aside class="dw-side">
       <div class="ph"><picture><source srcset="img/opt/gal-spa-huiles-t.webp" type="image/webp">
         <img width="620" height="440" src="img/opt/gal-spa-huiles-t.jpg" alt="Serviettes et huiles du spa" loading="lazy"></picture></div>

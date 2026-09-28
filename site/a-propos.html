@@ -411,6 +411,18 @@ section{padding:100px 0}
 .space:hover .ph img{transform:scale(1.05)}
 .space .tx{padding:48px}
 .space .tx h3{font-size:1.6rem;margin:12px 0 14px}
+/* 24 · Le numero de section tourne — maquette « Motion design II ».
+   Chaque colonne roule d'un cran (translateY -50 %) derriere une fenetre
+   d'une ligne ; 1,3 s --ease-inout, delai .3 s, le libelle .15 s apres.
+   La fenetre est aussi large que le plus long des deux libelles : le
+   surtitre est seul sur sa ligne, cet espace ne pousse rien. */
+.sec-no .rl{display:inline-block;height:1.3em;overflow:hidden;vertical-align:top}
+.sec-no .col{display:flex;flex-direction:column;transition:transform 1.3s var(--ease-inout) .3s}
+.sec-no .col-l{transition-delay:.45s}
+.sec-no .col>span{display:block;height:1.3em;line-height:1.3em}
+/* .pas : seules les colonnes a DEUX lignes roulent. La premiere
+   section n'en a qu'une ; la decaler de moitie la couperait en deux. */
+.space.vu .sec-no .pas{transform:translateY(-50%)}
 .space .tx p{font-size:14.5px}
 .space .tx a{display:inline-block;margin-top:16px;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--bronze);border:1px solid var(--bronze);padding:14px 20px;font-weight:700;transition:.3s}
 .space .tx a:hover{background:var(--bronze);color:var(--bark)}
@@ -560,31 +572,31 @@ section{padding:100px 0}
   <h2 style="margin-bottom:44px" data-t="h3">Cinq lieux, un même soin</h2>
   <article class="space reveal">
     <div class="ph"><picture><source srcset="img/opt/r-anglaise-640.webp 640w, img/opt/r-anglaise.webp 1080w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp"><img width="1080" height="720" loading="lazy" src="img/opt/r-anglaise.jpg" srcset="img/opt/r-anglaise-640.jpg 640w, img/opt/r-anglaise.jpg 1080w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" alt="Suite de l'Hôtel Evannath"></picture></div>
-    <div class="tx"><span class="eyebrow" data-t="es1">01 · Hébergement</span><h3 data-t="t1">Chambres &amp; Suites</h3>
+    <div class="tx"><span class="eyebrow sec-no"><span class="rl"><span class="col"><span>01</span></span></span> · <span class="rl"><span class="col"><span data-t="es1">Hébergement</span></span></span></span><h3 data-t="t1">Chambres &amp; Suites</h3>
       <p data-t="ed1">Des matériaux nobles, des couleurs harmonieuses et une décoration soignée créent un espace où détente et bien-être sont les maîtres mots. Sept catégories, de la chambre standard à la Suite Arabe deux chambres.</p>
       <a href="index.html#chambres" data-t="a1">Voir les catégories</a></div>
   </article>
   <article class="space reveal">
     <div class="ph"><picture><source srcset="img/opt/g-resto-640.webp 640w, img/opt/g-resto-1024.webp 1024w, img/opt/g-resto.webp 1200w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp"><img width="1200" height="851" loading="lazy" src="img/opt/g-resto.jpg" srcset="img/opt/g-resto-640.jpg 640w, img/opt/g-resto-1024.jpg 1024w, img/opt/g-resto.jpg 1200w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" alt="La salle du restaurant"></picture></div>
-    <div class="tx"><span class="eyebrow" data-t="es2">02 · Table</span><h3 data-t="t2">Restaurant</h3>
+    <div class="tx"><span class="eyebrow sec-no"><span class="rl"><span class="col pas"><span aria-hidden="true">01</span><span>02</span></span></span> · <span class="rl"><span class="col col-l pas"><span aria-hidden="true" data-t="es1">Hébergement</span><span data-t="es2">Table</span></span></span></span><h3 data-t="t2">Restaurant</h3>
       <p data-t="ed2">Les saveurs authentiques de la Côte d'Ivoire, dans un cadre chaleureux et lumineux ouvert sur la piscine. Kedjenou, thiéboudiène, capitaine en papillote — et une carte de cocktails maison.</p>
       <a href="carte.html" data-t="a2">Consulter la carte</a></div>
   </article>
   <article class="space reveal">
     <div class="ph"><picture><source srcset="img/opt/g-seminaire-640.webp 640w, img/opt/g-seminaire-1024.webp 1024w, img/opt/g-seminaire.webp 1200w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp"><img width="1200" height="851" loading="lazy" src="img/opt/g-seminaire.jpg" srcset="img/opt/g-seminaire-640.jpg 640w, img/opt/g-seminaire-1024.jpg 1024w, img/opt/g-seminaire.jpg 1200w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" alt="Salle de conférence équipée"></picture></div>
-    <div class="tx"><span class="eyebrow" data-t="es3">03 · Professionnels</span><h3 data-t="t3">Rencontres &amp; Événements</h3>
+    <div class="tx"><span class="eyebrow sec-no"><span class="rl"><span class="col pas"><span aria-hidden="true">02</span><span>03</span></span></span> · <span class="rl"><span class="col col-l pas"><span aria-hidden="true" data-t="es2">Table</span><span data-t="es3">Professionnels</span></span></span></span><h3 data-t="t3">Rencontres &amp; Événements</h3>
       <p data-t="ed3">Un espace baigné de lumière naturelle, au design contemporain, qui se prête à tout : séminaires, cocktails, dîners de gala, lancements de produits. Sonorisation et technicien disponibles.</p>
       <a href="contact.html" data-t="a3">Demander un devis</a></div>
   </article>
   <article class="space reveal">
     <div class="ph"><picture><source srcset="img/opt/gal-spa-case-640.webp 640w, img/opt/gal-spa-case-1024.webp 1024w, img/opt/gal-spa-case.webp 1748w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp"><img width="1748" height="1240" loading="lazy" src="img/opt/gal-spa-case.jpg" srcset="img/opt/gal-spa-case-640.jpg 640w, img/opt/gal-spa-case-1024.jpg 1024w, img/opt/gal-spa-case.jpg 1748w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" alt="La case ronde qui abrite le spa"></picture></div>
-    <div class="tx"><span class="eyebrow" data-t="es4">04 · Bien-être</span><h3 data-t="t4">Spa &amp; Sauna</h3>
+    <div class="tx"><span class="eyebrow sec-no"><span class="rl"><span class="col pas"><span aria-hidden="true">03</span><span>04</span></span></span> · <span class="rl"><span class="col col-l pas"><span aria-hidden="true" data-t="es3">Professionnels</span><span data-t="es4">Bien-être</span></span></span></span><h3 data-t="t4">Spa &amp; Sauna</h3>
       <p data-t="ed4">Massages aux pierres chauffantes, rituel de l'Orient à l'argan, gommage au savon noir africain, soins du visage aux cinq fleurs d'Assinie. Et un sauna pour finir la journée.</p>
       <a href="spa.html" data-t="a4">Voir les soins</a></div>
   </article>
   <article class="space reveal">
     <div class="ph"><picture><source srcset="img/opt/c-piscine-640.webp 640w, img/opt/c-piscine.webp 900w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp"><img width="900" height="638" loading="lazy" src="img/opt/c-piscine.jpg" srcset="img/opt/c-piscine-640.jpg 640w, img/opt/c-piscine.jpg 900w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" alt="La piscine de l'hôtel en fin de journée"></picture></div>
-    <div class="tx"><span class="eyebrow" data-t="es5">05 · Loisirs</span><h3 data-t="t5">Piscine &amp; Jacuzzi</h3>
+    <div class="tx"><span class="eyebrow sec-no"><span class="rl"><span class="col pas"><span aria-hidden="true">04</span><span>05</span></span></span> · <span class="rl"><span class="col col-l pas"><span aria-hidden="true" data-t="es4">Bien-être</span><span data-t="es5">Loisirs</span></span></span></span><h3 data-t="t5">Piscine &amp; Jacuzzi</h3>
       <p data-t="ed5">Un grand bassin avec jacuzzi intégré, des transats et des parasols, ouverts du lever du jour à la nuit tombée. Aire de jeux pour les enfants et salle de sport à deux pas.</p>
       <a href="circuits.html" data-t="a5">Découvrir les offres</a></div>
   </article>
@@ -832,6 +844,9 @@ if(!('IntersectionObserver' in window)||reduce){document.querySelectorAll('.reve
 else{var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.1});
  document.querySelectorAll('.reveal').forEach(function(el){io.observe(el)});
  setTimeout(function(){document.querySelectorAll('.reveal:not(.in)').forEach(function(el){if(el.getBoundingClientRect().top<innerHeight)el.classList.add('in')})},1200)}
+/* 24 · chaque surtitre roule quand sa section arrive, une fois. */
+EVN_AU_SCROLL('.space','vu');
+
 
 if(!('IntersectionObserver' in window)||reduce){
   document.querySelectorAll('.cnt').forEach(function(e){e.textContent=e.dataset.to+(e.dataset.suffix||'')});
@@ -859,15 +874,15 @@ w4:"The best location",w4p:"At PK 19, between the Atlantic Ocean and the Aby lag
 w5:"Special offers",w5p:"Holiday Packs, tours, birthday boxes: packages built to enjoy Assinie differently.",
 w6:"Staff who answer",w6p:"Helpful, present, and glad to answer every question. It is the first thing our guests mention.",
 e3:"Our spaces",h3:"Five places, one same care",
-es1:"01 · Accommodation",t1:"Rooms &amp; Suites",
+es1:"Accommodation",t1:"Rooms &amp; Suites",
 ed1:"Fine materials, harmonious colours and careful decoration create a space where relaxation and wellbeing come first. Seven categories, from the standard room to the two-bedroom Arabian Suite.",a1:"See the categories",
-es2:"02 · Table",t2:"Restaurant",
+es2:"Table",t2:"Restaurant",
 ed2:"The authentic flavours of Côte d'Ivoire, in a warm, bright room opening onto the pool. Kedjenou, thiéboudiène, capitaine en papillote — and a list of house cocktails.",a2:"See the menu",
-es3:"03 · Business",t3:"Meetings &amp; Events",
+es3:"Business",t3:"Meetings &amp; Events",
 ed3:"A space bathed in natural light, contemporary in design, that suits anything: seminars, cocktails, gala dinners, product launches. PA system and sound engineer available.",a3:"Request a quote",
-es4:"04 · Wellbeing",t4:"Spa &amp; Sauna",
+es4:"Wellbeing",t4:"Spa &amp; Sauna",
 ed4:"Hot stone massages, an Oriental argan ritual, African black soap scrub, facials with the five flowers of Assinie. And a sauna to close the day.",a4:"See the treatments",
-es5:"05 · Leisure",t5:"Pool &amp; Jacuzzi",
+es5:"Leisure",t5:"Pool &amp; Jacuzzi",
 ed5:"A large pool with built-in jacuzzi, sun loungers and parasols, open from first light until dark. Children's play area and gym a few steps away.",a5:"See the offers",
 e4:"On the estate",h4:"Thirteen amenities,<br>all included",
 q1:"Air conditioning",q2:"Free wifi",q3:"Pool &amp; jacuzzi",q4:"Spa &amp; sauna",q5:"Gym",q6:"Smart TV",q7:"Play area",

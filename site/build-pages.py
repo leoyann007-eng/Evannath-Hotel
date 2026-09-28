@@ -42,6 +42,18 @@ section{padding:100px 0}
 .space:hover .ph img{transform:scale(1.05)}
 .space .tx{padding:48px}
 .space .tx h3{font-size:1.6rem;margin:12px 0 14px}
+/* 24 · Le numero de section tourne — maquette « Motion design II ».
+   Chaque colonne roule d'un cran (translateY -50 %) derriere une fenetre
+   d'une ligne ; 1,3 s --ease-inout, delai .3 s, le libelle .15 s apres.
+   La fenetre est aussi large que le plus long des deux libelles : le
+   surtitre est seul sur sa ligne, cet espace ne pousse rien. */
+.sec-no .rl{display:inline-block;height:1.3em;overflow:hidden;vertical-align:top}
+.sec-no .col{display:flex;flex-direction:column;transition:transform 1.3s var(--ease-inout) .3s}
+.sec-no .col-l{transition-delay:.45s}
+.sec-no .col>span{display:block;height:1.3em;line-height:1.3em}
+/* .pas : seules les colonnes a DEUX lignes roulent. La premiere
+   section n'en a qu'une ; la decaler de moitie la couperait en deux. */
+.space.vu .sec-no .pas{transform:translateY(-50%)}
 .space .tx p{font-size:14.5px}
 .space .tx a{display:inline-block;margin-top:16px;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--bronze);border:1px solid var(--bronze);padding:14px 20px;font-weight:700;transition:.3s}
 .space .tx a:hover{background:var(--bronze);color:var(--bark)}
@@ -189,13 +201,36 @@ body.append('''  </div>
   <span class="eyebrow" data-t="e3">Nos espaces</span>
   <h2 style="margin-bottom:44px" data-t="h3">Cinq lieux, un même soin</h2>''')
 
+def _numero(i):
+    """24 · Le surtitre « 02 · Table » roule depuis celui de la section
+    precedente, « 01 · Hebergement ». Deux colonnes : le numero, puis le
+    libelle, qui part .15 s plus tard.
+
+    La ligne precedente est aria-hidden : un lecteur d'ecran lirait sinon
+    « 01 02 · Hebergement Table ». Et elle porte la MEME cle de traduction
+    que la section d'avant — le meme texte, la meme cle, donc la meme
+    traduction, sans rien ecrire deux fois. La premiere section n'a rien
+    avant elle : elle ne roule pas."""
+    no, lab = SPACES[i - 1][0].split(' · ')
+    if i == 1:
+        return ('<span class="eyebrow sec-no"><span class="rl"><span class="col">'
+                '<span>%s</span></span></span> · <span class="rl"><span class="col">'
+                '<span data-t="es1">%s</span></span></span></span>' % (no, lab))
+    pno, plab = SPACES[i - 2][0].split(' · ')
+    return ('<span class="eyebrow sec-no"><span class="rl"><span class="col pas">'
+            '<span aria-hidden="true">%s</span><span>%s</span></span></span> · '
+            '<span class="rl"><span class="col col-l pas">'
+            '<span aria-hidden="true" data-t="es%d">%s</span><span data-t="es%d">%s</span>'
+            '</span></span></span>' % (pno, no, i - 1, plab, i, lab))
+
+
 for i, (nm, t, img, alt, d, href, cta) in enumerate(SPACES, 1):
     body.append('''  <article class="space reveal">
     <div class="ph"><picture><source srcset="img/opt/%s.webp" type="image/webp"><img loading="lazy" src="img/opt/%s.jpg" width="1200" height="800" alt="%s"></picture></div>
-    <div class="tx"><span class="eyebrow" data-t="es%d">%s</span><h3 data-t="t%d">%s</h3>
+    <div class="tx">%s<h3 data-t="t%d">%s</h3>
       <p data-t="ed%d">%s</p>
       <a href="%s" data-t="a%d">%s</a></div>
-  </article>''' % (img, img, alt, i, nm, i, t, i, d, href, i, cta))
+  </article>''' % (img, img, alt, _numero(i), i, t, i, d, href, i, cta))
 
 body.append('''</section>
 
@@ -249,6 +284,9 @@ body.append('''  </div>
 ''' + FOOTER)
 
 JS_ABOUT = NAV_JS + '''
+/* 24 · chaque surtitre roule quand sa section arrive, une fois. */
+EVN_AU_SCROLL('.space','vu');
+
 
 if(!('IntersectionObserver' in window)||reduce){
   document.querySelectorAll('.cnt').forEach(function(e){e.textContent=e.dataset.to+(e.dataset.suffix||'')});
@@ -276,15 +314,15 @@ w4:"The best location",w4p:"At PK 19, between the Atlantic Ocean and the Aby lag
 w5:"Special offers",w5p:"Holiday Packs, tours, birthday boxes: packages built to enjoy Assinie differently.",
 w6:"Staff who answer",w6p:"Helpful, present, and glad to answer every question. It is the first thing our guests mention.",
 e3:"Our spaces",h3:"Five places, one same care",
-es1:"01 · Accommodation",t1:"Rooms &amp; Suites",
+es1:"Accommodation",t1:"Rooms &amp; Suites",
 ed1:"Fine materials, harmonious colours and careful decoration create a space where relaxation and wellbeing come first. Seven categories, from the standard room to the two-bedroom Arabian Suite.",a1:"See the categories",
-es2:"02 · Table",t2:"Restaurant",
+es2:"Table",t2:"Restaurant",
 ed2:"The authentic flavours of Côte d'Ivoire, in a warm, bright room opening onto the pool. Kedjenou, thiéboudiène, capitaine en papillote — and a list of house cocktails.",a2:"See the menu",
-es3:"03 · Business",t3:"Meetings &amp; Events",
+es3:"Business",t3:"Meetings &amp; Events",
 ed3:"A space bathed in natural light, contemporary in design, that suits anything: seminars, cocktails, gala dinners, product launches. PA system and sound engineer available.",a3:"Request a quote",
-es4:"04 · Wellbeing",t4:"Spa &amp; Sauna",
+es4:"Wellbeing",t4:"Spa &amp; Sauna",
 ed4:"Hot stone massages, an Oriental argan ritual, African black soap scrub, facials with the five flowers of Assinie. And a sauna to close the day.",a4:"See the treatments",
-es5:"05 · Leisure",t5:"Pool &amp; Jacuzzi",
+es5:"Leisure",t5:"Pool &amp; Jacuzzi",
 ed5:"A large pool with built-in jacuzzi, sun loungers and parasols, open from first light until dark. Children's play area and gym a few steps away.",a5:"See the offers",
 e4:"On the estate",h4:"Thirteen amenities,<br>all included",
 q1:"Air conditioning",q2:"Free wifi",q3:"Pool &amp; jacuzzi",q4:"Spa &amp; sauna",q5:"Gym",q6:"Smart TV",q7:"Play area",
