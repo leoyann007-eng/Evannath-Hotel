@@ -172,25 +172,18 @@ header.sans-transition,header.sans-transition *{transition:none!important}
 header.menu .hd-fond{background:var(--bark);backdrop-filter:none;
   box-shadow:0 1px 0 var(--line)}
 .nav{display:flex;align-items:center;justify-content:space-between;gap:20px}
-/* A3 · Le logo cede la place a l'EMBLEME. Les deux sont superposes dans
-   une boite de taille fixe : on passe de l'un a l'autre en fondu et en
-   echelle, jamais en largeur.
+/* A3 · Le logo RESTE le logo. L'embleme avait ete mis a sa place par une
+   mauvaise lecture de la remise : l'effet 18 construit le logo sur
+   l'ECRAN DE CHARGEMENT, il ne le remplace pas ici. embleme.svg reste
+   dans img/ pour ce jour-la.
 
-   L'embleme est pose en MASQUE et non inline : 17 Ko de trace, sur
-   vingt-deux pages, feraient 374 Ko pour une marque de 60 px. En masque
-   c'est un fichier mis en cache une fois — et il prend quand meme la
-   couleur du texte, ce qui etait la raison d'etre du currentColor. */
-.brand{color:var(--bronze)}
-.brand .bl{position:relative;display:block;width:168px;height:41px}
-.brand .bl img{position:absolute;left:0;top:0;width:168px;
-  transition:opacity .8s ease,transform .8s var(--ease-out)}
-.brand .bl .emb{position:absolute;left:0;top:0;width:62px;height:41px;
-  background:currentColor;opacity:0;transform:scale(.92);
-  -webkit-mask:url(img/embleme.svg) left center/contain no-repeat;
-  mask:url(img/embleme.svg) left center/contain no-repeat;
-  transition:opacity .8s ease,transform .8s var(--ease-out)}
-header.scrolled .bl img{opacity:0;transform:scale(.96)}
-header.scrolled .bl .emb{opacity:1;transform:none}
+   Le logo se reduit quand meme, mais par TRANSFORM et non par largeur :
+   la regle « pas d'animation de dimensions » vaut aussi pour lui, et un
+   scale ne coute qu'une composition. L'origine a gauche le garde aligne
+   sur la marge. */
+.brand img{width:168px;transform-origin:left center;
+  transition:transform .8s var(--ease-out)}
+header.scrolled .brand img{transform:scale(.8)}
 /* La signature sous le logo s'efface : c'est elle qui fait la difference
    entre « le logo complet » et « l'embleme ». Pour aller jusqu'au
    monogramme seul il faudrait un second fichier — l'actuel est un
@@ -538,10 +531,7 @@ caption{caption-side:bottom;padding:16px 4px 0;font-size:12.5px;color:var(--mute
   <div class="hd-fond" aria-hidden="true"></div>
   <div class="wrap nav">
     <a href="index.html" class="brand" aria-label="Hôtel Evannath, accueil">
-      <span class="bl">
-        <img width="729" height="176" src="img/opt/logo-bronze.png" alt="Hôtel Evannath">
-        <span class="emb" aria-hidden="true"></span>
-      </span>
+      <img width="729" height="176" src="img/opt/logo-bronze.png" alt="Hôtel Evannath">
       <small>LE RÊVE AFRICAIN</small>
     </a>
     <div class="nav-right">
