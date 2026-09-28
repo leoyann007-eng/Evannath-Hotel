@@ -240,6 +240,11 @@ header.scrolled .brand small{opacity:0}
    stroke-dasharray:1 avec pathLength="1" veut dire « un tiret long comme
    tout le trace ». L'offset le pousse hors du cadre, et le ramener a zero
    dessine le trait. */
+/* La frise est la DERNIERE du tiroir : rubriques et colonne de droite
+   partagent la premiere rangee, qui prend toute la hauteur libre (1fr) ;
+   la frise se pose en bas, comme dans la maquette 07. Placee entre les
+   deux colonnes, elle ouvrait une rangee et renvoyait la photo dessous. */
+.dw-in{grid-template-rows:1fr auto}
 .dw-med{grid-column:1/-1;width:360px;max-width:100%;margin:0 auto;
   color:var(--bronze);opacity:.85}
 /* Les delais ne vivent que dans l'etat OUVERT. Une transition prend les
@@ -485,7 +490,7 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
 
 
 @media(max-width:1080px){
-  .dw-in{grid-template-columns:1fr;gap:40px;align-content:start}
+  .dw-in{grid-template-columns:1fr;grid-template-rows:none;gap:40px;align-content:start}
   .dw-side .ph{display:none}
 }
 @media(max-width:1024px){
@@ -629,7 +634,6 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
       <a href="contact.html"><i>10</i><span data-t="n10">Contact</span></a>
       <a href="reserver.html"><i>11</i><span data-t="n11">Réserver</span></a>
     </nav>
-<span class="pagne pagne-med dw-med" aria-hidden="true"><svg focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 40"><g fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path pathLength="1" d="M0 20H148M212 20H360" stroke-width="1"></path><circle cx="148" cy="20" r="1.6" fill="currentColor" stroke="none"></circle><circle cx="212" cy="20" r="1.6" fill="currentColor" stroke="none"></circle><path pathLength="1" d="M180 1L199 20L180 39L161 20Z" stroke-width="1"></path><g transform="translate(169.5 9.5) scale(.35)" stroke-width="3.4"><path pathLength="1" d="M8 52V8H52V52H16V16H44V44H24V24H36V36H30"></path></g></g></svg></span>
     <aside class="dw-side">
       <div class="ph"><picture><source srcset="img/opt/gal-art-lanterne-640.webp 640w, img/opt/gal-art-lanterne-1024.webp 1024w, img/opt/gal-art-lanterne.webp 1748w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp">
         <img width="1748" height="1240" src="img/opt/gal-art-lanterne.jpg" srcset="img/opt/gal-art-lanterne-640.jpg 640w, img/opt/gal-art-lanterne-1024.jpg 1024w, img/opt/gal-art-lanterne.jpg 1748w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" srcset="img/opt/gal-art-lanterne.jpg" alt="Lanterne de rotin de l'Hôtel Evannath" loading="lazy"></picture></div>
@@ -642,6 +646,7 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
       </div>
       <div class="lang"><button class="on" data-lang="fr">FR</button><button data-lang="en">EN</button></div>
     </aside>
+<span class="pagne pagne-med dw-med" aria-hidden="true"><svg focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 40"><g fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path pathLength="1" d="M0 20H148M212 20H360" stroke-width="1"></path><circle cx="148" cy="20" r="1.6" fill="currentColor" stroke="none"></circle><circle cx="212" cy="20" r="1.6" fill="currentColor" stroke="none"></circle><path pathLength="1" d="M180 1L199 20L180 39L161 20Z" stroke-width="1"></path><g transform="translate(169.5 9.5) scale(.35)" stroke-width="3.4"><path pathLength="1" d="M8 52V8H52V52H16V16H44V44H24V24H36V36H30"></path></g></g></svg></span>
   </div>
 </div>
 

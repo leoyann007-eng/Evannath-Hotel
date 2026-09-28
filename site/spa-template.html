@@ -148,6 +148,11 @@ header.scrolled .brand img{transform:scale(.8)}
    stroke-dasharray:1 avec pathLength="1" veut dire « un tiret long comme
    tout le trace ». L'offset le pousse hors du cadre, et le ramener a zero
    dessine le trait. */
+/* La frise est la DERNIERE du tiroir : rubriques et colonne de droite
+   partagent la premiere rangee, qui prend toute la hauteur libre (1fr) ;
+   la frise se pose en bas, comme dans la maquette 07. Placee entre les
+   deux colonnes, elle ouvrait une rangee et renvoyait la photo dessous. */
+.dw-in{grid-template-rows:1fr auto}
 .dw-med{grid-column:1/-1;width:360px;max-width:100%;margin:0 auto;
   color:var(--bronze);opacity:.85}
 /* Les delais ne vivent que dans l'etat OUVERT. Une transition prend les
@@ -302,7 +307,7 @@ footer{background:#0B0704}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition-duration:.01ms!important;transition-delay:0s!important}.js .reveal,.dw-in nav a{opacity:1;transform:none}}
 
 @media(max-width:1080px){
-  .dw-in{grid-template-columns:1fr;gap:40px;align-content:start}
+  .dw-in{grid-template-columns:1fr;grid-template-rows:none;gap:40px;align-content:start}
   .dw-side .ph{display:none}
   .mani .grid,.book .grid{grid-template-columns:1fr;gap:40px}
   .menu-list{column-count:1}
@@ -355,7 +360,6 @@ footer{background:#0B0704}
     <nav aria-label="Navigation principale">
 {{NAV_LINKS}}
     </nav>
-    {{MED}}
     <aside class="dw-side">
       <div class="ph"><picture><source srcset="img/opt/gal-spa-huiles-t.webp" type="image/webp">
         <img src="img/opt/gal-spa-huiles-t.jpg" width="700" height="467" alt="Serviettes et huiles du spa" loading="lazy"></picture></div>
@@ -368,6 +372,7 @@ footer{background:#0B0704}
       </div>
       <div class="lang"><button class="on" data-lang="fr">FR</button><button data-lang="en">EN</button></div>
     </aside>
+    {{MED}}
   </div>
 </div>
 

@@ -593,6 +593,11 @@ header.scrolled .brand small{opacity:0}
    stroke-dasharray:1 avec pathLength="1" veut dire Â« un tiret long comme
    tout le trace Â». L'offset le pousse hors du cadre, et le ramener a zero
    dessine le trait. */
+/* La frise est la DERNIERE du tiroir : rubriques et colonne de droite
+   partagent la premiere rangee, qui prend toute la hauteur libre (1fr) ;
+   la frise se pose en bas, comme dans la maquette 07. Placee entre les
+   deux colonnes, elle ouvrait une rangee et renvoyait la photo dessous. */
+.dw-in{grid-template-rows:1fr auto}
 .dw-med{grid-column:1/-1;width:360px;max-width:100%;margin:0 auto;
   color:var(--bronze);opacity:.85}
 /* Les delais ne vivent que dans l'etat OUVERT. Une transition prend les
@@ -669,7 +674,7 @@ main{display:block}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition-duration:.01ms!important;transition-delay:0s!important}.js .reveal,.dw-in nav a{opacity:1;transform:none}}
 
 @media(max-width:1080px){
-  .dw-in{grid-template-columns:1fr;gap:40px;align-content:start}
+  .dw-in{grid-template-columns:1fr;grid-template-rows:none;gap:40px;align-content:start}
   .dw-side .ph{display:none}
 }
 @media(max-width:720px){
@@ -984,7 +989,6 @@ def drawer(current='', photo='gal-art-lanterne', alt='Lanterne de rotin de l\'HÃ
     <nav aria-label="Navigation principale">
 %s
     </nav>
-%s
     <aside class="dw-side">
       <div class="ph"><picture><source srcset="img/opt/%s.webp" type="image/webp">
         <img src="img/opt/%s.jpg" width="1100" height="733" alt="%s" loading="lazy"></picture></div>
@@ -997,10 +1001,11 @@ def drawer(current='', photo='gal-art-lanterne', alt='Lanterne de rotin de l\'HÃ
       </div>
       <div class="lang"><button class="on" data-lang="fr">FR</button><button data-lang="en">EN</button></div>
     </aside>
+%s
   </div>
 </div>
 
-<main id="contenu">'''.replace('{{WA}}', WA).replace('{{MAIL}}', MAIL) % ('\n'.join(rows), medaillon('carre-large', 'dw-med'), photo, photo, alt)
+<main id="contenu">'''.replace('{{WA}}', WA).replace('{{MAIL}}', MAIL) % ('\n'.join(rows), photo, photo, alt, medaillon('carre-large', 'dw-med'))
 
 FOOTER = '''</main>
 
