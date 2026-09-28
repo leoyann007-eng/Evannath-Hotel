@@ -137,26 +137,67 @@ p{color:var(--prose)}
    612 px avait donne 96 -> 75 et m'avait fait croire a un ecart : a cette
    largeur la mise en page n'est plus la meme. Une hauteur de header se
    mesure a la largeur ou elle est vue. */
-header{position:fixed;top:0;left:0;right:0;z-index:100;padding:22px 0;
-  background:rgba(251,247,240,.90);backdrop-filter:blur(14px);
-  transition:padding .8s var(--ease-out),background-color .8s ease,
-             border-color .8s ease,box-shadow .8s ease}
-header.scrolled{padding:11px 0;background:rgba(251,247,240,.97);border-bottom:1px solid var(--line)}
+/* A3 · Le header ne change plus de DIMENSION. Sa boite fait 104 px, tout
+   le temps. Ce qui se contracte est un CALQUE de fond, par transform :
+   scaleY(.75) le ramene a 78 px vus, exactement la valeur de la remise. Le
+   contenu remonte de 13 px pour rester centre dans la bande.
+
+   Pourquoi ce detour : animer `padding` ou `height` relance la mise en page
+   a chaque image, et la remise l'interdit. Un transform ne coute qu'une
+   composition.
+
+   getBoundingClientRect() tient compte du transform : le script qui mesure
+   --h-nav lit donc 78 px sur ce calque, et les ancres gardent le bon
+   decalage. C'est pour cela que le fond est un ELEMENT et non un
+   pseudo-element, qu'on ne peut pas mesurer. */
+header{position:fixed;top:0;left:0;right:0;z-index:100;height:104px;
+  display:flex;align-items:center}
+.hd-fond{position:absolute;left:0;top:0;right:0;height:104px;z-index:0;
+  transform-origin:top;background:rgba(251,247,240,.90);backdrop-filter:blur(14px);
+  transition:transform .8s var(--ease-out),background-color .8s ease,
+             box-shadow .8s ease}
+header.scrolled .hd-fond{transform:scaleY(.75);background:rgba(251,247,240,.97);
+  box-shadow:0 1px 0 var(--line)}
+.nav{position:relative;z-index:1;width:100%;
+  transition:transform .8s var(--ease-out)}
+header.scrolled .nav{transform:translateY(-13px)}
+/* Le temps d'une mesure, rien ne bouge — voir le script de --h-nav. */
+header.sans-transition,header.sans-transition *{transition:none!important}
+
 /* Menu ouvert : l en-tete devient opaque, et de la couleur du tiroir.
    Sinon le contenu du menu defile DESSOUS et transparait par les 10 pour cent
    qui restent — le logo se melangeait au premier lien. La page, elle, ne
    defile plus quand le menu est ouvert : l en-tete ne passait donc jamais en
    mode defile, et gardait son fond translucide. */
-header.menu{background:var(--bark);backdrop-filter:none;border-bottom:1px solid var(--line)}
+header.menu .hd-fond{background:var(--bark);backdrop-filter:none;
+  box-shadow:0 1px 0 var(--line)}
 .nav{display:flex;align-items:center;justify-content:space-between;gap:20px}
-.brand img{width:168px;transition:width .9s var(--ease-out)}
+/* A3 · Le logo cede la place a l'EMBLEME. Les deux sont superposes dans
+   une boite de taille fixe : on passe de l'un a l'autre en fondu et en
+   echelle, jamais en largeur.
+
+   L'embleme est pose en MASQUE et non inline : 17 Ko de trace, sur
+   vingt-deux pages, feraient 374 Ko pour une marque de 60 px. En masque
+   c'est un fichier mis en cache une fois — et il prend quand meme la
+   couleur du texte, ce qui etait la raison d'etre du currentColor. */
+.brand{color:var(--bronze)}
+.brand .bl{position:relative;display:block;width:168px;height:41px}
+.brand .bl img{position:absolute;left:0;top:0;width:168px;
+  transition:opacity .8s ease,transform .8s var(--ease-out)}
+.brand .bl .emb{position:absolute;left:0;top:0;width:62px;height:41px;
+  background:currentColor;opacity:0;transform:scale(.92);
+  -webkit-mask:url(img/embleme.svg) left center/contain no-repeat;
+  mask:url(img/embleme.svg) left center/contain no-repeat;
+  transition:opacity .8s ease,transform .8s var(--ease-out)}
+header.scrolled .bl img{opacity:0;transform:scale(.96)}
+header.scrolled .bl .emb{opacity:1;transform:none}
 /* La signature sous le logo s'efface : c'est elle qui fait la difference
    entre « le logo complet » et « l'embleme ». Pour aller jusqu'au
    monogramme seul il faudrait un second fichier — l'actuel est un
    logotype d'un seul tenant, et le recadrer laisserait un trou. */
 .brand small{transition:opacity .8s ease}
 header.scrolled .brand small{opacity:0}
-header.scrolled .brand img{width:132px}
+
 .brand small{display:block;font-size:8px;letter-spacing:.42em;color:var(--bronze);margin-top:6px;padding-left:2px;font-weight:700}
 .nav-right{display:flex;align-items:center;gap:18px}
 .lang{display:flex;border:1px solid var(--line)}
@@ -188,18 +229,41 @@ header.scrolled .brand img{width:132px}
   transition:transform .9s cubic-bezier(.7,0,.2,1),visibility 0s}
 .dw-in{min-height:100svh;display:grid;grid-template-columns:1.25fr 1fr;align-items:center;gap:60px;max-width:var(--max);margin:0 auto;padding:130px 24px 60px}
 .dw-in nav{display:flex;flex-direction:column}
-/* Chaque rubrique monte DERRIERE une fenetre : le parent masque le
-   debordement, l'enfant translate de 110 %. Sans le masque, le texte
-   glisserait par-dessus la rubrique voisine au lieu de surgir. */
+/* A2 · Chaque rubrique monte derriere SA PROPRE fenetre.
+   Le masque etait pose sur le <nav> entier : les liens glissaient les uns
+   sur les autres au lieu de surgir chacun de sa ligne, et la bordure du
+   dernier coupait le mouvement des autres. C'est donc le lien qui masque,
+   et son CONTENU qui translate — la bordure, elle, reste en place. */
 .dw-in nav a{
   display:flex;align-items:baseline;gap:22px;padding:16px 0;border-bottom:1px solid var(--line-2);
   font-family:var(--f-display);font-size:clamp(1.45rem,3.2vw,2.4rem);color:var(--cream);
-  transform:translateY(110%);transition:color .3s,transform .5s var(--ease-out)
+  overflow:hidden;transition:color .3s
 }
-.dw-in nav{overflow:hidden}
-.drawer.open .dw-in nav a{transform:none;transition:color .3s,transform 1s var(--ease-out)}
+.dw-in nav a>*{display:inline-block;transform:translateY(110%);
+  transition:transform .5s var(--ease-out)}
+.drawer.open .dw-in nav a>*{transform:none;transition:transform 1s var(--ease-out)}
 .dw-in nav a:hover,.dw-in nav a.on{color:var(--bronze-2)}
 .dw-in nav a i{font-style:normal;font-family:var(--f-body);font-size:10px;letter-spacing:.2em;color:var(--bronze);font-weight:700;flex:0 0 auto;opacity:.7}
+/* A2 · Le medaillon se trace a l'ouverture du tiroir — la mecanique de
+   l'effet 01, avec les delais de la maquette 07 : les filets d'abord a
+   1,2 s, le losange a 1,7 s, le signe en fondu a 2,2 s. Le panneau a fini
+   de descendre a .9 s : le dessin commence donc apres, pas pendant.
+
+   stroke-dasharray:1 avec pathLength="1" veut dire « un tiret long comme
+   tout le trace ». L'offset le pousse hors du cadre, et le ramener a zero
+   dessine le trait. */
+.dw-med{grid-column:1/-1;width:360px;max-width:100%;margin:0 auto;
+  color:var(--bronze);opacity:.85}
+.dw-med path{stroke-dasharray:1;stroke-dashoffset:1}
+.dw-med>svg>g>path:nth-of-type(1){transition:stroke-dashoffset 1.2s var(--ease-draw) 1.2s}
+.dw-med>svg>g>path:nth-of-type(2){transition:stroke-dashoffset 1s var(--ease-draw) 1.7s}
+.dw-med circle{opacity:0;transition:opacity 1.2s ease 1.2s}
+/* Le signe n'est pas dessine, il apparait : son trace est trop court et
+   trop replie pour qu'un dessin s'y lise. */
+.dw-med g g path{stroke-dashoffset:0;opacity:0;transition:opacity 1s ease 2.2s}
+.drawer.open .dw-med>svg>g>path{stroke-dashoffset:0}
+.drawer.open .dw-med circle,.drawer.open .dw-med g g path{opacity:1}
+
 .dw-side{display:flex;flex-direction:column;gap:26px;
   opacity:0;transition:opacity .3s ease}
 .drawer.open .dw-side{opacity:1;transition:opacity 1s ease 1s}
@@ -297,7 +361,6 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
 .js .reveal{opacity:0;transform:translateY(28px);transition:opacity .9s cubic-bezier(.2,.8,.2,1),transform .9s cubic-bezier(.2,.8,.2,1)}
 .js .reveal.in{opacity:1;transform:none}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition-duration:.01ms!important}.js .reveal,.dw-in nav a{opacity:1;transform:none}}
-}
 
 @media(max-width:1080px){
   .dw-in{grid-template-columns:1fr;gap:40px;align-content:start}
@@ -490,9 +553,13 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
 
 <a class="skip" href="#contenu">Aller au contenu</a>
 <header id="hd">
+  <div class="hd-fond" aria-hidden="true"></div>
   <div class="wrap nav">
     <a href="index.html" class="brand" aria-label="Hôtel Evannath, accueil">
-      <img width="729" height="176" src="img/opt/logo-bronze.png" alt="Hôtel Evannath">
+      <span class="bl">
+        <img width="729" height="176" src="img/opt/logo-bronze.png" alt="Hôtel Evannath">
+        <span class="emb" aria-hidden="true"></span>
+      </span>
       <small>LE RÊVE AFRICAIN</small>
     </a>
     <div class="nav-right">
@@ -520,6 +587,7 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
       <a href="contact.html"><i>10</i><span data-t="n10">Contact</span></a>
       <a href="reserver.html"><i>11</i><span data-t="n11">Réserver</span></a>
     </nav>
+<span class="pagne pagne-med dw-med" aria-hidden="true"><svg focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 40"><g fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path pathLength="1" d="M0 20H148M212 20H360" stroke-width="1"></path><circle cx="148" cy="20" r="1.6" fill="currentColor" stroke="none"></circle><circle cx="212" cy="20" r="1.6" fill="currentColor" stroke="none"></circle><path pathLength="1" d="M180 1L199 20L180 39L161 20Z" stroke-width="1"></path><g transform="translate(169.5 9.5) scale(.35)" stroke-width="3.4"><path pathLength="1" d="M8 52V8H52V52H16V16H44V44H24V24H36V36H30"></path></g></g></svg></span>
     <aside class="dw-side">
       <div class="ph"><picture><source srcset="img/opt/gal-art-lanterne-640.webp 640w, img/opt/gal-art-lanterne-1024.webp 1024w, img/opt/gal-art-lanterne.webp 1748w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp">
         <img width="1748" height="1240" src="img/opt/gal-art-lanterne.jpg" srcset="img/opt/gal-art-lanterne-640.jpg 640w, img/opt/gal-art-lanterne-1024.jpg 1024w, img/opt/gal-art-lanterne.jpg 1748w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" alt="Lanterne de rotin de l'Hôtel Evannath" loading="lazy"></picture></div>
@@ -771,12 +839,38 @@ function toggleMenu(){
   bg.setAttribute('aria-label',o?'Fermer le menu':'Ouvrir le menu');
   document.body.style.overflow=o?'hidden':'';
   /* .5s puis .07s par rang — maquette « Motion design I », effet 07.
-     A la fermeture, aucun delai : on ne retient pas quelqu'un qui part. */
-  dwLinks.forEach(function(a,i){a.style.transitionDelay=o?(500+i*70)+'ms':'0ms'});
+     Le delai va sur le CONTENU du lien, qui est ce qui bouge : le lien,
+     lui, ne fait plus que masquer. A la fermeture, aucun delai — on ne
+     retient pas quelqu'un qui part. */
+  dwLinks.forEach(function(a,i){
+    [].forEach.call(a.children,function(c){c.style.transitionDelay=o?(500+i*70)+'ms':'0ms'});
+  });
+  if(o){
+    /* Le focus entre dans le tiroir. Sans cela, la tabulation continue
+       dans la page qui est DERRIERE, invisible et bloquee au defilement :
+       on tabule a l'aveugle. */
+    setTimeout(function(){var p=dw.querySelector('nav a');if(p)p.focus()},120);
+  }else{
+    bg.focus();
+  }
 }
 bg.onclick=toggleMenu;
 dwLinks.forEach(function(a){a.onclick=function(){if(dw.classList.contains('open'))toggleMenu()}});
-addEventListener('keydown',function(e){if(e.key==='Escape'&&dw.classList.contains('open'))toggleMenu()});
+
+/* Le piege a focus. Tant que le tiroir est ouvert, la tabulation tourne
+   entre ses elements : le bouton Menu, les rubriques, les liens de la
+   colonne contact. Echap rend la main, et le focus retourne au bouton. */
+addEventListener('keydown',function(e){
+  if(!dw.classList.contains('open'))return;
+  if(e.key==='Escape'){toggleMenu();return}
+  if(e.key!=='Tab')return;
+  var f=[bg].concat([].slice.call(dw.querySelectorAll('a[href],button:not([disabled])')))
+    .filter(function(n){return n.offsetParent!==null||n===bg});
+  if(!f.length)return;
+  var premier=f[0],dernier=f[f.length-1];
+  if(e.shiftKey&&document.activeElement===premier){e.preventDefault();dernier.focus()}
+  else if(!e.shiftKey&&document.activeElement===dernier){e.preventDefault();premier.focus()}
+});
 
 /* Films d'ambiance -------------------------------------------------------
    On ne charge un film que si cela a du sens : ecran large, connexion qui
@@ -832,13 +926,22 @@ function plein(el){
   var h = document.querySelector('header');
   if (!h) return;
   function mesurer(){
+    /* On mesure le CALQUE DE FOND, pas la boite. Depuis que le header a une
+       hauteur fixe de 104 px, sa boite ne bouge plus : c'est le calque qui
+       se contracte par transform, et getBoundingClientRect en tient compte.
+       Mesurer le header rendrait 104 quoi qu'il arrive, et toutes les
+       ancres se caleraient 26 px trop bas. */
+    var fond = h.querySelector('.hd-fond') || h;
     var etait = h.classList.contains('scrolled');
-    h.style.transition = 'none';
+    /* TOUT le header, pas seulement le calque. Couper la seule transition
+       du fond laissait le logo et l'embleme demarrer leur fondu pendant la
+       mesure : un battement visible a chaque chargement de page. */
+    h.classList.add('sans-transition');
     h.classList.add('scrolled');
-    var v = Math.round(h.getBoundingClientRect().height);
+    var v = Math.round(fond.getBoundingClientRect().height);
     if (!etait) h.classList.remove('scrolled');
     void h.offsetHeight;
-    h.style.transition = '';
+    h.classList.remove('sans-transition');
     if (v > 0) document.documentElement.style.setProperty('--h-nav', v + 'px');
   }
   mesurer();

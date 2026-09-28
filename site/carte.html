@@ -1033,12 +1033,38 @@ function toggleMenu(){
   bg.setAttribute('aria-label',o?'Fermer le menu':'Ouvrir le menu');
   document.body.style.overflow=o?'hidden':'';
   /* .5s puis .07s par rang — maquette « Motion design I », effet 07.
-     A la fermeture, aucun delai : on ne retient pas quelqu'un qui part. */
-  dwLinks.forEach(function(a,i){a.style.transitionDelay=o?(500+i*70)+'ms':'0ms'});
+     Le delai va sur le CONTENU du lien, qui est ce qui bouge : le lien,
+     lui, ne fait plus que masquer. A la fermeture, aucun delai — on ne
+     retient pas quelqu'un qui part. */
+  dwLinks.forEach(function(a,i){
+    [].forEach.call(a.children,function(c){c.style.transitionDelay=o?(500+i*70)+'ms':'0ms'});
+  });
+  if(o){
+    /* Le focus entre dans le tiroir. Sans cela, la tabulation continue
+       dans la page qui est DERRIERE, invisible et bloquee au defilement :
+       on tabule a l'aveugle. */
+    setTimeout(function(){var p=dw.querySelector('nav a');if(p)p.focus()},120);
+  }else{
+    bg.focus();
+  }
 }
 bg.onclick=toggleMenu;
 dwLinks.forEach(function(a){a.onclick=function(){if(dw.classList.contains('open'))toggleMenu()}});
-addEventListener('keydown',function(e){if(e.key==='Escape'&&dw.classList.contains('open'))toggleMenu()});
+
+/* Le piege a focus. Tant que le tiroir est ouvert, la tabulation tourne
+   entre ses elements : le bouton Menu, les rubriques, les liens de la
+   colonne contact. Echap rend la main, et le focus retourne au bouton. */
+addEventListener('keydown',function(e){
+  if(!dw.classList.contains('open'))return;
+  if(e.key==='Escape'){toggleMenu();return}
+  if(e.key!=='Tab')return;
+  var f=[bg].concat([].slice.call(dw.querySelectorAll('a[href],button:not([disabled])')))
+    .filter(function(n){return n.offsetParent!==null||n===bg});
+  if(!f.length)return;
+  var premier=f[0],dernier=f[f.length-1];
+  if(e.shiftKey&&document.activeElement===premier){e.preventDefault();dernier.focus()}
+  else if(!e.shiftKey&&document.activeElement===dernier){e.preventDefault();premier.focus()}
+});
 
 /* Films d'ambiance -------------------------------------------------------
    On ne charge un film que si cela a du sens : ecran large, connexion qui
@@ -1094,13 +1120,22 @@ function plein(el){
   var h = document.querySelector('header');
   if (!h) return;
   function mesurer(){
+    /* On mesure le CALQUE DE FOND, pas la boite. Depuis que le header a une
+       hauteur fixe de 104 px, sa boite ne bouge plus : c'est le calque qui
+       se contracte par transform, et getBoundingClientRect en tient compte.
+       Mesurer le header rendrait 104 quoi qu'il arrive, et toutes les
+       ancres se caleraient 26 px trop bas. */
+    var fond = h.querySelector('.hd-fond') || h;
     var etait = h.classList.contains('scrolled');
-    h.style.transition = 'none';
+    /* TOUT le header, pas seulement le calque. Couper la seule transition
+       du fond laissait le logo et l'embleme demarrer leur fondu pendant la
+       mesure : un battement visible a chaque chargement de page. */
+    h.classList.add('sans-transition');
     h.classList.add('scrolled');
-    var v = Math.round(h.getBoundingClientRect().height);
+    var v = Math.round(fond.getBoundingClientRect().height);
     if (!etait) h.classList.remove('scrolled');
     void h.offsetHeight;
-    h.style.transition = '';
+    h.classList.remove('sans-transition');
     if (v > 0) document.documentElement.style.setProperty('--h-nav', v + 'px');
   }
   mesurer();
