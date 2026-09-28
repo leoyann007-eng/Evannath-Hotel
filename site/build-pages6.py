@@ -6,7 +6,7 @@ import _chambres
 import _schema
 from _evenements import EVENEMENTS, EN as EV_EN
 NL_ = chr(10)
-from _chrome import page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV, PAGNE_CSS
+from _chrome import page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV, PAGNE_CSS, PAGNE_JS
 
 CSS = """
 /* Les intertitres qui separent les quatre parties de la page. */
@@ -318,6 +318,7 @@ b = [header('#demande','Réserver'), drawer('circuits.html'), '''
   <span class="eyebrow" data-t="eb">Onze offres &amp; un rendez-vous hebdomadaire</span>
   <h1 data-t="h1">Offres &amp; Événements</h1>
   <div class="pagne pagne-damas vers-gauche pagne-offres" aria-hidden="true"></div>
+  <div class="pagne pagne-lampe pagne-offres" aria-hidden="true"></div>
   <p class="lede" data-t="lede">Ce qui se passe en ce moment, et les séjours déjà composés — chambre, repas, activités et attentions comprises. Choisissez, indiquez vos dates, et la réception s'occupe du reste.</p>
 </div>
 
@@ -1079,6 +1080,10 @@ LD = _schema.bloc(
     _schema.fil([('Accueil','index'),('Offres & Événements',None)]))
 
 CORPS = NL_.join(b).replace('{{AGENDA}}', AGENDA)
+
+# Les motifs arrivent au defilement : ce morceau ne part que sur les
+# pages qui en portent.
+JS = JS + PAGNE_JS
 
 io.open('circuits.html','w',encoding='utf-8').write(page(
  "Offres &amp; Événements — Hôtel Evannath, Assinie",

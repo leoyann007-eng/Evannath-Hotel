@@ -8,7 +8,7 @@ des hypotheses a faire confirmer — voir README.
 import io
 import _schema
 from _chrome import (page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV, WA,
-                     REMISE_JS, REMISE_CSS, DISPO_JS, PAGNE_CSS)
+                     REMISE_JS, REMISE_CSS, DISPO_JS, PAGNE_CSS, PAGNE_JS)
 
 # slug, nom, prix, capacite, resume, accroche, 3 paragraphes, equipements+, photos
 from _chambres import CHAMBRES
@@ -533,7 +533,7 @@ var EN={''' % (c['prix'], c['slug']) + EN_NAV + _en_dict(c) + '};\n\n' + LANG_JS
         "%s — Hôtel Evannath, Assinie | %s FCFA la nuit" % (c['nom'], fmt(c['prix'])),
         "%s à l'Hôtel Evannath, Assinie PK 19 : %s. %s FCFA la nuit, petit-déjeuner et navette aéroport inclus."
         % (c['nom'], c['meta'], fmt(c['prix'])),
-        c['photos'][0][0], CSS, '\n'.join(b), JS, preload=c['photos'][0][0], slug=c['slug'], jsonld=LD, sizes=mosa)
+        c['photos'][0][0], CSS, '\n'.join(b), JS + PAGNE_JS, preload=c['photos'][0][0], slug=c['slug'], jsonld=LD, sizes=mosa)
     # Le numero WhatsApp du moment : voir WA_EN_TEST dans _chrome.py.
     io.open(c['slug'] + '.html', 'w', encoding='utf-8').write(HTML.replace('{{WA}}', WA))
     print('  %-26s %s FCFA' % (c['slug'] + '.html', fmt(c['prix'])))

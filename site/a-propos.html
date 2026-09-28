@@ -247,15 +247,18 @@ header.scrolled .brand small{opacity:0}
    dessine le trait. */
 .dw-med{grid-column:1/-1;width:360px;max-width:100%;margin:0 auto;
   color:var(--bronze);opacity:.85}
-.dw-med path{stroke-dasharray:1;stroke-dashoffset:1}
-.dw-med>svg>g>path:nth-of-type(1){transition:stroke-dashoffset 1.2s var(--ease-draw) 1.2s}
-.dw-med>svg>g>path:nth-of-type(2){transition:stroke-dashoffset 1s var(--ease-draw) 1.7s}
-.dw-med circle{opacity:0;transition:opacity 1.2s ease 1.2s}
-/* Le signe n'est pas dessine, il apparait : son trace est trop court et
-   trop replie pour qu'un dessin s'y lise. */
-.dw-med g g path{stroke-dashoffset:0;opacity:0;transition:opacity 1s ease 2.2s}
+/* Les delais ne vivent que dans l'etat OUVERT. Une transition prend les
+   reglages de l'etat d'ARRIVEE : poses sur l'etat de repos, les 1,2 s de
+   delai jouaient aussi a la fermeture, et un menu rouvert dans la seconde
+   retrouvait son medaillon deja trace, sans le voir se dessiner. */
+.dw-med [pathLength]{stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset .3s ease}
+.dw-med g g [pathLength]{stroke-dashoffset:0}
+.dw-med>svg>g>circle,.dw-med>svg>g>g{opacity:0;transition:opacity .3s ease}
 .drawer.open .dw-med>svg>g>path{stroke-dashoffset:0}
-.drawer.open .dw-med circle,.drawer.open .dw-med g g path{opacity:1}
+.drawer.open .dw-med>svg>g>path:nth-last-of-type(2){transition:stroke-dashoffset 1.2s var(--ease-draw) 1.2s}
+.drawer.open .dw-med>svg>g>path:nth-last-of-type(1){transition:stroke-dashoffset 1s var(--ease-draw) 1.7s}
+.drawer.open .dw-med>svg>g>circle{opacity:1;transition:opacity 1.2s ease 1.2s}
+.drawer.open .dw-med>svg>g>g{opacity:1;transition:opacity 1s ease 2.2s}
 
 .dw-side{display:flex;flex-direction:column;gap:26px;
   opacity:0;transition:opacity .3s ease}
@@ -353,7 +356,15 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
 
 .js .reveal{opacity:0;transform:translateY(28px);transition:opacity .9s cubic-bezier(.2,.8,.2,1),transform .9s cubic-bezier(.2,.8,.2,1)}
 .js .reveal.in{opacity:1;transform:none}
-@media(prefers-reduced-motion:reduce){*{animation:none!important;transition-duration:.01ms!important}.js .reveal,.dw-in nav a{opacity:1;transform:none}}
+/* transition-delay aussi. Couper la seule duree laissait vivre les delais :
+   sous « reduire les animations », le losange d'un medaillon attendait ses
+   0,9 s avant de sauter a l'etat final. Ce n'est pas un etat final
+   immediat, c'est un etat final en retard.
+
+   Et *::before, *::after : l'etoile seule ne selectionne PAS les
+   pseudo-elements. Le galon, qui se tisse dans son ::before, gardait ses
+   1,4 s sous « reduire les animations ». */
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition-duration:.01ms!important;transition-delay:0s!important}.js .reveal,.dw-in nav a{opacity:1;transform:none}}
 
 @media(max-width:1080px){
   .dw-in{grid-template-columns:1fr;gap:40px;align-content:start}

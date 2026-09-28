@@ -247,15 +247,18 @@ header.scrolled .brand small{opacity:0}
    dessine le trait. */
 .dw-med{grid-column:1/-1;width:360px;max-width:100%;margin:0 auto;
   color:var(--bronze);opacity:.85}
-.dw-med path{stroke-dasharray:1;stroke-dashoffset:1}
-.dw-med>svg>g>path:nth-of-type(1){transition:stroke-dashoffset 1.2s var(--ease-draw) 1.2s}
-.dw-med>svg>g>path:nth-of-type(2){transition:stroke-dashoffset 1s var(--ease-draw) 1.7s}
-.dw-med circle{opacity:0;transition:opacity 1.2s ease 1.2s}
-/* Le signe n'est pas dessine, il apparait : son trace est trop court et
-   trop replie pour qu'un dessin s'y lise. */
-.dw-med g g path{stroke-dashoffset:0;opacity:0;transition:opacity 1s ease 2.2s}
+/* Les delais ne vivent que dans l'etat OUVERT. Une transition prend les
+   reglages de l'etat d'ARRIVEE : poses sur l'etat de repos, les 1,2 s de
+   delai jouaient aussi a la fermeture, et un menu rouvert dans la seconde
+   retrouvait son medaillon deja trace, sans le voir se dessiner. */
+.dw-med [pathLength]{stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset .3s ease}
+.dw-med g g [pathLength]{stroke-dashoffset:0}
+.dw-med>svg>g>circle,.dw-med>svg>g>g{opacity:0;transition:opacity .3s ease}
 .drawer.open .dw-med>svg>g>path{stroke-dashoffset:0}
-.drawer.open .dw-med circle,.drawer.open .dw-med g g path{opacity:1}
+.drawer.open .dw-med>svg>g>path:nth-last-of-type(2){transition:stroke-dashoffset 1.2s var(--ease-draw) 1.2s}
+.drawer.open .dw-med>svg>g>path:nth-last-of-type(1){transition:stroke-dashoffset 1s var(--ease-draw) 1.7s}
+.drawer.open .dw-med>svg>g>circle{opacity:1;transition:opacity 1.2s ease 1.2s}
+.drawer.open .dw-med>svg>g>g{opacity:1;transition:opacity 1s ease 2.2s}
 
 .dw-side{display:flex;flex-direction:column;gap:26px;
   opacity:0;transition:opacity .3s ease}
@@ -353,7 +356,15 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
 
 .js .reveal{opacity:0;transform:translateY(28px);transition:opacity .9s cubic-bezier(.2,.8,.2,1),transform .9s cubic-bezier(.2,.8,.2,1)}
 .js .reveal.in{opacity:1;transform:none}
-@media(prefers-reduced-motion:reduce){*{animation:none!important;transition-duration:.01ms!important}.js .reveal,.dw-in nav a{opacity:1;transform:none}}
+/* transition-delay aussi. Couper la seule duree laissait vivre les delais :
+   sous « reduire les animations », le losange d'un medaillon attendait ses
+   0,9 s avant de sauter a l'etat final. Ce n'est pas un etat final
+   immediat, c'est un etat final en retard.
+
+   Et *::before, *::after : l'etoile seule ne selectionne PAS les
+   pseudo-elements. Le galon, qui se tisse dans son ::before, gardait ses
+   1,4 s sous « reduire les animations ». */
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition-duration:.01ms!important;transition-delay:0s!important}.js .reveal,.dw-in nav a{opacity:1;transform:none}}
 
 @media(max-width:1080px){
   .dw-in{grid-template-columns:1fr;gap:40px;align-content:start}
@@ -393,13 +404,80 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
   mask-image:radial-gradient(ellipse 50% 50% at 50% 50%,#000 30%,transparent 100%)}
 
 /* Le galon : une bande de 20 px, en haut d'une carte, DANS sa bordure. */
-.pagne-galon{position:absolute;top:0;left:0;right:0;height:20px;opacity:.8;
+.pagne-galon{position:absolute;top:0;left:0;right:0;height:20px;opacity:.8}
+/* Le dessin vit dans un pseudo-element, et c'est LUI qui se decoupe.
+   L'element, lui, garde une boite entiere : c'est elle qu'observe
+   EVN_AU_SCROLL. Chrome applique le clip-path au calcul d'intersection —
+   un galon entierement « detisse » etait donc juge invisible, ratio 0, et
+   ne recevait jamais `vu` : il attendait d'etre vu pour se tisser, et ne
+   pouvait etre vu que tisse. Sur un ecran ou la carte est sous la ligne
+   de flottaison, il ne serait jamais apparu. */
+.pagne-galon::before{content:"";position:absolute;inset:0;
   background:url(img/pagne/galon-pagne.svg) repeat-x center;background-size:48px 20px}
 
 /* Les medaillons sont en SVG inline : leur trait suit `color`. */
 .pagne-med{display:block;margin:0 auto;color:#A88560}
 .pagne-med svg{display:block;width:100%;height:auto}
 .pagne-med.or-logo{color:var(--bronze)}
+
+/* ══ Etape 3 du motion ═══════════════════════════════════════════════
+   Les motifs ne sont plus la au chargement : ils ARRIVENT, une fois,
+   quand on les atteint. EVN_AU_SCROLL pose la classe `vu` au seuil de
+   0,3 et cesse d'observer.
+
+   01 · LE MEDAILLON SE DESSINE. stroke-dasharray:1 avec pathLength="1"
+   veut dire « un tiret long comme tout le trace » ; l'offset le pousse
+   hors du cadre, et le ramener a zero dessine le trait.
+
+   Les deux familles de medaillon n'ont pas la meme structure : le
+   compact n'a qu'un losange, les larges ont deux filets PUIS un losange.
+   D'ou nth-last-of-type, qui compte depuis la fin : le losange est
+   toujours le dernier trace direct, les filets l'avant-dernier quand ils
+   existent. Un nth-of-type(1) aurait dessine le losange du compact au
+   rythme des filets des autres. */
+/* :where(:not(.dw-med)) — le medaillon du TIROIR est aussi un .pagne-med,
+   mais il obeit a l'ouverture du menu, pas au defilement. :where exclut
+   SANS ajouter de specificite : un simple :not() en ajoutait, et la regle
+   « masque » passait devant la regle « vu -> trace ». Les medaillons
+   recevaient `vu` et restaient invisibles.
+
+   On vise la STRUCTURE, pas les balises : le signe est le groupe imbrique
+   (g>g). Dans le medaillon soleil il n'est fait que d'un cercle et de huit
+   <line> — viser `g g path` laissait ses rayons masques pour toujours. */
+.pagne-med:where(:not(.dw-med)) [pathLength]{stroke-dasharray:1;stroke-dashoffset:1}
+.pagne-med:where(:not(.dw-med)) g g [pathLength]{stroke-dashoffset:0}
+.pagne-med:where(:not(.dw-med))>svg>g>path:nth-last-of-type(2){transition:stroke-dashoffset 1.2s var(--ease-draw) .15s}
+.pagne-med:where(:not(.dw-med))>svg>g>path:nth-last-of-type(1){transition:stroke-dashoffset 1s var(--ease-draw) .9s}
+.pagne-med:where(:not(.dw-med))>svg>g>circle{opacity:0;transition:opacity 1.2s ease .15s}
+/* Le signe n'est pas dessine : il apparait, trop court et trop replie pour
+   qu'un trace s'y lise. */
+.pagne-med:where(:not(.dw-med))>svg>g>g{opacity:0;transition:opacity 1s ease 1.5s}
+.pagne-med.vu>svg>g>path{stroke-dashoffset:0}
+.pagne-med.vu>svg>g>circle,.pagne-med.vu>svg>g>g{opacity:1}
+
+/* 02 · LE DAMAS SE REVELE. Il monte de 16 px en s'allumant — 2,8 s, le
+   temps qu'il faut pour qu'un ton sur ton a 9 % ne surgisse pas. */
+.pagne-damas{opacity:0;transform:translateY(16px);
+  transition:opacity 2.8s var(--ease-draw),transform 2.8s var(--ease-out)}
+.pagne-damas.vu{opacity:.09;transform:none}
+
+/* 03 · LE GALON SE TISSE, de gauche a droite. */
+.pagne-galon::before{clip-path:inset(0 100% 0 0);
+  transition:clip-path 1.4s var(--ease-inout) .2s}
+.pagne-galon.vu::before{clip-path:inset(0)}
+
+/* 43 · LE DAMAS SOUS LA LAMPE. Un second calque, plus dense, que l'on ne
+   voit que sous la souris : le masque est un rond de 220 px qui la suit.
+   Invisible hors survol, et absent partout ou il n'y a pas de souris. */
+.pagne-lampe{display:none}
+@media(hover:hover) and (min-width:768px){
+  /* Pas de classe .pagne-damas sur ce calque : l'observateur lui poserait
+     `vu`, et .pagne-damas.vu le ramenerait a .09 par-dessus son .16. */
+  .pagne-lampe{display:block;position:absolute;z-index:-1;opacity:.16;
+    background:url(img/pagne/damas-pagne.svg) repeat;background-size:252px 158px;
+    -webkit-mask-image:radial-gradient(circle 220px at var(--x,-999px) var(--y,-999px),#000,transparent);
+    mask-image:radial-gradient(circle 220px at var(--x,-999px) var(--y,-999px),#000,transparent)}
+}
 
 @media(max-width:767px){
   /* Sur un telephone il n'y a plus de vide : le damas n'a plus d'endroit
@@ -1195,6 +1273,41 @@ document.querySelectorAll('.lang button').forEach(function(b){b.onclick=function
      placeholder de champ, par exemple — declare window.EVN_LANG. */
   if(typeof EVN_LANG==='function')EVN_LANG(lg);
 }});
+/* Les motifs arrivent au defilement, une fois. EVN_AU_SCROLL tient le
+   seuil et l'unicite — voir la base du mouvement. */
+EVN_AU_SCROLL('.pagne-med:not(.dw-med),.pagne-damas,.pagne-galon','vu');
+
+/* 43 · Le damas sous la lampe. Le masque suit la souris, mais AVEC DU
+   RETARD : on interpole de 12 % par image vers la position reelle. Sans
+   ce lissage le rond colle au curseur et le motif clignote a chaque
+   saccade de la main ; avec, il traine comme une lampe qu'on deplace.
+
+   Une seule boucle, qui s'arrete quand la souris quitte le bloc : pas
+   d'animation en boucle, la remise l'interdit. */
+(function(){
+  var l = document.querySelector('.pagne-lampe');
+  if (!l || !matchMedia('(hover: hover) and (min-width: 768px)').matches) return;
+  var hote = l.parentNode, x = 0, y = 0, cx = 0, cy = 0, tourne = false;
+  function image(){
+    cx += (x - cx) * .12; cy += (y - cy) * .12;
+    l.style.setProperty('--x', cx.toFixed(1) + 'px');
+    l.style.setProperty('--y', cy.toFixed(1) + 'px');
+    /* On s'arrete des que le rond a rejoint la souris : une boucle qui
+       tourne sur un dixieme de pixel ne sert plus qu'a chauffer. */
+    if (Math.abs(x - cx) > .5 || Math.abs(y - cy) > .5) requestAnimationFrame(image);
+    else tourne = false;
+  }
+  hote.addEventListener('pointermove', function(e){
+    var r = l.getBoundingClientRect();
+    x = e.clientX - r.left; y = e.clientY - r.top;
+    if (!tourne) { tourne = true; requestAnimationFrame(image); }
+  });
+  hote.addEventListener('pointerleave', function(){
+    x = -999; y = -999;
+    if (!tourne) { tourne = true; requestAnimationFrame(image); }
+  });
+}());
+
 </script>
 </body>
 </html>

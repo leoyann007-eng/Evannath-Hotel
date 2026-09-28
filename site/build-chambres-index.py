@@ -11,7 +11,7 @@ et un tableau recapitulatif des sept categories cote a cote.
 import io
 import _schema
 from _chambres import CHAMBRES, FAMILLE
-from _chrome import REMISE_JS, REMISE_CSS, page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV, SITE, medaillon, PAGNE_CSS
+from _chrome import REMISE_JS, REMISE_CSS, page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV, SITE, medaillon, PAGNE_CSS, PAGNE_JS
 
 
 def fmt(n):
@@ -388,6 +388,10 @@ EVN_REMISE.quand(function (R) {
   });
 });
 '''
+
+# Les motifs arrivent au defilement : ce morceau ne part que sur les
+# pages qui en portent.
+JS = JS + PAGNE_JS
 
 io.open('chambres.html', 'w', encoding='utf-8').write(page(
     "Chambres &amp; Suites — Hôtel Evannath, Assinie | de 67 000 à 280 000 FCFA",

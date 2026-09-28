@@ -217,7 +217,14 @@ JS = NAV_JS + '''
       }
     })
     .catch(function () { liste.innerHTML = PANNE; })
-    .then(function () { if (window.EVN_LANG) window.EVN_LANG(); });
+    .then(function () {
+      /* 01 · Le medaillon n'existe qu'APRES la reponse du serveur : il est
+         dans le bloc vide, injecte ici. L'observateur doit donc tourner
+         maintenant — lance au chargement, il n'aurait rien trouve, et le
+         medaillon serait reste invisible, bloque a son etat de depart. */
+      if (window.EVN_AU_SCROLL) window.EVN_AU_SCROLL('.pagne-vide', 'vu');
+      if (window.EVN_LANG) window.EVN_LANG();
+    });
 
   /* Copier le lien d'une offre : c'est le geste qui sert a la publier sur
      Facebook ou a l'envoyer par WhatsApp. */
@@ -263,5 +270,6 @@ html = page(
  "Les postes ouverts à l'Hôtel Evannath, Assinie PK 19. Réception, "
  "restauration, spa : les offres en cours et comment postuler.",
  "g-entree", CSS, '\n'.join(b), JS, slug="recrutement", jsonld=LD)
+
 io.open('recrutement.html', 'w', encoding='utf-8').write(html)
 print('recrutement.html      ok')

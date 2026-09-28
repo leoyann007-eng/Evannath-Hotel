@@ -7,7 +7,7 @@ photo : les seuls visuels existants sont des images de synthese.
 """
 import io
 import _schema
-from _chrome import page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV, medaillon, PAGNE_CSS
+from _chrome import page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV, medaillon, PAGNE_CSS, PAGNE_JS
 
 # ── sur le domaine ────────────────────────────────────────────
 DOMAINE = [
@@ -267,6 +267,10 @@ LD = _schema.bloc(
     _schema.service('Expériences et activités', "Balade lagunaire en pirogue, jet ski, spa, piscine et excursions autour d'Assinie depuis l'Hôtel Evannath.", 'experiences', image='gal-lag-bateau'),
     _schema.hotel(),
     _schema.fil([('Accueil','index'),('Expériences',None)]))
+
+# Les motifs arrivent au defilement : ce morceau ne part que sur les
+# pages qui en portent.
+JS = JS + PAGNE_JS
 
 io.open('experiences.html', 'w', encoding='utf-8').write(page(
  "Expériences — Hôtel Evannath, Assinie",
