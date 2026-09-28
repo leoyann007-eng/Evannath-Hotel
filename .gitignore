@@ -105,3 +105,8 @@ site/.quarantaine/
 # site/img/pagne/, nettoyes de leurs metadonnees. L'original reste chez
 # le designer, pas dans le depot du site.
 handoff_touches_pagne/
+
+# La remise motion : maquettes de reference, 215 Ko de HTML jouable. Elles
+# servent a relever des timings, pas a etre servies. Memes raisons que
+# handoff_touches_pagne/.
+handoff_motion/

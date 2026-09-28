@@ -53,6 +53,16 @@
   --cream:#2A231E; --prose:#4C423B; --muted:#6E6154;
   --palm:#4F6B32; --err:#A63A25;
   --line:rgba(138,95,43,.22); --line-2:rgba(138,95,43,.12);
+  /* ── Mouvement ──────────────────────────────────────────────────────
+     Les trois courbes de la remise motion, declarees une fois. Elles ne
+     decrivent pas une couleur : elles decrivent une MANIERE de bouger, et
+     deux effets qui n'emploient pas la meme courbe ne se ressemblent pas.
+       --ease-out    ce qui arrive et se pose
+       --ease-draw   ce qui se trace, un trait qui avance
+       --ease-inout  ce qui part et arrive au meme rythme */
+  --ease-out:cubic-bezier(.2,.7,.2,1);
+  --ease-draw:cubic-bezier(.3,.6,.2,1);
+  --ease-inout:cubic-bezier(.6,0,.2,1);
   --max:1240px;
   /* Hauteur de l'en-tete fixe une fois compacte. Cette valeur n'est qu'un REPLI : devinee a 83 px alors que
      l'en-tete compacte en fait 75 a 77 selon la page, la bordure basse de
@@ -116,7 +126,20 @@ p{color:var(--prose)}
 .btn-solid:hover{background:var(--bronze-2);border-color:var(--bronze-2)}
 
 /* NAV : un seul element */
-header{position:fixed;top:0;left:0;right:0;z-index:100;transition:.45s;padding:22px 0;background:rgba(251,247,240,.90);backdrop-filter:blur(14px)}
+/* 08 · Le header se condense. Au-dela de 80 px de defilement il perd sa
+   hauteur, son fond devient opaque et un filet le detache du contenu.
+   .8s, courbe --ease-out, et REVERSIBLE : la meme transition joue en
+   remontant, parce qu'elle porte sur les proprietes, pas sur un sens.
+
+   Mesure a 1440 px : 104 -> 76 px, soit exactement ce que la remise
+   annonce a deux pixels pres. Une mesure faite d'abord dans un volet de
+   612 px avait donne 96 -> 75 et m'avait fait croire a un ecart : a cette
+   largeur la mise en page n'est plus la meme. Une hauteur de header se
+   mesure a la largeur ou elle est vue. */
+header{position:fixed;top:0;left:0;right:0;z-index:100;padding:22px 0;
+  background:rgba(251,247,240,.90);backdrop-filter:blur(14px);
+  transition:padding .8s var(--ease-out),background-color .8s ease,
+             border-color .8s ease,box-shadow .8s ease}
 header.scrolled{padding:11px 0;background:rgba(251,247,240,.97);border-bottom:1px solid var(--line)}
 /* Menu ouvert : l en-tete devient opaque, et de la couleur du tiroir.
    Sinon le contenu du menu defile DESSOUS et transparait par les 10 pour cent
@@ -125,7 +148,13 @@ header.scrolled{padding:11px 0;background:rgba(251,247,240,.97);border-bottom:1p
    mode defile, et gardait son fond translucide. */
 header.menu{background:var(--bark);backdrop-filter:none;border-bottom:1px solid var(--line)}
 .nav{display:flex;align-items:center;justify-content:space-between;gap:20px}
-.brand img{width:168px;transition:.45s}
+.brand img{width:168px;transition:width .9s var(--ease-out)}
+/* La signature sous le logo s'efface : c'est elle qui fait la difference
+   entre « le logo complet » et « l'embleme ». Pour aller jusqu'au
+   monogramme seul il faudrait un second fichier — l'actuel est un
+   logotype d'un seul tenant, et le recadrer laisserait un trou. */
+.brand small{transition:opacity .8s ease}
+header.scrolled .brand small{opacity:0}
 header.scrolled .brand img{width:132px}
 .brand small{display:block;font-size:8px;letter-spacing:.42em;color:var(--bronze);margin-top:6px;padding-left:2px;font-weight:700}
 .nav-right{display:flex;align-items:center;gap:18px}
@@ -139,19 +168,40 @@ header.scrolled .brand img{width:132px}
 .burger.open .bars span:nth-child(1){transform:translateY(7.5px) rotate(45deg)}
 .burger.open .bars span:nth-child(2){opacity:0}
 .burger.open .bars span:nth-child(3){transform:translateY(-7.5px) rotate(-45deg)}
-.drawer{position:fixed;inset:0;background:var(--bark);z-index:99;opacity:0;visibility:hidden;transition:.5s cubic-bezier(.2,.8,.2,1);overflow-y:auto}
-.drawer.open{opacity:1;visibility:visible}
+/* 07 · Le menu s'ouvre comme un rideau.
+   Le panneau DESCEND — translateY(-101% -> 0) — au lieu d'apparaitre en
+   fondu. Les 101 % plutot que 100 : a 100 le bord haut du panneau reste
+   sur la ligne de l'ecran et laisse un liseré d'un pixel selon l'arrondi.
+
+   Timings releves dans la maquette, pas devines :
+     panneau     transform .9s cubic-bezier(.7,0,.2,1)
+     rubriques   transform 1s --ease-out, delai .5s + .07s par rang
+     colonne     opacity 1s ease, delai 1s
+   La fermeture est plus rapide et sans delai : on ne fait pas attendre
+   quelqu'un qui veut partir. */
+.drawer{position:fixed;inset:0;background:var(--bark);z-index:99;
+  visibility:hidden;overflow-y:auto;
+  transform:translateY(-101%);
+  transition:transform .55s cubic-bezier(.7,0,.2,1),visibility 0s .55s}
+.drawer.open{visibility:visible;transform:translateY(0);
+  transition:transform .9s cubic-bezier(.7,0,.2,1),visibility 0s}
 .dw-in{min-height:100svh;display:grid;grid-template-columns:1.25fr 1fr;align-items:center;gap:60px;max-width:var(--max);margin:0 auto;padding:130px 24px 60px}
 .dw-in nav{display:flex;flex-direction:column}
+/* Chaque rubrique monte DERRIERE une fenetre : le parent masque le
+   debordement, l'enfant translate de 110 %. Sans le masque, le texte
+   glisserait par-dessus la rubrique voisine au lieu de surgir. */
 .dw-in nav a{
   display:flex;align-items:baseline;gap:22px;padding:16px 0;border-bottom:1px solid var(--line-2);
   font-family:var(--f-display);font-size:clamp(1.45rem,3.2vw,2.4rem);color:var(--cream);
-  opacity:0;transform:translateY(18px);transition:color .3s,opacity .6s,transform .6s
+  transform:translateY(110%);transition:color .3s,transform .5s var(--ease-out)
 }
-.drawer.open .dw-in nav a{opacity:1;transform:none}
+.dw-in nav{overflow:hidden}
+.drawer.open .dw-in nav a{transform:none;transition:color .3s,transform 1s var(--ease-out)}
 .dw-in nav a:hover,.dw-in nav a.on{color:var(--bronze-2)}
 .dw-in nav a i{font-style:normal;font-family:var(--f-body);font-size:10px;letter-spacing:.2em;color:var(--bronze);font-weight:700;flex:0 0 auto;opacity:.7}
-.dw-side{display:flex;flex-direction:column;gap:26px}
+.dw-side{display:flex;flex-direction:column;gap:26px;
+  opacity:0;transition:opacity .3s ease}
+.drawer.open .dw-side{opacity:1;transition:opacity 1s ease 1s}
 .dw-side .ph{aspect-ratio:4/3;overflow:hidden;background:var(--bark-2)}
 .dw-side .ph img{width:100%;height:100%;object-fit:cover}
 .dw-side b{display:block;font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--bronze);font-weight:700;margin-bottom:12px}
@@ -207,9 +257,38 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
    position:fixed et 56x56 en rond. Le lien du panneau de repli la portait,
    et se retrouvait donc arrache du panneau, en pastille au coin de l'ecran —
    le bouton le plus utile du repli etait invisible. Il porte .wa-envoi. */
-.wa{position:fixed;right:22px;bottom:22px;z-index:90;width:56px;height:56px;border-radius:50%;background:#25D366;display:grid;place-items:center;box-shadow:0 10px 30px rgba(37,211,102,.35);transition:.35s}
-.wa:hover{transform:scale(1.09)}
-.wa svg{width:28px;height:28px;fill:#fff}
+/* 32 · Le bouton WhatsApp s'etire.
+   La bulle verte de la marque WhatsApp partait ; elle criait sur un site
+   qui ne crie pas. A sa place une pastille brun profond, trait or.
+
+   PAS D'ANIMATION DE `width`, malgre la maquette qui en fait une : la
+   remise l'interdit noir sur blanc, et une largeur qui bouge relance la
+   mise en page a chaque image. La pastille fait donc TOUJOURS 270 px ;
+   c'est un clip-path qui n'en montre que 58 au repos, et qui s'ouvre vers
+   la gauche au survol. Meme mouvement a l'ecran, rien a recalculer.
+
+   `round 29px` dans le clip : sans lui le bord gauche serait coupe droit
+   et la pastille ne serait plus ronde au repos.
+
+   Le libelle entre APRES la pastille — .4s de fondu, .3s de retard — et
+   sort tout de suite : au depart on n'attend pas. */
+.wa{position:fixed;right:22px;bottom:22px;z-index:90;
+  width:270px;height:58px;border-radius:29px;background:#2B2019;
+  display:flex;align-items:center;justify-content:flex-end;
+  box-shadow:0 12px 30px -14px rgba(43,32,25,.6);
+  clip-path:inset(0 0 0 212px round 29px);
+  transition:clip-path .7s var(--ease-inout)}
+.wa .lbl{white-space:nowrap;font-size:11px;letter-spacing:.2em;font-weight:600;
+  color:#F6F0E6;padding-left:24px;opacity:0;transition:opacity .4s ease}
+.wa .rond{flex:none;width:58px;height:58px;display:grid;place-items:center}
+.wa svg{width:22px;height:22px;fill:none;stroke:#C9A46A;stroke-width:1.4;
+  stroke-linecap:round;stroke-linejoin:round}
+/* Le survol n'existe pas sur un ecran tactile : la pastille y resterait
+   ouverte sur un effleurement, ou ne s'ouvrirait jamais. */
+@media(hover:hover){
+  .wa:hover,.wa:focus-visible{clip-path:inset(0 0 0 0 round 29px)}
+  .wa:hover .lbl,.wa:focus-visible .lbl{opacity:1;transition:opacity .4s ease .3s}
+}
 @media(max-width:1080px){ .f-grid{grid-template-columns:repeat(2,1fr)} }
 @media(max-width:720px){ .f-grid{grid-template-columns:1fr} }
 
@@ -217,6 +296,7 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
 .js .reveal{opacity:0;transform:translateY(28px);transition:opacity .9s cubic-bezier(.2,.8,.2,1),transform .9s cubic-bezier(.2,.8,.2,1)}
 .js .reveal.in{opacity:1;transform:none}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition-duration:.01ms!important}.js .reveal,.dw-in nav a{opacity:1;transform:none}}
+}
 
 @media(max-width:1080px){
   .dw-in{grid-template-columns:1fr;gap:40px;align-content:start}
@@ -405,12 +485,40 @@ body{background:var(--bark)}
 </footer>
 
 <a class="wa" href="https://wa.me/2250758408079" target="_blank" rel="noopener" aria-label="Nous écrire sur WhatsApp">
-  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.5 14.4c-.3-.1-1.7-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.7 1-.9 1.2-.2.2-.3.2-.6.1-1.7-.9-2.9-1.6-4-3.5-.3-.5.3-.5.9-1.6.1-.2 0-.4 0-.5s-.7-1.6-.9-2.2c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.3 5.2 4.6 1.9.8 2.7.9 3.6.8.6-.1 1.7-.7 2-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.6-.3M12 2a10 10 0 00-8.6 15L2 22l5.2-1.4A10 10 0 1012 2z"/></svg>
+  <span class="lbl" aria-hidden="true">ÉCRIRE SUR WHATSAPP</span>
+  <span class="rond"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l1.3-4A8 8 0 1 1 8 18.7Z"/></svg></span>
 </a>
 
 <script>
+/* ── Base du mouvement ────────────────────────────────────────────────
+   Un seul observateur pour tous les effets au defilement : seuil 0,3, et
+   UNE SEULE FOIS par element — il cesse d'observer des qu'il a pose sa
+   classe. Sans cela un element qui entre et ressort rejouerait, et la
+   remise l'interdit : « aucune boucle ».
+
+   Sous prefers-reduced-motion, la classe est posee tout de suite : l'etat
+   final, sans transition. La feuille coupe deja les durees ; ici on
+   s'assure que l'etat final EXISTE, meme si l'observateur ne tourne pas.
+
+   Aucun effet ne s'en sert encore — 01, 02 et 03 viendront a l'etape 3.
+   Il est pose maintenant parce que c'est lui qui decide du seuil et de
+   l'unicite, et que trois effets qui s'observent chacun a leur facon ne
+   se declenchent jamais ensemble. */
+window.EVN_AU_SCROLL=function(selecteur,classe){
+  var els=[].slice.call(document.querySelectorAll(selecteur));
+  if(!els.length)return;
+  var c=classe||'vu';
+  if(!('IntersectionObserver' in window)||matchMedia('(prefers-reduced-motion: reduce)').matches){
+    els.forEach(function(e){e.classList.add(c)});return;
+  }
+  var io=new IntersectionObserver(function(es){
+    es.forEach(function(e){if(!e.isIntersecting)return;e.target.classList.add(c);io.unobserve(e.target)})
+  },{threshold:.3});
+  els.forEach(function(e){io.observe(e)});
+};
+
 var hd=document.getElementById('hd');
-addEventListener('scroll',function(){hd.classList.toggle('scrolled',scrollY>60)},{passive:true});
+addEventListener('scroll',function(){hd.classList.toggle('scrolled',scrollY>80)},{passive:true});
 
 var bg=document.getElementById('bg'),dw=document.getElementById('dw');
 var dwLinks=[].slice.call(dw.querySelectorAll('nav a'));
@@ -421,7 +529,9 @@ function toggleMenu(){
   bg.setAttribute('aria-expanded',o);
   bg.setAttribute('aria-label',o?'Fermer le menu':'Ouvrir le menu');
   document.body.style.overflow=o?'hidden':'';
-  dwLinks.forEach(function(a,i){a.style.transitionDelay=o?(60+i*55)+'ms':'0ms'});
+  /* .5s puis .07s par rang — maquette « Motion design I », effet 07.
+     A la fermeture, aucun delai : on ne retient pas quelqu'un qui part. */
+  dwLinks.forEach(function(a,i){a.style.transitionDelay=o?(500+i*70)+'ms':'0ms'});
 }
 bg.onclick=toggleMenu;
 dwLinks.forEach(function(a){a.onclick=function(){if(dw.classList.contains('open'))toggleMenu()}});
