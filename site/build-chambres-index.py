@@ -11,7 +11,7 @@ et un tableau recapitulatif des sept categories cote a cote.
 import io
 import _schema
 from _chambres import CHAMBRES, FAMILLE
-from _chrome import REMISE_JS, REMISE_CSS, page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV, SITE
+from _chrome import REMISE_JS, REMISE_CSS, page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV, SITE, medaillon, PAGNE_CSS
 
 
 def fmt(n):
@@ -46,6 +46,16 @@ section{padding:88px 0}
   padding:20px 0;border-block:1px solid var(--line);
   background:rgba(251,247,240,.96);backdrop-filter:blur(12px)}
 .grp{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+/* Signature textile — touche 5 sur 5. Le medaillon se pose SUR le filet
+   bas de la barre de filtres, legerement en dessous : son centre a 12 px
+   sous le trait, donc son haut a 8 px au-dessus. Il ne touche ni les
+   boutons, ni le compteur, qui sont dans la barre au-dessus.
+
+   Le fond --bark derriere lui COUPE le filet de la page, et le medaillon
+   le redessine lui-meme : ses deux traits reprennent la ligne de part et
+   d'autre du losange. Sans ce fond, le filet traverserait le motif. */
+.pagne-filtres{width:360px;max-width:100%;height:40px;margin:-8px auto 0;
+  position:relative;z-index:1;background:var(--bark);color:#A88560}
 .grp b{font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-right:6px}
 .chip{background:none;border:1px solid var(--line);color:var(--muted);font:600 11px/1 var(--f-body);
   letter-spacing:.14em;text-transform:uppercase;padding:11px 16px;cursor:pointer;transition:.3s;font-family:var(--f-body)}
@@ -120,6 +130,15 @@ caption{caption-side:bottom;padding:16px 4px 0;font-size:12.5px;color:var(--mute
   .inc{grid-template-columns:1fr}
 }
 """
+# Les cinq touches textiles : ce morceau ne part que sur les pages qui
+# en portent une.
+# Les utilitaires D'ABORD, les placements ensuite : a specificite egale
+# c'est la derniere regle qui gagne, et ce sont les placements qui
+# doivent gagner. Dans l'autre sens, `.pagne-damas{position:absolute}`
+# ecrasait le `position:relative` du placement, et le motif sortait du
+# flux — largeur zero, invisible, et le test passait au vert.
+CSS = PAGNE_CSS + CSS
+
 
 INCLUS = [
  ('Petit-déjeuner', "Compris dans toutes les catégories",
@@ -173,6 +192,8 @@ b = [header('reserver.html', 'Réserver', 'cta'), drawer('index.html#chambres'),
     </div>
     <span class="compte" id="compte"></span>
   </div>
+
+  ''' + medaillon('carre-large', 'pagne-filtres large') + '''
 
   <div class="rooms" id="grille">''']
 

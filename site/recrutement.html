@@ -217,6 +217,7 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
 .js .reveal{opacity:0;transform:translateY(28px);transition:opacity .9s cubic-bezier(.2,.8,.2,1),transform .9s cubic-bezier(.2,.8,.2,1)}
 .js .reveal.in{opacity:1;transform:none}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition-duration:.01ms!important}.js .reveal,.dw-in nav a{opacity:1;transform:none}}
+}
 
 @media(max-width:1080px){
   .dw-in{grid-template-columns:1fr;gap:40px;align-content:start}
@@ -228,6 +229,48 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
   .dw-in{padding:110px 24px 50px}
 }
 
+/* ── Signature textile ────────────────────────────────────────────────
+   Cinq touches, sur cinq pages, et nulle part ailleurs. Ces utilitaires
+   vivent ici pour qu'il n'y en ait qu'un exemplaire ; les emplacements,
+   eux, sont ecrits dans chaque generateur.
+
+   TROIS REGLES QUI NE SE NEGOCIENT PAS :
+     - jamais sous un texte, un bouton ou un champ ;
+     - decoratif : aria-hidden, et aucun evenement de pointeur ;
+     - pas d'animation en boucle. L'apparition reutilise .reveal, qui
+       respecte deja prefers-reduced-motion. */
+.pagne{pointer-events:none;-webkit-user-select:none;user-select:none}
+
+/* Le damas : un ton sur ton a 9 %, pose DERRIERE, dans un vide. Le fondu
+   le fait disparaitre avant d'atteindre la colonne de texte — sans lui, le
+   motif s'arrete net et se voit. */
+/* z-index:-1, et non 0. Dans un contexte d'empilement, un element POSITIONNE
+   a z-index:0 se peint AU-DESSUS du texte statique voisin : le damas serait
+   passe par-dessus le titre. A -1 il reste derriere le contenu et devant le
+   fond — a condition que son parent ouvre un contexte, d'ou le
+   `position:relative;z-index:0` pose sur chaque bloc d'accueil. */
+.pagne-damas{position:absolute;z-index:-1;opacity:.09;
+  background:url(img/pagne/damas-pagne.svg) repeat;background-size:252px 158px}
+.pagne-damas.vers-gauche{-webkit-mask-image:linear-gradient(90deg,transparent,#000 50%);
+  mask-image:linear-gradient(90deg,transparent,#000 50%)}
+.pagne-damas.au-centre{-webkit-mask-image:radial-gradient(ellipse 50% 50% at 50% 50%,#000 30%,transparent 100%);
+  mask-image:radial-gradient(ellipse 50% 50% at 50% 50%,#000 30%,transparent 100%)}
+
+/* Le galon : une bande de 20 px, en haut d'une carte, DANS sa bordure. */
+.pagne-galon{position:absolute;top:0;left:0;right:0;height:20px;opacity:.8;
+  background:url(img/pagne/galon-pagne.svg) repeat-x center;background-size:48px 20px}
+
+/* Les medaillons sont en SVG inline : leur trait suit `color`. */
+.pagne-med{display:block;margin:0 auto;color:#A88560}
+.pagne-med svg{display:block;width:100%;height:auto}
+.pagne-med.or-logo{color:var(--bronze)}
+
+@media(max-width:767px){
+  /* Sur un telephone il n'y a plus de vide : le damas n'a plus d'endroit
+     ou vivre sans passer sous le texte. On le retire. */
+  .pagne-damas{display:none}
+  .pagne-med.large{max-width:240px}
+}
 
 body{background:var(--bark)}
 .head{padding:150px 0 10px}
@@ -264,6 +307,10 @@ body{background:var(--bark)}
    reseau coupe qui dirait « aucun poste » ferait croire qu'il n'y a rien. */
 .etat{border:1px solid var(--line);background:var(--bark-2);padding:44px 32px;
   text-align:center}
+/* Signature textile — touche 3 sur 5. Le medaillon coiffe le bloc vide.
+   Le padding du bloc l'ecarte deja du bord ; le margin-bottom pose les
+   12 px demandes entre lui et la premiere ligne. */
+.pagne-vide{width:96px;margin:0 auto 14px;color:#A88560}
 .etat p{color:var(--muted);font-size:15.5px;margin:0 auto;max-width:48ch}
 .etat .g{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:24px}
 .etat.mal{border-color:rgba(166,58,37,.4)}
@@ -468,6 +515,9 @@ else{var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.is
  setTimeout(function(){document.querySelectorAll('.reveal:not(.in)').forEach(function(el){if(el.getBoundingClientRect().top<innerHeight)el.classList.add('in')})},1200)}
 
 (function () {
+  /* Le medaillon est pose a la GENERATION, pas recopie ici : une seule
+     source, le fichier SVG. */
+  var MED = "<span class=\"pagne pagne-med pagne-vide\" aria-hidden=\"true\"><svg focusable=\"false\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 120 40\"><g fill=\"none\" stroke=\"currentColor\" stroke-width=\"1\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M60 1L79 20L60 39L41 20Z\" stroke-width=\"1\"></path><g transform=\"translate(49.5 9.5) scale(.35)\" stroke-width=\"3.4\"><path d=\"M8 52V8H52V52H16V16H44V44H24V24H36V36H30\"></path></g></g></svg></span>";
   var liste = document.getElementById('liste');
   if (!liste) return;
 
@@ -527,7 +577,8 @@ else{var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.is
       + '</div></article>';
   }
 
-  var VIDE = '<div class="etat"><p data-t="vide">Aucun poste n\'est ouvert en ce moment. '
+  var VIDE = '<div class="etat">' + MED
+    + '<p data-t="vide">Aucun poste n\'est ouvert en ce moment. '
     + 'Les offres paraissent ici et sur notre page Facebook.</p>'
     + '<div class="g"><a class="btn" href="https://www.facebook.com/evannathhotel"'
     + ' target="_blank" rel="noopener" data-t="fb">Suivre sur Facebook</a></div></div>';

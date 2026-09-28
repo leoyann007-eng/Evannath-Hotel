@@ -28,12 +28,22 @@ const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 const PORT = 9000 + Math.floor(Math.random() * 900);
 const BASE = (process.argv[2] || 'http://localhost:5599').replace(/\/$/, '');
 
-const PAGES = [
-  '', 'chambres', 'chambre-standard', 'deluxe-baldaquin', 'deluxe-superieure',
-  'suite-anglaise', 'chambre-mezzanine', 'mezzanine-superieure', 'suite-arabe',
-  'reserver', 'galerie', 'circuits', 'carte', 'spa', 'a-propos', 'contact',
-  'experiences', 'seminaires', 'informations-utiles', 'mentions-legales', '404',
-];
+/* La liste se DEDUIT du repertoire, elle ne se recopie pas.
+ *
+ * Elle etait ecrite a la main, et recrutement.html — ajoutee le 27 septembre
+ * — n'y a jamais figure : la page a vecu un jour sans qu'un seul de ses
+ * textes soit mesure, et rien ne le disait. Le verificateur, lui, balaye le
+ * repertoire depuis toujours ; c'etait cette asymetrie le defaut.
+ *
+ * Les memes exclusions que verifier.py : des gabarits, pas des pages. */
+const IGNORE = new Set(['index-luxe-variante', 'carte-template',
+                        'spa-template', 'index-template']);
+const PAGES = fs.readdirSync(path.join(__dirname, '..', 'site'))
+  .filter((f) => f.endsWith('.html'))
+  .map((f) => f.slice(0, -5))
+  .filter((s) => !IGNORE.has(s))
+  .map((s) => (s === 'index' ? '' : s))
+  .sort();
 
 const MESURE = `(function(){
   var lum = function (c) {

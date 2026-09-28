@@ -3,6 +3,9 @@
 Utilise par les generateurs de pages. Aucune expression reguliere destructrice ici :
 les pages sont ecrites en entier a partir de ces briques.
 """
+import io
+import os
+import re
 
 # Domaine de production. Une seule ligne a changer le jour ou le site passe
 # sur evannathhotel.com : og:image, og:url, canonical et sitemap.xml en decoulent.
@@ -517,6 +520,7 @@ main{display:block}
 .js .reveal{opacity:0;transform:translateY(28px);transition:opacity .9s cubic-bezier(.2,.8,.2,1),transform .9s cubic-bezier(.2,.8,.2,1)}
 .js .reveal.in{opacity:1;transform:none}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition-duration:.01ms!important}.js .reveal,.dw-in nav a{opacity:1;transform:none}}
+}
 
 @media(max-width:1080px){
   .dw-in{grid-template-columns:1fr;gap:40px;align-content:start}
@@ -553,6 +557,93 @@ LINKS = [
  ('10','contact.html','n10','Contact'),
  ('11','reserver.html','n11','Réserver'),
 ]
+
+
+# ── Signature textile ───────────────────────────────────────────────────
+# CE MORCEAU N'EST PAS DANS HEAD_CSS. Les cinq pages qui portent une
+# touche l'ajoutent a leur propre feuille ; les dix-sept autres n'en
+# recoivent pas un octet, et ne changent donc pas d'une ligne.
+#
+# L'or des motifs est declare ICI, une fois. Ce n'est pas un jeton de
+# la palette : un jeton se declare dans :root, donc dans TOKENS, donc
+# dans les vingt-deux pages — pour un ornement qui n'en concerne que
+# cinq, et qui ne porte jamais de texte.
+PAGNE_CSS = """/* ── Signature textile ────────────────────────────────────────────────
+   Cinq touches, sur cinq pages, et nulle part ailleurs. Ces utilitaires
+   vivent ici pour qu'il n'y en ait qu'un exemplaire ; les emplacements,
+   eux, sont ecrits dans chaque generateur.
+
+   TROIS REGLES QUI NE SE NEGOCIENT PAS :
+     - jamais sous un texte, un bouton ou un champ ;
+     - decoratif : aria-hidden, et aucun evenement de pointeur ;
+     - pas d'animation en boucle. L'apparition reutilise .reveal, qui
+       respecte deja prefers-reduced-motion. */
+.pagne{pointer-events:none;-webkit-user-select:none;user-select:none}
+
+/* Le damas : un ton sur ton a 9 %, pose DERRIERE, dans un vide. Le fondu
+   le fait disparaitre avant d'atteindre la colonne de texte — sans lui, le
+   motif s'arrete net et se voit. */
+/* z-index:-1, et non 0. Dans un contexte d'empilement, un element POSITIONNE
+   a z-index:0 se peint AU-DESSUS du texte statique voisin : le damas serait
+   passe par-dessus le titre. A -1 il reste derriere le contenu et devant le
+   fond — a condition que son parent ouvre un contexte, d'ou le
+   `position:relative;z-index:0` pose sur chaque bloc d'accueil. */
+.pagne-damas{position:absolute;z-index:-1;opacity:.09;
+  background:url(img/pagne/damas-pagne.svg) repeat;background-size:252px 158px}
+.pagne-damas.vers-gauche{-webkit-mask-image:linear-gradient(90deg,transparent,#000 50%);
+  mask-image:linear-gradient(90deg,transparent,#000 50%)}
+.pagne-damas.au-centre{-webkit-mask-image:radial-gradient(ellipse 50% 50% at 50% 50%,#000 30%,transparent 100%);
+  mask-image:radial-gradient(ellipse 50% 50% at 50% 50%,#000 30%,transparent 100%)}
+
+/* Le galon : une bande de 20 px, en haut d'une carte, DANS sa bordure. */
+.pagne-galon{position:absolute;top:0;left:0;right:0;height:20px;opacity:.8;
+  background:url(img/pagne/galon-pagne.svg) repeat-x center;background-size:48px 20px}
+
+/* Les medaillons sont en SVG inline : leur trait suit `color`. */
+.pagne-med{display:block;margin:0 auto;color:#A88560}
+.pagne-med svg{display:block;width:100%;height:auto}
+.pagne-med.or-logo{color:var(--bronze)}
+
+@media(max-width:767px){
+  /* Sur un telephone il n'y a plus de vide : le damas n'a plus d'endroit
+     ou vivre sans passer sous le texte. On le retire. */
+  .pagne-damas{display:none}
+  .pagne-med.large{max-width:240px}
+}
+"""
+
+# ── Les medaillons de la signature textile ───────────────────────────────
+# Ils sont INLINES, et non poses en <img>, parce que leur trait est en
+# currentColor : c'est ce qui leur permet de prendre l'or des motifs a un
+# endroit et le brun du logo a un autre, sans deuxieme fichier.
+#
+# Le dessin se LIT dans le fichier au moment de la generation plutot que
+# d'etre recopie ici. Une copie diverge ; celle-ci se deduit, et le jour ou
+# le SVG change, les pages changent avec lui a la regeneration.
+_MEDAILLONS = {
+    'carre':       'medaillon-spirale-carree.svg',       # 120 x 40
+    'carre-large': 'medaillon-spirale-carree-large.svg',  # 360 x 40, avec filets
+    'soleil':      'medaillon-soleil-large.svg',          # 360 x 40, avec filets
+}
+_MED_CACHE = {}
+
+
+def medaillon(variante, classes='', style=''):
+    """Un medaillon en SVG inline, decoratif et hors du flux de lecture."""
+    if variante not in _MEDAILLONS:
+        raise ValueError('medaillon inconnu : %s' % variante)
+    if variante not in _MED_CACHE:
+        chemin = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                              'img', 'pagne', _MEDAILLONS[variante])
+        svg = io.open(chemin, encoding='utf-8').read().strip()
+        # Ni largeur ni hauteur en dur : c'est le conteneur qui decide, et
+        # le viewBox qui garde les proportions.
+        svg = re.sub(r'\s(width|height)="\d+"', '', svg, count=2)
+        svg = svg.replace('<svg ', '<svg focusable="false" ', 1)
+        _MED_CACHE[variante] = svg
+    return '<span class="pagne pagne-med %s" aria-hidden="true"%s>%s</span>' % (
+        classes, (' style="%s"' % style) if style else '', _MED_CACHE[variante])
+
 
 # Le logo BRONZE, pas le blanc. L'en-tete est rgba(251,247,240,.90) a
 # toutes les hauteurs de defilement, et le pied est --bark-2 : deux fonds

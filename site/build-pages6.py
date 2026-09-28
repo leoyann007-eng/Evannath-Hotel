@@ -6,7 +6,7 @@ import _chambres
 import _schema
 from _evenements import EVENEMENTS, EN as EV_EN
 NL_ = chr(10)
-from _chrome import page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV
+from _chrome import page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV, PAGNE_CSS
 
 CSS = """
 /* Les intertitres qui separent les quatre parties de la page. */
@@ -87,6 +87,13 @@ CSS = """
 .head{padding:150px 0 46px}
 .head h1{margin:10px 0 20px}
 .head .lede{font-size:1.1rem;max-width:60ch}
+/* Signature textile — touche 2 sur 5. Le damas occupe le vide a DROITE du
+   bloc titre, jamais la colonne de texte : il commence apres les 60ch de
+   la lede, et le fondu l'efface avant meme d'y arriver. Le parent ouvre un
+   contexte d'empilement pour que le motif reste derriere le texte. */
+.head{position:relative;z-index:0}
+.pagne-offres{top:138px;right:0;width:min(600px,46%);height:340px}
+@media(max-width:1100px){.pagne-offres{display:none}}
 .camp{border:1px solid var(--bronze);background:var(--bark-2);padding:34px;margin-bottom:56px}
 .camp .top{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;margin-bottom:26px}
 .camp .live{display:inline-flex;align-items:center;gap:9px;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--palm);font-weight:700}
@@ -237,6 +244,15 @@ CSS = """
   .pick{text-align:center}
 }
 """
+# Les cinq touches textiles : ce morceau ne part que sur les pages qui
+# en portent une.
+# Les utilitaires D'ABORD, les placements ensuite : a specificite egale
+# c'est la derniere regle qui gagne, et ce sont les placements qui
+# doivent gagner. Dans l'autre sens, `.pagne-damas{position:absolute}`
+# ecrasait le `position:relative` du placement, et le motif sortait du
+# flux — largeur zero, invisible, et le test passait au vert.
+CSS = PAGNE_CSS + CSS
+
 
 PACKS = [
  ('Pack Famille','250000','forfait','g-aerien-t','Vue aérienne du domaine Evannath','p1','uf','FCFA · le forfait','250 000'),
@@ -301,6 +317,7 @@ b = [header('#demande','Réserver'), drawer('circuits.html'), '''
   </nav>
   <span class="eyebrow" data-t="eb">Onze offres &amp; un rendez-vous hebdomadaire</span>
   <h1 data-t="h1">Offres &amp; Événements</h1>
+  <div class="pagne pagne-damas vers-gauche pagne-offres" aria-hidden="true"></div>
   <p class="lede" data-t="lede">Ce qui se passe en ce moment, et les séjours déjà composés — chambre, repas, activités et attentions comprises. Choisissez, indiquez vos dates, et la réception s'occupe du reste.</p>
 </div>
 

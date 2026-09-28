@@ -218,6 +218,7 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
 .js .reveal{opacity:0;transform:translateY(28px);transition:opacity .9s cubic-bezier(.2,.8,.2,1),transform .9s cubic-bezier(.2,.8,.2,1)}
 .js .reveal.in{opacity:1;transform:none}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition-duration:.01ms!important}.js .reveal,.dw-in nav a{opacity:1;transform:none}}
+}
 
 @media(max-width:1080px){
   .dw-in{grid-template-columns:1fr;gap:40px;align-content:start}
@@ -229,6 +230,48 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
   .dw-in{padding:110px 24px 50px}
 }
 
+/* ── Signature textile ────────────────────────────────────────────────
+   Cinq touches, sur cinq pages, et nulle part ailleurs. Ces utilitaires
+   vivent ici pour qu'il n'y en ait qu'un exemplaire ; les emplacements,
+   eux, sont ecrits dans chaque generateur.
+
+   TROIS REGLES QUI NE SE NEGOCIENT PAS :
+     - jamais sous un texte, un bouton ou un champ ;
+     - decoratif : aria-hidden, et aucun evenement de pointeur ;
+     - pas d'animation en boucle. L'apparition reutilise .reveal, qui
+       respecte deja prefers-reduced-motion. */
+.pagne{pointer-events:none;-webkit-user-select:none;user-select:none}
+
+/* Le damas : un ton sur ton a 9 %, pose DERRIERE, dans un vide. Le fondu
+   le fait disparaitre avant d'atteindre la colonne de texte — sans lui, le
+   motif s'arrete net et se voit. */
+/* z-index:-1, et non 0. Dans un contexte d'empilement, un element POSITIONNE
+   a z-index:0 se peint AU-DESSUS du texte statique voisin : le damas serait
+   passe par-dessus le titre. A -1 il reste derriere le contenu et devant le
+   fond — a condition que son parent ouvre un contexte, d'ou le
+   `position:relative;z-index:0` pose sur chaque bloc d'accueil. */
+.pagne-damas{position:absolute;z-index:-1;opacity:.09;
+  background:url(img/pagne/damas-pagne.svg) repeat;background-size:252px 158px}
+.pagne-damas.vers-gauche{-webkit-mask-image:linear-gradient(90deg,transparent,#000 50%);
+  mask-image:linear-gradient(90deg,transparent,#000 50%)}
+.pagne-damas.au-centre{-webkit-mask-image:radial-gradient(ellipse 50% 50% at 50% 50%,#000 30%,transparent 100%);
+  mask-image:radial-gradient(ellipse 50% 50% at 50% 50%,#000 30%,transparent 100%)}
+
+/* Le galon : une bande de 20 px, en haut d'une carte, DANS sa bordure. */
+.pagne-galon{position:absolute;top:0;left:0;right:0;height:20px;opacity:.8;
+  background:url(img/pagne/galon-pagne.svg) repeat-x center;background-size:48px 20px}
+
+/* Les medaillons sont en SVG inline : leur trait suit `color`. */
+.pagne-med{display:block;margin:0 auto;color:#A88560}
+.pagne-med svg{display:block;width:100%;height:auto}
+.pagne-med.or-logo{color:var(--bronze)}
+
+@media(max-width:767px){
+  /* Sur un telephone il n'y a plus de vide : le damas n'a plus d'endroit
+     ou vivre sans passer sous le texte. On le retire. */
+  .pagne-damas{display:none}
+  .pagne-med.large{max-width:240px}
+}
 
 /* L'en-tete est fixe : le hero doit lui reserver sa hauteur, comme le font
    les pages sans hero avec leur padding de 150px. Sans cela, sur un ecran
@@ -242,6 +285,10 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
 
 section{padding:104px 0}
 .head{text-align:center;margin-bottom:60px}
+/* Signature textile — touche 1 sur 5. Le medaillon marque la jonction
+   entre le bas du hero et la section : il annonce le surtitre, il ne le
+   remplace pas. 24 px le separent du texte, et il n'est sous rien. */
+.pagne-domaine{width:360px;max-width:100%;margin:0 auto 24px;opacity:.85}
 .head p{max-width:54ch;margin:18px auto 0;color:var(--muted)}
 
 /* sur le domaine */
@@ -386,6 +433,7 @@ section{padding:104px 0}
 
 <section class="wrap" id="domaine">
   <div class="head reveal">
+    <span class="pagne pagne-med pagne-domaine or-logo" aria-hidden="true"><svg focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 40"><g fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M0 20H148M212 20H360" stroke-width="1"></path><circle cx="148" cy="20" r="1.6" fill="currentColor" stroke="none"></circle><circle cx="212" cy="20" r="1.6" fill="currentColor" stroke="none"></circle><path d="M180 1L199 20L180 39L161 20Z" stroke-width="1"></path><g transform="translate(169.5 9.5) scale(.35)" stroke-width="3.4"><circle cx="30" cy="30" r="8"></circle><line x1="43.0" y1="30.0" x2="51.0" y2="30.0"></line><line x1="39.2" y1="39.2" x2="44.8" y2="44.8"></line><line x1="30.0" y1="43.0" x2="30.0" y2="51.0"></line><line x1="20.8" y1="39.2" x2="15.2" y2="44.8"></line><line x1="17.0" y1="30.0" x2="9.0" y2="30.0"></line><line x1="20.8" y1="20.8" x2="15.2" y2="15.2"></line><line x1="30.0" y1="17.0" x2="30.0" y2="9.0"></line><line x1="39.2" y1="20.8" x2="44.8" y2="15.2"></line></g></g></svg></span>
     <span class="eyebrow" data-t="eb2">Sur le domaine</span>
     <h2 style="margin-top:16px" data-t="h2">Sans passer le portail</h2>
     <p data-t="p2">Six lieux, tous à moins de deux minutes de marche de votre chambre.</p>

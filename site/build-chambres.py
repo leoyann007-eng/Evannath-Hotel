@@ -8,7 +8,7 @@ des hypotheses a faire confirmer — voir README.
 import io
 import _schema
 from _chrome import (page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV, WA,
-                     REMISE_JS, REMISE_CSS, DISPO_JS)
+                     REMISE_JS, REMISE_CSS, DISPO_JS, PAGNE_CSS)
 
 # slug, nom, prix, capacite, resume, accroche, 3 paragraphes, equipements+, photos
 from _chambres import CHAMBRES
@@ -39,6 +39,23 @@ INCL = [
 CSS = REMISE_CSS + """
 .head{padding:150px 0 34px}
 .head-top{display:flex;justify-content:space-between;align-items:flex-end;gap:30px;flex-wrap:wrap}
+/* Signature textile — touche 4 sur 5, le damas. Il vit dans le VIDE entre
+   le titre, a gauche, et le prix, a droite. Le fondu radial l'eteint avant
+   d'atteindre l'un ou l'autre : au centre il est a 9 %, aux bords a rien.
+   Le parent ouvre un contexte d'empilement pour qu'il reste derriere. */
+.head{position:relative;z-index:0}
+/* Le damas est un ELEMENT DE LA GRILLE, pas un calque pose a des
+   coordonnees devinees. Il prend le vide que le flex laisse entre le bloc
+   titre et le prix : `flex:1` lui donne ce qui reste, et rien de plus.
+   Le recouvrement devient impossible par construction — la premiere
+   version, centree a 50 %, passait sur le titre de 144 px. */
+.pagne-chambre{position:relative;z-index:auto;flex:1 1 0;min-width:0;
+  height:150px;align-self:center;margin-bottom:6px}
+@media(max-width:1100px){.pagne-chambre{display:none}}
+/* Le galon, touche 4 sur 5 (suite) : une bande de 20 px en haut de la
+   carte de reservation, DANS sa bordure. Le contenu commence dessous —
+   d'ou les 20 px ajoutes au padding du haut, plutot qu'un chevauchement. */
+.panel{padding-top:48px}
 .head h1{margin:10px 0 0}
 .facts{display:flex;gap:26px;flex-wrap:wrap;margin-top:22px;font-size:13.5px;color:var(--muted)}
 .facts b{color:var(--cream);font-weight:500}
@@ -147,6 +164,15 @@ CSS = REMISE_CSS + """
   #lb .prev{left:8px}#lb .next{right:8px}
 }
 """
+# Les cinq touches textiles : ce morceau ne part que sur les pages qui
+# en portent une.
+# Les utilitaires D'ABORD, les placements ensuite : a specificite egale
+# c'est la derniere regle qui gagne, et ce sont les placements qui
+# doivent gagner. Dans l'autre sens, `.pagne-damas{position:absolute}`
+# ecrasait le `position:relative` du placement, et le motif sortait du
+# flux — largeur zero, invisible, et le test passait au vert.
+CSS = PAGNE_CSS + CSS
+
 
 # Largeurs reelles des vignettes de la mosaique -------------------------------
 #
@@ -243,6 +269,7 @@ for c in CHAMBRES:
 
     b.append('''      </div>
     </div>
+    <div class="pagne pagne-damas au-centre pagne-chambre" aria-hidden="true"></div>
     <div class="head-price" id="prix-tete"><b>%s</b><span data-t="pnuit">FCFA / nuit</span></div>
   </div>
 </div>
@@ -317,6 +344,7 @@ for c in CHAMBRES:
  </div>
 
  <aside class="panel" id="reserver">
+  <div class="pagne pagne-galon" aria-hidden="true"></div>
   <span class="from" data-t="apd">À partir de</span>
   <div class="rate" id="prix-panneau">%s <span style="font-size:1rem">FCFA</span></div>
   <div class="per" data-t="pern">par nuit, petit-déjeuner inclus</div>

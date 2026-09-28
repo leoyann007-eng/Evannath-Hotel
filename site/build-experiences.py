@@ -7,7 +7,7 @@ photo : les seuls visuels existants sont des images de synthese.
 """
 import io
 import _schema
-from _chrome import page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV
+from _chrome import page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV, medaillon, PAGNE_CSS
 
 # ── sur le domaine ────────────────────────────────────────────
 DOMAINE = [
@@ -80,6 +80,10 @@ CSS = """
 
 section{padding:104px 0}
 .head{text-align:center;margin-bottom:60px}
+/* Signature textile — touche 1 sur 5. Le medaillon marque la jonction
+   entre le bas du hero et la section : il annonce le surtitre, il ne le
+   remplace pas. 24 px le separent du texte, et il n'est sous rien. */
+.pagne-domaine{width:360px;max-width:100%;margin:0 auto 24px;opacity:.85}
 .head p{max-width:54ch;margin:18px auto 0;color:var(--muted)}
 
 /* sur le domaine */
@@ -156,6 +160,15 @@ section{padding:104px 0}
   .band{height:44vh}
 }
 """
+# Les cinq touches textiles : ce morceau ne part que sur les pages qui
+# en portent une.
+# Les utilitaires D'ABORD, les placements ensuite : a specificite egale
+# c'est la derniere regle qui gagne, et ce sont les placements qui
+# doivent gagner. Dans l'autre sens, `.pagne-damas{position:absolute}`
+# ecrasait le `position:relative` du placement, et le motif sortait du
+# flux — largeur zero, invisible, et le test passait au vert.
+CSS = PAGNE_CSS + CSS
+
 
 b = [header('reserver.html', 'Réserver'), drawer(''), '''
 <section class="hero">
@@ -173,6 +186,7 @@ b = [header('reserver.html', 'Réserver'), drawer(''), '''
 
 <section class="wrap" id="domaine">
   <div class="head reveal">
+    ''' + medaillon('soleil', 'pagne-domaine or-logo') + '''
     <span class="eyebrow" data-t="eb2">Sur le domaine</span>
     <h2 style="margin-top:16px" data-t="h2">Sans passer le portail</h2>
     <p data-t="p2">Six lieux, tous à moins de deux minutes de marche de votre chambre.</p>

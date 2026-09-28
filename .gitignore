@@ -100,3 +100,8 @@ verif-*.png
 # des variantes dont le chemin était construit en JavaScript ont failli être
 # effacées. Voir « Photos mal nommées » dans le README.
 site/.quarantaine/
+
+# Le dossier de remise des motifs pagne : les SVG utiles vivent dans
+# site/img/pagne/, nettoyes de leurs metadonnees. L'original reste chez
+# le designer, pas dans le depot du site.
+handoff_touches_pagne/

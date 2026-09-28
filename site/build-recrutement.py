@@ -36,8 +36,9 @@ n'est pas la meme chose qu'une panne : un reseau coupe qui afficherait
 alors qu'on n'arrive pas a afficher, et on donne le contact.
 """
 import io
+import json
 import _schema
-from _chrome import page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV, WA, MAIL
+from _chrome import page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV, WA, MAIL, medaillon, PAGNE_CSS
 
 CSS = """
 body{background:var(--bark)}
@@ -75,6 +76,10 @@ body{background:var(--bark)}
    reseau coupe qui dirait « aucun poste » ferait croire qu'il n'y a rien. */
 .etat{border:1px solid var(--line);background:var(--bark-2);padding:44px 32px;
   text-align:center}
+/* Signature textile — touche 3 sur 5. Le medaillon coiffe le bloc vide.
+   Le padding du bloc l'ecarte deja du bord ; le margin-bottom pose les
+   12 px demandes entre lui et la premiere ligne. */
+.pagne-vide{width:96px;margin:0 auto 14px;color:#A88560}
 .etat p{color:var(--muted);font-size:15.5px;margin:0 auto;max-width:48ch}
 .etat .g{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:24px}
 .etat.mal{border-color:rgba(166,58,37,.4)}
@@ -86,6 +91,15 @@ body{background:var(--bark)}
   .poste .post{flex-direction:column;align-items:flex-start;gap:10px}
 }
 """
+# Les cinq touches textiles : ce morceau ne part que sur les pages qui
+# en portent une.
+# Les utilitaires D'ABORD, les placements ensuite : a specificite egale
+# c'est la derniere regle qui gagne, et ce sont les placements qui
+# doivent gagner. Dans l'autre sens, `.pagne-damas{position:absolute}`
+# ecrasait le `position:relative` du placement, et le motif sortait du
+# flux — largeur zero, invisible, et le test passait au vert.
+CSS = PAGNE_CSS + CSS
+
 
 b = [header('index.html#reserver', 'Réserver'), drawer(''), '''
 <section class="head">
@@ -113,6 +127,9 @@ b = [header('index.html#reserver', 'Réserver'), drawer(''), '''
 JS = NAV_JS + '''
 
 (function () {
+  /* Le medaillon est pose a la GENERATION, pas recopie ici : une seule
+     source, le fichier SVG. */
+  var MED = ''' + json.dumps(medaillon('carre', 'pagne-vide')) + ''';
   var liste = document.getElementById('liste');
   if (!liste) return;
 
@@ -172,7 +189,8 @@ JS = NAV_JS + '''
       + '</div></article>';
   }
 
-  var VIDE = '<div class="etat"><p data-t="vide">Aucun poste n\\'est ouvert en ce moment. '
+  var VIDE = '<div class="etat">' + MED
+    + '<p data-t="vide">Aucun poste n\\'est ouvert en ce moment. '
     + 'Les offres paraissent ici et sur notre page Facebook.</p>'
     + '<div class="g"><a class="btn" href="https://www.facebook.com/evannathhotel"'
     + ' target="_blank" rel="noopener" data-t="fb">Suivre sur Facebook</a></div></div>';
