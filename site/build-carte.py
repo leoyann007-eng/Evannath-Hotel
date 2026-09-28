@@ -210,7 +210,13 @@ HTML = (HTML
       _schema.fil([('Accueil','index'),('La table',None)]))))
 # En dernier : le JSON-LD injecte plus haut porte lui aussi l'adresse.
 io.open('carte.html','w',encoding='utf-8').write(
-    versionner(responsive(dimensionner(HTML), hero='gal-lag-nuit')).replace('{{MAIL}}', MAIL))
+    versionner(responsive(dimensionner(HTML), hero='gal-lag-nuit',
+                          # La bande des lanternes (20) est pleine largeur : declaree a
+                          # 700 px — sa taille dans le tiroir — elle recevait la
+                          # version de 1024 px etiree sur 1 440, floue. Sous 900 px
+                          # la bande devient presque carree et la photo, cadree par
+                          # la hauteur, deborde : 1,17 fois l'ecran a 768, 1,4 a 390.
+                          sizes={'gal-art-lanterne': '(max-width:900px) 140vw, 100vw'})).replace('{{MAIL}}', MAIL))
 print('carte.html :', total, 'articles')
 
 SPAH = io.open('spa-template.html',encoding='utf-8').read()

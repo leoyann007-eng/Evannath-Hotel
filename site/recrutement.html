@@ -739,9 +739,19 @@ window.EVN_AU_SCROLL=function(selecteur,classe){
   if(!('IntersectionObserver' in window)||matchMedia('(prefers-reduced-motion: reduce)').matches){
     els.forEach(function(e){e.classList.add(c)});return;
   }
+  /* isIntersecting est vrai des le PREMIER pixel visible : le tester seul
+     declenchait l'effet quand l'element pointait a peine en bas de
+     l'ecran — les lanternes etaient deja allumees quand on arrivait
+     devant. C'est le seuil de 30 % qui decide. Un element plus haut que
+     l'ecran n'atteint jamais 30 % de lui-meme : on compte alors 30 % de
+     l'ecran. D'ou plusieurs seuils, pour etre rappele en chemin. */
   var io=new IntersectionObserver(function(es){
-    es.forEach(function(e){if(!e.isIntersecting)return;e.target.classList.add(c);io.unobserve(e.target)})
-  },{threshold:.3});
+    es.forEach(function(e){
+      var vu=e.intersectionRatio>=.299||(e.rootBounds&&e.intersectionRect.height>=e.rootBounds.height*.3);
+      if(!vu)return;
+      e.target.classList.add(c);io.unobserve(e.target);
+    })
+  },{threshold:[0,.1,.2,.3]});
   els.forEach(function(e){io.observe(e)});
 };
 

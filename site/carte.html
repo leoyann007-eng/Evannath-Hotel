@@ -353,10 +353,15 @@ header.scrolled .brand img{transform:scale(.8)}
    de conteneur. Les halos y sont poses en pourcentage de l'image, donc
    toujours sur l'ampoule.
 
-   isolation:isolate borne le mix-blend-mode au bandeau. */
+   isolation:isolate borne le mix-blend-mode au bandeau.
+
+   La penombre est portee par .eteinte, que le SCRIPT pose : sans lui, la
+   photo restait assombrie pour toujours (cette page ne pose pas .js). La
+   transition ne vit que dans l'etat allume : poser .eteinte assombrit sans
+   animer. */
 .band.lanternes{container-type:size;isolation:isolate}
-.band.lanternes img{filter:brightness(.45) saturate(.6);transition:filter 2.4s ease}
-.band.lanternes.vu img{filter:brightness(1.12) saturate(1.08)}
+.band.lanternes.eteinte img{filter:brightness(.45) saturate(.6)}
+.band.lanternes.eteinte.vu img{filter:brightness(1.12) saturate(1.08);transition:filter 2.4s ease}
 .lueurs{position:absolute;left:50%;top:50%;z-index:2;pointer-events:none;
   width:max(100cqw,calc(100cqh * 1748 / 1240));aspect-ratio:1748/1240;
   transform:translate(-50%,-50%)}
@@ -365,10 +370,20 @@ header.scrolled .brand img{transform:scale(.8)}
 .lueurs i{position:absolute;left:53.3%;top:48.6%;aspect-ratio:1;border-radius:50%;
   background:radial-gradient(circle,rgba(255,206,130,.55) 0%,rgba(255,180,90,.18) 38%,rgba(255,170,80,0) 70%);
   mix-blend-mode:screen;opacity:0}
-.lueurs i:nth-child(1){width:20%;margin:-10% 0 0 -10%;transition:opacity 1.4s ease .9s}
-.lueurs i:nth-child(2){width:38%;margin:-19% 0 0 -19%;transition:opacity 1.4s ease 1.25s}
-.lueurs i:nth-child(3){width:60%;margin:-30% 0 0 -30%;transition:opacity 1.4s ease 1.6s}
+.lueurs i:nth-of-type(1){width:20%;margin:-10% 0 0 -10%;transition:opacity 1.4s ease .9s}
+.lueurs i:nth-of-type(2){width:38%;margin:-19% 0 0 -19%;transition:opacity 1.4s ease 1.25s}
+.lueurs i:nth-of-type(3){width:60%;margin:-30% 0 0 -30%;transition:opacity 1.4s ease 1.6s}
 .band.vu .lueurs i{opacity:1}
+/* L'ampoule est le point le plus clair de la photo : des que la photo
+   s'eveille, elle parait deja allumee, et les halos arrivaient sur une
+   ampoule blanche — on ne la voyait pas s'allumer. Un voile la garde
+   ETEINTE pendant que la photo s'eveille, et s'efface quand le premier
+   halo monte (.9 s). Il ne vit qu'avec le script (.eteinte). */
+.lueurs b{position:absolute;left:53.3%;top:48.6%;width:16%;aspect-ratio:1;margin:-8% 0 0 -8%;border-radius:50%;
+  background:radial-gradient(circle,rgba(16,11,6,.8) 0%,rgba(16,11,6,.62) 32%,rgba(16,11,6,0) 70%);
+  mix-blend-mode:multiply;opacity:0}
+.band.eteinte .lueurs b{opacity:1}
+.band.eteinte.vu .lueurs b{opacity:0;transition:opacity 1s ease-out .9s}
 .band::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(16,11,6,.5) 0%,rgba(16,11,6,.22) 30%,rgba(16,11,6,.72) 62%,rgba(16,11,6,.95) 100%)}
 .band .cap{position:absolute;left:0;right:0;bottom:38px;z-index:3;text-align:center;padding:0 24px}
 .band .cap span{font-size:10px;letter-spacing:.34em;text-transform:uppercase;color:var(--bronze-2);font-weight:700;text-shadow:0 2px 14px rgba(10,6,3,.95),0 0 4px rgba(10,6,3,.9)}
@@ -603,8 +618,8 @@ footer{background:#0B0704}
       <a href="reserver.html"><i>11</i><span data-t="n11">Réserver</span></a>
     </nav>
     <aside class="dw-side">
-      <div class="ph"><picture><source srcset="img/opt/gal-art-lanterne-640.webp 640w, img/opt/gal-art-lanterne-1024.webp 1024w, img/opt/gal-art-lanterne.webp 1748w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp">
-        <img width="1748" height="1240" src="img/opt/gal-art-lanterne.jpg" srcset="img/opt/gal-art-lanterne-640.jpg 640w, img/opt/gal-art-lanterne-1024.jpg 1024w, img/opt/gal-art-lanterne.jpg 1748w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" alt="Lanterne de rotin de l'Hôtel Evannath" loading="lazy"></picture></div>
+      <div class="ph"><picture><source srcset="img/opt/gal-art-lanterne-640.webp 640w, img/opt/gal-art-lanterne-1024.webp 1024w, img/opt/gal-art-lanterne.webp 1748w" sizes="(max-width:900px) 140vw, 100vw" type="image/webp">
+        <img width="1748" height="1240" src="img/opt/gal-art-lanterne.jpg" srcset="img/opt/gal-art-lanterne-640.jpg 640w, img/opt/gal-art-lanterne-1024.jpg 1024w, img/opt/gal-art-lanterne.jpg 1748w" sizes="(max-width:900px) 140vw, 100vw" alt="Lanterne de rotin de l'Hôtel Evannath" loading="lazy"></picture></div>
       <div>
         <b data-t="dr">Réservations</b>
         <a href="tel:+2250151527575">+225 01 51 52 75 75</a>
@@ -649,9 +664,9 @@ footer{background:#0B0704}
 </section>
 
 <div class="band reveal lanternes">
-  <picture><source srcset="img/opt/gal-art-lanterne-640.webp 640w, img/opt/gal-art-lanterne-1024.webp 1024w, img/opt/gal-art-lanterne.webp 1748w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp">
-  <img width="1748" height="1240" src="img/opt/gal-art-lanterne.jpg" srcset="img/opt/gal-art-lanterne-640.jpg 640w, img/opt/gal-art-lanterne-1024.jpg 1024w, img/opt/gal-art-lanterne.jpg 1748w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" alt="Lanterne de rotin allumée au-dessus des tables" loading="lazy"></picture>
-  <div class="lueurs" aria-hidden="true"><i></i><i></i><i></i></div>
+  <picture><source srcset="img/opt/gal-art-lanterne-640.webp 640w, img/opt/gal-art-lanterne-1024.webp 1024w, img/opt/gal-art-lanterne.webp 1748w" sizes="(max-width:900px) 140vw, 100vw" type="image/webp">
+  <img width="1748" height="1240" src="img/opt/gal-art-lanterne.jpg" srcset="img/opt/gal-art-lanterne-640.jpg 640w, img/opt/gal-art-lanterne-1024.jpg 1024w, img/opt/gal-art-lanterne.jpg 1748w" sizes="(max-width:900px) 140vw, 100vw" alt="Lanterne de rotin allumée au-dessus des tables" loading="lazy"></picture>
+  <div class="lueurs" aria-hidden="true"><b></b><i></i><i></i><i></i></div>
   <div class="cap"><span data-t="cb1">Le service du soir</span><p data-t="cb1p">Les lanternes de rotin s'allument à la tombée du jour.</p></div>
 </div>
 
@@ -1198,9 +1213,19 @@ window.EVN_AU_SCROLL=function(selecteur,classe){
   if(!('IntersectionObserver' in window)||matchMedia('(prefers-reduced-motion: reduce)').matches){
     els.forEach(function(e){e.classList.add(c)});return;
   }
+  /* isIntersecting est vrai des le PREMIER pixel visible : le tester seul
+     declenchait l'effet quand l'element pointait a peine en bas de
+     l'ecran — les lanternes etaient deja allumees quand on arrivait
+     devant. C'est le seuil de 30 % qui decide. Un element plus haut que
+     l'ecran n'atteint jamais 30 % de lui-meme : on compte alors 30 % de
+     l'ecran. D'ou plusieurs seuils, pour etre rappele en chemin. */
   var io=new IntersectionObserver(function(es){
-    es.forEach(function(e){if(!e.isIntersecting)return;e.target.classList.add(c);io.unobserve(e.target)})
-  },{threshold:.3});
+    es.forEach(function(e){
+      var vu=e.intersectionRatio>=.299||(e.rootBounds&&e.intersectionRect.height>=e.rootBounds.height*.3);
+      if(!vu)return;
+      e.target.classList.add(c);io.unobserve(e.target);
+    })
+  },{threshold:[0,.1,.2,.3]});
   els.forEach(function(e){io.observe(e)});
 };
 
@@ -1455,6 +1480,7 @@ tc:"Food",tbo:"Bar &amp; cellar",nr:"No results. Try “poulet”, “mojito” 
 e6:"Tonight",h6:"Book a table",l1:"Date",l2:"Time",l3:"Covers",l4:"Name",l5:"Phone / WhatsApp",l6:"Confirm the table",
 k3:"Lunch",k4:"Dinner",k5:"Bar &amp; terrace",k5v:"until closing",k6:"Méchoui Party",k6v:"Saturday, from 3 pm",k7:"Bookings"};
 /* 20 · la bande du service du soir s'eveille quand on l'atteint. */
+document.querySelectorAll('.band.lanternes').forEach(function(b){b.classList.add('eteinte')});
 EVN_AU_SCROLL('.band.lanternes','vu');
 var FR={};document.querySelectorAll('[data-t]').forEach(function(e){FR[e.dataset.t]=e.innerHTML});
 /* 51 · Les titres VISIBLES roulent vers leur traduction : l'ancien texte
