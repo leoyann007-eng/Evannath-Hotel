@@ -774,8 +774,11 @@ main{display:block}
 #   - apres la premiere page de la session (sessionStorage) ;
 #   - sous « reduire les animations » : l'etat final d'un ecran de
 #     chargement, c'est pas d'ecran du tout ;
-#   - sur un retour arriere ou un rechargement : la page est deja connue ;
-#   - si la page a fini de charger avant que le logo n'arrive.
+#   - sur un retour arriere : la page revient telle qu'on l'a quittee.
+#
+# Il REJOUE sur un rechargement, meme deja vu dans la session : c'est le
+# geste de qui veut revoir l'arrivee sur le site (demande de la direction).
+# Passer d'une page a l'autre, lui, ne le rejoue pas : 2,5 s a chaque clic.
 #
 # Le logo (104 Ko) n'est telecharge que s'il doit jouer : l'integrer a
 # chaque page l'aurait fait payer a toutes les visites, pour une seule.
@@ -805,10 +808,11 @@ html.intro::after{content:"";position:fixed;inset:0;z-index:1000;background:var(
 <script>(function(){
 var d=document,h=d.documentElement;
 try{
-  if(sessionStorage.getItem('evn-intro'))return;
-  if(!window.fetch||!window.matchMedia||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
   var nav=performance.getEntriesByType?performance.getEntriesByType('navigation')[0]:null;
-  if(nav&&nav.type&&nav.type!=='navigate')return;
+  var recharge=!!(nav&&nav.type==='reload');
+  if(sessionStorage.getItem('evn-intro')&&!recharge)return;
+  if(!window.fetch||!window.matchMedia||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  if(nav&&nav.type==='back_forward')return;
   if(d.readyState==='complete')return;
   sessionStorage.setItem('evn-intro','1');
 }catch(e){return}
@@ -824,7 +828,10 @@ fetch('img/logo-calques.svg').then(function(r){return r.ok?r.text():Promise.reje
   function poser(){
     if(fini)return;
     clearTimeout(limite);
-    if(d.readyState==='complete'){lever();return}
+    /* Plus de renoncement si la page a fini de charger entre-temps : sur
+       un rechargement, tout vient du cache et la page gagnait la course —
+       l'ecran ne jouait jamais. L'aplat la cache depuis le debut : le logo
+       peut se construire par-dessus. */
     fini=true;
     var e=d.createElement('div');
     e.className='intro-ecran';

@@ -94,6 +94,14 @@ CSS = """
 .head{position:relative;z-index:0}
 .pagne-offres{top:138px;right:0;width:min(600px,46%);height:340px}
 @media(max-width:1100px){.pagne-offres{display:none}}
+/* 43 · « Invisible hors survol » : la ou il y a une souris, le damas fixe
+   s'efface et seule la lampe le montre, sous le curseur. Pose par-dessus
+   un damas deja visible, elle n'ajoutait qu'une nuance que personne ne
+   voyait. Sans souris (tablette, telephone), le damas fixe reste. */
+@media(hover:hover) and (min-width:768px){
+  .pagne-damas.pagne-offres{visibility:hidden}
+  .pagne-lampe.pagne-offres{opacity:.3}
+}
 .camp{border:1px solid var(--bronze);background:var(--bark-2);padding:34px;margin-bottom:56px}
 .camp .top{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;margin-bottom:26px}
 .camp .live{display:inline-flex;align-items:center;gap:9px;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--palm);font-weight:700}

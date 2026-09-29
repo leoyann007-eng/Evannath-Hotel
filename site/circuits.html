@@ -43,10 +43,11 @@ html.intro::after{content:"";position:fixed;inset:0;z-index:1000;background:var(
 <script>(function(){
 var d=document,h=d.documentElement;
 try{
-  if(sessionStorage.getItem('evn-intro'))return;
-  if(!window.fetch||!window.matchMedia||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
   var nav=performance.getEntriesByType?performance.getEntriesByType('navigation')[0]:null;
-  if(nav&&nav.type&&nav.type!=='navigate')return;
+  var recharge=!!(nav&&nav.type==='reload');
+  if(sessionStorage.getItem('evn-intro')&&!recharge)return;
+  if(!window.fetch||!window.matchMedia||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  if(nav&&nav.type==='back_forward')return;
   if(d.readyState==='complete')return;
   sessionStorage.setItem('evn-intro','1');
 }catch(e){return}
@@ -62,7 +63,10 @@ fetch('img/logo-calques.svg').then(function(r){return r.ok?r.text():Promise.reje
   function poser(){
     if(fini)return;
     clearTimeout(limite);
-    if(d.readyState==='complete'){lever();return}
+    /* Plus de renoncement si la page a fini de charger entre-temps : sur
+       un rechargement, tout vient du cache et la page gagnait la course —
+       l'ecran ne jouait jamais. L'aplat la cache depuis le debut : le logo
+       peut se construire par-dessus. */
     fini=true;
     var e=d.createElement('div');
     e.className='intro-ecran';
@@ -666,6 +670,14 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
 .head{position:relative;z-index:0}
 .pagne-offres{top:138px;right:0;width:min(600px,46%);height:340px}
 @media(max-width:1100px){.pagne-offres{display:none}}
+/* 43 · « Invisible hors survol » : la ou il y a une souris, le damas fixe
+   s'efface et seule la lampe le montre, sous le curseur. Pose par-dessus
+   un damas deja visible, elle n'ajoutait qu'une nuance que personne ne
+   voyait. Sans souris (tablette, telephone), le damas fixe reste. */
+@media(hover:hover) and (min-width:768px){
+  .pagne-damas.pagne-offres{visibility:hidden}
+  .pagne-lampe.pagne-offres{opacity:.3}
+}
 .camp{border:1px solid var(--bronze);background:var(--bark-2);padding:34px;margin-bottom:56px}
 .camp .top{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;margin-bottom:26px}
 .camp .live{display:inline-flex;align-items:center;gap:9px;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--palm);font-weight:700}

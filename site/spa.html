@@ -21,10 +21,11 @@ html.intro::after{content:"";position:fixed;inset:0;z-index:1000;background:var(
 <script>(function(){
 var d=document,h=d.documentElement;
 try{
-  if(sessionStorage.getItem('evn-intro'))return;
-  if(!window.fetch||!window.matchMedia||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
   var nav=performance.getEntriesByType?performance.getEntriesByType('navigation')[0]:null;
-  if(nav&&nav.type&&nav.type!=='navigate')return;
+  var recharge=!!(nav&&nav.type==='reload');
+  if(sessionStorage.getItem('evn-intro')&&!recharge)return;
+  if(!window.fetch||!window.matchMedia||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  if(nav&&nav.type==='back_forward')return;
   if(d.readyState==='complete')return;
   sessionStorage.setItem('evn-intro','1');
 }catch(e){return}
@@ -40,7 +41,10 @@ fetch('img/logo-calques.svg').then(function(r){return r.ok?r.text():Promise.reje
   function poser(){
     if(fini)return;
     clearTimeout(limite);
-    if(d.readyState==='complete'){lever();return}
+    /* Plus de renoncement si la page a fini de charger entre-temps : sur
+       un rechargement, tout vient du cache et la page gagnait la course —
+       l'ecran ne jouait jamais. L'aplat la cache depuis le debut : le logo
+       peut se construire par-dessus. */
     fini=true;
     var e=d.createElement('div');
     e.className='intro-ecran';
