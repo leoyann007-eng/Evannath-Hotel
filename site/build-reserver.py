@@ -371,6 +371,8 @@ var T={fr:{loc:'fr-FR',p1:' personne',pp:' personnes',n1:'Nuit',nn:'Nuits',tarif
              +' à partir du '+jour(j.du)+', '+j.pax+(j.pax>1?' personnes':' personne')
              +'. Acompte réglé : '+fmt(j.montant)+' FCFA.'; },
            payeN1:'Votre réservation est enregistrée et confirmée auprès de la réception.',
+           payeTdemo:'Acompte reçu (démonstration)',
+           payeN1demo:'Mode test : aucune chambre n’est retenue et aucun argent n’a bougé.',
            payeN2:function(j){ return 'Le solde, '+fmt(j.total-j.montant)+' FCFA, se règle à l’arrivée, sur place.'; },
            payeN3:'Pour toute question, la réception retrouve votre dossier avec cette référence.'},
      en:{loc:'en-GB',p1:' guest',pp:' guests',n1:'Night',nn:'Nights',tarif:'Rate',
@@ -404,6 +406,8 @@ var T={fr:{loc:'fr-FR',p1:' personne',pp:' personnes',n1:'Nuit',nn:'Nuits',tarif
              +' from '+jour(j.du)+', '+j.pax+(j.pax>1?' guests':' guest')
              +'. Deposit paid: '+fmt(j.montant)+' FCFA.'; },
            payeN1:'Your booking is recorded and confirmed with the front desk.',
+           payeTdemo:'Deposit received (demonstration)',
+           payeN1demo:'Test mode: no room is held and no money has moved.',
            payeN2:function(j){ return 'The balance, '+fmt(j.total-j.montant)+' FCFA, is settled on arrival, at the hotel.'; },
            payeN3:'For any question, the front desk finds your file with this reference.'}};
 function jour(v){return v?new Date(v).toLocaleDateString(T[LG].loc,{weekday:'long',day:'numeric',month:'long'}):'—'}
@@ -653,10 +657,10 @@ function confirmer(j,ref){
 function peindrePaye(){
   if(!PAY.paye)return;
   var j=PAY.paye.j,t=T[LG];
-  document.querySelector('#p4 h2').textContent=t.payeT;
+  document.querySelector('#p4 h2').textContent=j.demo?t.payeTdemo:t.payeT;
   document.getElementById('dm').textContent=t.payeM(j);
   var ns=document.querySelectorAll('#p4 .next-steps span');
-  if(ns[0])ns[0].textContent=t.payeN1;
+  if(ns[0])ns[0].textContent=j.demo?t.payeN1demo:t.payeN1;
   if(ns[1])ns[1].textContent=t.payeN2(j);
   if(ns[2])ns[2].textContent=t.payeN3;
 }

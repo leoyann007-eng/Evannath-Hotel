@@ -698,6 +698,16 @@ async function retirerFermeture(id) {
   } catch (e) { /* elle expirera */ }
 }
 
+/** Retire une demonstration de paiement (mode test, sans chambre). */
+async function retirerDemo(id) {
+  try {
+    const frais = await lire();
+    if (PANNE) return;
+    frais.demos = (frais.demos || []).filter((x) => x && x.id !== id);
+    await ecrire(frais);
+  } catch (e) { /* elle vieillira */ }
+}
+
 /** Pose la retenue, puis verifie qu'elle a bien survecu. */
 async function poserRetenue(d, entree, ch) {
   d.fermetures = Array.isArray(d.fermetures) ? d.fermetures : [];
@@ -1021,9 +1031,11 @@ function siteDe(req) {
 
 const payee = (s) => ['complete', 'completed', 'paid', 'succeeded', 'success'].includes(String(s || '').toLowerCase());
 
-/** La retenue qui porte ce paiement, dans un magasin deja lu. */
+/** La retenue qui porte ce paiement, dans un magasin deja lu. Les
+ *  demonstrations (mode test sans chambre saisie) vivent a part, dans
+ *  d.demos : elles ne doivent jamais peser sur la disponibilite. */
 function trouverPaiement(d, { ref, session }) {
-  return (d.fermetures || []).find((f) => f && f.paiement
+  return [].concat(d.fermetures || [], d.demos || []).find((f) => f && f.paiement
     && ((ref && f.paiement.reference === ref) || (session && f.paiement.session === session))) || null;
 }
 
@@ -1055,6 +1067,9 @@ async function marquerPaye({ ref, session, transaction, montant }) {
   f.expire = null;
   const w = await ecrire(d);
   if (!w.ok) return { ok: false, raison: 'ecriture' };
+  /* Une demonstration n'envoie pas de courriel : « votre reservation est
+     confirmee » serait faux, aucune chambre n'etant retenue. */
+  if (f.demo) return { ok: true, courriel: 'demonstration' };
   const ch = (d.chambres || []).find((x) => x.id === f.cible);
   const courriel = await courrielAuClient(f, nomDeCategorie(ch && ch.categorie));
   return { ok: true, courriel };
@@ -1234,14 +1249,35 @@ module.exports = async function handler(req, res) {
     if (!q.ok) return json(res, 422, { ok: false, raison: q.raison });
 
     const reference = nouvelleReference(d0);
+    const paiement = { reference, montant: q.acompte, total: q.total, nuits: q.nuits,
+      pax: q.pax, telephone, statut: 'en-attente', session: '', cree: new Date().toISOString() };
     const r = await retenir({ categorie: q.categorie, du: q.du, au: q.au,
-      nom: prenom + ' ' + nom, courriel, motif: reference, minutes: PAIEMENT_MINUTES,
-      paiement: { reference, montant: q.acompte, total: q.total, nuits: q.nuits,
-        pax: q.pax, telephone, statut: 'en-attente', session: '', cree: new Date().toISOString() } });
-    /* Rien de libre, ou rien de connu : on n'encaisse pas. « inconnu » veut
-       dire que les chambres ne sont pas encore saisies — le tunnel reprend
-       alors la demande a la reception. */
-    if (!r.retenue) return json(res, 200, { ok: false, raison: r.raison });
+      nom: prenom + ' ' + nom, courriel, motif: reference, minutes: PAIEMENT_MINUTES, paiement });
+    let entreeId = r.retenue ? r.entree.id : '';
+    let demo = false;
+    if (!r.retenue) {
+      /* Rien de libre, ou rien de connu : on n'encaisse pas. « inconnu » veut
+         dire que les chambres ne sont pas encore saisies — le tunnel reprend
+         alors la demande a la reception.
+
+         UNE exception : la cle de TEST. Aucun argent ne bouge, et il faut
+         pouvoir montrer le parcours avant que l'hotel ait saisi ses
+         chambres. On paie alors SANS retenir de chambre, dans d.demos, et
+         l'ecran de fin le dit. Avec une cle reelle, jamais. */
+      if (!(r.raison === 'inconnu' && LOMI_TEST)) return json(res, 200, { ok: false, raison: r.raison });
+      const dd = await lire();
+      if (PANNE) return json(res, 200, { ok: false, raison: 'indisponible' });
+      const trenteJours = Date.now() - 30 * 864e5;
+      dd.demos = (dd.demos || []).filter((x) => x && Date.parse(x.cree) > trenteJours);
+      const objet = { id: crypto.randomUUID(), demo: true, categorie: q.categorie,
+        debut: q.du, fin: veille(q.au), client: prenom + ' ' + nom, courriel, motif: reference,
+        statut: 'attente', paiement, cree: new Date().toISOString() };
+      dd.demos.push(objet);
+      const w = await ecrire(dd);
+      if (!w.ok) return json(res, 200, { ok: false, raison: 'ecriture' });
+      entreeId = objet.id;
+      demo = true;
+    }
 
     const site = siteDe(req);
     const s = await lomi('/checkout-sessions', 'POST', {
@@ -1253,20 +1289,20 @@ module.exports = async function handler(req, res) {
       customer_email: courriel,
       success_url: site + '/reserver?paiement=' + reference,
       cancel_url: site + '/reserver?paiement=' + reference + '&abandon=1',
-      metadata: { reference, retenue: r.entree.id },
+      metadata: { reference, retenue: entreeId },
     });
     const lien = s.corps && (s.corps.checkout_url || s.corps.url);
     if (!s.ok || !lien) {
       /* lomi ne repond pas, ou refuse : on libere la chambre tout de suite
          plutot que de la bloquer une heure pour un paiement impossible. */
-      await retirerFermeture(r.entree.id);
+      if (demo) await retirerDemo(entreeId); else await retirerFermeture(entreeId);
       return json(res, 200, { ok: false, raison: 'lomi', statut: s.statut });
     }
     // On note la session : c'est elle qu'on relira au retour du client.
     const d1 = await lire();
     const f = !PANNE && trouverPaiement(d1, { ref: reference });
     if (f) { f.paiement.session = String(s.corps.id || ''); await ecrire(d1); }
-    return json(res, 200, { ok: true, url: lien, reference, montant: q.acompte, test: LOMI_TEST });
+    return json(res, 200, { ok: true, url: lien, reference, montant: q.acompte, test: LOMI_TEST, demo });
   }
 
   /* ── Paiement interrompu ─────────────────────────────────────────────────
@@ -1285,7 +1321,9 @@ module.exports = async function handler(req, res) {
     if (!/^EVN-[A-Z0-9]{6}$/.test(ref)) return json(res, 400, { ok: false });
     const d = await lire();
     const f = !PANNE && trouverPaiement(d, { ref });
-    if (f && f.paiement.statut !== 'paye' && f.statut === 'attente') await retirerFermeture(f.id);
+    if (f && f.paiement.statut !== 'paye' && f.statut === 'attente') {
+      if (f.demo) await retirerDemo(f.id); else await retirerFermeture(f.id);
+    }
     return json(res, 200, { ok: true });
   }
 
@@ -1310,10 +1348,11 @@ module.exports = async function handler(req, res) {
         f = trouverPaiement(d, { ref }) || f;
       }
     }
-    const ch = (d.chambres || []).find((x) => x.id === f.cible);
+    const ch = !f.demo && (d.chambres || []).find((x) => x.id === f.cible);
     return json(res, 200, { ok: true, reference: ref, statut: f.paiement.statut,
-      montant: f.paiement.montant, total: f.paiement.total, categorie: nomDeCategorie(ch && ch.categorie),
-      du: f.debut, nuits: f.paiement.nuits, pax: f.paiement.pax, test: LOMI_TEST });
+      montant: f.paiement.montant, total: f.paiement.total,
+      categorie: nomDeCategorie(ch ? ch.categorie : f.categorie),
+      du: f.debut, nuits: f.paiement.nuits, pax: f.paiement.pax, test: LOMI_TEST, demo: !!f.demo });
   }
 
   // ── Connexion ───────────────────────────────────────────────────────────
