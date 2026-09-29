@@ -22,6 +22,7 @@
  */
 
 const crypto = require('crypto');
+const tarif = require('./_tarif.js');
 
 /* Les categories, telles que le site les vend. On les lit au lieu de les
    recopier : le courriel de confirmation doit dire « Chambre Standard », pas
@@ -86,6 +87,26 @@ let memoire = null;                          // mode demonstration
  * La reception transforme la retenue en reservation d'un clic, et celle-la
  * n'expire pas. */
 const RETENUE_MINUTES = 120;
+
+/* ── Paiement en ligne (lomi) ─────────────────────────────────────────────
+ * La cle vit dans l'environnement (LOMI_SECRET_KEY), jamais dans le code.
+ * Sans elle, le paiement en ligne est simplement absent : le tunnel reprend
+ * la demande a la reception, comme avant.
+ *
+ * Une cle « lomi_sk_test_ » ouvre le bac a sable : aucun argent ne bouge, et
+ * le tunnel le dit en clair.
+ *
+ * Pendant le paiement, la chambre est retenue une heure : le temps de payer,
+ * pas davantage. Payee, la retenue devient une reservation, qui n'expire pas.
+ */
+const LOMI_CLE = process.env.LOMI_SECRET_KEY || '';
+const LOMI_TEST = LOMI_CLE.indexOf('lomi_sk_test_') === 0;
+const LOMI_API = (process.env.LOMI_API_URL || 'https://api.lomi.africa').replace(/\/+$/, '');
+const PAIEMENT_MINUTES = 60;
+/* L'adresse publique du site, pour les retours de lomi. Jamais tiree de
+   l'en-tete Host tel quel : un Host forge enverrait le client, apres paiement,
+   sur un site qui n'est pas le notre. */
+const SITE_PUBLIC = (process.env.SITE_URL || 'https://evannathhotel.vercel.app').replace(/\/+$/, '');
 
 /* Le debit de la route publique qui ECRIT. Les autres ne font que lire.
  *
@@ -867,6 +888,8 @@ async function courrielAuClient(f, nomCategorie) {
     ['Départ', d(depart)],
   ];
   if (f.motif) lignes.push(['Référence', f.motif]);
+  const regle = f.paiement && f.paiement.statut === 'paye';
+  if (regle) lignes.push(['Acompte réglé', Number(f.paiement.montant).toLocaleString('fr-FR') + ' FCFA']);
 
   const html = `<div style="font:400 15px/1.6 Georgia,serif;color:#1b1b1b;max-width:520px">
     <p>Bonjour ${echappe(f.client)},</p>
@@ -874,7 +897,8 @@ async function courrielAuClient(f, nomCategorie) {
     <table style="border-collapse:collapse;margin:18px 0">${lignes.map(
       ([k, v]) => `<tr><td style="padding:6px 18px 6px 0;color:#8a7d6c;white-space:nowrap">${k}</td>`
         + `<td style="padding:6px 0">${echappe(v)}</td></tr>`).join('')}</table>
-    <p>La réception vous recontacte pour les modalités de règlement.</p>
+    <p>${regle ? 'Le solde se règle à l’arrivée, sur place.'
+      : 'La réception vous recontacte pour les modalités de règlement.'}</p>
     <p style="color:#8a7d6c;font-size:13.5px">Hôtel Evannath — Assinie PK 19,
       Côte d'Ivoire<br>Pour toute question, répondez simplement à ce message.</p>
   </div>`;
@@ -907,6 +931,146 @@ const json = (res, code, corps) => {
   res.setHeader('Cache-Control', 'no-store');
   return res.status(code).json(corps);
 };
+
+/**
+ * Retient une chambre de la categorie sur ces dates. Rend
+ * { retenue:true, entree, ch } ou { retenue:false, raison }.
+ *
+ * Trois essais. Une collision n'est pas un echec : elle veut dire qu'une
+ * autre demande a pris CETTE chambre. On relit, et la chambre apparait alors
+ * occupee — on en propose une autre. Ce n'est qu'apres trois collisions
+ * d'affilee qu'on renonce, et on dit alors « complet » plutot que d'inventer
+ * une raison.
+ *
+ * `paiement` : pose tel quel sur la retenue (voir a=payer).
+ */
+async function retenir({ categorie, du, au, nom, courriel, motif, minutes, paiement }) {
+  /* Les dates du client sont une ARRIVEE et un DEPART ; une fermeture se
+     compte en NUITS. Il dort du 24 au 26 : les nuits du 24 et du 25. */
+  const derniere = veille(au);
+  for (let essai = 0; essai < 3; essai++) {
+    const d = await lire();
+    if (PANNE) return { retenue: false, raison: 'indisponible' };
+    const ch = premiereLibre(d, categorie, du, au);
+    if (!ch) {
+      /* « Complet » est une AFFIRMATION : elle dit que l'hotel est plein.
+         Sans aucune chambre saisie dans cette categorie, on ne sait rien —
+         et `a=dispo` repond deja `inconnu` dans ce cas. Le paiement, lui,
+         n'encaisse JAMAIS sur un « inconnu ». */
+      const saisies = (Array.isArray(d.chambres) ? d.chambres : [])
+        .some((c) => c && c.categorie === categorie);
+      return { retenue: false, raison: saisies ? 'complet' : 'inconnu' };
+    }
+    const entree = nettoyerFermeture({
+      cible: ch.id, debut: du, fin: derniere,
+      nature: 'client', statut: 'attente', client: nom, courriel, motif,
+      expire: new Date(Date.now() + minutes * 60000).toISOString().slice(0, 16),
+    }).objet;
+    if (paiement) entree.paiement = paiement;
+
+    const r = await poserRetenue(d, entree, ch);
+    if (r.ok) return { retenue: true, entree, ch };
+    /* Une panne d'ecriture ne se retente pas : elle ne vient pas d'une
+       course, et reessayer l'aggraverait. */
+    if (r.raison === 'ecriture' || r.raison === 'indisponible') {
+      return { retenue: false, raison: r.raison };
+    }
+  }
+  return { retenue: false, raison: 'complet' };
+}
+
+/* ── lomi : l'appel, la reference, le passage a « paye » ───────────────── */
+
+/** Un appel a l'API lomi. Rend { ok, statut, corps }. Dix secondes au plus :
+ *  un client devant un bouton qui tourne sans fin repart. */
+async function lomi(chemin, methode, corps) {
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), 10000);
+  try {
+    const r = await fetch(LOMI_API + chemin, {
+      method: methode || 'GET',
+      headers: { 'X-API-KEY': LOMI_CLE, 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: corps ? JSON.stringify(corps) : undefined,
+      signal: ctrl.signal,
+    });
+    let j = null;
+    try { j = await r.json(); } catch (e) { j = null; }
+    return { ok: r.ok, statut: r.status, corps: j };
+  } catch (e) {
+    return { ok: false, statut: 0, corps: null };
+  } finally { clearTimeout(t); }
+}
+
+/** Une reference de dossier que personne ne devine : EVN- et six signes
+ *  tires au hasard, sans 0/O ni 1/I qu'on confond au telephone. */
+function nouvelleReference(d) {
+  const A = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  for (;;) {
+    const ref = 'EVN-' + Array.from(crypto.randomBytes(6), (b) => A[b % A.length]).join('');
+    if (!(d.fermetures || []).some((f) => f && f.motif === ref)) return ref;
+  }
+}
+
+/** L'adresse ou lomi renvoie le client. Le Host de la requete n'est suivi que
+ *  pour le poste de developpement ; en ligne, c'est SITE_PUBLIC. */
+function siteDe(req) {
+  const h = String(req.headers.host || '');
+  if (/^(localhost|127\.0\.0\.1)(:\d+)?$/.test(h)) return 'http://' + h;
+  return SITE_PUBLIC;
+}
+
+const payee = (s) => ['complete', 'completed', 'paid', 'succeeded', 'success'].includes(String(s || '').toLowerCase());
+
+/** La retenue qui porte ce paiement, dans un magasin deja lu. */
+function trouverPaiement(d, { ref, session }) {
+  return (d.fermetures || []).find((f) => f && f.paiement
+    && ((ref && f.paiement.reference === ref) || (session && f.paiement.session === session))) || null;
+}
+
+/**
+ * Le paiement est confirme — par la notification signee de lomi, ou par la
+ * relecture de la session au retour du client. Idempotent : lomi previent
+ * que les doublons sont normaux, et les deux voies peuvent arriver ensemble.
+ *
+ * La retenue devient une reservation CONFIRMEE, qui n'expire plus. Si lomi
+ * annonce un montant, il doit etre celui qu'on a demande : sinon on ne
+ * confirme rien, et la reception tranche.
+ */
+async function marquerPaye({ ref, session, transaction, montant }) {
+  const d = await lire();
+  if (PANNE) return { ok: false, raison: 'indisponible' };
+  const f = trouverPaiement(d, { ref, session });
+  if (!f) return { ok: false, raison: 'inconnu' };
+  if (f.paiement.statut === 'paye') return { ok: true, deja: true };
+  if (montant != null && Number(montant) !== Number(f.paiement.montant)) {
+    f.paiement.statut = 'a-verifier';
+    f.paiement.note = 'Montant annonce par lomi : ' + montant;
+    await ecrire(d);
+    return { ok: false, raison: 'montant' };
+  }
+  f.paiement.statut = 'paye';
+  f.paiement.paye = new Date().toISOString();
+  if (transaction) f.paiement.transaction = String(transaction).slice(0, 80);
+  f.statut = 'confirmee';
+  f.expire = null;
+  const w = await ecrire(d);
+  if (!w.ok) return { ok: false, raison: 'ecriture' };
+  const ch = (d.chambres || []).find((x) => x.id === f.cible);
+  const courriel = await courrielAuClient(f, nomDeCategorie(ch && ch.categorie));
+  return { ok: true, courriel };
+}
+
+/** Le paiement a echoue. La retenue reste le temps prevu : le client peut
+ *  reessayer. Un paiement deja confirme ne redescend jamais. */
+async function marquerEchec({ ref, session }) {
+  const d = await lire();
+  if (PANNE) return { ok: false };
+  const f = trouverPaiement(d, { ref, session });
+  if (!f || f.paiement.statut === 'paye') return { ok: true };
+  f.paiement.statut = 'echoue';
+  await ecrire(d);
+  return { ok: true };
+}
 
 module.exports = async function handler(req, res) {
   const action = (req.query.a || '').toString();
@@ -951,6 +1115,9 @@ module.exports = async function handler(req, res) {
       promotions: (d.promotions || []).filter(visible).filter(enCours),
       campagnes: (d.campagnes || []).filter(visible).filter(enCours),
       emplois: (d.emplois || []).filter(visible).filter(ouverte),
+      /* Le tunnel en a besoin AVANT le clic : bouton « Payer » ou « Envoyer »,
+         et bandeau « mode test » quand aucun argent ne bouge. */
+      paiement: { actif: !!LOMI_CLE, test: LOMI_TEST },
       maj: d.maj,
     });
   }
@@ -1028,55 +1195,125 @@ module.exports = async function handler(req, res) {
       return json(res, 200, { ok: true, retenue: false, raison: 'incomplet' });
     }
 
-    /* Les dates du client sont une ARRIVEE et un DEPART ; une fermeture se
-       compte en NUITS. Il dort du 24 au 26 : les nuits du 24 et du 25. */
-    const derniere = veille(au);
+    const r = await retenir({ categorie, du, au, nom,
+      courriel: propre(corps.courriel, 160), motif: propre(corps.reference, 40),
+      minutes: RETENUE_MINUTES });
+    if (r.retenue) return json(res, 200, { ok: true, retenue: true, minutes: RETENUE_MINUTES });
+    return json(res, 200, { ok: true, retenue: false, raison: r.raison });
+  }
 
-    /* Trois essais. Une collision n'est pas un echec : elle veut dire qu'une
-       autre demande a pris CETTE chambre. On relit, et la chambre apparait
-       alors occupee — on en propose une autre. Ce n'est qu'apres trois
-       collisions d'affilee qu'on renonce, et on dit alors « complet » plutot
-       que d'inventer une raison. */
-    for (let essai = 0; essai < 3; essai++) {
-      const d = await lire();
-      if (PANNE) {
-        return json(res, 200, { ok: true, retenue: false, raison: 'indisponible' });
-      }
-      const ch = premiereLibre(d, categorie, du, au);
-      if (!ch) {
-        /* « Complet » est une AFFIRMATION : elle dit que l'hotel est plein.
-           Sans aucune chambre saisie dans cette categorie, on ne sait rien —
-           et `a=dispo` repond deja `inconnu` dans ce cas. Repondre `complet`
-           ici ferait dire deux choses differentes aux deux routes sur le
-           meme etat.
+  /* ── Payer l'acompte ────────────────────────────────────────────────────
+     Le client a rempli le tunnel. On recalcule le montant ICI, on retient une
+     chambre, et lomi fabrique la page de paiement. Aucun montant ne vient du
+     navigateur. */
+  if (action === 'payer') {
+    if (req.method !== 'POST') return json(res, 405, { ok: false });
+    res.setHeader('Cache-Control', 'no-store');
+    if (!LOMI_CLE) return json(res, 200, { ok: false, raison: 'hors-ligne' });
 
-           Sans consequence aujourd'hui : le tunnel n'attend pas la reponse.
-           Mais le paiement en ligne, lui, devra la lire avant d'encaisser. */
-        const saisies = (Array.isArray(d.chambres) ? d.chambres : [])
-          .some((c) => c && c.categorie === categorie);
-        return json(res, 200, { ok: true, retenue: false,
-          raison: saisies ? 'complet' : 'inconnu' });
-      }
+    const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim()
+      || req.socket?.remoteAddress || 'inconnue';
+    if (tropDeDemandes(ip)) return json(res, 429, { ok: false, raison: 'debit' });
 
-      const entree = nettoyerFermeture({
-        cible: ch.id, debut: du, fin: derniere,
-        nature: 'client', statut: 'attente', client: nom,
-        courriel: propre(corps.courriel, 160),
-        expire: new Date(Date.now() + RETENUE_MINUTES * 60000).toISOString().slice(0, 16),
-        motif: propre(corps.reference, 40),
-      }).objet;
+    let corps = req.body;
+    if (typeof corps === 'string') { try { corps = JSON.parse(corps); } catch { corps = {}; } }
+    corps = corps || {};
 
-      const r = await poserRetenue(d, entree, ch);
-      if (r.ok) {
-        return json(res, 200, { ok: true, retenue: true, minutes: RETENUE_MINUTES });
-      }
-      /* Une panne d'ecriture ne se retente pas : elle ne vient pas d'une
-         course, et reessayer l'aggraverait. */
-      if (r.raison === 'ecriture' || r.raison === 'indisponible') {
-        return json(res, 200, { ok: true, retenue: false, raison: r.raison });
+    const prenom = propre(corps.prenom, 40), nom = propre(corps.nom, 40);
+    const courriel = propre(corps.courriel, 160);
+    const telephone = propre(corps.telephone, 30);
+    if (prenom.length < 2 || nom.length < 2 || !courrielValide(courriel)
+        || telephone.replace(/\D/g, '').length < 8) {
+      return json(res, 422, { ok: false, raison: 'coordonnees' });
+    }
+
+    const d0 = await lire();
+    if (PANNE) return json(res, 200, { ok: false, raison: 'indisponible' });
+    const q = tarif.devis({ categorie: slug(corps.categorie), du: jour(corps.du),
+      au: jour(corps.au), pax: Number(corps.pax) }, d0.promotions || []);
+    if (!q.ok) return json(res, 422, { ok: false, raison: q.raison });
+
+    const reference = nouvelleReference(d0);
+    const r = await retenir({ categorie: q.categorie, du: q.du, au: q.au,
+      nom: prenom + ' ' + nom, courriel, motif: reference, minutes: PAIEMENT_MINUTES,
+      paiement: { reference, montant: q.acompte, total: q.total, nuits: q.nuits,
+        pax: q.pax, telephone, statut: 'en-attente', session: '', cree: new Date().toISOString() } });
+    /* Rien de libre, ou rien de connu : on n'encaisse pas. « inconnu » veut
+       dire que les chambres ne sont pas encore saisies — le tunnel reprend
+       alors la demande a la reception. */
+    if (!r.retenue) return json(res, 200, { ok: false, raison: r.raison });
+
+    const site = siteDe(req);
+    const s = await lomi('/checkout-sessions', 'POST', {
+      amount: q.acompte,
+      currency_code: 'XOF',
+      title: 'Acompte · ' + q.nom,
+      description: q.nuits + (q.nuits > 1 ? ' nuits' : ' nuit') + ' du ' + q.du + ' au ' + q.au
+        + ' · ' + q.pax + (q.pax > 1 ? ' personnes' : ' personne') + ' · ' + reference,
+      customer_email: courriel,
+      success_url: site + '/reserver?paiement=' + reference,
+      cancel_url: site + '/reserver?paiement=' + reference + '&abandon=1',
+      metadata: { reference, retenue: r.entree.id },
+    });
+    const lien = s.corps && (s.corps.checkout_url || s.corps.url);
+    if (!s.ok || !lien) {
+      /* lomi ne repond pas, ou refuse : on libere la chambre tout de suite
+         plutot que de la bloquer une heure pour un paiement impossible. */
+      await retirerFermeture(r.entree.id);
+      return json(res, 200, { ok: false, raison: 'lomi', statut: s.statut });
+    }
+    // On note la session : c'est elle qu'on relira au retour du client.
+    const d1 = await lire();
+    const f = !PANNE && trouverPaiement(d1, { ref: reference });
+    if (f) { f.paiement.session = String(s.corps.id || ''); await ecrire(d1); }
+    return json(res, 200, { ok: true, url: lien, reference, montant: q.acompte, test: LOMI_TEST });
+  }
+
+  /* ── Paiement interrompu ─────────────────────────────────────────────────
+     Le client est revenu de lomi sans payer : on libere la chambre qu'on
+     retenait pour lui, plutot que de la bloquer l'heure entiere — elle
+     pourrait manquer a son propre second essai. Jamais une reservation
+     payee : celle-la ne se defait qu'a la reception. */
+  if (action === 'abandon') {
+    if (req.method !== 'POST') return json(res, 405, { ok: false });
+    const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim()
+      || req.socket?.remoteAddress || 'inconnue';
+    if (tropDeDemandes(ip)) return json(res, 429, { ok: false });
+    let corps = req.body;
+    if (typeof corps === 'string') { try { corps = JSON.parse(corps); } catch { corps = {}; } }
+    const ref = String((corps && corps.ref) || '').toUpperCase();
+    if (!/^EVN-[A-Z0-9]{6}$/.test(ref)) return json(res, 400, { ok: false });
+    const d = await lire();
+    const f = !PANNE && trouverPaiement(d, { ref });
+    if (f && f.paiement.statut !== 'paye' && f.statut === 'attente') await retirerFermeture(f.id);
+    return json(res, 200, { ok: true });
+  }
+
+  /* ── Ou en est ce paiement ? ─────────────────────────────────────────────
+     La page de retour le demande avec la reference. On ne rend que l'etat
+     et le sejour — jamais le nom ni l'adresse : la reference circule dans
+     une URL. Si rien n'est encore arrive de lomi, on relit la session
+     nous-memes : la notification peut avoir du retard sur le client. */
+  if (action === 'paiement') {
+    res.setHeader('Cache-Control', 'no-store');
+    const ref = String(req.query.ref || '').toUpperCase();
+    if (!/^EVN-[A-Z0-9]{6}$/.test(ref)) return json(res, 400, { ok: false });
+    let d = await lire();
+    let f = trouverPaiement(d, { ref });
+    if (!f) return json(res, 404, { ok: false, raison: 'inconnu' });
+    if (f.paiement.statut !== 'paye' && f.paiement.session && LOMI_CLE) {
+      const s = await lomi('/checkout-sessions/' + encodeURIComponent(f.paiement.session));
+      const c = s.corps || {};
+      if (s.ok && (payee(c.status) || payee(c.payment_status))) {
+        await marquerPaye({ ref, session: f.paiement.session, transaction: c.transaction_id });
+        d = await lire();
+        f = trouverPaiement(d, { ref }) || f;
       }
     }
-    return json(res, 200, { ok: true, retenue: false, raison: 'complet' });
+    const ch = (d.chambres || []).find((x) => x.id === f.cible);
+    return json(res, 200, { ok: true, reference: ref, statut: f.paiement.statut,
+      montant: f.paiement.montant, total: f.paiement.total, categorie: nomDeCategorie(ch && ch.categorie),
+      du: f.debut, nuits: f.paiement.nuits, pax: f.paiement.pax, test: LOMI_TEST });
   }
 
   // ── Connexion ───────────────────────────────────────────────────────────
@@ -1224,6 +1461,13 @@ module.exports = async function handler(req, res) {
        chaque enregistrement : une reservation confirmee rajeunirait, et
        perdrait une course contre une demande venue du site. */
     if (avant && avant.cree && objet.cree) objet.cree = avant.cree;
+    /* Le paiement appartient au SERVEUR : il ne vient jamais du formulaire,
+       et l'enregistrer depuis l'administration ne doit ni l'effacer ni le
+       forger. On reprend celui du magasin, tel quel. */
+    if (corps.type === 'fermeture') {
+      delete objet.paiement;
+      if (avant && avant.paiement) objet.paiement = avant.paiement;
+    }
     const aConfirmer = corps.type === 'fermeture' && objet.nature === 'client'
       && objet.statut === 'confirmee'
       && (!avant || avant.statut !== 'confirmee');
@@ -1289,3 +1533,5 @@ module.exports = async function handler(req, res) {
    Vercel ne lit que la fonction elle-meme ; ces proprietes ne le genent
    pas. */
 module.exports.regles = { plusAncienne, nuitsSeCroisent, retenueGagne };
+/* Ce que la notification de lomi (api/lomi.mjs) appelle. */
+module.exports.paiement = { marquerPaye, marquerEchec };

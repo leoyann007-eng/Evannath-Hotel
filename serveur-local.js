@@ -72,15 +72,20 @@ async function charger(fichier) {
   return modules.get(fichier);
 }
 
+/* Le corps, BRUT (Buffer) : une signature se verifie sur les octets exacts —
+   voir api/lomi.mjs. L'analyse JSON vient apres, pour les fonctions (req, res). */
 function corps(req) {
   return new Promise((resoudre) => {
-    let d = '';
-    req.on('data', (c) => { d += c; if (d.length > 1e6) req.destroy(); });
-    req.on('end', () => {
-      if (!d) return resoudre(undefined);
-      try { resoudre(JSON.parse(d)); } catch { resoudre(d); }
-    });
+    const morceaux = [];
+    let taille = 0;
+    req.on('data', (c) => { morceaux.push(c); taille += c.length; if (taille > 1e6) req.destroy(); });
+    req.on('end', () => resoudre(Buffer.concat(morceaux)));
   });
+}
+function analyser(brut) {
+  if (!brut.length) return undefined;
+  const d = brut.toString('utf8');
+  try { return JSON.parse(d); } catch { return d; }
 }
 
 const serveur = http.createServer(async (req, res) => {
@@ -90,13 +95,15 @@ const serveur = http.createServer(async (req, res) => {
   // ── Les fonctions ────────────────────────────────────────────────────────
   if (chemin.startsWith('/api/')) {
     const nom = chemin.slice(5).split('/')[0].replace(/[^\w-]/g, '');
-    const fichier = path.join(RACINE, 'api', nom + '.js');
+    let fichier = path.join(RACINE, 'api', nom + '.js');
+    if (!fs.existsSync(fichier)) fichier = path.join(RACINE, 'api', nom + '.mjs');
     if (!fs.existsSync(fichier)) {
       res.writeHead(404, { 'Content-Type': TYPES['.json'] });
       return res.end(JSON.stringify({ ok: false, message: 'Fonction inconnue : ' + nom }));
     }
     try {
-      req.body = await corps(req);
+      const brut = await corps(req);
+      req.body = analyser(brut);
       habiller(req, res, requete);
       // Le module est charge UNE fois et reutilise. Le recharger a chaque
       // appel remettrait a zero son etat interne — et le stockage de
@@ -104,7 +111,20 @@ const serveur = http.createServer(async (req, res) => {
       // evenement cree etait perdu dans la seconde.
       // Consequence : une modification du code demande un redemarrage.
       const fn = await charger(fichier);
-      await fn(req, res);
+      if (typeof fn === 'function') { await fn(req, res); return; }
+      /* Forme « Web » : export POST(request) / GET(request), comme Vercel
+         l'accepte. On lui donne une vraie Request, corps brut compris. */
+      const methode = req.method.toUpperCase();
+      if (typeof fn[methode] !== 'function') {
+        res.writeHead(405, { 'Content-Type': TYPES['.json'] });
+        return res.end(JSON.stringify({ ok: false }));
+      }
+      const reponse = await fn[methode](new Request(requete.href, {
+        method: methode, headers: req.headers,
+        body: methode === 'GET' || methode === 'HEAD' ? undefined : brut,
+      }));
+      res.writeHead(reponse.status, Object.fromEntries(reponse.headers));
+      res.end(Buffer.from(await reponse.arrayBuffer()));
     } catch (e) {
       console.error('api/' + nom, e);
       if (!res.headersSent) res.writeHead(500, { 'Content-Type': TYPES['.json'] });

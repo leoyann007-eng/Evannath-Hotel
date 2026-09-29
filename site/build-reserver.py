@@ -123,6 +123,14 @@ input::placeholder,textarea::placeholder{color:#6E6154}
 .recap .acompte{margin-top:14px;padding:14px 16px;border:1px solid var(--line);font-size:13px;color:var(--muted)}
 .recap .acompte b{color:var(--bronze-2);font-weight:600}
 
+/* paiement en ligne */
+/* `hidden` doit gagner : sans cela, .pay{display:grid} et .btn gardaient
+   les choix de moyen et le bouton « Envoyer » a l'ecran en mode paiement. */
+[hidden]{display:none!important}
+.test-pay{border:1px dashed var(--bronze);padding:12px 16px;font-size:13.5px;color:var(--bronze-2);margin:0 0 22px}
+.retour{margin-top:8px}
+.retour p{font-size:15.5px;color:var(--prose);margin-bottom:22px}
+
 /* confirmation */
 .done-box{text-align:center;padding:20px 0 60px}
 .done-box h2{margin-bottom:14px}
@@ -226,11 +234,13 @@ body = [header('index.html#chambres', 'Nos chambres', 'navch'), drawer('index.ht
     <!-- 3 ─────────────────────────────────────── -->
     <section class="pane" id="p3">
       <h2 data-t="h2c">L'acompte</h2>
-      <p class="sub" data-t="sub3">Trente pour cent pour bloquer la chambre, le solde à l'arrivée. Indiquez le moyen qui vous arrange : la réception vous envoie le lien de paiement une fois la disponibilité confirmée.</p>
+      <p class="sub" id="sub3" data-t="sub3">Trente pour cent pour bloquer la chambre, le solde à l'arrivée. Indiquez le moyen qui vous arrange : la réception vous envoie le lien de paiement une fois la disponibilité confirmée.</p>
 
-      <div class="pay">
+      <p class="sub" id="sub3p" data-t="sub3p" hidden>Trente pour cent pour réserver la chambre, le solde à l'arrivée. Vous réglez sur la page sécurisée de lomi, notre prestataire de paiement : Wave, MTN Mobile Money ou carte bancaire.</p>
+      <p class="test-pay" id="testpay" data-t="testp" hidden><b>Mode test.</b> Aucun argent ne bouge : utilisez les numéros et cartes de test de lomi.</p>
+
+      <div class="pay" id="payopts">
         <label><input type="radio" name="pay" value="Wave" checked><span>Wave<em data-t="py0">Le plus utilisé en Côte d'Ivoire</em></span></label>
-        <label><input type="radio" name="pay" value="Orange Money"><span>Orange Money<em data-t="py1">Paiement par téléphone</em></span></label>
         <label><input type="radio" name="pay" value="MTN Money"><span>MTN Money<em data-t="py2">Paiement par téléphone</em></span></label>
         <label><input type="radio" name="pay" value="Carte bancaire"><span data-t="py3n">Carte bancaire<em>Visa · Mastercard</em></span></label>
       </div>
@@ -245,6 +255,11 @@ body = [header('index.html#chambres', 'Nos chambres', 'navch'), drawer('index.ht
       <div class="nav-btn" style="margin-top:26px">
         <button class="btn ghost" id="back2" data-t="retr2">Retour</button>
         <button class="btn btn-solid" id="pay" data-t="env">Envoyer ma demande</button>
+        <button class="btn btn-solid" id="payer" data-t="envp" hidden>Payer l'acompte</button>
+      </div>
+      <div class="retour" id="retour" role="status" hidden>
+        <p id="retourm"></p>
+        <button class="btn btn-solid" id="reprendre" data-t="repr" hidden>Reprendre le paiement</button>
       </div>
     </section>
 
@@ -336,7 +351,28 @@ var T={fr:{loc:'fr-FR',p1:' personne',pp:' personnes',n1:'Nuit',nn:'Nuits',tarif
            dcomplet:"<b>Cette catégorie est complète sur ces nuits.</b> Changez de dates "
                     +"ou de catégorie ci-dessus. Vous pouvez aussi envoyer votre demande "
                     +"telle quelle : la réception vous dira ce qu'elle peut faire.",
-           nav1:'Votre navette aéroport est notée (',nav2:"). Le solde se règle à l'arrivée."},
+           nav1:'Votre navette aéroport est notée (',nav2:"). Le solde se règle à l'arrivée.",
+           dlibreP:'<b>Disponible à ces dates.</b> La chambre est à vous dès l’acompte réglé.',
+           dderniereP:"<b>Il ne reste qu'une chambre de cette catégorie sur ces nuits.</b> "
+                     +"Elle est à vous dès l’acompte réglé.",
+           redir:'Ouverture de la page de paiement…',
+           complet:"Plus aucune chambre libre dans cette catégorie à ces dates : quelqu'un vient de la réserver. "
+                   +"Changez de dates ou de catégorie à l'étape 1.",
+           lomiKO:"Le paiement en ligne ne répond pas pour l'instant. Vous pouvez envoyer votre demande à la réception à la place.",
+           verif:'Nous vérifions votre paiement auprès de lomi…',
+           tarde:"La confirmation de lomi tarde. Votre référence : #. Elle arrivera d'elle-même ; "
+                 +'en cas de doute, la réception la retrouve avec cette référence.',
+           echec:"Le paiement n'a pas abouti. Vous pouvez recommencer.",
+           abandon:"Le paiement a été interrompu. Votre sélection est conservée : vous pouvez le reprendre.",
+           averif:'La réception vérifie votre paiement. Référence : #.',
+           inconnue:'Cette référence de paiement est introuvable.',
+           payeT:'Acompte reçu : votre chambre est réservée',
+           payeM:function(j){ return 'Merci. '+j.categorie+', '+j.nuits+(j.nuits>1?' nuits':' nuit')
+             +' à partir du '+jour(j.du)+', '+j.pax+(j.pax>1?' personnes':' personne')
+             +'. Acompte réglé : '+fmt(j.montant)+' FCFA.'; },
+           payeN1:'Votre réservation est enregistrée et confirmée auprès de la réception.',
+           payeN2:function(j){ return 'Le solde, '+fmt(j.total-j.montant)+' FCFA, se règle à l’arrivée, sur place.'; },
+           payeN3:'Pour toute question, la réception retrouve votre dossier avec cette référence.'},
      en:{loc:'en-GB',p1:' guest',pp:' guests',n1:'Night',nn:'Nights',tarif:'Rate',
            aulieu:'instead of',
            merci:'{{CG_EN}}Thank you ',dem:'. Your request for the ',du:' from ',au:' to ',
@@ -348,7 +384,28 @@ var T={fr:{loc:'fr-FR',p1:' personne',pp:' personnes',n1:'Nuit',nn:'Nuits',tarif
            dcomplet:'<b>This category is fully booked on these nights.</b> Change your '
                     +'dates or category above. You may also send your request as it is: '
                     +'the front desk will tell you what it can do.',
-           nav1:'Your airport shuttle is noted (',nav2:'). The balance is settled on arrival.'}};
+           nav1:'Your airport shuttle is noted (',nav2:'). The balance is settled on arrival.',
+           dlibreP:'<b>Available on these dates.</b> The room is yours once the deposit is paid.',
+           dderniereP:'<b>Only one room left in this category on these nights.</b> '
+                     +'It is yours once the deposit is paid.',
+           redir:'Opening the payment page…',
+           complet:'No room left in this category on these dates: someone has just booked it. '
+                   +'Change your dates or category at step 1.',
+           lomiKO:'Online payment is not responding right now. You can send your request to the front desk instead.',
+           verif:'We are checking your payment with lomi…',
+           tarde:'The confirmation from lomi is taking a while. Your reference: #. It will arrive on its own; '
+                 +'if in doubt, the front desk can find it with this reference.',
+           echec:'The payment did not go through. You can try again.',
+           abandon:'The payment was interrupted. Your selection is kept: you can resume it.',
+           averif:'The front desk is checking your payment. Reference: #.',
+           inconnue:'This payment reference cannot be found.',
+           payeT:'Deposit received: your room is booked',
+           payeM:function(j){ return 'Thank you. '+j.categorie+', '+j.nuits+(j.nuits>1?' nights':' night')
+             +' from '+jour(j.du)+', '+j.pax+(j.pax>1?' guests':' guest')
+             +'. Deposit paid: '+fmt(j.montant)+' FCFA.'; },
+           payeN1:'Your booking is recorded and confirmed with the front desk.',
+           payeN2:function(j){ return 'The balance, '+fmt(j.total-j.montant)+' FCFA, is settled on arrival, at the hotel.'; },
+           payeN3:'For any question, the front desk finds your file with this reference.'}};
 function jour(v){return v?new Date(v).toLocaleDateString(T[LG].loc,{weekday:'long',day:'numeric',month:'long'}):'—'}
 /* Le recapitulatif a la place d'etre compact ; une demande relue en janvier
    pour un sejour de decembre, non. Le message porte donc l'annee. */
@@ -366,6 +423,9 @@ function peindre(){
   var n=document.getElementById('dnote');
   if(!n)return;
   var cle={libre:'dlibre',derniere:'dderniere',complet:'dcomplet'}[ETAT];
+  /* Paiement en ligne ouvert : plus de « la reception confirmera », la
+     chambre se reserve des l'acompte regle. */
+  if(cle && PAY.actif && T[LG][cle+'P']) cle=cle+'P';
   /* `inconnu` ne montre rien : le tunnel dit deja, sur son ecran de
      confirmation, que la reception repond sous 24 h. Une note qui repete
      « on ne sait pas » a chaque changement de date n'apprend rien. */
@@ -379,7 +439,7 @@ function peindre(){
 function interroger(){
   EVN_DISPO.pour(cat.value,d1.value,d2.value,function(e){ETAT=e;peindre()});
 }
-function EVN_LANG(lg){ LG=T[lg]?lg:'fr'; peindre();
+function EVN_LANG(lg){ LG=T[lg]?lg:'fr'; peindre(); peindrePaye();
   /* Les libelles des categories sont ecrits par ce script : [data-t] ne
      les atteint pas, il faut les refaire a la main a chaque bascule. */
   [].forEach.call(cat.options,function(o){o.textContent=libelleCat(o.value)});
@@ -512,7 +572,120 @@ document.getElementById('go3').onclick=function(){
 
 // ── paiement ──────────────────────────────────
 var N='\\n';
-document.getElementById('pay').onclick=function(){
+/* ── Paiement en ligne (lomi) ─────────────────────────────────────────
+   Ouvert quand le serveur a sa cle (a=public le dit). Sinon, ou si lomi
+   ne repond pas, ou si les chambres ne sont pas encore saisies, la demande
+   part a la reception comme avant : on ne bloque jamais un client. */
+var PAY={actif:false,test:false,paye:null};
+function majPaiement(){
+  var on=PAY.actif;
+  document.getElementById('sub3').hidden=on;
+  document.getElementById('sub3p').hidden=!on;
+  document.getElementById('payopts').hidden=on;
+  document.getElementById('testpay').hidden=!(on&&PAY.test);
+  document.getElementById('pay').hidden=on;
+  document.getElementById('payer').hidden=!on;
+  peindre();
+}
+fetch('/api/admin?a=public',{cache:'no-store'})
+  .then(function(r){return r.ok?r.json():null})
+  .then(function(j){ if(j&&j.paiement){PAY.actif=!!j.paiement.actif;PAY.test=!!j.paiement.test} majPaiement(); })
+  .catch(function(){});
+
+function champ(id){var e=document.getElementById(id);return e?e.value.trim():''}
+function garder(){
+  try{ sessionStorage.setItem('evn-tunnel',JSON.stringify({cat:cat.value,d1:d1.value,d2:d2.value,
+    pax:pax.value,fn:champ('fn'),ln:champ('ln'),em:champ('em'),tl:champ('tl'),
+    nav:champ('nav'),note:champ('note')})); }catch(e){}
+}
+function repli(){ PAY.actif=false; majPaiement(); }
+
+function payer(){
+  var b=document.getElementById('payer'),err=document.getElementById('err'),lib=b.textContent;
+  err.classList.remove('on'); b.disabled=true; b.textContent=T[LG].redir;
+  function rendre(){ b.disabled=false; b.textContent=lib; }
+  fetch('/api/admin?a=payer',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({categorie:cat.value,du:d1.value,au:d2.value,pax:+pax.value,
+      prenom:champ('fn'),nom:champ('ln'),courriel:champ('em'),telephone:champ('tl')})})
+  .then(function(r){return r.json().catch(function(){return {ok:false}})})
+  .then(function(j){
+    if(j&&j.ok&&j.url){ garder(); location.href=j.url; return; }
+    rendre();
+    var r=j&&j.raison;
+    if(r==='complet'){ err.textContent=T[LG].complet; err.classList.add('on'); return; }
+    if(r==='coordonnees'){ etape(2); return; }
+    /* Chambres pas encore saisies, ou paiement ferme : la demande d'avant,
+       sans rien dire — le client n'a rien a changer. */
+    if(r==='inconnu'||r==='hors-ligne'){ repli(); demander(); return; }
+    repli(); err.textContent=T[LG].lomiKO; err.classList.add('on');
+  })
+  .catch(function(){ rendre(); repli(); err.textContent=T[LG].lomiKO; err.classList.add('on'); });
+}
+document.getElementById('payer').onclick=payer;
+
+/* ── Le retour de lomi : reserver?paiement=EVN-XXXXXX ───────────────────
+   On ne croit pas l'URL : on demande l'etat au serveur, qui relit lomi. */
+function retour(msg,reprise){
+  document.getElementById('retour').hidden=false;
+  document.getElementById('retourm').textContent=msg;
+  document.getElementById('reprendre').hidden=!reprise;
+  ['sub3','sub3p','payopts','testpay','pay','payer'].forEach(function(id){document.getElementById(id).hidden=true});
+}
+function confirmer(j,ref){
+  PAY.paye={j:j,ref:ref};
+  try{ sessionStorage.removeItem('evn-tunnel'); }catch(e){}
+  document.getElementById('ref').textContent=ref;
+  peindrePaye();
+  etape(4);
+}
+function peindrePaye(){
+  if(!PAY.paye)return;
+  var j=PAY.paye.j,t=T[LG];
+  document.querySelector('#p4 h2').textContent=t.payeT;
+  document.getElementById('dm').textContent=t.payeM(j);
+  var ns=document.querySelectorAll('#p4 .next-steps span');
+  if(ns[0])ns[0].textContent=t.payeN1;
+  if(ns[1])ns[1].textContent=t.payeN2(j);
+  if(ns[2])ns[2].textContent=t.payeN3;
+}
+(function(){
+  var q=new URLSearchParams(location.search),ref=(q.get('paiement')||'').toUpperCase();
+  if(!/^EVN-[A-Z0-9]{6}$/.test(ref))return;
+  try{ var m=JSON.parse(sessionStorage.getItem('evn-tunnel')||'null');
+    if(m){ cat.value=m.cat; remplirPax(); d1.value=m.d1; d2.value=m.d2; pax.value=m.pax;
+      ['fn','ln','em','tl','nav','note'].forEach(function(id){var e=document.getElementById(id); if(e&&m[id]!=null)e.value=m[id]});
+      calc(); } }catch(e){}
+  etape(3); retour(T[LG].verif,false);
+  var abandon=q.get('abandon')==='1',essais=0;
+  document.getElementById('reprendre').onclick=function(){
+    document.getElementById('retour').hidden=true; majPaiement();
+    history.replaceState(null,'',location.pathname);
+  };
+  function lire(){
+    fetch('/api/admin?a=paiement&ref='+ref,{cache:'no-store'})
+    .then(function(r){return r.json().catch(function(){return null})})
+    .then(function(j){
+      if(!j||!j.ok){ retour(T[LG].inconnue,false); return; }
+      if(j.statut==='paye'){ confirmer(j,ref); return; }
+      if(j.statut==='a-verifier'){ retour(T[LG].averif.replace('#',ref),false); return; }
+      if(j.statut==='echoue'){ retour(T[LG].echec,true); return; }
+      if(abandon){
+        /* Interrompu : on libere tout de suite la chambre retenue, pour
+           qu'elle ne manque pas au prochain essai — le sien compris. */
+        fetch('/api/admin?a=abandon',{method:'POST',headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({ref:ref})}).catch(function(){});
+        retour(T[LG].abandon,true); return;
+      }
+      if(++essais<20) setTimeout(lire,2500); else retour(T[LG].tarde.replace('#',ref),false);
+    })
+    .catch(function(){ if(++essais<20) setTimeout(lire,2500); else retour(T[LG].tarde.replace('#',ref),false); });
+  }
+  lire();
+})();
+
+/* La demande a la reception, telle qu'elle existait avant le paiement en
+   ligne : c'est le repli, et le seul chemin tant qu'il est ferme. */
+function demander(){
   var moyen=document.querySelector('input[name=pay]:checked').value;
   var c=CH[cat.value];
   var nv=document.getElementById('nav').value;
@@ -589,7 +762,8 @@ document.getElementById('pay').onclick=function(){
       : T[LG].nav1+navette+T[LG].nav2;
     etape(4);
   });
-};
+}
+document.getElementById('pay').onclick=demander;
 
 var EN={''' + EN_NAV + EN_SECOURS + '''navch:"Our rooms",
 c1:"Home",c2:"Rooms &amp; Suites",c3:"Booking",
@@ -609,7 +783,10 @@ nv0:"I am making my own way",nv1:"One way — collect me at the airport",nv2:"Bo
 retr:"Back",suiv2:"Continue",
 h2c:"The deposit",
 sub3:"Thirty per cent to hold the room, the balance on arrival. Tell us which method suits you: the front desk sends the payment link once availability is confirmed.",
-py0:"The most used in Côte d\u2019Ivoire",py1:"Payment by phone",py2:"Payment by phone",
+py0:"The most used in Côte d\u2019Ivoire",py2:"Payment by phone",
+sub3p:"Thirty per cent to book the room, the balance on arrival. You pay on the secure page of lomi, our payment provider: Wave, MTN Mobile Money or bank card.",
+testp:"<b>Test mode.</b> No money moves: use lomi\u2019s test numbers and cards.",
+envp:"Pay the deposit",repr:"Resume the payment",
 py3n:"Bank card<em>Visa · Mastercard</em>",
 annul:"Free cancellation up to 48 h before arrival, deposit refunded in full. After that, the deposit is retained by the property.",
 retr2:"Back",env:"Send my request",
@@ -625,7 +802,7 @@ rac:"Deposit to pay today:",rso:"Balance on arrival:"};
 
 HTML = (page(
  "Réserver votre séjour — Hôtel Evannath, Assinie",
- "Réservez en direct à l'Hôtel Evannath, Assinie PK 19 : sept catégories de 67 000 à 280 000 FCFA la nuit, acompte de 30 % par Wave, Orange Money, MTN ou carte bancaire.",
+ "Réservez en direct à l'Hôtel Evannath, Assinie PK 19 : sept catégories de 67 000 à 280 000 FCFA la nuit, acompte de 30 % par Wave, MTN ou carte bancaire.",
  "r-standard", CSS, '\n'.join(body), JS, slug="reserver").replace(
  '<meta property="og:image"', (('' if PROSPECTION else '<meta name="robots" content="noindex, follow">\n') + '<meta property="og:image"')))
 print('reserver.html         ok — tunnel en 3 etapes')
