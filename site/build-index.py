@@ -9,7 +9,7 @@ propre que les six valeurs de couleur qui lui sont specifiques.
 import io
 NL_ = chr(10)
 from _chrome import REMISE_JS, REMISE_CSS, DISPO_JS, FOOTER_CSS
-from _chrome import medaillon, INTRO
+from _chrome import medaillon, INTRO, WA_BOUTON
 from _chrome import (TOKENS, NAV_BASE, LANG_JS, dimensionner, responsive, versionner,
                      liens_nav, EN_NAV, WA, WA_TEXTE, MAIL)
 from _evenements import EVENEMENTS, EN as EV_EN
@@ -175,6 +175,7 @@ html = (html
         .replace('{{BANDEAU}}', BANDEAU)
         .replace('{{NAV_LINKS}}', liens_nav('index.html'))
         .replace('{{EN_NAV}}', EN_NAV + EN_BANDEAU)
+        .replace('{{WA_BOUTON}}', WA_BOUTON)
         .replace('{{WA}}', WA)
         .replace('{{WA_TEXTE}}', WA_TEXTE)
         .replace('{{TOKENS}}', TOKENS + REMISE_CSS)

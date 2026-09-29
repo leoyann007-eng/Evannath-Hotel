@@ -350,7 +350,7 @@ header.scrolled .brand small{opacity:0}
 .dw-side .ph{aspect-ratio:4/3;overflow:hidden;background:var(--bark-2)}
 .dw-side .ph img{width:100%;height:100%;object-fit:cover}
 .dw-side b{display:block;font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--bronze);font-weight:700;margin-bottom:12px}
-.dw-side a{display:block;font-size:15px;color:#CDBFAE;padding:7px 0;transition:.3s}
+.dw-side a{display:block;font-size:15px;color:var(--prose);padding:7px 0;transition:.3s}
 .dw-side a:hover{color:var(--bronze)}
 .dw-side p{font-size:13.5px;color:var(--muted);margin-top:12px}
 .dw-side .lang{margin-top:6px;width:max-content}
@@ -403,8 +403,11 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
    et se retrouvait donc arrache du panneau, en pastille au coin de l'ecran —
    le bouton le plus utile du repli etait invisible. Il porte .wa-envoi. */
 /* 32 · Le bouton WhatsApp s'etire.
-   La bulle verte de la marque WhatsApp partait ; elle criait sur un site
-   qui ne crie pas. A sa place une pastille brun profond, trait or.
+   VERT, a la demande de la cliente (la remise le voulait brun, trait or) :
+   c'est le bouton qu'on cherche des yeux, il doit se reconnaitre. Pas le
+   vert vif de la marque (#25D366) : le libelle blanc n'y lisait qu'a 2:1.
+   #15803D porte le blanc a 5,0:1, et se detache a 4,7:1 du creme, a 3,9:1
+   de la nuit. Le pictogramme officiel, en blanc.
 
    PAS D'ANIMATION DE `width`, malgre la maquette qui en fait une : la
    remise l'interdit noir sur blanc, et une largeur qui bouge relance la
@@ -418,16 +421,17 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
    Le libelle entre APRES la pastille — .4s de fondu, .3s de retard — et
    sort tout de suite : au depart on n'attend pas. */
 .wa{position:fixed;right:22px;bottom:22px;z-index:90;
-  width:270px;height:58px;border-radius:29px;background:#2B2019;
+  width:270px;height:58px;border-radius:29px;background:#15803D;
   display:flex;align-items:center;justify-content:flex-end;
-  box-shadow:0 12px 30px -14px rgba(43,32,25,.6);
+  box-shadow:0 12px 30px -14px rgba(21,128,61,.7);
   clip-path:inset(0 0 0 212px round 29px);
   transition:clip-path .7s var(--ease-inout)}
 .wa .lbl{white-space:nowrap;font-size:11px;letter-spacing:.2em;font-weight:600;
-  color:#F6F0E6;padding-left:24px;opacity:0;transition:opacity .4s ease}
+  color:#fff;padding-left:24px;opacity:0;transition:opacity .4s ease}
 .wa .rond{flex:none;width:58px;height:58px;display:grid;place-items:center}
-.wa svg{width:22px;height:22px;fill:none;stroke:#C9A46A;stroke-width:1.4;
-  stroke-linecap:round;stroke-linejoin:round}
+/* evenodd : le telephone est un trace DANS la bulle ; rempli comme elle,
+   il disparaissait. En creux, il apparait en vert, comme sur le logo. */
+.wa svg{width:26px;height:26px;fill:#fff;fill-rule:evenodd}
 /* Le survol n'existe pas sur un ecran tactile : la pastille y resterait
    ouverte sur un effleurement, ou ne s'ouvrirait jamais. */
 @media(hover:hover){
@@ -768,7 +772,7 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
 
 <a class="wa" href="https://wa.me/2250758408079" target="_blank" rel="noopener" aria-label="Nous écrire sur WhatsApp">
   <span class="lbl" aria-hidden="true">ÉCRIRE SUR WHATSAPP</span>
-  <span class="rond"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l1.3-4A8 8 0 1 1 8 18.7Z"/></svg></span>
+  <span class="rond"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.5 14.4c-.3-.1-1.7-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.7 1-.9 1.2-.2.2-.3.2-.6.1-1.7-.9-2.9-1.6-4-3.5-.3-.5.3-.5.9-1.6.1-.2 0-.4 0-.5s-.7-1.6-.9-2.2c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.3 5.2 4.6 1.9.8 2.7.9 3.6.8.6-.1 1.7-.7 2-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.6-.3M12 2a10 10 0 00-8.6 15L2 22l5.2-1.4A10 10 0 1012 2z"/></svg></span>
 </a>
 
 <script>
