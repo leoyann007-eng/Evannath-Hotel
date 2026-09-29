@@ -973,6 +973,7 @@ function interroger(slug){
    ecrite par ce script, donc hors de portee de [data-t]. */
 function EVN_LANG(){peindre()}
 EVN_REMISE.quand(function(R){
+  peindre();
   calc();
   document.querySelectorAll('.room-foot').forEach(function(pied){
     var lien=pied.querySelector('a[href$=".html"]');

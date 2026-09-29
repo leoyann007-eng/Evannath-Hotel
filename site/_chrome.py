@@ -57,6 +57,7 @@ ENVOI_WHATSAPP = True
 REMISE_JS = r"""
 window.EVN_REMISE = (function () {
   var P = null;                  /* la promotion retenue, une fois chargee */
+  var PAIEMENT = null;           /* { actif, test } : le paiement en ligne */
   var attentes = [];
   var pret = false;
 
@@ -95,6 +96,9 @@ window.EVN_REMISE = (function () {
         : '−' + r.valeur + ' %';
     },
     titre: function () { return P ? (P.titre || 'Promotion en cours') : ''; },
+    /* Le paiement en ligne est-il ouvert ? Faux tant que la reponse n'est
+       pas la : on n'annonce rien qu'on ne sait pas. */
+    paiement: function () { return !!(PAIEMENT && PAIEMENT.actif); },
     /* Appelle f des que la reponse est la — tout de suite si elle l est deja.
        Chaque page passe par ici : personne n attend le reseau a la main. */
     quand: function (f) {
@@ -116,6 +120,7 @@ window.EVN_REMISE = (function () {
          retient la premiere : deux remises cumulees sur une meme chambre
          n auraient pas de sens, et personne ne saurait laquelle s applique. */
       P = ((j && j.promotions) || [])[0] || null;
+      PAIEMENT = (j && j.paiement) || null;
     })
     .catch(function () { P = null; })
     .then(fini, fini);
@@ -175,7 +180,17 @@ window.EVN_DISPO = (function () {
   var API = {
     libelle: function (etat, lg) {
       var m = MOTS[etat] || MOTS.inconnu;
-      return m[lg || document.documentElement.lang] || m.fr;
+      var l = lg || document.documentElement.lang;
+      var t = m[l] || m.fr;
+      /* Paiement en ligne ouvert ET chambre libre : elle se reserve des
+         l'acompte regle, sans attendre la reception. Ailleurs — disponibilite
+         inconnue — le paiement repasse par la reception, et « confirmee sous
+         24 h » reste la verite : on n'y touche pas. */
+      if ((etat === 'libre' || etat === 'derniere') && window.EVN_REMISE
+          && EVN_REMISE.paiement && EVN_REMISE.paiement()) {
+        t += l === 'en' ? ' · booked once the deposit is paid' : ' · réservée dès l’acompte réglé';
+      }
+      return t;
     },
     couleur: function (etat) { return COULEURS[etat] || COULEURS.inconnu; },
 

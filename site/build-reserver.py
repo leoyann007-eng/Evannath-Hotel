@@ -524,8 +524,20 @@ EVN_REMISE.quand(function(R){
 });
 
 cat.addEventListener('change',function(){remplirPax();calc()});
+/* Venu d'une fiche chambre avec ses dates ET ses voyageurs : l'etape 1 est
+   deja faite, on ouvre les coordonnees. Sans le nombre de voyageurs — le
+   lien de l'accueil n'en porte pas — on reste a l'etape 1 : on ne facturerait
+   pas une taxe de sejour sur un nombre de personnes que le client n'a pas vu.
+   Des dates passees ou a l'envers : etape 1 aussi, pour qu'il les corrige. */
+var DEJA_CHOISI=(function(){
+  var du=q.get('du')||'',au=q.get('au')||'',J=/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/;
+  return !q.get('paiement') && !!CH[q.get('chambre')] && q.get('chambre')===cat.value
+    && wanted>=1 && wanted<=CH[cat.value][2] && +pax.value===wanted
+    && J.test(du) && J.test(au) && au>du && du>=iso(new Date());
+})();
 [d1,d2,pax].forEach(function(e){e.addEventListener('change',calc)});
 calc();
+if(DEJA_CHOISI)etape(2);
 
 // ── etapes ────────────────────────────────────
 function etape(n){

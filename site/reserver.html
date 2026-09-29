@@ -1194,6 +1194,7 @@ var EVN = {
 
 window.EVN_REMISE = (function () {
   var P = null;                  /* la promotion retenue, une fois chargee */
+  var PAIEMENT = null;           /* { actif, test } : le paiement en ligne */
   var attentes = [];
   var pret = false;
 
@@ -1232,6 +1233,9 @@ window.EVN_REMISE = (function () {
         : '−' + r.valeur + ' %';
     },
     titre: function () { return P ? (P.titre || 'Promotion en cours') : ''; },
+    /* Le paiement en ligne est-il ouvert ? Faux tant que la reponse n'est
+       pas la : on n'annonce rien qu'on ne sait pas. */
+    paiement: function () { return !!(PAIEMENT && PAIEMENT.actif); },
     /* Appelle f des que la reponse est la — tout de suite si elle l est deja.
        Chaque page passe par ici : personne n attend le reseau a la main. */
     quand: function (f) {
@@ -1253,6 +1257,7 @@ window.EVN_REMISE = (function () {
          retient la premiere : deux remises cumulees sur une meme chambre
          n auraient pas de sens, et personne ne saurait laquelle s applique. */
       P = ((j && j.promotions) || [])[0] || null;
+      PAIEMENT = (j && j.paiement) || null;
     })
     .catch(function () { P = null; })
     .then(fini, fini);
@@ -1291,7 +1296,17 @@ window.EVN_DISPO = (function () {
   var API = {
     libelle: function (etat, lg) {
       var m = MOTS[etat] || MOTS.inconnu;
-      return m[lg || document.documentElement.lang] || m.fr;
+      var l = lg || document.documentElement.lang;
+      var t = m[l] || m.fr;
+      /* Paiement en ligne ouvert ET chambre libre : elle se reserve des
+         l'acompte regle, sans attendre la reception. Ailleurs — disponibilite
+         inconnue — le paiement repasse par la reception, et « confirmee sous
+         24 h » reste la verite : on n'y touche pas. */
+      if ((etat === 'libre' || etat === 'derniere') && window.EVN_REMISE
+          && EVN_REMISE.paiement && EVN_REMISE.paiement()) {
+        t += l === 'en' ? ' · booked once the deposit is paid' : ' · réservée dès l’acompte réglé';
+      }
+      return t;
     },
     couleur: function (etat) { return COULEURS[etat] || COULEURS.inconnu; },
 
@@ -1532,8 +1547,20 @@ EVN_REMISE.quand(function(R){
 });
 
 cat.addEventListener('change',function(){remplirPax();calc()});
+/* Venu d'une fiche chambre avec ses dates ET ses voyageurs : l'etape 1 est
+   deja faite, on ouvre les coordonnees. Sans le nombre de voyageurs — le
+   lien de l'accueil n'en porte pas — on reste a l'etape 1 : on ne facturerait
+   pas une taxe de sejour sur un nombre de personnes que le client n'a pas vu.
+   Des dates passees ou a l'envers : etape 1 aussi, pour qu'il les corrige. */
+var DEJA_CHOISI=(function(){
+  var du=q.get('du')||'',au=q.get('au')||'',J=/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/;
+  return !q.get('paiement') && !!CH[q.get('chambre')] && q.get('chambre')===cat.value
+    && wanted>=1 && wanted<=CH[cat.value][2] && +pax.value===wanted
+    && J.test(du) && J.test(au) && au>du && du>=iso(new Date());
+})();
 [d1,d2,pax].forEach(function(e){e.addEventListener('change',calc)});
 calc();
+if(DEJA_CHOISI)etape(2);
 
 // ── etapes ────────────────────────────────────
 function etape(n){

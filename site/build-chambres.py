@@ -468,6 +468,7 @@ function calc(){
    Une remise affichee sur la carte et absente ici enverrait le client
    decouvrir le prix reel au moment de payer. */
 EVN_REMISE.quand(function(R){
+  peindre();   /* le paiement en ligne se sait maintenant : voir EVN_DISPO.libelle */
   var applique=R.prix(PLEIN,SLUG);
   if(applique>=PLEIN)return;
   RATE=applique;
