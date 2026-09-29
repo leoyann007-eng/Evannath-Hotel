@@ -581,9 +581,16 @@ function vise(f, ch) {
  *
  *  Elle reste dans le magasin : la demande a bien eu lieu, et effacer
  *  perdrait le nom du client et ses dates. Elle cesse simplement de peser. */
+/** Les etats d'un paiement qui rendent la chambre : refuse par lomi,
+ *  interrompu par le client, ou remplace par son nouvel essai. La retenue
+ *  reste dans le magasin — si l'argent arrive quand meme, marquerPaye la
+ *  retrouve et verifie que la chambre est toujours libre. */
+const PAIEMENT_LACHE = ['echoue', 'abandonne', 'remplace'];
+
 function vivante(f, maintenant) {
   if (!f || !f.debut) return false;
   if (f.statut === 'annulee') return false;
+  if (f.statut !== 'confirmee' && f.paiement && PAIEMENT_LACHE.includes(f.paiement.statut)) return false;
   if (f.expire && Date.parse(f.expire) < maintenant) return false;
   return true;
 }
@@ -1054,6 +1061,25 @@ async function marquerPaye({ ref, session, transaction, montant }) {
   const f = trouverPaiement(d, { ref, session });
   if (!f) return { ok: false, raison: 'inconnu' };
   if (f.paiement.statut === 'paye') return { ok: true, deja: true };
+  /* Deja mis de cote pour la reception : une notification en double, ou la
+     relecture au retour du client, ne doit pas trancher a sa place. */
+  if (f.paiement.statut === 'a-verifier') return { ok: false, raison: 'a-verifier' };
+  /* La chambre avait ete rendue (paiement refuse puis repris, retenue
+     perimee, client revenu en arriere) : quelqu'un a pu la prendre entre
+     temps. On ne confirme alors que si elle est toujours libre ; sinon
+     l'argent est la, la chambre non — la reception tranche (reloger ou
+     rembourser), et on ne promet rien au client par courriel. */
+  const ch0 = !f.demo && (d.chambres || []).find((x) => x.id === f.cible);
+  if (ch0 && !vivante(f, Date.now())) {
+    const rivales = concurrentes(d, f, ch0, Date.now());
+    if (rivales.length) {
+      f.paiement.statut = 'a-verifier';
+      f.paiement.note = 'Paye apres que la chambre a ete rendue, et elle a ete reprise : a reloger ou rembourser.';
+      if (transaction) f.paiement.transaction = String(transaction).slice(0, 80);
+      await ecrire(d);
+      return { ok: false, raison: 'reprise' };
+    }
+  }
   if (montant != null && Number(montant) !== Number(f.paiement.montant)) {
     f.paiement.statut = 'a-verifier';
     f.paiement.note = 'Montant annonce par lomi : ' + montant;
@@ -1075,8 +1101,10 @@ async function marquerPaye({ ref, session, transaction, montant }) {
   return { ok: true, courriel };
 }
 
-/** Le paiement a echoue. La retenue reste le temps prevu : le client peut
- *  reessayer. Un paiement deja confirme ne redescend jamais. */
+/** Le paiement a echoue. La chambre est rendue tout de suite (voir
+ *  vivante) : sinon le nouvel essai du client butait sur sa propre
+ *  retenue et lisait « complet ». Un paiement deja confirme ne redescend
+ *  jamais. */
 async function marquerEchec({ ref, session }) {
   const d = await lire();
   if (PANNE) return { ok: false };
@@ -1248,6 +1276,25 @@ module.exports = async function handler(req, res) {
       au: jour(corps.au), pax: Number(corps.pax) }, d0.promotions || []);
     if (!q.ok) return json(res, 422, { ok: false, raison: q.raison });
 
+    /* Un nouvel essai du MEME client sur la MEME categorie et les MEMES
+       dates remplace le precedent, encore en attente : sans cela, sa
+       premiere retenue lui prend la chambre qu'il essaie de payer. */
+    const derniereNuit = veille(q.au);
+    let remplaces = 0;
+    for (const f of d0.fermetures || []) {
+      if (!f || !f.paiement || f.statut !== 'attente' || f.paiement.statut !== 'en-attente') continue;
+      if (String(f.courriel || '').toLowerCase() !== courriel.toLowerCase()) continue;
+      if (f.debut !== q.du || f.fin !== derniereNuit) continue;
+      const c = (d0.chambres || []).find((x) => x.id === f.cible);
+      if (!c || c.categorie !== q.categorie) continue;
+      f.paiement.statut = 'remplace';
+      remplaces++;
+    }
+    if (remplaces) {
+      const w = await ecrire(d0);
+      if (!w.ok) return json(res, 200, { ok: false, raison: 'ecriture' });
+    }
+
     const reference = nouvelleReference(d0);
     const paiement = { reference, montant: q.acompte, total: q.total, nuits: q.nuits,
       pax: q.pax, telephone, statut: 'en-attente', session: '', cree: new Date().toISOString() };
@@ -1321,8 +1368,11 @@ module.exports = async function handler(req, res) {
     if (!/^EVN-[A-Z0-9]{6}$/.test(ref)) return json(res, 400, { ok: false });
     const d = await lire();
     const f = !PANNE && trouverPaiement(d, { ref });
-    if (f && f.paiement.statut !== 'paye' && f.statut === 'attente') {
-      if (f.demo) await retirerDemo(f.id); else await retirerFermeture(f.id);
+    /* On marque, on n'efface pas : si lomi confirme malgre tout un
+       paiement (deux onglets, retour arriere), la trace doit exister. */
+    if (f && f.paiement.statut === 'en-attente' && f.statut === 'attente') {
+      f.paiement.statut = 'abandonne';
+      await ecrire(d);
     }
     return json(res, 200, { ok: true });
   }

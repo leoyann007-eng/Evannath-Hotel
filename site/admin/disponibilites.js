@@ -75,6 +75,11 @@ const heureDe = (t) => {
    bandeau de page perimee. Deux scripts classiques partagent la meme
    portee globale, et la collision ne se voit qu'au navigateur. */
 const retenueTombee = (f) => !!f.expire && Date.parse(f.expire) < Date.now();
+/* Paiement en ligne refuse, interrompu, ou remplace par un nouvel essai du
+   meme client : la chambre est rendue (voir vivante() dans api/admin.js).
+   La trace reste dans les donnees, mais ne s'affiche plus comme un sejour. */
+const paiementLache = (f) => f.statut !== 'confirmee' && !!f.paiement
+  && ['echoue', 'abandonne', 'remplace'].includes(f.paiement.statut);
 const jLong = (j) => jMaj(rang(jDt(j).toLocaleDateString('fr-FR',
   { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })));
 const fCouvre = (f, n) => f.debut && f.debut <= n && (f.fin == null || f.fin >= n);
@@ -102,7 +107,7 @@ function dspEtat(ch, n, idx, auj) {
   for (const f of l) {
     if (!fCouvre(f, n)) continue;
     if (fClient(f)) {
-      if (f.statut === 'annulee') continue;
+      if (f.statut === 'annulee' || paiementLache(f)) continue;
       return { k: f.debut <= auj ? 'occ' : 'res', f };
     }
     bloc = bloc || f;
@@ -558,7 +563,7 @@ function htmlDsp() {
   /* Les prochaines arrivees. Plusieurs chambres au meme nom, aux memes dates
      et dans la meme categorie font une seule reservation. */
   const groupes = {};
-  F.filter((x) => x.nature === 'client' && x.statut !== 'annulee' && x.debut >= auj).forEach((x) => {
+  F.filter((x) => x.nature === 'client' && x.statut !== 'annulee' && !paiementLache(x) && x.debut >= auj).forEach((x) => {
     const ch = chambres.find((c) => c.id === x.cible);
     if (!ch) return;
     const k = [x.client, x.debut, x.fin, ch.categorie].join('|');
@@ -581,7 +586,7 @@ function htmlDsp() {
      s'occupe se remet en vente toute seule, et le client n'aura jamais de
      reponse. C'est la seule chose de cet ecran qui ait une echeance. */
   const aTraiter = (F || [])
-    .filter((x) => x.nature === 'client' && x.statut === 'attente' && x.expire)
+    .filter((x) => x.nature === 'client' && x.statut === 'attente' && x.expire && !paiementLache(x))
     .map((x) => ({ f: x, ch: chambres.find((c) => c.id === x.cible) }))
     .filter((x) => x.ch)
     .sort((a, b) => String(a.f.expire).localeCompare(String(b.f.expire)));
@@ -926,7 +931,7 @@ function rendreFiche(el, tr) {
      fermetures passees ne servent plus a rien ici. */
   const siennes = (ETAT.fermetures || [])
     .filter((f) => f.debut && fVise(f, ch) && (!f.fin || f.fin >= auj)
-      && f.statut !== 'annulee')
+      && f.statut !== 'annulee' && !paiementLache(f))
     .sort((a, b) => a.debut.localeCompare(b.debut));
 
   const datee = tr.statut === 'reservee' || tr.statut === 'vente'
@@ -1225,7 +1230,7 @@ function analyseLot() {
   const m = DSP.modal;
   const choisies = ETAT.chambres.filter((c) => m.ids.includes(c.id)).sort(parNum);
   const conflits = m.action === 'dispo' ? [] : choisies.map((ch) => {
-    const f = ETAT.fermetures.find((x) => fClient(x) && x.statut !== 'annulee'
+    const f = ETAT.fermetures.find((x) => fClient(x) && x.statut !== 'annulee' && !paiementLache(x)
       && fVise(x, ch) && fChevauche(x, m.debut, m.fin));
     return f ? { ch, f } : null;
   }).filter(Boolean);
@@ -1237,7 +1242,7 @@ function libresResa() {
   if (!m.debut || !m.fin || m.fin <= m.debut) return [];
   const der = jPlus(m.fin, -1);
   return ETAT.chambres.filter((ch) => ch.categorie === m.cat && ch.service !== false
-    && !ETAT.fermetures.some((f) => f.statut !== 'annulee' && fVise(f, ch) && fChevauche(f, m.debut, der)))
+    && !ETAT.fermetures.some((f) => f.statut !== 'annulee' && !paiementLache(f) && fVise(f, ch) && fChevauche(f, m.debut, der)))
     .sort(parNum);
 }
 
