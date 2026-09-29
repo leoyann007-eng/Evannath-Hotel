@@ -863,7 +863,19 @@ function plein(el){
 (function(){
   var h = document.querySelector('header');
   if (!h) return;
+  /* Une transition de l'en-tete vient de partir (on a defile) : la mesure
+     couperait les transitions et la figerait net — le logo sautait a
+     l'embleme au lieu de glisser, quand « load » tombait juste apres le
+     premier defilement, ce qui arrive en ligne. On note l'heure de chaque
+     depart et la mesure attend la fin (.9 s). Un simple evenement, et non
+     getAnimations() : l'interroger pendant le chargement retardait d'une
+     demi-seconde le depart des animations de l'ecran de chargement. */
+  var bouge = 0;
+  h.addEventListener('transitionrun', function(){ bouge = Date.now(); });
   function mesurer(){
+    if (Date.now() - bouge < 950) {
+      clearTimeout(mesurer.t); mesurer.t = setTimeout(mesurer, 950); return;
+    }
     /* On mesure le CALQUE DE FOND, pas la boite. Depuis que le header a une
        hauteur fixe de 104 px, sa boite ne bouge plus : c'est le calque qui
        se contracte par transform, et getBoundingClientRect en tient compte.
