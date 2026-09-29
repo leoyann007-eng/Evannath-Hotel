@@ -333,6 +333,13 @@ header.scrolled .brand small{opacity:0}
 .crumb a{padding:6px 0;display:inline-block}
 .crumb a:hover{color:var(--bronze)}
 .crumb span{color:var(--bronze)}
+/* Sur la photo du hero, le gris (#9C8B78) et le bronze du fil d'Ariane
+   tombaient sur le bord eclaire des lanternes : « Accueil » y disparaissait.
+   Creme et or clair, comme le hero de l'accueil, et une ombre douce qui les
+   detache d'un fond lumineux. */
+.hero .crumb{color:#E3D9C9;text-shadow:0 0 10px rgba(16,11,6,.95),0 1px 3px rgba(16,11,6,.9)}
+.hero .crumb span{color:#E2BE8C}
+.hero .crumb a:hover{color:#fff}
 .hero h1{font-size:clamp(3rem,10vw,8rem);line-height:.92;margin:20px 0}
 .hero h1 em{display:block;font-style:italic;color:var(--bronze-2);font-size:.5em;margin-top:10px}
 .hero .lede{max-width:46ch;margin:0 auto;font-size:1.06rem;color:#E3D9C9}
