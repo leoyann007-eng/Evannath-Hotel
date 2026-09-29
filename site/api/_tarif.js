@@ -58,10 +58,34 @@ const ISO = /^\d{4}-\d{2}-\d{2}$/;
  * du et au sont une ARRIVEE et un DEPART (AAAA-MM-JJ) ; on paie les nuits
  * entre les deux.
  */
-function devis(demande, promotions, maintenant) {
+/** Le prix de la nuit d'une categorie : celui que la direction a saisi dans
+ *  l'administration (d.tarifs), sinon celui de la grille. Un prix saisi qui
+ *  n'est pas un entier plausible est ignore : on retombe sur la grille
+ *  plutot que d'encaisser une aberration. */
+function prixDe(slug, tarifs) {
+  const c = GRILLE.chambres[slug];
+  if (!c) return null;
+  const v = tarifs && tarifs[slug];
+  return prixValide(v) ? v : c.prix;
+}
+const PRIX_MIN = 1000, PRIX_MAX = 10000000;
+const prixValide = (v) => Number.isInteger(v) && v >= PRIX_MIN && v <= PRIX_MAX;
+
+/** Les prix saisis qui s'ecartent de la grille, et eux seuls. */
+function tarifsEnVigueur(tarifs) {
+  const o = {};
+  for (const slug of Object.keys(GRILLE.chambres)) {
+    const p = prixDe(slug, tarifs);
+    if (p !== GRILLE.chambres[slug].prix) o[slug] = p;
+  }
+  return o;
+}
+
+function devis(demande, promotions, maintenant, tarifs) {
   const t = maintenant || Date.now();
-  const c = GRILLE.chambres[demande && demande.categorie];
-  if (!c) return { ok: false, raison: 'categorie' };
+  const g = GRILLE.chambres[demande && demande.categorie];
+  if (!g) return { ok: false, raison: 'categorie' };
+  const c = { ...g, prix: prixDe(demande.categorie, tarifs) };
   const du = String(demande.du || ''), au = String(demande.au || '');
   if (!ISO.test(du) || !ISO.test(au)) return { ok: false, raison: 'dates' };
   const nuits = Math.round((Date.parse(au) - Date.parse(du)) / JOUR);
@@ -86,4 +110,5 @@ function devis(demande, promotions, maintenant) {
   };
 }
 
-module.exports = { devis, prixRemise, promotionDuJour, GRILLE };
+module.exports = { devis, prixRemise, promotionDuJour, prixDe, prixValide,
+  tarifsEnVigueur, GRILLE, PRIX_MIN, PRIX_MAX };

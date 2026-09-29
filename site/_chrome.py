@@ -58,7 +58,14 @@ REMISE_JS = r"""
 window.EVN_REMISE = (function () {
   var P = null;                  /* la promotion retenue, une fois chargee */
   var PAIEMENT = null;           /* { actif, test } : le paiement en ligne */
+  /* Les prix de la nuit saisis dans l'administration, quand ils different de
+     ceux graves dans la page : { slug: prix }. Vide tant que rien n'est
+     arrive — la page garde alors ses prix, qui sont ceux de la grille. */
+  var TARIFS = {};
   var attentes = [];
+  /* Groupes de trois chiffres separes d'une espace, comme les generateurs
+     ecrivent les prix dans les pages. */
+  function milliers(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' '); }
   var pret = false;
 
   function vise(p, slug) {
@@ -68,6 +75,12 @@ window.EVN_REMISE = (function () {
   }
 
   var API = {
+    /* Le prix de la nuit, avant toute remise : celui de l'administration
+       s'il y en a un, sinon celui que la page porte deja (la grille). */
+    base: function (slug, montant) {
+      var t = TARIFS[slug];
+      return (typeof t === 'number' && t > 0) ? t : montant;
+    },
     /* La promotion applicable a cette chambre, ou null. */
     pour: function (slug) {
       return (P && vise(P, slug)) ? P : null;
@@ -107,7 +120,35 @@ window.EVN_REMISE = (function () {
     }
   };
 
+  /* Les prix graves dans la page, repeints AVANT que chaque page n'applique
+     sa remise : celle-ci lit alors le bon prix de depart.
+       [data-prix-de="slug"]     un prix affiche
+       [data-slug][data-prix]    une carte que l'on trie par prix — et le
+                                 prix dit par son lien aux lecteurs d'ecran */
+  function repeindre() {
+    var sel = function (s) { return [].slice.call(document.querySelectorAll(s)); };
+    sel('[data-prix-de]').forEach(function (el) {
+      var s = el.getAttribute('data-prix-de'), t = TARIFS[s];
+      if (t) el.textContent = milliers(t);
+    });
+    sel('[data-slug][data-prix]').forEach(function (el) {
+      var t = TARIFS[el.getAttribute('data-slug')];
+      if (!t) return;
+      /* L'ancien prix, quelle que soit l'espace entre les milliers (fine
+         insecable dans les libelles) ; le nouveau reprend la meme. */
+      var avant = new RegExp(milliers(el.getAttribute('data-prix')).split(' ')
+        .join('[ \\u00a0\\u202f]'), 'g');
+      el.setAttribute('data-prix', String(t));
+      [].slice.call(el.querySelectorAll('[aria-label]')).forEach(function (a) {
+        a.setAttribute('aria-label', a.getAttribute('aria-label').replace(avant, function (m) {
+          return milliers(t).split(' ').join((m.match(/[^0-9]/) || [' '])[0]);
+        }));
+      });
+    });
+  }
+
   function fini() {
+    try { repeindre(); } catch (e) {}
     pret = true;
     attentes.forEach(function (f) { try { f(API); } catch (e) {} });
     attentes = [];
@@ -121,6 +162,7 @@ window.EVN_REMISE = (function () {
          n auraient pas de sens, et personne ne saurait laquelle s applique. */
       P = ((j && j.promotions) || [])[0] || null;
       PAIEMENT = (j && j.paiement) || null;
+      TARIFS = (j && j.tarifs) || {};
     })
     .catch(function () { P = null; })
     .then(fini, fini);

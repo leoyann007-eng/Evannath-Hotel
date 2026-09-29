@@ -519,6 +519,9 @@ function calc(){
    recapitulatif des qu'elle est la. Si l'API se tait, tout reste au tarif
    plein — le repli sur. */
 EVN_REMISE.quand(function(R){
+  /* Le prix de la nuit saisi dans l'administration remplace celui de la
+     grille : c'est aussi celui sur lequel le serveur calcule l'acompte. */
+  Object.keys(CH).forEach(function(k){CH[k][1]=R.base(k,CH[k][1])});
   /* On renomme TOUTES les options, pas seulement si la chambre affichee au
      depart est ciblee : une promotion sur une seule chambre laissait sinon
      son option au tarif plein, et le menu contredisait le recapitulatif.

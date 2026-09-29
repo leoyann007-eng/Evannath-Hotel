@@ -1161,6 +1161,10 @@ module.exports = async function handler(req, res) {
       /* Le tunnel en a besoin AVANT le clic : bouton « Payer » ou « Envoyer »,
          et bandeau « mode test » quand aucun argent ne bouge. */
       paiement: { actif: !!LOMI_CLE, test: LOMI_TEST },
+      /* Les prix de la nuit saisis dans l'administration, quand ils
+         s'ecartent de la grille gravee dans les pages : chaque page les
+         repeint (REMISE_JS), et a=payer encaisse sur les memes. */
+      tarifs: tarif.tarifsEnVigueur(d.tarifs),
       maj: d.maj,
     });
   }
@@ -1273,7 +1277,7 @@ module.exports = async function handler(req, res) {
     const d0 = await lire();
     if (PANNE) return json(res, 200, { ok: false, raison: 'indisponible' });
     const q = tarif.devis({ categorie: slug(corps.categorie), du: jour(corps.du),
-      au: jour(corps.au), pax: Number(corps.pax) }, d0.promotions || []);
+      au: jour(corps.au), pax: Number(corps.pax) }, d0.promotions || [], undefined, d0.tarifs);
     if (!q.ok) return json(res, 422, { ok: false, raison: q.raison });
 
     /* Un nouvel essai du MEME client sur la MEME categorie et les MEMES
@@ -1575,6 +1579,38 @@ module.exports = async function handler(req, res) {
       courriel = await courrielAuClient(objet, nomDeCategorie(ch && ch.categorie));
     }
     return json(res, 200, { ok: true, entree: objet, courriel });
+  }
+
+  /* ── Les prix de la nuit ─────────────────────────────────────────────────
+     { tarifs: { slug: prix | null } }. null, ou le prix de la grille, rend
+     la categorie a la grille. Un prix hors bornes refuse TOUT l'envoi : un
+     zero de trop sur une ligne ne doit pas passer parce que les six autres
+     sont justes. */
+  if (action === 'tarifs') {
+    if (req.method !== 'POST') return json(res, 405, { ok: false });
+    let corps = req.body;
+    if (typeof corps === 'string') { try { corps = JSON.parse(corps); } catch { corps = {}; } }
+    const recus = (corps && corps.tarifs) || {};
+    const d = await lire();
+    if (PANNE) return json(res, 503, { ok: false, message: PANNE
+      + ' Rien n a ete enregistre : ecrire maintenant effacerait le reste.' });
+    const suivants = { ...(d.tarifs || {}) };
+    for (const [s, v] of Object.entries(recus)) {
+      const g = tarif.GRILLE.chambres[s];
+      if (!g) return json(res, 422, { ok: false, message: 'Catégorie inconnue : ' + s + '.' });
+      if (v === null || v === '' || v === undefined) { delete suivants[s]; continue; }
+      const n = Number(v);
+      if (!tarif.prixValide(n)) {
+        return json(res, 422, { ok: false, champs: [s], message: 'Le prix de « ' + g.nom
+          + ' » doit être un nombre entier entre ' + tarif.PRIX_MIN.toLocaleString('fr-FR')
+          + ' et ' + tarif.PRIX_MAX.toLocaleString('fr-FR') + ' FCFA.' });
+      }
+      if (n === g.prix) delete suivants[s]; else suivants[s] = n;
+    }
+    d.tarifs = suivants;
+    const w = await ecrire(d);
+    if (!w.ok) return json(res, 502, { ok: false, message: w.message });
+    return json(res, 200, { ok: true, tarifs: d.tarifs });
   }
 
   if (action === 'supprimer') {

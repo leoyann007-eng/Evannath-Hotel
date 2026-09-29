@@ -10,7 +10,7 @@ import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const { devis, prixRemise, promotionDuJour, GRILLE } = require('../site/api/_tarif.js');
+const { devis, prixRemise, promotionDuJour, tarifsEnVigueur, GRILLE } = require('../site/api/_tarif.js');
 
 const SRC = (() => {
   const py = readFileSync('site/_chrome.py', 'utf8');
@@ -94,6 +94,36 @@ console.log('\nLe devis refuse ce qu\'on ne peut pas vendre');
   verifier('trop de personnes pour la chambre', devis({ ...base, pax: 3 }, [], t).raison, 'personnes');
   verifier('personnes non entieres', devis({ ...base, pax: 1.5 }, [], t).raison, 'personnes');
   verifier('arrivee aujourd\'hui : acceptee', devis({ ...base, du: '2026-10-10', au: '2026-10-11' }, [], t).ok, true);
+}
+
+console.log('\nLe prix saisi dans l\'administration (d.tarifs)');
+{
+  const t = Date.parse('2026-10-10T08:00:00Z');
+  const base = { categorie: 'chambre-standard', du: '2026-10-20', au: '2026-10-23', pax: 2 };
+  const d = devis(base, [], t, { 'chambre-standard': 70000 });
+  // 70 000 x 3 = 210 000 ; taxe 9 000 ; total 219 000 ; 30 % = 65 700
+  verifier('il remplace la grille', [d.plein, d.tarif, d.total, d.acompte], [70000, 70000, 219000, 65700]);
+  const r = devis(base, CAS['pourcentage impair (arrondi)'], t, { 'chambre-standard': 70000 });
+  verifier('la promotion s\'applique par-dessus', r.tarif, Math.round(70000 * 0.93));
+  verifier('les autres categories gardent la grille',
+    devis({ ...base, categorie: 'suite-arabe' }, [], t, { 'chambre-standard': 70000 }).plein, 280000);
+  for (const [nom, v] of [['zero', 0], ['negatif', -5], ['decimal', 70000.5], ['texte', '70000'], ['absurde', 1e9]]) {
+    verifier('prix ' + nom + ' : ignore, grille', devis(base, [], t, { 'chambre-standard': v }).plein, 67000);
+  }
+  verifier('en vigueur : seulement les ecarts',
+    tarifsEnVigueur({ 'chambre-standard': 70000, 'suite-arabe': 280000, 'penthouse': 5000, 'deluxe-baldaquin': 0 }),
+    { 'chambre-standard': 70000 });
+
+  // La page lit le meme prix : base() puis prix(), comme la fiche.
+  const win = {};
+  const faux = async () => ({ ok: true, json: async () => ({ promotions: CAS['pourcentage impair (arrondi)'],
+    tarifs: tarifsEnVigueur({ 'chambre-standard': 70000 }) }) });
+  new Function('window', 'fetch', SRC)(win, faux);
+  const R = await new Promise((ok) => win.EVN_REMISE.quand(ok));
+  const plein = R.base('chambre-standard', 67000);
+  verifier('page : base() rend le prix saisi', plein, 70000);
+  verifier('page et serveur : meme tarif remise', R.prix(plein, 'chambre-standard'), r.tarif);
+  verifier('page : sans prix saisi, celui de la page', R.base('suite-arabe', 280000), 280000);
 }
 
 console.log('');

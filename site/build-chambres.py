@@ -270,12 +270,12 @@ for c in CHAMBRES:
     b.append('''      </div>
     </div>
     <div class="pagne pagne-damas au-centre pagne-chambre" aria-hidden="true"></div>
-    <div class="head-price" id="prix-tete"><b>%s</b><span data-t="pnuit">FCFA / nuit</span></div>
+    <div class="head-price" id="prix-tete"><b data-prix-de="%s">%s</b><span data-t="pnuit">FCFA / nuit</span></div>
   </div>
 </div>
 
 <div class="wrap">
-  <div class="mosaic%s" id="gl">''' % (fmt(c['prix']), ' court' if len(c['photos']) < 5 else ''))
+  <div class="mosaic%s" id="gl">''' % (c['slug'], fmt(c['prix']), ' court' if len(c['photos']) < 5 else ''))
 
     for i, (img, alt, cap) in enumerate(c['photos']):
         ld = 'eager' if i == 0 else 'lazy'
@@ -346,7 +346,7 @@ for c in CHAMBRES:
  <aside class="panel" id="reserver">
   <div class="pagne pagne-galon" aria-hidden="true"></div>
   <span class="from" data-t="apd">À partir de</span>
-  <div class="rate" id="prix-panneau">%s <span style="font-size:1rem">FCFA</span></div>
+  <div class="rate" id="prix-panneau"><span data-prix-de="%s">%s</span> <span style="font-size:1rem">FCFA</span></div>
   <div class="per" data-t="pern">par nuit, petit-déjeuner inclus</div>
 
   <form id="bkf">
@@ -374,7 +374,7 @@ for c in CHAMBRES:
   <div class="wrap">
     <span class="eyebrow" data-t="ebo">Autres catégories</span>
     <h2 data-t="hao">Si celle-ci est prise</h2>
-    <div class="more-grid">''' % (fmt(c['prix']), pax_opts, fmt(c['prix'])))
+    <div class="more-grid">''' % (c['slug'], fmt(c['prix']), pax_opts, fmt(c['prix'])))
 
     for i, slug in enumerate(c['autres']):
         o = PAR_SLUG[slug]
@@ -383,8 +383,8 @@ for c in CHAMBRES:
         <div class="ph"><picture><source srcset="img/opt/%s.webp" type="image/webp">
           <img loading="lazy" src="img/opt/%s.jpg" alt="%s"></picture></div>
         <div><h3>%s</h3><p style="font-size:14px" data-t="om%d">%s</p>
-        <div class="p"><b>%s</b><span data-t="on%d">FCFA / nuit</span></div></div>
-      </a>''' % (slug, img, img, o['nom'], o['nom'], i, o['meta'], fmt(o['prix']), i))
+        <div class="p"><b data-prix-de="%s">%s</b><span data-t="on%d">FCFA / nuit</span></div></div>
+      </a>''' % (slug, img, img, o['nom'], o['nom'], i, o['meta'], slug, fmt(o['prix']), i))
 
     b.append('''    </div>
   </div>
@@ -469,8 +469,11 @@ function calc(){
    decouvrir le prix reel au moment de payer. */
 EVN_REMISE.quand(function(R){
   peindre();   /* le paiement en ligne se sait maintenant : voir EVN_DISPO.libelle */
+  /* Le prix saisi dans l'administration remplace celui de la grille. Les
+     prix affiches sont deja repeints (REMISE_JS) ; reste le calcul. */
+  PLEIN=R.base(SLUG,PLEIN); RATE=PLEIN;
   var applique=R.prix(PLEIN,SLUG);
-  if(applique>=PLEIN)return;
+  if(applique>=PLEIN){calc();return;}
   RATE=applique;
 
   var tete=document.getElementById('prix-tete');

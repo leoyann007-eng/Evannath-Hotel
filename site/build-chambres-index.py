@@ -230,7 +230,7 @@ for c in CHAMBRES:
         <p class="meta">%s</p>
         <p>%s</p>
         <div class="bas">
-          <span class="pr"><b>%s</b><span>FCFA · la nuit</span></span>
+          <span class="pr"><b data-prix-de="%s">%s</b><span>FCFA · la nuit</span></span>
           <a href="%s.html" class="go">Voir la chambre &nbsp;&rarr;</a>
         </div>
       </div>
@@ -238,7 +238,7 @@ for c in CHAMBRES:
                      c['slug'], c['nom'], fmt(c['prix']),
                      tag, ph, ph, alt,
                      c['slug'], c['nom'], c['meta'], resume,
-                     fmt(c['prix']), c['slug']))
+                     c['slug'], fmt(c['prix']), c['slug']))
 
 b.append('''  </div>
   <p class="vide" id="vide" data-t="vd">Aucune catégorie ne correspond à ce filtre.</p>
@@ -261,10 +261,10 @@ b.append('''  </div>
 for c in sorted(CHAMBRES, key=lambda x: x['prix']):
     b.append('          <tr data-slug="%s" data-prix="%d">'
              '<th scope="row"><a href="%s.html">%s</a></th>'
-             '<td>%s</td><td>%d</td><td>%s</td><td class="num">%s F</td></tr>'
+             '<td>%s</td><td>%d</td><td>%s</td><td class="num"><span data-prix-de="%s">%s</span> F</td></tr>'
              % (c['slug'], c['prix'], c['slug'], c['nom'],
                 FAM_NOM[FAMILLE[c['slug']]], c['pax'],
-                c['meta'].split('·')[-1].strip(), fmt(c['prix'])))
+                c['meta'].split('·')[-1].strip(), c['slug'], fmt(c['prix'])))
 
 b.append('''        </tbody>
       </table>
@@ -355,6 +355,9 @@ JS += REMISE_JS + '''
    suivante : elle annoncait une remise que la page ne tenait pas.
    Si l API se tait, tout reste au prix affiche — c est le bon sens du repli. */
 EVN_REMISE.quand(function (R) {
+  /* Les prix de l'administration sont repeints (REMISE_JS) : l'ordre
+     « tarif croissant » peut avoir change, on retrie. */
+  if (typeof appliquer === 'function') appliquer();
   var fmt = function (n) { return Number(n).toLocaleString('fr-FR'); };
   var etiquette = R.etiquette();
 

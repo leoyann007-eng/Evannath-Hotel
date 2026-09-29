@@ -516,6 +516,7 @@ details.plus summary::marker{color:var(--bronze)}
       <button data-v="bord" class="on" title="Tableau de bord"><i>▦</i><span>Tableau de bord</span></button>
       <h2>Gestion</h2>
       <button data-v="disponibilites" title="Disponibilités"><i>▤</i><span>Disponibilités</span></button>
+      <button data-v="tarifs" title="Prix des chambres"><i>¤</i><span>Prix des chambres</span></button>
       <button data-v="evenements" title="Événements"><i>◆</i><span>Événements</span></button>
       <button data-v="promotions" title="Promotions"><i>◉</i><span>Promotions</span></button>
       <button data-v="campagnes" title="Campagnes saisonnières"><i>☀</i><span>Campagnes saisonnières</span></button>
@@ -686,9 +687,84 @@ async function charger() {
   ETAT.panne = etat.panne || '';
   ETAT.fichiers = etat.fichiers || 0;
   await verifierEmpreinte();
-  ETAT.categories = categories;
+  /* La grille gravee dans le site, et par-dessus les prix saisis ici : les
+     autres ecrans (l'apercu d'une promotion) montrent le prix en vigueur. */
+  ETAT.grille = categories;
+  ETAT.tarifs = (tout.donnees && tout.donnees.tarifs) || {};
+  appliquerTarifs();
   ETAT.images = images;
   rendre();
+}
+
+function appliquerTarifs() {
+  ETAT.categories = (ETAT.grille || []).map((c) => {
+    const t = Number(ETAT.tarifs[c.slug]);
+    return Number.isInteger(t) && t > 0 ? { ...c, prix: t } : c;
+  });
+}
+
+/* ── Les prix de la nuit ───────────────────────────────── */
+function vueTarifs() {
+  const lignes = (ETAT.grille || []).map((c) => {
+    const saisi = Number(ETAT.tarifs[c.slug]);
+    const actuel = Number.isInteger(saisi) && saisi > 0 ? saisi : c.prix;
+    return `<div class="ligne">
+      <img class="vig" src="/img/opt/${ech(c.photo)}.jpg" alt="">
+      <div class="txt"><b>${ech(c.nom)}</b>
+        <span>${actuel === c.prix ? 'Prix d’origine du site'
+          : 'Prix d’origine : ' + FCFA(c.prix)}</span></div>
+      <div style="display:flex;align-items:center;gap:8px;flex:none">
+        <input data-tarif="${ech(c.slug)}" data-grille="${c.prix}" inputmode="numeric"
+          aria-label="Prix de la nuit, ${ech(c.nom)}" value="${actuel}"
+          style="width:130px;text-align:right">
+        <span style="color:var(--muted);font-size:13px">FCFA</span>
+        ${actuel === c.prix ? '' : `<button type="button" class="btn mince"
+          data-tarif-grille="${ech(c.slug)}">Rétablir</button>`}
+      </div></div>`;
+  }).join('');
+  return `<div class="entete"><div>
+      <h1 class="t">Prix des chambres</h1>
+      <p class="sous">Le prix d'une nuit, par catégorie, avant promotion.</p></div></div>
+    ${avertissement()}
+    <div class="carte">
+      <p class="aide" style="margin:0 0 16px;font-size:13px">Le nouveau prix s'affiche
+      sur tout le site dès l'enregistrement : fiches, liste des chambres, accueil et
+      page de réservation. L'acompte payé en ligne est calculé sur ce prix, et une
+      promotion en cours s'applique par-dessus. Une réservation déjà faite garde le
+      prix auquel elle a été faite.</p>
+      <p class="aide" style="margin:0 0 20px;font-size:13px">Les résultats Google
+      montrent le prix d'origine jusqu'à la prochaine mise à jour du site.</p>
+      ${lignes}
+      <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:20px">
+        <button class="btn plein" id="tarifs-ok">Enregistrer les prix</button>
+        <p class="msg" id="msg-tarifs" role="status"></p>
+      </div>
+    </div>`;
+}
+
+async function enregistrerTarifs() {
+  const m = $('#msg-tarifs');
+  const envoi = {};
+  for (const i of document.querySelectorAll('[data-tarif]')) {
+    const brut = i.value.replace(/[\s  .]/g, '');
+    const n = Number(brut);
+    if (!/^\d+$/.test(brut) || n < 1000 || n > 10000000) {
+      m.className = 'msg mal';
+      m.textContent = 'Un prix s’écrit en chiffres, entre 1 000 et 10 000 000 FCFA.';
+      i.focus();
+      return;
+    }
+    envoi[i.dataset.tarif] = n === Number(i.dataset.grille) ? null : n;
+  }
+  m.className = 'msg'; m.textContent = 'Enregistrement…';
+  const r = await appel('tarifs', { tarifs: envoi });
+  if (!r.ok) { m.className = 'msg mal'; m.textContent = r.message || 'Rien n’a été enregistré.'; return; }
+  ETAT.tarifs = r.tarifs || {};
+  appliquerTarifs();
+  rendre();
+  const m2 = $('#msg-tarifs');
+  m2.className = 'msg bon';
+  m2.textContent = 'Prix enregistrés. Ils sont en ligne.';
 }
 
 $('#menu').addEventListener('click', (e) => {
@@ -1977,6 +2053,8 @@ function rendre() {
       <div id="dsp-zone">${htmlDsp()}</div>
 
 `;
+  } else if (VUE === 'tarifs') {
+    v.innerHTML = vueTarifs();
   } else if (VUE === 'parametres') {
     v.innerHTML = `<div class="entete"><div>
         <h1 class="t">Paramètres</h1>
@@ -2011,9 +2089,10 @@ function rendre() {
           ETAT.variable}</code></div>` : ''}
       </div>
       <div class="carte">
-        <p style="color:var(--muted)">Les numéros de téléphone, l'adresse e-mail et les
-        tarifs se règlent aujourd'hui dans le code du site. Les rendre modifiables ici
-        fait partie de ce qui reste à construire.</p>
+        <p style="color:var(--muted)">Les numéros de téléphone et l'adresse e-mail
+        se règlent aujourd'hui dans le code du site ; les rendre modifiables ici
+        fait partie de ce qui reste à construire. Les prix des chambres, eux, se
+        modifient dans « Prix des chambres ».</p>
       </div>`;
   } else if (VUE === 'utilisateurs') {
     v.innerHTML = `<div class="entete"><div>
@@ -2048,6 +2127,15 @@ document.addEventListener('click', async (e) => {
      disponibilites.js. */
   if (typeof clicDsp === 'function' && clicDsp(e)) return;
 
+  if (e.target.closest('#tarifs-ok')) { enregistrerTarifs(); return; }
+  const rg = e.target.closest('[data-tarif-grille]');
+  if (rg) {
+    const i = document.querySelector('[data-tarif="' + rg.dataset.tarifGrille + '"]');
+    if (i) { i.value = i.dataset.grille; i.focus(); }
+    /* Pas `hidden` : .btn impose son display et l'emporterait. */
+    rg.remove();
+    return;
+  }
   const ote = e.target.closest('[data-oter]');
   if (ote) {
     const ch = (ETAT.chambres || []).find((x) => x.id === ote.dataset.oter);
