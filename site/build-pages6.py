@@ -87,21 +87,29 @@ CSS = """
 .head{padding:150px 0 46px}
 .head h1{margin:10px 0 20px}
 .head .lede{font-size:1.1rem;max-width:60ch}
-/* Signature textile — touche 2 sur 5. Le damas occupe le vide a DROITE du
-   bloc titre, jamais la colonne de texte : il commence apres les 60ch de
-   la lede, et le fondu l'efface avant meme d'y arriver. Le parent ouvre un
-   contexte d'empilement pour que le motif reste derriere le texte. */
+/* Signature textile — touche 2 sur 5, et 43 · Le damas sous la lampe.
+   Comme la maquette « Motion design III » : le damas couvre TOUT le bloc
+   titre, a peine visible ; sous la souris, une lampe le revele. Le texte
+   est pose sur un aplat creme (.head-texte) : le motif ne passe jamais
+   dessous. Le bloc ouvre un contexte d'empilement pour que les deux
+   calques restent derriere le texte. Ils commencent sous l'en-tete. */
 .head{position:relative;z-index:0}
-.pagne-offres{top:138px;right:0;width:min(600px,46%);height:340px}
-@media(max-width:1100px){.pagne-offres{display:none}}
-/* 43 · « Invisible hors survol » : la ou il y a une souris, le damas fixe
-   s'efface et seule la lampe le montre, sous le curseur. Pose par-dessus
-   un damas deja visible, elle n'ajoutait qu'une nuance que personne ne
-   voyait. Sans souris (tablette, telephone), le damas fixe reste. */
+.head-texte{position:relative;background:var(--bark);width:fit-content;max-width:100%;
+  padding:18px 32px 18px 0}
+.offres-damas,.pagne-lampe{position:absolute;left:0;right:0;top:104px;bottom:0;z-index:-1;
+  background:url(img/pagne/damas-pagne.svg) repeat;background-size:252px 158px}
+.offres-damas{opacity:.06}
+/* La lampe : un rond de 150 px, plein au centre, a 40 % a mi-rayon, nul au
+   bord. Eteinte hors survol, elle s'allume et s'eteint en .6 s. */
+.pagne-lampe{display:none}
 @media(hover:hover) and (min-width:768px){
-  .pagne-damas.pagne-offres{visibility:hidden}
-  .pagne-lampe.pagne-offres{opacity:.3}
+  .pagne-lampe{display:block;opacity:0;transition:opacity .6s ease;
+    -webkit-mask-image:radial-gradient(circle 150px at var(--x,-999px) var(--y,-999px),#000 0%,rgba(0,0,0,.4) 45%,transparent 100%);
+    mask-image:radial-gradient(circle 150px at var(--x,-999px) var(--y,-999px),#000 0%,rgba(0,0,0,.4) 45%,transparent 100%)}
+  .pagne-lampe.allume{opacity:.34}
 }
+/* Sur un telephone il n'y a plus de vide autour du texte : pas de damas. */
+@media(max-width:767px){.offres-damas{display:none}.head-texte{padding-right:0}}
 .camp{border:1px solid var(--bronze);background:var(--bark-2);padding:34px;margin-bottom:56px}
 .camp .top{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;margin-bottom:26px}
 .camp .live{display:inline-flex;align-items:center;gap:9px;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--palm);font-weight:700}
@@ -320,14 +328,16 @@ def rendre_cartes(liste):
 
 b = [header('#demande','Réserver'), drawer('circuits.html'), '''
 <div class="wrap head">
+  <div class="pagne offres-damas" aria-hidden="true"></div>
+  <div class="pagne pagne-lampe" aria-hidden="true"></div>
+  <div class="head-texte">
   <nav class="crumb" aria-label="Fil d'Ariane">
     <a href="index.html" data-t="c1">Accueil</a> &nbsp;·&nbsp; <span data-t="c2">Offres &amp; Événements</span>
   </nav>
   <span class="eyebrow" data-t="eb">Onze offres &amp; un rendez-vous hebdomadaire</span>
   <h1 data-t="h1">Offres &amp; Événements</h1>
-  <div class="pagne pagne-damas vers-gauche pagne-offres" aria-hidden="true"></div>
-  <div class="pagne pagne-lampe pagne-offres" aria-hidden="true"></div>
   <p class="lede" data-t="lede">Ce qui se passe en ce moment, et les séjours déjà composés — chambre, repas, activités et attentions comprises. Choisissez, indiquez vos dates, et la réception s'occupe du reste.</p>
+  </div>
 </div>
 
 <div class="wrap">

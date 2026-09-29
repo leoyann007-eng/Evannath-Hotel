@@ -566,18 +566,8 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
   transition:clip-path 1.4s var(--ease-inout) .2s}
 .pagne-galon.vu::before{clip-path:inset(0)}
 
-/* 43 · LE DAMAS SOUS LA LAMPE. Un second calque, plus dense, que l'on ne
-   voit que sous la souris : le masque est un rond de 220 px qui la suit.
-   Invisible hors survol, et absent partout ou il n'y a pas de souris. */
-.pagne-lampe{display:none}
-@media(hover:hover) and (min-width:768px){
-  /* Pas de classe .pagne-damas sur ce calque : l'observateur lui poserait
-     `vu`, et .pagne-damas.vu le ramenerait a .09 par-dessus son .16. */
-  .pagne-lampe{display:block;position:absolute;z-index:-1;opacity:.16;
-    background:url(img/pagne/damas-pagne.svg) repeat;background-size:252px 158px;
-    -webkit-mask-image:radial-gradient(circle 220px at var(--x,-999px) var(--y,-999px),#000,transparent);
-    mask-image:radial-gradient(circle 220px at var(--x,-999px) var(--y,-999px),#000,transparent)}
-}
+/* 43 · Le damas sous la lampe : ses calques vivent dans la page Offres
+   (build-pages6.py), la seule qui le porte. */
 
 @media(max-width:767px){
   /* Sur un telephone il n'y a plus de vide : le damas n'a plus d'endroit
@@ -1553,12 +1543,14 @@ EVN_AU_SCROLL('.pagne-med:not(.dw-med),.pagne-damas,.pagne-galon','vu');
   hote.addEventListener('pointermove', function(e){
     var r = l.getBoundingClientRect();
     x = e.clientX - r.left; y = e.clientY - r.top;
+    /* A l'allumage, la lampe part de la souris : sans cela elle glisserait
+       depuis l'endroit ou on l'a quittee. */
+    if (!l.classList.contains('allume')) { cx = x; cy = y; l.classList.add('allume'); }
     if (!tourne) { tourne = true; requestAnimationFrame(image); }
   });
-  hote.addEventListener('pointerleave', function(){
-    x = -999; y = -999;
-    if (!tourne) { tourne = true; requestAnimationFrame(image); }
-  });
+  /* En sortant, la lampe ne file pas hors du bloc : elle s'eteint sur
+     place, en .6 s (voir la transition d'opacite). */
+  hote.addEventListener('pointerleave', function(){ l.classList.remove('allume'); });
 }());
 
 </script>
