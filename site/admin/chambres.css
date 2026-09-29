@@ -71,6 +71,38 @@ table.cm-table{width:100%;border-collapse:collapse;font-size:14px;min-width:860p
 .cm-herite{color:var(--muted);font-size:11px;margin-left:4px}
 .cm-vide-l td{text-align:center;color:var(--muted);padding:40px 14px}
 
+/* La selection et le tri */
+.cm-table th.cm-case,.cm-table td.cm-case{width:44px;padding-right:0}
+.cm-case input{width:16px;height:16px;accent-color:var(--bronze);cursor:pointer;display:block}
+.cm-table tbody tr.cm-choisie{background:#FBF8F2}
+.cm-tri{background:none;border:0;padding:0;font:inherit;letter-spacing:inherit;text-transform:inherit;
+  color:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.cm-tri i{font-style:normal;font-size:9px;opacity:.45}
+.cm-tri.on{color:var(--bronze-2)}
+.cm-tri.on i{opacity:1}
+.cm-tri:hover{color:var(--cream)}
+.cm-lot{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--night);color:#fff;
+  padding:10px 14px 10px 18px;margin-bottom:10px}
+.cm-lot b{font-weight:600;font-size:13.5px;margin-right:auto}
+.cm-lot .btn{border-color:rgba(255,255,255,.45);color:#fff}
+.cm-lot .btn:hover{background:#fff;color:var(--night)}
+.cm-lot .btn[disabled]{opacity:.5;cursor:wait}
+.cm-lot-x{background:none;border:0;color:#C9D3E2;font:400 12.5px var(--f-b);cursor:pointer;
+  text-decoration:underline;text-underline-offset:3px;padding:6px}
+.cm-lot-x:hover{color:#fff}
+
+/* L'ajout d'une serie */
+.cm-mode{display:inline-flex;border:1px solid var(--line);margin-bottom:18px}
+.cm-mode label{display:flex;align-items:center;gap:8px;margin:0;padding:9px 16px;cursor:pointer;
+  text-transform:none;letter-spacing:0;font-size:13.5px;color:var(--prose);background:var(--bark-2)}
+.cm-mode label+label{border-left:1px solid var(--line)}
+.cm-mode label.on{background:var(--night);color:#fff}
+.cm-mode input{width:auto;accent-color:var(--bronze)}
+.cm-apercu{background:var(--bark);border:1px solid var(--line);padding:12px 16px;font-size:13.5px;
+  color:var(--prose);margin:-4px 0 18px}
+.cm-apercu b{color:var(--cream)}
+.cm-mal{color:var(--err)}
+
 /* Le statut */
 .cm-statut{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;white-space:nowrap}
 .cm-statut:before{content:"";width:8px;height:8px;border-radius:50%;background:var(--c)}

@@ -33,11 +33,29 @@ const CM = {
   photoVue: 0,               // la photo affichee dans la fiche
   filtres: { q: '', cat: '', statut: '', site: '' },
   occupe: new Set(),         // les ids dont une bascule est en cours
+  selection: new Set(),      // les chambres cochees dans le tableau
+  tri: { cle: 'numero', sens: 1 },
 };
 
 /** Remis a zero quand on arrive par le menu : on retombe sur la liste. */
 function cmReinit() {
   CM.mode = 'liste'; CM.id = null; CM.brouillon = null; CM.erreurs = [];
+  CM.selection.clear();
+}
+
+/* Le tri du tableau. Le numero se lit comme un humain le lit (2 avant 10),
+   et chaque autre cle departage ses ex aequo par le numero. */
+const CM_TRIS = {
+  numero: () => 0,
+  categorie: (a, b) => (ETAT.grille || []).findIndex((c) => c.slug === a.categorie)
+    - (ETAT.grille || []).findIndex((c) => c.slug === b.categorie),
+  etage: (a, b) => String(a.etage || '\uffff').localeCompare(String(b.etage || '\uffff'), 'fr', { numeric: true }),
+  statut: (a, b) => ['active', 'maintenance', 'hors-service'].indexOf(cmStatut(a))
+    - ['active', 'maintenance', 'hors-service'].indexOf(cmStatut(b)),
+};
+function cmTrier(liste) {
+  const { cle, sens } = CM.tri, f = CM_TRIS[cle] || CM_TRIS.numero;
+  return liste.sort((a, b) => sens * (f(a, b) || cmParNum(a, b)));
 }
 
 const CM_STATUTS = {
@@ -146,6 +164,13 @@ function cmListe(onglets) {
     && (!f.cat || c.categorie === f.cat)
     && (!f.statut || cmStatut(c) === f.statut)
     && (!f.site || (f.site === 'oui') === cmPubliee(c)));
+  cmTrier(vues);
+  /* Une chambre cochee puis cachee par un filtre ne reste pas cochee : on
+     n'agit jamais sur ce qu'on ne voit pas. */
+  const visibles = new Set(vues.map((c) => c.id));
+  [...CM.selection].forEach((id) => { if (!visibles.has(id)) CM.selection.delete(id); });
+  const nSel = CM.selection.size;
+  const tout = vues.length > 0 && nSel === vues.length;
 
   const opt = (v, l, cur) => `<option value="${ech(v)}" ${cur === v ? 'selected' : ''}>${ech(l)}</option>`;
   const outils = `<div class="cm-outils">
@@ -164,7 +189,9 @@ function cmListe(onglets) {
     const cap = c.capacite ? c.capacite
       : (cat ? `<span class="cm-hors">${cat.pax}</span><span class="cm-herite" title="Capacité de la catégorie">cat.</span>` : '—');
     const prix = cmPrix(c.categorie);
-    return `<tr data-cm-ligne="${ech(c.id)}">
+    return `<tr data-cm-ligne="${ech(c.id)}"${CM.selection.has(c.id) ? ' class="cm-choisie"' : ''}>
+      <td class="cm-case"><input type="checkbox" data-cm-cocher="${ech(c.id)}" ${CM.selection.has(c.id) ? 'checked' : ''}
+        aria-label="Sélectionner la chambre ${ech(c.numero)}"></td>
       <td><button class="cm-no" data-cm-voir="${ech(c.id)}" aria-label="Voir la chambre ${ech(c.numero)}">${ech(c.numero)}</button></td>
       <td><div class="cm-cat"><img src="${ech(cmCouverture(c).src)}" alt="" loading="lazy"><span>${ech(cmNomCat(c.categorie))}</span></div></td>
       <td class="cm-col-etage">${c.etage ? ech(c.etage) : '<span class="cm-hors">—</span>'}</td>
@@ -181,10 +208,10 @@ function cmListe(onglets) {
   }).join('');
 
   const vide = !n
-    ? `<tr class="cm-vide-l"><td colspan="9"><b style="display:block;font-family:var(--f-t);font-weight:400;font-size:20px;color:var(--cream);margin-bottom:6px">Aucune chambre saisie</b>
+    ? `<tr class="cm-vide-l"><td colspan="10"><b style="display:block;font-family:var(--f-t);font-weight:400;font-size:20px;color:var(--cream);margin-bottom:6px">Aucune chambre saisie</b>
         Ajoutez les chambres de l’hôtel une par une : numéro, catégorie, et le reste quand vous l’avez.<br>
         <button class="btn plein" data-cm-ajouter style="margin-top:16px">+ Ajouter une chambre</button></td></tr>`
-    : `<tr class="cm-vide-l"><td colspan="9">Aucune chambre ne correspond à ces filtres.</td></tr>`;
+    : `<tr class="cm-vide-l"><td colspan="10">Aucune chambre ne correspond à ces filtres.</td></tr>`;
 
   return `<div class="entete"><div>
       <h1 class="t">Chambres</h1>
@@ -197,11 +224,35 @@ function cmListe(onglets) {
     ${avertissement()}
     ${kpis}
     ${outils}
+    ${nSel ? `<div class="cm-lot" role="region" aria-label="Actions sur la sélection">
+      <b>${cmPl(nSel, 'chambre sélectionnée', 'chambres sélectionnées')}</b>
+      <button class="btn mince" data-cm-lot="publier">Publier</button>
+      <button class="btn mince" data-cm-lot="masquer">Masquer</button>
+      <button class="btn mince" data-cm-lot="maintenance">Maintenance</button>
+      <button class="btn mince" data-cm-lot="activer">Réactiver</button>
+      <button class="cm-lot-x" data-cm-lot="aucune">Tout désélectionner</button></div>` : ''}
     <div class="cm-table-cadre"><table class="cm-table">
-      <thead><tr><th>N°</th><th>Catégorie</th><th class="cm-col-etage">Étage</th><th>Capacité</th>
-        <th class="cm-col-lit">Lit</th><th>Prix de base</th><th>Statut</th><th>Sur le site</th>
+      <thead><tr><th class="cm-case"><input type="checkbox" data-cm-cocher-tout ${tout ? 'checked' : ''}
+          ${nSel && !tout ? 'data-partiel' : ''} aria-label="Sélectionner les ${vues.length} chambres affichées"></th>
+        ${cmTh('numero', 'N°')}${cmTh('categorie', 'Catégorie')}${cmTh('etage', 'Étage', 'cm-col-etage')}<th>Capacité</th>
+        <th class="cm-col-lit">Lit</th><th>Prix de base</th>${cmTh('statut', 'Statut')}<th>Sur le site</th>
         <th><span style="position:absolute;left:-9999px">Actions</span></th></tr></thead>
       <tbody>${lignes || vide}</tbody></table></div>`;
+}
+
+/** Apres chaque rendu : ce que le HTML ne sait pas dire. Une case
+ *  « tout » a moitie cochee ne s'ecrit pas en attribut. */
+function cmApres() {
+  const t = document.querySelector('[data-cm-cocher-tout]');
+  if (t) t.indeterminate = t.hasAttribute('data-partiel');
+}
+
+/** Un titre de colonne qui trie. aria-sort dit l'ordre aux lecteurs d'ecran. */
+function cmTh(cle, lib, classe) {
+  const actif = CM.tri.cle === cle;
+  return `<th class="${classe || ''}" aria-sort="${actif ? (CM.tri.sens > 0 ? 'ascending' : 'descending') : 'none'}">
+    <button class="cm-tri${actif ? ' on' : ''}" data-cm-tri="${cle}">${lib}<i aria-hidden="true">${
+      actif ? (CM.tri.sens > 0 ? '▲' : '▼') : '↕'}</i></button></th>`;
 }
 
 /* ── La fiche ──────────────────────────────────────────────────────── */
@@ -277,8 +328,31 @@ function cmFiche(ch) {
 function cmNouveau(cat) {
   return { id: '', numero: '', categorie: cat || '', etage: '', capacite: '', lit: '',
     superficie: '', equipements: [], description: '', photos: [], statut: 'active',
-    publie: true, note: '' };
+    publie: true, note: '', serie: false, prefixe: '', du: '', au: '' };
 }
+
+/** Les numeros d'une serie : prefixe + du..au, en gardant les zeros de tete
+ *  (« 01 » a « 12 » donne 01, 02… 12). Rend { numeros, erreur }. */
+function cmNumerosSerie(b) {
+  const du = String(b.du || '').trim(), au = String(b.au || '').trim();
+  if (!/^\d{1,5}$/.test(du) || !/^\d{1,5}$/.test(au)) return { numeros: [], erreur: 'Du et au sont des nombres : 101 et 116, par exemple.' };
+  const a = +du, z = +au;
+  if (z < a) return { numeros: [], erreur: 'Le dernier numéro vient après le premier.' };
+  if (z - a + 1 > 60) return { numeros: [], erreur: 'Une série compte 60 chambres au plus.' };
+  const larg = du.length > 1 && du[0] === '0' ? du.length : 0;
+  const pre = String(b.prefixe || '').trim();
+  const numeros = [];
+  for (let k = a; k <= z; k++) numeros.push(pre + String(k).padStart(larg, '0'));
+  if (numeros.some((x) => x.length > 20)) return { numeros: [], erreur: 'Un numéro fait 20 caractères au plus.' };
+  return { numeros, erreur: '' };
+}
+/** Combien la serie creera vraiment : les numeros deja pris sont ignores. */
+function cmNeufsSerie(b) {
+  const pareil = (v) => String(v || '').trim().toLowerCase();
+  const pris = new Set((ETAT.chambres || []).map((x) => pareil(x.numero)));
+  return cmNumerosSerie(b).numeros.filter((x) => !pris.has(pareil(x))).length;
+}
+const cmLibelleSerie = (n) => (n ? 'Ajouter ' + cmPl(n, 'chambre', 'chambres') : 'Ajouter la série');
 
 function cmFormulaire() {
   const b = CM.brouillon;
@@ -409,10 +483,15 @@ function cmFormulaireAjout(b, cat, prix, mal) {
     ${avertissement()}
     <div class="cm-form">
       <div class="cm-form-g">
-        <div class="carte"><h2 class="bloc-t">La chambre</h2>
+        <div class="carte"><h2 class="bloc-t">${b.serie ? 'Les chambres' : 'La chambre'}</h2>
+          <div class="cm-mode" role="radiogroup" aria-label="Combien de chambres">
+            <label class="${b.serie ? '' : 'on'}"><input type="radio" name="cm-mode" value="une" ${b.serie ? '' : 'checked'}> Une chambre</label>
+            <label class="${b.serie ? 'on' : ''}"><input type="radio" name="cm-mode" value="serie" ${b.serie ? 'checked' : ''}> Une série de chambres</label>
+          </div>
+          ${b.serie ? cmChampsSerie(b, mal) : ''}
           <div class="cm-deux">
-            <div class="champ${mal('numero')}"><label for="cm-numero">Numéro *</label>
-              <input id="cm-numero" data-cm-champ="numero" maxlength="20" value="${ech(b.numero)}" placeholder="101, B12…"></div>
+            ${b.serie ? '' : `<div class="champ${mal('numero')}"><label for="cm-numero">Numéro *</label>
+              <input id="cm-numero" data-cm-champ="numero" maxlength="20" value="${ech(b.numero)}" placeholder="101, B12…"></div>`}
             <div class="champ${mal('categorie')}"><label for="cm-categorie">Catégorie *</label>
               <select id="cm-categorie" data-cm-champ="categorie">
                 <option value="">Choisir…</option>
@@ -443,8 +522,31 @@ function cmFormulaireAjout(b, cat, prix, mal) {
     <div class="cm-pied-form">
       <p class="msg mal" id="cm-msg" role="alert">${CM.erreurs.length ? ech(CM.message || '') : ''}</p>
       <button class="btn" data-cm-annuler>Annuler</button>
-      <button class="btn plein" data-cm-enregistrer>Ajouter la chambre</button>
+      <button class="btn plein" data-cm-enregistrer>${b.serie ? cmLibelleSerie(cmNeufsSerie(b)) : 'Ajouter la chambre'}</button>
     </div>`;
+}
+
+/** Les champs d'une serie, et l'apercu de ce qui sera cree. */
+function cmChampsSerie(b, mal) {
+  const { numeros, erreur } = cmNumerosSerie(b);
+  const pareil = (v) => String(v || '').trim().toLowerCase();
+  const pris = new Set((ETAT.chambres || []).map((x) => pareil(x.numero)));
+  const doublons = numeros.filter((x) => pris.has(pareil(x)));
+  const neufs = numeros.length - doublons.length;
+  const court = (l) => (l.length > 8 ? l.slice(0, 4).join(', ') + ' … ' + l.slice(-2).join(', ') : l.join(', '));
+  return `<div class="cm-trois">
+      <div class="champ"><label for="cm-prefixe">Préfixe</label>
+        <input id="cm-prefixe" data-cm-champ="prefixe" maxlength="6" value="${ech(b.prefixe)}" placeholder="Aucun, B…"></div>
+      <div class="champ${mal('du')}"><label for="cm-du">Du numéro *</label>
+        <input id="cm-du" data-cm-champ="du" inputmode="numeric" maxlength="5" value="${ech(b.du)}" placeholder="101"></div>
+      <div class="champ${mal('au')}"><label for="cm-au">Au numéro *</label>
+        <input id="cm-au" data-cm-champ="au" inputmode="numeric" maxlength="5" value="${ech(b.au)}" placeholder="116"></div>
+    </div>
+    <div class="cm-apercu" id="cm-apercu" aria-live="polite">${!b.du && !b.au ? 'Indiquez le premier et le dernier numéro.'
+      : erreur ? `<span class="cm-mal">${ech(erreur)}</span>`
+      : `<b>${cmPl(neufs, 'chambre sera créée', 'chambres seront créées')}</b>${neufs ? ' : ' + ech(court(numeros.filter((x) => !pris.has(pareil(x))))) : ''}.${
+        doublons.length ? `<br><span class="cm-mal">${cmPl(doublons.length, 'numéro existe déjà', 'numéros existent déjà')} et ${
+          doublons.length > 1 ? 'seront ignorés' : 'sera ignoré'} : ${ech(court(doublons))}.</span>` : ''}`}</div>`;
 }
 
 /** Recopie la saisie dans le brouillon : chaque re-rendu repart de lui. */
@@ -474,9 +576,43 @@ function cmValider(b) {
   return err;
 }
 
+async function cmEnregistrerSerie(b) {
+  const err = [];
+  if (!b.categorie) err.push('categorie');
+  const ent = (v) => v === '' || v == null || (/^\d+$/.test(String(v).trim()) && +v >= 1 && +v <= 20);
+  if (!ent(b.capacite)) err.push('capacite');
+  const { numeros, erreur } = cmNumerosSerie(b);
+  if (erreur || !numeros.length) err.push('du', 'au');
+  else if (!cmNeufsSerie(b)) { err.push('du', 'au'); }
+  CM.erreurs = err;
+  CM.message = err.includes('du') ? (erreur || (numeros.length ? 'Ces numéros sont tous déjà saisis.' : 'Indiquez le premier et le dernier numéro.'))
+    : err.includes('categorie') ? 'La catégorie est obligatoire.'
+    : err.includes('capacite') ? 'La capacité est un nombre de personnes, de 1 à 20.' : '';
+  if (err.length) { rendre(); return; }
+  const btn = document.querySelector('[data-cm-enregistrer]');
+  if (btn) { btn.disabled = true; btn.textContent = 'Enregistrement…'; }
+  const commun = { categorie: b.categorie, etage: String(b.etage || '').trim(), statut: b.statut, publie: true,
+    capacite: b.capacite === '' ? null : Number(b.capacite) };
+  const r = await appel('chambres-serie', { entrees: numeros.map((numero) => Object.assign({ numero }, commun)) });
+  if (!r.ok) { CM.erreurs = ['_']; CM.message = r.message || 'Rien n’a été enregistré.'; rendre(); return; }
+  ETAT.chambres.push(...r.creees);
+  CM.brouillon = null; CM.erreurs = []; CM.mode = 'liste'; CM.id = null;
+  CM.filtres = { q: '', cat: '', statut: '', site: '' };
+  rendre();
+  const ids = new Set(r.creees.map((x) => x.id));
+  let premiere = null;
+  document.querySelectorAll('tr[data-cm-ligne]').forEach((t) => {
+    if (ids.has(t.dataset.cmLigne)) { t.classList.add('cm-neuve'); premiere = premiere || t; }
+  });
+  if (premiere) premiere.scrollIntoView({ block: 'center' });
+  notifier(cmPl(r.creees.length, 'chambre ajoutée', 'chambres ajoutées')
+    + (r.ignores.length ? ' · ' + r.ignores.length + ' déjà saisie' + (r.ignores.length > 1 ? 's' : '') + ', ignorée' + (r.ignores.length > 1 ? 's' : '') : ''));
+}
+
 async function cmEnregistrer() {
   cmLire();
   const b = CM.brouillon;
+  if (!b.id && b.serie) return cmEnregistrerSerie(b);
   CM.erreurs = cmValider(b);
   if (CM.erreurs.length) { rendre(); return; }
   const btn = document.querySelector('[data-cm-enregistrer]');
@@ -701,6 +837,38 @@ async function cmSupprimer(id) {
   notifier('Chambre ' + ch.numero + ' supprimée');
 }
 
+async function cmLot(action) {
+  if (action === 'aucune') { CM.selection.clear(); rendre(); return; }
+  const ids = [...CM.selection];
+  const chambres = ids.map(cmChambre).filter(Boolean);
+  if (!chambres.length) return;
+  let changement;
+  if (action === 'publier') changement = { publie: true };
+  else if (action === 'masquer') changement = { publie: false };
+  else if (action === 'activer') changement = { statut: 'active', note: '' };
+  else if (action === 'maintenance') {
+    const sej = chambres.reduce((t, c) => t + cmSejours(c.id).length, 0);
+    const rep = await cmDemander({
+      titre: 'Mettre ' + cmPl(chambres.length, 'chambre', 'chambres') + ' en maintenance ?',
+      texte: 'Le site cesse de les vendre jusqu’à ce que vous les remettiez en service : '
+        + ech(chambres.slice(0, 10).map((c) => c.numero).join(', ')) + (chambres.length > 10 ? '…' : '') + '.',
+      attention: sej ? cmPl(sej, 'séjour à venir reste posé', 'séjours à venir restent posés')
+        + ' sur ces chambres. Ce changement ne les annule pas : déplacez-les dans Disponibilités si besoin.' : '',
+      bouton: 'Mettre en maintenance', champ: 'Motif — interne, facultatif' });
+    if (!rep.ok) return;
+    changement = { statut: 'maintenance', note: rep.motif || '' };
+  } else return;
+  document.querySelectorAll('[data-cm-lot]').forEach((b) => { b.disabled = true; });
+  const r = await appel('chambres-lot', { ids, changement });
+  if (!r.ok) { rendre(); return notifier(r.message || 'Rien n’a été enregistré', true); }
+  const par = new Map(r.modifiees.map((x) => [x.id, x]));
+  ETAT.chambres = ETAT.chambres.map((x) => par.get(x.id) || x);
+  CM.selection.clear();
+  rendre();
+  notifier(cmPl(r.modifiees.length, 'chambre', 'chambres') + ' : ' + { publier: 'publiées', masquer: 'masquées',
+    activer: 'réactivées', maintenance: 'en maintenance' }[action]);
+}
+
 function cmOuvrirForm(id, versPhotos) {
   const ch = id ? cmChambre(id) : null;
   CM.brouillon = ch ? Object.assign(cmNouveau(), ch, {
@@ -750,6 +918,12 @@ document.addEventListener('click', async (e) => {
     return;
   }
   if ((b = q('[data-cm-publier]'))) { cmPublier(b.dataset.cmPublier); return; }
+  if ((b = q('[data-cm-tri]'))) {
+    const cle = b.dataset.cmTri;
+    CM.tri = CM.tri.cle === cle ? { cle, sens: -CM.tri.sens } : { cle, sens: 1 };
+    rendre(); const n = document.querySelector('[data-cm-tri="' + cle + '"]'); if (n) n.focus(); return;
+  }
+  if ((b = q('[data-cm-lot]'))) { cmLot(b.dataset.cmLot); return; }
   if ((b = q('[data-cm-voir]'))) { CM.mode = 'voir'; CM.id = b.dataset.cmVoir; CM.photoVue = 0; rendre(); window.scrollTo(0, 0); return; }
   if (q('[data-cm-ajouter]')) { cmOuvrirForm(null); return; }
   if ((b = q('[data-cm-modifier]'))) { cmOuvrirForm(b.dataset.cmModifier); return; }
@@ -796,11 +970,30 @@ document.addEventListener('click', async (e) => {
 document.addEventListener('change', async (e) => {
   if (VUE !== 'chambres') return;
   if (e.target.name === 'cm-statut') { cmLire(); rendre(); return; }
+  if (e.target.name === 'cm-mode') {
+    cmLire(); CM.brouillon.serie = e.target.value === 'serie'; CM.erreurs = []; rendre();
+    const f = document.getElementById(CM.brouillon.serie ? 'cm-du' : 'cm-numero'); if (f) f.focus();
+    return;
+  }
+  if (e.target.dataset.cmCocher) {
+    const id = e.target.dataset.cmCocher;
+    if (e.target.checked) CM.selection.add(id); else CM.selection.delete(id);
+    rendre(); const n = document.querySelector('[data-cm-cocher="' + id + '"]'); if (n) n.focus(); return;
+  }
+  if (e.target.hasAttribute('data-cm-cocher-tout')) {
+    const coche = e.target.checked;
+    document.querySelectorAll('[data-cm-cocher]').forEach((c) => { if (coche) CM.selection.add(c.dataset.cmCocher); else CM.selection.delete(c.dataset.cmCocher); });
+    rendre(); const n = document.querySelector('[data-cm-cocher-tout]'); if (n) n.focus(); return;
+  }
   if (e.target.id === 'cm-f-cat' || e.target.id === 'cm-f-statut' || e.target.id === 'cm-f-site') {
     CM.filtres[{ 'cm-f-cat': 'cat', 'cm-f-statut': 'statut', 'cm-f-site': 'site' }[e.target.id]] = e.target.value;
     rendre(); return;
   }
-  if (e.target.id === 'cm-categorie') { cmLire(); rendre(); return; }
+  if (e.target.id === 'cm-categorie') {
+    cmLire();
+    if (e.target.value) CM.erreurs = CM.erreurs.filter((k) => k !== 'categorie');
+    rendre(); return;
+  }
   if (e.target.id === 'cm-fichier') { cmTeleverser(e.target); }
 });
 
@@ -812,6 +1005,16 @@ document.addEventListener('input', (e) => {
     champ.classList.remove('mal');
     CM.erreurs = CM.erreurs.filter((k) => k !== e.target.dataset.cmChamp);
     if (!document.querySelector('.cm-form .champ.mal')) { const m = document.getElementById('cm-msg'); if (m) m.textContent = ''; }
+  }
+  if (CM.brouillon && CM.brouillon.serie && ['cm-prefixe', 'cm-du', 'cm-au'].includes(e.target.id)) {
+    cmLire();
+    const tmp = document.createElement('div');
+    tmp.innerHTML = cmChampsSerie(CM.brouillon, () => '');
+    const neuf = tmp.querySelector('#cm-apercu'), vieux = document.getElementById('cm-apercu');
+    if (neuf && vieux) vieux.innerHTML = neuf.innerHTML;
+    const btn = document.querySelector('[data-cm-enregistrer]');
+    if (btn) btn.textContent = cmLibelleSerie(cmNeufsSerie(CM.brouillon));
+    return;
   }
   if (e.target.id !== 'cm-q') return;
   CM.filtres.q = e.target.value;

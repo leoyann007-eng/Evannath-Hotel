@@ -2183,6 +2183,7 @@ function rendre() {
   /* Le calendrier a besoin de toute la largeur, et s ouvre sur aujourd hui. */
   v.classList.toggle('large', VUE === 'disponibilites');
   v.classList.toggle('cm-large', VUE === 'chambres');
+  if (VUE === 'chambres' && typeof cmApres === 'function') cmApres();
   if (VUE === 'disponibilites') apresDsp();
   /* Chaque vue n'a pas le meme besoin de largeur : le calendrier en veut
      tout, une fiche d'evenement s'arrete a 1100 px. */

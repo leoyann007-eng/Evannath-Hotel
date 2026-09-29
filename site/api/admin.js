@@ -1611,6 +1611,72 @@ module.exports = async function handler(req, res) {
     return json(res, 200, { ok: true, entree: objet, courriel });
   }
 
+  /* ── Plusieurs chambres a la fois ────────────────────────────────────────
+     a=chambres-serie : { entrees: [chambre…] } — une serie (101 a 116).
+     Un numero deja pris est SAUTE et rendu dans `ignores` : on n'ecrase
+     jamais une chambre existante. Une seule ecriture pour toute la serie.
+     a=chambres-lot : { ids: [...], changement: { publie } | { statut } } —
+     la meme action sur une selection. Rien d'autre ne se change en lot. */
+  if (action === 'chambres-serie') {
+    if (req.method !== 'POST') return json(res, 405, { ok: false });
+    let corps = req.body;
+    if (typeof corps === 'string') { try { corps = JSON.parse(corps); } catch { corps = {}; } }
+    const recues = Array.isArray(corps && corps.entrees) ? corps.entrees : [];
+    if (!recues.length || recues.length > 60) {
+      return json(res, 422, { ok: false, message: 'Une série compte de 1 à 60 chambres.' });
+    }
+    const d = await lire();
+    if (PANNE) return json(res, 503, { ok: false, message: PANNE
+      + ' Rien n a ete enregistre : ecrire maintenant effacerait le reste.' });
+    d.chambres = d.chambres || [];
+    const pareil = (v) => String(v || '').trim().toLowerCase();
+    const pris = new Set(d.chambres.map((x) => pareil(x.numero)));
+    const creees = [], ignores = [];
+    for (const e of recues) {
+      const { objet, manque } = nettoyerChambre(Object.assign({}, e, { id: '' }));
+      if (manque.length) {
+        return json(res, 422, { ok: false, champs: manque, message: 'Il manque le ' + manque.join(' et le ') + '.' });
+      }
+      if (pris.has(pareil(objet.numero))) { ignores.push(objet.numero); continue; }
+      pris.add(pareil(objet.numero));
+      creees.push(objet);
+    }
+    if (creees.length) {
+      d.chambres.push(...creees);
+      const w = await ecrire(d);
+      if (!w.ok) return json(res, 502, { ok: false, message: w.message });
+    }
+    return json(res, 200, { ok: true, creees, ignores });
+  }
+
+  if (action === 'chambres-lot') {
+    if (req.method !== 'POST') return json(res, 405, { ok: false });
+    let corps = req.body;
+    if (typeof corps === 'string') { try { corps = JSON.parse(corps); } catch { corps = {}; } }
+    const ids = new Set(Array.isArray(corps && corps.ids) ? corps.ids.map(String) : []);
+    const c = (corps && corps.changement) || {};
+    const ch = {};
+    if (typeof c.publie === 'boolean') ch.publie = c.publie;
+    if (STATUTS_CHAMBRE.includes(c.statut)) { ch.statut = c.statut; ch.note = propre(c.note, 120); }
+    if (!ids.size || !Object.keys(ch).length) {
+      return json(res, 422, { ok: false, message: 'Rien à changer.' });
+    }
+    const d = await lire();
+    if (PANNE) return json(res, 503, { ok: false, message: PANNE
+      + ' Rien n a ete enregistre : ecrire maintenant effacerait le reste.' });
+    const modifiees = [];
+    d.chambres = (d.chambres || []).map((x) => {
+      if (!ids.has(x.id)) return x;
+      const o = nettoyerChambre(Object.assign({}, x, ch)).objet;
+      modifiees.push(o);
+      return o;
+    });
+    if (!modifiees.length) return json(res, 404, { ok: false, message: 'Aucune de ces chambres n’existe plus.' });
+    const w = await ecrire(d);
+    if (!w.ok) return json(res, 502, { ok: false, message: w.message });
+    return json(res, 200, { ok: true, modifiees });
+  }
+
   /* ── Les prix de la nuit ─────────────────────────────────────────────────
      { tarifs: { slug: prix | null } }. null, ou le prix de la grille, rend
      la categorie a la grille. Un prix hors bornes refuse TOUT l'envoi : un
