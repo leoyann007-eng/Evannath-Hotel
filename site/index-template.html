@@ -283,7 +283,10 @@ header.scrolled .brand small{opacity:0}
    photo. Le bronze fonce qui l'ecrasait rendait « africain » presque
    illisible sur le ciel et les toits. */
 .hero h1 em{font-style:italic}
-.hero p{font-size:clamp(1rem,1.55vw,1.18rem);max-width:530px;color:var(--prose)}
+/* Pas de couleur ici non plus : le creme (#F6EEE2) pose plus haut vaut
+   pour la photo. var(--prose), le texte courant des pages claires, posait
+   un paragraphe fonce sur le ciel et les toits. */
+.hero p{font-size:clamp(1rem,1.55vw,1.18rem);max-width:530px}
 .hero-cta{display:flex;gap:14px;flex-wrap:wrap;margin-top:34px}
 .scroll-hint{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);z-index:3;font-size:9.5px;letter-spacing:.3em;text-transform:uppercase;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:10px}
 .scroll-hint i{width:1px;height:44px;background:linear-gradient(var(--bronze),transparent);animation:drop 2.2s infinite}
