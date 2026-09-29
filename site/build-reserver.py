@@ -24,6 +24,11 @@ CHAMBRES = {
  'suite-arabe':          ('Suite Arabe', 280000, 6, 'sa-main'),
 }
 
+# Taxe de sejour, par personne et par nuit, et part de l'acompte. Ecrites UNE
+# fois : la page les affiche, le serveur les encaisse (api/_grille.json).
+TAXE_SEJOUR = 1500
+PART_ACOMPTE = 0.3
+
 CSS = REMISE_CSS + CONF_CSS + """
 .head{padding:150px 0 30px}
 .head h1{margin:10px 0 14px}
@@ -297,7 +302,7 @@ body = [header('index.html#chambres', 'Nos chambres', 'navch'), drawer('index.ht
 JS = NAV_JS + ENVOI_JS + REMISE_JS + DISPO_JS + '''
 
 var CH=''' + json.dumps(CHAMBRES, ensure_ascii=False) + ''';
-var TAX=1500; // taxe de séjour par personne et par nuit
+var TAX=''' + str(TAXE_SEJOUR) + '''; // taxe de séjour par personne et par nuit
 
 var cat=document.getElementById('cat'),d1=document.getElementById('d1'),
     d2=document.getElementById('d2'),pax=document.getElementById('pax');
@@ -411,7 +416,7 @@ function calc(){
      deduire du total serait la pire des deux versions. */
   var plein=c[1], tarif=EVN_REMISE.prix(plein, cat.value), remise=plein-tarif;
   var brut=plein*n, sejour=tarif*n, taxe=TAX*p*n,
-      total=sejour+taxe, acc=Math.round(total*0.3);
+      total=sejour+taxe, acc=Math.round(total*''' + str(PART_ACOMPTE) + ''');
 
   document.getElementById('rimg').src='img/opt/'+c[3]+'.jpg';
   document.getElementById('rimg').alt=c[0];
@@ -638,3 +643,14 @@ for _m, _v in (('{{CT}}',    CONF_TITRE    or 'Demande envoyée'),
     HTML = HTML.replace(_m, _v.replace("'", "\'"))
 
 io.open('reserver.html', 'w', encoding='utf-8').write(HTML)
+
+NL_ = chr(10)
+# La grille que le SERVEUR lit pour calculer l'acompte a encaisser. Le montant
+# ne vient jamais de la page : un navigateur se modifie, et l'on encaisserait
+# ce qu'il annonce. Meme source que la page, pour que les deux tombent juste.
+io.open('api/_grille.json', 'w', encoding='utf-8').write(json.dumps({
+    'taxe': TAXE_SEJOUR,
+    'acompte': PART_ACOMPTE,
+    'chambres': {slug: {'nom': nom, 'prix': prix, 'max': mx}
+                 for slug, (nom, prix, mx, _img) in CHAMBRES.items()},
+}, ensure_ascii=False, indent=1) + NL_)

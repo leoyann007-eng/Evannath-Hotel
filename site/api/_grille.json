@@ -1,0 +1,41 @@
+{
+ "taxe": 1500,
+ "acompte": 0.3,
+ "chambres": {
+  "chambre-standard": {
+   "nom": "Chambre Standard",
+   "prix": 67000,
+   "max": 2
+  },
+  "deluxe-baldaquin": {
+   "nom": "Deluxe · lits à baldaquin",
+   "prix": 82000,
+   "max": 2
+  },
+  "deluxe-superieure": {
+   "nom": "Deluxe Supérieure",
+   "prix": 97000,
+   "max": 3
+  },
+  "suite-anglaise": {
+   "nom": "Suite Anglaise",
+   "prix": 107000,
+   "max": 2
+  },
+  "chambre-mezzanine": {
+   "nom": "Chambre en Mezzanine",
+   "prix": 127000,
+   "max": 2
+  },
+  "mezzanine-superieure": {
+   "nom": "Mezzanine Supérieure",
+   "prix": 142000,
+   "max": 4
+  },
+  "suite-arabe": {
+   "nom": "Suite Arabe",
+   "prix": 280000,
+   "max": 6
+  }
+ }
+}
