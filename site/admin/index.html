@@ -1964,7 +1964,9 @@ function rendre() {
 
     /* Les demandes que la reception doit traiter, la plus pressee d'abord. */
     const aTraiter = F.filter((f) => f.nature === 'client'
-      && f.statut === 'attente' && f.expire && chambres.some((c) => c.id === f.cible))
+      && f.statut === 'attente' && f.expire && chambres.some((c) => c.id === f.cible)
+      /* Un paiement en ligne refuse ou interrompu a deja rendu la chambre. */
+      && !(typeof paiementLache === 'function' && paiementLache(f)))
       .sort((a, b) => String(a.expire).localeCompare(String(b.expire)));
 
     /* Ce soir : on compte chambre par chambre, avec la meme regle que le
@@ -2026,7 +2028,7 @@ function rendre() {
           ${chiffre(libres === null ? '—' : libres, 'Chambres libres', 'var(--et-libre)')}
           ${chiffre(arrivees, 'Arrivées aujourd\'hui', 'var(--ambre)')}
           ${chiffre(departs, 'Départs aujourd\'hui', 'var(--ciel)')}
-          ${chiffre(horsService, 'Hors service', 'var(--et-hs)')}
+          ${chiffre(horsService, 'Hors service ou en maintenance', 'var(--et-hs)')}
         </div>`
       : `<div class="carte" style="border-left:3px solid var(--bronze)">
           <div class="bloc-t" style="margin-bottom:6px">Vos chambres ne sont pas encore saisies</div>
@@ -2035,7 +2037,7 @@ function rendre() {
             à chaque visiteur que la réception confirme sous 24 h.${
               ETAT.annoncees ? ` Votre site annonce ${ETAT.annoncees} chambres
               et suites.` : ''}</p>
-          <button class="btn plein" data-aller="disponibilites">Saisir les chambres</button>
+          <button class="btn plein" data-aller="chambres">Saisir les chambres</button>
         </div>`}
 
       <p class="lb" style="margin:26px 0 12px">En ligne sur le site</p>
