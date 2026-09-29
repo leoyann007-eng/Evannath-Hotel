@@ -232,6 +232,18 @@ h1.t:after{content:"";display:block;width:44px;height:2px;background:var(--bronz
 /* ── Blocs ─────────────────────────────────────────────── */
 /* Un filet clair en haut du bloc, comme une lumiere rasante : il detache la
    carte du fond sans ombre lourde. */
+.cat-grille{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px}
+.cat-carte{display:flex;flex-direction:column;text-align:left;padding:0;cursor:pointer;
+  background:var(--bark-2);border:1px solid var(--line);color:inherit;font:inherit;
+  transition:border-color .2s}
+.cat-carte:hover,.cat-carte:focus-visible{border-color:var(--bronze)}
+.cat-carte img{width:100%;aspect-ratio:3/2;object-fit:cover;display:block}
+.cat-corps{display:flex;flex-direction:column;gap:6px;padding:16px 18px 18px}
+.cat-corps b{font-family:var(--f-t);font-size:18px;font-weight:400}
+.cat-corps>span{font-size:12.5px;color:var(--muted)}
+.cat-corps .cat-prix{font-size:16px;color:var(--bronze-2);margin-top:4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.cat-prix i{font-style:normal;font-size:12px;color:var(--muted)}
+.cat-prix .etat{font-style:normal}
 .carte{background:var(--bark-2);border:1px solid var(--line);padding:24px 26px;margin-bottom:20px}
 .chiffres{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:24px}
 .chiffre{position:relative;background:var(--bark-2);border:1px solid var(--line);
@@ -516,7 +528,7 @@ details.plus summary::marker{color:var(--bronze)}
       <button data-v="bord" class="on" title="Tableau de bord"><i>▦</i><span>Tableau de bord</span></button>
       <h2>Gestion</h2>
       <button data-v="disponibilites" title="Disponibilités"><i>▤</i><span>Disponibilités</span></button>
-      <button data-v="tarifs" title="Prix des chambres"><i>¤</i><span>Prix des chambres</span></button>
+      <button data-v="chambres" title="Chambres"><i>▥</i><span>Chambres</span></button>
       <button data-v="evenements" title="Événements"><i>◆</i><span>Événements</span></button>
       <button data-v="promotions" title="Promotions"><i>◉</i><span>Promotions</span></button>
       <button data-v="campagnes" title="Campagnes saisonnières"><i>☀</i><span>Campagnes saisonnières</span></button>
@@ -703,42 +715,88 @@ function appliquerTarifs() {
   });
 }
 
-/* ── Les prix de la nuit ───────────────────────────────── */
-function vueTarifs() {
-  const lignes = (ETAT.grille || []).map((c) => {
-    const saisi = Number(ETAT.tarifs[c.slug]);
-    const actuel = Number.isInteger(saisi) && saisi > 0 ? saisi : c.prix;
-    return `<div class="ligne">
-      <img class="vig" src="/img/opt/${ech(c.photo)}.jpg" alt="">
-      <div class="txt"><b>${ech(c.nom)}</b>
-        <span>${actuel === c.prix ? 'Prix d’origine du site'
-          : 'Prix d’origine : ' + FCFA(c.prix)}</span></div>
-      <div style="display:flex;align-items:center;gap:8px;flex:none">
-        <input data-tarif="${ech(c.slug)}" data-grille="${c.prix}" inputmode="numeric"
-          aria-label="Prix de la nuit, ${ech(c.nom)}" value="${actuel}"
-          style="width:130px;text-align:right">
-        <span style="color:var(--muted);font-size:13px">FCFA</span>
-        ${actuel === c.prix ? '' : `<button type="button" class="btn mince"
-          data-tarif-grille="${ech(c.slug)}">Rétablir</button>`}
-      </div></div>`;
+/* ── Les chambres : les categories que le site vend ───────
+   La liste, puis la fiche d'une categorie. Seul le prix de la nuit se
+   modifie aujourd'hui ; la fiche est la place des autres informations
+   quand elles deviendront modifiables. */
+let CAT_OUVERTE = null;                 // le slug de la fiche ouverte
+
+function prixActuel(c) {
+  const t = Number(ETAT.tarifs[c.slug]);
+  return Number.isInteger(t) && t > 0 ? t : c.prix;
+}
+const physiques = (slug) => (ETAT.chambres || []).filter((x) => x && x.categorie === slug)
+  .sort((a, b) => String(a.numero).localeCompare(String(b.numero), 'fr', { numeric: true }));
+const pluriel = (n, un, plus) => n + ' ' + (n > 1 ? plus : un);
+
+function vueChambres() {
+  const c = CAT_OUVERTE && (ETAT.grille || []).find((x) => x.slug === CAT_OUVERTE);
+  return c ? ficheCategorie(c) : listeCategories();
+}
+
+function listeCategories() {
+  const cartes = (ETAT.grille || []).map((c) => {
+    const actuel = prixActuel(c), n = physiques(c.slug).length;
+    return `<button type="button" class="cat-carte" data-cat="${ech(c.slug)}">
+      <img src="/img/opt/${ech(c.photo)}.jpg" alt="" loading="lazy">
+      <span class="cat-corps">
+        <b>${ech(c.nom)}</b>
+        <span>${pluriel(c.pax, 'personne', 'personnes')} au plus · ${
+          n ? pluriel(n, 'chambre saisie', 'chambres saisies') : 'aucune chambre saisie'}</span>
+        <span class="cat-prix">${FCFA(actuel)}CFA <i>/ nuit</i>${actuel !== c.prix
+          ? ' <em class="etat vif">modifié</em>' : ''}</span>
+      </span></button>`;
   }).join('');
   return `<div class="entete"><div>
-      <h1 class="t">Prix des chambres</h1>
-      <p class="sous">Le prix d'une nuit, par catégorie, avant promotion.</p></div></div>
+      <h1 class="t">Chambres</h1>
+      <p class="sous">Les ${(ETAT.grille || []).length} catégories que le site propose.
+      Ouvrez-en une pour changer son prix.</p></div></div>
+    ${avertissement()}
+    <div class="cat-grille">${cartes}</div>`;
+}
+
+function ficheCategorie(c) {
+  const actuel = prixActuel(c), ch = physiques(c.slug);
+  return `<div class="entete"><div>
+      <button type="button" class="btn mince" data-cat-retour style="margin-bottom:14px">← Toutes les chambres</button>
+      <h1 class="t">${ech(c.nom)}</h1>
+      <p class="sous"><a href="/${ech(c.slug)}" target="_blank" rel="noopener"
+        style="color:var(--bronze-2)">Voir la fiche sur le site ↗</a></p></div>
+      <img src="/img/opt/${ech(c.photo)}.jpg" alt="" style="width:180px;height:120px;object-fit:cover;flex:none"></div>
     ${avertissement()}
     <div class="carte">
-      <p class="aide" style="margin:0 0 16px;font-size:13px">Le nouveau prix s'affiche
-      sur tout le site dès l'enregistrement : fiches, liste des chambres, accueil et
-      page de réservation. L'acompte payé en ligne est calculé sur ce prix, et une
-      promotion en cours s'applique par-dessus. Une réservation déjà faite garde le
-      prix auquel elle a été faite.</p>
-      <p class="aide" style="margin:0 0 20px;font-size:13px">Les résultats Google
-      montrent le prix d'origine jusqu'à la prochaine mise à jour du site.</p>
-      ${lignes}
-      <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:20px">
-        <button class="btn plein" id="tarifs-ok">Enregistrer les prix</button>
+      <h2 class="bloc-t">Prix de la nuit</h2>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <input id="f-tarif" data-tarif="${ech(c.slug)}" data-grille="${c.prix}" inputmode="numeric"
+          aria-label="Prix de la nuit" value="${actuel}" style="width:160px;text-align:right">
+        <span style="color:var(--muted)">FCFA</span>
+        ${actuel === c.prix ? '' : `<button type="button" class="btn mince"
+          data-tarif-grille="${ech(c.slug)}">Rétablir ${FCFA(c.prix)}CFA</button>`}
+      </div>
+      <p class="aide">${actuel === c.prix ? 'C’est le prix d’origine du site.'
+        : 'Prix d’origine du site : ' + FCFA(c.prix) + 'CFA.'} Avant promotion : une
+        promotion en cours s’applique par-dessus.</p>
+      <p class="aide">Le nouveau prix s’affiche sur tout le site dès l’enregistrement —
+        fiche, liste des chambres, accueil, page de réservation — et l’acompte payé en
+        ligne est calculé dessus. Une réservation déjà faite garde son prix. Les
+        résultats Google montrent le prix d’origine jusqu’à la prochaine mise à jour
+        du site.</p>
+      <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:18px">
+        <button class="btn plein" id="tarifs-ok">Enregistrer le prix</button>
         <p class="msg" id="msg-tarifs" role="status"></p>
       </div>
+    </div>
+    <div class="carte">
+      <h2 class="bloc-t">Sur le site</h2>
+      <div class="ligne" style="margin:0"><div class="txt"><b>Capacité</b>
+        <span>Le sélecteur de voyageurs s’arrête là.</span></div>
+        <span>${pluriel(c.pax, 'personne', 'personnes')}</span></div>
+      <div class="ligne"><div class="txt"><b>Chambres de cette catégorie</b>
+        <span>${ch.length ? 'N° ' + ch.map((x) => ech(x.numero)).join(', ')
+          : 'Aucune saisie : le site ne peut pas dire si elle est libre.'}</span></div>
+        <button type="button" class="btn mince" data-aller="disponibilites">Disponibilités</button></div>
+      <p class="aide" style="margin-top:14px">La description, les photos et la capacité se
+        modifient aujourd’hui dans le code du site.</p>
     </div>`;
 }
 
@@ -764,13 +822,13 @@ async function enregistrerTarifs() {
   rendre();
   const m2 = $('#msg-tarifs');
   m2.className = 'msg bon';
-  m2.textContent = 'Prix enregistrés. Ils sont en ligne.';
+  m2.textContent = 'Prix enregistré. Il est en ligne.';
 }
 
 $('#menu').addEventListener('click', (e) => {
   const b = e.target.closest('button[data-v]');
   if (!b) return;
-  VUE = b.dataset.v; EDITE = null;
+  VUE = b.dataset.v; EDITE = null; CAT_OUVERTE = null;
   [...$('#menu').querySelectorAll('button')].forEach((x) => x.classList.toggle('on', x === b));
   /* Le choix est fait : la barre se referme sur lui. e.detail vaut 0 quand
      le clic vient du clavier — la, on ne referme pas, sinon quelqu'un qui
@@ -2053,8 +2111,8 @@ function rendre() {
       <div id="dsp-zone">${htmlDsp()}</div>
 
 `;
-  } else if (VUE === 'tarifs') {
-    v.innerHTML = vueTarifs();
+  } else if (VUE === 'chambres') {
+    v.innerHTML = vueChambres();
   } else if (VUE === 'parametres') {
     v.innerHTML = `<div class="entete"><div>
         <h1 class="t">Paramètres</h1>
@@ -2092,7 +2150,7 @@ function rendre() {
         <p style="color:var(--muted)">Les numéros de téléphone et l'adresse e-mail
         se règlent aujourd'hui dans le code du site ; les rendre modifiables ici
         fait partie de ce qui reste à construire. Les prix des chambres, eux, se
-        modifient dans « Prix des chambres ».</p>
+        modifient dans « Chambres ».</p>
       </div>`;
   } else if (VUE === 'utilisateurs') {
     v.innerHTML = `<div class="entete"><div>
@@ -2128,6 +2186,11 @@ document.addEventListener('click', async (e) => {
   if (typeof clicDsp === 'function' && clicDsp(e)) return;
 
   if (e.target.closest('#tarifs-ok')) { enregistrerTarifs(); return; }
+  const cc = e.target.closest('[data-cat]');
+  if (cc) { CAT_OUVERTE = cc.dataset.cat; rendre(); window.scrollTo(0, 0); return; }
+  if (e.target.closest('[data-cat-retour]')) { CAT_OUVERTE = null; rendre(); return; }
+  const va = e.target.closest('[data-aller]');
+  if (va) { const m = $('#menu button[data-v="' + va.dataset.aller + '"]'); if (m) m.click(); return; }
   const rg = e.target.closest('[data-tarif-grille]');
   if (rg) {
     const i = document.querySelector('[data-tarif="' + rg.dataset.tarifGrille + '"]');
