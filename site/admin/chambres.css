@@ -12,6 +12,13 @@
   text-transform:uppercase;color:var(--muted);cursor:pointer;margin-bottom:-1px}
 .cm-onglets button:hover{color:var(--cream)}
 .cm-onglets button[aria-selected="true"]{color:var(--bronze-2);border-bottom-color:var(--bronze)}
+.cm-onglets{margin-bottom:12px}
+/* La phrase qui dit ce que montre l'onglet ouvert. */
+.cm-explique{font-size:13.5px;color:var(--prose);margin:0 0 22px}
+.cm-explique b{color:var(--cream);font-weight:600}
+/* La chambre qu'on vient d'ajouter, mise en evidence puis rendue au tableau. */
+.cm-table tr.cm-neuve td{animation:cm-neuve 2.6s ease-out}
+@keyframes cm-neuve{0%,40%{background:#F6EEDC}100%{background:transparent}}
 
 /* ── Les chiffres ────────────────────────────────────────────────────── */
 .cm-kpis{display:grid;grid-template-columns:1.1fr 1.1fr 1.1fr 1.6fr;gap:16px;margin-bottom:22px}

@@ -732,7 +732,7 @@ const pluriel = (n, un, plus) => n + ' ' + (n > 1 ? plus : un);
 
 function vueChambres(onglets) {
   const c = CAT_OUVERTE && (ETAT.grille || []).find((x) => x.slug === CAT_OUVERTE);
-  return c ? ficheCategorie(c) : listeCategories(onglets);
+  return c ? ficheCategorie(c, onglets) : listeCategories(onglets);
 }
 
 function listeCategories(onglets) {
@@ -753,11 +753,13 @@ function listeCategories(onglets) {
       <p class="sous">Les ${(ETAT.grille || []).length} catégories que le site propose.
       Ouvrez-en une pour changer son prix : il vaut pour toutes ses chambres.</p></div></div>
     ${onglets || ''}
+    ${onglets ? `<p class="cm-explique"><b>Ce que l’hôtel vend, et à quel prix</b> — le prix d’une
+      catégorie vaut pour toutes ses chambres physiques.</p>` : ''}
     ${avertissement()}
     <div class="cat-grille">${cartes}</div>`;
 }
 
-function ficheCategorie(c) {
+function ficheCategorie(c, onglets) {
   const actuel = prixActuel(c), ch = physiques(c.slug);
   return `<div class="entete"><div>
       <button type="button" class="btn mince" data-cat-retour style="margin-bottom:14px">← Toutes les catégories</button>
@@ -765,6 +767,9 @@ function ficheCategorie(c) {
       <p class="sous"><a href="/${ech(c.slug)}" target="_blank" rel="noopener"
         style="color:var(--bronze-2)">Voir la fiche sur le site ↗</a></p></div>
       <img src="/img/opt/${ech(c.photo)}.jpg" alt="" style="width:180px;height:120px;object-fit:cover;flex:none"></div>
+    ${onglets ? onglets + `<p class="cm-explique"><b>Une catégorie : ce que l’hôtel vend</b> — son prix
+      vaut pour ${physiques(c.slug).length > 1 ? 'ses ' + physiques(c.slug).length + ' chambres physiques'
+        : physiques(c.slug).length ? 'sa chambre physique' : 'toutes ses chambres physiques'}.</p>` : ''}
     ${avertissement()}
     <div class="carte">
       <h2 class="bloc-t">Prix de la nuit</h2>
@@ -2102,8 +2107,8 @@ function rendre() {
   } else if (VUE === 'disponibilites') {
     v.innerHTML = `<div class="entete"><div>
         <h1 class="t">Disponibilités des chambres</h1>
-        <p class="sous">Une ligne par chambre. L'état que vous saisissez ici est
-        celui que le site annonce.</p>
+        <p class="sous">Quand les chambres sont libres : une ligne par chambre, un jour
+        par colonne. L'état que vous saisissez ici est celui que le site annonce.</p>
         </div>
         <div style="display:flex;gap:10px;flex-wrap:wrap">
           <button class="btn plein" id="dsp-resa-btn">+ Nouvelle réservation</button>

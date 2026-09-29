@@ -192,6 +192,8 @@ function cmListe(onglets) {
         Le calendrier se gère dans Disponibilités.</p></div>
       <button class="btn plein" data-cm-ajouter>+ Ajouter une chambre</button></div>
     ${onglets}
+    <p class="cm-explique"><b>Les chambres physiques de l’hôtel</b> — 101, B12… Chacune appartient à une
+      catégorie, dont elle reprend le prix. Quand elles sont libres : voir Disponibilités.</p>
     ${avertissement()}
     ${kpis}
     ${outils}
@@ -284,6 +286,7 @@ function cmFormulaire() {
   const mal = (k) => (CM.erreurs.includes(k) ? ' mal' : '');
   const prix = cmPrix(b.categorie);
   const neuf = !b.id;
+  if (neuf) return cmFormulaireAjout(b, cat, prix, mal);
   const eqs = CM_EQUIPEMENTS.concat((b.equipements || []).filter((e) => !CM_EQUIPEMENTS.includes(e)));
 
   return `<button class="btn mince cm-retour" data-cm-annuler>← ${neuf ? 'Toutes les chambres' : 'Chambre ' + ech(b.numero)}</button>
@@ -392,6 +395,58 @@ function cmFormulaire() {
     </div>`;
 }
 
+/** L'AJOUT ne demande que l'essentiel : numero, categorie, etage, capacite,
+ *  statut. La categorie apporte le prix et la capacite habituelle ; le lit,
+ *  les equipements, la description et les photos se completent ensuite par
+ *  « Modifier ». Une chambre ajoutee est publiee : elle se vend comme ses
+ *  voisines, sauf a la masquer depuis le tableau. */
+function cmFormulaireAjout(b, cat, prix, mal) {
+  return `<button class="btn mince cm-retour" data-cm-annuler>← Toutes les chambres</button>
+    <div class="entete"><div>
+      <h1 class="t">Ajouter une chambre</h1>
+      <p class="sous">Une chambre physique de l’hôtel. Sa catégorie lui donne son prix ;
+        le reste de la fiche se complète ensuite, par « Modifier ».</p></div></div>
+    ${avertissement()}
+    <div class="cm-form">
+      <div class="cm-form-g">
+        <div class="carte"><h2 class="bloc-t">La chambre</h2>
+          <div class="cm-deux">
+            <div class="champ${mal('numero')}"><label for="cm-numero">Numéro *</label>
+              <input id="cm-numero" data-cm-champ="numero" maxlength="20" value="${ech(b.numero)}" placeholder="101, B12…"></div>
+            <div class="champ${mal('categorie')}"><label for="cm-categorie">Catégorie *</label>
+              <select id="cm-categorie" data-cm-champ="categorie">
+                <option value="">Choisir…</option>
+                ${(ETAT.grille || []).map((c) => `<option value="${ech(c.slug)}" ${c.slug === b.categorie ? 'selected' : ''}>${ech(c.nom)}</option>`).join('')}
+              </select></div>
+            <div class="champ"><label for="cm-etage">Étage</label>
+              <input id="cm-etage" data-cm-champ="etage" maxlength="20" value="${ech(b.etage)}" placeholder="1, RDC…"></div>
+            <div class="champ${mal('capacite')}"><label for="cm-capacite">Capacité</label>
+              <div class="cm-unite"><input id="cm-capacite" data-cm-champ="capacite" inputmode="numeric" value="${ech(b.capacite)}"
+                placeholder="${cat ? cat.pax : ''}"><span>pers.</span></div>
+              <p class="aide">${cat ? 'Vide : celle de la catégorie, ' + cat.pax + '.' : 'Si elle diffère de celle de sa catégorie.'}</p></div>
+          </div>
+          <label style="margin-top:4px">Prix de base</label>
+          <div class="cm-prix"><div><b>${prix ? FCFA(prix) + 'CFA' : '—'}</b> <span class="cm-hors">/ nuit</span>
+            <div class="aide" style="margin-top:2px">${cat ? 'Hérité de la catégorie ' + ech(cat.nom)
+              + '. Il se modifie dans l’onglet « Catégories et prix ».' : 'Choisissez une catégorie : elle donne le prix.'}</div></div></div>
+        </div>
+      </div>
+      <div class="cm-form-d">
+        <div class="carte"><h2 class="bloc-t">Statut</h2>
+          <div class="cm-seg" role="radiogroup" aria-label="Statut">${Object.entries(CM_STATUTS).map(([k, s]) => `
+            <label class="${b.statut === k ? 'on' : ''}"><input type="radio" name="cm-statut" value="${k}"
+              ${b.statut === k ? 'checked' : ''}><span><span class="cm-statut cm-s-${k}">${s.lib}</span><small>${s.aide}</small></span></label>`).join('')}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="cm-pied-form">
+      <p class="msg mal" id="cm-msg" role="alert">${CM.erreurs.length ? ech(CM.message || '') : ''}</p>
+      <button class="btn" data-cm-annuler>Annuler</button>
+      <button class="btn plein" data-cm-enregistrer>Ajouter la chambre</button>
+    </div>`;
+}
+
 /** Recopie la saisie dans le brouillon : chaque re-rendu repart de lui. */
 function cmLire() {
   const b = CM.brouillon;
@@ -439,9 +494,21 @@ async function cmEnregistrer() {
     rendre();
     return;
   }
-  CM.mode = 'voir'; CM.id = r.entree.id; CM.brouillon = null; CM.erreurs = []; CM.photoVue = 0;
-  rendre(); window.scrollTo(0, 0);
-  notifier(b.id ? 'Chambre ' + r.entree.numero + ' enregistrée' : 'Chambre ' + r.entree.numero + ' ajoutée');
+  CM.brouillon = null; CM.erreurs = []; CM.photoVue = 0;
+  if (b.id) {
+    CM.mode = 'voir'; CM.id = r.entree.id;
+    rendre(); window.scrollTo(0, 0);
+    notifier('Chambre ' + r.entree.numero + ' enregistrée');
+    return;
+  }
+  /* Une chambre AJOUTEE se montre dans le tableau, a sa place, mise en
+     evidence. Les filtres sont leves : elle ne doit pas s'y cacher. */
+  CM.mode = 'liste'; CM.id = null;
+  CM.filtres = { q: '', cat: '', statut: '', site: '' };
+  rendre();
+  const ligne = document.querySelector('tr[data-cm-ligne="' + r.entree.id + '"]');
+  if (ligne) { ligne.classList.add('cm-neuve'); ligne.scrollIntoView({ block: 'center' }); }
+  notifier('Chambre ' + r.entree.numero + ' ajoutée');
 }
 
 /** Ecrit une chambre, et met l'etat local a jour sur la reponse. */
