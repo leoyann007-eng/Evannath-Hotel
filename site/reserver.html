@@ -50,9 +50,13 @@ try{
   if(d.readyState==='complete')return;
   sessionStorage.setItem('evn-intro','1');
 }catch(e){return}
-h.classList.add('intro');
+h.classList.add('intro');h.setAttribute('data-intro','');
+/* Tant que data-intro est la, les effets au defilement (EVN_AU_SCROLL)
+   attendent : ce qui est deja a l'ecran jouerait SOUS l'ecran de
+   chargement, et serait fini avant qu'on le voie. */
+function finIntro(){if(h.hasAttribute('data-intro')){h.removeAttribute('data-intro');d.dispatchEvent(new Event('evn-intro-fin'))}}
 var fini=false;
-function lever(){if(!fini){fini=true;h.classList.remove('intro')}}
+function lever(){if(!fini){fini=true;h.classList.remove('intro')}finIntro()}
 var limite=setTimeout(lever,900);
 fetch('img/logo-calques.svg').then(function(r){return r.ok?r.text():Promise.reject(r.status)}).then(function(svg){
   function poser(){
@@ -85,7 +89,7 @@ fetch('img/logo-calques.svg').then(function(r){return r.ok?r.text():Promise.reje
     var sig=e.querySelector('.i5');if(sig)sig.addEventListener('animationend',partir);
     function partir(){
       if(parti)return;parti=true;clearTimeout(t);
-      e.classList.add('part');
+      e.classList.add('part');finIntro();
       setTimeout(function(){if(e.parentNode)e.parentNode.removeChild(e)},300);
     }
     e.addEventListener('pointerdown',partir);
@@ -853,6 +857,12 @@ input::placeholder,textarea::placeholder{color:#6E6154}
    l'unicite, et que trois effets qui s'observent chacun a leur facon ne
    se declenchent jamais ensemble. */
 window.EVN_AU_SCROLL=function(selecteur,classe){
+  /* L'ecran de chargement (18) couvre la page : on attend qu'il se leve.
+     6 s : filet, si son script s'est arrete en route. */
+  if(document.documentElement.hasAttribute('data-intro')){
+    var fait=false,rel=function(){if(fait)return;fait=true;document.documentElement.removeAttribute('data-intro');EVN_AU_SCROLL(selecteur,classe)};
+    document.addEventListener('evn-intro-fin',rel);setTimeout(rel,6000);return;
+  }
   var els=[].slice.call(document.querySelectorAll(selecteur));
   if(!els.length)return;
   var c=classe||'vu';

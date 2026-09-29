@@ -28,9 +28,13 @@ try{
   if(d.readyState==='complete')return;
   sessionStorage.setItem('evn-intro','1');
 }catch(e){return}
-h.classList.add('intro');
+h.classList.add('intro');h.setAttribute('data-intro','');
+/* Tant que data-intro est la, les effets au defilement (EVN_AU_SCROLL)
+   attendent : ce qui est deja a l'ecran jouerait SOUS l'ecran de
+   chargement, et serait fini avant qu'on le voie. */
+function finIntro(){if(h.hasAttribute('data-intro')){h.removeAttribute('data-intro');d.dispatchEvent(new Event('evn-intro-fin'))}}
 var fini=false;
-function lever(){if(!fini){fini=true;h.classList.remove('intro')}}
+function lever(){if(!fini){fini=true;h.classList.remove('intro')}finIntro()}
 var limite=setTimeout(lever,900);
 fetch('img/logo-calques.svg').then(function(r){return r.ok?r.text():Promise.reject(r.status)}).then(function(svg){
   function poser(){
@@ -63,7 +67,7 @@ fetch('img/logo-calques.svg').then(function(r){return r.ok?r.text():Promise.reje
     var sig=e.querySelector('.i5');if(sig)sig.addEventListener('animationend',partir);
     function partir(){
       if(parti)return;parti=true;clearTimeout(t);
-      e.classList.add('part');
+      e.classList.add('part');finIntro();
       setTimeout(function(){if(e.parentNode)e.parentNode.removeChild(e)},300);
     }
     e.addEventListener('pointerdown',partir);
@@ -322,6 +326,44 @@ header.scrolled .brand small{opacity:0}
 .hero{position:relative;min-height:100svh;display:flex;align-items:center;overflow:hidden;padding:150px 0}
 .hero .bg{position:absolute;inset:0;background:url('img/opt/gal-lag-nuit.jpg') center/cover;animation:kb 22s ease-out forwards}
 @keyframes kb{from{transform:scale(1.03)}to{transform:scale(1.14)}}
+/* 20 · Les lanternes s'allument — sur le HERO, comme dans la maquette
+   « Motion design I » (qui travaillait sur le hero de La table). La photo
+   s'eveille de la penombre en 2,4 s ; chaque lanterne s'allume a son tour,
+   .25 s d'ecart (la remise corrigee), a partir de .9 s.
+
+   Huit lanternes, reperees sur la photo et non estimees : les huit plus
+   grands foyers de pixels clairs, les deux tables du bas mises a part.
+   Centre et diametre en pourcentage de l'IMAGE (1748 x 1240).
+
+   Deux calques suivent le lent zoom du fond (meme animation kb, lancee au
+   meme instant) et reproduisent son recadrage « cover » en unites de
+   conteneur, pour rester sur les lanternes a toutes les tailles :
+     .ombre  un voile sombre sur chaque lanterne, qui la garde ETEINTE
+             pendant que la photo s'eveille, et s'efface a son tour ;
+     .ciel   les halos, SOUS le degrade du hero : poses au-dessus, ils
+             delavaient le fil d'Ariane et le surtitre, ecrits juste sous
+             la grande lanterne. Le degrade les tempere pres du texte,
+             comme il tempere deja les lanternes de la photo.
+   Le mode de fusion est pose sur le calque entier : un calque transforme
+   isole ses enfants, un halo en « screen » a l'interieur ne verrait pas la
+   photo. La penombre est portee par .eteinte, pose par un script des
+   l'ouverture du hero : sans script, la photo s'affiche normalement. */
+.hero.lanternes{isolation:isolate}
+.hero.lanternes.eteinte .bg{filter:brightness(.45) saturate(.6)}
+.hero.lanternes.eteinte.vu .bg{filter:brightness(1.12) saturate(1.08);transition:filter 2.4s ease}
+.hero .ombre,.hero .ciel{position:absolute;inset:0;container-type:size;pointer-events:none;animation:kb 22s ease-out forwards}
+.hero .ombre{mix-blend-mode:multiply}
+.hero .ciel{mix-blend-mode:screen}
+.feux{position:absolute;left:50%;top:50%;width:max(100cqw,calc(100cqh * 1748 / 1240));aspect-ratio:1748/1240;transform:translate(-50%,-50%)}
+.feux i,.feux b{position:absolute;left:var(--x);top:var(--y);aspect-ratio:1;border-radius:50%;opacity:0}
+.feux i{width:var(--d);margin:calc(var(--d) / -2) 0 0 calc(var(--d) / -2);
+  background:radial-gradient(circle,rgba(255,206,130,.55) 0%,rgba(255,180,90,.18) 38%,rgba(255,170,80,0) 70%);
+  transition:opacity 1.4s ease calc(.9s + var(--k) * .25s)}
+.feux b{width:calc(var(--d) * .6);margin:calc(var(--d) * -.3) 0 0 calc(var(--d) * -.3);
+  background:radial-gradient(circle,rgba(16,11,6,.8) 0%,rgba(16,11,6,.6) 35%,rgba(16,11,6,0) 70%)}
+.hero.vu .feux i{opacity:1}
+.hero.eteinte .feux b{opacity:1}
+.hero.eteinte.vu .feux b{opacity:0;transition:opacity 1s ease-out calc(.9s + var(--k) * .25s)}
 .hero::after{content:"";position:absolute;inset:0;background:
   radial-gradient(ellipse at 50% 45%,rgba(16,11,6,.26),rgba(16,11,6,.86) 72%),
   linear-gradient(180deg,rgba(16,11,6,.72),transparent 30%,rgba(16,11,6,.97))}
@@ -647,8 +689,11 @@ footer{background:#0B0704}
 
 <main id="contenu">
 
-<section class="hero">
+<section class="hero lanternes">
+  <script>document.currentScript.parentNode.classList.add('eteinte')</script>
   <div class="bg"></div>
+  <div class="ombre" aria-hidden="true"><div class="feux"><b style="--x:43.0%;--y:20.2%;--d:24.0%;--k:0"></b><b style="--x:90.5%;--y:23.4%;--d:20.6%;--k:1"></b><b style="--x:17.2%;--y:25.9%;--d:17.0%;--k:2"></b><b style="--x:67.4%;--y:29.2%;--d:11.4%;--k:3"></b><b style="--x:36.4%;--y:40.6%;--d:9.7%;--k:4"></b><b style="--x:76.7%;--y:38.7%;--d:13.0%;--k:5"></b><b style="--x:52.7%;--y:43.7%;--d:9.0%;--k:6"></b><b style="--x:67.4%;--y:43.3%;--d:12.6%;--k:7"></b></div></div>
+  <div class="ciel" aria-hidden="true"><div class="feux"><i style="--x:43.0%;--y:20.2%;--d:24.0%;--k:0"></i><i style="--x:90.5%;--y:23.4%;--d:20.6%;--k:1"></i><i style="--x:17.2%;--y:25.9%;--d:17.0%;--k:2"></i><i style="--x:67.4%;--y:29.2%;--d:11.4%;--k:3"></i><i style="--x:36.4%;--y:40.6%;--d:9.7%;--k:4"></i><i style="--x:76.7%;--y:38.7%;--d:13.0%;--k:5"></i><i style="--x:52.7%;--y:43.7%;--d:9.0%;--k:6"></i><i style="--x:67.4%;--y:43.3%;--d:12.6%;--k:7"></i></div></div>
   <div class="in narrow">
     <nav class="crumb" aria-label="Fil d'Ariane">
       <a href="index.html" data-t="c1">Accueil</a> &nbsp;·&nbsp; <span data-t="c2">La table</span>
@@ -1219,6 +1264,12 @@ var EVN = {
    l'unicite, et que trois effets qui s'observent chacun a leur facon ne
    se declenchent jamais ensemble. */
 window.EVN_AU_SCROLL=function(selecteur,classe){
+  /* L'ecran de chargement (18) couvre la page : on attend qu'il se leve.
+     6 s : filet, si son script s'est arrete en route. */
+  if(document.documentElement.hasAttribute('data-intro')){
+    var fait=false,rel=function(){if(fait)return;fait=true;document.documentElement.removeAttribute('data-intro');EVN_AU_SCROLL(selecteur,classe)};
+    document.addEventListener('evn-intro-fin',rel);setTimeout(rel,6000);return;
+  }
   var els=[].slice.call(document.querySelectorAll(selecteur));
   if(!els.length)return;
   var c=classe||'vu';
@@ -1494,6 +1545,15 @@ k3:"Lunch",k4:"Dinner",k5:"Bar &amp; terrace",k5v:"until closing",k6:"Méchoui P
 /* 20 · la bande du service du soir s'eveille quand on l'atteint. */
 document.querySelectorAll('.band.lanternes').forEach(function(b){b.classList.add('eteinte')});
 EVN_AU_SCROLL('.band.lanternes','vu');
+/* 20 · Le hero s'allume quand sa photo est arrivee : avant, on verrait
+   s'eveiller un fond vide. 3 s au plus d'attente. */
+(function(){
+  var h=document.querySelector('.hero.lanternes');if(!h)return;
+  var parti=false,go=function(){if(parti)return;parti=true;EVN_AU_SCROLL('.hero.lanternes','vu')};
+  var m=getComputedStyle(h.querySelector('.bg')).backgroundImage.match(/url\(["']?([^"')]+)/);
+  if(!m){go();return}
+  var im=new Image();im.onload=im.onerror=go;im.src=m[1];setTimeout(go,3000);
+})();
 var FR={};document.querySelectorAll('[data-t]').forEach(function(e){FR[e.dataset.t]=e.innerHTML});
 /* 51 · Les titres VISIBLES roulent vers leur traduction : l'ancien texte
    sort vers le haut, le nouveau entre par le bas, .7 s, --ease-inout. Le

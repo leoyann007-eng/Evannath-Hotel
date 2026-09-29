@@ -198,8 +198,28 @@ def anchors(groups,pref):
 total = sum(len(r) for _,r in CUISINE)+sum(len(r) for _,r in BOISSONS)
 total_spa = sum(len(r) for _,r in SPA)
 
+# 20 · Les lanternes du hero (gal-lag-nuit.jpg, 1748 x 1240), dans l'ordre
+# ou elles s'allument : (x %, y %, diametre du halo %), en pourcentage de
+# l'image. Centres = barycentres des huit plus grands foyers de pixels
+# clairs (image floutee, seuil 170/255), les deux tables du bas ecartees ;
+# diametre ~ 1,6 fois la lanterne.
+LANTERNES = (
+    (43.0, 20.2, 24.0),   # la grande, au centre
+    (90.5, 23.4, 20.6),   # la grande, a droite
+    (17.2, 25.9, 17.0),   # la paire, a gauche
+    (67.4, 29.2, 11.4),
+    (36.4, 40.6,  9.7),
+    (76.7, 38.7, 13.0),
+    (52.7, 43.7,  9.0),
+    (67.4, 43.3, 12.6),
+)
+def _feux(balise):
+    return ''.join('<%s style="--x:%s%%;--y:%s%%;--d:%s%%;--k:%d"></%s>' % (balise, x, y, d, k, balise)
+                   for k, (x, y, d) in enumerate(LANTERNES))
+
 HTML = io.open('carte-template.html',encoding='utf-8').read()
 HTML = (HTML
+  .replace('{{FEUX_B}}', _feux('b')).replace('{{FEUX_I}}', _feux('i'))
   .replace('{{CUISINE}}',sections(CUISINE,'c'))
   .replace('{{BOISSONS}}',sections(BOISSONS,'b'))
   .replace('{{WA}}', WA).replace('{{MED}}', medaillon('carre-large', 'dw-med')).replace('{{NAV_LINKS}}', liens_nav('carte.html')).replace('{{EN_NAV}}', EN_NAV).replace('{{WA_TEXTE}}', WA_TEXTE).replace('{{SECOURS}}', secours('sec')).replace('{{EN_SECOURS}}', EN_SECOURS).replace('{{CG}}', (CONF_GESTE or '').replace("'", "\\'")).replace('{{CV}}', CONF_VERBE).replace('{{CT}}', CONF_TITRE or 'Table demand\u00e9e').replace('{{ENVOI}}', ENVOI_JS).replace('{{NAV_JS}}', NAV_JS).replace('{{TOKENS}}', TOKENS).replace('{{LANG_JS}}', LANG_JS).replace('{{INTRO}}', INTRO).replace('{{HEAD_CSS}}', HEAD_CSS).replace('{{FOOTER_CSS}}', FOOTER_CSS)

@@ -207,6 +207,44 @@ header.scrolled .brand small{opacity:0}
 .hero{position:relative;min-height:100svh;display:flex;align-items:center;overflow:hidden;padding:150px 0}
 .hero .bg{position:absolute;inset:0;background:url('img/opt/gal-lag-nuit.jpg') center/cover;animation:kb 22s ease-out forwards}
 @keyframes kb{from{transform:scale(1.03)}to{transform:scale(1.14)}}
+/* 20 · Les lanternes s'allument — sur le HERO, comme dans la maquette
+   « Motion design I » (qui travaillait sur le hero de La table). La photo
+   s'eveille de la penombre en 2,4 s ; chaque lanterne s'allume a son tour,
+   .25 s d'ecart (la remise corrigee), a partir de .9 s.
+
+   Huit lanternes, reperees sur la photo et non estimees : les huit plus
+   grands foyers de pixels clairs, les deux tables du bas mises a part.
+   Centre et diametre en pourcentage de l'IMAGE (1748 x 1240).
+
+   Deux calques suivent le lent zoom du fond (meme animation kb, lancee au
+   meme instant) et reproduisent son recadrage « cover » en unites de
+   conteneur, pour rester sur les lanternes a toutes les tailles :
+     .ombre  un voile sombre sur chaque lanterne, qui la garde ETEINTE
+             pendant que la photo s'eveille, et s'efface a son tour ;
+     .ciel   les halos, SOUS le degrade du hero : poses au-dessus, ils
+             delavaient le fil d'Ariane et le surtitre, ecrits juste sous
+             la grande lanterne. Le degrade les tempere pres du texte,
+             comme il tempere deja les lanternes de la photo.
+   Le mode de fusion est pose sur le calque entier : un calque transforme
+   isole ses enfants, un halo en « screen » a l'interieur ne verrait pas la
+   photo. La penombre est portee par .eteinte, pose par un script des
+   l'ouverture du hero : sans script, la photo s'affiche normalement. */
+.hero.lanternes{isolation:isolate}
+.hero.lanternes.eteinte .bg{filter:brightness(.45) saturate(.6)}
+.hero.lanternes.eteinte.vu .bg{filter:brightness(1.12) saturate(1.08);transition:filter 2.4s ease}
+.hero .ombre,.hero .ciel{position:absolute;inset:0;container-type:size;pointer-events:none;animation:kb 22s ease-out forwards}
+.hero .ombre{mix-blend-mode:multiply}
+.hero .ciel{mix-blend-mode:screen}
+.feux{position:absolute;left:50%;top:50%;width:max(100cqw,calc(100cqh * 1748 / 1240));aspect-ratio:1748/1240;transform:translate(-50%,-50%)}
+.feux i,.feux b{position:absolute;left:var(--x);top:var(--y);aspect-ratio:1;border-radius:50%;opacity:0}
+.feux i{width:var(--d);margin:calc(var(--d) / -2) 0 0 calc(var(--d) / -2);
+  background:radial-gradient(circle,rgba(255,206,130,.55) 0%,rgba(255,180,90,.18) 38%,rgba(255,170,80,0) 70%);
+  transition:opacity 1.4s ease calc(.9s + var(--k) * .25s)}
+.feux b{width:calc(var(--d) * .6);margin:calc(var(--d) * -.3) 0 0 calc(var(--d) * -.3);
+  background:radial-gradient(circle,rgba(16,11,6,.8) 0%,rgba(16,11,6,.6) 35%,rgba(16,11,6,0) 70%)}
+.hero.vu .feux i{opacity:1}
+.hero.eteinte .feux b{opacity:1}
+.hero.eteinte.vu .feux b{opacity:0;transition:opacity 1s ease-out calc(.9s + var(--k) * .25s)}
 .hero::after{content:"";position:absolute;inset:0;background:
   radial-gradient(ellipse at 50% 45%,rgba(16,11,6,.26),rgba(16,11,6,.86) 72%),
   linear-gradient(180deg,rgba(16,11,6,.72),transparent 30%,rgba(16,11,6,.97))}
@@ -476,8 +514,11 @@ footer{background:#0B0704}
 
 <main id="contenu">
 
-<section class="hero">
+<section class="hero lanternes">
+  <script>document.currentScript.parentNode.classList.add('eteinte')</script>
   <div class="bg"></div>
+  <div class="ombre" aria-hidden="true"><div class="feux">{{FEUX_B}}</div></div>
+  <div class="ciel" aria-hidden="true"><div class="feux">{{FEUX_I}}</div></div>
   <div class="in narrow">
     <nav class="crumb" aria-label="Fil d'Ariane">
       <a href="index.html" data-t="c1">Accueil</a> &nbsp;·&nbsp; <span data-t="c2">La table</span>
@@ -843,6 +884,15 @@ k3:"Lunch",k4:"Dinner",k5:"Bar &amp; terrace",k5v:"until closing",k6:"Méchoui P
 /* 20 · la bande du service du soir s'eveille quand on l'atteint. */
 document.querySelectorAll('.band.lanternes').forEach(function(b){b.classList.add('eteinte')});
 EVN_AU_SCROLL('.band.lanternes','vu');
+/* 20 · Le hero s'allume quand sa photo est arrivee : avant, on verrait
+   s'eveiller un fond vide. 3 s au plus d'attente. */
+(function(){
+  var h=document.querySelector('.hero.lanternes');if(!h)return;
+  var parti=false,go=function(){if(parti)return;parti=true;EVN_AU_SCROLL('.hero.lanternes','vu')};
+  var m=getComputedStyle(h.querySelector('.bg')).backgroundImage.match(/url\(["']?([^"')]+)/);
+  if(!m){go();return}
+  var im=new Image();im.onload=im.onerror=go;im.src=m[1];setTimeout(go,3000);
+})();
 {{LANG_JS}}
 
 /* La barre de recherche a un texte d aide hors [data-t] : on le traduit
