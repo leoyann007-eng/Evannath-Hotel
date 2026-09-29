@@ -66,8 +66,14 @@ def _vignette(c):
     nom = c['photos'][0][0]
     return nom + '-640' if os.path.exists('img/opt/%s-640.jpg' % nom) else nom
 
+# Le lit, tel que la fiche l'annonce (« Queen », « Baldaquin ») : le
+# back-office le propose en EXEMPLE pour une chambre de la categorie, sans
+# le lui attribuer. Absent quand la fiche n'en dit rien.
+def _lit(c):
+    return next((v for v, l in c['facts'] if l in ('lit', 'lits')), '')
+
 _ch = [dict(slug=c['slug'], nom=c['nom'], prix=c['prix'], pax=c['pax'],
-            photo=_vignette(c))
+            photo=_vignette(c), lit=_lit(c))
        for c in _chambres.CHAMBRES]
 io.open('donnees/chambres.json', 'w', encoding='utf-8').write(
     json.dumps(_ch, ensure_ascii=False))

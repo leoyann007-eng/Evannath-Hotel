@@ -8,6 +8,7 @@
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Karla:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/admin/disponibilites.css">
+<link rel="stylesheet" href="/admin/chambres.css">
 <style>
 :root{
   /* ── Marine, or et blanc ────────────────────────────────────────────
@@ -729,12 +730,12 @@ const physiques = (slug) => (ETAT.chambres || []).filter((x) => x && x.categorie
   .sort((a, b) => String(a.numero).localeCompare(String(b.numero), 'fr', { numeric: true }));
 const pluriel = (n, un, plus) => n + ' ' + (n > 1 ? plus : un);
 
-function vueChambres() {
+function vueChambres(onglets) {
   const c = CAT_OUVERTE && (ETAT.grille || []).find((x) => x.slug === CAT_OUVERTE);
-  return c ? ficheCategorie(c) : listeCategories();
+  return c ? ficheCategorie(c) : listeCategories(onglets);
 }
 
-function listeCategories() {
+function listeCategories(onglets) {
   const cartes = (ETAT.grille || []).map((c) => {
     const actuel = prixActuel(c), n = physiques(c.slug).length;
     return `<button type="button" class="cat-carte" data-cat="${ech(c.slug)}">
@@ -750,7 +751,8 @@ function listeCategories() {
   return `<div class="entete"><div>
       <h1 class="t">Chambres</h1>
       <p class="sous">Les ${(ETAT.grille || []).length} catégories que le site propose.
-      Ouvrez-en une pour changer son prix.</p></div></div>
+      Ouvrez-en une pour changer son prix : il vaut pour toutes ses chambres.</p></div></div>
+    ${onglets || ''}
     ${avertissement()}
     <div class="cat-grille">${cartes}</div>`;
 }
@@ -758,7 +760,7 @@ function listeCategories() {
 function ficheCategorie(c) {
   const actuel = prixActuel(c), ch = physiques(c.slug);
   return `<div class="entete"><div>
-      <button type="button" class="btn mince" data-cat-retour style="margin-bottom:14px">← Toutes les chambres</button>
+      <button type="button" class="btn mince" data-cat-retour style="margin-bottom:14px">← Toutes les catégories</button>
       <h1 class="t">${ech(c.nom)}</h1>
       <p class="sous"><a href="/${ech(c.slug)}" target="_blank" rel="noopener"
         style="color:var(--bronze-2)">Voir la fiche sur le site ↗</a></p></div>
@@ -829,6 +831,7 @@ $('#menu').addEventListener('click', (e) => {
   const b = e.target.closest('button[data-v]');
   if (!b) return;
   VUE = b.dataset.v; EDITE = null; CAT_OUVERTE = null;
+  if (typeof cmReinit === 'function') { cmReinit(); CM.onglet = 'inventaire'; }
   [...$('#menu').querySelectorAll('button')].forEach((x) => x.classList.toggle('on', x === b));
   /* Le choix est fait : la barre se referme sur lui. e.detail vaut 0 quand
      le clic vient du clavier — la, on ne referme pas, sinon quelqu'un qui
@@ -2112,7 +2115,9 @@ function rendre() {
 
 `;
   } else if (VUE === 'chambres') {
-    v.innerHTML = vueChambres();
+    /* Le module est dans chambres.js : le referentiel des chambres, et
+       l'onglet des categories et de leur prix (vueChambres, plus bas). */
+    v.innerHTML = vueChambresModule();
   } else if (VUE === 'parametres') {
     v.innerHTML = `<div class="entete"><div>
         <h1 class="t">Paramètres</h1>
@@ -2172,6 +2177,7 @@ function rendre() {
 
   /* Le calendrier a besoin de toute la largeur, et s ouvre sur aujourd hui. */
   v.classList.toggle('large', VUE === 'disponibilites');
+  v.classList.toggle('cm-large', VUE === 'chambres');
   if (VUE === 'disponibilites') apresDsp();
   /* Chaque vue n'a pas le meme besoin de largeur : le calendrier en veut
      tout, une fiche d'evenement s'arrete a 1100 px. */
@@ -2544,5 +2550,6 @@ document.addEventListener('change', async (ev) => {
 appel('etat').then((r) => { if (r.ok) montrerCadre(); }).catch(() => {});
 </script>
 <script src="/admin/disponibilites.js"></script>
+<script src="/admin/chambres.js"></script>
 </body>
 </html>

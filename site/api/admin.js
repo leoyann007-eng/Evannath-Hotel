@@ -476,17 +476,44 @@ function nettoyerChambre(e) {
        Facultatif — personne ne nous l'a donne, et la colonne ne s'affiche
        que si au moins une chambre en porte un. */
     etage: propre(e.etage, 20),
-    /* HORS SERVICE : indisponible sans dates, jusqu'a nouvel ordre. Une
-       climatisation en panne n'a pas de date de fin connue, et obliger a en
-       inventer une ferait rouvrir la chambre toute seule ce jour-la. */
-    service: e.service !== false,
+    /* LE STATUT. « active » se vend ; « maintenance » (temporaire) et
+       « hors-service » (jusqu'a nouvel ordre) ne se vendent pas, sans dates :
+       une climatisation en panne n'a pas de date de fin connue, et obliger a
+       en inventer une ferait rouvrir la chambre toute seule ce jour-la.
+       Une chambre enregistree avant ce champ n'a que `service` : on le lit. */
+    statut: STATUTS_CHAMBRE.includes(e.statut) ? e.statut
+      : (e.service === false ? 'hors-service' : 'active'),
+    /* PUBLIEE : le site peut la vendre en ligne. Non publiee, elle reste a
+       l'hotel et au calendrier — la reception la loue elle-meme. */
+    publie: e.publie !== false,
     note: propre(e.note, 120),
+    /* La fiche : ce que la reception sait de la chambre. Tout est
+       facultatif — rien n'est invente a sa place. */
+    capacite: entierEntre(e.capacite, 1, 20),
+    lit: propre(e.lit, 60),
+    superficie: entierEntre(e.superficie, 1, 1000),
+    equipements: listeDe(e.equipements, 30, 40),
+    description: propre(e.description, 1200),
+    photos: (Array.isArray(e.photos) ? e.photos : []).map((p) => String(p || '').trim())
+      .filter((p) => /^https:\/\/[\w.-]+\.public\.blob\.vercel-storage\.com\/[\w./-]+$/.test(p)
+        || /^[\w-]{1,80}$/.test(p)).slice(0, 12),
   };
+  /* `service` reste ecrit : les regles de disponibilite et le calendrier le
+     lisent depuis toujours. Il ne dit plus qu'une chose : « active ». */
+  o.service = o.statut === 'active';
   const manque = [];
   if (!o.numero) manque.push('numéro');
   if (!o.categorie || o.categorie === '*') manque.push('catégorie');
   return { objet: o, manque };
 }
+const STATUTS_CHAMBRE = ['active', 'maintenance', 'hors-service'];
+function entierEntre(v, min, max) {
+  if (v === '' || v == null) return null;
+  const n = Number(v);
+  return Number.isInteger(n) && n >= min && n <= max ? n : null;
+}
+/** Le site peut-il vendre cette chambre en ligne ? */
+const vendable = (ch) => ch && ch.service !== false && ch.publie !== false;
 
 /** Le sejour [du, au[ touche-t-il les nuits [debut, fin] ?
  *
@@ -597,8 +624,11 @@ function vivante(f, maintenant) {
 
 /** L'etat d'une CATEGORIE sur un sejour. Voir le commentaire du bloc. */
 function etatDe(d, categorie, du, au) {
+  /* Une chambre non publiee n'existe pas pour le site : la reception la
+     loue elle-meme. Aucune publiee dans la categorie : on ne sait rien, et
+     le site retombe sur « confirmee sous 24 h ». */
   const chambres = (Array.isArray(d.chambres) ? d.chambres : [])
-    .filter((c) => c && c.categorie === categorie);
+    .filter((c) => c && c.categorie === categorie && c.publie !== false);
   // Categorie dont aucune chambre n'a ete saisie : on ne sait rien.
   if (!chambres.length) return 'inconnu';
 
@@ -608,8 +638,8 @@ function etatDe(d, categorie, du, au) {
     .filter((f) => vivante(f, maintenant));
 
   const libres = chambres.filter((ch) => {
-    // Hors service : indisponible, quelles que soient les dates.
-    if (ch.service === false) return false;
+    // Hors service ou en maintenance : indisponible, quelles que soient les dates.
+    if (!vendable(ch)) return false;
     return !fermetures.some((f) => vise(f, ch) && chevauche(du, au, f.debut, f.fin));
   }).length;
 
@@ -750,7 +780,7 @@ function premiereLibre(d, categorie, du, au) {
   const fermetures = (Array.isArray(d.fermetures) ? d.fermetures : [])
     .filter((f) => vivante(f, maintenant));
   return (Array.isArray(d.chambres) ? d.chambres : [])
-    .filter((c) => c && c.categorie === categorie && c.service !== false)
+    .filter((c) => c && c.categorie === categorie && vendable(c))
     .sort((a, b) => String(a.numero).localeCompare(String(b.numero), 'fr',
       { numeric: true, sensitivity: 'base' }))
     .find((ch) => !fermetures.some((f) => vise(f, ch) && chevauche(du, au, f.debut, f.fin)))
@@ -975,7 +1005,7 @@ async function retenir({ categorie, du, au, nom, courriel, motif, minutes, paiem
          et `a=dispo` repond deja `inconnu` dans ce cas. Le paiement, lui,
          n'encaisse JAMAIS sur un « inconnu ». */
       const saisies = (Array.isArray(d.chambres) ? d.chambres : [])
-        .some((c) => c && c.categorie === categorie);
+        .some((c) => c && c.categorie === categorie && c.publie !== false);
       return { retenue: false, raison: saisies ? 'complet' : 'inconnu' };
     }
     const entree = nettoyerFermeture({
@@ -1625,6 +1655,21 @@ module.exports = async function handler(req, res) {
        ont disparu comme ca. */
     if (PANNE) return json(res, 503, { ok: false, message: PANNE
       + ' Rien n a ete enregistre : ecrire maintenant effacerait le reste.' });
+    /* Une chambre qui porte encore des sejours a venir ne se supprime pas :
+       ils resteraient accroches a une chambre qui n'existe plus, et
+       disparaitraient du calendrier sans que personne ne les deplace. */
+    if (corps.type === 'chambre') {
+      const auj = new Date().toISOString().slice(0, 10);
+      const sejours = (d.fermetures || []).filter((f) => f && f.cible === corps.id
+        && f.nature === 'client' && vivante(f, Date.now()) && (f.fin == null || f.fin >= auj));
+      if (sejours.length) {
+        return json(res, 409, { ok: false, sejours: sejours.length,
+          message: sejours.length + (sejours.length > 1 ? ' séjours à venir sont posés'
+            : ' séjour à venir est posé') + ' sur cette chambre. Déplacez-'
+            + (sejours.length > 1 ? 'les' : 'le') + ' dans Disponibilités avant de la supprimer, '
+            + 'ou désactivez-la plutôt.' });
+      }
+    }
     d[type] = (d[type] || []).filter((x) => x.id !== corps.id);
     const w = await ecrire(d);
     if (!w.ok) return json(res, 502, { ok: false, message: w.message });

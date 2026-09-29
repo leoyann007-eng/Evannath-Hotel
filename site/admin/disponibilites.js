@@ -101,7 +101,8 @@ function dspIndex(F, chambres) {
 /** L état d une chambre, une nuit. Un séjour l emporte sur un blocage : si
     les deux se chevauchent, c est le client qu il faut voir. */
 function dspEtat(ch, n, idx, auj) {
-  if (ch.service === false) return { k: 'hs', motif: ch.note || 'Hors service' };
+  if (ch.service === false) return { k: 'hs', motif: ch.note
+    || (ch.statut === 'maintenance' ? 'Maintenance' : 'Hors service') };
   const l = (idx.par[ch.id] || []).concat(idx.larges.filter((f) => fVise(f, ch)));
   let bloc = null;
   for (const f of l) {
@@ -999,9 +1000,9 @@ function rendreFiche(el, tr) {
       ${tr.erreur ? `<p class="msg mal" role="alert" style="margin-top:14px">${ech(tr.erreur)}</p>` : ''}
 
       <div style="margin-top:24px;padding-top:16px;border-top:1px solid var(--line)">
-        <button class="btn danger" data-oter="${ech(ch.id)}">Retirer cette chambre</button>
-        <p class="aide" style="margin-top:8px">Elle disparaît de l'inventaire. Pour une
-          panne, préférez « hors service » : la chambre reste chez vous.</p>
+        <button class="btn" data-cm-ouvrir="${ech(ch.id)}">Fiche de la chambre</button>
+        <p class="aide" style="margin-top:8px">Numéro, catégorie, équipements, photos,
+          publication, suppression : tout cela se gère dans le module Chambres.</p>
       </div>
     </div>
     <div class="dsp-tp">
@@ -1039,13 +1040,13 @@ async function enregistrerFiche() {
   try {
     if (tr.statut === 'hs') {
       const r = await appel('enregistrer', { type: 'chambre',
-        entree: Object.assign({}, ch, { service: false, note: tr.motif.trim() }) });
+        entree: Object.assign({}, ch, { service: false, statut: 'hors-service', note: tr.motif.trim() }) });
       if (!r.ok) throw new Error(r.message);
       ETAT.chambres = ETAT.chambres.map((x) => (x.id === ch.id ? r.entree : x));
     } else if (tr.statut === 'dispo') {
       if (ch.service === false) {
         const r = await appel('enregistrer', { type: 'chambre',
-          entree: Object.assign({}, ch, { service: true }) });
+          entree: Object.assign({}, ch, { service: true, statut: 'active' }) });
         if (!r.ok) throw new Error(r.message);
         ETAT.chambres = ETAT.chambres.map((x) => (x.id === ch.id ? r.entree : x));
       } else {
@@ -1189,7 +1190,7 @@ async function enregistrerTiroir() {
         if (tr.statut === 'dispo') {
           if (ch.service === false) {
             const r = await appel('enregistrer', { type: 'chambre',
-              entree: Object.assign({}, ch, { service: true }) });
+              entree: Object.assign({}, ch, { service: true, statut: 'active' }) });
             if (!r.ok) throw new Error(r.message);
             ETAT.chambres = ETAT.chambres.map((x) => (x.id === ch.id ? r.entree : x));
           } else await libererF([ch.id], tr.nuit, tr.nuit);
