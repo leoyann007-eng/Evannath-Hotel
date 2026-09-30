@@ -1145,6 +1145,36 @@ async function marquerEchec({ ref, session }) {
   return { ok: true };
 }
 
+/** Ce que le site peut montrer, a cet instant : ce que a=public publie, et
+ *  ce que le chatbot (api/chat.js) annonce. Un seul tri pour les deux.
+ *
+ *  Une promotion programmee ne doit pas sortir d'ici : son contenu serait
+ *  lisible par n'importe qui avant l'heure, et une promotion terminee
+ *  resterait affichee sur une page ouverte depuis longtemps. Le tri se fait
+ *  donc cote serveur, pas cote navigateur.
+ *
+ *  Une offre d'emploi expiree ne sort pas d'ici non plus. Abidjan est a
+ *  UTC+0 : la date ISO du serveur EST la date ici. Le jour de la date de
+ *  fin, l'offre est encore visible — « jusqu'au 15 » veut dire le 15 inclus. */
+function publiees(d, maintenant) {
+  const visible = (x) => x.publie !== false;
+  const enCours = (p) => {
+    const d1 = p.debut ? Date.parse(p.debut) : null;
+    const d2 = p.fin ? Date.parse(p.fin) : null;
+    if (d1 && maintenant < d1) return false;
+    if (d2 && maintenant > d2) return false;
+    return true;
+  };
+  const aujourdhui = new Date(maintenant).toISOString().slice(0, 10);
+  const ouverte = (o) => !o.fin || o.fin >= aujourdhui;
+  return {
+    evenements: (d.evenements || []).filter(visible),
+    promotions: (d.promotions || []).filter(visible).filter(enCours),
+    campagnes: (d.campagnes || []).filter(visible).filter(enCours),
+    emplois: (d.emplois || []).filter(visible).filter(ouverte),
+  };
+}
+
 module.exports = async function handler(req, res) {
   const action = (req.query.a || '').toString();
 
@@ -1160,34 +1190,8 @@ module.exports = async function handler(req, res) {
     // a fonctionne. La reponse fait quelques centaines d'octets, la depense
     // est negligeable.
     res.setHeader('Cache-Control', 'no-store, max-age=0');
-    const visible = (x) => x.publie !== false;
-    /* Une promotion programmee ne doit pas sortir d'ici : son contenu
-       serait lisible par n'importe qui avant l'heure, et une promotion
-       terminee resterait affichee sur une page ouverte depuis longtemps.
-       Le tri se fait donc cote serveur, pas cote navigateur. */
-    const maintenant = Date.now();
-    const enCours = (p) => {
-      const d1 = p.debut ? Date.parse(p.debut) : null;
-      const d2 = p.fin ? Date.parse(p.fin) : null;
-      if (d1 && maintenant < d1) return false;
-      if (d2 && maintenant > d2) return false;
-      return true;
-    };
-    /* Une offre d'emploi expiree ne sort pas d'ici — pas meme pour etre
-       masquee par le navigateur. Un poste pourvu dont l'annonce reste
-       lisible par qui sait ouvrir du JSON fait perdre son temps a des
-       candidats, et l'hotel ne pense pas a retirer une annonce.
-
-       Abidjan est a UTC+0 : la date ISO du serveur EST la date ici. Le jour
-       de la date de fin, l'offre est encore visible — « jusqu'au 15 » veut
-       dire le 15 inclus. */
-    const aujourdhui = new Date().toISOString().slice(0, 10);
-    const ouverte = (o) => !o.fin || o.fin >= aujourdhui;
     return res.status(200).json({
-      evenements: (d.evenements || []).filter(visible),
-      promotions: (d.promotions || []).filter(visible).filter(enCours),
-      campagnes: (d.campagnes || []).filter(visible).filter(enCours),
-      emplois: (d.emplois || []).filter(visible).filter(ouverte),
+      ...publiees(d, Date.now()),
       /* Le tunnel en a besoin AVANT le clic : bouton « Payer » ou « Envoyer »,
          et bandeau « mode test » quand aucun argent ne bouge. */
       paiement: { actif: !!LOMI_CLE, test: LOMI_TEST },
@@ -1771,3 +1775,6 @@ module.exports = async function handler(req, res) {
 module.exports.regles = { plusAncienne, nuitsSeCroisent, retenueGagne };
 /* Ce que la notification de lomi (api/lomi.mjs) appelle. */
 module.exports.paiement = { marquerPaye, marquerEchec };
+/* Ce que le chatbot (api/chat.js) lit : les memes regles que le site, pour
+   qu'il ne dise jamais autre chose que la page. */
+module.exports.chatbot = { lire, etatDe, publiees, panne: () => PANNE };

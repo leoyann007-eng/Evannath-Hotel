@@ -1154,7 +1154,154 @@ footer{background:#0B0704}
 <a class="wa" href="https://wa.me/2250758408079" target="_blank" rel="noopener" aria-label="Nous écrire sur WhatsApp">
   <span class="lbl" aria-hidden="true">ÉCRIRE SUR WHATSAPP</span>
   <span class="rond"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.5 14.4c-.3-.1-1.7-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.7 1-.9 1.2-.2.2-.3.2-.6.1-1.7-.9-2.9-1.6-4-3.5-.3-.5.3-.5.9-1.6.1-.2 0-.4 0-.5s-.7-1.6-.9-2.2c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.3 5.2 4.6 1.9.8 2.7.9 3.6.8.6-.1 1.7-.7 2-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.6-.3M12 2a10 10 0 00-8.6 15L2 22l5.2-1.4A10 10 0 1012 2z"/></svg></span>
-</a>
+</a><style>
+.chat-bulle{position:fixed;right:22px;bottom:92px;z-index:91;width:58px;height:58px;border-radius:999px;border:0;
+  background:var(--bronze);color:#fff;display:grid;place-items:center;cursor:pointer;
+  box-shadow:0 12px 30px -14px rgba(101,63,19,.8);transition:transform .25s var(--ease-out),background .2s}
+.chat-bulle:hover{background:var(--bronze-2);transform:translateY(-2px)}
+.chat-bulle:focus-visible{outline:2px solid var(--bronze);outline-offset:4px}
+.chat-bulle svg{width:26px;height:26px;fill:none;stroke:#fff;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.chat-bulle[aria-expanded="true"] .ico-ouvre,.chat-bulle:not([aria-expanded="true"]) .ico-ferme{display:none}
+.chat{position:fixed;right:22px;bottom:162px;z-index:95;width:392px;max-width:calc(100vw - 32px);
+  height:min(600px,calc(100vh - 290px));min-height:360px;display:flex;flex-direction:column;background:var(--bark);
+  border:1px solid var(--line);box-shadow:0 30px 60px -28px rgba(42,35,30,.45);color:var(--cream);
+  opacity:0;transform:translateY(12px);pointer-events:none;visibility:hidden;
+  transition:opacity .25s ease,transform .3s var(--ease-out),visibility 0s linear .3s}
+.chat.ouvert{opacity:1;transform:none;pointer-events:auto;visibility:visible;transition:opacity .25s ease,transform .3s var(--ease-out)}
+.chat-tete{display:flex;align-items:center;gap:12px;padding:16px 18px;background:var(--night);color:#F4EDE1}
+.chat-tete .av{width:38px;height:38px;border-radius:999px;background:var(--bronze);display:grid;place-items:center;flex:none;
+  font-family:Marcellus,serif;font-size:17px;color:#fff}
+.chat-tete b{display:block;font-family:Marcellus,serif;font-weight:400;font-size:17px;letter-spacing:.02em}
+.chat-tete small{display:block;font-size:11.5px;color:#CDBFAE}
+.chat-tete button{margin-left:auto;background:none;border:0;color:#F4EDE1;font-size:22px;line-height:1;cursor:pointer;padding:6px}
+.chat-fil{flex:1;overflow-y:auto;padding:18px 16px 8px;display:flex;flex-direction:column;gap:12px;overscroll-behavior:contain}
+.chat-m{max-width:86vw;font-size:14.5px;line-height:1.55;padding:11px 14px;white-space:pre-line;overflow-wrap:anywhere}
+.chat-m.ia{align-self:flex-start;background:var(--bark-2);border:1px solid var(--line-2);max-width:88.5ch}
+.chat-m.moi{align-self:flex-end;background:var(--bronze);color:#fff}
+.chat-m strong{font-weight:700}
+.chat-actions{display:flex;flex-direction:column;gap:8px;align-self:flex-start;max-width:320px;width:100vw}
+.chat-actions a{display:flex;align-items:center;justify-content:center;gap:8px;padding:11px 14px;text-decoration:none;
+  font-size:11px;letter-spacing:.16em;text-transform:uppercase;font-weight:700;border:1px solid var(--bronze);color:var(--bronze-2)}
+.chat-actions a.reserver{background:var(--bronze);color:#fff}
+.chat-actions a.whatsapp{border-color:#15803D;color:#0F6A31}
+.chat-sugg{display:flex;flex-wrap:wrap;gap:8px;padding:0 16px 10px}
+.chat-sugg button{font:400 13px var(--f-b,inherit);padding:8px 12px;border:1px solid var(--line);background:var(--bark);color:var(--prose);cursor:pointer}
+.chat-sugg button:hover{border-color:var(--bronze);color:var(--bronze-2)}
+.chat-points{align-self:flex-start;display:flex;gap:5px;padding:14px 16px;background:var(--bark-2);border:1px solid var(--line-2)}
+.chat-points i{width:7px;height:7px;border-radius:999px;background:var(--muted);opacity:.25;animation:chat-pt .6s infinite alternate ease-in-out}
+.chat-points i:nth-child(2){animation-delay:.2s}.chat-points i:nth-child(3){animation-delay:.4s}
+@keyframes chat-pt{to{opacity:1;transform:translateY(-3px)}}
+.chat-saisie{display:flex;gap:8px;padding:12px 14px;border-top:1px solid var(--line);background:var(--bark-2)}
+.chat-saisie textarea{flex:1;resize:none;border:1px solid var(--line);background:var(--bark);color:var(--cream);
+  font-family:inherit;font-size:14.5px;line-height:1.4;
+  padding:10px 12px;max-height:120px;min-height:44px}
+.chat-saisie textarea:focus{outline:none;border-color:var(--bronze)}
+.chat-saisie button{flex:none;width:44px;border:0;background:var(--bronze);color:#fff;cursor:pointer;display:grid;place-items:center}
+.chat-saisie button[disabled]{opacity:.5;cursor:wait}
+.chat-saisie svg{width:20px;height:20px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.chat-note{font-size:11px;color:var(--muted);padding:0 14px 10px;background:var(--bark-2);line-height:1.45}
+/* Sur un telephone, la fenetre prend l'ecran entier, par-dessus l'en-tete :
+   un panneau coince entre l'en-tete et les deux bulles n'aurait plus la
+   place d'afficher une reponse. La croix de l'en-tete la ferme. */
+@media(max-width:560px){
+  .chat{inset:0;width:auto;max-width:none;height:auto;min-height:0;z-index:120;border:0}
+}
+@media(prefers-reduced-motion:reduce){.chat,.chat.ouvert{transition:none}.chat-points i{animation:none;opacity:.6}}
+</style>
+<button class="chat-bulle" type="button" aria-expanded="false" aria-controls="chat" aria-label="Poser une question au concierge">
+  <svg class="ico-ouvre" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5h16v10H9.5L5 19.5v-4H4z"/><path d="M8 9.5h8M8 12.5h5"/></svg>
+  <svg class="ico-ferme" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+</button>
+<div class="chat" id="chat" role="dialog" aria-labelledby="chat-titre" aria-hidden="true">
+  <div class="chat-tete"><span class="av" aria-hidden="true">E</span>
+    <div><b id="chat-titre">Le concierge</b><small id="chat-sous">Réponse immédiate · la réception prend le relais</small></div>
+    <button type="button" class="chat-x" aria-label="Fermer">×</button></div>
+  <div class="chat-fil" aria-live="polite"></div>
+  <div class="chat-sugg"></div>
+  <form class="chat-saisie"><label for="chat-q" class="sr-only" style="position:absolute;left:-9999px">Votre question</label>
+    <textarea id="chat-q" rows="1" maxlength="1500" placeholder="Posez votre question…"></textarea>
+    <button type="submit" aria-label="Envoyer"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"/></svg></button></form>
+  <p class="chat-note"></p>
+</div>
+<script>(function(){
+var d=document,b=d.querySelector('.chat-bulle'),p=d.getElementById('chat');if(!b||!p)return;
+var fil=p.querySelector('.chat-fil'),sugg=p.querySelector('.chat-sugg'),f=p.querySelector('.chat-saisie'),q=d.getElementById('chat-q');
+var WA='2250758408079';
+var MOTS={
+  fr:{bonjour:'Bonjour ! Je suis le concierge de l’Hôtel Evannath. Chambres, disponibilités, table, spa, accès : posez votre question.',
+      sugg:['Des chambres libres ce week-end ?','Que comprend le tarif ?','Comment venir depuis Abidjan ?','Parler à la réception'],
+      titre:'Le concierge',sous:'Réponse immédiate · la réception prend le relais',ph:'Posez votre question…',
+      note:'Assistant automatique : il peut se tromper, la réception confirme toute réservation. Vos messages sont traités par une IA (Anthropic) pour vous répondre ; n’y écrivez aucune donnée de paiement.',
+      panne:'Je ne peux pas répondre pour le moment. La réception vous répond sur WhatsApp, à toute heure.',
+      vite:'Beaucoup de questions à la suite : laissez-moi une minute, ou écrivez directement à la réception.',
+      wa:'Écrire à la réception sur WhatsApp',envoyer:'Envoyer',fermer:'Fermer',ouvrir:'Poser une question au concierge'},
+  en:{bonjour:'Hello! I’m the Hôtel Evannath concierge. Rooms, availability, dining, spa, getting here: ask me anything.',
+      sugg:['Any rooms free this weekend?','What does the rate include?','How do I get there from Abidjan?','Talk to reception'],
+      titre:'The concierge',sous:'Instant answers · reception takes over',ph:'Ask your question…',
+      note:'Automated assistant: it can make mistakes, and reception confirms every booking. Your messages are processed by an AI (Anthropic) to answer you; never share payment details here.',
+      panne:'I can’t answer right now. Reception replies on WhatsApp, day and night.',
+      vite:'Lots of questions in a row: give me a minute, or write to reception directly.',
+      wa:'Message reception on WhatsApp',envoyer:'Send',fermer:'Close',ouvrir:'Ask the concierge'}
+};
+function lg(){return (d.documentElement.lang||'fr').slice(0,2)==='en'?'en':'fr'}
+function M(){return MOTS[lg()]}
+var E={m:[],o:false};
+try{var s=JSON.parse(sessionStorage.getItem('evn-chat')||'null');if(s&&Array.isArray(s.m))E=s}catch(e){}
+function garder(){try{sessionStorage.setItem('evn-chat',JSON.stringify({m:E.m.slice(-40),o:E.o}))}catch(e){}}
+function esc(t){return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function riche(t){return esc(t).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')}
+function bulle(m){
+  var e=d.createElement('div');e.className='chat-m '+(m.r==='user'?'moi':'ia');
+  e.innerHTML=m.r==='user'?esc(m.t):riche(m.t);fil.appendChild(e);
+  if(m.a&&m.a.length){var a=d.createElement('div');a.className='chat-actions';
+    m.a.forEach(function(x){var l=d.createElement('a');l.className=x.type;l.href=x.url;l.textContent=x.libelle;
+      if(x.type==='whatsapp'){l.target='_blank';l.rel='noopener'}a.appendChild(l)});fil.appendChild(a)}
+}
+function peindre(){
+  var t=M();p.querySelector('#chat-titre').textContent=t.titre;p.querySelector('#chat-sous').textContent=t.sous;
+  q.placeholder=t.ph;p.querySelector('.chat-note').textContent=t.note;p.querySelector('.chat-x').setAttribute('aria-label',t.fermer);
+  f.querySelector('button').setAttribute('aria-label',t.envoyer);b.setAttribute('aria-label',t.ouvrir);
+  fil.innerHTML='';bulle({r:'assistant',t:t.bonjour});E.m.forEach(bulle);
+  sugg.innerHTML='';if(!E.m.length)t.sugg.forEach(function(x){var s=d.createElement('button');s.type='button';s.textContent=x;
+    s.onclick=function(){demander(x)};sugg.appendChild(s)});
+  fil.scrollTop=fil.scrollHeight;
+}
+function ouvrir(v){E.o=v;garder();p.classList.toggle('ouvert',v);p.setAttribute('aria-hidden',v?'false':'true');
+  b.setAttribute('aria-expanded',v?'true':'false');if(v){peindre();setTimeout(function(){q.focus()},60)}}
+b.addEventListener('click',function(){ouvrir(!E.o)});
+p.querySelector('.chat-x').addEventListener('click',function(){ouvrir(false);b.focus()});
+d.addEventListener('keydown',function(e){if(e.key==='Escape'&&E.o){ouvrir(false);b.focus()}});
+q.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();f.requestSubmit?f.requestSubmit():f.dispatchEvent(new Event('submit'))}});
+q.addEventListener('input',function(){q.style.height='auto';q.style.height=Math.min(q.scrollHeight,120)+'px'});
+f.addEventListener('submit',function(e){e.preventDefault();var t=q.value.trim();if(t)demander(t)});
+var occupe=false;
+function demander(t){
+  if(occupe)return;occupe=true;q.value='';q.style.height='';sugg.innerHTML='';
+  E.m.push({r:'user',t:t});garder();bulle({r:'user',t:t});
+  var pts=d.createElement('div');pts.className='chat-points';pts.innerHTML='<i></i><i></i><i></i>';fil.appendChild(pts);fil.scrollTop=fil.scrollHeight;
+  f.querySelector('button').disabled=true;
+  var waSecours={type:'whatsapp',url:'https://wa.me/'+WA+'?text='+encodeURIComponent(t),libelle:M().wa};
+  fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({langue:lg(),messages:E.m.map(function(m){return{role:m.r,text:m.t}})})})
+  .then(function(r){return r.json().catch(function(){return{ok:false}}).then(function(j){j.code=r.status;return j})})
+  .then(function(j){
+    var m=j&&j.ok&&j.texte?{r:'assistant',t:j.texte,a:j.actions||[]}
+      :{r:'assistant',t:j&&j.raison==='debit'?M().vite:M().panne,a:[waSecours],x:1};
+    fin(m);
+  })
+  .catch(function(){fin({r:'assistant',t:M().panne,a:[waSecours],x:1})});
+  function fin(m){
+    occupe=false;pts.remove();f.querySelector('button').disabled=false;
+    /* Un message d'erreur s'affiche mais ne part pas dans l'historique :
+       l'IA n'a pas a le relire au tour suivant. */
+    if(!m.x){E.m.push(m);garder()}
+    bulle(m);fil.scrollTop=fil.scrollHeight;if(E.o)q.focus();
+  }
+}
+/* La langue bascule avec le selecteur FR/EN : on repeint. */
+new MutationObserver(function(){if(E.o)peindre()}).observe(d.documentElement,{attributes:true,attributeFilter:['lang']});
+if(E.o)ouvrir(true);
+})();</script>
 
 <script>
 

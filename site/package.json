@@ -4,6 +4,7 @@
   "private": true,
   "description": "Dependances des fonctions serverless. Le site lui-meme n'en a aucune : il est genere en Python et servi en statique.",
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.129.0",
     "@vercel/blob": "^0.27.0"
   }
 }
