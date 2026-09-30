@@ -287,8 +287,15 @@ module.exports = async function handler(req, res) {
     return json(res, 200, { ok: true, texte, actions: uniques });
   } catch (e) {
     const code = e instanceof Anthropic.RateLimitError ? 'surcharge' : e instanceof Anthropic.APIError ? 'ia' : 'erreur';
-    if (!(e instanceof Anthropic.APIError)) console.error('chat', e && e.message);
-    return json(res, 502, { ok: false, raison: code });
+    console.error('chat', e && e.status, e && e.message);
+    /* Le statut et le type d'erreur d'Anthropic (401 cle refusee, 400 credit
+       epuise...) : ce qu'il faut pour savoir quoi corriger, sans rien de
+       secret — la cle n'apparait jamais dans ces messages. */
+    const detail = e instanceof Anthropic.APIError
+      ? { statut: e.status, type: e.error && e.error.error && e.error.error.type,
+          message: String((e.error && e.error.error && e.error.error.message) || '').slice(0, 200) }
+      : undefined;
+    return json(res, 502, { ok: false, raison: code, detail });
   }
 };
 
