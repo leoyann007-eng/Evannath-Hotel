@@ -1277,6 +1277,13 @@ CHAT_BULLE = '''<style>
 .chat-saisie button[disabled]{opacity:.5;cursor:wait}
 .chat-saisie svg{width:20px;height:20px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .chat-note{font-size:11px;color:var(--muted);padding:0 14px 10px;background:var(--bark-2);line-height:1.45}
+/* Un ecran BAS (portable, navigateur zoome) : entre l'en-tete et les
+   bulles, la fenetre n'a plus sa place et remontait sous l'en-tete. Elle
+   devient un panneau sur toute la hauteur, a droite, par-dessus l'en-tete ;
+   la croix de sa tete la ferme. */
+@media(max-height:720px) and (min-width:561px){
+  .chat{top:0;bottom:0;right:0;height:auto;min-height:0;z-index:120;border-width:0 0 0 1px;max-width:420px}
+}
 /* Sur un telephone, la fenetre prend l'ecran entier, par-dessus l'en-tete :
    un panneau coince entre l'en-tete et les deux bulles n'aurait plus la
    place d'afficher une reponse. La croix de l'en-tete la ferme. */
