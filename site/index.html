@@ -13,6 +13,7 @@ html.intro::after{content:"";position:fixed;inset:0;z-index:1000;background:var(
 .intro-ecran .i1{animation-delay:.16s}.intro-ecran .i2{animation-delay:.32s}.intro-ecran .i3{animation-delay:.48s}
 .intro-ecran .i4{animation:intro-devoile 1.3s var(--ease-inout) .7s both}
 .intro-ecran .i5{animation:intro-signe .6s var(--ease-out) 1.4s both,intro-parait .6s ease 1.4s both}
+.intro-ecran:not(.joue) .i0,.intro-ecran:not(.joue) .i1,.intro-ecran:not(.joue) .i2,.intro-ecran:not(.joue) .i3,.intro-ecran:not(.joue) .i4,.intro-ecran:not(.joue) .i5{animation-play-state:paused}
 @keyframes intro-monte{from{transform:translateY(18%)}}
 @keyframes intro-signe{from{transform:translateY(30%)}}
 @keyframes intro-parait{from{opacity:0}}
@@ -62,14 +63,30 @@ fetch('img/logo-calques.svg').then(function(r){return r.ok?r.text():Promise.reje
     var s=e.querySelector('svg');if(s){s.removeAttribute('role');s.removeAttribute('aria-label')}
     d.body.appendChild(e);
     h.classList.remove('intro');
-    /* Le depart suit la FIN de l'animation, pas une minuterie : le
-       navigateur ne peint rien avant d'avoir ses polices, et les
-       animations attendent cette premiere image. Une minuterie partie a
-       l'insertion coupait le logo a mi-construction. Deux filets : 2,2 s
-       apres la premiere image peinte (2,5 s fondu compris, quoi qu'il
-       arrive), et 3,5 s si l'onglet est en arriere-plan et ne peint rien. */
-    var parti=false,t=setTimeout(partir,3500);
-    requestAnimationFrame(function(){if(!parti){clearTimeout(t);t=setTimeout(partir,2200)}});
+    /* LA CONSTRUCTION ATTEND QUE LE NAVIGATEUR PEIGNE REGULIEREMENT.
+       Pendant et juste apres le chargement, il est occupe (images,
+       scripts, polices) et saute des images par paquets de 200 a 300 ms :
+       les piliers montaient pendant ces trous, et l'on voyait le logo
+       deja construit. Les calques restent donc en pause, invisibles,
+       jusqu'a douze images d'affilee sans trou (environ 200 ms de calme) —
+       2,2 s au plus — et la construction se joue alors en entier. Mesurer
+       plutot que deviner un delai : un telephone lent attend plus, un
+       ordinateur rapide presque pas. */
+    var parti=false,joue=false,t=setTimeout(partir,5000),calme=0,prec=0;
+    function jouer(){
+      if(joue||parti)return;joue=true;
+      e.classList.add('joue');
+      /* Le depart suit la FIN de l'animation (la signature) ; filet a
+         2,4 s si l'onglet, en arriere-plan, ne peint rien. */
+      clearTimeout(t);t=setTimeout(partir,2400);
+    }
+    function guetter(ts){
+      if(joue||parti)return;
+      calme=prec&&ts-prec<34?calme+1:0;prec=ts;
+      if(calme>=12)jouer();else requestAnimationFrame(guetter);
+    }
+    requestAnimationFrame(guetter);
+    setTimeout(jouer,2200);
     var sig=e.querySelector('.i5');if(sig)sig.addEventListener('animationend',partir);
     function partir(){
       if(parti)return;parti=true;clearTimeout(t);
@@ -77,7 +94,9 @@ fetch('img/logo-calques.svg').then(function(r){return r.ok?r.text():Promise.reje
       setTimeout(function(){if(e.parentNode)e.parentNode.removeChild(e)},300);
     }
     e.addEventListener('pointerdown',partir);
-    d.addEventListener('keydown',partir,{once:true});
+    /* Seules les touches d'un geste voulu levent l'ecran : une touche de
+       capture d'ecran ou de rechargement le faisait disparaitre. */
+    d.addEventListener('keydown',function(k){if(k.key==='Escape'||k.key==='Enter'||k.key===' ')partir()});
   }
   if(d.body)poser();else d.addEventListener('DOMContentLoaded',poser);
 }).catch(lever);
