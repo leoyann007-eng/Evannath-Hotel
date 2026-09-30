@@ -43,13 +43,15 @@ html.intro::after{content:"";position:fixed;inset:0;z-index:1000;background:var(
 <script>(function(){
 var d=document,h=d.documentElement;
 try{
-  var nav=performance.getEntriesByType?performance.getEntriesByType('navigation')[0]:null;
-  var recharge=!!(nav&&nav.type==='reload');
-  if(sessionStorage.getItem('evn-intro')&&!recharge)return;
+  if(sessionStorage.getItem('evn-intro'))return;
   if(!window.fetch||!window.matchMedia||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
-  if(nav&&nav.type==='back_forward')return;
+  var nav=performance.getEntriesByType?performance.getEntriesByType('navigation')[0]:null;
+  var type=nav&&nav.type;
+  if(type==='back_forward')return;
+  var interne=false;
+  try{interne=!!d.referrer&&new URL(d.referrer).origin===location.origin}catch(e){}
+  if(interne&&type!=='reload')return;
   if(d.readyState==='complete')return;
-  sessionStorage.setItem('evn-intro','1');
 }catch(e){return}
 h.classList.add('intro');h.setAttribute('data-intro','');
 /* Tant que data-intro est la, les effets au defilement (EVN_AU_SCROLL)

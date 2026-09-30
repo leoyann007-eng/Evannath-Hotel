@@ -770,15 +770,20 @@ main{display:block}
 # en .3 s. Le navigateur demarre les animations 0,1 a 0,15 s apres avoir
 # peint l'ecran quand la page charge encore : ce dixieme gagne les absorbe.
 #
+# Il joue a chaque ARRIVEE sur le site : adresse tapee, favori, lien venu
+# d'ailleurs — et a chaque rechargement. La direction le veut « au
+# chargement de la page » : une seule fois par onglet, il ne jouait plus
+# des qu'on revenait sur l'accueil dans un onglet deja passe par le site.
+#
 # Il ne joue PAS :
-#   - apres la premiere page de la session (sessionStorage) ;
+#   - en passant d'une page du site a une autre (la page precedente est du
+#     meme site : document.referrer) — 2,5 s a chaque clic ;
+#   - sur un retour arriere : la page revient telle qu'on l'a quittee ;
 #   - sous « reduire les animations » : l'etat final d'un ecran de
 #     chargement, c'est pas d'ecran du tout ;
-#   - sur un retour arriere : la page revient telle qu'on l'a quittee.
-#
-# Il REJOUE sur un rechargement, meme deja vu dans la session : c'est le
-# geste de qui veut revoir l'arrivee sur le site (demande de la direction).
-# Passer d'une page a l'autre, lui, ne le rejoue pas : 2,5 s a chaque clic.
+#   - quand sessionStorage porte « evn-intro » : c'est l'interrupteur des
+#     outils de mesure, qui ne veulent pas de l'ecran. Le site ne l'ecrit
+#     plus lui-meme.
 #
 # Le logo (104 Ko) n'est telecharge que s'il doit jouer : l'integrer a
 # chaque page l'aurait fait payer a toutes les visites, pour une seule.
@@ -808,13 +813,15 @@ html.intro::after{content:"";position:fixed;inset:0;z-index:1000;background:var(
 <script>(function(){
 var d=document,h=d.documentElement;
 try{
-  var nav=performance.getEntriesByType?performance.getEntriesByType('navigation')[0]:null;
-  var recharge=!!(nav&&nav.type==='reload');
-  if(sessionStorage.getItem('evn-intro')&&!recharge)return;
+  if(sessionStorage.getItem('evn-intro'))return;
   if(!window.fetch||!window.matchMedia||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
-  if(nav&&nav.type==='back_forward')return;
+  var nav=performance.getEntriesByType?performance.getEntriesByType('navigation')[0]:null;
+  var type=nav&&nav.type;
+  if(type==='back_forward')return;
+  var interne=false;
+  try{interne=!!d.referrer&&new URL(d.referrer).origin===location.origin}catch(e){}
+  if(interne&&type!=='reload')return;
   if(d.readyState==='complete')return;
-  sessionStorage.setItem('evn-intro','1');
 }catch(e){return}
 h.classList.add('intro');h.setAttribute('data-intro','');
 /* Tant que data-intro est la, les effets au defilement (EVN_AU_SCROLL)
