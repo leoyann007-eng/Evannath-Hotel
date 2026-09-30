@@ -248,6 +248,12 @@ module.exports = async function handler(req, res) {
 
   try {
     let reponse;
+    /* Tout le texte ecrit par le modele, a chaque tour : il repond souvent
+       AVANT d'appeler un outil (« Nous n'acceptons pas les animaux ; pour
+       le tennis, je vous mets en relation… »), puis n'ecrit plus rien
+       apres. Ne garder que le dernier tour rendait une bulle vide. */
+    const textes = [];
+    const question = messages[messages.length - 1].content;
     for (let tour = 0; tour <= OUTILS_MAX; tour++) {
       reponse = await client.beta.messages.create({
         model: MODELE,
@@ -263,6 +269,7 @@ module.exports = async function handler(req, res) {
         tools: OUTILS,
         messages,
       });
+      for (const b of reponse.content) if (b.type === 'text' && b.text.trim()) textes.push(b.text.trim());
       if (reponse.stop_reason !== 'tool_use') break;
       /* Le tour de l'assistant est renvoye TEL QUEL (reflexion comprise) :
          dans une meme reponse, l'historique ne fait que s'allonger. */
@@ -284,7 +291,14 @@ module.exports = async function handler(req, res) {
         texte: langue === 'en' ? 'I can’t help with that here — our reception will be happy to answer you on WhatsApp.'
           : 'Je ne peux pas vous aider sur ce point ici — la réception vous répondra volontiers sur WhatsApp.' });
     }
-    const texte = reponse.content.filter((b) => b.type === 'text').map((b) => b.text).join('\n').trim();
+    let texte = textes.join('\n\n').trim();
+    if (!texte) {
+      if (!actions.length) {
+        await executer('passer_a_la_reception', { resume: question.slice(0, 300) }, actions, langue);
+      }
+      texte = langue === 'en' ? 'I’m not sure about that one — our reception will answer you on WhatsApp.'
+        : 'Je préfère ne pas vous répondre au hasard — la réception vous répondra sur WhatsApp.';
+    }
     // Un bouton de chaque sorte, pas davantage : le dernier propose est le bon.
     const uniques = [];
     for (const a of actions.reverse()) if (!uniques.some((u) => u.type === a.type)) uniques.unshift(a);
