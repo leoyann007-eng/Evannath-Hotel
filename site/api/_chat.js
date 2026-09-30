@@ -250,8 +250,6 @@ async function allume() {
 }
 const cle = () => !!(process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_AUTH_TOKEN);
 
-const json = (res, code, corps) => { res.setHeader('Cache-Control', 'no-store'); return res.status(code).json(corps); };
-
 /** Une reponse complete : le texte, et les boutons. `surTexte`, s'il est
  *  donne, recoit le texte au fil de l'ecriture (flux). */
 async function converser({ messages, langue, page, surTexte }) {
@@ -359,47 +357,25 @@ function diagnostic(e) {
   return { ok: false, raison: code, detail };
 }
 
-module.exports = async function handler(req, res) {
-  /* GET : la bulle demande si elle doit s'afficher. Allume dans le
-     back-office ET cle presente — sinon elle ne se montre pas du tout. */
-  if (req.method === 'GET') return json(res, 200, { ok: true, actif: cle() && await allume() });
-  if (req.method !== 'POST') return json(res, 405, { ok: false });
-  if (!cle()) return json(res, 503, { ok: false, raison: 'hors-ligne' });
-  if (!(await allume())) return json(res, 503, { ok: false, raison: 'eteint' });
-  const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || req.socket?.remoteAddress || 'inconnue';
-  if (tropVite(ip)) return json(res, 429, { ok: false, raison: 'debit' });
-
-  let corps = req.body;
+/** La requete du navigateur, verifiee. Rend soit { refus: { code, corps } }
+ *  a renvoyer tel quel, soit ce qu'il faut pour converser. Aucune reponse
+ *  HTTP ici : c'est api/chat.mjs qui l'ecrit (en flux ou non). */
+async function preparer(corps, ip) {
+  if (!cle()) return { refus: { code: 503, corps: { ok: false, raison: 'hors-ligne' } } };
+  if (!(await allume())) return { refus: { code: 503, corps: { ok: false, raison: 'eteint' } } };
+  if (tropVite(ip || 'inconnue')) return { refus: { code: 429, corps: { ok: false, raison: 'debit' } } };
   if (typeof corps === 'string') { try { corps = JSON.parse(corps); } catch { corps = {}; } }
   const langue = corps && corps.langue === 'en' ? 'en' : 'fr';
   const page = corps && typeof corps.page === 'string' ? corps.page.slice(0, 80) : '';
   const messages = nettoyer(corps && corps.messages);
-  if (!messages) return json(res, 422, { ok: false, raison: 'message' });
+  if (!messages) return { refus: { code: 422, corps: { ok: false, raison: 'message' } } };
+  return { messages, langue, page, flux: !!(corps && corps.flux) };
+}
 
-  if (!(corps && corps.flux)) {
-    try { return json(res, 200, { ok: true, ...(await converser({ messages, langue, page })) }); }
-    catch (e) { return json(res, 502, diagnostic(e)); }
-  }
+/** GET : la bulle demande si elle doit s'afficher. Allume dans le
+ *  back-office ET cle presente — sinon elle ne se montre pas du tout. */
+async function etat() { return { ok: true, actif: cle() && await allume() }; }
 
-  /* EN FLUX : une ligne JSON par evenement (NDJSON).
-       { t:'texte', d:'...' }                      un morceau de reponse
-       { t:'fin', texte, actions }                 le texte definitif, les boutons
-       { t:'erreur', raison, detail }              en cours de route
-     Le texte definitif fait foi : il remplace ce qui s'est ecrit (un refus
-     ou une reponse vide y deviennent une phrase et un bouton). */
-  res.statusCode = 200;
-  res.setHeader('Content-Type', 'application/x-ndjson; charset=utf-8');
-  res.setHeader('Cache-Control', 'no-store');
-  res.setHeader('X-Accel-Buffering', 'no');
-  const ligne = (o) => res.write(JSON.stringify(o) + '\n');
-  try {
-    const fin = await converser({ messages, langue, page, surTexte: (d) => ligne({ t: 'texte', d }) });
-    ligne({ t: 'fin', ...fin });
-  } catch (e) {
-    ligne({ t: 'erreur', ...diagnostic(e) });
-  }
-  res.end();
-};
-
-// Pour les tests : la consigne et les outils, sans appel reseau.
-module.exports.interne = { CONSIGNE, OUTILS, executer, nettoyer, contextePage };
+module.exports = { preparer, converser, diagnostic, etat,
+  // Pour les tests : la consigne et les outils, sans appel reseau.
+  interne: { CONSIGNE, OUTILS, executer, nettoyer, contextePage } };

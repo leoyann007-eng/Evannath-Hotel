@@ -124,7 +124,16 @@ const serveur = http.createServer(async (req, res) => {
         body: methode === 'GET' || methode === 'HEAD' ? undefined : brut,
       }));
       res.writeHead(reponse.status, Object.fromEntries(reponse.headers));
-      res.end(Buffer.from(await reponse.arrayBuffer()));
+      /* Le corps passe morceau par morceau, comme chez Vercel : une reponse
+         en flux (api/chat.mjs) doit s'ecrire a mesure, pas a la fin. */
+      if (!reponse.body) return res.end();
+      const lecteur = reponse.body.getReader();
+      for (;;) {
+        const { done, value } = await lecteur.read();
+        if (done) break;
+        res.write(Buffer.from(value));
+      }
+      res.end();
     } catch (e) {
       console.error('api/' + nom, e);
       if (!res.headersSent) res.writeHead(500, { 'Content-Type': TYPES['.json'] });
