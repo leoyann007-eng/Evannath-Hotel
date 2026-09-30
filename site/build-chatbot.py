@@ -67,7 +67,7 @@ class Texte(HTMLParser):
 
     def handle_starttag(self, tag, attrs):
         a = dict(attrs)
-        saute = (tag in SAUTE or a.get('aria-hidden') == 'true' or a.get('id') == 'dw'
+        saute = (tag in SAUTE or a.get('aria-hidden') == 'true' or a.get('id') in ('dw', 'chat')
                  or 'wa' == (a.get('class') or '').split(' ')[0]
                  or 'intro-ecran' in (a.get('class') or ''))
         if tag in BLOCS and not self._saute():
