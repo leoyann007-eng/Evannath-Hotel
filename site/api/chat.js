@@ -234,7 +234,11 @@ module.exports = async function handler(req, res) {
   const messages = nettoyer(corps && corps.messages);
   if (!messages) return json(res, 422, { ok: false, raison: 'message' });
 
-  const client = new Anthropic.Anthropic();
+  /* Une cle creee au niveau de l'organisation, et non dans un espace de
+     travail (workspace), doit dire quel espace utiliser. ANTHROPIC_WORKSPACE_ID
+     le donne ; une cle creee DANS un espace n'en a pas besoin. */
+  const espace = process.env.ANTHROPIC_WORKSPACE_ID;
+  const client = new Anthropic.Anthropic(espace ? { defaultHeaders: { 'anthropic-workspace-id': espace } } : {});
   const actions = [];
   const jour = new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Africa/Abidjan' });
   const system = [
