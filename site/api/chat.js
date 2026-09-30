@@ -297,6 +297,8 @@ module.exports = async function handler(req, res) {
        secret — la cle n'apparait jamais dans ces messages. */
     const detail = e instanceof Anthropic.APIError
       ? { statut: e.status, type: e.error && e.error.error && e.error.error.type,
+          /* Oui ou non, jamais la valeur : la fonction voit-elle l'espace ? */
+          espace_de_travail: !!espace,
           message: String((e.error && e.error.error && e.error.error.message) || '').slice(0, 200) }
       : undefined;
     return json(res, 502, { ok: false, raison: code, detail });
