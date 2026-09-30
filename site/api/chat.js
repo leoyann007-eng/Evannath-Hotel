@@ -218,22 +218,43 @@ function nettoyer(messages) {
   return l.length && l[l.length - 1].role === 'user' ? l : null;
 }
 
+/* La page que le visiteur a sous les yeux. Sur la fiche de la Suite Arabe,
+   « elle est libre ce week-end ? » parle de la Suite Arabe : le modele doit
+   le savoir sans redemander. Seul le chemin est accepte, jamais un texte
+   libre venu du navigateur. */
+const PAGES = {
+  '': 'Accueil', chambres: 'Chambres & Suites (liste des sept catégories)', carte: 'La table (restaurant)',
+  spa: 'Le spa', experiences: 'Expériences', circuits: 'Offres & Événements', seminaires: 'Séminaires & groupes',
+  galerie: 'Galerie', 'a-propos': 'À propos', 'informations-utiles': 'Informations utiles', contact: 'Contact',
+  reserver: 'Réserver (le tunnel de réservation)',
+};
+function contextePage(chemin) {
+  const p = String(chemin || '').toLowerCase();
+  if (!/^\/[a-z0-9-]*(\.html)?$/.test(p)) return '';
+  const slug = p.slice(1).replace(/\.html$/, '').replace(/^index$/, '');
+  if (NOM[slug]) {
+    return ` Le visiteur lit la fiche de la ${NOM[slug]} (identifiant « ${slug} ») : « cette chambre », « elle », « celle-ci » désignent la ${NOM[slug]}.`;
+  }
+  return PAGES[slug] !== undefined ? ` Le visiteur lit la page « ${PAGES[slug]} ».` : '';
+}
+
+/* L'interrupteur du back-office (Parametres) : d.reglages.chatbot.actif.
+   Absent, le chatbot est allume. Une lecture du magasin en panne ne
+   l'eteint pas : on ne coupe pas le concierge parce que le stockage a
+   hoquete. */
+async function allume() {
+  try {
+    const d = await admin.chatbot.lire();
+    return !(d && d.reglages && d.reglages.chatbot && d.reglages.chatbot.actif === false);
+  } catch (e) { return true; }
+}
+const cle = () => !!(process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_AUTH_TOKEN);
+
 const json = (res, code, corps) => { res.setHeader('Cache-Control', 'no-store'); return res.status(code).json(corps); };
 
-module.exports = async function handler(req, res) {
-  if (req.method !== 'POST') return json(res, 405, { ok: false });
-  if (!process.env.ANTHROPIC_API_KEY && !process.env.ANTHROPIC_AUTH_TOKEN) {
-    return json(res, 503, { ok: false, raison: 'hors-ligne' });
-  }
-  const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || req.socket?.remoteAddress || 'inconnue';
-  if (tropVite(ip)) return json(res, 429, { ok: false, raison: 'debit' });
-
-  let corps = req.body;
-  if (typeof corps === 'string') { try { corps = JSON.parse(corps); } catch { corps = {}; } }
-  const langue = corps && corps.langue === 'en' ? 'en' : 'fr';
-  const messages = nettoyer(corps && corps.messages);
-  if (!messages) return json(res, 422, { ok: false, raison: 'message' });
-
+/** Une reponse complete : le texte, et les boutons. `surTexte`, s'il est
+ *  donne, recoit le texte au fil de l'ecriture (flux). */
+async function converser({ messages, langue, page, surTexte }) {
   /* Une cle creee au niveau de l'organisation, et non dans un espace de
      travail (workspace), doit dire quel espace utiliser. ANTHROPIC_WORKSPACE_ID
      le donne ; une cle creee DANS un espace n'en a pas besoin. */
@@ -243,81 +264,142 @@ module.exports = async function handler(req, res) {
   const jour = new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Africa/Abidjan' });
   const system = [
     { type: 'text', text: CONSIGNE, cache_control: { type: 'ephemeral' } },
-    { type: 'text', text: `Aujourd'hui : ${jour} (${aujourdhui()}). La page du visiteur est en ${langue === 'en' ? 'anglais' : 'français'}.` },
+    { type: 'text', text: `Aujourd'hui : ${jour} (${aujourdhui()}). La page du visiteur est en ${langue === 'en' ? 'anglais' : 'français'}.${contextePage(page)}` },
   ];
+  /* En flux, les outils recoivent leurs arguments au fil de l'ecriture
+     (eager_input_streaming) ; le serveur ne les valide plus, executer() le
+     fait : categorie connue, dates au bon format, texte tronque. */
+  const outils = surTexte ? OUTILS.map((o) => ({ ...o, eager_input_streaming: true })) : OUTILS;
 
-  try {
-    let reponse;
-    /* Tout le texte ecrit par le modele, a chaque tour : il repond souvent
-       AVANT d'appeler un outil (« Nous n'acceptons pas les animaux ; pour
-       le tennis, je vous mets en relation… »), puis n'ecrit plus rien
-       apres. Ne garder que le dernier tour rendait une bulle vide. */
-    const textes = [];
-    const question = messages[messages.length - 1].content;
-    for (let tour = 0; tour <= OUTILS_MAX; tour++) {
-      reponse = await client.beta.messages.create({
-        model: MODELE,
-        max_tokens: 4000,
-        /* Une conversation de concierge n'a pas besoin de reflechir
-           longtemps : effort bas, reponse en quelques secondes. */
-        output_config: { effort: 'low' },
-        /* Si le modele decline une demande (filtre de securite), l'API la
-           rejoue d'elle-meme sur le modele de secours adapte. */
-        betas: ['server-side-fallback-2026-07-01'],
-        fallbacks: 'default',
-        system,
-        tools: OUTILS,
-        messages,
+  let reponse;
+  /* Tout le texte ecrit par le modele, a chaque tour : il repond souvent
+     AVANT d'appeler un outil (« Nous n'acceptons pas les animaux ; pour
+     le tennis, je vous mets en relation… »), puis n'ecrit plus rien
+     apres. Ne garder que le dernier tour rendait une bulle vide. */
+  const textes = [];
+  let ecrit = false;
+  const question = messages[messages.length - 1].content;
+  for (let tour = 0; tour <= OUTILS_MAX; tour++) {
+    const params = {
+      model: MODELE,
+      max_tokens: 4000,
+      /* Une conversation de concierge n'a pas besoin de reflechir
+         longtemps : effort bas, reponse en quelques secondes. */
+      output_config: { effort: 'low' },
+      /* Si le modele decline une demande (filtre de securite), l'API la
+         rejoue d'elle-meme sur le modele de secours adapte. */
+      betas: ['server-side-fallback-2026-07-01'],
+      fallbacks: 'default',
+      system,
+      tools: outils,
+      messages,
+    };
+    if (surTexte) {
+      const flux = client.beta.messages.stream(params);
+      let debut = true;
+      flux.on('text', (d) => {
+        // Deux tours d'ecriture se separent d'une ligne vide, comme a l'ecran.
+        if (debut && ecrit) surTexte('\n\n');
+        debut = false; ecrit = true;
+        surTexte(d);
       });
-      for (const b of reponse.content) if (b.type === 'text' && b.text.trim()) textes.push(b.text.trim());
-      if (reponse.stop_reason !== 'tool_use') break;
-      /* Le tour de l'assistant est renvoye TEL QUEL (reflexion comprise) :
-         dans une meme reponse, l'historique ne fait que s'allonger. */
-      messages.push({ role: 'assistant', content: reponse.content });
-      const resultats = [];
-      for (const b of reponse.content) {
-        if (b.type !== 'tool_use') continue;
-        let r;
-        try { r = await executer(b.name, b.input || {}, actions, langue); }
-        catch (e) { r = { erreur: 'Outil indisponible.' }; }
-        resultats.push({ type: 'tool_result', tool_use_id: b.id, content: JSON.stringify(r), ...(r.erreur ? { is_error: true } : {}) });
-      }
-      messages.push({ role: 'user', content: resultats });
+      reponse = await flux.finalMessage();
+    } else {
+      reponse = await client.beta.messages.create(params);
     }
+    for (const b of reponse.content) if (b.type === 'text' && b.text.trim()) textes.push(b.text.trim());
+    if (reponse.stop_reason !== 'tool_use') break;
+    /* Le tour de l'assistant est renvoye TEL QUEL (reflexion comprise) :
+       dans une meme reponse, l'historique ne fait que s'allonger. */
+    messages.push({ role: 'assistant', content: reponse.content });
+    const resultats = [];
+    for (const b of reponse.content) {
+      if (b.type !== 'tool_use') continue;
+      let r;
+      try { r = await executer(b.name, (b.input && typeof b.input === 'object') ? b.input : {}, actions, langue); }
+      catch (e) { r = { erreur: 'Outil indisponible.' }; }
+      resultats.push({ type: 'tool_result', tool_use_id: b.id, content: JSON.stringify(r), ...(r.erreur ? { is_error: true } : {}) });
+    }
+    messages.push({ role: 'user', content: resultats });
+  }
 
-    if (reponse.stop_reason === 'refusal') {
-      await executer('passer_a_la_reception', { resume: langue === 'en' ? 'Hello, I have a question about my stay.' : 'Bonjour, j\'ai une question sur mon séjour.' }, actions, langue);
-      return json(res, 200, { ok: true, actions,
-        texte: langue === 'en' ? 'I can’t help with that here — our reception will be happy to answer you on WhatsApp.'
-          : 'Je ne peux pas vous aider sur ce point ici — la réception vous répondra volontiers sur WhatsApp.' });
-    }
-    let texte = textes.join('\n\n').trim();
+  let texte;
+  if (reponse.stop_reason === 'refusal') {
+    actions.length = 0;
+    await executer('passer_a_la_reception', { resume: langue === 'en' ? 'Hello, I have a question about my stay.' : 'Bonjour, j\'ai une question sur mon séjour.' }, actions, langue);
+    texte = langue === 'en' ? 'I can’t help with that here — our reception will be happy to answer you on WhatsApp.'
+      : 'Je ne peux pas vous aider sur ce point ici — la réception vous répondra volontiers sur WhatsApp.';
+  } else {
+    texte = textes.join('\n\n').trim();
     if (!texte) {
-      if (!actions.length) {
-        await executer('passer_a_la_reception', { resume: question.slice(0, 300) }, actions, langue);
-      }
+      if (!actions.length) await executer('passer_a_la_reception', { resume: question.slice(0, 300) }, actions, langue);
       texte = langue === 'en' ? 'I’m not sure about that one — our reception will answer you on WhatsApp.'
         : 'Je préfère ne pas vous répondre au hasard — la réception vous répondra sur WhatsApp.';
     }
-    // Un bouton de chaque sorte, pas davantage : le dernier propose est le bon.
-    const uniques = [];
-    for (const a of actions.reverse()) if (!uniques.some((u) => u.type === a.type)) uniques.unshift(a);
-    return json(res, 200, { ok: true, texte, actions: uniques });
-  } catch (e) {
-    const code = e instanceof Anthropic.RateLimitError ? 'surcharge' : e instanceof Anthropic.APIError ? 'ia' : 'erreur';
-    console.error('chat', e && e.status, e && e.message);
-    /* Le statut et le type d'erreur d'Anthropic (401 cle refusee, 400 credit
-       epuise...) : ce qu'il faut pour savoir quoi corriger, sans rien de
-       secret — la cle n'apparait jamais dans ces messages. */
-    const detail = e instanceof Anthropic.APIError
-      ? { statut: e.status, type: e.error && e.error.error && e.error.error.type,
-          /* Oui ou non, jamais la valeur : la fonction voit-elle l'espace ? */
-          espace_de_travail: !!espace,
-          message: String((e.error && e.error.error && e.error.error.message) || '').slice(0, 200) }
-      : undefined;
-    return json(res, 502, { ok: false, raison: code, detail });
   }
+  // Un bouton de chaque sorte, pas davantage : le dernier propose est le bon.
+  const uniques = [];
+  for (const a of actions.reverse()) if (!uniques.some((u) => u.type === a.type)) uniques.unshift(a);
+  return { texte, actions: uniques };
+}
+
+/** Ce qu'on peut dire d'une erreur, sans rien de secret. */
+function diagnostic(e) {
+  const code = e instanceof Anthropic.RateLimitError ? 'surcharge' : e instanceof Anthropic.APIError ? 'ia' : 'erreur';
+  console.error('chat', e && e.status, e && e.message);
+  /* Le statut et le type d'erreur d'Anthropic (401 cle refusee, 400 credit
+     epuise...) : ce qu'il faut pour savoir quoi corriger — la cle
+     n'apparait jamais dans ces messages. */
+  const detail = e instanceof Anthropic.APIError
+    ? { statut: e.status, type: e.error && e.error.error && e.error.error.type,
+        /* Oui ou non, jamais la valeur : la fonction voit-elle l'espace ? */
+        espace_de_travail: !!process.env.ANTHROPIC_WORKSPACE_ID,
+        message: String((e.error && e.error.error && e.error.error.message) || '').slice(0, 200) }
+    : undefined;
+  return { ok: false, raison: code, detail };
+}
+
+module.exports = async function handler(req, res) {
+  /* GET : la bulle demande si elle doit s'afficher. Allume dans le
+     back-office ET cle presente — sinon elle ne se montre pas du tout. */
+  if (req.method === 'GET') return json(res, 200, { ok: true, actif: cle() && await allume() });
+  if (req.method !== 'POST') return json(res, 405, { ok: false });
+  if (!cle()) return json(res, 503, { ok: false, raison: 'hors-ligne' });
+  if (!(await allume())) return json(res, 503, { ok: false, raison: 'eteint' });
+  const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || req.socket?.remoteAddress || 'inconnue';
+  if (tropVite(ip)) return json(res, 429, { ok: false, raison: 'debit' });
+
+  let corps = req.body;
+  if (typeof corps === 'string') { try { corps = JSON.parse(corps); } catch { corps = {}; } }
+  const langue = corps && corps.langue === 'en' ? 'en' : 'fr';
+  const page = corps && typeof corps.page === 'string' ? corps.page.slice(0, 80) : '';
+  const messages = nettoyer(corps && corps.messages);
+  if (!messages) return json(res, 422, { ok: false, raison: 'message' });
+
+  if (!(corps && corps.flux)) {
+    try { return json(res, 200, { ok: true, ...(await converser({ messages, langue, page })) }); }
+    catch (e) { return json(res, 502, diagnostic(e)); }
+  }
+
+  /* EN FLUX : une ligne JSON par evenement (NDJSON).
+       { t:'texte', d:'...' }                      un morceau de reponse
+       { t:'fin', texte, actions }                 le texte definitif, les boutons
+       { t:'erreur', raison, detail }              en cours de route
+     Le texte definitif fait foi : il remplace ce qui s'est ecrit (un refus
+     ou une reponse vide y deviennent une phrase et un bouton). */
+  res.statusCode = 200;
+  res.setHeader('Content-Type', 'application/x-ndjson; charset=utf-8');
+  res.setHeader('Cache-Control', 'no-store');
+  res.setHeader('X-Accel-Buffering', 'no');
+  const ligne = (o) => res.write(JSON.stringify(o) + '\n');
+  try {
+    const fin = await converser({ messages, langue, page, surTexte: (d) => ligne({ t: 'texte', d }) });
+    ligne({ t: 'fin', ...fin });
+  } catch (e) {
+    ligne({ t: 'erreur', ...diagnostic(e) });
+  }
+  res.end();
 };
 
 // Pour les tests : la consigne et les outils, sans appel reseau.
-module.exports.interne = { CONSIGNE, OUTILS, executer, nettoyer };
+module.exports.interne = { CONSIGNE, OUTILS, executer, nettoyer, contextePage };

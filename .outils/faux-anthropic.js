@@ -67,9 +67,38 @@ http.createServer((req, res) => {
     req.on('end', () => {
       let corps = {};
       try { corps = JSON.parse(Buffer.concat(morceaux).toString('utf8')); } catch (e) {}
-      journal.push({ beta: req.headers['anthropic-beta'] || '', cle: !!req.headers['x-api-key'], corps });
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify(repondre(corps)));
+      journal.push({ beta: req.headers['anthropic-beta'] || '', cle: !!req.headers['x-api-key'],
+        espace: req.headers['anthropic-workspace-id'] || '', corps });
+      const m = repondre(corps);
+      if (!corps.stream) {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        return res.end(JSON.stringify(m));
+      }
+      /* En flux (Server-Sent Events), comme l'API : le texte arrive par
+         morceaux de quelques lettres, espaces de 30 ms. */
+      res.writeHead(200, { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache' });
+      const ev = (type, data) => res.write('event: ' + type + '\ndata: ' + JSON.stringify({ type, ...data }) + '\n\n');
+      const pause = (ms) => new Promise((r) => setTimeout(r, ms));
+      (async () => {
+        ev('message_start', { message: { ...m, content: [], stop_reason: null } });
+        for (let i = 0; i < m.content.length; i++) {
+          const b = m.content[i];
+          if (b.type === 'text') {
+            ev('content_block_start', { index: i, content_block: { type: 'text', text: '' } });
+            for (let k = 0; k < b.text.length; k += 8) {
+              ev('content_block_delta', { index: i, delta: { type: 'text_delta', text: b.text.slice(k, k + 8) } });
+              await pause(30);
+            }
+          } else {
+            ev('content_block_start', { index: i, content_block: { type: 'tool_use', id: b.id, name: b.name, input: {} } });
+            ev('content_block_delta', { index: i, delta: { type: 'input_json_delta', partial_json: JSON.stringify(b.input) } });
+          }
+          ev('content_block_stop', { index: i });
+        }
+        ev('message_delta', { delta: { stop_reason: m.stop_reason, stop_sequence: null }, usage: { output_tokens: 10 } });
+        ev('message_stop', {});
+        res.end();
+      })();
     });
     return;
   }

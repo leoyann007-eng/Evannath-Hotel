@@ -1007,6 +1007,7 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
 .chat-bulle:hover{background:var(--bronze-2);transform:translateY(-2px)}
 .chat-bulle:focus-visible{outline:2px solid var(--bronze);outline-offset:4px}
 .chat-bulle svg{width:26px;height:26px;fill:none;stroke:#fff;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.chat-bulle.chat-cache{display:none}
 .chat-bulle[aria-expanded="true"] .ico-ouvre,.chat-bulle:not([aria-expanded="true"]) .ico-ferme{display:none}
 .chat{position:fixed;right:22px;bottom:162px;z-index:95;width:392px;max-width:calc(100vw - 32px);
   height:min(600px,calc(100vh - 290px));min-height:360px;display:flex;flex-direction:column;background:var(--bark);
@@ -1061,7 +1062,7 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
 }
 @media(prefers-reduced-motion:reduce){.chat,.chat.ouvert{transition:none}.chat-points i{animation:none;opacity:.6}}
 </style>
-<button class="chat-bulle" type="button" aria-expanded="false" aria-controls="chat" aria-label="Poser une question au concierge">
+<button class="chat-bulle chat-cache" type="button" aria-expanded="false" aria-controls="chat" aria-label="Poser une question au concierge">
   <svg class="ico-ouvre" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5h16v10H9.5L5 19.5v-4H4z"/><path d="M8 9.5h8M8 12.5h5"/></svg>
   <svg class="ico-ferme" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
 </button>
@@ -1079,17 +1080,30 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
 <script>(function(){
 var d=document,b=d.querySelector('.chat-bulle'),p=d.getElementById('chat');if(!b||!p)return;
 var fil=p.querySelector('.chat-fil'),sugg=p.querySelector('.chat-sugg'),f=p.querySelector('.chat-saisie'),q=d.getElementById('chat-q');
-var WA='2250758408079';
+var WA='2250758408079',CHAMBRES=["chambre-standard", "deluxe-baldaquin", "deluxe-superieure", "suite-anglaise", "chambre-mezzanine", "mezzanine-superieure", "suite-arabe"];
+/* La page ouverte : une fiche chambre, la table, le spa... Elle part avec
+   chaque question (le serveur n'accepte que le chemin) et choisit les
+   suggestions de depart. */
+var CHEMIN=location.pathname,CLE=CHEMIN.replace(/^\//,'').replace(/\.html$/,'');
+var FICHE=CHAMBRES.indexOf(CLE)>=0;
 var MOTS={
   fr:{bonjour:'Bonjour ! Je suis le concierge de l’Hôtel Evannath. Chambres, disponibilités, table, spa, accès : posez votre question.',
+      bonjourFiche:'Bonjour ! Une question sur cette chambre, ses disponibilités ou son prix ? Je vous réponds tout de suite.',
       sugg:['Des chambres libres ce week-end ?','Que comprend le tarif ?','Comment venir depuis Abidjan ?','Parler à la réception'],
+      suggFiche:['Est-elle libre ce week-end ?','Combien pour 2 nuits à 2 ?','Qu’y a-t-il dans la chambre ?','Parler à la réception'],
+      suggCarte:['Quels sont les horaires du restaurant ?','Peut-on réserver une table ?','Le petit-déjeuner est-il compris ?','Parler à la réception'],
+      suggSpa:['Quels soins proposez-vous ?','Faut-il réserver un soin ?','Le spa est-il ouvert tous les jours ?','Parler à la réception'],
       titre:'Le concierge',sous:'Réponse immédiate · la réception prend le relais',ph:'Posez votre question…',
       note:'Assistant automatique : il peut se tromper, la réception confirme toute réservation. Vos messages sont traités par une IA (Anthropic) pour vous répondre ; n’y écrivez aucune donnée de paiement.',
       panne:'Je ne peux pas répondre pour le moment. La réception vous répond sur WhatsApp, à toute heure.',
       vite:'Beaucoup de questions à la suite : laissez-moi une minute, ou écrivez directement à la réception.',
       wa:'Écrire à la réception sur WhatsApp',envoyer:'Envoyer',fermer:'Fermer',ouvrir:'Poser une question au concierge'},
   en:{bonjour:'Hello! I’m the Hôtel Evannath concierge. Rooms, availability, dining, spa, getting here: ask me anything.',
+      bonjourFiche:'Hello! Any question about this room, its availability or its price? I’ll answer right away.',
       sugg:['Any rooms free this weekend?','What does the rate include?','How do I get there from Abidjan?','Talk to reception'],
+      suggFiche:['Is it free this weekend?','How much for 2 nights for 2?','What’s in the room?','Talk to reception'],
+      suggCarte:['What are the restaurant hours?','Can I book a table?','Is breakfast included?','Talk to reception'],
+      suggSpa:['Which treatments do you offer?','Do I need to book a treatment?','Is the spa open every day?','Talk to reception'],
       titre:'The concierge',sous:'Instant answers · reception takes over',ph:'Ask your question…',
       note:'Automated assistant: it can make mistakes, and reception confirms every booking. Your messages are processed by an AI (Anthropic) to answer you; never share payment details here.',
       panne:'I can’t answer right now. Reception replies on WhatsApp, day and night.',
@@ -1098,24 +1112,28 @@ var MOTS={
 };
 function lg(){return (d.documentElement.lang||'fr').slice(0,2)==='en'?'en':'fr'}
 function M(){return MOTS[lg()]}
+function suggestions(){var t=M();return FICHE?t.suggFiche:CLE==='carte'?t.suggCarte:CLE==='spa'?t.suggSpa:t.sugg}
 var E={m:[],o:false};
 try{var s=JSON.parse(sessionStorage.getItem('evn-chat')||'null');if(s&&Array.isArray(s.m))E=s}catch(e){}
 function garder(){try{sessionStorage.setItem('evn-chat',JSON.stringify({m:E.m.slice(-40),o:E.o}))}catch(e){}}
 function esc(t){return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
 function riche(t){return esc(t).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')}
+function boutons(el,liste){
+  if(!liste||!liste.length)return;var a=d.createElement('div');a.className='chat-actions';
+  liste.forEach(function(x){var l=d.createElement('a');l.className=x.type;l.href=x.url;l.textContent=x.libelle;
+    if(x.type==='whatsapp'){l.target='_blank';l.rel='noopener'}a.appendChild(l)});
+  el.parentNode.insertBefore(a,el.nextSibling);
+}
 function bulle(m){
   var e=d.createElement('div');e.className='chat-m '+(m.r==='user'?'moi':'ia');
-  e.innerHTML=m.r==='user'?esc(m.t):riche(m.t);fil.appendChild(e);
-  if(m.a&&m.a.length){var a=d.createElement('div');a.className='chat-actions';
-    m.a.forEach(function(x){var l=d.createElement('a');l.className=x.type;l.href=x.url;l.textContent=x.libelle;
-      if(x.type==='whatsapp'){l.target='_blank';l.rel='noopener'}a.appendChild(l)});fil.appendChild(a)}
+  e.innerHTML=m.r==='user'?esc(m.t):riche(m.t);fil.appendChild(e);boutons(e,m.a);return e;
 }
 function peindre(){
   var t=M();p.querySelector('#chat-titre').textContent=t.titre;p.querySelector('#chat-sous').textContent=t.sous;
   q.placeholder=t.ph;p.querySelector('.chat-note').textContent=t.note;p.querySelector('.chat-x').setAttribute('aria-label',t.fermer);
   f.querySelector('button').setAttribute('aria-label',t.envoyer);b.setAttribute('aria-label',t.ouvrir);
-  fil.innerHTML='';bulle({r:'assistant',t:t.bonjour});E.m.forEach(bulle);
-  sugg.innerHTML='';if(!E.m.length)t.sugg.forEach(function(x){var s=d.createElement('button');s.type='button';s.textContent=x;
+  fil.innerHTML='';bulle({r:'assistant',t:FICHE?t.bonjourFiche:t.bonjour});E.m.forEach(bulle);
+  sugg.innerHTML='';if(!E.m.length)suggestions().forEach(function(x){var s=d.createElement('button');s.type='button';s.textContent=x;
     s.onclick=function(){demander(x)};sugg.appendChild(s)});
   fil.scrollTop=fil.scrollHeight;
 }
@@ -1134,26 +1152,50 @@ function demander(t){
   var pts=d.createElement('div');pts.className='chat-points';pts.innerHTML='<i></i><i></i><i></i>';fil.appendChild(pts);fil.scrollTop=fil.scrollHeight;
   f.querySelector('button').disabled=true;
   var waSecours={type:'whatsapp',url:'https://wa.me/'+WA+'?text='+encodeURIComponent(t),libelle:M().wa};
-  fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({langue:lg(),messages:E.m.map(function(m){return{role:m.r,text:m.t}})})})
-  .then(function(r){return r.json().catch(function(){return{ok:false}}).then(function(j){j.code=r.status;return j})})
-  .then(function(j){
-    var m=j&&j.ok&&j.texte?{r:'assistant',t:j.texte,a:j.actions||[]}
-      :{r:'assistant',t:j&&j.raison==='debit'?M().vite:M().panne,a:[waSecours],x:1};
-    fin(m);
-  })
-  .catch(function(){fin({r:'assistant',t:M().panne,a:[waSecours],x:1})});
+  /* La reponse s'ecrit a mesure qu'elle arrive (une ligne JSON par
+     morceau) ; la ligne « fin » apporte le texte definitif et les boutons. */
+  var el=null,recu='';
+  function ecrire(txt){if(!el){pts.remove();el=bulle({r:'assistant',t:''})}el.innerHTML=riche(txt);fil.scrollTop=fil.scrollHeight}
   function fin(m){
-    occupe=false;pts.remove();f.querySelector('button').disabled=false;
+    occupe=false;if(pts.parentNode)pts.remove();f.querySelector('button').disabled=false;
+    if(el){el.innerHTML=riche(m.t);boutons(el,m.a)}else{el=bulle(m)}
     /* Un message d'erreur s'affiche mais ne part pas dans l'historique :
        l'IA n'a pas a le relire au tour suivant. */
-    if(!m.x){E.m.push(m);garder()}
-    bulle(m);fil.scrollTop=fil.scrollHeight;if(E.o)q.focus();
+    if(!m.x){E.m.push({r:'assistant',t:m.t,a:m.a});garder()}
+    fil.scrollTop=fil.scrollHeight;if(E.o)q.focus();
   }
+  function panne(j){fin({r:'assistant',t:j&&j.raison==='debit'?M().vite:M().panne,a:[waSecours],x:1})}
+  fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({flux:true,page:CHEMIN,langue:lg(),messages:E.m.map(function(m){return{role:m.r,text:m.t}})})})
+  .then(function(r){
+    var type=r.headers.get('content-type')||'';
+    if(!r.ok||type.indexOf('ndjson')<0||!r.body||!r.body.getReader){
+      return r.json().catch(function(){return{}}).then(function(j){
+        if(j&&j.ok&&j.texte)fin({r:'assistant',t:j.texte,a:j.actions||[]});else panne(j)});
+    }
+    var lire=r.body.getReader(),dec=new TextDecoder(),reste='',fini=false;
+    function traiter(l){if(!l.trim())return;var o;try{o=JSON.parse(l)}catch(e){return}
+      if(o.t==='texte'){recu+=o.d;ecrire(recu)}
+      else if(o.t==='fin'){fini=true;fin({r:'assistant',t:o.texte,a:o.actions||[]})}
+      else if(o.t==='erreur'){fini=true;panne(o)}}
+    function pomper(){return lire.read().then(function(x){
+      if(x.done){if(reste)traiter(reste);if(!fini)panne({});return}
+      reste+=dec.decode(x.value,{stream:true});var l=reste.split('\n');reste=l.pop();l.forEach(traiter);return pomper()})}
+    return pomper();
+  })
+  .catch(function(){if(occupe)panne({})});
 }
 /* La langue bascule avec le selecteur FR/EN : on repeint. */
 new MutationObserver(function(){if(E.o)peindre()}).observe(d.documentElement,{attributes:true,attributeFilter:['lang']});
-if(E.o)ouvrir(true);
+/* La bulle ne se montre que si le concierge est allume dans le back-office
+   et que la cle est posee. La reponse est gardee dix minutes dans l'onglet :
+   une seule question au serveur, pas une par page. */
+function montrer(v){b.classList.toggle('chat-cache',!v);if(!v&&E.o){E.o=false;garder();p.classList.remove('ouvert')}else if(v&&E.o)ouvrir(true)}
+var memo=null;try{memo=JSON.parse(sessionStorage.getItem('evn-chat-actif')||'null')}catch(e){}
+if(memo&&Date.now()-memo.t<600000)montrer(memo.v);
+else fetch('/api/chat',{cache:'no-store'}).then(function(r){return r.json()}).then(function(j){
+  var v=!!(j&&j.actif);try{sessionStorage.setItem('evn-chat-actif',JSON.stringify({v:v,t:Date.now()}))}catch(e){}montrer(v)})
+  .catch(function(){montrer(false)});
 })();</script>
 
 <div id="lb" role="dialog" aria-modal="true" aria-label="Photo en grand">

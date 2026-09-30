@@ -699,6 +699,7 @@ async function charger() {
   ETAT.version = etat.version || '';
   ETAT.panne = etat.panne || '';
   ETAT.fichiers = etat.fichiers || 0;
+  ETAT.chatbot = etat.chatbot || { actif: true, cle: false };
   await verifierEmpreinte();
   /* La grille gravee dans le site, et par-dessus les prix saisis ici : les
      autres ecrans (l'apercu d'une promotion) montrent le prix en vigueur. */
@@ -2159,6 +2160,21 @@ function rendre() {
           ETAT.variable}</code></div>` : ''}
       </div>
       <div class="carte">
+        <h2 class="bloc-t">Le concierge (chatbot)</h2>
+        <div class="ligne" style="margin:0"><div class="txt"><b>Sur le site</b>
+          <span>${ETAT.chatbot.actif
+            ? 'La bulle du concierge s’affiche sur toutes les pages et répond aux visiteurs.'
+            : 'Éteint : la bulle ne s’affiche plus. Le bouton WhatsApp reste en place.'}</span></div>
+          <button type="button" class="cm-bascule" role="switch" id="chatbot-bascule"
+            aria-checked="${ETAT.chatbot.actif}"><i></i>${ETAT.chatbot.actif ? 'Allumé' : 'Éteint'}</button></div>
+        <div class="ligne"><div class="txt"><b>Clé Anthropic</b>
+          <span>${ETAT.chatbot.cle ? 'Présente : le concierge peut répondre.'
+            : 'Absente : même allumé, le concierge ne s’affiche pas. Elle se pose dans Vercel (ANTHROPIC_API_KEY).'}</span></div>
+          <span class="etat ${ETAT.chatbot.cle ? 'vif' : 'fini'}">${ETAT.chatbot.cle ? 'Présente' : 'Absente'}</span></div>
+        <p class="aide" style="margin-top:12px">Chaque question coûte quelques francs, facturés par
+          Anthropic. Éteindre le concierge arrête toute dépense ; le rallumer est immédiat.</p>
+      </div>
+      <div class="carte">
         <p style="color:var(--muted)">Les numéros de téléphone et l'adresse e-mail
         se règlent aujourd'hui dans le code du site ; les rendre modifiables ici
         fait partie de ce qui reste à construire. Les prix des chambres, eux, se
@@ -2200,6 +2216,17 @@ document.addEventListener('click', async (e) => {
   if (typeof clicDsp === 'function' && clicDsp(e)) return;
 
   if (e.target.closest('#tarifs-ok')) { enregistrerTarifs(); return; }
+  const cb = e.target.closest('#chatbot-bascule');
+  if (cb) {
+    cb.disabled = true;
+    const voulu = !ETAT.chatbot.actif;
+    const r = await appel('reglages', { chatbot: { actif: voulu } });
+    if (r.ok) ETAT.chatbot.actif = voulu;
+    rendre();
+    if (typeof notifier === 'function') notifier(r.ok ? (voulu ? 'Concierge allumé' : 'Concierge éteint')
+      : (r.message || 'Rien n’a été enregistré'), !r.ok);
+    return;
+  }
   const cc = e.target.closest('[data-cat]');
   if (cc) { CAT_OUVERTE = cc.dataset.cat; rendre(); window.scrollTo(0, 0); return; }
   if (e.target.closest('[data-cat-retour]')) { CAT_OUVERTE = null; rendre(); return; }

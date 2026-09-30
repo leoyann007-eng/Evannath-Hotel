@@ -1498,6 +1498,12 @@ module.exports = async function handler(req, res) {
       medias: (d.medias || []).length,
       chambres: (d.chambres || []).length,
       fermetures: (d.fermetures || []).length,
+      /* Le concierge (api/chat.js) : allume ou non dans Parametres, et la
+         cle Anthropic presente ou non — oui ou non, jamais la valeur. */
+      chatbot: {
+        actif: !(d.reglages && d.reglages.chatbot && d.reglages.chatbot.actif === false),
+        cle: !!(process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_AUTH_TOKEN),
+      },
       maj: d.maj,
     });
   }
@@ -1613,6 +1619,24 @@ module.exports = async function handler(req, res) {
       courriel = await courrielAuClient(objet, nomDeCategorie(ch && ch.categorie));
     }
     return json(res, 200, { ok: true, entree: objet, courriel });
+  }
+
+  /* ── Les reglages : { chatbot: { actif } } ────────────────────────────
+     Un interrupteur, pas davantage. Le reste des reglages vit dans le code
+     tant qu'il n'a pas besoin de changer sans developpeur. */
+  if (action === 'reglages') {
+    if (req.method !== 'POST') return json(res, 405, { ok: false });
+    let corps = req.body;
+    if (typeof corps === 'string') { try { corps = JSON.parse(corps); } catch { corps = {}; } }
+    const c = corps && corps.chatbot;
+    if (!c || typeof c.actif !== 'boolean') return json(res, 422, { ok: false, message: 'Rien à régler.' });
+    const d = await lire();
+    if (PANNE) return json(res, 503, { ok: false, message: PANNE
+      + ' Rien n a ete enregistre : ecrire maintenant effacerait le reste.' });
+    d.reglages = { ...(d.reglages || {}), chatbot: { actif: c.actif } };
+    const w = await ecrire(d);
+    if (!w.ok) return json(res, 502, { ok: false, message: w.message });
+    return json(res, 200, { ok: true, reglages: d.reglages });
   }
 
   /* ── Plusieurs chambres a la fois ────────────────────────────────────────
