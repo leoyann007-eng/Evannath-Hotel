@@ -110,3 +110,5 @@ handoff_touches_pagne/
 # servent a relever des timings, pas a etre servies. Memes raisons que
 # handoff_touches_pagne/.
 handoff_motion/
+.agents/
+skills-lock.json
