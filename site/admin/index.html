@@ -9,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Karla:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/admin/disponibilites.css">
 <link rel="stylesheet" href="/admin/chambres.css">
+<link rel="stylesheet" href="/admin/comptes.css">
 <style>
 :root{
   /* ── Marine, or et blanc ────────────────────────────────────────────
@@ -504,13 +505,44 @@ details.plus summary::marker{color:var(--bronze)}
     <img class="logo" src="/img/opt/logo-bronze.png" alt="Hôtel Evannath">
     <p class="devise">Le rêve africain</p>
     <h1>Espace d'administration</h1>
-    <p>Publiez vos événements, vos promotions et vos campagnes.</p>
+    <p>Connectez-vous avec votre compte.</p>
+    <div class="champ">
+      <label for="courriel">Adresse e-mail</label>
+      <input type="email" id="courriel" autocomplete="username" inputmode="email"
+        autocapitalize="none" spellcheck="false">
+    </div>
     <div class="champ">
       <label for="mdp">Mot de passe</label>
       <input type="password" id="mdp" autocomplete="current-password" required>
     </div>
     <button class="btn plein" style="width:100%;justify-content:center">Entrer</button>
-    <p class="msg mal" id="errporte" style="margin-top:14px"></p>
+    <p class="msg mal" id="errporte" style="margin-top:14px" role="alert"></p>
+    <p class="aide cp-secours">Accès de secours : laissez l’e-mail vide et saisissez
+      le mot de passe principal de l’installation.</p>
+  </form>
+  <form id="fpremier" hidden>
+    <img class="logo" src="/img/opt/logo-bronze.png" alt="Hôtel Evannath">
+    <p class="devise">Première connexion</p>
+    <h1>Choisissez votre mot de passe</h1>
+    <p id="premier-qui">Le mot de passe qu’on vous a transmis est provisoire. Remplacez-le
+      par le vôtre : personne d’autre ne le connaîtra.</p>
+    <div class="champ">
+      <label for="p-ancien">Mot de passe provisoire</label>
+      <input type="password" id="p-ancien" autocomplete="current-password" required>
+    </div>
+    <div class="champ">
+      <label for="p-nouveau">Nouveau mot de passe</label>
+      <input type="password" id="p-nouveau" autocomplete="new-password" minlength="10" required
+        aria-describedby="p-aide">
+      <p class="aide" id="p-aide">10 caractères au moins. Une courte phrase se retient mieux
+        qu’un mot compliqué.</p>
+    </div>
+    <div class="champ">
+      <label for="p-confirme">Confirmez-le</label>
+      <input type="password" id="p-confirme" autocomplete="new-password" required>
+    </div>
+    <button class="btn plein" style="width:100%;justify-content:center">Enregistrer et entrer</button>
+    <p class="msg mal" id="errpremier" style="margin-top:14px" role="alert"></p>
   </form>
 </div>
 
@@ -539,7 +571,9 @@ details.plus summary::marker{color:var(--bronze)}
       <h2>Administration</h2>
       <button data-v="parametres" title="Paramètres"><i>⚙</i><span>Paramètres</span></button>
       <button data-v="utilisateurs" title="Utilisateurs"><i>◐</i><span>Utilisateurs</span></button>
-      <h2>&nbsp;</h2>
+      <button data-v="journal" title="Journal d'activité"><i>≡</i><span>Journal d'activité</span></button>
+      <h2 id="moi-nom">&nbsp;</h2>
+      <button data-v="compte" title="Mon compte"><i>◍</i><span>Mon compte</span></button>
       <button id="sortir" title="Se déconnecter"><i>↩</i><span>Se déconnecter</span></button>
     </nav>
   </aside>
@@ -648,6 +682,8 @@ async function appel(action, corps, methode) {
 /* ── Connexion ─────────────────────────────────────────── */
 function montrerPorte() {
   $('#porte').style.display = 'grid';
+  $('#fporte').hidden = false;
+  $('#fpremier').hidden = true;
   $('#cadre').classList.remove('on');
 }
 function montrerCadre() {
@@ -659,7 +695,7 @@ function montrerCadre() {
 $('#fporte').addEventListener('submit', async (e) => {
   e.preventDefault();
   $('#errporte').textContent = '';
-  const r = await appel('entrer', { mdp: $('#mdp').value });
+  const r = await appel('entrer', { courriel: $('#courriel').value.trim(), mdp: $('#mdp').value });
   if (r.ok) { $('#mdp').value = ''; montrerCadre(); }
   else $('#errporte').textContent = r.message || 'Connexion impossible.';
 });
@@ -684,6 +720,11 @@ async function charger() {
     // combien de chambres il reste a saisir.
     fetch('/donnees/hotel.json').then((r) => (r.ok ? r.json() : null)).catch(() => null),
   ]);
+  /* La personne connectee. Un mot de passe provisoire ne laisse rien voir
+     d'autre que l'ecran qui le remplace — le serveur refuse le reste. */
+  ETAT.moi = etat.moi || null;
+  if (ETAT.moi && ETAT.moi.provisoire) { montrerPremier(); return; }
+  appliquerProfil();
   ETAT.stockage = etat.stockage;
   ETAT.magasin = etat.magasin;
   ETAT.variable = etat.variable;
@@ -776,9 +817,10 @@ function ficheCategorie(c, onglets) {
       <h2 class="bloc-t">Prix de la nuit</h2>
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
         <input id="f-tarif" data-tarif="${ech(c.slug)}" data-grille="${c.prix}" inputmode="numeric"
-          aria-label="Prix de la nuit" value="${actuel}" style="width:160px;text-align:right">
+          aria-label="Prix de la nuit" value="${actuel}" style="width:160px;text-align:right"
+          ${peut('tarifs') ? '' : 'disabled'}>
         <span style="color:var(--muted)">FCFA</span>
-        ${actuel === c.prix ? '' : `<button type="button" class="btn mince"
+        ${actuel === c.prix || !peut('tarifs') ? '' : `<button type="button" class="btn mince"
           data-tarif-grille="${ech(c.slug)}">Rétablir ${FCFA(c.prix)}CFA</button>`}
       </div>
       <p class="aide">${actuel === c.prix ? 'C’est le prix d’origine du site.'
@@ -790,7 +832,8 @@ function ficheCategorie(c, onglets) {
         résultats Google montrent le prix d’origine jusqu’à la prochaine mise à jour
         du site.</p>
       <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:18px">
-        <button class="btn plein" id="tarifs-ok">Enregistrer le prix</button>
+        ${peut('tarifs') ? '<button class="btn plein" id="tarifs-ok">Enregistrer le prix</button>'
+          : '<p class="aide" style="margin:0">Seul un administrateur modifie les prix.</p>'}
         <p class="msg" id="msg-tarifs" role="status"></p>
       </div>
     </div>
@@ -835,7 +878,8 @@ async function enregistrerTarifs() {
 
 $('#menu').addEventListener('click', (e) => {
   const b = e.target.closest('button[data-v]');
-  if (!b) return;
+  // Une rubrique que le profil n'ouvre pas : un lien du tableau de bord y menait encore.
+  if (!b || b.hidden) return;
   VUE = b.dataset.v; EDITE = null; CAT_OUVERTE = null;
   if (typeof cmReinit === 'function') { cmReinit(); CM.onglet = 'inventaire'; }
   [...$('#menu').querySelectorAll('button')].forEach((x) => x.classList.toggle('on', x === b));
@@ -1991,6 +2035,9 @@ function rendre() {
     const chiffre = (n, l, c) => `<div class="carte"${c ? ` style="--c:${c}"` : ''}>
       <b>${c ? '<span class="pt"></span>' : ''}${n}</b><span>${l}</span></div>`;
 
+    /* La Communication ne recoit pas les sejours (api/admin.js, a=tout) :
+       « 0 arrivee » serait faux. On ne lui montre pas ce qu'elle ne voit pas. */
+    const voitResa = !ETAT.moi || (ETAT.moi.vues || []).includes('disponibilites');
     v.innerHTML = `<div class="entete"><div>
         <h1 class="t">Tableau de bord</h1>
         <p class="sous">${jour.charAt(0).toUpperCase() + jour.slice(1)}${
@@ -1999,7 +2046,7 @@ function rendre() {
       </div></div>
       ${avertissement()}
 
-      ${aTraiter.length ? `<div class="carte dsp-traiter">
+      ${voitResa && aTraiter.length ? `<div class="carte dsp-traiter">
         <h2 class="bloc-t" style="margin-bottom:4px">${aTraiter.length} demande${
           aTraiter.length > 1 ? 's' : ''} venue${aTraiter.length > 1 ? 's' : ''} du site</h2>
         <p class="aide" style="margin:0 0 14px">Une chambre leur est gardée jusqu'à
@@ -2024,7 +2071,7 @@ function rendre() {
                 aTraiter.length > 4 ? 's' : ''}</span>` : ''}</div>
       </div>` : ''}
 
-      ${chambres.length ? `<p class="lb" style="margin:0 0 12px">Ce soir</p>
+      ${!voitResa ? '' : chambres.length ? `<p class="lb" style="margin:0 0 12px">Ce soir</p>
         <div class="dsp-chiffres-h">
           ${chiffre(libres === null ? '—' : libres, 'Chambres libres', 'var(--et-libre)')}
           ${chiffre(arrivees, 'Arrivées aujourd\'hui', 'var(--ambre)')}
@@ -2038,7 +2085,7 @@ function rendre() {
             à chaque visiteur que la réception confirme sous 24 h.${
               ETAT.annoncees ? ` Votre site annonce ${ETAT.annoncees} chambres
               et suites.` : ''}</p>
-          <button class="btn plein" data-aller="chambres">Saisir les chambres</button>
+          ${peut('chambres') ? '<button class="btn plein" data-aller="chambres">Saisir les chambres</button>' : ''}
         </div>`}
 
       <p class="lb" style="margin:26px 0 12px">En ligne sur le site</p>
@@ -2048,12 +2095,12 @@ function rendre() {
         ${chiffre(ETAT.images.length, 'Photos disponibles')}
       </div>
 
-      <div class="carte">
+      ${peut('contenu') ? `<div class="carte">
         <div class="bloc-t" style="margin-bottom:10px">Publier une affiche</div>
         <p class="aide" style="margin-bottom:18px">Un événement daté disparaît du site
         tout seul le lendemain de sa date de fin. Vous n'avez rien à décrocher.</p>
         <button class="btn plein" data-neuf="evenements">Nouvel événement</button>
-      </div>`;
+      </div>` : ''}`;
   } else if (VUE === 'evenements' || VUE === 'promotions') {
     const promo = VUE === 'promotions';
     v.innerHTML = `<div class="entete">
@@ -2181,22 +2228,23 @@ function rendre() {
         modifient dans « Chambres ».</p>
       </div>`;
   } else if (VUE === 'utilisateurs') {
-    v.innerHTML = `<div class="entete"><div>
-        <h1 class="t">Utilisateurs</h1>
-        <p class="sous">Qui peut publier.</p></div></div>
-      <div class="carte">
-        <p style="color:var(--muted)">L'accès se fait aujourd'hui par <strong>un mot de
-        passe unique</strong>, partagé par l'équipe et défini dans les variables Vercel.
-        C'est le strict nécessaire pour que la page ne soit pas ouverte à tous.</p>
-        <p style="color:var(--muted);margin-top:14px">Des comptes nominatifs — avec un
-        journal de qui a publié quoi — demandent le stockage durable. C'est la suite
-        logique, une fois le magasin branché.</p>
-      </div>`;
+    v.innerHTML = vueUtilisateurs();
+  } else if (VUE === 'journal') {
+    v.innerHTML = vueJournal();
+  } else if (VUE === 'compte') {
+    v.innerHTML = vueCompte();
   }
 
   /* Le bandeau de page périmée passe devant tout le reste, sur toutes les
      vues. Le poser vue par vue en oubliait trois. */
   if (PERIMEE) v.insertAdjacentHTML("afterbegin", perimee());
+  /* Lecture seule : dit une fois, en haut, plutot que de laisser cliquer
+     sur des boutons que le serveur refusera. */
+  if (ETAT.moi && !ETAT.moi.droits.length && !['compte'].includes(VUE)) {
+    v.insertAdjacentHTML('afterbegin', '<div class="cp-lecture">Profil <b>Lecture seule</b> : '
+      + 'vous consultez tout, sans pouvoir rien modifier.</div>');
+  }
+  if (typeof cpApres === 'function') cpApres();
 
   /* Le calendrier a besoin de toute la largeur, et s ouvre sur aujourd hui. */
   v.classList.toggle('large', VUE === 'disponibilites');
@@ -2595,5 +2643,6 @@ appel('etat').then((r) => { if (r.ok) montrerCadre(); }).catch(() => {});
 </script>
 <script src="/admin/disponibilites.js"></script>
 <script src="/admin/chambres.js"></script>
+<script src="/admin/comptes.js"></script>
 </body>
 </html>

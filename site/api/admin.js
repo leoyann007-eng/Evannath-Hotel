@@ -15,14 +15,15 @@
  * Le mode est annonce dans /api/admin?a=etat : l'interface le dit en clair
  * plutot que de laisser croire que les donnees sont conservees.
  *
- * AUTHENTIFICATION — un mot de passe, defini par ADMIN_MDP, echange contre un
- * cookie signe. Ce n'est pas un systeme multi-utilisateurs : c'est le strict
- * necessaire pour que l'acces ne soit pas ouvert a tous. La gestion de
- * plusieurs comptes viendra avec le stockage reel.
+ * AUTHENTIFICATION — des comptes nominatifs a quatre profils, et ADMIN_MDP
+ * comme acces de secours. Tout est dans _comptes.js ; ici, chaque action
+ * verifie le droit qu'elle exige AVANT de lire quoi que ce soit, et chaque
+ * modification laisse une ligne dans le journal (d.journal).
  */
 
 const crypto = require('crypto');
 const tarif = require('./_tarif.js');
+const comptes = require('./_comptes.js');
 
 /* Les categories, telles que le site les vend. On les lit au lieu de les
    recopier : le courriel de confirmation doit dire « Chambre Standard », pas
@@ -60,7 +61,7 @@ function trouverJeton() {
   return { valeur: '', nom: '' };
 }
 const { valeur: JETON_BLOB, nom: NOM_JETON } = trouverJeton();
-const DUREE = 12 * 3600;                     // 12 h de session
+const COMPTES = comptes.creer({ jeton: JETON_BLOB, secours: MDP, secret: SECRET });
 
 // ── Stockage ───────────────────────────────────────────────────────────────
 // Le fichier de donnees porte un suffixe aleatoire, ajoute par Blob.
@@ -262,28 +263,43 @@ function expliquer(e) {
   return "Le stockage a refusé l'opération : " + m.slice(0, 140);
 }
 
-// ── Session ────────────────────────────────────────────────────────────────
-const signe = (v) => crypto.createHmac('sha256', SECRET).update(v).digest('hex').slice(0, 32);
-
-function creerJeton() {
-  const exp = Math.floor(Date.now() / 1000) + DUREE;
-  return exp + '.' + signe(String(exp));
+// ── Journal d'activite ─────────────────────────────────────────────────────
+/* Qui a fait quoi, et quand. Il vit DANS le fichier de donnees et part dans
+   la meme ecriture que la modification qu'il decrit : une ligne de journal
+   ne peut donc ni manquer a une modification, ni en decrire une qui a
+   echoue. 90 jours, 1 000 lignes au plus. Il ne sort jamais par les routes
+   publiques, et seuls les administrateurs le lisent. */
+const JOURNAL_JOURS = 90, JOURNAL_MAX = 1000;
+function noter(d, qui, texte) {
+  const limite = new Date(Date.now() - JOURNAL_JOURS * 864e5).toISOString();
+  d.journal = (d.journal || []).filter((l) => l && l.t >= limite);
+  d.journal.push({ t: new Date().toISOString(), u: qui.id, n: qui.nom, x: texte });
+  if (d.journal.length > JOURNAL_MAX) d.journal = d.journal.slice(-JOURNAL_MAX);
+}
+const STATUTS_EN_CLAIR = { confirmee: 'confirmée', attente: 'en attente', annulee: 'annulée', terminee: 'terminée' };
+/** Ce qu'une ligne de journal dit d'une entree. */
+function libelle(type, o, d) {
+  if (!o) return 'une entrée';
+  const dates = (f) => f.debut + (f.fin && f.fin !== f.debut ? ' → ' + f.fin : '');
+  if (type === 'chambre') return 'la chambre ' + o.numero;
+  if (type === 'fermeture') {
+    const ch = ((d && d.chambres) || []).find((x) => x.id === o.cible);
+    const ou = ch ? ' (chambre ' + ch.numero + ', ' + dates(o) + ')' : ' (' + dates(o) + ')';
+    return o.nature === 'client'
+      ? 'la réservation de ' + (o.client || 'un client') + ou
+      : 'une fermeture' + ou;
+  }
+  const nom = { evenement: 'l’événement', promotion: 'la promotion', campagne: 'la campagne',
+    emploi: 'l’offre d’emploi' }[type] || 'l’entrée';
+  return nom + ' « ' + (o.titre || '') + ' »';
 }
 
-function jetonValide(j) {
-  if (!j || !j.includes('.')) return false;
-  const [exp, sig] = j.split('.');
-  if (signe(exp) !== sig) return false;
-  return Number(exp) > Math.floor(Date.now() / 1000);
+/* Le corps JSON d'une requete, quel que soit le chemin par lequel il arrive. */
+function corpsDe(req) {
+  let c = req.body;
+  if (typeof c === 'string') { try { c = JSON.parse(c); } catch { c = {}; } }
+  return c && typeof c === 'object' ? c : {};
 }
-
-function cookieSession(req) {
-  const c = req.headers.cookie || '';
-  const m = c.match(/(?:^|;\s*)evn_adm=([^;]+)/);
-  return m ? decodeURIComponent(m[1]) : '';
-}
-
-const authentifie = (req) => jetonValide(cookieSession(req));
 
 // ── Validation ─────────────────────────────────────────────────────────────
 const propre = (v, max) => String(v == null ? '' : v).replace(/\s+/g, ' ').trim().slice(0, max);
@@ -1446,40 +1462,85 @@ module.exports = async function handler(req, res) {
   // ── Connexion ───────────────────────────────────────────────────────────
   if (action === 'entrer') {
     if (req.method !== 'POST') return json(res, 405, { ok: false });
-    if (!MDP) {
-      return json(res, 503, {
-        ok: false,
-        message: "L'administration n'est pas encore configurée. "
-               + 'Définissez ADMIN_MDP dans les variables Vercel.',
-      });
-    }
-    let corps = req.body;
-    if (typeof corps === 'string') { try { corps = JSON.parse(corps); } catch { corps = {}; } }
-    const donne = String((corps && corps.mdp) || '');
-    // Comparaison a duree constante : une comparaison naive laisse deviner le
-    // mot de passe caractere par caractere.
-    const a = crypto.createHash('sha256').update(donne).digest();
-    const b = crypto.createHash('sha256').update(MDP).digest();
-    if (!crypto.timingSafeEqual(a, b)) {
-      return json(res, 401, { ok: false, message: 'Mot de passe incorrect.' });
-    }
-    res.setHeader('Set-Cookie',
-      `evn_adm=${encodeURIComponent(creerJeton())}; Path=/; HttpOnly; SameSite=Lax; Secure; Max-Age=${DUREE}`);
-    return json(res, 200, { ok: true });
+    const c = corpsDe(req);
+    const r = await COMPTES.entrer({ courriel: c.courriel, mdp: c.mdp });
+    if (r.cookie) res.setHeader('Set-Cookie', r.cookie);
+    return json(res, r.code, r.corps);
   }
 
   if (action === 'sortir') {
-    res.setHeader('Set-Cookie', 'evn_adm=; Path=/; HttpOnly; SameSite=Lax; Secure; Max-Age=0');
+    res.setHeader('Set-Cookie', COMPTES.sortie());
     return json(res, 200, { ok: true });
   }
 
   // ── Tout le reste demande une session ───────────────────────────────────
-  if (!authentifie(req)) return json(res, 401, { ok: false, message: 'Session expirée.' });
+  const qui = await COMPTES.session(req);
+  if (qui.erreur === 503) return json(res, 503, { ok: false, message: qui.message });
+  if (qui.erreur) return json(res, 401, { ok: false, message: 'Session expirée.' });
+
+  /* Un mot de passe provisoire ouvre une seule porte : celle qui le change.
+     Tant qu'il n'est pas remplace, il circule encore sur un bout de papier
+     ou dans une conversation WhatsApp. */
+  if (qui.provisoire && !['etat', 'mot-de-passe'].includes(action)) {
+    return json(res, 403, { ok: false, provisoire: true,
+      message: 'Choisissez d’abord votre mot de passe personnel.' });
+  }
+
+  /* LE controle d'acces. Il passe avant toute lecture : un profil qui n'a pas
+     le droit n'apprend meme pas si l'entree visee existe. */
+  const droit = comptes.droitRequis(action, corpsDe(req).type);
+  if (droit && !comptes.peut(qui.role, droit)) {
+    return json(res, 403, { ok: false, message: 'Votre profil (' + comptes.ROLES[qui.role].nom
+      + ') ne permet pas cette action. Voyez avec un administrateur.' });
+  }
+
+  if (action === 'mot-de-passe') {
+    if (req.method !== 'POST') return json(res, 405, { ok: false });
+    const r = await COMPTES.changerMdp(qui, corpsDe(req));
+    if (r.cookie) res.setHeader('Set-Cookie', r.cookie);
+    return json(res, r.code, r.corps);
+  }
+
+  // ── Les comptes (administrateurs : le droit a ete verifie plus haut) ────
+  if (action === 'comptes') {
+    const r = await COMPTES.lister();
+    return json(res, r.code, r.corps);
+  }
+  if (action === 'compte') {
+    if (req.method !== 'POST') return json(res, 405, { ok: false });
+    const r = await COMPTES.enregistrer(qui, corpsDe(req));
+    return json(res, r.code, r.corps);
+  }
+  if (action === 'compte-reinitialiser') {
+    if (req.method !== 'POST') return json(res, 405, { ok: false });
+    const r = await COMPTES.reinitialiser(qui, String(corpsDe(req).id || ''));
+    return json(res, r.code, r.corps);
+  }
+  if (action === 'compte-supprimer') {
+    if (req.method !== 'POST') return json(res, 405, { ok: false });
+    const r = await COMPTES.supprimer(qui, String(corpsDe(req).id || ''));
+    return json(res, r.code, r.corps);
+  }
+  /* Le journal : les modifications (fichier de donnees) et les acces
+     (fichier des comptes), fondus dans l'ordre, du plus recent au plus ancien. */
+  if (action === 'journal') {
+    const d = await lire();
+    const tout = (d.journal || []).concat(await COMPTES.journal())
+      .sort((a, b) => (a.t < b.t ? 1 : -1)).slice(0, 1500);
+    return json(res, 200, { ok: true, journal: tout });
+  }
 
   if (action === 'etat') {
     const d = await lire();
+    const role = comptes.ROLES[qui.role];
     return json(res, 200, {
       ok: true,
+      /* La personne connectee et ce que son profil ouvre. L'interface s'en
+         sert pour son menu ; le serveur, lui, revérifie a chaque action. */
+      moi: { id: qui.id, nom: qui.nom, courriel: qui.courriel, role: qui.role,
+        profil: role.nom, vues: role.vues, droits: role.droits,
+        provisoire: qui.provisoire, secours: !!qui.secours },
+      comptes: await COMPTES.combien(),
       version: VERSION,
       stockage: JETON_BLOB ? 'durable' : 'demonstration',
       // Vide quand la lecture s est bien passee.
@@ -1511,6 +1572,11 @@ module.exports = async function handler(req, res) {
   if (action === 'tout') {
     const d = await lire();
     if (PANNE) return json(res, 503, { ok: false, message: PANNE });
+    /* Le journal ne part qu'aux administrateurs (par a=journal), et les
+       sejours clients — noms, e-mails, telephones — seulement aux profils
+       qui ont a les voir. La Communication n'en a pas l'usage. */
+    delete d.journal;
+    if (!comptes.ROLES[qui.role].vues.includes('disponibilites')) d.fermetures = [];
     return json(res, 200, { ok: true, donnees: d });
   }
 
@@ -1605,6 +1671,9 @@ module.exports = async function handler(req, res) {
       && objet.statut === 'confirmee'
       && (!avant || avant.statut !== 'confirmee');
     if (i >= 0) d[type][i] = objet; else d[type].push(objet);
+    noter(d, qui, (!avant ? 'A créé ' : 'A modifié ') + libelle(corps.type, objet, d)
+      + (avant && corps.type === 'fermeture' && avant.statut !== objet.statut && objet.statut
+        ? ' : passée en « ' + (STATUTS_EN_CLAIR[objet.statut] || objet.statut) + ' »' : ''));
     const w = await ecrire(d);
     if (!w.ok) return json(res, 502, { ok: false, message: w.message });
 
@@ -1634,6 +1703,7 @@ module.exports = async function handler(req, res) {
     if (PANNE) return json(res, 503, { ok: false, message: PANNE
       + ' Rien n a ete enregistre : ecrire maintenant effacerait le reste.' });
     d.reglages = { ...(d.reglages || {}), chatbot: { actif: c.actif } };
+    noter(d, qui, c.actif ? 'A allumé le concierge (chatbot)' : 'A éteint le concierge (chatbot)');
     const w = await ecrire(d);
     if (!w.ok) return json(res, 502, { ok: false, message: w.message });
     return json(res, 200, { ok: true, reglages: d.reglages });
@@ -1671,6 +1741,8 @@ module.exports = async function handler(req, res) {
     }
     if (creees.length) {
       d.chambres.push(...creees);
+      noter(d, qui, 'A ajouté ' + creees.length + (creees.length > 1 ? ' chambres : ' : ' chambre : ')
+        + creees.map((x) => x.numero).join(', '));
       const w = await ecrire(d);
       if (!w.ok) return json(res, 502, { ok: false, message: w.message });
     }
@@ -1700,6 +1772,9 @@ module.exports = async function handler(req, res) {
       return o;
     });
     if (!modifiees.length) return json(res, 404, { ok: false, message: 'Aucune de ces chambres n’existe plus.' });
+    noter(d, qui, 'A ' + ('publie' in ch ? (ch.publie ? 'publié' : 'retiré de la vente') : 'passé en « ' + ch.statut + ' »')
+      + ' ' + modifiees.length + (modifiees.length > 1 ? ' chambres : ' : ' chambre : ')
+      + modifiees.map((x) => x.numero).join(', '));
     const w = await ecrire(d);
     if (!w.ok) return json(res, 502, { ok: false, message: w.message });
     return json(res, 200, { ok: true, modifiees });
@@ -1731,7 +1806,13 @@ module.exports = async function handler(req, res) {
       }
       if (n === g.prix) delete suivants[s]; else suivants[s] = n;
     }
+    const avantT = tarif.tarifsEnVigueur(d.tarifs), apresT = tarif.tarifsEnVigueur(suivants);
+    const changes = Object.keys(recus).filter((k) => tarif.GRILLE.chambres[k]
+      && (avantT[k] || tarif.GRILLE.chambres[k].prix) !== (apresT[k] || tarif.GRILLE.chambres[k].prix))
+      .map((k) => tarif.GRILLE.chambres[k].nom + ' ' + (avantT[k] || tarif.GRILLE.chambres[k].prix).toLocaleString('fr-FR')
+        + ' → ' + (apresT[k] || tarif.GRILLE.chambres[k].prix).toLocaleString('fr-FR') + ' F');
     d.tarifs = suivants;
+    if (changes.length) noter(d, qui, 'A modifié les prix : ' + changes.join(' ; '));
     const w = await ecrire(d);
     if (!w.ok) return json(res, 502, { ok: false, message: w.message });
     return json(res, 200, { ok: true, tarifs: d.tarifs });
@@ -1764,7 +1845,9 @@ module.exports = async function handler(req, res) {
             + 'ou désactivez-la plutôt.' });
       }
     }
+    const retiree = (d[type] || []).find((x) => x.id === corps.id);
     d[type] = (d[type] || []).filter((x) => x.id !== corps.id);
+    if (retiree) noter(d, qui, 'A supprimé ' + libelle(corps.type, retiree, d));
     const w = await ecrire(d);
     if (!w.ok) return json(res, 502, { ok: false, message: w.message });
     return json(res, 200, { ok: true });
@@ -1780,6 +1863,7 @@ module.exports = async function handler(req, res) {
       + ' Rien n a ete enregistre : ecrire maintenant effacerait le reste.' });
     const par = new Map((d[type] || []).map((x) => [x.id, x]));
     d[type] = (corps.ordre || []).map((id) => par.get(id)).filter(Boolean);
+    noter(d, qui, 'A changé l’ordre d’affichage (' + type + ')');
     const w = await ecrire(d);
     if (!w.ok) return json(res, 502, { ok: false, message: w.message });
     return json(res, 200, { ok: true });

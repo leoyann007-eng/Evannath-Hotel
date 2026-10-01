@@ -1035,17 +1035,54 @@ est défini et quel stockage est actif.
 chargés une fois et gardés. Les recharger à chaque appel remettrait à zéro le
 stockage de démonstration — chaque événement créé se perdait dans la seconde.*
 
-### L'accès
+### L'accès : comptes, profils, journal
 
-Un mot de passe, défini par `ADMIN_MDP`, échangé contre un cookie signé de
-12 heures. La comparaison est à durée constante : une comparaison naïve laisse
-deviner le mot de passe caractère par caractère.
+Chaque personne a **son compte** (nom, e-mail, profil). Le code est dans
+`site/api/_comptes.js` (serveur) et `site/admin/comptes.js` (écrans).
 
-Ce n'est pas un système multi-comptes. Des comptes nominatifs, avec un journal
-de qui a publié quoi, demandent le stockage durable — c'est la suite logique.
+| Profil | Voit | Modifie |
+|---|---|---|
+| **Administrateur** | tout | tout, plus les comptes, les prix, les paramètres, le journal |
+| **Réception** | tableau de bord, disponibilités, chambres | réservations, fermetures, chambres (pas les prix) |
+| **Communication** | événements, promotions, campagnes, emplois, galerie | ces contenus et les affiches — **aucune donnée client** ne lui est envoyée |
+| **Lecture seule** | tout sauf comptes, paramètres et journal | rien |
 
-Sans `ADMIN_MDP`, la connexion répond 503 avec la marche à suivre plutôt que
-d'échouer sans explication.
+**Le serveur seul fait foi.** Chaque action vérifie le droit qu'elle exige
+avant de lire quoi que ce soit (`droitRequis` / `peut`) ; l'interface ne fait
+que masquer ce que le profil n'ouvre pas.
+
+**Créer un compte.** Utilisateurs → « Ajouter une personne ». Un mot de passe
+provisoire s'affiche **une seule fois**, avec un message prêt à envoyer. Tant
+qu'il n'est pas remplacé, il n'ouvre qu'un écran : celui qui le remplace.
+
+**Ce qui coupe les sessions ouvertes** : changer le profil, désactiver,
+réinitialiser le mot de passe, supprimer le compte, ou changer soi-même son
+mot de passe (les *autres* sessions). Le cookie porte une version du compte ;
+une version dépassée ne vaut plus rien.
+
+**Garde-fous.** Il reste toujours au moins un administrateur actif ; on ne
+change ni son propre profil ni ne se supprime soi-même ; cinq mots de passe
+faux en quinze minutes ferment l'adresse un quart d'heure. Mots de passe :
+10 caractères au moins, hachés par scrypt avec un sel par compte.
+
+**L'accès de secours** : e-mail vide + `ADMIN_MDP`. Il sert à créer le premier
+compte, et à rentrer si le dernier administrateur a perdu son mot de passe.
+Changer `ADMIN_MDP` dans Vercel coupe les sessions de secours ouvertes.
+
+**Le journal d'activité** (administrateurs) : connexions, gestion des comptes
+et chaque modification (« Awa Koné — A modifié la réservation de M. Diallo
+(chambre 104, 2026-12-24 → 2026-12-27) : passée en « confirmée » »). Les
+modifications sont notées dans la même écriture que la modification
+elle-même : 90 jours, 1 000 lignes au plus. Il ne sort jamais par les routes
+publiques.
+
+**Stockage.** Les comptes vivent dans leur propre fichier Blob
+(`evannath/comptes`), jamais mêlé aux données du site, avec cinq versions
+conservées. Le magasin est encore public : les adresses des fichiers ne se
+devinent pas, mais le rendre **privé** reste la prochaine étape de sécurité.
+
+Tests : `node tests/comptes.test.mjs` (droits, mots de passe, sessions,
+révocation, garde-fous — hors réseau).
 
 ## Version anglaise
 

@@ -1,0 +1,74 @@
+/* Module « Comptes » : utilisateurs, journal, mon compte. */
+
+/* Les rubriques que le profil n'ouvre pas. nav button est en display:flex,
+   qui l'emporte sur l'attribut hidden du navigateur : sans cette ligne, le
+   menu les montrait toutes. */
+#menu [hidden]{display:none!important}
+#porte .cp-secours{margin-top:18px;margin-bottom:0;font-size:12px}
+#moi-nom{text-transform:none;letter-spacing:.02em;font-size:12px;font-weight:600;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#cadre.replie aside:not(.deploye) #moi-nom{visibility:hidden}
+
+/* Lecture seule : le bandeau, et pas de boutons d'ecriture a cliquer pour rien. */
+.cp-lecture{border-left:3px solid var(--bronze);background:rgba(138,95,43,.08);
+  padding:12px 18px;margin-bottom:20px;font-size:13.5px}
+body.cp-ro main .btn.plein:not(.cp-garde),
+body.cp-ro main .btn.danger:not(.cp-garde){display:none}
+
+/* La liste des comptes */
+.cp-table-zone{overflow-x:auto;padding:8px 10px}
+.cp-table{width:100%;border-collapse:collapse;font-size:14px}
+.cp-table th{text-align:left;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--muted);font-weight:700;padding:12px 12px;border-bottom:1px solid var(--line)}
+.cp-table td{padding:14px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+.cp-table tr:last-child td{border-bottom:0}
+.cp-table td b{font-weight:600}
+.cp-table select{width:auto;min-width:140px;padding:8px 10px;font-size:13.5px}
+.cp-sous{display:block;font-size:12.5px;color:var(--muted)}
+td.cp-sous{display:table-cell}
+.cp-actions{text-align:right;white-space:nowrap}
+.cp-actions .btn{margin-left:6px;padding:8px 11px}
+.cp-inactif td{opacity:.62}
+.cp-inactif td.cp-actions{opacity:1}
+.cp-badge{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--bronze-2);
+  border:1px solid rgba(138,95,43,.45);padding:2px 6px;margin-left:6px;font-weight:700}
+.cp-vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+/* Le choix du profil */
+.cp-profils{border:0;padding:0;margin:4px 0 14px;display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.cp-profils legend{font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;
+  color:var(--muted);margin-bottom:8px}
+.cp-profil{text-transform:none;letter-spacing:normal;font-size:14px;font-weight:400;color:var(--cream);margin:0;
+  display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);
+  padding:12px 14px;cursor:pointer;background:var(--bark)}
+.cp-profil:has(input:checked){border-color:var(--bronze);background:rgba(138,95,43,.06)}
+.cp-profil input{width:auto;margin-top:4px}
+.cp-profil b{display:block;font-weight:600}
+.cp-profil small{display:block;color:var(--muted);font-size:12px;line-height:1.45}
+
+/* Le mot de passe provisoire, montre une fois */
+.cp-cree{border-color:var(--bronze)}
+.cp-mdp{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.cp-mdp code{font:600 22px/1.2 ui-monospace,Consolas,monospace;letter-spacing:.06em;
+  background:var(--bark);border:1px dashed var(--bronze);padding:10px 16px;user-select:all}
+.cp-message{margin-top:16px}
+.cp-message summary{cursor:pointer;font-size:13.5px;color:var(--bronze-2)}
+.cp-message pre{white-space:pre-wrap;font:13px/1.55 var(--f-b);background:var(--bark);
+  border:1px solid var(--line);padding:12px 14px;margin-top:10px}
+
+/* Le journal */
+.cp-jour{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);
+  font-weight:700;margin:20px 0 6px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+.cp-jour:first-of-type{margin-top:8px}
+.cp-entree{display:flex;gap:14px;padding:7px 0;font-size:14px;line-height:1.5}
+.cp-entree time{flex:none;width:44px;color:var(--muted);font-variant-numeric:tabular-nums}
+.cp-entree b{font-weight:600}
+
+@media (max-width:720px){
+  .cp-actions{white-space:normal;text-align:left}
+  .cp-actions .btn{margin:4px 6px 0 0}
+  .cp-table thead{display:none}
+  .cp-table tr{display:block;border-bottom:1px solid var(--line);padding:8px 0}
+  .cp-table td{display:block;border:0;padding:4px 8px}
+}
