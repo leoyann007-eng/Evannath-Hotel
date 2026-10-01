@@ -1,54 +1,24 @@
-# ── Documents de prospection ──────────────────────────────────
-# La proposition (source HTML et PDF envoyé au prospect), les brouillons de
-# messages et le relevé de performance. Ils portent les coordonnées
-# personnelles de l'émetteur et une offre nominative : ils n'ont rien à faire
-# dans un dépôt, ni sur le web.
-proposition-commerciale.html
-Proposition-Evannath.pdf
-mail-prospection.md
-mail-relance.md
-message-whatsapp.md
-Mesure-performance.pdf
-.mesures/
+# ── Documents commerciaux : jamais dans le dépôt ──────────────
+# Proposition, devis, tarification (prix plancher, marge de négociation),
+# scripts oraux, mails, support de présentation et son outillage
+# (pptxgenjs). Ils portent des montants et des coordonnées nominatives.
+prospection/
+# Filet de sécurité : un PDF ou un support régénéré par erreur à la racine.
+/*.pdf
+/*.pptx
+/*.docx
 
-# ── Rendez-vous du 7 septembre, et sa suite ───────────────────
-# Support client, script oral, déroulé, tarification et modèle de devis.
-# La tarification ne se transmet jamais : elle porte les fourchettes, la
-# marge de négociation et le prix plancher. Le devis, lui, part signé — mais
-# rempli, il porte un montant nominatif.
-Presentation-Evannath.pptx
-script-oral.md
-# Ses derives portent le meme contenu confidentiel : plancher de prix,
-# marge de negociation, ce qu'il ne faut pas montrer a l'ecran.
-script-oral.html
-Script-oral-Evannath.pdf
-preparation-presentation.md
-tarification-interne.md
-tarification-interne.html
-Tarification-interne.pdf
-devis-modele.html
-Devis-modele.pdf
+# ── Archives locales ──────────────────────────────────────────
+# Remises de design (motion, motifs pagne), captures du site d'origine,
+# relevés d'audit, variante d'accueil non retenue. Gardés pour mémoire.
+archives/
 
-# Sources du support : script pptxgenjs, images redimensionnées, contrôle
-# géométrique. Reconstructibles à volonté par « node .deck/deck.js ».
-.deck/
-
-# pptxgenjs, installé à la racine uniquement pour fabriquer le support de
-# présentation. Rien de tout cela ne part en production.
-node_modules/
-/package.json
-/package-lock.json
-
-# site/package.json, lui, EST versionné : Vercel y lit les dépendances des
-# fonctions serverless — @vercel/blob pour le stockage de l'administration.
-# Le site lui-même n'a toujours aucune dépendance : il est généré en Python
-# et servi en statique.
-!site/package.json
-
-# Captures du site d'origine, prises pour illustrer l'audit. Ce sont des
-# copies d'ecran du site d'un tiers : elles servent la proposition, elles
-# n'ont pas a vivre dans le depot.
-.captures/
+# ── Secrets locaux ────────────────────────────────────────────
+# .env.local porte ADMIN_MDP. Il ne doit JAMAIS partir dans le dépôt : un mot
+# de passe poussé sur un dépôt distant est à considérer comme divulgué, même
+# si on l'efface ensuite.
+.env.local
+.env
 
 # ── Photos sources ────────────────────────────────────────────
 # Les originaux téléchargés depuis evannathhotel.com (~60 Mo de PNG).
@@ -62,53 +32,33 @@ site/img/insta/
 site/img/manquant/
 site/img/fb/
 
-# ── Relevés d'audit ───────────────────────────────────────────
-.media/
-
-# ── Variante non retenue ──────────────────────────────────────
-site/index-luxe-variante.html
+# ── Images écartées ───────────────────────────────────────────
+# Fichiers devenus orphelins, déplacés plutôt que supprimés : une fois déjà,
+# des variantes dont le chemin était construit en JavaScript ont failli être
+# effacées. Voir « Photos mal nommées » dans le README.
+site/.quarantaine/
 site/*.gardefou
+site/index-luxe-variante.html
 
-# ── Secrets locaux ────────────────────────────────────────────
-# .env.local porte ADMIN_MDP et le jeton du stockage. Il ne doit JAMAIS
-# partir dans le depot : un mot de passe pousse sur un depot distant est
-# a considerer comme divulgue, meme si on l'efface ensuite.
-.env.local
-.env
-
-# ── Environnement local ───────────────────────────────────────
-.claude/
-__pycache__/
-*.pyc
-Thumbs.db
-desktop.ini
-.DS_Store
+# ── Dépendances ───────────────────────────────────────────────
+# site/package.json EST versionné : Vercel y lit les dépendances des
+# fonctions serverless. Le dossier node_modules, lui, se réinstalle.
+node_modules/
 
 # ── Captures de travail ───────────────────────────────────────
-# Les images produites par .outils/capturer.js pour montrer un ecran en
-# cours de construction. Cinq d'entre elles sont parties dans un commit
-# avant d'etre remarquees : elles ne documentent rien, elles se refont
-# d'une commande, et elles pesent plus que le code qu'elles illustrent.
+# Produites par .outils/capturer.js ; elles se refont d'une commande.
 apercu-*.png
 maquette-*.png
 vue-*.png
 bo-*.png
 verif-*.png
 
-# ── Images écartées ───────────────────────────────────────────
-# Fichiers devenus orphelins, déplacés plutôt que supprimés : une fois déjà,
-# des variantes dont le chemin était construit en JavaScript ont failli être
-# effacées. Voir « Photos mal nommées » dans le README.
-site/.quarantaine/
-
-# Le dossier de remise des motifs pagne : les SVG utiles vivent dans
-# site/img/pagne/, nettoyes de leurs metadonnees. L'original reste chez
-# le designer, pas dans le depot du site.
-handoff_touches_pagne/
-
-# La remise motion : maquettes de reference, 215 Ko de HTML jouable. Elles
-# servent a relever des timings, pas a etre servies. Memes raisons que
-# handoff_touches_pagne/.
-handoff_motion/
+# ── Environnement local et outils IA ──────────────────────────
+.claude/
 .agents/
 skills-lock.json
+__pycache__/
+*.pyc
+Thumbs.db
+desktop.ini
+.DS_Store

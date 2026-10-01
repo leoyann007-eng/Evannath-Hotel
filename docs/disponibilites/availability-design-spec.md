@@ -3,7 +3,7 @@
 > ## ⚠️ REMPLACÉE — ne plus s'y référer
 >
 > **Statut : périmée le 23 septembre 2026.** La direction a validé une
-> nouvelle maquette, `docs/availability-reference-v2.webp`, qui remplace
+> nouvelle maquette, `docs/disponibilites/availability-reference-v2.webp`, qui remplace
 > celle-ci. Ce document est conservé pour l'historique, et pour les règles
 > d'UX qui restent valables (sections 3 et suivantes) — mais **sa maquette,
 > sa navigation et ses valeurs ne font plus foi.**
@@ -25,7 +25,7 @@
 > **Statut:** REMPLACÉE  
 > **Page:** Disponibilités des chambres  
 > **Application:** Back-office Evannath Hotel  
-> **Référence visuelle:** `docs/availability-reference.png` (périmée)
+> **Référence visuelle:** `docs/disponibilites/availability-reference.png` (périmée)
 
 ---
 
@@ -51,7 +51,7 @@ L'objectif principal est de permettre à un utilisateur non technique de compren
 
 La référence visuelle principale est :
 
-`docs/availability-reference.png`
+`docs/disponibilites/availability-reference.png`
 
 La maquette représente la direction visuelle validée de la page.
 
@@ -1509,11 +1509,11 @@ Cette section est obligatoire.
 
 La maquette :
 
-`docs/availability-reference.png`
+`docs/disponibilites/availability-reference.png`
 
 et cette spécification :
 
-`docs/availability-design-spec.md`
+`docs/disponibilites/availability-design-spec.md`
 
 constituent la référence de la page.
 

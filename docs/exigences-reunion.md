@@ -233,7 +233,7 @@ Aujourd'hui l'administration publie des affiches et des promotions. Un mot de
 passe unique, partagé, y suffit : au pire on publie une affiche de travers.
 
 **Demain elle gouvernera les chambres libres et touchera à de l'argent.** Le
-même mot de passe ne suffit plus. Ce qui figurait dans `AMELIORATIONS.md`
+même mot de passe ne suffit plus. Ce qui figurait dans `docs/ameliorations.md`
 comme « à faire sous deux semaines » devient **préalable à la mise en ligne** :
 
 - `ADMIN_SECRET` défini pour de bon,

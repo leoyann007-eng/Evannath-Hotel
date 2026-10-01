@@ -1021,7 +1021,7 @@ PAGNE_CSS = """/* ── Signature textile ────────────�
 .pagne-galon.vu::before{clip-path:inset(0)}
 
 /* 43 · Le damas sous la lampe : ses calques vivent dans la page Offres
-   (build-pages6.py), la seule qui le porte. */
+   (build-circuits.py), la seule qui le porte. */
 
 @media(max-width:767px){
   /* Sur un telephone il n'y a plus de vide : le damas n'a plus d'endroit

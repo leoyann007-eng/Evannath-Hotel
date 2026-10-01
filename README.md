@@ -91,14 +91,34 @@ Bilingue français / anglais sur toutes les pages, sans rechargement.
 ## Structure
 
 ```
-site/
-├── *.html                  les 23 pages servies
-├── _chrome.py              briques partagées : nav, tiroir, pied de page
-├── build-*.py              générateurs de pages
-├── carte-template.html     gabarit de la carte du restaurant
-├── spa-template.html       gabarit de la carte des soins
-└── img/opt/                images optimisées (WebP + JPEG de secours)
+site/                    ce que Vercel sert (Root Directory = site)
+├── *.html               les pages générées — jamais modifiées à la main
+├── *-template.html      gabarits : accueil, carte, soins
+├── _chrome.py           briques partagées : nav, tiroir, pied de page, chatbot
+├── _chambres*.py        catalogue des chambres (FR / EN)
+├── build-*.py           générateurs de pages
+├── verifier.py          contrôles sur les pages générées
+├── admin/               back-office
+├── api/                 fonctions serverless (admin, paiement, chatbot)
+├── donnees/             JSON lus par le back-office
+├── img/opt/ · video/    médias optimisés
+└── .vercelignore        ce qui ne doit PAS être servi (sources Python, gabarits)
+docs/                    documentation technique et notes de projet
+├── disponibilites/      spécification et maquette du calendrier
+├── ameliorations.md · exigences-reunion.md · notre-comprehension.md
+tests/                   tests automatiques (node tests/*.test.mjs)
+.outils/                 outils de développement (captures, faux lomi / Anthropic, contrastes)
+serveur-local.js         serveur local avec les fonctions api/
 ```
+
+Deux dossiers restent **uniquement sur le poste** (ignorés par git) :
+
+- `prospection/` — tout le commercial : proposition, devis, tarification,
+  scripts oraux, mails, support de présentation (`prospection/presentation/`,
+  à reconstruire avec `node .deck/deck.js` depuis ce dossier). Ces documents
+  portent des montants et des coordonnées nominatives.
+- `archives/` — remises de design, captures et relevés d'audit, variante
+  d'accueil non retenue. Conservés pour mémoire, plus utilisés.
 
 Les dossiers `img/gallery/`, `img/rest/`, `img/rooms/`, `img/brand/`,
 `img/insta/` et `img/manquant/` contiennent les **originaux téléchargés** et ne
@@ -111,23 +131,29 @@ gabarit, puis on relance.
 
 ```bash
 cd site
-python build-chambres.py   # les 7 fiches chambres
-python build-reserver.py   # reserver.html
-python build-carte.py      # carte.html + spa.html
-python build-galerie.py    # galerie.html (+ optimise les photos manquantes)
-python build-404.py        # 404.html
-python build-pages.py      # a-propos.html
-python build-pages2.py     # contact.html
-python build-pages3.py     # informations-utiles.html
-python build-pages4.py     # mentions-legales.html
-python build-pages5.py     # suite-arabe.html (remplacé par build-chambres.py)
-python build-pages6.py     # circuits.html
+python build-index.py            # index.html (depuis index-template.html)
+python build-chambres.py         # les 7 fiches chambres
+python build-chambres-index.py   # chambres.html
+python build-reserver.py         # reserver.html + api/_grille.json
+python build-carte.py            # carte.html + spa.html
+python build-galerie.py          # galerie.html (+ optimise les photos manquantes)
+python build-images.py           # variantes responsives -640 / -1024 / -1600
+python build-a-propos.py         # a-propos.html
+python build-contact.py          # contact.html
+python build-informations.py     # informations-utiles.html
+python build-mentions.py         # mentions-legales.html
+python build-circuits.py         # circuits.html (Offres & Événements)
+python build-experiences.py      # experiences.html
+python build-seminaires.py       # seminaires.html
+python build-recrutement.py      # recrutement.html
+python build-404.py              # 404.html
+python build-chatbot.py          # api/_chatbot.json (ce que sait le chatbot)
+python build-sitemap.py          # sitemap.xml, robots.txt, donnees/*.json
+python verifier.py               # les contrôles
 ```
 
-`index.html` est écrit à la main et n'a pas de générateur.
-
 Dépendance unique : **Pillow** (`pip install Pillow`), pour l'optimisation des
-images dans `build-galerie.py`.
+images.
 
 ## Régénérer les images
 
@@ -139,11 +165,12 @@ relancer `build-galerie.py`, qui ne régénère que les fichiers manquants.
 ## Prévisualiser en local
 
 ```bash
-cd site
-python -m http.server 5599
+node serveur-local.js
 ```
 
-Puis ouvrir <http://localhost:5599>.
+Puis ouvrir <http://localhost:5599>. Contrairement à `python -m http.server`,
+ce serveur exécute aussi `site/api/` (administration, paiement, chatbot) ;
+il lit ses variables dans `.env.local`.
 
 ---
 
@@ -812,7 +839,7 @@ C'est l'aveuglement d'avant, mesuré.
 La synchronisation Booking / Airbnb, formule Performance. Et un vrai verrou
 transactionnel, qui devient un **préalable** le jour du paiement en ligne :
 sans réception pour rattraper une collision, deux paiements simultanés sur la
-dernière chambre encaissent deux fois. Voir `notre-comprehension.md`.
+dernière chambre encaissent deux fois. Voir `docs/notre-comprehension.md`.
 
 **Un calendrier que personne ne remplit est pire que pas de calendrier** : il
 transforme un silence honnête en promesse fausse. C'est pourquoi l'écran de
@@ -1050,7 +1077,7 @@ segment sans traduction. Les deux cas ont été testés en les provoquant.
 Son corps juridique reste **volontairement en français**, qui fait foi —
 traduire un document juridique crée un second texte non relu par un conseil,
 et une ambiguïté sur celui qui prévaut. Le bandeau de mise à jour le dit au
-lecteur. La décision est écrite dans `build-pages4.py` sous la forme du
+lecteur. La décision est écrite dans `build-mentions.py` sous la forme du
 marqueur `EVN_FR_FAIT_FOI`, que `verifier.py` lit : elle est donc explicite,
 pas subie.
 
@@ -1388,7 +1415,7 @@ Elles étaient affichées mais **invisibles des moteurs** : le `Service` de
 `circuits.html` n'avait pas de `hasOfferCatalog`, donc aucun forfait
 n'existait pour une recherche du type « forfait lune de miel Assinie ».
 
-Le catalogue se construit maintenant dans `build-pages6.py` à partir des mêmes
+Le catalogue se construit maintenant dans `build-circuits.py` à partir des mêmes
 listes que la page — `PACKS` et `CARDS` — pour qu'il ne puisse pas dériver du
 contenu affiché. Chaque offre porte son prix, sa disponibilité et son **unité**
 (`le forfait`, `par personne`, `par enfant`) via `UnitPriceSpecification` :

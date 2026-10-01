@@ -1,0 +1,10 @@
+# Ce qui est dans site/ mais ne doit pas être servi en ligne.
+# Sans ce fichier, https://…/_chrome.py ou /build-index.py répondaient 200 :
+# n'importe qui lisait les générateurs, les gabarits et les commentaires.
+*.py
+*-template.html
+outils-video.sh
+__pycache__/
+.quarantaine/
+*.gardefou
+index-luxe-variante.html
