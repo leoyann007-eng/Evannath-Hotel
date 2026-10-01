@@ -20,8 +20,9 @@ SITE = "https://evannathhotel.vercel.app"
 #         leur marque sans accord ecrit. Le visiteur qui a le lien voit tout
 #         normalement : seuls les robots sont ecartes.
 # False : le jour de la signature. Repasser a False, relancer tous les
-#         generateurs et build-sitemap.py, puis retirer la regle
-#         X-Robots-Tag de vercel.json (elle est commentee sur place).
+#         generateurs puis build-sitemap.py EN DERNIER : il ecrit sitemap.xml,
+#         le declare dans robots.txt et retire lui-meme la regle X-Robots-Tag
+#         de vercel.json.
 PROSPECTION = True
 
 # Ce que le site annonce publiquement. Le chiffre est repete en clair dans

@@ -195,7 +195,7 @@ Trois couches, parce qu'aucune ne suffit seule :
 |---|---|---|
 | `<meta name="robots">` + `googlebot` | les 21 pages | HTML |
 | En-tête `X-Robots-Tag` | `vercel.json`, toutes les routes | images, PDF, manifest — tout |
-| Aucun `sitemap.xml` | supprimé automatiquement | on n'invite pas |
+| Aucun `sitemap.xml` servi | `sitemap-apercu.xml`, exclu par `.vercelignore` | on n'invite pas |
 
 **Le crawl reste autorisé, et c'est volontaire.** Un `Disallow: /` serait ici un
 contresens : Google ne lirait alors jamais la directive `noindex`, et pourrait
@@ -207,13 +207,33 @@ Le visiteur qui a le lien voit le site normalement. Seuls les robots sont
 
 ### Repasser en production le jour de la signature
 
-1. `PROSPECTION = False` en tête de `site/_chrome.py`
-2. Relancer tous les générateurs, puis `build-sitemap.py`
-3. Dans `site/vercel.json` : supprimer la règle `X-Robots-Tag` (la dernière
-   entrée de `headers`). Attention, `vercel.json` **refuse toute propriété
-   inconnue** — ne pas y ajouter de note ou de commentaire, le déploiement
-   échouerait silencieusement.
-4. Redéployer, puis soumettre `sitemap.xml` à la Search Console
+1. En tête de `site/_chrome.py` : `PROSPECTION = False`, et `SITE` sur le
+   domaine définitif (par exemple `https://evannathhotel.com`) — canonical,
+   og:url, og:image, données structurées et sitemap en découlent.
+2. Relancer tous les générateurs, **puis `build-sitemap.py` en dernier**. Il
+   écrit `sitemap.xml` (au lieu de `sitemap-apercu.xml`), le déclare dans
+   `robots.txt`, et **retire de lui-même** la règle `X-Robots-Tag` de
+   `site/vercel.json`.
+3. `python verifier.py`, puis pousser.
+4. Dans la Google Search Console (et Bing Webmaster Tools) : valider le
+   domaine, puis soumettre `https://<domaine>/sitemap.xml`.
+
+### Le sitemap
+
+`build-sitemap.py` le construit à partir des pages produites :
+
+- **19 pages** indexables, l'accueil en tête. Réserver, mentions légales et
+  404 en sont exclues (elles portent `noindex`) mais restent crawlables, pour
+  que Google lise justement ce `noindex`.
+- **`lastmod`** = date du dernier commit qui a touché la page, et non l'heure
+  du fichier, que chaque régénération remettait à aujourd'hui.
+- **Les photos de chaque page** (extension image du protocole), remontées
+  de la vignette à l'original : un hôtel se choisit aussi sur Google Images.
+- Le générateur **refuse** une page dont la `canonical` ne correspond pas à
+  son adresse dans le sitemap.
+
+En mode prospection, il est écrit sous le nom `sitemap-apercu.xml`, que
+`.vercelignore` garde hors ligne : on peut le relire, il ne part pas.
 
 ## Une seule source pour le châssis
 

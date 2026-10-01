@@ -1,11 +1,23 @@
 # -*- coding: utf-8 -*-
 """Genere sitemap.xml, robots.txt et site.webmanifest.
 
-A relancer apres toute creation ou suppression de page. Les pages portant
-<meta name="robots" content="noindex"> (reserver, mentions-legales, 404) sont
-exclues du sitemap : elles n'ont rien a faire dans l'index de Google.
+A relancer apres toute creation ou suppression de page, et en DERNIER, apres
+les autres generateurs : il lit les pages produites.
+
+    python build-sitemap.py
+
+Le sitemap declare chaque page indexable, sa date de derniere modification
+(celle du dernier commit qui l'a touchee) et les photos qu'elle montre — un
+hotel se choisit sur Google Images autant que sur les liens bleus.
+
+Mode prospection (_chrome.PROSPECTION) : le sitemap est ecrit sous le nom
+sitemap-apercu.xml, que .vercelignore garde hors ligne. On peut le relire, il
+ne part pas. Le jour de la mise en ligne, PROSPECTION = False : sitemap.xml
+est servi, robots.txt le declare, et la regle X-Robots-Tag de vercel.json est
+retiree — ici, automatiquement.
 """
-import io, os, glob, datetime, sys
+import io, os, re, glob, json, datetime, subprocess, sys
+from xml.sax.saxutils import escape
 sys.path.insert(0, '.')
 from _chrome import SITE, PROSPECTION, CHAMBRES_ANNONCEES
 
@@ -19,18 +31,63 @@ PRIORITE = {
  'chambre-standard': '0.7',
  'a-propos': '0.6', 'informations-utiles': '0.6',
 }
-IGNORE = {'index-luxe-variante', 'carte-template', 'spa-template'}
+IGNORE = {'index-luxe-variante', 'index-template', 'carte-template', 'spa-template'}
+# Hors index, quel que soit le mode : le tunnel de reservation, les mentions
+# legales et la page d'erreur portent leur propre noindex. La liste est
+# ecrite ici plutot que devinee dans le HTML : en prospection, TOUTES les
+# pages portent noindex, et la detection videait le sitemap.
+HORS_INDEX = {'reserver', 'mentions-legales', '404'}
+
+AUJOURD_HUI = datetime.date.today().isoformat()
+
+def date_de(f):
+    """Le dernier commit qui a touche la page — pas l'heure du fichier, que
+    chaque regeneration remet a aujourd'hui. Une page modifiee et pas encore
+    commitee date d'aujourd'hui."""
+    try:
+        sale = subprocess.run(['git', 'status', '--porcelain', '--', f],
+                              capture_output=True, text=True).stdout.strip()
+        if sale:
+            return AUJOURD_HUI
+        d = subprocess.run(['git', 'log', '-1', '--format=%cs', '--', f],
+                           capture_output=True, text=True).stdout.strip()
+        return d or AUJOURD_HUI
+    except OSError:
+        return datetime.date.fromtimestamp(os.path.getmtime(f)).isoformat()
+
+# Les photos d'une page : ses <img> et son og:image. On remonte de la
+# vignette ou du palier responsive (-t, -640…) a l'original quand il existe,
+# et on laisse de cote ce qui n'est pas une photo (logos, icones, SVG).
+_palier = re.compile(r'-(640|1024|1600|t|t360)(\.\w+)$')
+def photos_de(html):
+    vues = []
+    for src in re.findall(r'<img\b[^>]*?\ssrc="([^"]+)"', html) + \
+               re.findall(r'<meta property="og:image" content="([^"]+)"', html):
+        chemin = src.replace(SITE, '').lstrip('/')
+        if not chemin.startswith('img/opt/') or not re.search(r'\.(jpe?g|webp|png)$', chemin):
+            continue
+        if 'logo' in chemin or 'icon' in chemin:
+            continue
+        orig = _palier.sub(r'\2', chemin)
+        chemin = orig if os.path.exists(orig) else chemin
+        if chemin not in vues:
+            vues.append(chemin)
+    return vues
 
 pages = []
 for f in sorted(glob.glob('*.html')):
     slug = f[:-5]
-    if slug in IGNORE:
+    if slug in IGNORE or slug in HORS_INDEX:
         continue
     contenu = io.open(f, encoding='utf-8').read()
-    if 'name="robots" content="noindex' in contenu:
-        continue
-    pages.append((slug, PRIORITE.get(slug, '0.5'),
-                  datetime.date.fromtimestamp(os.path.getmtime(f)).isoformat()))
+    loc = SITE + ('/' if slug == 'index' else '/' + slug)
+    # Le sitemap et la page doivent dire la meme adresse : une canonical qui
+    # diverge, et Google ignore l'entree.
+    canon = re.search(r'<link rel="canonical" href="([^"]+)"', contenu)
+    if not canon or canon.group(1) != loc:
+        sys.exit('ERREUR %s : canonical %s, attendu %s'
+                 % (f, canon.group(1) if canon else 'absente', loc))
+    pages.append((slug, PRIORITE.get(slug, '0.5'), date_de(f), loc, photos_de(contenu)))
 
 # ── Inventaire des photos, pour le selecteur d'images de l'administration ──
 # On ne liste que les originaux : ni les paliers responsives (-640, -1024,
@@ -85,25 +142,49 @@ io.open('donnees/hotel.json', 'w', encoding='utf-8').write(
     json.dumps({'chambres_annoncees': CHAMBRES_ANNONCEES}, ensure_ascii=False))
 print('donnees/hotel.json      %d chambres annoncees' % CHAMBRES_ANNONCEES)
 
+# changefreq et priority ne sont plus lus par Google ; on garde priority pour
+# Bing et pour l'ordre du fichier, qui se relit mieux de l'accueil vers le bas.
 lignes = ['<?xml version="1.0" encoding="UTF-8"?>',
-          '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
-for slug, prio, maj in sorted(pages, key=lambda p: (-float(p[1]), p[0])):
-    loc = SITE + ('/' if slug == 'index' else '/' + slug)
+          '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"',
+          '        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">']
+nb_photos = 0
+for slug, prio, maj, loc, photos in sorted(pages, key=lambda p: (-float(p[1]), p[0])):
     lignes.append('  <url>')
-    lignes.append('    <loc>%s</loc>' % loc)
+    lignes.append('    <loc>%s</loc>' % escape(loc))
     lignes.append('    <lastmod>%s</lastmod>' % maj)
-    lignes.append('    <changefreq>%s</changefreq>' % ('weekly' if float(prio) >= 0.9 else 'monthly'))
     lignes.append('    <priority>%s</priority>' % prio)
+    for p in photos[:1000]:                       # plafond du protocole
+        lignes.append('    <image:image><image:loc>%s/%s</image:loc></image:image>'
+                      % (SITE, escape(p)))
+        nb_photos += 1
     lignes.append('  </url>')
 lignes.append('</urlset>')
+xml = '\n'.join(lignes) + '\n'
 
-if PROSPECTION:
-    # Toutes les pages portent noindex : un sitemap n'aurait rien a declarer, et
-    # en publier un reviendrait a inviter les robots. On le retire s'il existe.
-    if os.path.exists('sitemap.xml'):
-        os.remove('sitemap.xml')
-else:
-    io.open('sitemap.xml', 'w', encoding='utf-8').write('\n'.join(lignes) + '\n')
+# En prospection : sitemap-apercu.xml, relisible en local, jamais servi
+# (.vercelignore). En publier un reviendrait a inviter les robots sur une
+# maquette qui porte la marque de l'hotel.
+NOM = 'sitemap-apercu.xml' if PROSPECTION else 'sitemap.xml'
+io.open(NOM, 'w', encoding='utf-8', newline='\n').write(xml)
+for vieux in {'sitemap.xml', 'sitemap-apercu.xml'} - {NOM}:
+    if os.path.exists(vieux):
+        os.remove(vieux)
+
+# La regle X-Robots-Tag de vercel.json suit le mode : posee en prospection,
+# retiree a la mise en ligne. Oublier de la retirer a la main laisserait le
+# site invisible de Google malgre tout le reste — ce n'est plus a retenir.
+REGLE_NOINDEX = {'source': '/(.*)', 'headers': [
+    {'key': 'X-Robots-Tag', 'value': 'noindex, nofollow, noarchive, noimageindex'}]}
+_vc = json.load(io.open('vercel.json', encoding='utf-8'))
+_a = REGLE_NOINDEX in _vc['headers']
+if PROSPECTION != _a:
+    if PROSPECTION:
+        _vc['headers'].append(REGLE_NOINDEX)
+    else:
+        _vc['headers'].remove(REGLE_NOINDEX)
+    io.open('vercel.json', 'w', encoding='utf-8', newline='\n').write(
+        json.dumps(_vc, indent=2, ensure_ascii=False) + '\n')
+    print('vercel.json           regle X-Robots-Tag ' + ('posee' if PROSPECTION else 'retiree'))
 
 if PROSPECTION:
     # Maquette de prospection : on laisse crawler pour que la directive noindex
@@ -119,14 +200,14 @@ Allow: /
 Disallow: /api/
 """)
 else:
+    # Reserver, mentions legales et 404 restent CRAWLABLES : elles portent
+    # noindex, et un Disallow empecherait Google de le lire — l'URL nue
+    # pourrait alors apparaitre dans les resultats, sans titre ni texte.
     io.open('robots.txt', 'w', encoding='utf-8').write(
 """User-agent: *
 Allow: /
 
-# Pages sans interet pour l'index : formulaire de reservation et pages legales.
 Disallow: /api/
-Disallow: /reserver
-Disallow: /mentions-legales
 
 Sitemap: %s/sitemap.xml
 """ % SITE)
@@ -150,7 +231,7 @@ io.open('site.webmanifest', 'w', encoding='utf-8').write(
 }
 """)
 
-print('sitemap.xml           ' + ('retire (mode prospection)'
-      if PROSPECTION else '%d pages indexables' % len(pages)))
+print('%-21s %d pages, %d photos%s' % (NOM, len(pages), nb_photos,
+      ' (apercu local, non servi : mode prospection)' if PROSPECTION else ''))
 print('robots.txt            ok')
 print('site.webmanifest      ok')
