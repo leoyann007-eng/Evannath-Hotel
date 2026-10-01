@@ -44,9 +44,11 @@ for (const p of ['', 'chambres', 'chambre-standard', 'reserver']) {
   verifier((p || 'accueil').padEnd(22) + ' embarque le module de remise',
     corps[p].includes('EVN_REMISE'));
 }
+// L accueil colore l en-tete lui-meme ; les autres pages, son calque .hd-fond.
+const menuOpaque = (p) => corps[p].includes('header.menu{') || corps[p].includes('header.menu .hd-fond{');
 verifier('toutes les pages rendent l’en-tête opaque menu ouvert',
-  PAGES.every((p) => corps[p].includes('header.menu{')),
-  'manque sur : ' + PAGES.filter((p) => !corps[p].includes('header.menu{')).join(', '));
+  PAGES.every(menuOpaque),
+  'manque sur : ' + PAGES.filter((p) => !menuOpaque(p)).join(', '));
 verifier('aucune page n’expose l’adresse du prestataire',
   PAGES.every((p) => !corps[p].includes('houansouyannaxel')),
   'présente sur : ' + PAGES.filter((p) => corps[p].includes('houansouyannaxel')).join(', '));
