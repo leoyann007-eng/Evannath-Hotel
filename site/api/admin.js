@@ -1987,12 +1987,29 @@ module.exports = async function handler(req, res) {
     if (req.method !== 'POST') return json(res, 405, { ok: false });
     let corps = req.body;
     if (typeof corps === 'string') { try { corps = JSON.parse(corps); } catch { corps = {}; } }
+    /* Seules les listes affichees en carrousel ont un ordre. Les chambres et
+       les sejours n'en ont pas : les laisser passer ici, c'etait offrir une
+       facon de tout effacer d'un coup, sans le garde-fou de « supprimer ». */
+    if (!['evenement', 'promotion', 'campagne'].includes(corps.type)) {
+      return json(res, 422, { ok: false, message: 'Cette liste ne se réordonne pas.' });
+    }
     const type = collection(corps.type);
     const d = await lire();
     if (PANNE) return json(res, 503, { ok: false, message: PANNE
       + ' Rien n a ete enregistre : ecrire maintenant effacerait le reste.' });
-    const par = new Map((d[type] || []).map((x) => [x.id, x]));
-    d[type] = (corps.ordre || []).map((id) => par.get(id)).filter(Boolean);
+    /* L'ordre recu vient d'une page qui peut dater : une entree creee entre-
+       temps par quelqu'un d'autre n'y figure pas. Elle n'est PAS supprimee
+       pour autant — elle garde sa place, a la suite. Reordonner ne retire
+       jamais rien. */
+    const liste = d[type] || [];
+    const par = new Map(liste.map((x) => [x.id, x]));
+    const vus = new Set();
+    const ordonnees = [];
+    for (const id of Array.isArray(corps.ordre) ? corps.ordre : []) {
+      const x = par.get(String(id));
+      if (x && !vus.has(x.id)) { vus.add(x.id); ordonnees.push(x); }
+    }
+    d[type] = ordonnees.concat(liste.filter((x) => !vus.has(x.id)));
     noter(d, qui, 'A changé l’ordre d’affichage (' + type + ')');
     const w = await ecrire(d);
     if (!w.ok) return json(res, 502, { ok: false, message: w.message });

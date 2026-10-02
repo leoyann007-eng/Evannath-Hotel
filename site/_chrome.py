@@ -305,7 +305,7 @@ WA_TEST        = '2250758408079'        # Leonardo HOUANSOU, pendant les tests
 #
 # Laquelle afficher en production reste a trancher avec l'etablissement :
 # bonjour@evannathhotel.com porte la marque, celle-ci est relevee. Voir le
-# point 8 de « A valider » dans le README. En attendant, on garde celle qui
+# point 9 de « A valider » dans le README. En attendant, on garde celle qui
 # est lue.
 MAIL_HOTEL = 'receptionhotelevannath@gmail.com'
 # Ou arrivent les essais tant que l e-mail sert de canal : c est la valeur a
