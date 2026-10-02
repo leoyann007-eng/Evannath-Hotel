@@ -1889,7 +1889,11 @@ window.NOMS_CHAMBRES = {"chambre-standard": "Chambre Standard", "deluxe-baldaqui
       });
       var a = d.querySelector('.btn');
       a.textContent = e.cta || 'En savoir plus';
-      a.setAttribute('href', e.href || '#demande');
+      /* Le serveur filtre deja les liens (api/admin.js, lienSur) ; la page
+         refuse a son tour tout schema autre que http(s), mailto et tel. */
+      var lien = String(e.href || '').replace(/[\u0000-\u0020]/g, '');
+      a.setAttribute('href', /^[a-z][a-z0-9+.-]*:/i.test(lien) && !/^(https?|mailto|tel):/i.test(lien)
+        ? '#demande' : (e.href || '#demande'));
       /* Ces textes viennent de l'administration : ils n'ont pas de traduction,
          et doivent echapper au dictionnaire de la bascule de langue. */
       d.querySelectorAll('[data-t]').forEach(function(x){ x.removeAttribute('data-t'); });

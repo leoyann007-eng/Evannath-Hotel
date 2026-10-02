@@ -8,6 +8,7 @@ node tests/remise.test.mjs        # la logique de remise, hors réseau
 node tests/en-ligne.test.mjs      # le site déployé, sans navigateur
 node tests/envoyer.test.mjs       # l'envoi des formulaires
 node tests/comptes.test.mjs       # comptes, profils et sessions, hors réseau
+node tests/liens.test.mjs         # liens et images posés sur le site public
 python site/verifier.py           # les 15 contrôles sur les pages générées
 ```
 

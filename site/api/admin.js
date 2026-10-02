@@ -304,6 +304,47 @@ function corpsDe(req) {
 // ── Validation ─────────────────────────────────────────────────────────────
 const propre = (v, max) => String(v == null ? '' : v).replace(/\s+/g, ' ').trim().slice(0, max);
 
+/* ── Liens et images : ce qu'un compte peut poser sur le site public ──────
+   Le lien d'un bouton est ecrit par un compte Communication et pose tel quel
+   dans la page publique. Sans controle, « javascript:… » y devenait un piege :
+   un administrateur connecte qui clique execute le code AVEC SA SESSION — et
+   ce code peut se creer un compte administrateur. On n'accepte donc que :
+   une ancre (#demande), un chemin du site (reserver?chambre=…, /contact),
+   http(s), mailto: et tel:. Le test se fait sur la valeur debarrassee des
+   espaces et caracteres de controle, que le navigateur ignore dans un
+   schema (« java	script: » reste du javascript pour lui). */
+function lienSur(v) {
+  const s = String(v == null ? '' : v).trim();
+  if (!s) return '';
+  const nu = s.replace(/[\u0000-\u0020\u007f-\u009f]/g, '');
+  if (/^(https?:\/\/|mailto:|tel:)/i.test(nu)) return s;
+  if (nu.startsWith('//')) return '';               // un autre site, deguise en chemin
+  if (/^[#?/]/.test(nu)) return s;
+  if (/^[\w.-]+(?:[?#][^:]*)?$/.test(nu)) return s;  // page.html, reserver?du=…
+  return '';
+}
+/* Une image : le nom d'une photo du site (r-standard), ou une affiche
+   deposee dans NOTRE magasin Blob. Pas d'URL arbitraire : une image tierce
+   suit chaque visiteur (pixel espion) et peut changer apres coup. */
+const IMAGE_BLOB = /^https:\/\/[a-z0-9]+\.public\.blob\.vercel-storage\.com\/[\w/.%-]+$/i;
+function imageSure(v) {
+  const s = String(v == null ? '' : v).trim().slice(0, 400);
+  return s && (IMAGE_BLOB.test(s) || /^[A-Za-z0-9][\w-]{0,79}$/.test(s)) ? s : '';
+}
+
+/** Le refus d'un lien ou d'une image saisis, ou null quand tout va bien. */
+function refusLienImage({ lien, image }) {
+  if (lien != null && String(lien).trim() && !lienSur(propre(lien, LIMITES.href))) {
+    return { manque: ['lien'], message: 'Ce lien n’est pas accepté. Il doit commencer par https://, '
+      + 'mailto: ou tel:, ou mener à une page du site (reserver, contact, #demande…).' };
+  }
+  if (image != null && String(image).trim() && !imageSure(image)) {
+    return { manque: ['image'], message: 'Cette image n’est pas acceptée : choisissez une photo du site '
+      + 'ou déposez l’affiche depuis l’administration.' };
+  }
+  return null;
+}
+
 /* Un texte de plusieurs lignes. propre() ecrase les retours a la ligne et
    coupe a la longueur maximale sans rien dire : une accroche ecrite en liste
    revenait en un bloc, amputee de sa fin en plein mot. Ici les lignes sont
@@ -814,7 +855,7 @@ function nettoyerCampagne(e) {
     titre: propre(e.titre, LIMITES.titre),
     // L affiche de la campagne — celle publiee sur Facebook. Nom d une
     // photo du site, ou URL d un visuel depose.
-    visuel: propre(e.visuel, 400),
+    visuel: imageSure(e.visuel),
     accroche: texteLong(e.accroche),
     note: propre(e.note, 120),
     debut: instant(e.debut),
@@ -828,7 +869,7 @@ function nettoyerCampagne(e) {
         prix: nombre(p && p.prix),
         unite: UNITES.includes(p && p.unite) ? p.unite : 'forfait',
         // Nom d une photo du site, ou URL d un visuel depose.
-        image: propre(p && p.image, 400),
+        image: imageSure(p && p.image),
       }))
       // Un pack sans nom ni prix n a rien a montrer.
       .filter((p) => p.nom && p.prix),
@@ -837,6 +878,9 @@ function nettoyerCampagne(e) {
     const t = o.debut; o.debut = o.fin; o.fin = t;
   }
   const manque = [];
+  const refus = refusLienImage({ image: e.visuel })
+    || (Array.isArray(e.packs) ? e.packs.slice(0, 8).map((p) => refusLienImage({ image: p && p.image })).find(Boolean) : null);
+  if (refus) return { objet: o, ...refus };
   if (!o.titre) manque.push('titre');
   if (!o.packs.length) manque.push('pack');
   if (o.accroche.length > LIMITES.accroche) {
@@ -859,9 +903,9 @@ function nettoyer(e, type) {
     badge: propre(e.badge, LIMITES.badge),
     texte: propre(e.texte, LIMITES.texte),
     cta: propre(e.cta, LIMITES.cta) || 'En savoir plus',
-    href: propre(e.href, LIMITES.href) || '#demande',
+    href: lienSur(propre(e.href, LIMITES.href)) || '#demande',
     // Soit un nom de photo du site, soit l'URL d'une affiche televersee.
-    fond: propre(e.fond, 400),
+    fond: imageSure(e.fond),
     // 'affiche' : le visuel est montre ENTIER, a cote du texte. C'est le cas
     //   des carres publies sur les reseaux, qui portent deja l'information.
     // 'fond'    : une photo large, recadree derriere le texte.
@@ -913,6 +957,10 @@ function nettoyer(e, type) {
   // telephone. Le redemander serait faire saisir deux fois la meme chose.
   const manque = [];
   if (!o.titre) manque.push('titre');
+  /* Un lien ou une image refuses le DISENT : remplaces en silence, le bouton
+     menerait ailleurs que prevu et personne ne saurait pourquoi. */
+  const refus = refusLienImage({ lien: e.href, image: e.fond });
+  if (refus) return { objet: o, ...refus };
   return { objet: o, manque };
 }
 
@@ -1183,10 +1231,17 @@ function publiees(d, maintenant) {
   };
   const aujourdhui = new Date(maintenant).toISOString().slice(0, 10);
   const ouverte = (o) => !o.fin || o.fin >= aujourdhui;
+  /* Ce qui a ete enregistre AVANT le controle des liens repasse le filtre a
+     la sortie : on ne publie rien qu'on n'accepterait plus aujourd'hui. */
+  const sur = (x) => ({ ...x,
+    ...('href' in x ? { href: lienSur(x.href) || '#demande' } : {}),
+    ...('fond' in x ? { fond: imageSure(x.fond) } : {}),
+    ...('visuel' in x ? { visuel: imageSure(x.visuel) } : {}),
+    ...(Array.isArray(x.packs) ? { packs: x.packs.map((p) => ({ ...p, image: imageSure(p.image) })) } : {}) });
   return {
-    evenements: (d.evenements || []).filter(visible),
-    promotions: (d.promotions || []).filter(visible).filter(enCours),
-    campagnes: (d.campagnes || []).filter(visible).filter(enCours),
+    evenements: (d.evenements || []).filter(visible).map(sur),
+    promotions: (d.promotions || []).filter(visible).filter(enCours).map(sur),
+    campagnes: (d.campagnes || []).filter(visible).filter(enCours).map(sur),
     emplois: (d.emplois || []).filter(visible).filter(ouverte),
   };
 }
@@ -1881,6 +1936,8 @@ module.exports = async function handler(req, res) {
    Vercel ne lit que la fonction elle-meme ; ces proprietes ne le genent
    pas. */
 module.exports.regles = { plusAncienne, nuitsSeCroisent, retenueGagne };
+/* Le filtre des liens et des images, expose pour les tests. */
+module.exports.surete = { lienSur, imageSure };
 /* Ce que la notification de lomi (api/lomi.mjs) appelle. */
 module.exports.paiement = { marquerPaye, marquerEchec };
 /* Ce que le chatbot (api/chat.js) lit : les memes regles que le site, pour
