@@ -1055,7 +1055,58 @@ const json = (res, code, corps) => {
  *
  * `paiement` : pose tel quel sur la retenue (voir a=payer).
  */
-async function retenir({ categorie, du, au, nom, courriel, motif, minutes, paiement }) {
+/* ── Ce qu'on peut retenir sans payer ──────────────────────────────────────
+   Une retenue venue du site garde une chambre sans un franc verse : deux
+   heures pour une demande, une heure pour un paiement commence. Sans plafond,
+   quelqu'un qui envoie de fausses demandes depuis quelques adresses retenait
+   TOUT l'hotel, et le site annonçait complet a chaque vrai client.
+
+   Trois plafonds, comptes dans les donnees elles-memes — donc vrais sur
+   toutes les instances du serveur a la fois, contrairement a un compteur en
+   memoire :
+     - 3 retenues non payees en cours par adresse IP. Pas 1 : en Cote
+       d'Ivoire, des dizaines de clients mobiles partagent une adresse ;
+     - la MOITIE des chambres vendables d'une categorie d'au moins 4
+       chambres, sur les memes nuits ;
+     - la MOITIE des chambres vendables de l'hotel (des 10 chambres), sur
+       les memes nuits.
+   L'autre moitie ne peut etre prise que par une reservation confirmee ou
+   payee : une attaque peut gener, elle ne peut plus fermer l'hotel.
+
+   Les petites categories (deux ou trois suites) restent entierement
+   reservables en ligne : y garder une moitie, c'etait refuser au deuxieme
+   client honnete de payer pendant que le premier paie. Elles restent
+   couvertes par la limite par adresse et par le plafond de l'hotel.
+
+   Au-dela, on ne retient rien — et rien ne casse : la demande part quand meme
+   a la reception, et le paiement en ligne se replie sur la demande. */
+const RETENUES_PAR_IP = 3;
+const PETITE_CATEGORIE = 4, PETIT_HOTEL = 10;
+const empreinteIp = (ip) => (ip ? crypto.createHmac('sha256', SECRET).update('ip:' + ip).digest('hex').slice(0, 16) : '');
+/** Une retenue du site, pas encore payee, qui compte encore. */
+function retenueNonPayee(f, maintenant) {
+  return f && f.nature === 'client' && f.statut === 'attente' && !!f.expire
+    && vivante(f, maintenant) && !(f.paiement && f.paiement.statut === 'paye');
+}
+/** Pourquoi on ne retiendrait PAS, ou '' : 'limite' (cette adresse) ou 'saturation'.
+    du / au : l'arrivee et le depart demandes. Les moities se comptent SUR CES
+    NUITS-LA : une retenue de decembre ne prend rien a fevrier. La limite par
+    adresse, elle, compte toutes les dates. */
+function plafondAtteint(d, categorie, ipH, maintenant, du, au) {
+  const chambres = Array.isArray(d.chambres) ? d.chambres : [];
+  const vivantes = (d.fermetures || []).filter((f) => retenueNonPayee(f, maintenant));
+  if (ipH && vivantes.filter((f) => f.ip === ipH).length >= RETENUES_PAR_IP) return 'limite';
+  const enCours = vivantes.filter((f) => chevauche(du, au, f.debut, f.fin));
+  const moitie = (n) => Math.max(1, Math.floor(n / 2));
+  const dansCat = (f) => { const c = chambres.find((x) => x.id === f.cible); return c && c.categorie === categorie; };
+  const vendablesCat = chambres.filter((c) => c && c.categorie === categorie && vendable(c)).length;
+  if (vendablesCat >= PETITE_CATEGORIE && enCours.filter(dansCat).length >= moitie(vendablesCat)) return 'saturation';
+  const vendablesHotel = chambres.filter(vendable).length;
+  if (vendablesHotel >= PETIT_HOTEL && enCours.length >= moitie(vendablesHotel)) return 'saturation';
+  return '';
+}
+
+async function retenir({ categorie, du, au, nom, courriel, motif, minutes, paiement, ip }) {
   /* Les dates du client sont une ARRIVEE et un DEPART ; une fermeture se
      compte en NUITS. Il dort du 24 au 26 : les nuits du 24 et du 25. */
   const derniere = veille(au);
@@ -1072,12 +1123,19 @@ async function retenir({ categorie, du, au, nom, courriel, motif, minutes, paiem
         .some((c) => c && c.categorie === categorie && c.publie !== false);
       return { retenue: false, raison: saisies ? 'complet' : 'inconnu' };
     }
+    /* Le plafond APRES la recherche : une categorie reellement pleine dit
+       « complet », pas « saturation ». */
+    const ipH = empreinteIp(ip);
+    const plafond = plafondAtteint(d, categorie, ipH, Date.now(), du, au);
+    if (plafond) return { retenue: false, raison: plafond };
     const entree = nettoyerFermeture({
       cible: ch.id, debut: du, fin: derniere,
       nature: 'client', statut: 'attente', client: nom, courriel, motif,
       expire: new Date(Date.now() + minutes * 60000).toISOString().slice(0, 16),
     }).objet;
     if (paiement) entree.paiement = paiement;
+    // L'adresse, jamais en clair : une empreinte qui ne sert qu'a compter.
+    if (ipH) entree.ip = ipH;
 
     const r = await poserRetenue(d, entree, ch);
     if (r.ok) return { retenue: true, entree, ch };
@@ -1349,7 +1407,7 @@ module.exports = async function handler(req, res) {
 
     const r = await retenir({ categorie, du, au, nom,
       courriel: propre(corps.courriel, 160), motif: propre(corps.reference, 40),
-      minutes: RETENUE_MINUTES });
+      minutes: RETENUE_MINUTES, ip });
     if (r.retenue) return json(res, 200, { ok: true, retenue: true, minutes: RETENUE_MINUTES });
     return json(res, 200, { ok: true, retenue: false, raison: r.raison });
   }
@@ -1408,7 +1466,7 @@ module.exports = async function handler(req, res) {
     const paiement = { reference, montant: q.acompte, total: q.total, nuits: q.nuits,
       pax: q.pax, telephone, statut: 'en-attente', session: '', cree: new Date().toISOString() };
     const r = await retenir({ categorie: q.categorie, du: q.du, au: q.au,
-      nom: prenom + ' ' + nom, courriel, motif: reference, minutes: PAIEMENT_MINUTES, paiement });
+      nom: prenom + ' ' + nom, courriel, motif: reference, minutes: PAIEMENT_MINUTES, paiement, ip });
     let entreeId = r.retenue ? r.entree.id : '';
     let demo = false;
     if (!r.retenue) {
@@ -1937,7 +1995,7 @@ module.exports = async function handler(req, res) {
    pas. */
 module.exports.regles = { plusAncienne, nuitsSeCroisent, retenueGagne };
 /* Le filtre des liens et des images, expose pour les tests. */
-module.exports.surete = { lienSur, imageSure };
+module.exports.surete = { lienSur, imageSure, plafondAtteint, RETENUES_PAR_IP };
 /* Ce que la notification de lomi (api/lomi.mjs) appelle. */
 module.exports.paiement = { marquerPaye, marquerEchec };
 /* Ce que le chatbot (api/chat.js) lit : les memes regles que le site, pour

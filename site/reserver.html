@@ -1921,7 +1921,9 @@ function payer(){
     if(r==='coordonnees'){ etape(2); return; }
     /* Chambres pas encore saisies, ou paiement ferme : la demande d'avant,
        sans rien dire — le client n'a rien a changer. */
-    if(r==='inconnu'||r==='hors-ligne'){ repli(); demander(); return; }
+    /* Plafond des retenues sans paiement atteint (api/admin.js) : la demande
+       part a la reception, qui confirme elle-meme. */
+    if(r==='inconnu'||r==='hors-ligne'||r==='saturation'||r==='limite'){ repli(); demander(); return; }
     repli(); err.textContent=T[LG].lomiKO; err.classList.add('on');
   })
   .catch(function(){ rendre(); repli(); err.textContent=T[LG].lomiKO; err.classList.add('on'); });
