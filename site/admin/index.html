@@ -740,6 +740,8 @@ async function charger() {
   ETAT.version = etat.version || '';
   ETAT.panne = etat.panne || '';
   ETAT.fichiers = etat.fichiers || 0;
+  ETAT.ancienneCopie = etat.ancienneCopie || 0;
+  ETAT.paiement = etat.paiement || { cle: false };
   ETAT.chatbot = etat.chatbot || { actif: true, cle: false };
   ETAT.cleSession = etat.cle || '';
   await verifierEmpreinte();
@@ -1084,12 +1086,12 @@ function avertissement() {
       message est là — vous écririez par-dessus.</span>
     </div>`;
   }
-  if (ETAT.stockage === 'durable') return '';
+  if (ETAT.stockage === 'durable' || ETAT.stockage === 'base') return '';
   return `<div class="alerte">
     <b>Mode démonstration</b>
     <span>Le stockage durable n'est pas encore branché : ce que vous enregistrez
     ici disparaîtra au prochain redéploiement. Pour conserver les données,
-    ajoutez un magasin Vercel Blob et la variable BLOB_READ_WRITE_TOKEN.</span>
+    branchez une base Postgres au projet dans Vercel (variable DATABASE_URL).</span>
   </div>`;
 }
 
@@ -2194,21 +2196,41 @@ function rendre() {
           <span class="etat ${ETAT.cleSession === 'dediee' ? 'vif' : 'attend'}">${
             ETAT.cleSession === 'dediee' ? 'Dédiée' : 'À renforcer'}</span></div>
         <div class="ligne"><div class="txt">
-          <b>Stockage</b><span>${ETAT.stockage === 'durable'
-            ? 'Vercel Blob — les données sont conservées.'
+          <b>Stockage</b><span>${ETAT.stockage === 'base'
+            ? 'Base de données Postgres, privée. Deux enregistrements au même instant ne peuvent plus s’écraser.'
+            : ETAT.stockage === 'durable'
+            ? 'Vercel Blob — les données sont conservées, mais dans un magasin public, et deux enregistrements '
+              + 'au même instant peuvent s’écraser. Branchez une base Postgres (DATABASE_URL) : '
+              + 'les données y passeront d’elles-mêmes.'
             : 'Mémoire — les données se perdent au redéploiement.'}</span></div>
-          <span class="etat ${ETAT.stockage === 'durable' ? 'vif' : 'fini'}">${
-            ETAT.stockage === 'durable' ? 'Durable' : 'Démonstration'}</span></div>
+          <span class="etat ${ETAT.stockage === 'base' ? 'vif' : ETAT.stockage === 'durable' ? 'attend' : 'fini'}">${
+            ETAT.stockage === 'base' ? 'Base de données' : ETAT.stockage === 'durable' ? 'À renforcer' : 'Démonstration'}</span></div>
+        ${ETAT.ancienneCopie ? `<div class="ligne"><div class="txt"><b>Ancienne copie publique</b>
+          <span>Les données sont passées dans la base, mais des fichiers de l’ancien magasin Blob
+          n’ont pas pu être effacés. Supprimez les fichiers « evannath/donnees… » et
+          « evannath/comptes… » depuis l’onglet Storage de Vercel.</span></div>
+          <span class="etat attend">${ETAT.ancienneCopie} fichier${ETAT.ancienneCopie > 1 ? 's' : ''}</span></div>` : ''}
+        ${ETAT.stockage === 'base' || ETAT.stockage === 'durable' ? `<div class="ligne"><div class="txt"><b>Sauvegardes</b>
+          <span>Exemplaires des données conservés. Chaque enregistrement
+          en ajoute un ; les dix plus récents sont gardés.</span></div>
+          <code style="font-size:12px;color:var(--bronze-2)">${ETAT.fichiers || 0}</code></div>` : ''}
+        <div class="ligne"><div class="txt"><b>Paiement en ligne</b>
+          <span>${!ETAT.paiement.cle
+            ? 'Aucune clé lomi : le tunnel envoie la demande à la réception.'
+            : ETAT.paiement.bloque
+            ? 'Une clé lomi réelle est posée, mais le paiement reste coupé tant que la base Postgres '
+              + 'n’est pas branchée : sans elle, une confirmation de paiement pourrait être écrasée. '
+              + 'Le tunnel envoie la demande à la réception.'
+            : ETAT.paiement.test
+            ? 'Clé de test : le parcours fonctionne, aucun argent ne bouge.'
+            : 'Clé réelle : les acomptes sont encaissés par lomi.'}</span></div>
+          <span class="etat ${ETAT.paiement.bloque ? 'attend' : ETAT.paiement.actif && !ETAT.paiement.test ? 'vif' : 'fini'}">${
+            !ETAT.paiement.cle ? 'Absent' : ETAT.paiement.bloque ? 'Bloqué' : ETAT.paiement.test ? 'Test' : 'Actif'}</span></div>
         ${ETAT.magasin ? `<div class="ligne"><div class="txt">
           <b>Magasin visé</b><span>Comparez cet identifiant à celui du magasin
           Blob dans Vercel. S'ils diffèrent, le jeton pointe ailleurs.</span></div>
           <code style="font-size:12px;color:var(--bronze-2)">${ETAT.magasin}</code>
           </div>
-
-        <div class="ligne"><div class="txt"><b>Sauvegardes</b>
-          <span>Exemplaires du fichier de données conservés. Chaque publication
-          en ajoute un ; les dix plus récents sont gardés.</span></div>
-          <code style="font-size:12px;color:var(--bronze-2)">${ETAT.fichiers || 0}</code></div>
         <div class="ligne"><div class="txt"><b>Variable lue</b>
           <span>Le nom de la variable d'environnement d'où vient le jeton.</span>
           </div><code style="font-size:12px;color:var(--bronze-2)">${
@@ -2226,8 +2248,14 @@ function rendre() {
           <span>${ETAT.chatbot.cle ? 'Présente : le concierge peut répondre.'
             : 'Absente : même allumé, le concierge ne s’affiche pas. Elle se pose dans Vercel (ANTHROPIC_API_KEY).'}</span></div>
           <span class="etat ${ETAT.chatbot.cle ? 'vif' : 'fini'}">${ETAT.chatbot.cle ? 'Présente' : 'Absente'}</span></div>
+        ${ETAT.chatbot.plafond ? `<div class="ligne"><div class="txt"><b>Plafond du jour</b>
+          <span>Au-delà, la bulle s’efface jusqu’au lendemain et WhatsApp prend le relais.
+          ${ETAT.chatbot.partage ? '' : 'Sans base de données, chaque serveur compte de son côté : le total peut dépasser ce chiffre.'}
+          Il se change dans Vercel (CHAT_MAX_JOUR).</span></div>
+          <code style="font-size:12px;color:var(--bronze-2)">${ETAT.chatbot.aujourdhui || 0} / ${ETAT.chatbot.plafond}</code></div>` : ''}
         <p class="aide" style="margin-top:12px">Chaque question coûte quelques francs, facturés par
-          Anthropic. Éteindre le concierge arrête toute dépense ; le rallumer est immédiat.</p>
+          Anthropic. Éteindre le concierge arrête toute dépense ; le rallumer est immédiat. Posez aussi
+          une limite de dépense dans la console Anthropic : c’est le dernier rempart.</p>
       </div>
       <div class="carte">
         <p style="color:var(--muted)">Les numéros de téléphone et l'adresse e-mail

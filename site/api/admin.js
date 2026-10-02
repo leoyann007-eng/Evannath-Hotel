@@ -4,11 +4,14 @@
  * donnees publiques en lecture : la page Offres & Evenements les recupere au
  * chargement, ce qui evite de reconstruire le site a chaque affiche publiee.
  *
- * STOCKAGE — deux modes, decides par la presence du jeton :
+ * STOCKAGE — trois modes, voir _magasin.js :
  *
- *   BLOB_READ_WRITE_TOKEN present  ->  Vercel Blob. Les donnees survivent aux
- *                                      redeploiements. C'est le mode reel.
- *   absent                         ->  memoire de l'instance. Tout se perd au
+ *   DATABASE_URL present           ->  base Postgres, privee. Une
+ *                                      modification ne peut plus en ecraser
+ *                                      une autre. C'est le mode a viser.
+ *   BLOB_READ_WRITE_TOKEN seul     ->  Vercel Blob, public, sans ecriture
+ *                                      conditionnelle. Mode d'attente.
+ *   ni l'un ni l'autre             ->  memoire de l'instance. Tout se perd au
  *                                      redemarrage. Suffisant pour montrer
  *                                      l'outil, jamais pour s'en servir.
  *
@@ -24,6 +27,8 @@
 const crypto = require('crypto');
 const tarif = require('./_tarif.js');
 const comptes = require('./_comptes.js');
+const magasin = require('./_magasin.js');
+const quota = require('./_quota.js');
 
 /* Les categories, telles que le site les vend. On les lit au lieu de les
    recopier : le courriel de confirmation doit dire « Chambre Standard », pas
@@ -77,20 +82,6 @@ function trouverJeton() {
 }
 const { valeur: JETON_BLOB, nom: NOM_JETON } = trouverJeton();
 const COMPTES = comptes.creer({ jeton: JETON_BLOB, secours: MDP, secret: SECRET });
-
-// ── Stockage ───────────────────────────────────────────────────────────────
-// Le fichier de donnees porte un suffixe aleatoire, ajoute par Blob.
-// Ecrit a une adresse fixe, son URL serait devinable — et publique, puisque
-// le magasin l'est : n'importe qui lirait tout, brouillons non publies
-// compris. On le retrouve par prefixe, cote serveur, jeton en main.
-const PREFIXE = 'evannath/donnees';
-/* Combien d exemplaires du fichier on conserve. Il pese deux kilo-octets :
-   en garder dix coute vingt kilo-octets, et transforme une catastrophe en un
-   retour en arriere. Le 3 septembre 2026, une ecriture par-dessus une lecture
-   en echec a efface deux affiches ; il n existait alors qu un seul
-   exemplaire, et rien derriere. */
-const GARDE = 10;
-let memoire = null;                          // mode demonstration
 
 /* Combien de temps une demande venue du site retient une chambre.
  *
@@ -155,127 +146,67 @@ function tropDeDemandes(ip) {
 const VIDE = { evenements: [], promotions: [], campagnes: [], medias: [],
                chambres: [], fermetures: [], emplois: [], maj: null };
 
+/* Le document du magasin (voir _magasin.js) : une base Postgres privee
+   quand DATABASE_URL est la, Vercel Blob en attendant, la memoire sinon.
+   GARDE : combien d'exemplaires on conserve. Le 3 septembre 2026, une
+   ecriture par-dessus une lecture en echec a efface deux affiches ; il
+   n'existait alors qu'un seul exemplaire, et rien derriere. */
+const GARDE = 10;
+const DOC = magasin.document({ cle: 'donnees', prefixeBlob: 'evannath/donnees', garde: GARDE,
+  vide: () => structuredClone(VIDE), jeton: JETON_BLOB, nom: 'du fichier de données' });
+const expliquer = magasin.expliquer;
+
+/* Le paiement en ligne. Une cle de TEST marche partout : aucun argent ne
+   bouge. Une cle REELLE exige la base de donnees : sans ecriture
+   conditionnelle, une confirmation de paiement pouvait etre ecrasee par un
+   enregistrement simultane de la reception — la chambre se revendait alors
+   que le client avait paye. Bloque, le tunnel reprend la demande a la
+   reception, comme sans cle, et Parametres dit pourquoi. */
+const PAIEMENT_BLOQUE = !!LOMI_CLE && !LOMI_TEST && DOC.mode !== 'postgres';
+const PAIEMENT_ACTIF = !!LOMI_CLE && !PAIEMENT_BLOQUE;
+
 /* La derniere lecture en echec, en clair. Vide quand tout va bien.
    Sans elle, une lecture qui echoue rendait exactement la meme chose qu un
    magasin vide : zero evenement, zero promotion, zero campagne, et pas un
    mot. On croit alors avoir tout perdu — alors que les donnees dorment
    intactes de l autre cote d un jeton qui ne repond plus. */
 let PANNE = '';
-// Combien de versions du fichier coexistent. Une seule en temps normal.
+// Combien de versions du fichier coexistent (Blob). Une seule en temps normal.
 let FICHIERS = 0;
 
+/** Pour LIRE seulement. Toute modification passe par modifier(). */
 async function lire() {
-  /* Un INSTANTANE, pas la reference vivante. Le stockage durable en rend un
-     forcement : chaque ecriture cree un nouveau fichier, et la lecture prend
-     le plus recent. Rendre ici l'objet vivant faisait que deux requetes
-     simultanees partageaient la meme memoire, et se voyaient donc l'une
-     l'autre instantanement — la course a l'ecriture etait INVISIBLE en local
-     et en test, et n'apparaissait qu'en production. */
-  if (!JETON_BLOB) {
-    if (!memoire) memoire = structuredClone(VIDE);
-    return structuredClone(memoire);
-  }
-  try {
-    const { list } = await import('@vercel/blob');
-    const { blobs } = await list({ prefix: PREFIXE, token: JETON_BLOB });
-    PANNE = '';
-    FICHIERS = blobs.length;
-    if (!blobs.length) return structuredClone(VIDE);
-    /* Si un menage a echoue, plusieurs versions coexistent : on prend la plus
-       recente. Mais l inventaire est a consistance differee — il rend parfois
-       une version tout juste supprimee, dont l adresse repond 403. On essaie
-       donc les suivantes au lieu d abandonner a la premiere : abandonner
-       revenait a dire « rien a lire », et le 403 tombait au hasard des
-       instants, une fois sur deux. */
-    const versions = blobs.slice().sort(
-      (x, y) => new Date(y.uploadedAt) - new Date(x.uploadedAt));
-    let dernier = '';
-    for (let i = 0; i < versions.length; i++) {
-      const b = versions[i];
-      try {
-        const r = await fetch(b.url, { cache: 'no-store' });
-        if (r.ok) {
-          /* Se rabattre sur une version anterieure sauve l affichage, mais ce
-             qu on montre alors n est PAS l etat courant. Enregistrer par-dessus
-             ecraserait des modifications plus recentes avec du vieux : on
-             previent, et les ecritures refusent. */
-          if (i > 0) {
-            PANNE = 'La version la plus récente du fichier de données n’a pas '
-              + 'pu être lue. Ce qui s’affiche date du '
-              + new Date(b.uploadedAt).toLocaleString('fr-FR')
-              + '. N’enregistrez rien : vous écraseriez des modifications plus '
-              + 'récentes. Rechargez dans un instant.';
-          }
-          return await r.json();
-        }
-        dernier = 'erreur ' + r.status;
-      } catch (e) {
-        dernier = e.message;
-      }
-    }
-    PANNE = 'Aucune des ' + versions.length + ' versions du fichier de données '
-      + 'n’a pu être lue (' + dernier + '). Rien n’est perdu : réessayez dans '
-      + 'un instant.';
-    return structuredClone(VIDE);
-  } catch (e) {
-    PANNE = expliquer(e);
-    return structuredClone(VIDE);
-  }
+  const l = await DOC.lire();
+  PANNE = l.ok ? '' : (l.panne || 'Lecture impossible.');
+  FICHIERS = l.fichiers || 0;
+  return l.d;
 }
 
-/** Rend une erreur explicite plutot que de laisser croire a un enregistrement.
- *  Un echec silencieux ici, c'est une affiche qu'on croit publiee et qui ne
- *  l'est pas — le pire des defauts pour cet outil. */
-async function ecrire(donnees) {
-  donnees.maj = new Date().toISOString();
-  if (!JETON_BLOB) { memoire = donnees; return { ok: true }; }
-  try {
-    const { put, list, del } = await import('@vercel/blob');
-    const avant = await list({ prefix: PREFIXE, token: JETON_BLOB });
-    await put(PREFIXE + '.json', JSON.stringify(donnees), {
-      access: 'public', token: JETON_BLOB, contentType: 'application/json',
-    });
-    /* Les versions precedentes partent APRES l'ecriture : si celle-ci echoue,
-       l'ancienne reste en place plutot que de tout perdre. On n'enleve que le
-       surplus — les GARDE-1 plus recentes restent, et forment avec la nouvelle
-       les GARDE exemplaires conserves. */
-    const surplus = avant.blobs.slice()
-      .sort((x, y) => new Date(y.uploadedAt) - new Date(x.uploadedAt))
-      .slice(GARDE - 1)
-      .map((b) => b.url);
-    if (surplus.length) {
-      try { await del(surplus, { token: JETON_BLOB }); }
-      catch (e) { /* du menage rate ne doit pas faire echouer la publication */ }
-    }
-    return { ok: true };
-  } catch (e) {
-    return { ok: false, message: expliquer(e) };
-  }
+/** Relire, appliquer, ecrire SI personne n'a ecrit entre-temps — sinon
+ *  recommencer sur l'etat frais (voir _magasin.js). `appliquer(d)` peut donc
+ *  tourner plusieurs fois : rien d'exterieur dedans. Elle rend { annuler: x }
+ *  pour s'arreter sans rien ecrire.
+ *
+ *  JAMAIS d'ecriture par-dessus une lecture en echec : la lecture ratee
+ *  rend un document vide, et l'ecrire effacerait tout. Deux affiches ont
+ *  disparu comme ca. modifier() s'arrete avant. */
+async function modifier(appliquer) {
+  const r = await DOC.modifier(async (d) => {
+    const v = await appliquer(d);
+    if (!(v && typeof v === 'object' && 'annuler' in v)) d.maj = new Date().toISOString();
+    return v;
+  });
+  if (r.panne !== undefined) PANNE = r.panne;
+  return r;
 }
 
-/* Les pannes de stockage ont des causes precises et des gestes precis. Une
-   erreur brute — « This store does not exist » — n'aide personne : on traduit
-   celles qu'on connait en ce qu'il faut aller faire. */
-function expliquer(e) {
-  const m = String(e && e.message);
-  if (/Cannot find module/.test(m))
-    return "Le paquet @vercel/blob n'est pas installé. Ajoutez-le aux dépendances.";
-  if (/private access|private store/i.test(m))
-    return "Le magasin Blob est en accès privé. Les affiches d'un site public "
-      + 'doivent être lisibles par les visiteurs : créez un magasin en accès '
-      + 'public et connectez-le à la place.';
-  // Cas typique : BLOB_READ_WRITE_TOKEN a ete saisi a la main, puis le magasin
-  // supprime. La variable manuelle survit a la suppression du magasin et
-  // l'emporte sur celle qu'ajoute la connexion du nouveau.
-  if (/store does not exist|no such store|store not found/i.test(m))
-    return "Le jeton désigne un magasin qui n'existe plus. Si "
-      + 'BLOB_READ_WRITE_TOKEN a été saisi à la main dans les variables '
-      + "d'environnement, supprimez cette variable : celle du magasin connecté "
-      + 'prendra le relais. Puis redéployez.';
-  if (/unauthorized|forbidden|invalid token/i.test(m))
-    return 'Le jeton de stockage est refusé. Reconnectez le magasin au projet, '
-      + 'puis redéployez.';
-  return "Le stockage a refusé l'opération : " + m.slice(0, 140);
+/** La reponse HTTP d'une modification qui n'a pas abouti. */
+function echecModification(res, r) {
+  if (r.panne !== undefined) {
+    return json(res, 503, { ok: false, message: r.panne
+      + ' Rien n a ete enregistre : ecrire maintenant effacerait le reste.' });
+  }
+  return json(res, 502, { ok: false, message: r.message });
 }
 
 // ── Journal d'activite ─────────────────────────────────────────────────────
@@ -800,30 +731,22 @@ function retenueGagne(entree, rivales) {
  *  on a promis une chambre qu'il n'a pas. */
 async function retirerFermeture(id) {
   try {
-    const frais = await lire();
-    if (PANNE) return;
-    frais.fermetures = (frais.fermetures || []).filter((f) => f && f.id !== id);
-    await ecrire(frais);
+    await modifier((d) => { d.fermetures = (d.fermetures || []).filter((f) => f && f.id !== id); });
   } catch (e) { /* elle expirera */ }
 }
 
 /** Retire une demonstration de paiement (mode test, sans chambre). */
 async function retirerDemo(id) {
   try {
-    const frais = await lire();
-    if (PANNE) return;
-    frais.demos = (frais.demos || []).filter((x) => x && x.id !== id);
-    await ecrire(frais);
+    await modifier((d) => { d.demos = (d.demos || []).filter((x) => x && x.id !== id); });
   } catch (e) { /* elle vieillira */ }
 }
 
-/** Pose la retenue, puis verifie qu'elle a bien survecu. */
-async function poserRetenue(d, entree, ch) {
-  d.fermetures = Array.isArray(d.fermetures) ? d.fermetures : [];
-  d.fermetures.push(entree);
-  const w = await ecrire(d);
-  if (!w.ok) return { ok: false, raison: 'ecriture' };
-
+/** Sans ecriture conditionnelle (Vercel Blob), une retenue ecrite peut
+ *  encore avoir ete ecrasee : on relit pour s'en assurer. Avec la base, la
+ *  question ne se pose plus — l'ecriture n'a pu passer que sur l'etat exact
+ *  ou la chambre etait libre. */
+async function verifierRetenue(entree, ch) {
   /* On RELIT. Sans cette relecture, on repondrait sur ce qu'on croit avoir
      ecrit, pas sur ce que le magasin contient. */
   const apres = await lire();
@@ -1125,40 +1048,46 @@ async function retenir({ categorie, du, au, nom, courriel, motif, minutes, paiem
   /* Les dates du client sont une ARRIVEE et un DEPART ; une fermeture se
      compte en NUITS. Il dort du 24 au 26 : les nuits du 24 et du 25. */
   const derniere = veille(au);
+  const ipH = empreinteIp(ip);
   for (let essai = 0; essai < 3; essai++) {
-    const d = await lire();
-    if (PANNE) return { retenue: false, raison: 'indisponible' };
-    const ch = premiereLibre(d, categorie, du, au);
-    if (!ch) {
-      /* « Complet » est une AFFIRMATION : elle dit que l'hotel est plein.
-         Sans aucune chambre saisie dans cette categorie, on ne sait rien —
-         et `a=dispo` repond deja `inconnu` dans ce cas. Le paiement, lui,
-         n'encaisse JAMAIS sur un « inconnu ». */
-      const saisies = (Array.isArray(d.chambres) ? d.chambres : [])
-        .some((c) => c && c.categorie === categorie && c.publie !== false);
-      return { retenue: false, raison: saisies ? 'complet' : 'inconnu' };
-    }
-    /* Le plafond APRES la recherche : une categorie reellement pleine dit
-       « complet », pas « saturation ». */
-    const ipH = empreinteIp(ip);
-    const plafond = plafondAtteint(d, categorie, ipH, Date.now(), du, au);
-    if (plafond) return { retenue: false, raison: plafond };
-    const entree = nettoyerFermeture({
-      cible: ch.id, debut: du, fin: derniere,
-      nature: 'client', statut: 'attente', client: nom, courriel, motif,
-      expire: new Date(Date.now() + minutes * 60000).toISOString().slice(0, 16),
-    }).objet;
-    if (paiement) entree.paiement = paiement;
-    // L'adresse, jamais en clair : une empreinte qui ne sert qu'a compter.
-    if (ipH) entree.ip = ipH;
-
-    const r = await poserRetenue(d, entree, ch);
-    if (r.ok) return { retenue: true, entree, ch };
-    /* Une panne d'ecriture ne se retente pas : elle ne vient pas d'une
-       course, et reessayer l'aggraverait. */
-    if (r.raison === 'ecriture' || r.raison === 'indisponible') {
-      return { retenue: false, raison: r.raison };
-    }
+    /* Choisir la chambre et la retenir dans la MEME modification : si une
+       autre demande ecrit entre-temps, modifier() recommence sur l'etat
+       frais, ou cette chambre apparait prise — et on en choisit une autre. */
+    let entree = null, ch = null;
+    const r = await modifier((d) => {
+      ch = premiereLibre(d, categorie, du, au);
+      if (!ch) {
+        /* « Complet » est une AFFIRMATION : elle dit que l'hotel est plein.
+           Sans aucune chambre saisie dans cette categorie, on ne sait rien —
+           et `a=dispo` repond deja `inconnu` dans ce cas. Le paiement, lui,
+           n'encaisse JAMAIS sur un « inconnu ». */
+        const saisies = (Array.isArray(d.chambres) ? d.chambres : [])
+          .some((c) => c && c.categorie === categorie && c.publie !== false);
+        return { annuler: { retenue: false, raison: saisies ? 'complet' : 'inconnu' } };
+      }
+      /* Le plafond APRES la recherche : une categorie reellement pleine dit
+         « complet », pas « saturation ». */
+      const plafond = plafondAtteint(d, categorie, ipH, Date.now(), du, au);
+      if (plafond) return { annuler: { retenue: false, raison: plafond } };
+      entree = nettoyerFermeture({
+        cible: ch.id, debut: du, fin: derniere,
+        nature: 'client', statut: 'attente', client: nom, courriel, motif,
+        expire: new Date(Date.now() + minutes * 60000).toISOString().slice(0, 16),
+      }).objet;
+      if (paiement) entree.paiement = paiement;
+      // L'adresse, jamais en clair : une empreinte qui ne sert qu'a compter.
+      if (ipH) entree.ip = ipH;
+      d.fermetures = Array.isArray(d.fermetures) ? d.fermetures : [];
+      d.fermetures.push(entree);
+    });
+    /* Une panne ne se retente pas : elle ne vient pas d'une course, et
+       reessayer l'aggraverait. */
+    if (!r.ok) return { retenue: false, raison: r.panne !== undefined ? 'indisponible' : 'ecriture' };
+    if (r.annule) return r.valeur;
+    if (DOC.transactionnel) return { retenue: true, entree, ch };
+    const v = await verifierRetenue(entree, ch);
+    if (v.ok) return { retenue: true, entree, ch };
+    if (v.raison === 'indisponible') return { retenue: false, raison: 'indisponible' };
   }
   return { retenue: false, raison: 'complet' };
 }
@@ -1223,48 +1152,58 @@ function trouverPaiement(d, { ref, session }) {
  * confirme rien, et la reception tranche.
  */
 async function marquerPaye({ ref, session, transaction, montant }) {
-  const d = await lire();
-  if (PANNE) return { ok: false, raison: 'indisponible' };
-  const f = trouverPaiement(d, { ref, session });
-  if (!f) return { ok: false, raison: 'inconnu' };
-  if (f.paiement.statut === 'paye') return { ok: true, deja: true };
-  /* Deja mis de cote pour la reception : une notification en double, ou la
-     relecture au retour du client, ne doit pas trancher a sa place. */
-  if (f.paiement.statut === 'a-verifier') return { ok: false, raison: 'a-verifier' };
-  /* La chambre avait ete rendue (paiement refuse puis repris, retenue
-     perimee, client revenu en arriere) : quelqu'un a pu la prendre entre
-     temps. On ne confirme alors que si elle est toujours libre ; sinon
-     l'argent est la, la chambre non — la reception tranche (reloger ou
-     rembourser), et on ne promet rien au client par courriel. */
-  const ch0 = !f.demo && (d.chambres || []).find((x) => x.id === f.cible);
-  if (ch0 && !vivante(f, Date.now())) {
-    const rivales = concurrentes(d, f, ch0, Date.now());
-    if (rivales.length) {
-      f.paiement.statut = 'a-verifier';
-      f.paiement.note = 'Paye apres que la chambre a ete rendue, et elle a ete reprise : a reloger ou rembourser.';
-      if (transaction) f.paiement.transaction = String(transaction).slice(0, 80);
-      await ecrire(d);
-      return { ok: false, raison: 'reprise' };
+  /* Tout se decide dans UNE modification : relue fraiche si la reception
+     enregistre au meme instant. Avant, son enregistrement pouvait reecrire
+     la retenue « en attente » par-dessus le paiement confirme — la chambre
+     expirait et se revendait, et lomi, qui avait eu sa reponse, ne
+     renvoyait rien. */
+  let issue = null, payee = null, categorie = null;
+  const r = await modifier((d) => {
+    const f = trouverPaiement(d, { ref, session });
+    if (!f) return { annuler: { ok: false, raison: 'inconnu' } };
+    if (f.paiement.statut === 'paye') return { annuler: { ok: true, deja: true } };
+    /* Deja mis de cote pour la reception : une notification en double, ou la
+       relecture au retour du client, ne doit pas trancher a sa place. */
+    if (f.paiement.statut === 'a-verifier') return { annuler: { ok: false, raison: 'a-verifier' } };
+    /* La chambre avait ete rendue (paiement refuse puis repris, retenue
+       perimee, client revenu en arriere) : quelqu'un a pu la prendre entre
+       temps. On ne confirme alors que si elle est toujours libre ; sinon
+       l'argent est la, la chambre non — la reception tranche (reloger ou
+       rembourser), et on ne promet rien au client par courriel. */
+    const ch0 = !f.demo && (d.chambres || []).find((x) => x.id === f.cible);
+    if (ch0 && !vivante(f, Date.now())) {
+      const rivales = concurrentes(d, f, ch0, Date.now());
+      if (rivales.length) {
+        f.paiement.statut = 'a-verifier';
+        f.paiement.note = 'Paye apres que la chambre a ete rendue, et elle a ete reprise : a reloger ou rembourser.';
+        if (transaction) f.paiement.transaction = String(transaction).slice(0, 80);
+        issue = { ok: false, raison: 'reprise' };
+        return;
+      }
     }
-  }
-  if (montant != null && Number(montant) !== Number(f.paiement.montant)) {
-    f.paiement.statut = 'a-verifier';
-    f.paiement.note = 'Montant annonce par lomi : ' + montant;
-    await ecrire(d);
-    return { ok: false, raison: 'montant' };
-  }
-  f.paiement.statut = 'paye';
-  f.paiement.paye = new Date().toISOString();
-  if (transaction) f.paiement.transaction = String(transaction).slice(0, 80);
-  f.statut = 'confirmee';
-  f.expire = null;
-  const w = await ecrire(d);
-  if (!w.ok) return { ok: false, raison: 'ecriture' };
+    if (montant != null && Number(montant) !== Number(f.paiement.montant)) {
+      f.paiement.statut = 'a-verifier';
+      f.paiement.note = 'Montant annonce par lomi : ' + montant;
+      issue = { ok: false, raison: 'montant' };
+      return;
+    }
+    f.paiement.statut = 'paye';
+    f.paiement.paye = new Date().toISOString();
+    if (transaction) f.paiement.transaction = String(transaction).slice(0, 80);
+    f.statut = 'confirmee';
+    f.expire = null;
+    issue = { ok: true };
+    payee = f;
+    const ch = (d.chambres || []).find((x) => x.id === f.cible);
+    categorie = ch && ch.categorie;
+  });
+  if (!r.ok) return { ok: false, raison: r.panne !== undefined ? 'indisponible' : 'ecriture' };
+  if (r.annule) return r.valeur;
+  if (!issue.ok) return issue;
   /* Une demonstration n'envoie pas de courriel : « votre reservation est
      confirmee » serait faux, aucune chambre n'etant retenue. */
-  if (f.demo) return { ok: true, courriel: 'demonstration' };
-  const ch = (d.chambres || []).find((x) => x.id === f.cible);
-  const courriel = await courrielAuClient(f, nomDeCategorie(ch && ch.categorie));
+  if (payee.demo) return { ok: true, courriel: 'demonstration' };
+  const courriel = await courrielAuClient(payee, nomDeCategorie(categorie));
   return { ok: true, courriel };
 }
 
@@ -1273,13 +1212,12 @@ async function marquerPaye({ ref, session, transaction, montant }) {
  *  retenue et lisait « complet ». Un paiement deja confirme ne redescend
  *  jamais. */
 async function marquerEchec({ ref, session }) {
-  const d = await lire();
-  if (PANNE) return { ok: false };
-  const f = trouverPaiement(d, { ref, session });
-  if (!f || f.paiement.statut === 'paye') return { ok: true };
-  f.paiement.statut = 'echoue';
-  await ecrire(d);
-  return { ok: true };
+  const r = await modifier((d) => {
+    const f = trouverPaiement(d, { ref, session });
+    if (!f || f.paiement.statut === 'paye') return { annuler: true };
+    f.paiement.statut = 'echoue';
+  });
+  return { ok: r.ok };
 }
 
 /** Ce que le site peut montrer, a cet instant : ce que a=public publie, et
@@ -1338,7 +1276,7 @@ module.exports = async function handler(req, res) {
       ...publiees(d, Date.now()),
       /* Le tunnel en a besoin AVANT le clic : bouton « Payer » ou « Envoyer »,
          et bandeau « mode test » quand aucun argent ne bouge. */
-      paiement: { actif: !!LOMI_CLE, test: LOMI_TEST },
+      paiement: { actif: PAIEMENT_ACTIF, test: LOMI_TEST },
       /* Les prix de la nuit saisis dans l'administration, quand ils
          s'ecartent de la grille gravee dans les pages : chaque page les
          repeint (REMISE_JS), et a=payer encaisse sur les memes. */
@@ -1434,7 +1372,7 @@ module.exports = async function handler(req, res) {
   if (action === 'payer') {
     if (req.method !== 'POST') return json(res, 405, { ok: false });
     res.setHeader('Cache-Control', 'no-store');
-    if (!LOMI_CLE) return json(res, 200, { ok: false, raison: 'hors-ligne' });
+    if (!PAIEMENT_ACTIF) return json(res, 200, { ok: false, raison: 'hors-ligne' });
 
     const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim()
       || req.socket?.remoteAddress || 'inconnue';
@@ -1462,20 +1400,20 @@ module.exports = async function handler(req, res) {
        dates remplace le precedent, encore en attente : sans cela, sa
        premiere retenue lui prend la chambre qu'il essaie de payer. */
     const derniereNuit = veille(q.au);
-    let remplaces = 0;
-    for (const f of d0.fermetures || []) {
-      if (!f || !f.paiement || f.statut !== 'attente' || f.paiement.statut !== 'en-attente') continue;
-      if (String(f.courriel || '').toLowerCase() !== courriel.toLowerCase()) continue;
-      if (f.debut !== q.du || f.fin !== derniereNuit) continue;
-      const c = (d0.chambres || []).find((x) => x.id === f.cible);
-      if (!c || c.categorie !== q.categorie) continue;
-      f.paiement.statut = 'remplace';
-      remplaces++;
-    }
-    if (remplaces) {
-      const w = await ecrire(d0);
-      if (!w.ok) return json(res, 200, { ok: false, raison: 'ecriture' });
-    }
+    const r0 = await modifier((d) => {
+      let remplaces = 0;
+      for (const f of d.fermetures || []) {
+        if (!f || !f.paiement || f.statut !== 'attente' || f.paiement.statut !== 'en-attente') continue;
+        if (String(f.courriel || '').toLowerCase() !== courriel.toLowerCase()) continue;
+        if (f.debut !== q.du || f.fin !== derniereNuit) continue;
+        const c = (d.chambres || []).find((x) => x.id === f.cible);
+        if (!c || c.categorie !== q.categorie) continue;
+        f.paiement.statut = 'remplace';
+        remplaces++;
+      }
+      if (!remplaces) return { annuler: 0 };
+    });
+    if (!r0.ok) return json(res, 200, { ok: false, raison: r0.panne !== undefined ? 'indisponible' : 'ecriture' });
 
     const reference = nouvelleReference(d0);
     const paiement = { reference, montant: q.acompte, total: q.total, nuits: q.nuits,
@@ -1494,16 +1432,15 @@ module.exports = async function handler(req, res) {
          chambres. On paie alors SANS retenir de chambre, dans d.demos, et
          l'ecran de fin le dit. Avec une cle reelle, jamais. */
       if (!(r.raison === 'inconnu' && LOMI_TEST)) return json(res, 200, { ok: false, raison: r.raison });
-      const dd = await lire();
-      if (PANNE) return json(res, 200, { ok: false, raison: 'indisponible' });
       const trenteJours = Date.now() - 30 * 864e5;
-      dd.demos = (dd.demos || []).filter((x) => x && Date.parse(x.cree) > trenteJours);
       const objet = { id: crypto.randomUUID(), demo: true, categorie: q.categorie,
         debut: q.du, fin: veille(q.au), client: prenom + ' ' + nom, courriel, motif: reference,
         statut: 'attente', paiement, cree: new Date().toISOString() };
-      dd.demos.push(objet);
-      const w = await ecrire(dd);
-      if (!w.ok) return json(res, 200, { ok: false, raison: 'ecriture' });
+      const w = await modifier((dd) => {
+        dd.demos = (dd.demos || []).filter((x) => x && Date.parse(x.cree) > trenteJours);
+        dd.demos.push(structuredClone(objet));
+      });
+      if (!w.ok) return json(res, 200, { ok: false, raison: w.panne !== undefined ? 'indisponible' : 'ecriture' });
       entreeId = objet.id;
       demo = true;
     }
@@ -1528,9 +1465,11 @@ module.exports = async function handler(req, res) {
       return json(res, 200, { ok: false, raison: 'lomi', statut: s.statut });
     }
     // On note la session : c'est elle qu'on relira au retour du client.
-    const d1 = await lire();
-    const f = !PANNE && trouverPaiement(d1, { ref: reference });
-    if (f) { f.paiement.session = String(s.corps.id || ''); await ecrire(d1); }
+    await modifier((d1) => {
+      const f = trouverPaiement(d1, { ref: reference });
+      if (!f) return { annuler: false };
+      f.paiement.session = String(s.corps.id || '');
+    });
     return json(res, 200, { ok: true, url: lien, reference, montant: q.acompte, test: LOMI_TEST, demo });
   }
 
@@ -1548,14 +1487,13 @@ module.exports = async function handler(req, res) {
     if (typeof corps === 'string') { try { corps = JSON.parse(corps); } catch { corps = {}; } }
     const ref = String((corps && corps.ref) || '').toUpperCase();
     if (!/^EVN-[A-Z0-9]{6}$/.test(ref)) return json(res, 400, { ok: false });
-    const d = await lire();
-    const f = !PANNE && trouverPaiement(d, { ref });
     /* On marque, on n'efface pas : si lomi confirme malgre tout un
        paiement (deux onglets, retour arriere), la trace doit exister. */
-    if (f && f.paiement.statut === 'en-attente' && f.statut === 'attente') {
+    await modifier((d) => {
+      const f = trouverPaiement(d, { ref });
+      if (!(f && f.paiement.statut === 'en-attente' && f.statut === 'attente')) return { annuler: false };
       f.paiement.statut = 'abandonne';
-      await ecrire(d);
-    }
+    });
     return json(res, 200, { ok: true });
   }
 
@@ -1672,10 +1610,18 @@ module.exports = async function handler(req, res) {
       // 'dediee' (ADMIN_SECRET) ou 'derivee' (du mot de passe de secours).
       cle: SECRET_DEDIE ? 'dediee' : 'derivee',
       version: VERSION,
-      stockage: JETON_BLOB ? 'durable' : 'demonstration',
+      /* 'base' (Postgres), 'durable' (Vercel Blob) ou 'demonstration'. */
+      stockage: DOC.mode === 'postgres' ? 'base' : DOC.mode === 'blob' ? 'durable' : 'demonstration',
       // Vide quand la lecture s est bien passee.
       panne: PANNE || null,
-      fichiers: FICHIERS,
+      // Les sauvegardes conservees : versions dans la base, fichiers dans Blob.
+      fichiers: DOC.mode === 'postgres' ? await DOC.sauvegardes() : FICHIERS,
+      /* Apres le passage a la base, l'ancienne copie publique dans Blob doit
+         avoir disparu. Un nombre ici dit qu'elle est encore la. */
+      ancienneCopie: await DOC.ancienneCopie(),
+      /* Le paiement en ligne : cle presente, de test, et bloquee tant qu'une
+         cle reelle n'a pas la base derriere elle. */
+      paiement: { cle: !!LOMI_CLE, test: LOMI_TEST, actif: PAIEMENT_ACTIF, bloque: PAIEMENT_BLOQUE },
       // L'identifiant du magasin vise, lisible dans le jeton. Il se compare a
       // celui affiche par Vercel : c'est ainsi qu'on voit a quel magasin on
       // parle. Ce n'est pas la partie secrete, et l'etat demande une session.
@@ -1694,6 +1640,8 @@ module.exports = async function handler(req, res) {
       chatbot: {
         actif: !(d.reglages && d.reglages.chatbot && d.reglages.chatbot.actif === false),
         cle: !!(process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_AUTH_TOKEN),
+        // Le plafond du jour, et ou il en est (exact avec la base seulement).
+        plafond: quota.PAR_JOUR, aujourdhui: await quota.aujourdhui(), partage: DOC.mode === 'postgres',
       },
       maj: d.maj,
     });
@@ -1762,50 +1710,62 @@ module.exports = async function handler(req, res) {
       return json(res, 422, { ok: false, champs: manque,
         message: message || 'Il manque le ' + manque.join(' et le ') + '.' });
     }
-    const d = await lire();
-    /* JAMAIS d ecriture par-dessus une lecture en echec. lire() rend un objet
-       vide quand elle echoue ; on inserait l entree dedans, puis ecrire()
-       ecrasait le fichier et supprimait la version precedente. Deux affiches
-       ont disparu comme ca. */
-    if (PANNE) return json(res, 503, { ok: false, message: PANNE
-      + ' Rien n a ete enregistre : ecrire maintenant effacerait le reste.' });
-    d[type] = d[type] || [];
-    if (corps.type === 'chambre') {
-      const pareil = (v) => String(v || '').trim().toLowerCase();
-      const double = d.chambres.find((x) => x.id !== objet.id
-        && pareil(x.numero) === pareil(objet.numero));
-      if (double) {
-        return json(res, 409, { ok: false, champs: ['numéro'],
-          message: 'La chambre ' + objet.numero + ' existe déjà. Deux fois le '
-            + 'même numéro, et le site croirait que vous en avez deux.' });
+    /* La modification se rejoue sur l'etat frais si quelqu'un a enregistre
+       entre-temps : on repart donc a chaque fois d'une copie de l'entree. */
+    let enregistree = null, avant = null, aConfirmer = false, categorieConfirmee = null;
+    const r = await modifier((d) => {
+      const o = structuredClone(objet);
+      d[type] = d[type] || [];
+      if (corps.type === 'chambre') {
+        const pareil = (v) => String(v || '').trim().toLowerCase();
+        const double = d.chambres.find((x) => x.id !== o.id
+          && pareil(x.numero) === pareil(o.numero));
+        if (double) {
+          return { annuler: { code: 409, corps: { ok: false, champs: ['numéro'],
+            message: 'La chambre ' + o.numero + ' existe déjà. Deux fois le '
+              + 'même numéro, et le site croirait que vous en avez deux.' } } };
+        }
       }
-    }
-    const i = d[type].findIndex((x) => x.id === objet.id);
-    /* Une retenue qui passe de « attente » a « confirmee » : c'est LE moment
-       ou le client doit apprendre que sa demande est acceptee. Avant, il
-       n'avait que sa reference, et personne ne le prevenait. */
-    const avant = i >= 0 ? d[type][i] : null;
-    /* `cree` date la DEMANDE, pas sa derniere modification. Le formulaire ne
-       le renvoie pas, et nettoyerFermeture en fabriquerait alors un neuf a
-       chaque enregistrement : une reservation confirmee rajeunirait, et
-       perdrait une course contre une demande venue du site. */
-    if (avant && avant.cree && objet.cree) objet.cree = avant.cree;
-    /* Le paiement appartient au SERVEUR : il ne vient jamais du formulaire,
-       et l'enregistrer depuis l'administration ne doit ni l'effacer ni le
-       forger. On reprend celui du magasin, tel quel. */
-    if (corps.type === 'fermeture') {
-      delete objet.paiement;
-      if (avant && avant.paiement) objet.paiement = avant.paiement;
-    }
-    const aConfirmer = corps.type === 'fermeture' && objet.nature === 'client'
-      && objet.statut === 'confirmee'
-      && (!avant || avant.statut !== 'confirmee');
-    if (i >= 0) d[type][i] = objet; else d[type].push(objet);
-    noter(d, qui, (!avant ? 'A créé ' : 'A modifié ') + libelle(corps.type, objet, d)
-      + (avant && corps.type === 'fermeture' && avant.statut !== objet.statut && objet.statut
-        ? ' : passée en « ' + (STATUTS_EN_CLAIR[objet.statut] || objet.statut) + ' »' : ''));
-    const w = await ecrire(d);
-    if (!w.ok) return json(res, 502, { ok: false, message: w.message });
+      const i = d[type].findIndex((x) => x.id === o.id);
+      /* Une retenue qui passe de « attente » a « confirmee » : c'est LE moment
+         ou le client doit apprendre que sa demande est acceptee. Avant, il
+         n'avait que sa reference, et personne ne le prevenait. */
+      avant = i >= 0 ? d[type][i] : null;
+      /* `cree` date la DEMANDE, pas sa derniere modification. Le formulaire ne
+         le renvoie pas, et nettoyerFermeture en fabriquerait alors un neuf a
+         chaque enregistrement : une reservation confirmee rajeunirait, et
+         perdrait une course contre une demande venue du site. */
+      if (avant && avant.cree && o.cree) o.cree = avant.cree;
+      /* Le paiement appartient au SERVEUR : il ne vient jamais du formulaire,
+         et l'enregistrer depuis l'administration ne doit ni l'effacer ni le
+         forger. On reprend celui du magasin, tel quel — celui de l'etat
+         FRAIS : un paiement confirme a l'instant par lomi est garde. */
+      if (corps.type === 'fermeture') {
+        delete o.paiement;
+        if (avant && avant.paiement) o.paiement = avant.paiement;
+        /* Un acompte paye fait foi. Le formulaire de la reception a pu
+           s'ouvrir AVANT le paiement : il renverrait « en attente » et
+           l'heure d'expiration d'alors, et la reservation payee se
+           rouvrirait seule une heure plus tard. Seule une decision
+           explicite — annulee, terminee — change son statut. */
+        if (o.paiement && o.paiement.statut === 'paye' && !['annulee', 'terminee'].includes(o.statut)) {
+          o.statut = 'confirmee';
+          o.expire = null;
+        }
+      }
+      aConfirmer = corps.type === 'fermeture' && o.nature === 'client'
+        && o.statut === 'confirmee'
+        && (!avant || avant.statut !== 'confirmee');
+      if (i >= 0) d[type][i] = o; else d[type].push(o);
+      noter(d, qui, (!avant ? 'A créé ' : 'A modifié ') + libelle(corps.type, o, d)
+        + (avant && corps.type === 'fermeture' && avant.statut !== o.statut && o.statut
+          ? ' : passée en « ' + (STATUTS_EN_CLAIR[o.statut] || o.statut) + ' »' : ''));
+      enregistree = o;
+      const ch = (d.chambres || []).find((x) => x.id === o.cible);
+      categorieConfirmee = ch && ch.categorie;
+    });
+    if (!r.ok) return echecModification(res, r);
+    if (r.annule) return json(res, r.valeur.code, r.valeur.corps);
 
     /* L'envoi vient APRES l'ecriture : une confirmation enregistree vaut
        mieux qu'un courriel parti pour une reservation qu'on n'a pas su
@@ -1813,11 +1773,8 @@ module.exports = async function handler(req, res) {
        silence, c'est un client que personne ne previent pendant que la
        reception croit le contraire. */
     let courriel;
-    if (aConfirmer) {
-      const ch = (d.chambres || []).find((x) => x.id === objet.cible);
-      courriel = await courrielAuClient(objet, nomDeCategorie(ch && ch.categorie));
-    }
-    return json(res, 200, { ok: true, entree: objet, courriel });
+    if (aConfirmer) courriel = await courrielAuClient(enregistree, nomDeCategorie(categorieConfirmee));
+    return json(res, 200, { ok: true, entree: enregistree, courriel });
   }
 
   /* ── Les reglages : { chatbot: { actif } } ────────────────────────────
@@ -1829,14 +1786,13 @@ module.exports = async function handler(req, res) {
     if (typeof corps === 'string') { try { corps = JSON.parse(corps); } catch { corps = {}; } }
     const c = corps && corps.chatbot;
     if (!c || typeof c.actif !== 'boolean') return json(res, 422, { ok: false, message: 'Rien à régler.' });
-    const d = await lire();
-    if (PANNE) return json(res, 503, { ok: false, message: PANNE
-      + ' Rien n a ete enregistre : ecrire maintenant effacerait le reste.' });
-    d.reglages = { ...(d.reglages || {}), chatbot: { actif: c.actif } };
-    noter(d, qui, c.actif ? 'A allumé le concierge (chatbot)' : 'A éteint le concierge (chatbot)');
-    const w = await ecrire(d);
-    if (!w.ok) return json(res, 502, { ok: false, message: w.message });
-    return json(res, 200, { ok: true, reglages: d.reglages });
+    const r = await modifier((d) => {
+      d.reglages = { ...(d.reglages || {}), chatbot: { actif: c.actif } };
+      noter(d, qui, c.actif ? 'A allumé le concierge (chatbot)' : 'A éteint le concierge (chatbot)');
+      return d.reglages;
+    });
+    if (!r.ok) return echecModification(res, r);
+    return json(res, 200, { ok: true, reglages: r.valeur });
   }
 
   /* ── Plusieurs chambres a la fois ────────────────────────────────────────
@@ -1853,29 +1809,33 @@ module.exports = async function handler(req, res) {
     if (!recues.length || recues.length > 60) {
       return json(res, 422, { ok: false, message: 'Une série compte de 1 à 60 chambres.' });
     }
-    const d = await lire();
-    if (PANNE) return json(res, 503, { ok: false, message: PANNE
-      + ' Rien n a ete enregistre : ecrire maintenant effacerait le reste.' });
-    d.chambres = d.chambres || [];
-    const pareil = (v) => String(v || '').trim().toLowerCase();
-    const pris = new Set(d.chambres.map((x) => pareil(x.numero)));
-    const creees = [], ignores = [];
+    const neuves = [];
     for (const e of recues) {
       const { objet, manque } = nettoyerChambre(Object.assign({}, e, { id: '' }));
       if (manque.length) {
         return json(res, 422, { ok: false, champs: manque, message: 'Il manque le ' + manque.join(' et le ') + '.' });
       }
-      if (pris.has(pareil(objet.numero))) { ignores.push(objet.numero); continue; }
-      pris.add(pareil(objet.numero));
-      creees.push(objet);
+      neuves.push(objet);
     }
-    if (creees.length) {
+    /* Les numeros deja pris se decident sur l'etat FRAIS : une chambre
+       ajoutee a l'instant par quelqu'un d'autre est sautee, pas doublee. */
+    let creees = [], ignores = [];
+    const r = await modifier((d) => {
+      creees = []; ignores = [];
+      d.chambres = d.chambres || [];
+      const pareil = (v) => String(v || '').trim().toLowerCase();
+      const pris = new Set(d.chambres.map((x) => pareil(x.numero)));
+      for (const objet of neuves) {
+        if (pris.has(pareil(objet.numero))) { ignores.push(objet.numero); continue; }
+        pris.add(pareil(objet.numero));
+        creees.push(structuredClone(objet));
+      }
+      if (!creees.length) return { annuler: true };
       d.chambres.push(...creees);
       noter(d, qui, 'A ajouté ' + creees.length + (creees.length > 1 ? ' chambres : ' : ' chambre : ')
         + creees.map((x) => x.numero).join(', '));
-      const w = await ecrire(d);
-      if (!w.ok) return json(res, 502, { ok: false, message: w.message });
-    }
+    });
+    if (!r.ok) return echecModification(res, r);
     return json(res, 200, { ok: true, creees, ignores });
   }
 
@@ -1891,22 +1851,22 @@ module.exports = async function handler(req, res) {
     if (!ids.size || !Object.keys(ch).length) {
       return json(res, 422, { ok: false, message: 'Rien à changer.' });
     }
-    const d = await lire();
-    if (PANNE) return json(res, 503, { ok: false, message: PANNE
-      + ' Rien n a ete enregistre : ecrire maintenant effacerait le reste.' });
-    const modifiees = [];
-    d.chambres = (d.chambres || []).map((x) => {
-      if (!ids.has(x.id)) return x;
-      const o = nettoyerChambre(Object.assign({}, x, ch)).objet;
-      modifiees.push(o);
-      return o;
+    let modifiees = [];
+    const r = await modifier((d) => {
+      modifiees = [];
+      d.chambres = (d.chambres || []).map((x) => {
+        if (!ids.has(x.id)) return x;
+        const o = nettoyerChambre(Object.assign({}, x, ch)).objet;
+        modifiees.push(o);
+        return o;
+      });
+      if (!modifiees.length) return { annuler: { code: 404, corps: { ok: false, message: 'Aucune de ces chambres n’existe plus.' } } };
+      noter(d, qui, 'A ' + ('publie' in ch ? (ch.publie ? 'publié' : 'retiré de la vente') : 'passé en « ' + ch.statut + ' »')
+        + ' ' + modifiees.length + (modifiees.length > 1 ? ' chambres : ' : ' chambre : ')
+        + modifiees.map((x) => x.numero).join(', '));
     });
-    if (!modifiees.length) return json(res, 404, { ok: false, message: 'Aucune de ces chambres n’existe plus.' });
-    noter(d, qui, 'A ' + ('publie' in ch ? (ch.publie ? 'publié' : 'retiré de la vente') : 'passé en « ' + ch.statut + ' »')
-      + ' ' + modifiees.length + (modifiees.length > 1 ? ' chambres : ' : ' chambre : ')
-      + modifiees.map((x) => x.numero).join(', '));
-    const w = await ecrire(d);
-    if (!w.ok) return json(res, 502, { ok: false, message: w.message });
+    if (!r.ok) return echecModification(res, r);
+    if (r.annule) return json(res, r.valeur.code, r.valeur.corps);
     return json(res, 200, { ok: true, modifiees });
   }
 
@@ -1920,32 +1880,36 @@ module.exports = async function handler(req, res) {
     let corps = req.body;
     if (typeof corps === 'string') { try { corps = JSON.parse(corps); } catch { corps = {}; } }
     const recus = (corps && corps.tarifs) || {};
-    const d = await lire();
-    if (PANNE) return json(res, 503, { ok: false, message: PANNE
-      + ' Rien n a ete enregistre : ecrire maintenant effacerait le reste.' });
-    const suivants = { ...(d.tarifs || {}) };
+    // Les refus ne dependent pas du magasin : on les dit avant d'y toucher.
     for (const [s, v] of Object.entries(recus)) {
       const g = tarif.GRILLE.chambres[s];
       if (!g) return json(res, 422, { ok: false, message: 'Catégorie inconnue : ' + s + '.' });
-      if (v === null || v === '' || v === undefined) { delete suivants[s]; continue; }
-      const n = Number(v);
-      if (!tarif.prixValide(n)) {
+      if (v === null || v === '' || v === undefined) continue;
+      if (!tarif.prixValide(Number(v))) {
         return json(res, 422, { ok: false, champs: [s], message: 'Le prix de « ' + g.nom
           + ' » doit être un nombre entier entre ' + tarif.PRIX_MIN.toLocaleString('fr-FR')
           + ' et ' + tarif.PRIX_MAX.toLocaleString('fr-FR') + ' FCFA.' });
       }
-      if (n === g.prix) delete suivants[s]; else suivants[s] = n;
     }
-    const avantT = tarif.tarifsEnVigueur(d.tarifs), apresT = tarif.tarifsEnVigueur(suivants);
-    const changes = Object.keys(recus).filter((k) => tarif.GRILLE.chambres[k]
-      && (avantT[k] || tarif.GRILLE.chambres[k].prix) !== (apresT[k] || tarif.GRILLE.chambres[k].prix))
-      .map((k) => tarif.GRILLE.chambres[k].nom + ' ' + (avantT[k] || tarif.GRILLE.chambres[k].prix).toLocaleString('fr-FR')
-        + ' → ' + (apresT[k] || tarif.GRILLE.chambres[k].prix).toLocaleString('fr-FR') + ' F');
-    d.tarifs = suivants;
-    if (changes.length) noter(d, qui, 'A modifié les prix : ' + changes.join(' ; '));
-    const w = await ecrire(d);
-    if (!w.ok) return json(res, 502, { ok: false, message: w.message });
-    return json(res, 200, { ok: true, tarifs: d.tarifs });
+    const r = await modifier((d) => {
+      const suivants = { ...(d.tarifs || {}) };
+      for (const [s, v] of Object.entries(recus)) {
+        const g = tarif.GRILLE.chambres[s];
+        if (v === null || v === '' || v === undefined) { delete suivants[s]; continue; }
+        const n = Number(v);
+        if (n === g.prix) delete suivants[s]; else suivants[s] = n;
+      }
+      const avantT = tarif.tarifsEnVigueur(d.tarifs), apresT = tarif.tarifsEnVigueur(suivants);
+      const changes = Object.keys(recus).filter((k) => tarif.GRILLE.chambres[k]
+        && (avantT[k] || tarif.GRILLE.chambres[k].prix) !== (apresT[k] || tarif.GRILLE.chambres[k].prix))
+        .map((k) => tarif.GRILLE.chambres[k].nom + ' ' + (avantT[k] || tarif.GRILLE.chambres[k].prix).toLocaleString('fr-FR')
+          + ' → ' + (apresT[k] || tarif.GRILLE.chambres[k].prix).toLocaleString('fr-FR') + ' F');
+      d.tarifs = suivants;
+      if (changes.length) noter(d, qui, 'A modifié les prix : ' + changes.join(' ; '));
+      return suivants;
+    });
+    if (!r.ok) return echecModification(res, r);
+    return json(res, 200, { ok: true, tarifs: r.valeur });
   }
 
   if (action === 'supprimer') {
@@ -1953,33 +1917,29 @@ module.exports = async function handler(req, res) {
     let corps = req.body;
     if (typeof corps === 'string') { try { corps = JSON.parse(corps); } catch { corps = {}; } }
     const type = collection(corps.type);
-    const d = await lire();
-    /* JAMAIS d ecriture par-dessus une lecture en echec. lire() rend un objet
-       vide quand elle echoue ; on inserait l entree dedans, puis ecrire()
-       ecrasait le fichier et supprimait la version precedente. Deux affiches
-       ont disparu comme ca. */
-    if (PANNE) return json(res, 503, { ok: false, message: PANNE
-      + ' Rien n a ete enregistre : ecrire maintenant effacerait le reste.' });
-    /* Une chambre qui porte encore des sejours a venir ne se supprime pas :
-       ils resteraient accroches a une chambre qui n'existe plus, et
-       disparaitraient du calendrier sans que personne ne les deplace. */
-    if (corps.type === 'chambre') {
-      const auj = new Date().toISOString().slice(0, 10);
-      const sejours = (d.fermetures || []).filter((f) => f && f.cible === corps.id
-        && f.nature === 'client' && vivante(f, Date.now()) && (f.fin == null || f.fin >= auj));
-      if (sejours.length) {
-        return json(res, 409, { ok: false, sejours: sejours.length,
-          message: sejours.length + (sejours.length > 1 ? ' séjours à venir sont posés'
-            : ' séjour à venir est posé') + ' sur cette chambre. Déplacez-'
-            + (sejours.length > 1 ? 'les' : 'le') + ' dans Disponibilités avant de la supprimer, '
-            + 'ou désactivez-la plutôt.' });
+    const r = await modifier((d) => {
+      /* Une chambre qui porte encore des sejours a venir ne se supprime pas :
+         ils resteraient accroches a une chambre qui n'existe plus, et
+         disparaitraient du calendrier sans que personne ne les deplace. Le
+         compte se fait sur l'etat frais : un sejour pose a l'instant compte. */
+      if (corps.type === 'chambre') {
+        const auj = new Date().toISOString().slice(0, 10);
+        const sejours = (d.fermetures || []).filter((f) => f && f.cible === corps.id
+          && f.nature === 'client' && vivante(f, Date.now()) && (f.fin == null || f.fin >= auj));
+        if (sejours.length) {
+          return { annuler: { code: 409, corps: { ok: false, sejours: sejours.length,
+            message: sejours.length + (sejours.length > 1 ? ' séjours à venir sont posés'
+              : ' séjour à venir est posé') + ' sur cette chambre. Déplacez-'
+              + (sejours.length > 1 ? 'les' : 'le') + ' dans Disponibilités avant de la supprimer, '
+              + 'ou désactivez-la plutôt.' } } };
+        }
       }
-    }
-    const retiree = (d[type] || []).find((x) => x.id === corps.id);
-    d[type] = (d[type] || []).filter((x) => x.id !== corps.id);
-    if (retiree) noter(d, qui, 'A supprimé ' + libelle(corps.type, retiree, d));
-    const w = await ecrire(d);
-    if (!w.ok) return json(res, 502, { ok: false, message: w.message });
+      const retiree = (d[type] || []).find((x) => x.id === corps.id);
+      d[type] = (d[type] || []).filter((x) => x.id !== corps.id);
+      if (retiree) noter(d, qui, 'A supprimé ' + libelle(corps.type, retiree, d));
+    });
+    if (!r.ok) return echecModification(res, r);
+    if (r.annule) return json(res, r.valeur.code, r.valeur.corps);
     return json(res, 200, { ok: true });
   }
 
@@ -1994,25 +1954,23 @@ module.exports = async function handler(req, res) {
       return json(res, 422, { ok: false, message: 'Cette liste ne se réordonne pas.' });
     }
     const type = collection(corps.type);
-    const d = await lire();
-    if (PANNE) return json(res, 503, { ok: false, message: PANNE
-      + ' Rien n a ete enregistre : ecrire maintenant effacerait le reste.' });
-    /* L'ordre recu vient d'une page qui peut dater : une entree creee entre-
-       temps par quelqu'un d'autre n'y figure pas. Elle n'est PAS supprimee
-       pour autant — elle garde sa place, a la suite. Reordonner ne retire
-       jamais rien. */
-    const liste = d[type] || [];
-    const par = new Map(liste.map((x) => [x.id, x]));
-    const vus = new Set();
-    const ordonnees = [];
-    for (const id of Array.isArray(corps.ordre) ? corps.ordre : []) {
-      const x = par.get(String(id));
-      if (x && !vus.has(x.id)) { vus.add(x.id); ordonnees.push(x); }
-    }
-    d[type] = ordonnees.concat(liste.filter((x) => !vus.has(x.id)));
-    noter(d, qui, 'A changé l’ordre d’affichage (' + type + ')');
-    const w = await ecrire(d);
-    if (!w.ok) return json(res, 502, { ok: false, message: w.message });
+    const r = await modifier((d) => {
+      /* L'ordre recu vient d'une page qui peut dater : une entree creee entre-
+         temps par quelqu'un d'autre n'y figure pas. Elle n'est PAS supprimee
+         pour autant — elle garde sa place, a la suite. Reordonner ne retire
+         jamais rien. */
+      const liste = d[type] || [];
+      const par = new Map(liste.map((x) => [x.id, x]));
+      const vus = new Set();
+      const ordonnees = [];
+      for (const id of Array.isArray(corps.ordre) ? corps.ordre : []) {
+        const x = par.get(String(id));
+        if (x && !vus.has(x.id)) { vus.add(x.id); ordonnees.push(x); }
+      }
+      d[type] = ordonnees.concat(liste.filter((x) => !vus.has(x.id)));
+      noter(d, qui, 'A changé l’ordre d’affichage (' + type + ')');
+    });
+    if (!r.ok) return echecModification(res, r);
     return json(res, 200, { ok: true });
   }
 

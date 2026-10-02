@@ -54,7 +54,7 @@ article a:hover{border-color:var(--bronze)}
 # Prefixees sm*, plus de collision possible.
 NAV_ITEMS = [('editeur','sm1','Éditeur du site'),('hebergeur','sm2','Hébergement'),
  ('propriete','sm3','Propriété intellectuelle'),('donnees','sm4','Données personnelles'),
- ('cookies','sm5','Cookies'),('reservation','sm6','Réservation et paiement'),
+ ('cookies','sm5','Cookies et stockage'),('reservation','sm6','Réservation et paiement'),
  ('responsabilite','sm7','Responsabilité'),('droit','sm8','Droit applicable'),('credits','sm9','Crédits')]
 
 def kv(k, lab, val, todo=False):
@@ -68,7 +68,7 @@ b = [header('index.html#reserver','Réserver'), drawer(''), '''
   </nav>
   <span class="eyebrow" data-t="eb">Informations juridiques</span>
   <h1 data-t="h1">Mentions légales &amp;<br>protection des données</h1>
-  <p class="maj" data-t="maj">Dernière mise à jour : <b>21 août 2026</b> · La version française de ce document fait foi.</p>
+  <p class="maj" data-t="maj">Dernière mise à jour : <b>2 octobre 2026</b> · La version française de ce document fait foi.</p>
 </div>
 
 <div class="wrap body">
@@ -108,10 +108,10 @@ b += [
  '    <section id="hebergeur">',
  '      <h2 data-t="t2">Hébergement du site</h2>',
  '      <p data-t="p2">Le site est hébergé par :</p>',
- kv('h1l','Hébergeur','Nom de la société',True),
- kv('h2l','Adresse','Adresse complète',True),
- kv('h3l','Contact','Téléphone ou e-mail',True),
- kv('h4l','Localisation des serveurs','Pays',True),
+ kv('h1l','Hébergeur','Vercel Inc.'),
+ kv('h2l','Adresse','440 N Barranca Ave #4133, Covina, CA 91723, États-Unis'),
+ kv('h3l','Contact','<a href="https://vercel.com/contact" target="_blank" rel="noopener">vercel.com/contact</a>'),
+ kv('h4l','Localisation des serveurs','Région des fonctions à confirmer dans Vercel',True),
  '    </section>',
 ]
 
@@ -132,11 +132,23 @@ b += [
  kv('d1','Formulaire de contact','nom, e-mail, téléphone, message'),
  kv('d2','Réservation','identité, coordonnées, dates et détails du séjour'),
  kv('d3','Paiement','traité par le prestataire, jamais stocké par nos soins'),
- kv('d4','Mesure d\'audience','données de navigation, sous forme agrégée'),
+ kv('d4','Concierge en ligne','les messages que vous lui écrivez'),
+ '      <p data-t="p4f">Le site ne pratique aucune mesure d\'audience et ne dépose aucun cookie publicitaire.</p>',
+ '      <h3 data-t="d12">Qui les reçoit</h3>',
+ '      <p data-t="p4g">Vos données ne servent qu\'à traiter votre demande. Pour cela, elles passent par les prestataires techniques suivants, qui agissent pour le compte de l\'établissement :</p>',
+ kv('d13','Vercel (États-Unis)','hébergement du site et de ses fonctions'),
+ kv('d14','Base de données','Fournisseur et pays',True),
+ kv('d15','Anthropic (États-Unis)','concierge en ligne : vos messages lui sont transmis pour rédiger la réponse'),
+ kv('d16','lomi','paiement en ligne de l\'acompte'),
+ kv('d17','Resend (États-Unis)','envoi des e-mails de confirmation'),
+ kv('d18','WhatsApp (Meta)','si vous choisissez d\'envoyer votre demande par WhatsApp'),
+ kv('d19','Google','polices de caractères et carte d\'accès : votre adresse IP leur parvient à l\'affichage'),
+ '      <p data-t="p4h">Plusieurs de ces prestataires sont établis hors de Côte d\'Ivoire, notamment aux États-Unis. N\'écrivez pas d\'informations sensibles (santé, numéro de carte) dans le concierge ni dans les formulaires.</p>',
+ kv('d20','Transferts hors de Côte d\'Ivoire','Référence de l\'autorisation ARTCI',True),
  '      <h3 data-t="d5">Combien de temps nous les conservons</h3>',
  kv('d6','Demandes de contact','à définir — usage : 12 mois',True),
  kv('d7','Dossiers de réservation','à définir — obligation comptable',True),
- kv('d8','Mesure d\'audience','13 mois maximum'),
+ kv('d8','Conversations avec le concierge','non conservées par l\'établissement : elles restent dans votre navigateur jusqu\'à la fermeture de l\'onglet'),
 ]
 
 b.append('''      <h3 data-t="d9">Vos droits</h3>
@@ -153,27 +165,28 @@ b.append('''      <p data-t="p4e">Les visiteurs résidant dans l'Union européen
     </section>
 
     <section id="cookies">
-      <h2 data-t="t5">Cookies</h2>
-      <p data-t="p5a">Un cookie est un petit fichier déposé sur votre appareil lors de la visite d'un site. Nous n'utilisons que les cookies décrits ci-dessous, et les cookies de mesure d'audience ne sont déposés qu'après votre accord.</p>
+      <h2 data-t="t5">Cookies et stockage du navigateur</h2>
+      <p data-t="p5a">Le site ne dépose aucun cookie publicitaire ni de mesure d'audience. Pour fonctionner, il garde seulement quelques informations dans votre navigateur :</p>
       <div class="cook">
-        <div class="h"><span data-t="ch1">Cookie</span><span data-t="ch2">Finalité</span><span data-t="ch3">Durée</span></div>
-        <div><b>evn_session</b><span data-t="ck1">Maintien de votre sélection pendant la réservation</span><span data-t="ck1d">session</span></div>
-        <div><b>evn_lang</b><span data-t="ck2">Mémorisation de la langue choisie, français ou anglais</span><span>6 <span data-t="mois">mois</span></span></div>
-        <div><b>evn_consent</b><span data-t="ck3">Mémorisation de votre choix concernant les cookies</span><span>6 <span data-t="mois">mois</span></span></div>
-        <div><b>_ga</b><span data-t="ck4">Mesure d'audience anonymisée — déposé après consentement</span><span>13 <span data-t="mois">mois</span></span></div>
+        <div class="h"><span data-t="ch1">Nom</span><span data-t="ch2">Finalité</span><span data-t="ch3">Durée</span></div>
+        <div><b>evn-langue</b><span data-t="ck1">Langue choisie, français ou anglais, pour que les pages suivantes s'affichent dans la même langue</span><span data-t="ck1d">jusqu'à effacement</span></div>
+        <div><b>evn-tunnel</b><span data-t="ck2">Réservation en cours de saisie, pour ne pas la perdre en changeant de page</span><span data-t="ck2d">fermeture de l'onglet</span></div>
+        <div><b>evn-chat</b><span data-t="ck3">Conversation avec le concierge en ligne</span><span data-t="ck3d">fermeture de l'onglet</span></div>
+        <div><b>evn-chat-actif</b><span data-t="ck4">Disponibilité du concierge, pour ne pas la redemander à chaque page</span><span data-t="ck4d">fermeture de l'onglet</span></div>
+        <div><b>evn_adm</b><span data-t="ck5">Connexion à l'espace d'administration — personnel de l'hôtel uniquement</span><span data-t="ck5d">12 heures</span></div>
       </div>
-      <p data-t="p5b">Vous pouvez à tout moment modifier votre choix, ou supprimer les cookies déjà déposés depuis les réglages de votre navigateur. Le refus des cookies de mesure d'audience n'empêche en rien la réservation.</p>
+      <p data-t="p5b">La carte Google intégrée aux pages Accueil et Contact peut déposer ses propres cookies, régis par Google. Vous pouvez effacer toutes ces données à tout moment depuis les réglages de votre navigateur : le site s'affichera simplement de nouveau en français.</p>
     </section>
 
     <section id="reservation">
       <h2 data-t="t6">Réservation et paiement</h2>
       <p data-t="p6a">Les conditions de réservation, d'acompte et d'annulation sont détaillées sur la page <a href="informations-utiles.html#reserver">Informations utiles</a>. Elles font partie intégrante du contrat conclu au moment de la confirmation.</p>
       <p data-t="p6b">Les tarifs sont indiqués en francs CFA (XOF), toutes taxes comprises sauf mention contraire. Ils s'entendent par nuit et par chambre pour l'hébergement, et par personne ou par forfait pour les circuits, selon ce qui est précisé.</p>
-      <p data-t="p6c">Les paiements en ligne sont traités par un prestataire agréé. Les données bancaires transitent de manière chiffrée et ne sont à aucun moment conservées sur nos serveurs.</p>''')
+      <p data-t="p6c">Les paiements en ligne sont traités par lomi, prestataire de paiement. Les données bancaires transitent de manière chiffrée et ne sont à aucun moment conservées sur nos serveurs.</p>''')
 
 b += [
- kv('r1','Prestataire de paiement','Nom et agrément',True),
- kv('r2','Moyens acceptés','Wave, Orange Money, MTN Money, Visa, Mastercard'),
+ kv('r1','Prestataire de paiement','lomi — agrément à préciser',True),
+ kv('r2','Moyens acceptés en ligne','Wave, MTN Mobile Money, carte bancaire — liste à confirmer avec lomi',True),
  '    </section>',
 ]
 
@@ -228,8 +241,8 @@ if('IntersectionObserver' in window){
 // EVN_FR_FAIT_FOI
 var EN={''' + EN_NAV + '''cta:"Book now",
 c1:"Home",c2:"Legal notice",eb:"Legal information",h1:"Legal notice &amp;<br>data protection",
-maj:"Last updated: <b>21 August 2026</b> · The French version of this document is the authoritative one.",
-sm:"Contents",sm1:"Site publisher",sm2:"Hosting",sm3:"Intellectual property",sm4:"Personal data",sm5:"Cookies",
+maj:"Last updated: <b>2 October 2026</b> · The French version of this document is the authoritative one.",
+sm:"Contents",sm1:"Site publisher",sm2:"Hosting",sm3:"Intellectual property",sm4:"Personal data",sm5:"Cookies and storage",
 sm6:"Booking and payment",sm7:"Liability",sm8:"Applicable law",sm9:"Credits"};
 
 ''' + LANG_JS

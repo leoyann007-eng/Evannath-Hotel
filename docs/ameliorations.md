@@ -1,6 +1,6 @@
 # Ce qu'il reste à améliorer
 
-État au 2 octobre 2026 (relu après l'audit du jour ; première version le 4 septembre). Classé par compartiment, et dans chacun par ordre
+État au 2 octobre 2026, après les corrections du jour (première version le 4 septembre). Classé par compartiment, et dans chacun par ordre
 de ce que ça coûte de ne pas le faire.
 
 Trois niveaux :
@@ -18,14 +18,15 @@ Trois niveaux :
 > l'administration ne publiait que des affiches, un mot de passe partagé
 > suffisait. Elle gouverne maintenant **les chambres qu'on annonce libres**,
 > et le paiement en ligne est codé. Les quatre premières lignes de la version
-> du 4 septembre sont faites ; ce qui reste est **préalable à une clé lomi
-> réelle**.
+> du 4 septembre sont faites. Le stockage transactionnel et privé est codé le
+> 2 octobre : **il ne reste qu'à brancher la base** dans Vercel.
 
 | | Quand | Pourquoi |
 |---|---|---|
-| **Le stockage n'est pas transactionnel** | Avant une clé lomi réelle | Chaque enregistrement réécrit le document entier, et l'inventaire de Blob est à consistance différée. Une confirmation de paiement peut être écrasée par un enregistrement simultané de la réception : la réservation repasse « en attente », expire, la chambre se revend alors que le client a payé — et lomi, qui a eu sa réponse, ne renvoie rien. Même mécanisme côté comptes : chaque connexion réécrit le fichier pour noter la date de visite, et peut défaire une désactivation faite au même instant. Réponse : Postgres (Neon, Supabase) ou Redis (Upstash). |
-| **Données clients et comptes dans un magasin public** | 2 semaines | Noms, e-mails, téléphones, empreintes de mots de passe : protégés seulement par une adresse indevinable. Un second magasin **privé** pour `donnees` et `comptes`, le public gardé pour les affiches. ⚠️ Avant toute montée de `@vercel/blob` en 1.x : passer `addRandomSuffix: true` explicitement, la valeur par défaut change. |
-| **Coût du concierge sans plafond** | Avant la mise en ligne | Le débit est limité par instance, en mémoire : un robot qui change d'adresse passe. Poser une limite de dépense dans la console Anthropic. Le choix du modèle (Opus 5.5 aujourd'hui) se mesure sur de vraies questions. |
+| **Brancher la base Postgres** | Avant une clé lomi réelle | Le code est prêt (écriture conditionnelle, base privée, passage automatique depuis Blob) ; tant que `DATABASE_URL` manque, le site reste sur Blob — public, et deux enregistrements simultanés peuvent encore s'écraser. Une clé lomi réelle est ignorée d'ici là. Voir « Le stockage » dans le README. |
+| **L'offre Vercel et `ADMIN_SECRET`** | Avant la mise en ligne | Hobby est réservé à un usage non commercial ; `ADMIN_SECRET` signe les sessions. Voir « Avant la mise en ligne » dans le README. |
+| **La limite de dépense Anthropic** | Avant la mise en ligne | Le site plafonne le concierge (`CHAT_MAX_JOUR`, 200 messages par jour) ; la limite de la console reste le dernier rempart. Le choix du modèle (Opus 5.5 aujourd'hui) se mesure sur de vraies questions. |
+| **`@vercel/blob` en 1.x et au-delà** | À la mise à jour | La valeur par défaut d'`addRandomSuffix` change : passer `addRandomSuffix: true` explicitement avant toute montée de version. |
 | **Les images acceptées viennent de n'importe quel magasin Blob** | Trimestre | `imageSure()` et la CSP acceptent `*.public.blob.vercel-storage.com`, pas seulement le nôtre. Seul un compte connecté peut en poser une. |
 | **`/admin` servi en `public, max-age=0`** | Trimestre | La règle `no-store` de `vercel.json` perd contre celle des `.html`. Sans conséquence : la page ne contient aucun secret, l'API est en `no-store`, et `must-revalidate` force une revalidation. |
 | **Le contenu des dépôts n'est pas validé** | Trimestre | On vérifie le type annoncé, pas les octets. Seul un compte connecté peut déposer. |
@@ -56,6 +57,7 @@ Trois niveaux :
 | **L'animation d'apparition est morte sur la carte et le spa** | Trimestre | Ces deux pages ont tout le nécessaire sauf la ligne qui l'active. Rien n'est invisible — la panne va dans le bon sens. Activer sans vérifier chaque bloc risquerait une page blanche. |
 | **Le châssis est recopié dans chaque page** | Trimestre | Environ 80 Ko de CSS et de JS en ligne par page, jamais mis en cache d'une page à l'autre. Les sortir en fichiers versionnés (`versionner()` existe) allège chaque navigation et simplifie la CSP. |
 | **L'accueil appelle `a=public` deux fois** | Trimestre | `build-index.py` et `REMISE_JS` font chacun leur appel ; chaque appel relit tout le magasin. Une seule promesse partagée suffit. |
+| **La traduction anglaise est incomplète** | 2 semaines | Maintenant que la langue suit le visiteur, les manques se voient sur chaque page : `chambres.html` (titre et fiches compris), les cartes de La table et du Spa, les légendes de la galerie. |
 | **Aucune restriction de remise sur les services** | Trimestre | Le formulaire permet de cibler le spa ou la table ; le site n'applique la remise qu'aux chambres. Le ciblage est donc sans effet. |
 
 ## Ce qui n'existe pas encore
@@ -89,7 +91,12 @@ Trois niveaux :
 
 ## Ce qui est déjà réglé
 
-Pour ne pas y revenir : les comptes nominatifs à quatre profils, la limite
+Pour ne pas y revenir : le stockage transactionnel et privé (2 octobre,
+`tests/magasin.test.mjs`, `tests/migration.test.mjs` — à brancher), un acompte
+payé qui fait foi face à un formulaire périmé, le plafond quotidien du
+concierge (`tests/quota.test.mjs`), la langue qui suit le visiteur d'une page à
+l'autre, les mentions légales remises au réel (cookies et prestataires), le
+générateur de la galerie qui ne la vide plus sans les originaux, les comptes nominatifs à quatre profils, la limite
 des tentatives de connexion, la clé de session dédiée (`ADMIN_SECRET`), le
 journal d'activité, la politique de sécurité du contenu (CSP par empreintes),
 le plafond des retenues sans paiement, le réordonnancement qui ne supprime

@@ -215,6 +215,7 @@ serveur.listen(PORT, () => {
   console.log('  Administration http://localhost:' + PORT + '/admin/');
   console.log('');
   console.log('  ADMIN_MDP  ' + (process.env.ADMIN_MDP ? 'défini' : 'ABSENT — /admin refusera la connexion'));
-  console.log('  Stockage   ' + (process.env.BLOB_READ_WRITE_TOKEN ? 'durable (Vercel Blob)' : 'mémoire — perdu à chaque redémarrage'));
+  console.log('  Stockage   ' + (process.env.DATABASE_URL || process.env.POSTGRES_URL ? 'base Postgres (DATABASE_URL)'
+    : process.env.BLOB_READ_WRITE_TOKEN ? 'durable (Vercel Blob)' : 'mémoire — perdu à chaque redémarrage'));
   console.log('');
 });

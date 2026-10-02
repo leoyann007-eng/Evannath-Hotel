@@ -27,7 +27,10 @@
  */
 const Anthropic = require('@anthropic-ai/sdk');
 const tarif = require('./_tarif.js');
+const crypto = require('crypto');
 const admin = require('./admin.js');
+const magasin = require('./_magasin.js');
+const quota = require('./_quota.js');
 const CHATBOT = require('./_chatbot.json');
 
 const MODELE = 'claude-opus-5-5';
@@ -37,15 +40,16 @@ const MODELE = 'claude-opus-5-5';
 const TOURS_MAX = 30, SIGNES_MAX = 1500, OUTILS_MAX = 5;
 
 /* Un visiteur tape vite ; un robot tape tres vite. 20 questions par
-   tranche de 10 minutes et par adresse, sur cette instance. */
+   tranche de 10 minutes et par adresse. Le compteur vit dans la base quand
+   elle est branchee — le meme pour toutes les instances — et sinon dans
+   celle-ci. L'adresse n'y est jamais en clair : une empreinte. Le plafond
+   du jour, tous visiteurs confondus, est dans _quota.js. */
 const FENETRE = 10 * 60 * 1000, PLAFOND = 20;
-const VUS = new Map();
-function tropVite(ip) {
-  const t = Date.now();
-  const l = (VUS.get(ip) || []).filter((x) => t - x < FENETRE);
-  l.push(t); VUS.set(ip, l);
-  if (VUS.size > 1000) for (const [k, v] of VUS) if (!v.some((x) => t - x < FENETRE)) VUS.delete(k);
-  return l.length > PLAFOND;
+const SEL = process.env.ADMIN_SECRET || process.env.ADMIN_MDP || 'evannath-chat';
+async function tropVite(ip) {
+  const empreinte = crypto.createHmac('sha256', SEL).update(String(ip)).digest('hex').slice(0, 16);
+  const tranche = Math.floor(Date.now() / FENETRE);
+  return (await magasin.compter('chat:ip:' + empreinte + ':' + tranche, FENETRE)) > PLAFOND;
 }
 
 const CATEGORIES = Object.entries(tarif.GRILLE.chambres)
@@ -363,18 +367,23 @@ function diagnostic(e) {
 async function preparer(corps, ip) {
   if (!cle()) return { refus: { code: 503, corps: { ok: false, raison: 'hors-ligne' } } };
   if (!(await allume())) return { refus: { code: 503, corps: { ok: false, raison: 'eteint' } } };
-  if (tropVite(ip || 'inconnue')) return { refus: { code: 429, corps: { ok: false, raison: 'debit' } } };
+  if (await tropVite(ip || 'inconnue')) return { refus: { code: 429, corps: { ok: false, raison: 'debit' } } };
   if (typeof corps === 'string') { try { corps = JSON.parse(corps); } catch { corps = {}; } }
   const langue = corps && corps.langue === 'en' ? 'en' : 'fr';
   const page = corps && typeof corps.page === 'string' ? corps.page.slice(0, 80) : '';
   const messages = nettoyer(corps && corps.messages);
   if (!messages) return { refus: { code: 422, corps: { ok: false, raison: 'message' } } };
+  /* Compte en dernier : seul un message qui partirait vraiment chez
+     Anthropic entame le plafond du jour. Au-dela, la bulle dit de passer
+     par WhatsApp, et ne se montre plus jusqu'au lendemain (etat). */
+  if (!(await quota.compterMessage())) return { refus: { code: 503, corps: { ok: false, raison: 'quota' } } };
   return { messages, langue, page, flux: !!(corps && corps.flux) };
 }
 
 /** GET : la bulle demande si elle doit s'afficher. Allume dans le
- *  back-office ET cle presente — sinon elle ne se montre pas du tout. */
-async function etat() { return { ok: true, actif: cle() && await allume() }; }
+ *  back-office, cle presente, et plafond du jour pas encore atteint —
+ *  sinon elle ne se montre pas du tout. */
+async function etat() { return { ok: true, actif: cle() && await allume() && !(await quota.atteint()) }; }
 
 module.exports = { preparer, converser, diagnostic, etat,
   // Pour les tests : la consigne et les outils, sans appel reseau.

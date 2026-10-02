@@ -163,6 +163,11 @@ absents, il faut les retélécharger depuis la médiathèque de l'hôtel
 (`https://evannathhotel.com/wp-json/wp/v2/media?per_page=100&page=1..5`) puis
 relancer `build-galerie.py`, qui ne régénère que les fichiers manquants.
 
+`build-galerie.py` se contente des versions optimisées de `img/opt/` quand un
+original manque. **Il refuse d'écrire `galerie.html` s'il lui manque une photo
+de part et d'autre** : lancé sans les originaux, il réécrivait autrefois la
+galerie vide — aucune des quarante-sept photos —, sans rien dire.
+
 ## Prévisualiser en local
 
 ```bash
@@ -182,6 +187,20 @@ Hébergé sur **Vercel**, en site statique — aucune étape de compilation.
 À l'import du dépôt, régler **Root Directory** sur `site`. Le fichier
 `site/vercel.json` fait le reste : URL sans `.html`, images en cache un an,
 en-têtes de sécurité. Chaque `git push` sur `main` redéploie automatiquement.
+
+### Avant la mise en ligne : ce qui se règle dans Vercel et chez Anthropic
+
+Le code ne peut pas le faire à votre place. Dans l'ordre :
+
+| | Où | Pourquoi |
+|---|---|---|
+| **L'offre Vercel** | *Settings → Billing* | L'offre gratuite (Hobby) est réservée à un usage personnel et non commercial. Le site d'un hôtel qui encaisse des acomptes doit être sur une offre payante (Pro). |
+| **`ADMIN_SECRET`** | *Settings → Environment Variables* | 64 caractères aléatoires (`node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"`). Sans elle, la clé des sessions dérive du mot de passe de secours. *Paramètres* doit afficher « Dédiée ». |
+| **La base Postgres** | *Storage → Create Database → Neon* | Voir « Le stockage ». *Paramètres* doit afficher « Base de données ». C'est elle qui rend possible une clé lomi réelle. |
+| **La limite de dépense Anthropic** | console Anthropic → *Limits* | Le dernier rempart du concierge : aucun bug ne la contourne. Le site plafonne aussi lui-même : `CHAT_MAX_JOUR` messages par jour (200 par défaut), compté dans la base — au-delà, la bulle s'efface jusqu'au lendemain et WhatsApp prend le relais. |
+| **lomi** | *Environment Variables* | `LOMI_SECRET_KEY` (réelle seulement une fois la base branchée), `LOMI_WEBHOOK_SECRET`, et `SITE_URL` sur le domaine définitif. |
+
+Puis la bascule de « Repasser en production le jour de la signature », plus bas.
 
 ## Mode prospection — le site est volontairement invisible des moteurs
 
@@ -335,6 +354,17 @@ node tests/dispo.test.mjs     # la regle des nuits, hors reseau
 node tests/remise.test.mjs    # la logique de remise
 node tests/envoyer.test.mjs   # l'envoi des formulaires
 node tests/ordonner.test.mjs  # reordonner ne supprime jamais rien
+node tests/magasin.test.mjs   # deux enregistrements simultanes ne s'ecrasent plus
+node tests/quota.test.mjs     # le plafond du concierge
+```
+
+Contre une vraie base Postgres (et pour `tests/migration.test.mjs`, le passage
+de Blob à la base, qui en a besoin) :
+
+```bash
+cd site && npm install && cd ..
+DATABASE_URL=postgres://… node tests/magasin.test.mjs
+DATABASE_URL=postgres://… node tests/migration.test.mjs
 ```
 
 ## Vidéo
@@ -809,11 +839,16 @@ modes — non pour corriger le défaut, mais pour le rendre reproductible.
 
 #### Ce qui est tenu, et ce qui ne l'est pas
 
-Ce n'est **pas** un vrai verrou. Il faudrait un magasin qui sache
-comparer-et-échanger ; Blob ne le sait pas. Un magasin transactionnel — Redis,
-Postgres — ou l'outil de gestion de l'hôtel reste la seule réponse complète.
+**Avec la base Postgres, c'est un vrai verrou.** Toute modification passe par
+`modifier()` (`site/api/_magasin.js`) : relire, appliquer, puis écrire
+**seulement si personne n'a écrit depuis la lecture** (`UPDATE … WHERE
+version = n`). Sinon on relit et on rejoue la modification sur l'état frais.
+Choisir la chambre et la retenir se font dans la même modification : la
+seconde demande voit la chambre prise et en choisit une autre.
 
-La garantie tenue est plus faible, et elle suffit tant qu'on n'encaisse pas :
+**Avec Vercel Blob seul**, le magasin ne sait pas comparer-et-échanger. On
+vérifie juste avant d'écrire, ce qui resserre la fenêtre sans la fermer, et
+la garantie tenue reste la plus faible :
 
 > **On ne dit jamais « gardée » à un client dont la retenue n'existe pas.**
 
@@ -840,6 +875,13 @@ la ferait rajeunir, et perdre une course contre une demande venue du site.
 
 #### Éprouvé
 
+`tests/magasin.test.mjs` éprouve l'écriture conditionnelle elle-même :
+vingt-cinq modifications lancées ensemble, douze événements créés au même
+instant, un paiement confirmé par lomi pendant que la réception enregistre,
+une connexion pendant qu'un administrateur désactive le compte. Sans la
+condition de version, 8 vérifications échouent contre une vraie base — dont
+la modification de la réception, perdue.
+
 `tests/collision.test.mjs` — 30 vérifications. La règle est testée **seule**,
 sur 36 paires, pour prouver que l'ordre est total. La course est testée **pour
 de vrai**, par `Promise.all` sur la route publique.
@@ -855,10 +897,11 @@ C'est l'aveuglement d'avant, mesuré.
 
 ### Ce que ça ne fait pas encore
 
-La synchronisation Booking / Airbnb, formule Performance. Et un vrai verrou
-transactionnel, qui devient un **préalable** le jour du paiement en ligne :
-sans réception pour rattraper une collision, deux paiements simultanés sur la
-dernière chambre encaissent deux fois. Voir `docs/notre-comprehension.md`.
+La synchronisation Booking / Airbnb, formule Performance. Le verrou, lui,
+existe — mais seulement une fois la base Postgres branchée (voir « Le
+stockage »). D'ici là, une clé lomi réelle reste **bloquée par le code** :
+sans écriture conditionnelle, deux paiements simultanés sur la dernière
+chambre pourraient encaisser deux fois. Voir `docs/notre-comprehension.md`.
 
 **Un calendrier que personne ne remplit est pire que pas de calendrier** : il
 transforme un silence honnête en promesse fausse. C'est pourquoi l'écran de
@@ -926,16 +969,53 @@ en a, elle refait les diapositives. Trois conséquences :
 
 ### Le stockage, et ce qu'il reste à brancher
 
-Deux modes, décidés par la présence de `BLOB_READ_WRITE_TOKEN` :
+Trois modes, décidés par l'environnement (`site/api/_magasin.js`) :
 
 | Mode | Quand | Ce qui se passe |
 |---|---|---|
-| **Démonstration** | pas de jeton | les données vivent en mémoire et se perdent au redéploiement |
-| **Durable** | jeton présent | Vercel Blob — les données sont conservées |
+| **Base de données** | `DATABASE_URL` présent | Postgres, **privé** : deux enregistrements au même instant ne peuvent plus s'écraser. C'est le mode à viser. |
+| **Durable** | seulement le jeton Blob | Vercel Blob : conservé, mais dans un magasin **public** et sans écriture conditionnelle. Mode d'attente. |
+| **Démonstration** | ni l'un ni l'autre | les données vivent en mémoire et se perdent au redéploiement |
 
-**Le mode est affiché en clair dans l'interface**, en rouge, sur chaque écran.
+**Le mode est affiché en clair dans l'interface** : en rouge sur chaque écran
+en démonstration, et dans *Paramètres* (« Base de données », « À renforcer »).
 Laisser croire qu'une affiche est enregistrée alors qu'elle disparaîtra au
 prochain déploiement serait le pire défaut possible pour cet outil.
+
+#### Brancher la base Postgres
+
+1. Vercel → le projet → *Storage* → *Create Database* → **Neon** (Postgres).
+   Choisir une région proche de celle des fonctions, et le connecter au
+   projet. Vercel ajoute `DATABASE_URL` de lui-même.
+2. Redéployer.
+3. À la première lecture, **les données passent d'elles-mêmes** de Blob à la
+   base, avec leurs sauvegardes. En production, la copie publique de Blob est
+   ensuite effacée et remplacée par une marque sans donnée personnelle.
+4. *Paramètres* doit afficher « Base de données », et aucune « Ancienne copie
+   publique ».
+
+N'importe quel Postgres convient (Neon, Supabase…) : seule `DATABASE_URL`
+compte (`POSTGRES_URL` est lue aussi).
+
+Ce qui protège ce passage — `tests/migration.test.mjs`, 23 vérifications :
+
+- **Rien n'est effacé sans avoir été recopié**, et rien n'est recopié si la
+  version la plus récente est illisible.
+- **Chaque environnement a ses documents** (« donnees », « donnees:preview »,
+  « donnees:local ») : un aperçu branché sur la même base ne touche jamais aux
+  réservations de la production, et n'efface jamais la copie que la
+  production lit encore.
+- **Un déploiement qui ne voit plus la base ne repart pas de zéro** : il lit
+  la marque dans Blob et refuse de lire comme d'écrire.
+- **Une production branchée sur une autre base** (vide) le dit, au lieu de
+  repartir d'un document vide.
+
+⚠️ **Après le passage, ne revenez pas (*Instant Rollback*) à un déploiement
+antérieur** : l'ancien code ne connaît pas la base, et lirait un magasin Blob
+vidé.
+
+Les affiches, elles, restent dans Vercel Blob : elles sont faites pour être
+vues de tous.
 
 **Trois objets, pas un.** Un **événement** a une date et se retire. Une
 **promotion** a une remise, un périmètre et une période qui commence. Une
@@ -979,8 +1059,9 @@ préfixe, côté serveur, jeton en main. Les versions précédentes sont effacé
 après chaque écriture réussie — jamais avant, pour qu'un échec ne fasse pas
 tout perdre.
 
-Pour passer en durable : créer un magasin Vercel Blob dans l'onglet *Storage*
-et le connecter au projet, en cochant **Production et Preview**. Vercel injecte
+Le magasin Blob sert aux affiches (et aux données tant que la base n'est pas
+branchée) : le créer dans l'onglet *Storage* et le connecter au projet, en
+cochant **Production et Preview**. Vercel injecte
 alors `BLOB_READ_WRITE_TOKEN` de lui-même — ne le saisissez pas à la main, vous
 auriez un doublon.
 
@@ -988,7 +1069,7 @@ auriez un doublon.
 le jour où le site est remis à l'établissement, un magasin partagé ne se remet
 pas.
 
-`site/package.json` déclare `@vercel/blob` — c'est là que Vercel lit les
+`site/package.json` déclare `@vercel/blob`, `pg` et le SDK Anthropic — c'est là que Vercel lit les
 dépendances des fonctions, la racine du projet étant `site/`. Le site lui-même
 n'a toujours aucune dépendance : il est généré en Python et servi en statique.
 
@@ -1010,7 +1091,8 @@ node -e "console.log(require('crypto').randomBytes(18).toString('base64url'))"
 |---|---|
 | `ADMIN_MDP` | le mot de passe généré |
 | `ADMIN_SECRET` | une seconde chaîne au hasard (64 caractères, 32 au minimum), qui signe les sessions. Sans elle, la clé est dérivée de `ADMIN_MDP` et Paramètres affiche « À renforcer » |
-| `BLOB_READ_WRITE_TOKEN` | le jeton du magasin Vercel Blob, pour le stockage durable |
+| `BLOB_READ_WRITE_TOKEN` | le jeton du magasin Vercel Blob (affiches), posé par la connexion du magasin |
+| `DATABASE_URL` | la base Postgres, posée par la connexion de la base — voir « Le stockage » |
 
 Redéployer après les avoir définies. Sans `ADMIN_MDP`, la connexion répond 503
 avec la marche à suivre.
@@ -1093,10 +1175,11 @@ modifications sont notées dans la même écriture que la modification
 elle-même : 90 jours, 1 000 lignes au plus. Il ne sort jamais par les routes
 publiques.
 
-**Stockage.** Les comptes vivent dans leur propre fichier Blob
-(`evannath/comptes`), jamais mêlé aux données du site, avec cinq versions
-conservées. Le magasin est encore public : les adresses des fichiers ne se
-devinent pas, mais le rendre **privé** reste la prochaine étape de sécurité.
+**Stockage.** Les comptes sont un document à part (« comptes »), jamais mêlé
+aux données du site, avec cinq versions conservées. Dans la base Postgres, ils
+sont **privés** ; une connexion qui note sa date de visite ne peut plus défaire
+une désactivation faite au même instant. Tant que seul Vercel Blob est branché,
+ils restent dans un magasin public, à une adresse indevinable.
 
 Tests : `node tests/comptes.test.mjs` (droits, mots de passe, sessions,
 révocation, garde-fous — hors réseau).
@@ -1106,6 +1189,11 @@ révocation, garde-fous — hors réseau).
 Le bouton FR/EN capture le français depuis le DOM au chargement, puis
 remplace chaque `[data-t]` par la valeur du dictionnaire `EN` de la page.
 Une clé absente laisse le français en place — jamais un trou.
+
+**Le choix suit le visiteur d'une page à l'autre.** Il vit dans
+`localStorage` (« evn-langue », déclaré dans les mentions légales) et
+s'applique au chargement de chaque page, sans animation. Avant, un touriste
+qui passait l'accueil en anglais retrouvait la page suivante en français.
 
 **Dix pages ne portaient de `data-t` que sur la navigation** : les sept fiches
 chambres, `reserver`, `seminaires` et `experiences`. Cliquer EN faisait
@@ -1352,14 +1440,19 @@ du navigateur. Le parcours :
 
 Sans clé, le paiement en ligne est simplement absent.
 
-> ⚠️ **Pas de clé réelle tant que le stockage reste Vercel Blob.** Le magasin
-> réécrit le document entier à chaque enregistrement, sans écriture
-> conditionnelle (voir « Le verrou anti-collision »). Une confirmation de
-> paiement peut donc être écrasée par un enregistrement simultané de la
-> réception : la réservation repasse « en attente », expire, et la chambre se
-> revend alors que le client a payé — et lomi, qui a reçu sa réponse, ne
-> renverra rien. Il faut d'abord un magasin transactionnel (Postgres, Redis).
-> La clé de test, elle, est sans risque.
+> ⚠️ **Une clé réelle n'est active qu'avec la base Postgres** — le code le
+> fait respecter. Sans écriture conditionnelle, une confirmation de paiement
+> pouvait être écrasée par un enregistrement simultané de la réception : la
+> réservation repassait « en attente », expirait, et la chambre se revendait
+> alors que le client avait payé — et lomi, qui avait eu sa réponse, ne
+> renvoyait rien. Sans base, une clé réelle est donc ignorée : le tunnel envoie
+> la demande à la réception, et *Paramètres* affiche « Bloqué ». La clé de
+> test, elle, marche partout.
+>
+> Autre garde-fou : **un acompte payé fait foi.** Un formulaire de la
+> réception ouvert avant le paiement ne peut pas remettre la réservation « en
+> attente » ; seule une décision explicite (annulée, terminée) change son
+> statut.
 
 ## Données structurées
 

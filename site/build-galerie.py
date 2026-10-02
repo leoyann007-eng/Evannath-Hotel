@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Optimise les 49 photos du domaine et genere galerie.html + 404.html."""
-import io, os
+import io, os, sys
 from PIL import Image
 import _schema
 from _chrome import page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV
@@ -89,6 +89,12 @@ for src, name, cat, cap in PHOTOS:
     full = 'img/opt/gal-%s.jpg' % name
     chemin = 'img/' + src
     if not os.path.exists(chemin):
+        # Les originaux ne sont pas versionnes (.gitignore) : sur un poste
+        # qui ne les a pas, la version optimisee deja faite suffit. Sauter la
+        # photo ici reecrivait galerie.html SANS elle — lance sans les
+        # originaux, ce script vidait la galerie entiere.
+        if os.path.exists(full) and os.path.exists('img/opt/gal-%s-t360.webp' % name):
+            made.append((name, cat, cap)); continue
         print('  ABSENT :', src); continue
 
     # On regenere si le fichier manque, mais aussi s'il n'est pas a la largeur
@@ -115,6 +121,13 @@ for src, name, cat, cap in PHOTOS:
 if refaites:
     print('  %d photos regenerees en %d px' % (len(refaites), LARGEUR))
 print('%d photos pretes pour la galerie' % len(made))
+# Une photo ni retrouvee ni deja optimisee manquerait a la page sans que
+# personne ne le voie : on refuse d'ecrire plutot que de publier une
+# galerie amputee.
+if len(made) < len(PHOTOS):
+    sys.exit('galerie.html NON ecrite : %d photo(s) introuvable(s), ni originale '
+             'ni optimisee. Voir « Regenerer les images » dans le README.'
+             % (len(PHOTOS) - len(made)))
 
 # ── galerie.html ──────────────────────────────────────────────
 CSS_GAL = """

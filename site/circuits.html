@@ -1759,11 +1759,10 @@ function EVN_ROULER(liste){
     ROULEMENTS.push(fin);a1.onfinish=fin;
   });
 }
-document.querySelectorAll('.lang button').forEach(function(b){b.onclick=function(){
-  var lg=b.dataset.lang;
+function EVN_LANGUE(lg,anime){
   document.querySelectorAll('.lang button').forEach(function(x){x.classList.toggle('on',x.dataset.lang===lg)});
   document.querySelectorAll('.lang').forEach(function(l){l.classList.toggle('en',lg==='en')});
-  var titres=EVN_TITRES();
+  var titres=anime?EVN_TITRES():[];
   var dict=lg==='en'?EN:FR;
   document.querySelectorAll('[data-t]').forEach(function(e){if(dict[e.dataset.t])e.innerHTML=dict[e.dataset.t]});
   EVN_ROULER(titres);
@@ -1771,7 +1770,25 @@ document.querySelectorAll('.lang button').forEach(function(b){b.onclick=function
   /* Point d'extension : une page qui a du texte hors [data-t] — un
      placeholder de champ, par exemple — declare window.EVN_LANG. */
   if(typeof EVN_LANG==='function')EVN_LANG(lg);
+}
+document.querySelectorAll('.lang button').forEach(function(b){b.onclick=function(){
+  try{localStorage.setItem('evn-langue',b.dataset.lang)}catch(e){}
+  EVN_LANGUE(b.dataset.lang,true);
 }});
+/* La langue choisie SUIT le visiteur. Sans cela, un touriste qui passait
+   l'accueil en anglais retrouvait chaque page suivante en francais, et
+   devait recliquer sur EN a chaque page. Le choix vit dans localStorage
+   (« evn-langue », declare dans les mentions legales) ; navigation privee
+   ou stockage refuse : on reste en francais, comme avant.
+
+   Applique a DOMContentLoaded, sans animation : les scripts de la page qui
+   definissent EVN_LANG peuvent venir APRES celui-ci. */
+(function(){
+  var lg;try{lg=localStorage.getItem('evn-langue')}catch(e){}
+  if(lg!=='en')return;
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){EVN_LANGUE('en',false)});
+  else EVN_LANGUE('en',false);
+})();
 window.VIGNETTES = ["g-aerien", "g-art", "g-bar", "g-chambre", "g-entree", "g-lagune", "g-lobby", "g-petitdej", "g-resto", "g-seminaire", "g-terrasse", "g-vue", "gal-art-bois", "gal-art-hall", "gal-art-lanterne", "gal-art-lumineuse", "gal-art-masques", "gal-art-salon", "gal-art-statue", "gal-ch-bain", "gal-ch-bureau", "gal-ch-mezz", "gal-ch-salon", "gal-ch-wax", "gal-ch-wax2", "gal-dom-aerien", "gal-dom-batiment", "gal-dom-couchant", "gal-dom-enseigne", "gal-dom-facade", "gal-dom-fontaine", "gal-dom-jardin", "gal-dom-mangrove", "gal-dom-pirogue", "gal-dom-piscine", "gal-dom-reve", "gal-lag-bateau", "gal-lag-cocotiers", "gal-lag-large", "gal-lag-nuit", "gal-lag-ponton", "gal-lag-rotin", "gal-lag-transat", "gal-spa-bassin", "gal-spa-case", "gal-spa-couchant", "gal-spa-huiles", "gal-tab-cave", "gal-tab-cocktail", "gal-tab-cocktails", "gal-tab-comptoir", "gal-tab-corbeille", "gal-tab-dejeuner", "gal-tab-dressee", "gal-tab-fruits", "gal-tab-rotin", "gal-tab-salle", "gal-tab-terrasse", "gal-tab-vin", "ig-jacuzzi"];
 
 window.NOMS_CHAMBRES = {"chambre-standard": "Chambre Standard", "deluxe-baldaquin": "Deluxe · lits à baldaquin", "deluxe-superieure": "Deluxe Supérieure", "suite-anglaise": "Suite Anglaise", "chambre-mezzanine": "Chambre en Mezzanine", "mezzanine-superieure": "Mezzanine Supérieure", "suite-arabe": "Suite Arabe"};
