@@ -22,6 +22,24 @@ const url = require('url');
 const RACINE = path.join(__dirname, 'site');
 const PORT = Number(process.env.PORT || 5599);
 
+/** Les en-tetes que vercel.json pose sur toutes les routes (« /(.*) »). */
+function enTetesDuSite() {
+  try {
+    const vc = JSON.parse(fs.readFileSync(path.join(__dirname, 'site', 'vercel.json'), 'utf8'));
+    const out = {};
+    for (const r of vc.headers || []) {
+      if (r.source !== '/(.*)') continue;
+      for (const h of r.headers) out[h.key] = h.value;
+    }
+    // En local, pas de https : upgrade-insecure-requests casserait tout.
+    if (out['Content-Security-Policy']) {
+      out['Content-Security-Policy'] = out['Content-Security-Policy']
+        .replace(/;\s*upgrade-insecure-requests/, '') + '; report-uri /__csp';
+    }
+    return out;
+  } catch (e) { return {}; }
+}
+
 // ── Variables d'environnement ──────────────────────────────────────────────
 // On lit .env.local sans ecraser ce qui est deja defini : la ligne de commande
 // l'emporte toujours sur le fichier.
@@ -91,6 +109,24 @@ function analyser(brut) {
 const serveur = http.createServer(async (req, res) => {
   const requete = new URL(req.url, 'http://' + (req.headers.host || 'localhost'));
   let chemin = decodeURIComponent(requete.pathname);
+
+  /* En local seulement : le navigateur signale ici chaque script, style ou
+     image que la Content-Security-Policy a refuse, et on l'ecrit dans le
+     journal. C'est le seul moyen fiable de voir qu'une page casse. */
+  if (chemin === '/__csp' && req.method === 'POST') {
+    let brut = '';
+    req.on('data', (c) => { brut += c; });
+    req.on('end', () => {
+      try {
+        const r = JSON.parse(brut)['csp-report'] || {};
+        console.log('[CSP refuse] ' + (r['effective-directive'] || r['violated-directive']) + '  '
+          + (r['blocked-uri'] || '') + '  sur ' + (r['document-uri'] || '') + '  '
+          + (r['source-file'] || '') + ':' + (r['line-number'] || ''));
+      } catch (e) { console.log('[CSP refuse] ' + brut.slice(0, 300)); }
+      res.writeHead(204); res.end();
+    });
+    return;
+  }
 
   // ── Les fonctions ────────────────────────────────────────────────────────
   if (chemin.startsWith('/api/')) {
@@ -163,6 +199,10 @@ const serveur = http.createServer(async (req, res) => {
   }
 
   res.writeHead(200, {
+    // Les en-tetes communs a tout le site, lus dans vercel.json a chaque
+    // requete : la Content-Security-Policy surtout. Sans elle en local, un
+    // script bloque en production passerait ici sans un mot.
+    ...enTetesDuSite(),
     'Content-Type': TYPES[path.extname(fichier).toLowerCase()] || 'application/octet-stream',
     'Cache-Control': 'no-store',
   });

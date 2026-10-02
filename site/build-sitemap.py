@@ -186,6 +186,21 @@ if PROSPECTION != _a:
         json.dumps(_vc, indent=2, ensure_ascii=False) + '\n')
     print('vercel.json           regle X-Robots-Tag ' + ('posee' if PROSPECTION else 'retiree'))
 
+# La politique de securite du contenu : les empreintes des scripts des pages
+# telles qu'elles viennent d'etre generees. Voir _csp.py.
+import _csp
+_vc = json.load(io.open('vercel.json', encoding='utf-8'))
+_valeur = _csp.politique(_csp.toutes_les_empreintes())
+_regle = next(r for r in _vc['headers'] if r['source'] == '/(.*)'
+              and any(h['key'] == 'X-Content-Type-Options' for h in r['headers']))
+_h = next((h for h in _regle['headers'] if h['key'] == 'Content-Security-Policy'), None)
+if not _h or _h['value'] != _valeur:
+    if _h: _h['value'] = _valeur
+    else: _regle['headers'].append({'key': 'Content-Security-Policy', 'value': _valeur})
+    io.open('vercel.json', 'w', encoding='utf-8', newline='\n').write(
+        json.dumps(_vc, indent=2, ensure_ascii=False) + '\n')
+print('vercel.json           CSP : %d scripts autorises par empreinte' % len(_csp.toutes_les_empreintes()))
+
 if PROSPECTION:
     # Maquette de prospection : on laisse crawler pour que la directive noindex
     # (balise meta + en-tete X-Robots-Tag) soit effectivement LUE. Un

@@ -3,7 +3,9 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "functions": {
-    "api/chat.mjs": { "maxDuration": 60 }
+    "api/chat.mjs": {
+      "maxDuration": 60
+    }
   },
   "headers": [
     {
@@ -104,6 +106,10 @@
         {
           "key": "Permissions-Policy",
           "value": "geolocation=(), microphone=(), camera=(), payment=()"
+        },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self' 'sha256-/j7TTUVJfNrFSf2Xj2jnKITUDnamQZfjdI/dzKaUC80=' 'sha256-10an+qNHOMj7bmGskWLmQyEK5OJ4BWddCHb1RppbqjI=' 'sha256-52/KDGVipdP9mJ6dl1luJ/NAwCCr4V30hrmSXOpp6nc=' 'sha256-Ds/rIjzcdzdwq8kfVF3jigSklPgH0t/eMnuuvD/GFIQ=' 'sha256-Eu2cwxHBA2yz/rNPfecAwx4X4geR4Un4h0aLhltaMYY=' 'sha256-J1NKGErzhYi2lc8rQCDglv4WKyOTwRtQ58JB6RzrwIA=' 'sha256-LSgW9BLkGLBd5L4R4+Ob1ux6BbSpdCMQ7lJtjfydR0I=' 'sha256-Q0nkP48r+CK7yjvA+vYPUAJdqeXMsBniMInW9wie4yk=' 'sha256-QUiXzz1QRZIv+gT/bkzSPzt546RgNPRuip89comY6pg=' 'sha256-U47qtc3sgj1iFwjdN/dPVSn5f7E7A9gkvSKAbS71p0A=' 'sha256-VwooAmJDrtNE6AK61WbQ3wULt/39VJDYE/BEsZJl+CY=' 'sha256-X6NNyhMWC8gHi6CPyq2vQq7Z3hnz2c195+1QMCWbWxc=' 'sha256-XpCQQ5IdypJf4IH92w9Fh87cTjSDOgZXYMZIdW5YeDM=' 'sha256-YYbWnTb90pSXXrKpvqDSbSTZOK4kwU/BoDt2lQNLWQI=' 'sha256-ZyJ6joyTl3Alv5DyD0fZ694osQrxV0H4u5VAD1M54Ak=' 'sha256-akNLpG8A3hztHJ9iki+NHoqePLN5TFmA3oyJx2j7mCo=' 'sha256-bzz3jFBGaeULvLh2VB2hC//Ei2dpR28OYwv0LIT76pE=' 'sha256-ejD0Mq2P/cTwlW/gJF7dc4Jdl1YW4dkvbwardhndXO4=' 'sha256-ezFnCJqAO91vmAJ7aabTMR47/9S+Pgcn/aVirz+48TU=' 'sha256-jDCW39aWnQmK3YWEuyO1hTqymEsQmHSwYgF0UqAJj1E=' 'sha256-lDlH+zEErK1yl/wBRr3sydmQmcb5LB18R4xHm9GT84w=' 'sha256-mKRTzebZpDMK9fHzZWGLmA2T8B4LadQBQOw7wD6OXSI=' 'sha256-qmYUYy3fETKV6IE0q9FrNMt9fbjrI4yBicGem8sAi6c=' 'sha256-rqVPLYlnbudzaZqBh+bj5ksT4Oz7h1wCoLWs3DmTatk=' 'sha256-sKJw7k0/kmChLqTzAW4burrqVugKWTW7VYC0ejrbFNQ=' 'sha256-v1lmuMYFxkjWUd61OEPtbZ846mgfUn43qvvXRTwK2bo=' 'sha256-vCtAS7KjGn82dr0qGcNoNamlG46rT1mRccR2ITxMJ5o=' 'sha256-wx07PyzCYvhQzjjLEjL4RZKkNkrdS4Tom3+ohrRo4/w='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://*.public.blob.vercel-storage.com; media-src 'self'; connect-src 'self'; frame-src https://www.google.com https://maps.google.com; frame-ancestors 'self'; form-action 'self'; base-uri 'self'; object-src 'none'; upgrade-insecure-requests"
         }
       ]
     },

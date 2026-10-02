@@ -186,7 +186,7 @@ for i, (sid, skey, slab, _) in enumerate(SECS, 1):
 b.append('''    </nav>
     <div class="tools">
       <button id="all" data-t="ta">Tout déplier</button>
-      <button onclick="window.print()" data-t="tp">Imprimer la page</button>
+      <button id="imprimer" data-t="tp">Imprimer la page</button>
     </div>
   </aside>
 
@@ -245,6 +245,9 @@ accs.forEach(function(a,i){
   });
 });
 function openAll(v){accs.forEach(function(a){a.classList.toggle('open',v);a.querySelector('button').setAttribute('aria-expanded',v)})}
+/* Pas d'onclick dans le HTML : la politique de securite (_csp.py) refuse les
+   gestionnaires ecrits dans les attributs. */
+document.getElementById('imprimer').addEventListener('click',function(){window.print()});
 var allBtn=document.getElementById('all'),allOpen=false;
 allBtn.onclick=function(){allOpen=!allOpen;openAll(allOpen);
   allBtn.textContent=allOpen?(document.documentElement.lang==='en'?'Collapse all':'Tout replier')

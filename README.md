@@ -148,7 +148,7 @@ python build-seminaires.py       # seminaires.html
 python build-recrutement.py      # recrutement.html
 python build-404.py              # 404.html
 python build-chatbot.py          # api/_chatbot.json (ce que sait le chatbot)
-python build-sitemap.py          # sitemap.xml, robots.txt, donnees/*.json
+python build-sitemap.py          # sitemap, robots.txt, donnees/*.json, CSP (EN DERNIER)
 python verifier.py               # les contrôles
 ```
 
@@ -1010,7 +1010,7 @@ node -e "console.log(require('crypto').randomBytes(18).toString('base64url'))"
 | Variable | Valeur |
 |---|---|
 | `ADMIN_MDP` | le mot de passe généré |
-| `ADMIN_SECRET` | une seconde chaîne au hasard, qui signe les sessions |
+| `ADMIN_SECRET` | une seconde chaîne au hasard (64 caractères, 32 au minimum), qui signe les sessions. Sans elle, la clé est dérivée de `ADMIN_MDP` et Paramètres affiche « À renforcer » |
 | `BLOB_READ_WRITE_TOKEN` | le jeton du magasin Vercel Blob, pour le stockage durable |
 
 Redéployer après les avoir définies. Sans `ADMIN_MDP`, la connexion répond 503
@@ -1034,6 +1034,24 @@ est défini et quel stockage est actif.
 *Une modification d'une fonction demande un redémarrage : les modules sont
 chargés une fois et gardés. Les recharger à chaque appel remettrait à zéro le
 stockage de démonstration — chaque événement créé se perdait dans la seconde.*
+
+### La politique de sécurité du contenu (CSP)
+
+`vercel.json` envoie un en-tête `Content-Security-Policy` sur toutes les
+routes. Le navigateur n'exécute **que** les scripts dont l'empreinte SHA-256
+y figure (`site/_csp.py`) : un script injecté — champ mal échappé, lien
+piégé — est refusé avant de tourner, et rien ne peut partir vers un autre
+site (`connect-src`, `img-src` limités au site, à Google Fonts, à la carte
+Google et à notre magasin Blob).
+
+**L'entretien est automatique, mais il a un ordre :** `build-sitemap.py`,
+lancé en dernier, recalcule les empreintes. Une page modifiée sans lui
+change d'empreinte et serait bloquée en ligne — `verifier.py` le détecte
+(« script hors de la Content-Security-Policy ») et refuse aussi tout
+`onclick="…"` dans le HTML.
+
+En local, `serveur-local.js` applique la même politique et écrit chaque
+refus dans son journal (`[CSP refuse] …`).
 
 ### L'accès : comptes, profils, journal
 

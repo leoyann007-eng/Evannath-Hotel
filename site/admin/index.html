@@ -741,6 +741,7 @@ async function charger() {
   ETAT.panne = etat.panne || '';
   ETAT.fichiers = etat.fichiers || 0;
   ETAT.chatbot = etat.chatbot || { actif: true, cle: false };
+  ETAT.cleSession = etat.cle || '';
   await verifierEmpreinte();
   /* La grille gravee dans le site, et par-dessus les prix saisis ici : les
      autres ecrans (l'apercu d'une promotion) montrent le prix en vigueur. */
@@ -2185,6 +2186,13 @@ function rendre() {
           perdre.</span></div>
           <code style="font-size:12px;color:var(--bronze-2)">${ETAT.version
             || 'inconnue'}</code></div>
+        <div class="ligne"><div class="txt"><b>Clé des sessions</b>
+          <span>${ETAT.cleSession === 'dediee'
+            ? 'Une clé dédiée (ADMIN_SECRET) signe les connexions.'
+            : 'Dérivée du mot de passe de secours : ajoutez une variable ADMIN_SECRET '
+              + '(64 caractères aléatoires) dans Vercel. Tout le monde devra se reconnecter une fois.'}</span></div>
+          <span class="etat ${ETAT.cleSession === 'dediee' ? 'vif' : 'attend'}">${
+            ETAT.cleSession === 'dediee' ? 'Dédiée' : 'À renforcer'}</span></div>
         <div class="ligne"><div class="txt">
           <b>Stockage</b><span>${ETAT.stockage === 'durable'
             ? 'Vercel Blob — les données sont conservées.'

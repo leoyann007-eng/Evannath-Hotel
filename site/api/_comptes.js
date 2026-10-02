@@ -210,6 +210,7 @@ function creer({ jeton, secours, secret }) {
   /** La personne derriere la requete, ou { erreur } : 401 sans session
       valable, 503 quand le fichier des comptes ne repond pas. */
   async function session(req) {
+    if (!secret) return { erreur: 503, message: 'L’administration n’est pas configurée : définissez ADMIN_SECRET dans Vercel.' };
     const p = lireCookie(req);
     if (!p) return { erreur: 401 };
     if (p.u === 'secours') {
@@ -244,6 +245,10 @@ function creer({ jeton, secours, secret }) {
   };
 
   async function entrer({ courriel, mdp }) {
+    if (!secret) {
+      return { code: 503, corps: { ok: false, message: 'L’administration n’est pas configurée : '
+        + 'définissez ADMIN_SECRET (ou ADMIN_MDP) dans les variables Vercel.' } };
+    }
     const adresse = String(courriel || '').trim().toLowerCase();
     const donne = String(mdp || '');
     const refus = { code: 401, corps: { ok: false, message: 'E-mail ou mot de passe incorrect.' } };

@@ -118,5 +118,14 @@ const j = await C.journal();
 verifier('le journal garde les gestes', ['Connexion par l’accès de secours', 'A créé le compte de Awa (Réception)',
   'A changé son mot de passe', 'A réinitialisé le mot de passe de Awa'].every((x) => j.some((l) => l.x === x)), true);
 
+console.log('\nSans cle de signature');
+const sansCle = comptes.creer({ jeton: '', secours: 'x', secret: '' });
+verifier('aucune connexion ne s ouvre', (await sansCle.entrer({ courriel: '', mdp: 'x' })).code, 503);
+verifier('aucune session n est reconnue', (await sansCle.session(req('evn_adm=abc.def'))).erreur, 503);
+const ancienneCle = comptes.creer({ jeton: '', secours: 'x', secret: 'evannath-sans-secret' });
+const forgeAncienne = await ancienneCle.entrer({ courriel: '', mdp: 'x' });
+verifier('un cookie signe avec l ancienne cle de repli ne vaut rien ailleurs',
+  (await C.session(req(cookieDe(forgeAncienne)))).erreur, 401);
+
 console.log('\n' + total + ' controles, ' + (total - echecs) + ' passes, ' + echecs + ' en echec');
 process.exit(echecs ? 1 : 0);

@@ -534,6 +534,29 @@ def controler():
                        'on ne peut donc pas en retirer une depuis l ecran qui '
                        'sert a les regarder'))
 
+    # 23. Chaque script de chaque page servie est autorise par la politique
+    # de securite (vercel.json, Content-Security-Policy). Un script modifie
+    # sans relancer build-sitemap.py change d'empreinte : en ligne, le
+    # navigateur le refuserait, et la page cesserait de fonctionner sans un
+    # mot. Et aucun gestionnaire dans un attribut (onclick="…") : la
+    # politique les refuse tous.
+    import _csp
+    vc = json.load(io.open('vercel.json', encoding='utf-8'))
+    csp = next((h['value'] for r in vc['headers'] for h in r['headers']
+                if h['key'] == 'Content-Security-Policy'), '')
+    if not csp:
+        pb.append(('vercel.json', 'aucune Content-Security-Policy : relancer build-sitemap.py'))
+    for f in _csp.pages_servies():
+        h = io.open(f, encoding='utf-8').read()
+        manquent = [e for e in _csp.empreintes_de(h) if e not in csp]
+        if manquent:
+            pb.append((f, '%d script(s) hors de la Content-Security-Policy : '
+                       'relancer build-sitemap.py' % len(manquent)))
+        attr = re.search(r'<[a-z][^>]*\son[a-z]+\s*=\s*["\']', h, re.I)
+        if attr:
+            pb.append((f, 'gestionnaire dans un attribut, refuse par la CSP : '
+                       + attr.group(0)[:60]))
+
     print('%d pages controlees' % len(pages))
     if pb:
         print('%d anomalie(s) :' % len(pb))

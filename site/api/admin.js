@@ -45,7 +45,22 @@ const VERSION = (process.env.VERCEL_GIT_COMMIT_SHA
   || process.env.VERSION || 'local-' + Date.now()).slice(0, 12);
 
 const MDP = process.env.ADMIN_MDP || '';
-const SECRET = process.env.ADMIN_SECRET || MDP || 'evannath-sans-secret';
+/* La cle qui SIGNE les sessions. Qui la connait fabrique un cookie valable
+   pour n'importe quel compte : elle doit etre longue, aleatoire, et ne
+   servir qu'a ca.
+
+   ADMIN_SECRET (32 caracteres au moins) : la cle dediee — c'est la bonne
+   configuration. A defaut, elle se DERIVE du mot de passe de secours : une
+   installation sans ADMIN_SECRET continue de fonctionner, mais sa securite
+   vaut celle de ce mot de passe, et le changer deconnecte tout le monde.
+   Parametres le dit en clair.
+
+   Et sans l'un ni l'autre : PAS de cle — aucune session ne s'ouvre. Il y
+   avait ici une valeur de repli ecrite dans le code ; publique, elle
+   permettait a quiconque lisait le code de signer ses propres cookies. */
+const SECRET_DEDIE = (process.env.ADMIN_SECRET || '').length >= 32;
+const SECRET = SECRET_DEDIE ? process.env.ADMIN_SECRET
+  : MDP ? crypto.createHmac('sha256', 'evannath-session-v1').update(MDP).digest('hex') : '';
 /* Connecter un magasin Blob a un projet permet de choisir un prefixe de
    variables : le jeton s'appelle alors MONPREFIXE_READ_WRITE_TOKEN. Chercher
    le seul nom BLOB_READ_WRITE_TOKEN laissait le stockage invisible alors qu'il
@@ -1654,6 +1669,8 @@ module.exports = async function handler(req, res) {
         profil: role.nom, vues: role.vues, droits: role.droits,
         provisoire: qui.provisoire, secours: !!qui.secours },
       comptes: await COMPTES.combien(),
+      // 'dediee' (ADMIN_SECRET) ou 'derivee' (du mot de passe de secours).
+      cle: SECRET_DEDIE ? 'dediee' : 'derivee',
       version: VERSION,
       stockage: JETON_BLOB ? 'durable' : 'demonstration',
       // Vide quand la lecture s est bien passee.
