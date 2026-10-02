@@ -1195,6 +1195,14 @@ Une clé absente laisse le français en place — jamais un trou.
 s'applique au chargement de chaque page, sans animation. Avant, un touriste
 qui passait l'accueil en anglais retrouvait la page suivante en français.
 
+**La carte de La table et celle du Spa** se traduisent depuis
+`_carte_en.py`, une table du français vers l'anglais tenue à part comme
+`_chambres_en.py`. Les noms de plats ivoiriens (attiéké, alloco, kedjenou,
+foutou…) restent tels quels : c'est ce que le voyageur lira et commandera sur
+place. Un texte absent de la table reste en français, sans clé — rien ne
+manque au dictionnaire. Les légendes de la galerie sont traduites dans
+`build-galerie.py` (`CAP_EN`), et la visionneuse suit la langue.
+
 **Dix pages ne portaient de `data-t` que sur la navigation** : les sept fiches
 chambres, `reserver`, `seminaires` et `experiences`. Cliquer EN faisait
 basculer le menu et laissait toute la page en français. Elles sont

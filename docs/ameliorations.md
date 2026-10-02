@@ -57,7 +57,6 @@ Trois niveaux :
 | **L'animation d'apparition est morte sur la carte et le spa** | Trimestre | Ces deux pages ont tout le nécessaire sauf la ligne qui l'active. Rien n'est invisible — la panne va dans le bon sens. Activer sans vérifier chaque bloc risquerait une page blanche. |
 | **Le châssis est recopié dans chaque page** | Trimestre | Environ 80 Ko de CSS et de JS en ligne par page, jamais mis en cache d'une page à l'autre. Les sortir en fichiers versionnés (`versionner()` existe) allège chaque navigation et simplifie la CSP. |
 | **L'accueil appelle `a=public` deux fois** | Trimestre | `build-index.py` et `REMISE_JS` font chacun leur appel ; chaque appel relit tout le magasin. Une seule promesse partagée suffit. |
-| **La traduction anglaise est incomplète** | 2 semaines | Maintenant que la langue suit le visiteur, les manques se voient sur chaque page : `chambres.html` (titre et fiches compris), les cartes de La table et du Spa, les légendes de la galerie. |
 | **Aucune restriction de remise sur les services** | Trimestre | Le formulaire permet de cibler le spa ou la table ; le site n'applique la remise qu'aux chambres. Le ciblage est donc sans effet. |
 
 ## Ce qui n'existe pas encore
@@ -95,7 +94,8 @@ Pour ne pas y revenir : le stockage transactionnel et privé (2 octobre,
 `tests/magasin.test.mjs`, `tests/migration.test.mjs` — à brancher), un acompte
 payé qui fait foi face à un formulaire périmé, le plafond quotidien du
 concierge (`tests/quota.test.mjs`), la langue qui suit le visiteur d'une page à
-l'autre, les mentions légales remises au réel (cookies et prestataires), le
+l'autre, la traduction anglaise complétée (page Chambres, cartes de La table et
+du Spa, légendes de la galerie), les mentions légales remises au réel (cookies et prestataires), le
 générateur de la galerie qui ne la vide plus sans les originaux, les comptes nominatifs à quatre profils, la limite
 des tentatives de connexion, la clé de session dédiée (`ADMIN_SECRET`), le
 journal d'activité, la politique de sécurité du contenu (CSP par empreintes),

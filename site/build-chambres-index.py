@@ -11,6 +11,7 @@ et un tableau recapitulatif des sept categories cote a cote.
 import io
 import _schema
 from _chambres import CHAMBRES, FAMILLE
+from _chambres_en import EN as CH_EN
 from _chrome import REMISE_JS, REMISE_CSS, page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV, SITE, medaillon, PAGNE_CSS, PAGNE_JS
 
 
@@ -19,6 +20,12 @@ def fmt(n):
 
 
 FAM_NOM = {'chambre': 'Chambre', 'suite': 'Suite', 'famille': 'Famille'}
+FAM_EN = {'chambre': 'Room', 'suite': 'Suite', 'famille': 'Family'}
+# Le resume d'une carte : la premiere phrase du texte de la fiche.
+resume_de = lambda p1: p1.split('. ')[0].rstrip('.') + '.'
+# Les textes anglais propres a cette page (cartes, comparateur) : la fiche
+# de chaque chambre les tient deja dans _chambres_en.py.
+EN_CARTES = ''
 
 CSS = REMISE_CSS + """
 /* Une promotion en cours se signale sur la carte de la chambre visee.
@@ -186,11 +193,11 @@ b = [header('reserver.html', 'Réserver', 'cta'), drawer('index.html#chambres'),
   <img src="img/opt/sa-main.jpg" width="1400" height="933" alt="Le salon d'une suite de l'Hôtel Evannath"></picture>
   <div class="in wrap">
     <nav class="crumb" aria-label="Fil d'Ariane">
-      <a href="index.html">Accueil</a> &nbsp;·&nbsp; <span>Chambres &amp; Suites</span>
+      <a href="index.html" data-t="c1">Accueil</a> &nbsp;·&nbsp; <span data-t="c2">Chambres &amp; Suites</span>
     </nav>
-    <span class="eyebrow">Sept catégories · 46 chambres</span>
-    <h1>Où vous allez dormir</h1>
-    <p>De la Chambre Standard à la Suite Arabe et ses deux chambres. Chaque catégorie a son décor, sa vue et son tarif affiché en clair — rien ne s'ajoute à l'arrivée.</p>
+    <span class="eyebrow" data-t="eb">Sept catégories · 46 chambres</span>
+    <h1 data-t="hh">Où vous allez dormir</h1>
+    <p data-t="hp">De la Chambre Standard à la Suite Arabe et ses deux chambres. Chaque catégorie a son décor, sa vue et son tarif affiché en clair — rien ne s'ajoute à l'arrivée.</p>
   </div>
 </section>
 
@@ -216,10 +223,13 @@ b = [header('reserver.html', 'Réserver', 'cta'), drawer('index.html#chambres'),
 
   <div class="rooms" id="grille">''']
 
-for c in CHAMBRES:
+for i, c in enumerate(CHAMBRES):
     ph, alt, _ = c['photos'][0]
-    tag = '<span class="tag">%s</span>' % c['tag'] if c['tag'] else ''
-    resume = c['p1'].split('. ')[0] + '.'
+    en = CH_EN[c['slug']]
+    tag = '<span class="tag" data-t="tg%d">%s</span>' % (i, c['tag']) if c['tag'] else ''
+    resume = resume_de(c['p1'])
+    EN_CARTES += ('tg%d:"%s",' % (i, en['tag']) if c['tag'] else '') + 'mt%d:"%s",rs%d:"%s",' % (
+        i, en['meta'], i, resume_de(en['p1']).replace('"', '\\"'))
     b.append('''    <article class="card" data-slug="%s" data-fam="%s" data-prix="%d" data-pax="%d">
       <a href="%s.html" aria-label="%s — %s FCFA la nuit">
         <div class="ph">%s<picture><source srcset="img/opt/%s.webp" type="image/webp">
@@ -227,17 +237,17 @@ for c in CHAMBRES:
       </a>
       <div class="tx">
         <h2><a href="%s.html">%s</a></h2>
-        <p class="meta">%s</p>
-        <p>%s</p>
+        <p class="meta" data-t="mt%d">%s</p>
+        <p data-t="rs%d">%s</p>
         <div class="bas">
-          <span class="pr"><b data-prix-de="%s">%s</b><span>FCFA · la nuit</span></span>
-          <a href="%s.html" class="go">Voir la chambre &nbsp;&rarr;</a>
+          <span class="pr"><b data-prix-de="%s">%s</b><span data-t="pn">FCFA · la nuit</span></span>
+          <a href="%s.html" class="go" data-t="vc">Voir la chambre &nbsp;&rarr;</a>
         </div>
       </div>
     </article>''' % (c['slug'], FAMILLE[c['slug']], c['prix'], c['pax'],
                      c['slug'], c['nom'], fmt(c['prix']),
                      tag, ph, ph, alt,
-                     c['slug'], c['nom'], c['meta'], resume,
+                     c['slug'], c['nom'], i, c['meta'], i, resume,
                      c['slug'], fmt(c['prix']), c['slug']))
 
 b.append('''  </div>
@@ -246,11 +256,11 @@ b.append('''  </div>
 
 <section class="cmp-sec">
   <div class="wrap">
-    <span class="eyebrow">Comparer</span>
-    <h2 style="margin-top:14px">Les sept, côte à côte</h2>
+    <span class="eyebrow" data-t="ce">Comparer</span>
+    <h2 style="margin-top:14px" data-t="chh">Les sept, côte à côte</h2>
     <div class="cmp-wrap">
       <table>
-        <caption>Tarifs par nuit, petit-déjeuner et navette aéroport compris. La taxe de séjour de 1 500 FCFA par personne et par nuit s'ajoute au moment du règlement.</caption>
+        <caption data-t="cc">Tarifs par nuit, petit-déjeuner et navette aéroport compris. La taxe de séjour de 1 500 FCFA par personne et par nuit s'ajoute au moment du règlement.</caption>
         <thead><tr>
           <th scope="col" data-t="h1">Catégorie</th><th scope="col" data-t="h2">Type</th>
           <th scope="col" data-t="h3">Personnes</th><th scope="col" data-t="h4">Ce qui la distingue</th>
@@ -259,12 +269,15 @@ b.append('''  </div>
         <tbody>''')
 
 for c in sorted(CHAMBRES, key=lambda x: x['prix']):
+    i = CHAMBRES.index(c)
+    fam = FAMILLE[c['slug']]
     b.append('          <tr data-slug="%s" data-prix="%d">'
              '<th scope="row"><a href="%s.html">%s</a></th>'
-             '<td>%s</td><td>%d</td><td>%s</td><td class="num"><span data-prix-de="%s">%s</span> F</td></tr>'
+             '<td data-t="fy-%s">%s</td><td>%d</td><td data-t="md%d">%s</td><td class="num"><span data-prix-de="%s">%s</span> F</td></tr>'
              % (c['slug'], c['prix'], c['slug'], c['nom'],
-                FAM_NOM[FAMILLE[c['slug']]], c['pax'],
-                c['meta'].split('·')[-1].strip(), c['slug'], fmt(c['prix'])))
+                fam, FAM_NOM[fam], c['pax'],
+                i, c['meta'].split('·')[-1].strip(), c['slug'], fmt(c['prix'])))
+    EN_CARTES += 'md%d:"%s",' % (i, CH_EN[c['slug']]['meta'].split('·')[-1].strip())
 
 b.append('''        </tbody>
       </table>
@@ -273,21 +286,21 @@ b.append('''        </tbody>
 </section>
 
 <section class="inc-sec wrap">
-  <span class="eyebrow">Dans toutes les catégories</span>
-  <h2 style="margin-top:14px">Compris, sans supplément</h2>
+  <span class="eyebrow" data-t="ie">Dans toutes les catégories</span>
+  <h2 style="margin-top:14px" data-t="ih">Compris, sans supplément</h2>
   <div class="inc">''')
 
-for titre, desc, ic in INCLUS:
-    b.append('    <div><svg viewBox="0 0 24 24" aria-hidden="true">%s</svg><b>%s</b><span>%s</span></div>'
-             % (ic, titre, desc))
+for i, (titre, desc, ic) in enumerate(INCLUS):
+    b.append('    <div><svg viewBox="0 0 24 24" aria-hidden="true">%s</svg><b data-t="ia%d">%s</b><span data-t="ib%d">%s</span></div>'
+             % (ic, i, titre, i, desc))
 
 b.append('''  </div>
 </section>
 
 <section class="fin wrap">
-  <span class="eyebrow">Prêt ?</span>
-  <h2 style="margin-top:14px">Réservez en direct</h2>
-  <p>Le tarif affiché ici est notre meilleur tarif. Vous ne le trouverez pas moins cher ailleurs, et l'acompte se règle par Wave, Orange Money, MTN ou carte bancaire.</p>
+  <span class="eyebrow" data-t="fe">Prêt ?</span>
+  <h2 style="margin-top:14px" data-t="fh">Réservez en direct</h2>
+  <p data-t="fp">Le tarif affiché ici est notre meilleur tarif. Vous ne le trouverez pas moins cher ailleurs, et l'acompte se règle par Wave, Orange Money, MTN ou carte bancaire.</p>
   <a href="reserver.html" class="btn btn-solid" data-t="cta2">Vérifier les disponibilités</a>
 </section>
 
@@ -310,7 +323,9 @@ function appliquer(){
   var signe = tri.charAt(0)==='-' ? -1 : 1, cle = tri.replace('-','');
   visibles.sort(function(a,b){ return signe * (+a.dataset[cle] - +b.dataset[cle]); });
   visibles.forEach(function(c){ grille.appendChild(c); });
-  compte.textContent = visibles.length + (visibles.length>1 ? ' catégories' : ' catégorie');
+  var en = document.documentElement.lang === 'en';
+  compte.textContent = visibles.length + (en ? (visibles.length>1 ? ' categories' : ' category')
+    : (visibles.length>1 ? ' catégories' : ' catégorie'));
   vide.classList.toggle('on', visibles.length===0);
 }
 
@@ -327,12 +342,28 @@ document.querySelectorAll('[data-s]').forEach(function(b){
   };
 });
 appliquer();
+/* Le compteur est ecrit ici, hors [data-t] : il se reecrit a chaque bascule. */
+window.EVN_LANG = function () { appliquer(); };
 
 var EN={''' + EN_NAV + '''cta:"Book",cta2:"Check availability",
 ft:"Type",tr:"Sort",f0:"All",f1:"Rooms",f2:"Suites",f3:"Families",
 t1:"Price, low to high",t2:"Price, high to low",t3:"Capacity",
 h1:"Category",h2:"Type",h3:"Guests",h4:"What sets it apart",h5:"Rate / night",
-vd:"No category matches this filter."};
+vd:"No category matches this filter.",
+c1:"Home",c2:"Rooms &amp; Suites",eb:"Seven categories · 46 rooms",hh:"Where you will sleep",
+hp:"From the Standard Room to the two-bedroom Arabian Suite. Each category has its own decor, its own view and its rate shown plainly — nothing is added on arrival.",
+pn:"FCFA · per night",vc:"View the room &nbsp;&rarr;",
+ce:"Compare",chh:"All seven, side by side",
+cc:"Rates per night, breakfast and airport shuttle included. The tourist tax of 1,500 FCFA per person per night is added at payment.",
+"fy-chambre":"Room","fy-suite":"Suite","fy-famille":"Family",
+ie:"In every category",ih:"Included, at no extra charge",
+ia0:"Breakfast",ib0:"Included in every category",ia1:"Airport shuttle",ib1:"Complimentary, both ways",
+ia2:"Wi-Fi",ib2:"Free, in rooms and common areas",ia3:"Air conditioning",ib3:"In every room",
+ia4:"Pool &amp; lagoon",ib4:"Open from sunrise to sunset",ia5:"Parking",ib5:"Free and supervised",
+ia6:"24-hour reception",ib6:"Whatever time you arrive",ia7:"Best rate guaranteed",ib7:"When you book direct here",
+fe:"Ready?",fh:"Book direct",
+fp:"The rate shown here is our best rate. You will not find it cheaper elsewhere, and the deposit can be paid by Wave, Orange Money, MTN or bank card.",
+''' + EN_CARTES + '''};
 
 ''' + LANG_JS
 

@@ -69,6 +69,35 @@ PHOTOS = [
  ('gallery/14.png', 'art-bois',     'art',     "Signalétique sculptée à la main"),
 ]
 
+# Les legendes en anglais, par photo. Une photo sans entree garde sa legende
+# francaise : rien ne manque au dictionnaire, la page ne montre jamais de trou.
+CAP_EN = {
+ 'dom-facade': "The main building and the pool", 'dom-piscine': "The pool and its parasols",
+ 'dom-batiment': "The facade from the courtyard", 'dom-aerien': "The estate from the air",
+ 'dom-mangrove': "The lagoon and the mangrove, from the air", 'dom-enseigne': "The wall sign at the entrance",
+ 'dom-jardin': "The garden sign", 'dom-reve': "The painted « Rêve Africain » sign",
+ 'dom-fontaine': "The fountain and the wooden elephant", 'dom-pirogue': "Decorative pirogue in the garden",
+ 'dom-couchant': "Sunset over Assinie", 'ch-wax2': "Bed and throw in wax prints",
+ 'lag-ponton': "The wooden deck over the water", 'lag-bateau': "The deck and the cruise boat",
+ 'lag-nuit': "The straw hut at nightfall", 'lag-cocotiers': "The Aby lagoon and its coconut palms",
+ 'lag-large': "The lagoon, wide view", 'lag-rotin': "Rattan furniture on the terrace",
+ 'lag-transat': "Sun lounger and parasol", 'ch-wax': "Room with wax textiles",
+ 'ch-salon': "Lounge corner and plants", 'ch-bureau': "Desk corner and sun mirror",
+ 'ch-mezz': "The mezzanine staircase", 'ch-bain': "Bathroom and bathtub",
+ 'tab-salle': "The restaurant dining room", 'tab-rotin': "The bar and its rattan armchairs",
+ 'tab-dressee': "Table set facing the garden", 'tab-comptoir': "The bar counter",
+ 'tab-vin': "A bottle from the cellar", 'tab-cave': "The cellar's bottle rack",
+ 'tab-cocktails': "Cocktails being mixed", 'tab-cocktail': "Cocktail by the pool",
+ 'tab-dejeuner': "Breakfast, fruit and juice", 'tab-fruits': "Pineapple and fresh-pressed juice",
+ 'tab-corbeille': "Basket of fresh fruit", 'tab-terrasse': "Refreshment on the terrace",
+ 'spa-bassin': "The main pool", 'spa-couchant': "The pool at the end of the day",
+ 'spa-case': "The spa's round hut", 'spa-huiles': "Towels and massage oils",
+ 'art-hall': "The hall and its sculptures", 'art-salon': "Reception lounge and crafts",
+ 'art-masques': "Masks and sculptures", 'art-statue': "Statue and flowering tree",
+ 'art-lanterne': "Lit rattan lantern", 'art-lumineuse': "The illuminated sign",
+ 'art-bois': "Hand-carved signage",
+}
+
 CATS = [('all','Tout voir'),('domaine','Le domaine'),('lagune','Lagune & paillote'),
         ('chambres','Chambres'),('table','La table'),('bienetre','Piscine & spa'),('art','Art & détails')]
 
@@ -234,10 +263,15 @@ FIGURE = """    <figure data-cat="%(cat)s"><picture>
       <img loading="lazy" src="img/opt/gal-%(n)s-t.jpg"
         srcset="img/opt/gal-%(n)s-t360.jpg 360w, img/opt/gal-%(n)s-t.jpg 620w"
         sizes="%(sizes)s" data-full="img/opt/gal-%(n)s.jpg" alt="%(cap)s"></picture>
-      <figcaption>%(cap)s</figcaption></figure>"""
+      <figcaption%(cle)s>%(cap)s</figcaption></figure>"""
 
-for name, cat, cap in made:
-    b.append(FIGURE % dict(cat=cat, n=name, sizes=SIZES, cap=cap))
+EN_CAP = ''
+for i, (name, cat, cap) in enumerate(made):
+    cle = ''
+    if name in CAP_EN:
+        cle = ' data-t="gp%d"' % i
+        EN_CAP += 'gp%d:"%s",' % (i, CAP_EN[name].replace('"', '\\"'))
+    b.append(FIGURE % dict(cat=cat, n=name, sizes=SIZES, cap=cap, cle=cle))
 
 b.append('''  </div>
   <p class="empty" id="empty" data-t="emp">Aucune photo dans cette catégorie.</p>
@@ -318,10 +352,14 @@ function show(i){
   gi=(i+v.length)%v.length;
   var im=v[gi].querySelector('img');
   lbi.src=plein(im); lbi.alt=im.alt;
-  lbc.textContent=im.alt+'  ·  '+(gi+1)+' / '+v.length;
+  lbc.textContent=legende(v[gi])+'  ·  '+(gi+1)+' / '+v.length;
   lb.classList.add('on'); document.body.style.overflow='hidden';
 }
 function hideLb(){lb.classList.remove('on');document.body.style.overflow=''}
+/* La legende affichee, dans la langue du moment : le texte alternatif
+   suit la legende a chaque bascule (EVN_LANG). */
+function legende(f){var c=f.querySelector('figcaption');return c?c.textContent:f.querySelector('img').alt}
+window.EVN_LANG=function(){figs.forEach(function(f){var c=f.querySelector('figcaption'),i=f.querySelector('img');if(c&&i)i.alt=c.textContent})};
 figs.forEach(function(f){f.onclick=function(){show(visibles().indexOf(f))}});
 lb.querySelector('.next').onclick=function(e){e.stopPropagation();show(gi+1)};
 lb.querySelector('.prev').onclick=function(e){e.stopPropagation();show(gi-1)};
@@ -338,9 +376,9 @@ var EN={''' + EN_NAV + '''cta:"Book now",
 c1:"Home",c2:"Gallery",eb:"%d photographs · no AI imagery",h1:"The estate, unfiltered",
 lede:"Everything you see here was photographed on site. No stock library, no generated illustration — the place as it is.",
 f0:"View all",f1:"The estate",f2:"Lagoon &amp; deck",f3:"Rooms",f4:"The table",f5:"Pool &amp; spa",f6:"Art &amp; details",
-ph:"photos",emp:"No photo in this category."};
+ph:"photos",emp:"No photo in this category.",%s};
 
-''' % len(made) + LANG_JS
+''' % (len(made), EN_CAP) + LANG_JS
 
 LD = _schema.bloc(
     _schema.galerie(['gal-' + m[0] for m in made[:20]]),
