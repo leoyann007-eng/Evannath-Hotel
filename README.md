@@ -14,7 +14,7 @@ Python à partir de gabarits, pour éviter la saisie manuelle.
 
 ---
 
-## Les 19 pages
+## Les 22 pages
 
 **Le parcours de réservation**
 
@@ -43,6 +43,7 @@ Python à partir de gabarits, pour éviter la saisie manuelle.
 | `contact.html` | 4 canaux, formulaire validé, carte d'accès |
 | `experiences.html` | 6 lieux du domaine, 4 activités nautiques, 4 excursions |
 | `seminaires.html` | 5 configurations de salle, 4 formules, demande de devis |
+| `recrutement.html` | Offres d'emploi publiées depuis l'administration |
 | `informations-utiles.html` | 17 questions en accordéon |
 | `mentions-legales.html` | Trame juridique à compléter |
 | `404.html` | Page introuvable |
@@ -193,7 +194,7 @@ Trois couches, parce qu'aucune ne suffit seule :
 
 | Couche | Où | Portée |
 |---|---|---|
-| `<meta name="robots">` + `googlebot` | les 21 pages | HTML |
+| `<meta name="robots">` + `googlebot` | les 22 pages | HTML |
 | En-tête `X-Robots-Tag` | `vercel.json`, toutes les routes | images, PDF, manifest — tout |
 | Aucun `sitemap.xml` servi | `sitemap-apercu.xml`, exclu par `.vercelignore` | on n'invite pas |
 
@@ -297,10 +298,7 @@ ils sont regénérés depuis leur gabarit.
 
 Ce qui reste propre à chaque page est conservé tel quel : l'accueil redéclare
 six couleurs plus chaudes, La table garde son en-tête transparent au repos et
-son `.btn` à elle. **Le reste de leur CSS n'a délibérément pas été fusionné** —
-ces pages surchargent des règles de base, et l'ordre de cascade doit être
-préservé. Une tentative de fusion complète a été mesurée puis abandonnée : elle
-neutralisait `.btn-solid` et rendait l'en-tête de La table opaque.
+son `.btn` à elle.
 
 Quand une page a du texte hors `[data-t]` — un `placeholder` de champ, par
 exemple — elle déclare `EVN_LANG(lg)`, que `LANG_JS` appelle à chaque bascule.
@@ -312,7 +310,7 @@ cd site && python verifier.py
 node .outils/contraste.js          # le contraste de chaque texte, chaque page
 ```
 
-`contraste.js` ouvre les 21 pages dans un vrai navigateur et mesure chaque
+`contraste.js` ouvre les 22 pages dans un vrai navigateur et mesure chaque
 texte contre le fond qu'il a réellement — les couches translucides sont
 **composées**, sans quoi un fond à 6 % d'opacité passe pour opaque et invente
 dix-huit défauts.
@@ -323,7 +321,7 @@ et écartés du verdict — ils se jugent sur capture. Lors du passage au crème
 l'outil annonçait zéro défaut sur 2 806 textes pendant que « Où vous allez
 dormir » disparaissait dans un canapé.
 
-Seize contrôles sur les 21 pages : variables CSS déclarées, jetons partagés
+Seize contrôles sur les 22 pages : variables CSS déclarées, jetons partagés
 présents, JS de navigation non divergent, images dimensionnées, fichiers
 existants, liens valides, navigation complète, JSON-LD valide, JavaScript qui
 se parse, `srcset` effacé sur les images reconstruites, et aucune
@@ -336,6 +334,7 @@ Les autres suites :
 node tests/dispo.test.mjs     # la regle des nuits, hors reseau
 node tests/remise.test.mjs    # la logique de remise
 node tests/envoyer.test.mjs   # l'envoi des formulaires
+node tests/ordonner.test.mjs  # reordonner ne supprime jamais rien
 ```
 
 ## Vidéo
@@ -1210,7 +1209,7 @@ clair suit également.
 
 | Constante | Valeur |
 |---|---|
-| `WA_HOTEL` / `WA_HOTEL_TEXTE` | `2250546017377` · `+225 05 46 01 73 77` |
+| `WA_HOTEL` / `WA_HOTEL_TEXTE` | `2250151527575` · `+225 01 51 52 75 75` |
 | `WA_TEST` / `WA_TEST_TEXTE` | `2250758408079` · `+225 07 58 40 80 79` |
 | `WA` / `WA_TEXTE` | **les deux seules valeurs que le reste du code emploie** |
 
@@ -1224,7 +1223,7 @@ numéro de l'hôtel revient partout, il n'a jamais quitté le fichier.
 `verifier.py` (contrôle 11 ter) refuse, tant que `WA_EN_TEST` vaut `True`,
 **toute** trace du numéro de l'hôtel — lien comme libellé affiché — et tout
 lien `wa.me` vers un autre numéro que celui du moment. Personne ne relit
-21 pages à la main, et une demande qui part au mauvais endroit ne se rattrape
+22 pages à la main, et une demande qui part au mauvais endroit ne se rattrape
 pas. Les deux cas ont été testés en les provoquant.
 
 Le drapeau est **indépendant de `PROSPECTION`** : on peut signer et rester sur
@@ -1323,13 +1322,44 @@ Tests : `node tests/envoyer.test.mjs` depuis la racine (12 vérifications).
 
 ### Ce que le tunnel de réservation promet
 
-Il envoie une **demande**, pas une réservation confirmée : aucune
-disponibilité n'est vérifiée en temps réel et aucun paiement n'est encaissé.
-Les libellés le disent — « Envoyer ma demande », « Demande envoyée », et la
-réception envoie le lien de paiement après avoir confirmé la chambre.
+**Sans paiement en ligne** (aucune `LOMI_SECRET_KEY`), il envoie une
+**demande**, pas une réservation confirmée : une chambre est retenue deux
+heures (voir « La retenue »), et la réception envoie le lien de paiement après
+avoir confirmé. Les libellés le disent — « Envoyer ma demande ».
 
-Passer à la réservation ferme et à l'encaissement demande un channel manager
-et un prestataire de paiement : c'est une décision de l'établissement.
+**Avec paiement en ligne**, le tunnel propose de régler l'acompte de 30 %
+chez **lomi** (Wave, MTN Mobile Money, carte). Voir « Paiement en ligne »
+ci-dessous.
+
+## Paiement en ligne (lomi)
+
+Le montant est **recalculé par le serveur** (`api/_tarif.js`) : rien ne vient
+du navigateur. Le parcours :
+
+1. `a=payer` retient une chambre **une heure** et ouvre une session lomi ;
+2. le client paie sur la page de lomi, puis revient sur `reserver?paiement=…` ;
+3. la notification signée de lomi (`api/lomi.mjs`, HMAC vérifié sur le corps
+   brut) **ou** la relecture de la session au retour passe la retenue en
+   réservation **confirmée**, qui n'expire plus, et envoie l'e-mail au client ;
+4. un montant différent de celui demandé, ou une chambre reprise entre-temps,
+   ne confirme rien : le paiement passe « à vérifier » pour la réception.
+
+| Variable | Valeur |
+|---|---|
+| `LOMI_SECRET_KEY` | `lomi_sk_test_…` (bac à sable : aucun argent ne bouge, le tunnel l'affiche) ou la clé réelle |
+| `LOMI_WEBHOOK_SECRET` | le secret de la notification (`whsec_…`) |
+| `SITE_URL` | l'adresse publique du site, pour les retours de lomi — **à changer au passage sur le domaine définitif** |
+
+Sans clé, le paiement en ligne est simplement absent.
+
+> ⚠️ **Pas de clé réelle tant que le stockage reste Vercel Blob.** Le magasin
+> réécrit le document entier à chaque enregistrement, sans écriture
+> conditionnelle (voir « Le verrou anti-collision »). Une confirmation de
+> paiement peut donc être écrasée par un enregistrement simultané de la
+> réception : la réservation repasse « en attente », expire, et la chambre se
+> revend alors que le client a payé — et lomi, qui a reçu sa réponse, ne
+> renverra rien. Il faut d'abord un magasin transactionnel (Postgres, Redis).
+> La clé de test, elle, est sans risque.
 
 ## Données structurées
 
@@ -1557,7 +1587,7 @@ débloqueraient ce gain-là aussi — c'est le premier point de la liste ci-dess
 (`img/brand/logo.png`) — le « H » stylisé, seul élément du logo lisible à
 32 px.
 
-Les 17 pages indexables portent une `canonical` absolue et une `og:image`
+Les 19 pages indexables portent une `canonical` absolue et une `og:image`
 absolue : sans quoi Facebook et WhatsApp n'affichent aucune vignette au
 partage — ce qui compte pour un établissement dont le premier canal compte
 21 000 abonnés. `reserver`, `mentions-legales` et `404` sont en `noindex`.
@@ -1610,7 +1640,7 @@ Avant toute mise en production :
 8. **Licence de la police** — le site d'origine utilise
    `MADE-TOMMY-Regular_PERSONAL-USE.otf`, dont la licence n'autorise pas
    l'usage commercial. La maquette n'utilise que des polices libres.
-8. **Quelle adresse e-mail afficher** — deux existent :
+9. **Quelle adresse e-mail afficher** — deux existent :
    `bonjour@evannathhotel.com`, publiée sur leur Facebook et alignée sur la
    marque, et `receptionhotelevannath@gmail.com`, celle que la réception
    relève réellement. La première fait plus professionnelle sur un site

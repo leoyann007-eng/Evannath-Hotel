@@ -1,0 +1,63 @@
+# Recopie le depot sur GitLab a chaque push sur GitHub.
+#
+# GitHub reste la reference : on travaille ici, GitLab suit. Ne rien
+# modifier directement sur GitLab, sinon les deux divergent et la copie
+# s'arrete.
+#
+# A configurer une fois, sur GitHub : Settings > Secrets and variables >
+# Actions > New repository secret, nomme GITLAB_TOKEN. Sa valeur : un jeton
+# du projet GitLab (Settings > Access tokens), role Maintainer, droit
+# write_repository.
+name: Miroir GitLab
+
+on:
+  push:
+    branches: ['**']
+    tags: ['**']
+  delete:
+
+concurrency:
+  group: miroir-gitlab-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  miroir:
+    runs-on: ubuntu-latest
+    env:
+      GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
+      GITLAB_DEPOT: gitlab.com/Leoyann/evannathhotel.git
+    steps:
+      - name: Jeton present ?
+        id: jeton
+        run: |
+          if [ -z "$GITLAB_TOKEN" ]; then
+            echo "::warning::Secret GITLAB_TOKEN absent : rien n'est recopie sur GitLab."
+            echo "ok=non" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=oui" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Recuperer l'historique complet
+        if: steps.jeton.outputs.ok == 'oui' && github.event_name == 'push'
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Pousser vers GitLab
+        if: steps.jeton.outputs.ok == 'oui' && github.event_name == 'push'
+        run: git push "https://oauth2:${GITLAB_TOKEN}@${GITLAB_DEPOT}" "HEAD:${GITHUB_REF}"
+
+      - name: Supprimer la branche ou l'etiquette sur GitLab
+        if: steps.jeton.outputs.ok == 'oui' && github.event_name == 'delete'
+        # Le nom vient de l'evenement : passe par l'environnement, jamais
+        # colle dans le script (un nom de branche peut contenir « $(...) »).
+        env:
+          TYPE: ${{ github.event.ref_type }}
+          NOM: ${{ github.event.ref }}
+        run: |
+          case "$TYPE" in
+            branch) ref="refs/heads/$NOM" ;;
+            tag)    ref="refs/tags/$NOM" ;;
+            *)      exit 0 ;;
+          esac
+          git init -q . && git push "https://oauth2:${GITLAB_TOKEN}@${GITLAB_DEPOT}" ":${ref}" || true
