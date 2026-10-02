@@ -39,7 +39,7 @@ jobs:
 
       - name: Recuperer l'historique complet
         if: steps.jeton.outputs.ok == 'oui' && github.event_name == 'push'
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
