@@ -8,7 +8,7 @@ from _chrome import (page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV, EN_S
 
 # ═══════════════════════════════ CONTACT ═══════════════════════════════
 CSS_CONTACT = CONF_CSS + """
-.head{padding:150px 0 40px}
+.head{padding-top:150px;padding-bottom:40px}
 .head h1{margin:10px 0 18px}
 .head p{max-width:58ch;font-size:1.08rem}
 .chan{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-bottom:76px}
@@ -79,7 +79,7 @@ CSS_CONTACT = CONF_CSS + """
   .route-grid{grid-template-columns:1fr}
 }
 @media(max-width:720px){
-  .head{padding:126px 0 30px}
+  .head{padding-top:126px;padding-bottom:30px}
   .chan,.form{grid-template-columns:1fr}
   .map iframe{height:380px}
   .map .over{position:relative;top:0;padding:0 24px;margin-top:-40px}

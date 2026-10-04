@@ -205,7 +205,7 @@ for i, (img, titre, desc, quand, href, lien) in enumerate(DOMAINE):
 b.append('''  </div>
 </section>
 
-<div class="band reveal">
+<div class="band sombre reveal">
   <picture><source srcset="img/opt/gal-lag-nuit.webp" type="image/webp">
   <img src="img/opt/gal-lag-nuit.jpg" width="1400" height="933" alt="La paillote à la tombée du jour" loading="lazy"></picture>
   <div class="cap"><span data-t="bt">Le service du soir</span><p data-t="bp">Les lanternes s'allument quand la lumière part.</p></div>

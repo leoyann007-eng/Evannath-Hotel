@@ -132,9 +132,10 @@ tbody th a:hover{color:var(--bronze-2)}
 td{color:var(--muted)}
 td.num{font-variant-numeric:tabular-nums;color:var(--bronze);white-space:nowrap}
 caption{caption-side:bottom;padding:16px 4px 0;font-size:12.5px;color:var(--muted);text-align:left;font-style:italic}
+.u{display:none}
 
 /* inclus */
-.inc-sec{padding:88px 0}
+.inc-sec{padding-top:88px;padding-bottom:88px}
 .inc{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);
   border:1px solid var(--line);margin-top:40px}
 .inc div{background:var(--bark);padding:26px 22px}
@@ -142,7 +143,7 @@ caption{caption-side:bottom;padding:16px 4px 0;font-size:12.5px;color:var(--mute
 .inc b{display:block;font-size:14px;color:var(--cream);font-weight:600;margin-bottom:4px}
 .inc span{font-size:12.5px;color:var(--muted)}
 
-.fin{text-align:center;padding:88px 0 100px;border-top:1px solid var(--line)}
+.fin{text-align:center;padding-top:88px;padding-bottom:100px;border-top:1px solid var(--line)}
 .fin p{max-width:52ch;margin:16px auto 28px;color:var(--muted)}
 
 @media(max-width:1080px){.rooms{grid-template-columns:repeat(2,1fr)}.inc{grid-template-columns:repeat(2,1fr)}}
@@ -154,6 +155,25 @@ caption{caption-side:bottom;padding:16px 4px 0;font-size:12.5px;color:var(--mute
   .card .go{white-space:normal}
   .bar{position:static;flex-direction:column;align-items:flex-start;gap:14px}
   .inc{grid-template-columns:1fr}
+  /* Le comparateur : 760 px de tableau dans 340 px d'ecran, coupe au
+     milieu des colonnes sans rien qui dise qu'il defile. Une fiche par
+     categorie : le nom et le tarif en tete, le type et la capacite
+     dessous, ce qui la distingue en dernier. */
+  .cmp-wrap{overflow:visible}
+  table,tbody,tr,th,td,caption{display:block}
+  table{min-width:0}
+  thead{display:none}
+  tbody tr{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:14px;row-gap:4px;
+    padding:16px 18px;border-bottom:1px solid var(--line-2)}
+  tbody th,tbody td{padding:0;border:0;white-space:normal}
+  tbody th{grid-column:1;grid-row:1}
+  td.num{grid-column:2;grid-row:1;align-self:baseline}
+  tbody td:nth-of-type(1),tbody td:nth-of-type(2){grid-row:2;font-size:12px;letter-spacing:.06em}
+  tbody td:nth-of-type(1){grid-column:1}
+  tbody td:nth-of-type(2){grid-column:2;text-align:right}
+  tbody td:nth-of-type(3){grid-column:1 / -1;grid-row:3;font-size:13.5px}
+  .u{display:inline}
+  caption{padding:16px 18px}
 }
 """
 # Les cinq touches textiles : ce morceau ne part que sur les pages qui
@@ -273,7 +293,7 @@ for c in sorted(CHAMBRES, key=lambda x: x['prix']):
     fam = FAMILLE[c['slug']]
     b.append('          <tr data-slug="%s" data-prix="%d">'
              '<th scope="row"><a href="%s.html">%s</a></th>'
-             '<td data-t="fy-%s">%s</td><td>%d</td><td data-t="md%d">%s</td><td class="num"><span data-prix-de="%s">%s</span> F</td></tr>'
+             '<td data-t="fy-%s">%s</td><td>%d<span class="u" data-t="pers"> pers.</span></td><td data-t="md%d">%s</td><td class="num"><span data-prix-de="%s">%s</span> F</td></tr>'
              % (c['slug'], c['prix'], c['slug'], c['nom'],
                 fam, FAM_NOM[fam], c['pax'],
                 i, c['meta'].split('·')[-1].strip(), c['slug'], fmt(c['prix'])))
@@ -348,7 +368,7 @@ window.EVN_LANG = function () { appliquer(); };
 var EN={''' + EN_NAV + '''cta:"Book",cta2:"Check availability",
 ft:"Type",tr:"Sort",f0:"All",f1:"Rooms",f2:"Suites",f3:"Families",
 t1:"Price, low to high",t2:"Price, high to low",t3:"Capacity",
-h1:"Category",h2:"Type",h3:"Guests",h4:"What sets it apart",h5:"Rate / night",
+h1:"Category",h2:"Type",h3:"Guests",pers:" guests",h4:"What sets it apart",h5:"Rate / night",
 vd:"No category matches this filter.",
 c1:"Home",c2:"Rooms &amp; Suites",eb:"Seven categories · 46 rooms",hh:"Where you will sleep",
 hp:"From the Standard Room to the two-bedroom Arabian Suite. Each category has its own decor, its own view and its rate shown plainly — nothing is added on arrival.",

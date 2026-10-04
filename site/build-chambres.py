@@ -37,7 +37,7 @@ INCL = [
 ]
 
 CSS = REMISE_CSS + """
-.head{padding:150px 0 34px}
+.head{padding-top:150px;padding-bottom:34px}
 .head-top{display:flex;justify-content:space-between;align-items:flex-end;gap:30px;flex-wrap:wrap}
 /* Signature textile — touche 4 sur 5, le damas. Il vit dans le VIDE entre
    le titre, a gauche, et le prix, a droite. Le fondu radial l'eteint avant
@@ -153,14 +153,19 @@ CSS = REMISE_CSS + """
   .more-grid{grid-template-columns:repeat(2,1fr)}
 }
 @media(max-width:720px){
-  .head{padding:126px 0 26px}
+  .head{padding-top:126px;padding-bottom:26px}
   .head-price{text-align:left}
   .amen,.more-grid{grid-template-columns:1fr}
   .two{grid-template-columns:1fr}
   .mosaic{grid-template-columns:1fr;grid-auto-rows:210px}
-  .mosaic figure:first-child{grid-column:span 1}
+  /* Une seule colonne : la photo « plein » (span 2) en recreait une seconde,
+     et la mosaique gardait une bande de 50 px a gauche. */
+  .mosaic figure:first-child,.mosaic.court figure:first-child,.mosaic figure.plein{grid-column:auto;grid-row:auto}
+  .mosaic figure:first-child{grid-row:span 2}
   .mobar{display:flex}
   body{padding-bottom:78px}
+  /* Les bulles flottantes passent au-dessus de la barre de reservation. */
+  .wa{bottom:92px}.chat-bulle{bottom:162px}
   #lb .prev{left:8px}#lb .next{right:8px}
 }
 """
@@ -284,7 +289,7 @@ for c in CHAMBRES:
         cl = ' class="plein"' if (i == len(c['photos']) - 1 and len(c['photos']) % 2 == 0) else ''
         b.append('''    <figure%s><picture><source srcset="img/opt/%s.webp" type="image/webp">
       <img loading="%s" src="img/opt/%s.jpg" data-full="img/opt/%s.jpg" alt="%s"></picture>
-      <figcaption data-t="cap%d">%s</figcaption></figure>''' % (cl, img, ld, img, img, alt, i, cap))
+      <figcaption class="sombre" data-t="cap%d">%s</figcaption></figure>''' % (cl, img, ld, img, img, alt, i, cap))
 
     b.append('''  </div>
 </div>
@@ -392,7 +397,7 @@ for c in CHAMBRES:
 
 ''' + FOOTER + '''
 
-<div class="mobar">
+<div class="mobar sombre">
   <div><b id="mb"></b><span data-t="mbs">FCFA · séjour total</span></div>
   <a href="#reserver" class="btn btn-solid" data-t="mbb">Réserver</a>
 </div>

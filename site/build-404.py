@@ -9,7 +9,7 @@ body{background:var(--bark)}
 /* Padding symetrique : l'en-tete fixe ne peut plus recouvrir le contenu,
    et le centre optique reste exactement ou il etait sur un ecran normal. */
 .err{position:relative;min-height:100svh;display:flex;align-items:center;overflow:hidden;padding:150px 0}
-.err .bg{position:absolute;inset:0;background:url('img/opt/gal-lag-nuit.jpg') center/cover;animation:kb 24s ease-out forwards}
+.err .bg{position:absolute;inset:0;background:url('img/opt/gal-lag-nuit.jpg') center/cover;background-image:image-set(url('img/opt/gal-lag-nuit.webp') type('image/webp'),url('img/opt/gal-lag-nuit.jpg') type('image/jpeg'));animation:kb 24s ease-out forwards}
 @keyframes kb{from{transform:scale(1.03)}to{transform:scale(1.12)}}
 .err::after{content:"";position:absolute;inset:0;background:
   radial-gradient(ellipse at 50% 46%,rgba(16,11,6,.4),rgba(16,11,6,.9) 74%),

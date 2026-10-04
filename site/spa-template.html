@@ -211,7 +211,7 @@ header.scrolled .brand small{opacity:0}
 /* Padding symetrique : l'en-tete fixe ne peut plus recouvrir le contenu,
    et le centre optique reste exactement ou il etait sur un ecran normal. */
 .hero{position:relative;min-height:92svh;display:flex;align-items:center;overflow:hidden;padding:150px 0}
-.hero .bg{position:absolute;inset:0;background:url('img/opt/gal-spa-couchant.jpg') center/cover;animation:kb 24s ease-out forwards}
+.hero .bg{position:absolute;inset:0;background:url('img/opt/gal-spa-couchant.jpg') center/cover;background-image:image-set(url('img/opt/gal-spa-couchant.webp') type('image/webp'),url('img/opt/gal-spa-couchant.jpg') type('image/jpeg'));animation:kb 24s ease-out forwards}
 @keyframes kb{from{transform:scale(1.03)}to{transform:scale(1.12)}}
 .hero::after{content:"";position:absolute;inset:0;background:
   radial-gradient(ellipse at 50% 48%,rgba(16,11,6,.3),rgba(16,11,6,.88) 74%),
@@ -356,6 +356,8 @@ footer{background:#0B0704}
 @media(max-width:720px){
   .burger .lbl{display:none}
   .nav-right .lang{display:none}
+  .nav-right{gap:12px}
+  .nav-right .btn{white-space:nowrap;padding:14px 18px;letter-spacing:.14em}
   .dw-in{padding:110px 24px 50px}
   .mani,.rituels,.book{padding:76px 0}
   .lieu{padding-bottom:76px}

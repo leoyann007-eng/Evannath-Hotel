@@ -5,7 +5,7 @@ from _chrome import PROSPECTION
 from _chrome import page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV
 
 CSS = """
-.head{padding:150px 0 34px}
+.head{padding-top:150px;padding-bottom:34px}
 .head h1{margin:10px 0 16px;font-size:clamp(2.2rem,4.6vw,3.2rem)}
 .head .maj{font-size:13px;color:var(--muted);letter-spacing:.04em}
 .head .maj b{color:var(--cream);font-weight:600}
@@ -43,7 +43,7 @@ article a:hover{border-color:var(--bronze)}
 .cook b{font-weight:600;color:var(--cream)}
 .cook span:last-child{color:var(--muted);text-align:right;font-variant-numeric:tabular-nums}
 @media(max-width:1080px){.body{grid-template-columns:1fr;gap:0}.side{display:none}}
-@media(max-width:720px){.head{padding:126px 0 26px}.kv{flex-direction:column;gap:4px}.kv>span:last-child{text-align:left}
+@media(max-width:720px){.head{padding-top:126px;padding-bottom:26px}.kv{flex-direction:column;gap:4px}.kv>span:last-child{text-align:left}
  .cook div{grid-template-columns:1fr;gap:6px}.cook span:last-child{text-align:left}.cook div.h{display:none}}
 """
 

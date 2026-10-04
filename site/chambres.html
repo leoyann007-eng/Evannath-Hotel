@@ -189,7 +189,9 @@ fetch('img/logo-calques.svg').then(function(r){return r.ok?r.text():Promise.reje
    correction. Les jetons sont redeclares POUR L INTERIEUR du hero, et
    `color` reaffirme — sans quoi la couleur heritee de body, deja calculee,
    ne suit pas. --bark y redevient « ce qui contraste » : sombre. */
-.hero{--cream:#F6EEE2;--prose:#D7CBBA;--muted:#C8BAA8;
+/* Sur un fond sombre (photo voilée, barre noire), --cream redevient la
+   couleur claire : dans le thème clair elle vaut l'encre. */
+.hero,.sombre{--cream:#F6EEE2;--prose:#D7CBBA;--muted:#C8BAA8;
   --bronze:#DFBB84;--bronze-2:#E8CDA3;--bark:#17100A;color:var(--cream)}
 
 *{box-sizing:border-box;margin:0;padding:0}
@@ -458,7 +460,7 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
   display:flex;align-items:center;justify-content:flex-end;
   box-shadow:0 12px 30px -14px rgba(21,128,61,.7);
   clip-path:inset(0 0 0 212px round 29px);
-  transition:clip-path .7s var(--ease-inout)}
+  transition:clip-path .7s var(--ease-inout),transform .35s ease,opacity .35s ease}
 .wa .lbl{white-space:nowrap;font-size:11px;letter-spacing:.2em;font-weight:600;
   color:#fff;padding-left:24px;opacity:0;transition:opacity .4s ease}
 .wa .rond{flex:none;width:58px;height:58px;display:grid;place-items:center}
@@ -473,6 +475,14 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
 }
 @media(max-width:1080px){ .f-grid{grid-template-columns:repeat(2,1fr)} }
 @media(max-width:720px){ .f-grid{grid-template-columns:1fr} }
+/* Sur telephone, les bulles flottantes masquaient les boutons « Voir la
+   chambre » au bas de l'ecran. Elles s'effacent quand on DESCEND et
+   reviennent des qu'on remonte, ou en bas de page (html.defile, pose par
+   le script de l'en-tete). La fenetre du concierge ouverte, sa bulle reste. */
+@media(max-width:720px){
+  html.defile .wa,html.defile .chat-bulle:not([aria-expanded="true"]){
+    transform:translateY(calc(100% + 40px));opacity:0;pointer-events:none}
+}
 
 
 .js .reveal{opacity:0;transform:translateY(28px);transition:opacity .9s cubic-bezier(.2,.8,.2,1),transform .9s cubic-bezier(.2,.8,.2,1)}
@@ -495,6 +505,10 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
   .burger .lbl{display:none}
   .nav-right .lang{display:none}
   .dw-in{padding:110px 24px 50px}
+  /* « Nos chambres », « Rendez-vous » passaient sur deux lignes : un bouton
+     de 56 px de haut dans un en-tete de 64. */
+  .nav-right{gap:12px}
+  .nav-right .btn{white-space:nowrap;padding:14px 18px;letter-spacing:.14em}
 }
 
 /* ── Signature textile ────────────────────────────────────────────────
@@ -706,9 +720,10 @@ tbody th a:hover{color:var(--bronze-2)}
 td{color:var(--muted)}
 td.num{font-variant-numeric:tabular-nums;color:var(--bronze);white-space:nowrap}
 caption{caption-side:bottom;padding:16px 4px 0;font-size:12.5px;color:var(--muted);text-align:left;font-style:italic}
+.u{display:none}
 
 /* inclus */
-.inc-sec{padding:88px 0}
+.inc-sec{padding-top:88px;padding-bottom:88px}
 .inc{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);
   border:1px solid var(--line);margin-top:40px}
 .inc div{background:var(--bark);padding:26px 22px}
@@ -716,7 +731,7 @@ caption{caption-side:bottom;padding:16px 4px 0;font-size:12.5px;color:var(--mute
 .inc b{display:block;font-size:14px;color:var(--cream);font-weight:600;margin-bottom:4px}
 .inc span{font-size:12.5px;color:var(--muted)}
 
-.fin{text-align:center;padding:88px 0 100px;border-top:1px solid var(--line)}
+.fin{text-align:center;padding-top:88px;padding-bottom:100px;border-top:1px solid var(--line)}
 .fin p{max-width:52ch;margin:16px auto 28px;color:var(--muted)}
 
 @media(max-width:1080px){.rooms{grid-template-columns:repeat(2,1fr)}.inc{grid-template-columns:repeat(2,1fr)}}
@@ -728,6 +743,25 @@ caption{caption-side:bottom;padding:16px 4px 0;font-size:12.5px;color:var(--mute
   .card .go{white-space:normal}
   .bar{position:static;flex-direction:column;align-items:flex-start;gap:14px}
   .inc{grid-template-columns:1fr}
+  /* Le comparateur : 760 px de tableau dans 340 px d'ecran, coupe au
+     milieu des colonnes sans rien qui dise qu'il defile. Une fiche par
+     categorie : le nom et le tarif en tete, le type et la capacite
+     dessous, ce qui la distingue en dernier. */
+  .cmp-wrap{overflow:visible}
+  table,tbody,tr,th,td,caption{display:block}
+  table{min-width:0}
+  thead{display:none}
+  tbody tr{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:14px;row-gap:4px;
+    padding:16px 18px;border-bottom:1px solid var(--line-2)}
+  tbody th,tbody td{padding:0;border:0;white-space:normal}
+  tbody th{grid-column:1;grid-row:1}
+  td.num{grid-column:2;grid-row:1;align-self:baseline}
+  tbody td:nth-of-type(1),tbody td:nth-of-type(2){grid-row:2;font-size:12px;letter-spacing:.06em}
+  tbody td:nth-of-type(1){grid-column:1}
+  tbody td:nth-of-type(2){grid-column:2;text-align:right}
+  tbody td:nth-of-type(3){grid-column:1 / -1;grid-row:3;font-size:13.5px}
+  .u{display:inline}
+  caption{padding:16px 18px}
 }
 
 </style>
@@ -941,13 +975,13 @@ caption{caption-side:bottom;padding:16px 4px 0;font-size:12.5px;color:var(--mute
           <th scope="col" data-t="h5">Tarif / nuit</th>
         </tr></thead>
         <tbody>
-          <tr data-slug="chambre-standard" data-prix="67000"><th scope="row"><a href="chambre-standard.html">Chambre Standard</a></th><td data-t="fy-chambre">Chambre</td><td>2</td><td data-t="md0">vue jardin</td><td class="num"><span data-prix-de="chambre-standard">67 000</span> F</td></tr>
-          <tr data-slug="deluxe-baldaquin" data-prix="82000"><th scope="row"><a href="deluxe-baldaquin.html">Deluxe · lits à baldaquin</a></th><td data-t="fy-chambre">Chambre</td><td>2</td><td data-t="md1">coin salon</td><td class="num"><span data-prix-de="deluxe-baldaquin">82 000</span> F</td></tr>
-          <tr data-slug="deluxe-superieure" data-prix="97000"><th scope="row"><a href="deluxe-superieure.html">Deluxe Supérieure</a></th><td data-t="fy-chambre">Chambre</td><td>3</td><td data-t="md2">salle à manger</td><td class="num"><span data-prix-de="deluxe-superieure">97 000</span> F</td></tr>
-          <tr data-slug="suite-anglaise" data-prix="107000"><th scope="row"><a href="suite-anglaise.html">Suite Anglaise</a></th><td data-t="fy-suite">Suite</td><td>2</td><td data-t="md3">le meilleur couchant</td><td class="num"><span data-prix-de="suite-anglaise">107 000</span> F</td></tr>
-          <tr data-slug="chambre-mezzanine" data-prix="127000"><th scope="row"><a href="chambre-mezzanine.html">Chambre en Mezzanine</a></th><td data-t="fy-chambre">Chambre</td><td>2</td><td data-t="md4">sous charpente</td><td class="num"><span data-prix-de="chambre-mezzanine">127 000</span> F</td></tr>
-          <tr data-slug="mezzanine-superieure" data-prix="142000"><th scope="row"><a href="mezzanine-superieure.html">Mezzanine Supérieure</a></th><td data-t="fy-famille">Famille</td><td>4</td><td data-t="md5">coin salon</td><td class="num"><span data-prix-de="mezzanine-superieure">142 000</span> F</td></tr>
-          <tr data-slug="suite-arabe" data-prix="280000"><th scope="row"><a href="suite-arabe.html">Suite Arabe</a></th><td data-t="fy-famille">Famille</td><td>6</td><td data-t="md6">décor arabo-andalou</td><td class="num"><span data-prix-de="suite-arabe">280 000</span> F</td></tr>
+          <tr data-slug="chambre-standard" data-prix="67000"><th scope="row"><a href="chambre-standard.html">Chambre Standard</a></th><td data-t="fy-chambre">Chambre</td><td>2<span class="u" data-t="pers"> pers.</span></td><td data-t="md0">vue jardin</td><td class="num"><span data-prix-de="chambre-standard">67 000</span> F</td></tr>
+          <tr data-slug="deluxe-baldaquin" data-prix="82000"><th scope="row"><a href="deluxe-baldaquin.html">Deluxe · lits à baldaquin</a></th><td data-t="fy-chambre">Chambre</td><td>2<span class="u" data-t="pers"> pers.</span></td><td data-t="md1">coin salon</td><td class="num"><span data-prix-de="deluxe-baldaquin">82 000</span> F</td></tr>
+          <tr data-slug="deluxe-superieure" data-prix="97000"><th scope="row"><a href="deluxe-superieure.html">Deluxe Supérieure</a></th><td data-t="fy-chambre">Chambre</td><td>3<span class="u" data-t="pers"> pers.</span></td><td data-t="md2">salle à manger</td><td class="num"><span data-prix-de="deluxe-superieure">97 000</span> F</td></tr>
+          <tr data-slug="suite-anglaise" data-prix="107000"><th scope="row"><a href="suite-anglaise.html">Suite Anglaise</a></th><td data-t="fy-suite">Suite</td><td>2<span class="u" data-t="pers"> pers.</span></td><td data-t="md3">le meilleur couchant</td><td class="num"><span data-prix-de="suite-anglaise">107 000</span> F</td></tr>
+          <tr data-slug="chambre-mezzanine" data-prix="127000"><th scope="row"><a href="chambre-mezzanine.html">Chambre en Mezzanine</a></th><td data-t="fy-chambre">Chambre</td><td>2<span class="u" data-t="pers"> pers.</span></td><td data-t="md4">sous charpente</td><td class="num"><span data-prix-de="chambre-mezzanine">127 000</span> F</td></tr>
+          <tr data-slug="mezzanine-superieure" data-prix="142000"><th scope="row"><a href="mezzanine-superieure.html">Mezzanine Supérieure</a></th><td data-t="fy-famille">Famille</td><td>4<span class="u" data-t="pers"> pers.</span></td><td data-t="md5">coin salon</td><td class="num"><span data-prix-de="mezzanine-superieure">142 000</span> F</td></tr>
+          <tr data-slug="suite-arabe" data-prix="280000"><th scope="row"><a href="suite-arabe.html">Suite Arabe</a></th><td data-t="fy-famille">Famille</td><td>6<span class="u" data-t="pers"> pers.</span></td><td data-t="md6">décor arabo-andalou</td><td class="num"><span data-prix-de="suite-arabe">280 000</span> F</td></tr>
         </tbody>
       </table>
     </div>
@@ -1005,7 +1039,7 @@ caption{caption-side:bottom;padding:16px 4px 0;font-size:12.5px;color:var(--mute
 </a><style>
 .chat-bulle{position:fixed;right:22px;bottom:92px;z-index:91;width:58px;height:58px;border-radius:999px;border:0;
   background:var(--bronze);color:#fff;display:grid;place-items:center;cursor:pointer;
-  box-shadow:0 12px 30px -14px rgba(101,63,19,.8);transition:transform .25s var(--ease-out),background .2s}
+  box-shadow:0 12px 30px -14px rgba(101,63,19,.8);transition:transform .3s var(--ease-out),opacity .3s,background .2s}
 .chat-bulle:hover{background:var(--bronze-2);transform:translateY(-2px)}
 .chat-bulle:focus-visible{outline:2px solid var(--bronze);outline-offset:4px}
 .chat-bulle svg{width:26px;height:26px;fill:none;stroke:#fff;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
@@ -1245,7 +1279,13 @@ window.EVN_AU_SCROLL=function(selecteur,classe){
 };
 
 var hd=document.getElementById('hd');
-addEventListener('scroll',function(){hd.classList.toggle('scrolled',scrollY>80)},{passive:true});
+var yAvant=scrollY,racine=document.documentElement;
+addEventListener('scroll',function(){
+  var y=scrollY;hd.classList.toggle('scrolled',y>80);
+  if(Math.abs(y-yAvant)<12)return;
+  var bas=y+innerHeight>=racine.scrollHeight-60;
+  racine.classList.toggle('defile',y>yAvant&&y>300&&!bas);yAvant=y;
+},{passive:true});
 
 var bg=document.getElementById('bg'),dw=document.getElementById('dw');
 var dwLinks=[].slice.call(dw.querySelectorAll('nav a'));
@@ -1427,7 +1467,7 @@ window.EVN_LANG = function () { appliquer(); };
 var EN={mn:"Menu",n1:"Rooms &amp; Suites",n2:"Experiences",n3:"The table",n4:"The spa",n5:"Offers &amp; Events",n6:"Meetings &amp; groups",n7:"Gallery",n8:"About",n9:"Useful information",n10:"Contact",n11:"Book",dr:"Reservations",cta:"Book",cta2:"Check availability",
 ft:"Type",tr:"Sort",f0:"All",f1:"Rooms",f2:"Suites",f3:"Families",
 t1:"Price, low to high",t2:"Price, high to low",t3:"Capacity",
-h1:"Category",h2:"Type",h3:"Guests",h4:"What sets it apart",h5:"Rate / night",
+h1:"Category",h2:"Type",h3:"Guests",pers:" guests",h4:"What sets it apart",h5:"Rate / night",
 vd:"No category matches this filter.",
 c1:"Home",c2:"Rooms &amp; Suites",eb:"Seven categories · 46 rooms",hh:"Where you will sleep",
 hp:"From the Standard Room to the two-bedroom Arabian Suite. Each category has its own decor, its own view and its rate shown plainly — nothing is added on arrival.",
