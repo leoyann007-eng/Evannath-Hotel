@@ -37,9 +37,15 @@
  */
 
 const URL_BASE = process.env.DATABASE_URL || process.env.POSTGRES_URL || '';
-/* L'environnement Vercel : production, preview, ou rien (poste local). */
-const production = () => process.env.VERCEL_ENV === 'production';
-const suffixe = () => (production() ? '' : ':' + (process.env.VERCEL_ENV || 'local'));
+/* L'environnement : production, preview, ou rien (poste local).
+
+   EVN_ENV d'abord, VERCEL_ENV ensuite. Vercel pose VERCEL_ENV de lui-meme ;
+   un autre hebergeur, non. Sans EVN_ENV=production chez lui, le site se
+   croirait sur un poste local, chercherait « donnees:local » dans la base
+   et demarrerait VIDE — les vraies donnees intactes, mais invisibles. */
+const environnement = () => process.env.EVN_ENV || process.env.VERCEL_ENV || '';
+const production = () => environnement() === 'production';
+const suffixe = () => (production() ? '' : ':' + (environnement() || 'local'));
 
 /* ── Postgres : une seule reserve de connexions par instance ──────────── */
 let reserve = null;
@@ -475,4 +481,4 @@ async function valeur(cle) {
   return c && c.expire >= Date.now() ? c.n : 0;
 }
 
-module.exports = { document, compter, valeur, expliquer };
+module.exports = { document, compter, valeur, expliquer, environnement };

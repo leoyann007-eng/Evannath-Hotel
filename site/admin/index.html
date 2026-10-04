@@ -741,6 +741,7 @@ async function charger() {
   ETAT.panne = etat.panne || '';
   ETAT.fichiers = etat.fichiers || 0;
   ETAT.ancienneCopie = etat.ancienneCopie || 0;
+  ETAT.environnement = etat.environnement || 'local';
   ETAT.paiement = etat.paiement || { cle: false };
   ETAT.chatbot = etat.chatbot || { actif: true, cle: false };
   ETAT.cleSession = etat.cle || '';
@@ -2205,6 +2206,12 @@ function rendre() {
             : 'Mémoire — les données se perdent au redéploiement.'}</span></div>
           <span class="etat ${ETAT.stockage === 'base' ? 'vif' : ETAT.stockage === 'durable' ? 'attend' : 'fini'}">${
             ETAT.stockage === 'base' ? 'Base de données' : ETAT.stockage === 'durable' ? 'À renforcer' : 'Démonstration'}</span></div>
+        ${ETAT.stockage === 'base' ? `<div class="ligne"><div class="txt"><b>Environnement</b>
+          <span>${ETAT.environnement === 'production'
+            ? 'Production : ce sont les données du site en ligne.'
+            : 'Ce déploiement lit ses propres données (« ' + ech(ETAT.environnement) + ' »), pas celles de la production. '
+              + 'Si c’est le site en ligne, chez un autre hébergeur que Vercel, posez la variable EVN_ENV=production.'}</span></div>
+          <span class="etat ${ETAT.environnement === 'production' ? 'vif' : 'attend'}">${ech(ETAT.environnement)}</span></div>` : ''}
         ${ETAT.ancienneCopie ? `<div class="ligne"><div class="txt"><b>Ancienne copie publique</b>
           <span>Les données sont passées dans la base, mais des fichiers de l’ancien magasin Blob
           n’ont pas pu être effacés. Supprimez les fichiers « evannath/donnees… » et
