@@ -30,7 +30,7 @@ TAXE_SEJOUR = 1500
 PART_ACOMPTE = 0.3
 
 CSS = REMISE_CSS + CONF_CSS + """
-.head{padding:150px 0 30px}
+.head{padding-top:150px;padding-bottom:30px}
 .head h1{margin:10px 0 14px}
 .head p{max-width:56ch;font-size:1.04rem}
 
@@ -148,7 +148,7 @@ input::placeholder,textarea::placeholder{color:#6E6154}
   .recap{position:static;order:-1}
 }
 @media(max-width:720px){
-  .head{padding:126px 0 24px}
+  .head{padding-top:126px;padding-bottom:24px}
   .steps{flex-direction:column}
   .steps div{border-right:0;border-bottom:1px solid var(--line)}
   .steps div:last-child{border-bottom:0}

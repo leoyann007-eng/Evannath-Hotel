@@ -46,7 +46,7 @@ CSS = """
    devenus sombres — « Dès 20 h » tombait a 1,22:1 sur son propre
    fond. Il redeclare donc des jetons clairs pour son interieur :
    une regle, plutot que la chasse a chaque couleur. */
-.infos span,.pilote button,.diapo .voile,.c .tag{--cream:#F6EEE2;--prose:#D7CBBA;--muted:#E0D6C8;
+.infos span,.pilote button,.cpt,.diapo .voile,.c .tag{--cream:#F6EEE2;--prose:#D7CBBA;--muted:#E0D6C8;
   --bronze:#DFBB84;--bronze-2:#E8CDA3;--bark:#17100A;
   color:var(--cream)}
 
@@ -72,7 +72,10 @@ CSS = """
   color:var(--bronze-2);font-size:20px;line-height:1;cursor:pointer;transition:.3s;
   font-family:var(--f-body)}
 .pilote button:hover{border-color:var(--bronze);background:var(--bronze);color:var(--bark)}
-.cpt{font-size:12px;letter-spacing:.16em;color:var(--muted);display:flex;gap:5px}
+/* Le compteur est pose sur la photo, ou sur le fond clair d'une affiche :
+   la meme pastille sombre que les fleches, pour se lire sur les deux. */
+.cpt{font-size:12px;letter-spacing:.16em;color:var(--muted);display:flex;gap:5px;
+  height:42px;align-items:center;padding:0 12px;background:rgba(23,16,10,.7)}
 .cpt b{color:var(--cream);font-weight:700}
 .cpt i{font-style:normal}
 
@@ -84,7 +87,7 @@ CSS = """
   .pilote{right:20px;bottom:20px}
 }
 
-.head{padding:150px 0 46px}
+.head{padding-top:150px;padding-bottom:46px}
 .head h1{margin:10px 0 20px}
 .head .lede{font-size:1.1rem;max-width:60ch}
 /* Signature textile — touche 2 sur 5, et 43 · Le damas sous la lampe.
@@ -253,7 +256,7 @@ CSS = """
   .recap{position:static}
 }
 @media(max-width:720px){
-  .head{padding:126px 0 34px}
+  .head{padding-top:126px;padding-bottom:34px}
   .grid,.packs,.two{grid-template-columns:1fr}
   .star .txt,.weekly .txt,.camp{padding:24px}
   .c .foot{flex-direction:column;align-items:stretch;gap:14px}
@@ -640,7 +643,7 @@ def _pastilles(e):
 DIAPOS = ''
 for _n, e in enumerate(EVENEMENTS):
     DIAPOS += '''
-    <article class="diapo%s" id="%s"%s>
+    <article class="diapo sombre%s" id="%s"%s>
       <picture><source srcset="img/opt/%s.webp" type="image/webp">
         <img src="img/opt/%s.jpg" alt="" loading="lazy"></picture>
       <div class="voile"></div>
@@ -769,7 +772,7 @@ JS += """
     hote.innerHTML = '';
     liste.forEach(function(e){
       var d = modele.cloneNode(true);
-      d.id = e.id || ''; d.className = 'diapo' + (e.format === 'affiche' ? ' affiche' : '');
+      d.id = e.id || ''; d.className = 'diapo' + (e.format === 'affiche' ? ' affiche' : ' sombre');
       if (e.fin) d.setAttribute('data-fin', e.fin); else d.removeAttribute('data-fin');
       var im = d.querySelector('img'), so = d.querySelector('source');
       /* Le champ porte soit l'URL d'une affiche deposee, soit le nom d'une

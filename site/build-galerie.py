@@ -160,12 +160,12 @@ if len(made) < len(PHOTOS):
 
 # ── galerie.html ──────────────────────────────────────────────
 CSS_GAL = """
-.head{padding:150px 0 34px}
+.head{padding-top:150px;padding-bottom:34px}
 .head h1{margin:10px 0 18px}
 .head p{max-width:58ch;font-size:1.06rem}
 .tools{background:var(--bark);
   border-block:1px solid var(--line);margin-bottom:44px}
-.tools .in{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;padding:13px 0}
+.tools .in{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;padding-top:13px;padding-bottom:13px}
 .filters{display:flex;gap:6px;flex-wrap:wrap}
 .filters button{background:none;border:1px solid transparent;color:var(--muted);font:700 10.5px/1 var(--f-body);
   letter-spacing:.18em;text-transform:uppercase;padding:14px 18px;cursor:pointer;transition:.3s}
@@ -214,7 +214,7 @@ CSS_GAL = """
 #lb .prev{left:26px;top:50%}#lb .next{right:26px;top:50%}#lb .close{top:26px;right:26px}
 @media(max-width:1080px){.grid{columns:3}}
 @media(max-width:720px){
-  .head{padding:126px 0 26px}
+  .head{padding-top:126px;padding-bottom:26px}
   .grid{columns:2;column-gap:10px}
   .grid figure{margin-bottom:10px}
   .grid figcaption{opacity:1;font-size:10px;padding:24px 10px 8px}
@@ -263,7 +263,7 @@ FIGURE = """    <figure data-cat="%(cat)s"><picture>
       <img loading="lazy" src="img/opt/gal-%(n)s-t.jpg"
         srcset="img/opt/gal-%(n)s-t360.jpg 360w, img/opt/gal-%(n)s-t.jpg 620w"
         sizes="%(sizes)s" data-full="img/opt/gal-%(n)s.jpg" alt="%(cap)s"></picture>
-      <figcaption%(cle)s>%(cap)s</figcaption></figure>"""
+      <figcaption class="sombre"%(cle)s>%(cap)s</figcaption></figure>"""
 
 EN_CAP = ''
 for i, (name, cat, cap) in enumerate(made):

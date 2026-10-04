@@ -189,7 +189,9 @@ fetch('img/logo-calques.svg').then(function(r){return r.ok?r.text():Promise.reje
    correction. Les jetons sont redeclares POUR L INTERIEUR du hero, et
    `color` reaffirme — sans quoi la couleur heritee de body, deja calculee,
    ne suit pas. --bark y redevient « ce qui contraste » : sombre. */
-.hero{--cream:#F6EEE2;--prose:#D7CBBA;--muted:#C8BAA8;
+/* Sur un fond sombre (photo voilée, barre noire), --cream redevient la
+   couleur claire : dans le thème clair elle vaut l'encre. */
+.hero,.sombre{--cream:#F6EEE2;--prose:#D7CBBA;--muted:#C8BAA8;
   --bronze:#DFBB84;--bronze-2:#E8CDA3;--bark:#17100A;color:var(--cream)}
 
 *{box-sizing:border-box;margin:0;padding:0}
@@ -458,7 +460,7 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
   display:flex;align-items:center;justify-content:flex-end;
   box-shadow:0 12px 30px -14px rgba(21,128,61,.7);
   clip-path:inset(0 0 0 212px round 29px);
-  transition:clip-path .7s var(--ease-inout)}
+  transition:clip-path .7s var(--ease-inout),transform .35s ease,opacity .35s ease}
 .wa .lbl{white-space:nowrap;font-size:11px;letter-spacing:.2em;font-weight:600;
   color:#fff;padding-left:24px;opacity:0;transition:opacity .4s ease}
 .wa .rond{flex:none;width:58px;height:58px;display:grid;place-items:center}
@@ -473,6 +475,14 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
 }
 @media(max-width:1080px){ .f-grid{grid-template-columns:repeat(2,1fr)} }
 @media(max-width:720px){ .f-grid{grid-template-columns:1fr} }
+/* Sur telephone, les bulles flottantes masquaient les boutons « Voir la
+   chambre » au bas de l'ecran. Elles s'effacent quand on DESCEND et
+   reviennent des qu'on remonte, ou en bas de page (html.defile, pose par
+   le script de l'en-tete). La fenetre du concierge ouverte, sa bulle reste. */
+@media(max-width:720px){
+  html.defile .wa,html.defile .chat-bulle:not([aria-expanded="true"]){
+    transform:translateY(calc(100% + 40px));opacity:0;pointer-events:none}
+}
 
 
 .js .reveal{opacity:0;transform:translateY(28px);transition:opacity .9s cubic-bezier(.2,.8,.2,1),transform .9s cubic-bezier(.2,.8,.2,1)}
@@ -495,6 +505,10 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
   .burger .lbl{display:none}
   .nav-right .lang{display:none}
   .dw-in{padding:110px 24px 50px}
+  /* « Nos chambres », « Rendez-vous » passaient sur deux lignes : un bouton
+     de 56 px de haut dans un en-tete de 64. */
+  .nav-right{gap:12px}
+  .nav-right .btn{white-space:nowrap;padding:14px 18px;letter-spacing:.14em}
 }
 
 /* ── Signature textile ────────────────────────────────────────────────
@@ -602,7 +616,7 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
   font-variant-numeric:tabular-nums}
 .apres{color:var(--bronze-2)}
 
-.head{padding:150px 0 34px}
+.head{padding-top:150px;padding-bottom:34px}
 .head-top{display:flex;justify-content:space-between;align-items:flex-end;gap:30px;flex-wrap:wrap}
 /* Signature textile — touche 4 sur 5, le damas. Il vit dans le VIDE entre
    le titre, a gauche, et le prix, a droite. Le fondu radial l'eteint avant
@@ -718,14 +732,19 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
   .more-grid{grid-template-columns:repeat(2,1fr)}
 }
 @media(max-width:720px){
-  .head{padding:126px 0 26px}
+  .head{padding-top:126px;padding-bottom:26px}
   .head-price{text-align:left}
   .amen,.more-grid{grid-template-columns:1fr}
   .two{grid-template-columns:1fr}
   .mosaic{grid-template-columns:1fr;grid-auto-rows:210px}
-  .mosaic figure:first-child{grid-column:span 1}
+  /* Une seule colonne : la photo « plein » (span 2) en recreait une seconde,
+     et la mosaique gardait une bande de 50 px a gauche. */
+  .mosaic figure:first-child,.mosaic.court figure:first-child,.mosaic figure.plein{grid-column:auto;grid-row:auto}
+  .mosaic figure:first-child{grid-row:span 2}
   .mobar{display:flex}
   body{padding-bottom:78px}
+  /* Les bulles flottantes passent au-dessus de la barre de reservation. */
+  .wa{bottom:92px}.chat-bulle{bottom:162px}
   #lb .prev{left:8px}#lb .next{right:8px}
 }
 
@@ -810,13 +829,13 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
   <div class="mosaic court" id="gl">
     <figure><picture><source srcset="img/opt/ig-baldaquin.webp" type="image/webp">
       <img width="640" height="334" loading="eager" src="img/opt/ig-baldaquin.jpg" data-full="img/opt/ig-baldaquin.jpg" alt="Chambre Deluxe à lits à baldaquin"></picture>
-      <figcaption data-t="cap0">La chambre</figcaption></figure>
+      <figcaption class="sombre" data-t="cap0">La chambre</figcaption></figure>
     <figure><picture><source srcset="img/opt/gal-ch-salon-640.webp 640w, img/opt/gal-ch-salon-1024.webp 1024w, img/opt/gal-ch-salon.webp 1748w" sizes="(max-width:720px) calc(100vw - 48px), (max-width:1100px) calc((100vw - 58px) / 2), (max-width:1287px) calc((100vw - 68px) / 4), 293px" type="image/webp">
       <img width="1748" height="1240" loading="lazy" src="img/opt/gal-ch-salon.jpg" srcset="img/opt/gal-ch-salon-640.jpg 640w, img/opt/gal-ch-salon-1024.jpg 1024w, img/opt/gal-ch-salon.jpg 1748w" sizes="(max-width:720px) calc(100vw - 48px), (max-width:1100px) calc((100vw - 58px) / 2), (max-width:1287px) calc((100vw - 68px) / 4), 293px" data-full="img/opt/gal-ch-salon.jpg" alt="Coin salon et plantes"></picture>
-      <figcaption data-t="cap1">Le coin salon</figcaption></figure>
+      <figcaption class="sombre" data-t="cap1">Le coin salon</figcaption></figure>
     <figure><picture><source srcset="img/opt/gal-ch-bain-640.webp 640w, img/opt/gal-ch-bain-1024.webp 1024w, img/opt/gal-ch-bain.webp 1748w" sizes="(max-width:720px) calc(100vw - 48px), (max-width:1100px) calc((100vw - 58px) / 2), (max-width:1287px) calc((100vw - 68px) / 4), 293px" type="image/webp">
       <img width="1748" height="1240" loading="lazy" src="img/opt/gal-ch-bain.jpg" srcset="img/opt/gal-ch-bain-640.jpg 640w, img/opt/gal-ch-bain-1024.jpg 1024w, img/opt/gal-ch-bain.jpg 1748w" sizes="(max-width:720px) calc(100vw - 48px), (max-width:1100px) calc((100vw - 58px) / 2), (max-width:1287px) calc((100vw - 68px) / 4), 293px" data-full="img/opt/gal-ch-bain.jpg" alt="Salle de bain"></picture>
-      <figcaption data-t="cap2">La salle d'eau</figcaption></figure>
+      <figcaption class="sombre" data-t="cap2">La salle d'eau</figcaption></figure>
   </div>
 </div>
 
@@ -957,7 +976,7 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
 </a><style>
 .chat-bulle{position:fixed;right:22px;bottom:92px;z-index:91;width:58px;height:58px;border-radius:999px;border:0;
   background:var(--bronze);color:#fff;display:grid;place-items:center;cursor:pointer;
-  box-shadow:0 12px 30px -14px rgba(101,63,19,.8);transition:transform .25s var(--ease-out),background .2s}
+  box-shadow:0 12px 30px -14px rgba(101,63,19,.8);transition:transform .3s var(--ease-out),opacity .3s,background .2s}
 .chat-bulle:hover{background:var(--bronze-2);transform:translateY(-2px)}
 .chat-bulle:focus-visible{outline:2px solid var(--bronze);outline-offset:4px}
 .chat-bulle svg{width:26px;height:26px;fill:none;stroke:#fff;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
@@ -1152,7 +1171,7 @@ else fetch('/api/chat',{cache:'no-store'}).then(function(r){return r.json()}).th
   .catch(function(){montrer(false)});
 })();</script>
 
-<div class="mobar">
+<div class="mobar sombre">
   <div><b id="mb"></b><span data-t="mbs">FCFA · séjour total</span></div>
   <a href="#reserver" class="btn btn-solid" data-t="mbb">Réserver</a>
 </div>
@@ -1210,7 +1229,13 @@ window.EVN_AU_SCROLL=function(selecteur,classe){
 };
 
 var hd=document.getElementById('hd');
-addEventListener('scroll',function(){hd.classList.toggle('scrolled',scrollY>80)},{passive:true});
+var yAvant=scrollY,racine=document.documentElement;
+addEventListener('scroll',function(){
+  var y=scrollY;hd.classList.toggle('scrolled',y>80);
+  if(Math.abs(y-yAvant)<12)return;
+  var bas=y+innerHeight>=racine.scrollHeight-60;
+  racine.classList.toggle('defile',y>yAvant&&y>300&&!bas);yAvant=y;
+},{passive:true});
 
 var bg=document.getElementById('bg'),dw=document.getElementById('dw');
 var dwLinks=[].slice.call(dw.querySelectorAll('nav a'));

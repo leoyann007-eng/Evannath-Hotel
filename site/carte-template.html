@@ -212,7 +212,7 @@ header.scrolled .brand small{opacity:0}
 /* Padding symetrique : l'en-tete fixe ne peut plus recouvrir le contenu,
    et le centre optique reste exactement ou il etait sur un ecran normal. */
 .hero{position:relative;min-height:100svh;display:flex;align-items:center;overflow:hidden;padding:150px 0}
-.hero .bg{position:absolute;inset:0;background:url('img/opt/gal-lag-nuit.jpg') center/cover;animation:kb 22s ease-out forwards}
+.hero .bg{position:absolute;inset:0;background:url('img/opt/gal-lag-nuit.jpg') center/cover;background-image:image-set(url('img/opt/gal-lag-nuit.webp') type('image/webp'),url('img/opt/gal-lag-nuit.jpg') type('image/jpeg'));animation:kb 22s ease-out forwards}
 @keyframes kb{from{transform:scale(1.03)}to{transform:scale(1.14)}}
 /* 20 · Les lanternes s'allument — sur le HERO, comme dans la maquette
    « Motion design I » (qui travaillait sur le hero de La table). La photo
@@ -396,7 +396,7 @@ header.scrolled .brand small{opacity:0}
   background:var(--bark-2);
   border-block:1px solid var(--line);margin-bottom:64px
 }
-.tools .in{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;padding:13px 0}
+.tools .in{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;padding-top:13px;padding-bottom:13px}
 .tabset{display:flex;gap:6px;flex-wrap:wrap}
 .tabset button{background:none;border:1px solid transparent;color:var(--muted);font:700 10.5px/1 var(--f-body);letter-spacing:.2em;text-transform:uppercase;padding:15px 22px;cursor:pointer;transition:.3s}
 .tabset button:hover{color:var(--bronze)}
@@ -470,6 +470,8 @@ footer{background:#0B0704}
 @media(max-width:720px){
   .burger .lbl{display:none}
   .nav-right .lang{display:none}
+  .nav-right{gap:12px}
+  .nav-right .btn{white-space:nowrap;padding:14px 18px;letter-spacing:.14em}
   .dw-in{padding:110px 24px 50px}
   .mani,.sigs,.bar{padding:76px 0}
   .carte{padding-top:76px}

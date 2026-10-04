@@ -7,7 +7,7 @@ from _chrome import page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV, WA, W
 
 # ════════════════════════ INFORMATIONS UTILES ════════════════════════
 CSS_INFO = """
-.head{padding:150px 0 40px}
+.head{padding-top:150px;padding-bottom:40px}
 .head h1{margin:10px 0 18px}
 .head p{max-width:60ch;font-size:1.06rem}
 .quick{display:grid;grid-template-columns:repeat(6,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-bottom:72px}
@@ -52,7 +52,7 @@ CSS_INFO = """
 .help p{max-width:50ch;margin:0 auto 26px}
 .help .g{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
 @media(max-width:1080px){.quick{grid-template-columns:repeat(3,1fr)}.body{grid-template-columns:1fr;gap:0}.side{display:none}.route-grid{grid-template-columns:1fr}}
-@media(max-width:720px){.head{padding:126px 0 30px}.quick{grid-template-columns:repeat(2,1fr)}.help{padding:30px}.acc .in .kv{flex-direction:column;gap:4px}}
+@media(max-width:720px){.head{padding-top:126px;padding-bottom:30px}.quick{grid-template-columns:repeat(2,1fr)}.help{padding:30px}.acc .in .kv{flex-direction:column;gap:4px}}
 """
 
 def kv(k, klab, v, vlab='', hi=False):

@@ -42,7 +42,7 @@ from _chrome import page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV, WA, M
 
 CSS = """
 body{background:var(--bark)}
-.head{padding:150px 0 10px}
+.head{padding-top:150px;padding-bottom:10px}
 .head h1{margin:10px 0 16px;font-size:clamp(2.1rem,4.6vw,3.1rem)}
 .head h1 em{font-style:italic;color:var(--bronze-2)}
 .head .lede{max-width:58ch;font-size:1.02rem;color:var(--prose)}
@@ -85,7 +85,7 @@ body{background:var(--bark)}
 .etat.mal{border-color:rgba(166,58,37,.4)}
 
 @media(max-width:720px){
-  .head{padding:120px 0 6px}
+  .head{padding-top:120px;padding-bottom:6px}
   .postes{padding:24px 0 70px}
   .poste{padding:24px 20px}
   .poste .post{flex-direction:column;align-items:flex-start;gap:10px}
