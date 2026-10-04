@@ -2,8 +2,9 @@
 """Génère carte.html à partir de la carte réelle de l'Hôtel Evannath.
 Source : https://evannathhotel.com/cartes/ (relevé le 20/08/2026).
 Les fautes de frappe du site d'origine sont corrigées ici ; les deux tarifs
-manifestement erronés (Tajine affiché « FREE », Casserole à 95 000) sont
-remplacés par « Nous consulter » plutôt qu'inventés.
+manifestement erronés étaient remplacés par « Nous consulter » ; l'hôtel a
+confirmé la Casserole à 95 000 (octobre 2026). Le Tajine, affiché « FREE »,
+reste « Nous consulter » en attendant son prix.
 """
 import io
 import _schema
@@ -26,7 +27,7 @@ CUISINE = [
   ("Filet de capitaine en papillote","14 000","Riz au curcuma"),
   ("Gambas flambées façon tikka","14 000","Gratin de pommes"),
   ("Môgô braisé aux petits légumes","14 000","Alloco ou attiéké"),
-  ("Casserole de la pêche bassamoise","—","Attiéké huile rouge · Nous consulter"),
+  ("Casserole de la pêche bassamoise","95 000","Attiéké huile rouge"),
  ]),
  ("Dégustations familiales <em>· 5 personnes</em>", [
   ("Thiéboudiène, poisson à la sénégalaise","50 000",""),
@@ -37,7 +38,7 @@ CUISINE = [
   ("Duo patate-épinard, queue de bœuf fumée","32 000","Riz étuvé"),
   ("Soumara lafri au poulet","30 000","Riz"),
   ("Akpessi de poisson fumé, bâton de banane aux fleurs de piment","30 000",""),
-  ("Tajine d'agneau aux prunes","—","Couscous · digestif offert · Nous consulter"),
+  ("Tajine d'agneau aux prunes","—","Couscous · digestif offert"),
  ]),
  ("Viandes blanches", [
   ("Cordon bleu Evannath","14 000","Féroce de manioc, sauce tartare"),

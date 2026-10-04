@@ -65,7 +65,7 @@ TRAD = {
  "Môgô braisé aux petits légumes": "Braised môgô with vegetables",
  "Alloco ou attiéké": "Alloco or attiéké",
  "Casserole de la pêche bassamoise": "Grand-Bassam fisherman's casserole",
- "Attiéké huile rouge · Nous consulter": "Attiéké with red palm oil · Please ask",
+ "Attiéké huile rouge": "Attiéké with red palm oil",
 
  # ── Degustations familiales ─────────────────────────────────────────────
  "Thiéboudiène, poisson à la sénégalaise": "Thiéboudiène, Senegalese-style fish",
@@ -82,7 +82,7 @@ TRAD = {
  "Akpessi de poisson fumé, bâton de banane aux fleurs de piment":
    "Smoked fish akpessi, plantain sticks with chilli flowers",
  "Tajine d'agneau aux prunes": "Lamb tagine with prunes",
- "Couscous · digestif offert · Nous consulter": "Couscous · complimentary digestif · Please ask",
+ "Couscous · digestif offert": "Couscous · complimentary digestif",
 
  # ── Viandes ─────────────────────────────────────────────────────────────
  "Cordon bleu Evannath": "Evannath cordon bleu",
