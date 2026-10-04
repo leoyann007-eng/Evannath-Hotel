@@ -1612,6 +1612,9 @@ module.exports = async function handler(req, res) {
       version: VERSION,
       /* 'base' (Postgres), 'durable' (Vercel Blob) ou 'demonstration'. */
       stockage: DOC.mode === 'postgres' ? 'base' : DOC.mode === 'blob' ? 'durable' : 'demonstration',
+      /* production, preview ou local : ce deploiement lit les donnees de cet
+         environnement-la. Hors de Vercel, EVN_ENV le dit (voir _magasin.js). */
+      environnement: magasin.environnement() || 'local',
       // Vide quand la lecture s est bien passee.
       panne: PANNE || null,
       // Les sauvegardes conservees : versions dans la base, fichiers dans Blob.

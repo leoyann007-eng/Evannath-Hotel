@@ -997,7 +997,7 @@ prochain déploiement serait le pire défaut possible pour cet outil.
 N'importe quel Postgres convient (Neon, Supabase…) : seule `DATABASE_URL`
 compte (`POSTGRES_URL` est lue aussi).
 
-Ce qui protège ce passage — `tests/migration.test.mjs`, 23 vérifications :
+Ce qui protège ce passage — `tests/migration.test.mjs`, 26 vérifications :
 
 - **Rien n'est effacé sans avoir été recopié**, et rien n'est recopié si la
   version la plus récente est illisible.
@@ -1005,6 +1005,12 @@ Ce qui protège ce passage — `tests/migration.test.mjs`, 23 vérifications :
   « donnees:local ») : un aperçu branché sur la même base ne touche jamais aux
   réservations de la production, et n'efface jamais la copie que la
   production lit encore.
+- **L'environnement se lit dans `EVN_ENV`, puis dans `VERCEL_ENV`.** Sur
+  Vercel, rien à faire. **Chez un autre hébergeur, posez `EVN_ENV=production`
+  sur le site en ligne** : sans elle, le site se croirait sur un poste local,
+  lirait « donnees:local » — un document vide — et les réservations
+  sembleraient avoir disparu (elles sont intactes dans la base). Paramètres
+  affiche la ligne « Environnement » pour le vérifier.
 - **Un déploiement qui ne voit plus la base ne repart pas de zéro** : il lit
   la marque dans Blob et refuse de lire comme d'écrire.
 - **Une production branchée sur une autre base** (vide) le dit, au lieu de

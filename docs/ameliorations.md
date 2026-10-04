@@ -38,6 +38,7 @@ Trois niveaux :
 | **Sauvegardes** | ✅ fait | Les dix dernières versions sont conservées. |
 | **Pas de bouton de restauration** | 2 semaines | Les dix versions existent, mais y revenir demande une intervention manuelle. La proposition promet « restauration sous 24 h » : c'est tenable, mais ça doit devenir un clic. |
 | **Aucune sauvegarde hors du magasin** | Trimestre | Les dix versions vivent au même endroit. Si le magasin Vercel disparaît, tout part avec. Une copie quotidienne ailleurs coûterait quelques lignes. |
+| **Le site dépendait de `VERCEL_ENV`** | ✅ fait | Hors de Vercel, la production aurait lu un document vide. `EVN_ENV=production` la remplace ; Paramètres affiche l'environnement. |
 | **Les images orphelines s'accumulent** | Trimestre | Supprimer un événement laisse son affiche dans le magasin. Sans conséquence aujourd'hui — 778 Ko — mais ça grossit. |
 
 ## Le back-office

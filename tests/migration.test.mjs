@@ -111,6 +111,24 @@ console.log('\nLa production recopie, puis efface la copie publique');
   process.env.VERCEL_ENV = 'production';
 }
 
+console.log('\nHors de Vercel, EVN_ENV=production lit les donnees de la production');
+{
+  delete process.env.VERCEL_ENV;
+  process.env.EVN_ENV = 'production';
+  const l = await doc(fb).lire();
+  verifie('sans VERCEL_ENV, EVN_ENV suffit', magasin.environnement() === 'production'
+    && l.ok && l.d.evenements.length === 2, l.d && l.d.evenements);
+  delete process.env.EVN_ENV;
+  const local = await doc(fb).lire();
+  verifie('sans l une ni l autre, le site se croit en local (et ne voit pas la production)',
+    local.ok && local.d.evenements.length === 0, local.d && local.d.evenements);
+  process.env.EVN_ENV = 'production';
+  process.env.VERCEL_ENV = 'preview';
+  verifie('EVN_ENV l emporte sur VERCEL_ENV', magasin.environnement() === 'production');
+  delete process.env.EVN_ENV;
+  process.env.VERCEL_ENV = 'production';
+}
+
 console.log('\nUn deploiement sans la base ne repart pas d un magasin vide');
 {
   const url = process.env.DATABASE_URL;
