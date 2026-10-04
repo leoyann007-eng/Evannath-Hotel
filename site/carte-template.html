@@ -700,7 +700,7 @@ footer{background:#0B0704}
       </div>
       <div class="search">
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
-        <label for="q" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Rechercher</label>
+        <label for="q" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)" data-t="qlab">Rechercher</label>
         <input type="search" id="q" placeholder="Rechercher un plat, un cocktail…" data-ph="Rechercher un plat, un cocktail…">
       </div>
     </div>
@@ -865,7 +865,7 @@ document.getElementById('tf').addEventListener('submit',function(e){e.preventDef
   });
 });
 
-var EN={{{EN_SECOURS}}{{EN_NAV}}tb:"Book",
+var EN={{{EN_SECOURS}}{{EN_NAV}}{{EN_MENU}}qlab:"Search",tb:"Book",
 c1:"Home",c2:"The table",eb:"Restaurant &amp; bar · Assinie PK 19",h1e:"of Assinie",
 lede:"The capitaine comes in at first light. The foutou is pounded before noon. At dusk, the rattan lanterns go on above the lagoon.",
 sc:"Explore",e1:"Our cooking",big:"Cooking that makes no apology for being Ivorian.",

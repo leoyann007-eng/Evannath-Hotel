@@ -7,6 +7,7 @@ remplacés par « Nous consulter » plutôt qu'inventés.
 """
 import io
 import _schema
+from _carte_en import Cles
 from _chrome import responsive, dimensionner, versionner, secours, liens_nav, EN_NAV, EN_SECOURS, CONF_TITRE, CONF_GESTE, CONF_VERBE, WA, WA_TEXTE, MAIL, ENVOI_JS, NAV_JS, TOKENS, HEAD_CSS, FOOTER_CSS, LANG_JS, medaillon, INTRO, WA_BOUTON
 
 CUISINE = [
@@ -170,24 +171,27 @@ SPA = [
  ]),
 ]
 
-def items(rows):
+# La traduction anglaise de chaque rubrique, plat et soin : _carte_en.py.
+# Chaque texte traduit recoit une cle data-t ; le dictionnaire de la page
+# est ensuite glisse dans son `var EN` par {{EN_MENU}}.
+def items(rows, cles):
     out=[]
     for nom,prix,desc in rows:
-        d = '<em>%s</em>' % desc if desc else ''
-        p = prix if prix != '—' else '<i>Nous consulter</i>'
-        out.append('<li><div><b>%s</b>%s</div><span>%s</span></li>' % (nom,d,p))
+        d = '<em%s>%s</em>' % (cles.attr(desc), desc) if desc else ''
+        p = prix if prix != '—' else '<i%s>Nous consulter</i>' % cles.attr('Nous consulter')
+        out.append('<li><div><b%s>%s</b>%s</div><span>%s</span></li>' % (cles.attr(nom),nom,d,p))
     return '\n        '.join(out)
 
-def sections(groups, pref):
+def sections(groups, pref, cles):
     out=[]
     for i,(titre,rows) in enumerate(groups):
         out.append(
  '''      <section class="grp" id="%s%d">
-        <h3>%s</h3>
+        <h3%s>%s</h3>
         <ul class="menu-list">
         %s
         </ul>
-      </section>''' % (pref,i,titre,items(rows)))
+      </section>''' % (pref,i,cles.attr(titre),titre,items(rows, cles)))
     return '\n'.join(out)
 
 def anchors(groups,pref):
@@ -217,11 +221,13 @@ def _feux(balise):
     return ''.join('<%s style="--x:%s%%;--y:%s%%;--d:%s%%;--k:%d"></%s>' % (balise, x, y, d, k, balise)
                    for k, (x, y, d) in enumerate(LANTERNES))
 
+CLES_CARTE = Cles('mc')
 HTML = io.open('carte-template.html',encoding='utf-8').read()
 HTML = (HTML
   .replace('{{FEUX_B}}', _feux('b')).replace('{{FEUX_I}}', _feux('i'))
-  .replace('{{CUISINE}}',sections(CUISINE,'c'))
-  .replace('{{BOISSONS}}',sections(BOISSONS,'b'))
+  .replace('{{CUISINE}}',sections(CUISINE,'c',CLES_CARTE))
+  .replace('{{BOISSONS}}',sections(BOISSONS,'b',CLES_CARTE)))
+HTML = (HTML.replace('{{EN_MENU}}', CLES_CARTE.dictionnaire())
   .replace('{{WA_BOUTON}}', WA_BOUTON).replace('{{WA}}', WA).replace('{{MED}}', medaillon('carre-large', 'dw-med')).replace('{{NAV_LINKS}}', liens_nav('carte.html')).replace('{{EN_NAV}}', EN_NAV).replace('{{WA_TEXTE}}', WA_TEXTE).replace('{{SECOURS}}', secours('sec')).replace('{{EN_SECOURS}}', EN_SECOURS).replace('{{CG}}', (CONF_GESTE or '').replace("'", "\\'")).replace('{{CV}}', CONF_VERBE).replace('{{CT}}', CONF_TITRE or 'Table demand\u00e9e').replace('{{ENVOI}}', ENVOI_JS).replace('{{NAV_JS}}', NAV_JS).replace('{{TOKENS}}', TOKENS).replace('{{LANG_JS}}', LANG_JS).replace('{{INTRO}}', INTRO).replace('{{HEAD_CSS}}', HEAD_CSS).replace('{{FOOTER_CSS}}', FOOTER_CSS)
   .replace('{{TOTAL}}',str(total))
   .replace('{{LD}}', _schema.bloc(
@@ -239,8 +245,10 @@ io.open('carte.html','w',encoding='utf-8').write(
                           sizes={'gal-art-lanterne': '(max-width:900px) 140vw, 100vw'})).replace('{{MAIL}}', MAIL))
 print('carte.html :', total, 'articles')
 
+CLES_SPA = Cles('ms')
 SPAH = io.open('spa-template.html',encoding='utf-8').read()
-SPAH = (SPAH.replace('{{SPA}}',sections(SPA,'s')).replace('{{WA_BOUTON}}', WA_BOUTON).replace('{{WA}}', WA).replace('{{MED}}', medaillon('carre-large', 'dw-med')).replace('{{NAV_LINKS}}', liens_nav('spa.html')).replace('{{EN_NAV}}', EN_NAV).replace('{{WA_TEXTE}}', WA_TEXTE).replace('{{SECOURS}}', secours('sec')).replace('{{EN_SECOURS}}', EN_SECOURS).replace('{{CG}}', (CONF_GESTE or '').replace("'", "\\'")).replace('{{CV}}', CONF_VERBE).replace('{{CT}}', CONF_TITRE or 'Cr\u00e9neau demand\u00e9').replace('{{ENVOI}}', ENVOI_JS).replace('{{NAV_JS}}', NAV_JS).replace('{{TOKENS}}', TOKENS).replace('{{LANG_JS}}', LANG_JS).replace('{{INTRO}}', INTRO).replace('{{HEAD_CSS}}', HEAD_CSS).replace('{{FOOTER_CSS}}', FOOTER_CSS).replace('{{TOTAL}}',str(total_spa))
+SPAH = SPAH.replace('{{SPA}}',sections(SPA,'s',CLES_SPA))
+SPAH = (SPAH.replace('{{EN_MENU}}', CLES_SPA.dictionnaire()).replace('{{WA_BOUTON}}', WA_BOUTON).replace('{{WA}}', WA).replace('{{MED}}', medaillon('carre-large', 'dw-med')).replace('{{NAV_LINKS}}', liens_nav('spa.html')).replace('{{EN_NAV}}', EN_NAV).replace('{{WA_TEXTE}}', WA_TEXTE).replace('{{SECOURS}}', secours('sec')).replace('{{EN_SECOURS}}', EN_SECOURS).replace('{{CG}}', (CONF_GESTE or '').replace("'", "\\'")).replace('{{CV}}', CONF_VERBE).replace('{{CT}}', CONF_TITRE or 'Cr\u00e9neau demand\u00e9').replace('{{ENVOI}}', ENVOI_JS).replace('{{NAV_JS}}', NAV_JS).replace('{{TOKENS}}', TOKENS).replace('{{LANG_JS}}', LANG_JS).replace('{{INTRO}}', INTRO).replace('{{HEAD_CSS}}', HEAD_CSS).replace('{{FOOTER_CSS}}', FOOTER_CSS).replace('{{TOTAL}}',str(total_spa))
   .replace('{{LD}}', _schema.bloc(
       _schema.service('Spa et soins du corps',
                       "Massages, gommages, soins du visage, sauna et onglerie au spa de l'Hôtel Evannath, "

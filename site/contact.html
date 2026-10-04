@@ -1471,11 +1471,10 @@ function EVN_ROULER(liste){
     ROULEMENTS.push(fin);a1.onfinish=fin;
   });
 }
-document.querySelectorAll('.lang button').forEach(function(b){b.onclick=function(){
-  var lg=b.dataset.lang;
+function EVN_LANGUE(lg,anime){
   document.querySelectorAll('.lang button').forEach(function(x){x.classList.toggle('on',x.dataset.lang===lg)});
   document.querySelectorAll('.lang').forEach(function(l){l.classList.toggle('en',lg==='en')});
-  var titres=EVN_TITRES();
+  var titres=anime?EVN_TITRES():[];
   var dict=lg==='en'?EN:FR;
   document.querySelectorAll('[data-t]').forEach(function(e){if(dict[e.dataset.t])e.innerHTML=dict[e.dataset.t]});
   EVN_ROULER(titres);
@@ -1483,7 +1482,25 @@ document.querySelectorAll('.lang button').forEach(function(b){b.onclick=function
   /* Point d'extension : une page qui a du texte hors [data-t] — un
      placeholder de champ, par exemple — declare window.EVN_LANG. */
   if(typeof EVN_LANG==='function')EVN_LANG(lg);
+}
+document.querySelectorAll('.lang button').forEach(function(b){b.onclick=function(){
+  try{localStorage.setItem('evn-langue',b.dataset.lang)}catch(e){}
+  EVN_LANGUE(b.dataset.lang,true);
 }});
+/* La langue choisie SUIT le visiteur. Sans cela, un touriste qui passait
+   l'accueil en anglais retrouvait chaque page suivante en francais, et
+   devait recliquer sur EN a chaque page. Le choix vit dans localStorage
+   (« evn-langue », declare dans les mentions legales) ; navigation privee
+   ou stockage refuse : on reste en francais, comme avant.
+
+   Applique a DOMContentLoaded, sans animation : les scripts de la page qui
+   definissent EVN_LANG peuvent venir APRES celui-ci. */
+(function(){
+  var lg;try{lg=localStorage.getItem('evn-langue')}catch(e){}
+  if(lg!=='en')return;
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){EVN_LANGUE('en',false)});
+  else EVN_LANGUE('en',false);
+})();
 </script>
 </body>
 </html>

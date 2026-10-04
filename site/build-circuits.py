@@ -534,6 +534,8 @@ dt.value=iso(new Date(Date.now()+864e5*7)); dt.min=iso(new Date());
 function fmt(n){return n.toLocaleString('fr-FR').replace(/ | |,/g,' ')}
 var UNITS={forfait:['forfait','forfaits'],personne:['personne','personnes'],
   enfant:['enfant','enfants'],nuit:['nuit','nuits']};
+var UNITS_EN={forfait:['package','packages'],personne:['person','people'],
+  enfant:['child','children'],nuit:['night','nights']};
 function recap(){
   var parts=circ.value.split('|'),prix=+parts[0],unite=parts[1];
   var label=circ.options[circ.selectedIndex].text.split('—')[0].trim();
@@ -542,10 +544,12 @@ function recap(){
   var facturable=(unite==='forfait')?1:n;
   // Une unite inconnue — une formule publiee avec une unite ajoutee plus
   // tard — ne doit pas casser le calcul et emporter toute la page.
-  var mots=UNITS[unite]||UNITS.forfait;
+  // Le recapitulatif est ecrit ici, hors [data-t] : il suit la langue du moment.
+  var en=document.documentElement.lang==='en', U=en?UNITS_EN:UNITS;
+  var mots=U[unite]||U.forfait;
   document.getElementById('rc').textContent=label;
-  document.getElementById('rd').textContent=dt.value?new Date(dt.value).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'}):'—';
-  document.getElementById('rql').textContent=(unite==='forfait')?'Forfait':'Quantité';
+  document.getElementById('rd').textContent=dt.value?new Date(dt.value).toLocaleDateString(en?'en-GB':'fr-FR',{day:'numeric',month:'long',year:'numeric'}):'—';
+  document.getElementById('rql').textContent=(unite==='forfait')?(en?'Package':'Forfait'):(en?'Quantity':'Quantité');
   document.getElementById('rq').textContent=facturable+' '+(facturable>1?mots[1]:mots[0]);
   document.getElementById('ru').textContent=fmt(prix);
   document.getElementById('rt').textContent=fmt(prix*facturable);
@@ -554,6 +558,7 @@ function recap(){
 }
 [circ,dt,qt].forEach(function(e){e.addEventListener('input',recap);e.addEventListener('change',recap)});
 recap();
+window.EVN_LANG=function(){recap()};
 
 /* Delegation : les formules publiees depuis l administration arrivent APRES
    le chargement. Attacher le clic a chaque bouton existant les laissait

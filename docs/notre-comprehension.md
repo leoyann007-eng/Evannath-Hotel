@@ -82,6 +82,13 @@ l'argent est encaissé des deux côtés.
 
 Ce n'est plus une amélioration, c'est un préalable.
 
+> **État au 2 octobre 2026 : le verrou est codé.** Avec une base Postgres
+> branchée (`DATABASE_URL`), toute modification n'est écrite que si personne
+> n'a écrit depuis sa lecture — choisir la chambre et la retenir se font d'un
+> seul geste. Sans la base, le code ignore une clé lomi réelle : le paiement
+> en ligne ne peut pas s'activer sur un stockage qui ne tient pas ce verrou.
+> Voir « Le stockage » dans le README.
+
 ### 2. Une retenue courte, pendant le paiement
 
 Deux heures n'ont plus de sens. Le client ne demande plus, il paie : la

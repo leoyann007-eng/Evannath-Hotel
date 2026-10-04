@@ -16,14 +16,17 @@
  *     le seul administrateur oublie le sien. Changer ADMIN_MDP dans Vercel
  *     coupe toutes les sessions de secours ouvertes.
  *
- * STOCKAGE : un fichier a part (evannath/comptes), jamais melange aux
- * donnees du site. Une connexion ecrit la date de derniere visite : dans le
- * fichier principal, elle aurait pu ecraser une reservation enregistree au
- * meme instant. Les mots de passe n'y sont jamais en clair : scrypt, sel
- * propre a chaque compte.
+ * STOCKAGE : un document a part (« comptes »), jamais melange aux donnees
+ * du site — voir _magasin.js : base Postgres privee quand elle est branchee,
+ * Vercel Blob en attendant. Chaque modification relit l'etat frais et
+ * n'ecrit que si personne n'a ecrit entre-temps : une connexion qui note sa
+ * date de visite ne peut plus defaire une desactivation faite au meme
+ * instant. Les mots de passe n'y sont jamais en clair : scrypt, sel propre a
+ * chaque compte.
  */
 
 const crypto = require('crypto');
+const magasin = require('./_magasin.js');
 
 // ── Les profils ────────────────────────────────────────────────────────────
 /* `vues` : les rubriques du menu. `droits` : ce que le profil peut ECRIRE.
@@ -125,56 +128,42 @@ const JOURNAL_MAX = 500;
 const CACHE_MS = 30_000;
 
 function creer({ jeton, secours, secret }) {
-  let memoire = null;               // sans stockage durable : la memoire de l'instance
+  const DOC = magasin.document({ cle: 'comptes', prefixeBlob: PREFIXE, garde: GARDE,
+    vide: VIDE, jeton, nom: 'du fichier des comptes' });
+  /* Les sessions se verifient a chaque appel : une lecture gardee trente
+     secondes evite de relire le fichier a chaque clic. Les modifications,
+     elles, repartent toujours de l'etat frais. */
   let cache = null, cacheA = 0;
 
   async function lire(frais) {
-    if (!jeton) {
-      if (!memoire) memoire = VIDE();
-      return { ok: true, d: structuredClone(memoire) };
-    }
     if (!frais && cache && Date.now() - cacheA < CACHE_MS) return { ok: true, d: structuredClone(cache) };
-    try {
-      const { list } = await import('@vercel/blob');
-      const { blobs } = await list({ prefix: PREFIXE, token: jeton });
-      if (!blobs.length) { cache = VIDE(); cacheA = Date.now(); return { ok: true, d: VIDE() }; }
-      const versions = blobs.slice().sort((x, y) => new Date(y.uploadedAt) - new Date(x.uploadedAt));
-      for (const b of versions) {
-        try {
-          const r = await fetch(b.url, { cache: 'no-store' });
-          if (r.ok) {
-            const d = await r.json();
-            d.comptes = d.comptes || []; d.journal = d.journal || [];
-            cache = d; cacheA = Date.now();
-            return { ok: true, d: structuredClone(d) };
-          }
-        } catch (e) { /* version suivante */ }
-      }
-      return { ok: false, message: 'Le fichier des comptes est illisible pour l’instant. Réessayez dans un instant.' };
-    } catch (e) {
-      return { ok: false, message: 'Le stockage ne répond pas : ' + e.message };
+    const l = await DOC.lire();
+    if (!l.ok) {
+      return { ok: false, message: l.panne || 'Le fichier des comptes est illisible pour l’instant. Réessayez dans un instant.' };
     }
+    l.d.comptes = l.d.comptes || []; l.d.journal = l.d.journal || [];
+    cache = structuredClone(l.d); cacheA = Date.now();
+    return { ok: true, d: l.d };
   }
 
-  async function ecrire(d) {
-    d.journal = (d.journal || []).slice(-JOURNAL_MAX);
-    if (!jeton) { memoire = structuredClone(d); return { ok: true }; }
-    try {
-      const { put, list, del } = await import('@vercel/blob');
-      const avant = await list({ prefix: PREFIXE, token: jeton });
-      await put(PREFIXE + '.json', JSON.stringify(d), {
-        access: 'public', token: jeton, contentType: 'application/json',
-      });
-      cache = structuredClone(d); cacheA = Date.now();
-      const surplus = avant.blobs.slice()
-        .sort((x, y) => new Date(y.uploadedAt) - new Date(x.uploadedAt))
-        .slice(GARDE - 1).map((b) => b.url);
-      if (surplus.length) { try { await del(surplus, { token: jeton }); } catch (e) { /* menage */ } }
-      return { ok: true };
-    } catch (e) {
-      return { ok: false, message: 'L’enregistrement des comptes a échoué : ' + e.message };
-    }
+  /** Relire, appliquer, ecrire si personne n'a ecrit entre-temps (voir
+   *  _magasin.js). `appliquer(d)` peut tourner plusieurs fois : rien
+   *  d'exterieur dedans. Elle rend { annuler: reponse } pour s'arreter. */
+  async function modifier(appliquer) {
+    const r = await DOC.modifier(async (d) => {
+      d.comptes = d.comptes || []; d.journal = d.journal || [];
+      const v = await appliquer(d);
+      d.journal = d.journal.slice(-JOURNAL_MAX);
+      return v;
+    });
+    if (r.ok && !r.annule) { cache = structuredClone(r.d); cacheA = Date.now(); }
+    return r;
   }
+
+  /** La reponse d'une modification qui n'a pas abouti. */
+  const refusModif = (r) => (r.panne !== undefined
+    ? { code: 503, corps: { ok: false, message: r.panne } }
+    : { code: 502, corps: { ok: false, message: 'L’enregistrement des comptes a échoué : ' + r.message } });
 
   // ── Sessions ─────────────────────────────────────────────────────────────
   /* Le cookie porte { u: compte, v: version, e: expiration }, signe. La
@@ -264,8 +253,7 @@ function creer({ jeton, secours, secret }) {
       const b = crypto.createHash('sha256').update(secours).digest();
       if (!crypto.timingSafeEqual(a, b)) { echec('secours'); return refus; }
       ECHECS.delete('secours');
-      const l = await lire(true);
-      if (l.ok) { noter(l.d, { id: 'secours', nom: 'Accès de secours' }, 'Connexion par l’accès de secours'); await ecrire(l.d); }
+      await modifier((d) => { noter(d, { id: 'secours', nom: 'Accès de secours' }, 'Connexion par l’accès de secours'); });
       return { code: 200, cookie: cookie(jeton_('secours', versionSecours()), DUREE), corps: { ok: true } };
     }
 
@@ -278,10 +266,20 @@ function creer({ jeton, secours, secret }) {
     if (!c || !bon) { echec(adresse); return refus; }
     if (!c.actif) return { code: 403, corps: { ok: false, message: 'Ce compte est désactivé. Voyez avec un administrateur.' } };
     ECHECS.delete(adresse);
-    c.derniere = new Date().toISOString();
-    noter(l.d, c, 'Connexion');
-    await ecrire(l.d);   // une date de visite perdue ne doit pas empecher d'entrer
-    return { code: 200, cookie: cookie(jeton_(c.id, c.version), DUREE), corps: { ok: true } };
+    /* La date de visite s'ecrit sur l'etat FRAIS : un compte desactive ou
+       reinitialise a l'instant le reste, et la session s'ouvre avec la
+       version la plus recente du compte. */
+    let version = c.version;
+    const r = await modifier((d) => {
+      const x = d.comptes.find((y) => y.id === c.id);
+      if (!x || !x.actif) return { annuler: 'coupe' };
+      x.derniere = new Date().toISOString();
+      noter(d, x, 'Connexion');
+      version = x.version;
+    });
+    if (r.ok && r.annule) return { code: 403, corps: { ok: false, message: 'Ce compte est désactivé. Voyez avec un administrateur.' } };
+    // Une date de visite perdue ne doit pas empecher d'entrer.
+    return { code: 200, cookie: cookie(jeton_(c.id, version), DUREE), corps: { ok: true } };
   }
 
   const sortie = () => cookie('', 0);
@@ -289,26 +287,29 @@ function creer({ jeton, secours, secret }) {
   // ── Son propre mot de passe ──────────────────────────────────────────────
   async function changerMdp(qui, { ancien, nouveau }) {
     if (qui.secours) return { code: 403, corps: { ok: false, message: 'L’accès de secours se change dans Vercel (ADMIN_MDP).' } };
-    const l = await lire(true);
-    if (!l.ok) return { code: 503, corps: { ok: false, message: l.message } };
-    const c = l.d.comptes.find((x) => x.id === qui.id);
-    if (!c) return { code: 401, corps: { ok: false, message: 'Session expirée.' } };
-    if (!(await verifier(ancien, c.empreinte))) {
-      return { code: 422, corps: { ok: false, champs: ['ancien'], message: 'Le mot de passe actuel est incorrect.' } };
-    }
-    const r = mdpRefuse(nouveau, c);
+    const r = mdpRefuse(nouveau, { courriel: qui.courriel });
     if (r) return { code: 422, corps: { ok: false, champs: ['nouveau'], message: r } };
     if (String(nouveau) === String(ancien)) {
       return { code: 422, corps: { ok: false, champs: ['nouveau'], message: 'Choisissez un mot de passe différent de l’actuel.' } };
     }
-    c.empreinte = await hacher(nouveau);
-    c.provisoire = false;
-    c.version = (c.version || 1) + 1;        // coupe les AUTRES sessions…
-    noter(l.d, c, 'A changé son mot de passe');
-    const w = await ecrire(l.d);
-    if (!w.ok) return { code: 502, corps: { ok: false, message: w.message } };
+    const empreinte = await hacher(nouveau);
+    let version = 0;
+    const w = await modifier(async (d) => {
+      const c = d.comptes.find((x) => x.id === qui.id);
+      if (!c) return { annuler: { code: 401, corps: { ok: false, message: 'Session expirée.' } } };
+      if (!(await verifier(ancien, c.empreinte))) {
+        return { annuler: { code: 422, corps: { ok: false, champs: ['ancien'], message: 'Le mot de passe actuel est incorrect.' } } };
+      }
+      c.empreinte = empreinte;
+      c.provisoire = false;
+      c.version = (c.version || 1) + 1;        // coupe les AUTRES sessions…
+      noter(d, c, 'A changé son mot de passe');
+      version = c.version;
+    });
+    if (!w.ok) return refusModif(w);
+    if (w.annule) return w.valeur;
     // …et celle-ci repart avec la nouvelle version.
-    return { code: 200, cookie: cookie(jeton_(c.id, c.version), DUREE), corps: { ok: true } };
+    return { code: 200, cookie: cookie(jeton_(qui.id, version), DUREE), corps: { ok: true } };
   }
 
   // ── Gestion des comptes (administrateurs) ────────────────────────────────
@@ -325,9 +326,6 @@ function creer({ jeton, secours, secret }) {
 
   /** Cree (sans id) ou modifie (nom, profil, actif) un compte. */
   async function enregistrer(qui, e) {
-    const l = await lire(true);
-    if (!l.ok) return { code: 503, corps: { ok: false, message: l.message } };
-    const d = l.d;
     const nom = propre(e.nom, 80);
     const role = ROLES[e.role] ? e.role : '';
     if (!nom) return { code: 422, corps: { ok: false, champs: ['nom'], message: 'Indiquez le nom de la personne.' } };
@@ -336,72 +334,82 @@ function creer({ jeton, secours, secret }) {
     if (!e.id) {
       const courriel = propre(e.courriel, 254).toLowerCase();
       if (!courrielValide(courriel)) return { code: 422, corps: { ok: false, champs: ['courriel'], message: 'Cette adresse e-mail n’est pas valide.' } };
-      if (d.comptes.some((x) => x.courriel === courriel)) {
-        return { code: 409, corps: { ok: false, champs: ['courriel'], message: 'Un compte existe déjà pour ' + courriel + '.' } };
-      }
-      if (d.comptes.length >= 50) return { code: 422, corps: { ok: false, message: '50 comptes au maximum.' } };
+      // Tire et hache une seule fois : la modification peut se rejouer.
       const mdp = provisoire();
       const c = { id: crypto.randomUUID(), nom, courriel, role, actif: true, provisoire: true,
         empreinte: await hacher(mdp), version: 1, cree: new Date().toISOString(), creePar: qui.nom };
-      d.comptes.push(c);
-      noter(d, qui, 'A créé le compte de ' + nom + ' (' + ROLES[role].nom + ')');
-      const w = await ecrire(d);
-      if (!w.ok) return { code: 502, corps: { ok: false, message: w.message } };
+      const w = await modifier((d) => {
+        if (d.comptes.some((x) => x.courriel === courriel)) {
+          return { annuler: { code: 409, corps: { ok: false, champs: ['courriel'], message: 'Un compte existe déjà pour ' + courriel + '.' } } };
+        }
+        if (d.comptes.length >= 50) return { annuler: { code: 422, corps: { ok: false, message: '50 comptes au maximum.' } } };
+        d.comptes.push(structuredClone(c));
+        noter(d, qui, 'A créé le compte de ' + nom + ' (' + ROLES[role].nom + ')');
+      });
+      if (!w.ok) return refusModif(w);
+      if (w.annule) return w.valeur;
       // Le seul moment ou le mot de passe provisoire existe en clair.
       return { code: 200, corps: { ok: true, compte: public_(c), provisoire: mdp } };
     }
 
-    const c = d.comptes.find((x) => x.id === e.id);
-    if (!c) return { code: 404, corps: { ok: false, message: 'Ce compte n’existe plus.' } };
-    const actif = e.actif !== false;
-    if (c.id === qui.id && (role !== c.role || !actif)) {
-      return { code: 409, corps: { ok: false, message: 'Vous ne pouvez pas changer votre propre profil ni vous désactiver : demandez-le à un autre administrateur.' } };
-    }
-    if (c.role === 'admin' && c.actif && (role !== 'admin' || !actif) && !adminsActifs(d, c.id)) {
-      return { code: 409, corps: { ok: false, message: 'C’est le dernier administrateur actif : nommez-en un autre d’abord.' } };
-    }
-    const changements = [];
-    if (nom !== c.nom) changements.push('nom');
-    if (role !== c.role) changements.push('profil ' + ROLES[c.role].nom + ' → ' + ROLES[role].nom);
-    if (actif !== c.actif) changements.push(actif ? 'réactivé' : 'désactivé');
-    if (!changements.length) return { code: 200, corps: { ok: true, compte: public_(c) } };
-    // Un profil retire ou un compte coupe ne doit pas survivre dans une session ouverte.
-    if (role !== c.role || actif !== c.actif) c.version = (c.version || 1) + 1;
-    Object.assign(c, { nom, role, actif });
-    noter(d, qui, 'A modifié le compte de ' + nom + ' : ' + changements.join(', '));
-    const w = await ecrire(d);
-    if (!w.ok) return { code: 502, corps: { ok: false, message: w.message } };
-    return { code: 200, corps: { ok: true, compte: public_(c) } };
+    let rendu = null;
+    const w = await modifier((d) => {
+      const c = d.comptes.find((x) => x.id === e.id);
+      if (!c) return { annuler: { code: 404, corps: { ok: false, message: 'Ce compte n’existe plus.' } } };
+      const actif = e.actif !== false;
+      if (c.id === qui.id && (role !== c.role || !actif)) {
+        return { annuler: { code: 409, corps: { ok: false, message: 'Vous ne pouvez pas changer votre propre profil ni vous désactiver : demandez-le à un autre administrateur.' } } };
+      }
+      if (c.role === 'admin' && c.actif && (role !== 'admin' || !actif) && !adminsActifs(d, c.id)) {
+        return { annuler: { code: 409, corps: { ok: false, message: 'C’est le dernier administrateur actif : nommez-en un autre d’abord.' } } };
+      }
+      const changements = [];
+      if (nom !== c.nom) changements.push('nom');
+      if (role !== c.role) changements.push('profil ' + ROLES[c.role].nom + ' → ' + ROLES[role].nom);
+      if (actif !== c.actif) changements.push(actif ? 'réactivé' : 'désactivé');
+      if (!changements.length) return { annuler: { code: 200, corps: { ok: true, compte: public_(c) } } };
+      // Un profil retire ou un compte coupe ne doit pas survivre dans une session ouverte.
+      if (role !== c.role || actif !== c.actif) c.version = (c.version || 1) + 1;
+      Object.assign(c, { nom, role, actif });
+      noter(d, qui, 'A modifié le compte de ' + nom + ' : ' + changements.join(', '));
+      rendu = public_(c);
+    });
+    if (!w.ok) return refusModif(w);
+    if (w.annule) return w.valeur;
+    return { code: 200, corps: { ok: true, compte: rendu } };
   }
 
   async function reinitialiser(qui, id) {
-    const l = await lire(true);
-    if (!l.ok) return { code: 503, corps: { ok: false, message: l.message } };
-    const c = l.d.comptes.find((x) => x.id === id);
-    if (!c) return { code: 404, corps: { ok: false, message: 'Ce compte n’existe plus.' } };
     const mdp = provisoire();
-    c.empreinte = await hacher(mdp);
-    c.provisoire = true;
-    c.version = (c.version || 1) + 1;
-    noter(l.d, qui, 'A réinitialisé le mot de passe de ' + c.nom);
-    const w = await ecrire(l.d);
-    if (!w.ok) return { code: 502, corps: { ok: false, message: w.message } };
-    return { code: 200, corps: { ok: true, compte: public_(c), provisoire: mdp } };
+    const empreinte = await hacher(mdp);
+    let rendu = null;
+    const w = await modifier((d) => {
+      const c = d.comptes.find((x) => x.id === id);
+      if (!c) return { annuler: { code: 404, corps: { ok: false, message: 'Ce compte n’existe plus.' } } };
+      c.empreinte = empreinte;
+      c.provisoire = true;
+      c.version = (c.version || 1) + 1;
+      noter(d, qui, 'A réinitialisé le mot de passe de ' + c.nom);
+      rendu = public_(c);
+    });
+    if (!w.ok) return refusModif(w);
+    if (w.annule) return w.valeur;
+    return { code: 200, corps: { ok: true, compte: rendu, provisoire: mdp } };
   }
 
   async function supprimer(qui, id) {
-    const l = await lire(true);
-    if (!l.ok) return { code: 503, corps: { ok: false, message: l.message } };
-    const c = l.d.comptes.find((x) => x.id === id);
-    if (!c) return { code: 404, corps: { ok: false, message: 'Ce compte n’existe plus.' } };
-    if (c.id === qui.id) return { code: 409, corps: { ok: false, message: 'Vous ne pouvez pas supprimer votre propre compte.' } };
-    if (c.role === 'admin' && c.actif && !adminsActifs(l.d, c.id)) {
-      return { code: 409, corps: { ok: false, message: 'C’est le dernier administrateur actif : nommez-en un autre d’abord.' } };
-    }
-    l.d.comptes = l.d.comptes.filter((x) => x.id !== id);
-    noter(l.d, qui, 'A supprimé le compte de ' + c.nom + ' (' + c.courriel + ')');
-    const w = await ecrire(l.d);
-    if (!w.ok) return { code: 502, corps: { ok: false, message: w.message } };
+    const w = await modifier((d) => {
+      const c = d.comptes.find((x) => x.id === id);
+      if (!c) return { annuler: { code: 404, corps: { ok: false, message: 'Ce compte n’existe plus.' } } };
+      if (c.id === qui.id) return { annuler: { code: 409, corps: { ok: false, message: 'Vous ne pouvez pas supprimer votre propre compte.' } } };
+      if (c.role === 'admin' && c.actif && !adminsActifs(d, c.id)) {
+        return { annuler: { code: 409, corps: { ok: false, message: 'C’est le dernier administrateur actif : nommez-en un autre d’abord.' } } };
+      }
+      d.comptes = d.comptes.filter((x) => x.id !== id);
+      noter(d, qui, 'A supprimé le compte de ' + c.nom + ' (' + c.courriel + ')');
+    });
+    if (!w.ok) return refusModif(w);
+    if (w.annule) return w.valeur;
     return { code: 200, corps: { ok: true } };
   }
 
