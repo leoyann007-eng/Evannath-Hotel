@@ -3,8 +3,7 @@
 Source : https://evannathhotel.com/cartes/ (relevé le 20/08/2026).
 Les fautes de frappe du site d'origine sont corrigées ici ; les deux tarifs
 manifestement erronés étaient remplacés par « Nous consulter » ; l'hôtel a
-confirmé la Casserole à 95 000 (octobre 2026). Le Tajine, affiché « FREE »,
-reste « Nous consulter » en attendant son prix.
+confirmé la Casserole à 95 000 et le Tajine offert (octobre 2026).
 """
 import io
 import _schema
@@ -38,7 +37,7 @@ CUISINE = [
   ("Duo patate-épinard, queue de bœuf fumée","32 000","Riz étuvé"),
   ("Soumara lafri au poulet","30 000","Riz"),
   ("Akpessi de poisson fumé, bâton de banane aux fleurs de piment","30 000",""),
-  ("Tajine d'agneau aux prunes","—","Couscous · digestif offert"),
+  ("Tajine d'agneau aux prunes","Offert","Couscous · digestif offert"),
  ]),
  ("Viandes blanches", [
   ("Cordon bleu Evannath","14 000","Féroce de manioc, sauce tartare"),
@@ -179,7 +178,9 @@ def items(rows, cles):
     out=[]
     for nom,prix,desc in rows:
         d = '<em%s>%s</em>' % (cles.attr(desc), desc) if desc else ''
-        p = prix if prix != '—' else '<i%s>Nous consulter</i>' % cles.attr('Nous consulter')
+        # Un mot à la place du prix : en petites capitales, sans « FCFA ».
+        mot = {'—': 'Nous consulter', 'Offert': 'Offert'}.get(prix)
+        p = '<i%s>%s</i>' % (cles.attr(mot), mot) if mot else prix
         out.append('<li><div><b%s>%s</b>%s</div><span>%s</span></li>' % (cles.attr(nom),nom,d,p))
     return '\n        '.join(out)
 

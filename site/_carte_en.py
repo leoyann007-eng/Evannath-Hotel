@@ -32,6 +32,7 @@ TRAD = {
  "Onglerie": "Nails",
  "Épilation": "Waxing",
  "Nous consulter": "Please ask",
+ "Offert": "Complimentary",
 
  # ── Les entrees ─────────────────────────────────────────────────────────
  "Salade d'avocat aux fruits de mer, chips de banane": "Avocado and seafood salad, plantain chips",
