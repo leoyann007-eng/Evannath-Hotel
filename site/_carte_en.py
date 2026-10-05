@@ -17,6 +17,7 @@ TRAD = {
  "Nos entrées": "Starters",
  "Fruits de mer &amp; poissons": "Seafood &amp; fish",
  "Dégustations familiales <em>· 5 personnes</em>": "Family sharing dishes <em>· 5 people</em>",
+ "Dégustations familiales": "Family sharing dishes",
  "Viandes blanches": "Poultry",
  "Viandes rouges": "Red meat",
  "Cocktails signatures": "Signature cocktails",
