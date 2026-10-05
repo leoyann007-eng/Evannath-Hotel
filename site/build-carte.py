@@ -206,16 +206,27 @@ def sections_carte(groups, pref, cles):
     out=[]
     for i,(titre,rows) in enumerate(groups):
         deux = ' deux' if len(rows) > 6 else ''
+        fil = FILIGRANES[pref][i % len(FILIGRANES[pref])]
+        # Mobile (2a, « le carnet ») : chaque rubrique devient un volet
+        # d'accordeon. Le bouton est cache sur ordinateur ; le compte de plats
+        # est ecrit par le script (il suit la langue).
+        acc = ('<button type="button" class="ca-acc" aria-expanded="false" aria-controls="%s%d-corps">'
+               '<span class="ca-vig"><img src="img/opt/%s.jpg" alt="" loading="lazy"></span>'
+               '<span class="ca-tt"><small>%s</small><b%s>%s</b></span><i aria-hidden="true"></i></button>'
+               % (pref,i,fil,ROMAINS[i],cles.attr(_court(titre)),_court(titre)))
         out.append(
  '''        <section class="grp" id="%s%d" data-n="%s" data-bg="img/opt/%s.jpg">
+          %s
           <span class="ca-num">%s</span>
           <h3%s>%s</h3>
           <span class="ca-orn" aria-hidden="true"><i></i><b></b><i></i></span>
+          <div class="ca-corps" id="%s%d-corps"><div>
           <ul class="menu-list%s">
           %s
           </ul>
-        </section>''' % (pref,i,ROMAINS[i],FILIGRANES[pref][i % len(FILIGRANES[pref])],ROMAINS[i],
-                         cles.attr(titre),titre,deux,items(rows, cles, rang=True)))
+          </div></div>
+        </section>''' % (pref,i,ROMAINS[i],fil,acc,ROMAINS[i],
+                         cles.attr(titre),titre,pref,i,deux,items(rows, cles, rang=True)))
     return '\n'.join(out)
 
 def rubriques(groups, pref, cles):

@@ -622,6 +622,53 @@ header.scrolled .brand small{opacity:0}
 .ca-pied .ca-prev{text-align:left}.ca-pied .ca-next{text-align:right}
 .ca-pied button:hover{color:#17100A}
 .ca-pos{font-family:var(--f-display);font-size:14px;color:#6B5A48;white-space:nowrap}
+.ca-acc{display:none}
+
+/* ── Mobile : « le carnet » (proposition 2a) ─────────────────────────
+   Sous 720 px, la carte imprimee laisse place a un sommaire en accordeon,
+   sur la nuit : vignette, numero, titre, et un « + » qui tourne. Une seule
+   rubrique ouverte a la fois ; les plats montent un a un a l'ouverture.
+   Meme HTML que l'ordinateur : seuls les styles et le bouton .ca-acc
+   changent. Sans script, tout reste deplie et lisible. */
+@media(max-width:720px){
+  .carte .ca-rub,.carte .ca-pied,.carte .ca-wm,.carte .ca-marque,.grp .ca-num,.grp h3,.grp .ca-orn{display:none!important}
+  .carte .ca-card{background:none;box-shadow:none;padding:0;margin:0 20px}
+  .carte .ca-in{border:0;outline:0;padding:0;color:var(--cream);text-align:left;overflow:visible}
+  .carte .grp,.ca-js .grp,.ca-js .grp.on{display:block;padding:0;margin:0!important;border-top:1px solid var(--line)!important;scroll-margin-top:90px}
+  .carte .grp:last-child{border-bottom:1px solid var(--line)}
+  .ca-js .ca-acc{display:flex;align-items:center;gap:14px;width:100%;background:none;border:0;padding:14px 0;cursor:pointer;text-align:left;color:inherit;font-family:var(--f-body)}
+  .ca-vig{width:58px;height:58px;flex:0 0 auto;overflow:hidden;background:var(--bark-2)}
+  .ca-vig img{width:100%;height:100%;object-fit:cover;filter:saturate(.15) brightness(.7);transition:filter .6s ease,transform 1.2s var(--ease-out)}
+  .ca-tt{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+  .ca-tt small{font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--bronze);font-weight:700}
+  .ca-tt b{font-family:var(--f-display);font-weight:400;font-size:19px;line-height:1.2;color:var(--cream);transition:color .4s}
+  .ca-acc i{position:relative;width:32px;height:32px;flex:0 0 auto;border:1px solid rgba(185,138,80,.4);border-radius:50%;transition:transform .5s var(--ease-out)}
+  .ca-acc i::before,.ca-acc i::after{content:"";position:absolute;left:50%;top:50%;width:12px;height:1px;margin:-.5px 0 0 -6px;background:var(--bronze-2)}
+  .ca-acc i::after{transform:rotate(90deg)}
+  .grp.ouvert .ca-vig img{filter:none;transform:scale(1.12)}
+  .grp.ouvert .ca-tt b{color:var(--bronze-2)}
+  .grp.ouvert .ca-acc i{transform:rotate(45deg)}
+  .ca-js .ca-corps{display:grid;grid-template-rows:0fr;transition:grid-template-rows .55s cubic-bezier(.3,.7,.2,1)}
+  .ca-js .grp.ouvert .ca-corps,.ca-js.cherche .ca-corps{grid-template-rows:1fr}
+  .ca-corps>div{overflow:hidden;min-height:0}
+  .carte .menu-list,.carte .menu-list.deux{grid-template-columns:minmax(0,1fr);gap:0;padding:0 0 18px}
+  .carte .menu-list li{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:baseline;gap:4px 14px;padding:12px 0;border-top:1px solid var(--line-2)}
+  .carte .menu-list li:first-child{border-top:0}
+  .carte .menu-list li.hide{display:none}
+  .carte .menu-list li>div{align-items:flex-start}
+  .carte .menu-list b{color:var(--cream);font-size:16.5px;text-wrap:pretty}
+  .carte .menu-list em{color:var(--muted);font-size:12.5px;text-wrap:pretty}
+  .carte .menu-list>li>span{font-family:var(--f-display);font-size:15.5px;letter-spacing:0;color:var(--bronze-2);font-weight:400;margin:0;text-align:right}
+  .carte .menu-list>li>span i{font-size:10px;letter-spacing:.14em;font-family:var(--f-body);font-weight:700}
+  .carte .menu-list .cur{display:block;font-family:var(--f-body);font-size:8.5px;letter-spacing:.18em;color:var(--muted);font-weight:700}
+  .carte .menu-list mark{background:rgba(185,138,80,.35)}
+  .carte .nores{color:var(--muted)}
+  /* les plats : caches volet ferme, montee en cascade a l'ouverture */
+  .carte.ca-js .grp .menu-list li{opacity:0;transform:translateY(10px);filter:none;transition:opacity .2s ease,transform .2s ease}
+  .carte.ca-js .grp.ouvert .menu-list li,.carte.ca-js.cherche .grp .menu-list li{opacity:1;transform:none;
+    transition:opacity .6s ease calc(80ms + var(--i,0) * 45ms),transform .7s var(--ease-out) calc(80ms + var(--i,0) * 45ms)}
+  .carte.ca-js.cherche .grp .menu-list li{transition:none}
+}
 
 /* ── réserver ─────────────────────────── */
 .book{position:relative;padding:120px 0;overflow:hidden}
@@ -994,9 +1041,11 @@ footer{background:#0B0704}
       <span class="ca-marque" data-t="cam">Hôtel Evannath · La table d'Assinie</span>
       <div class="pane on" id="pane-c">
         <section class="grp" id="c0" data-n="I" data-bg="img/opt/gal-tab-corbeille-t.jpg">
+          <button type="button" class="ca-acc" aria-expanded="false" aria-controls="c0-corps"><span class="ca-vig"><img width="620" height="440" src="img/opt/gal-tab-corbeille-t.jpg" alt="" loading="lazy"></span><span class="ca-tt"><small>I</small><b data-t="mc0">Nos entrées</b></span><i aria-hidden="true"></i></button>
           <span class="ca-num">I</span>
           <h3 data-t="mc0">Nos entrées</h3>
           <span class="ca-orn" aria-hidden="true"><i></i><b></b><i></i></span>
+          <div class="ca-corps" id="c0-corps"><div>
           <ul class="menu-list deux">
           <li style="--i:0"><div><b data-t="mc13">Salade d'avocat aux fruits de mer, chips de banane</b><em data-t="mc12">Laitue, chips de banane, avocat, crevette, oignon, olive noire, sauce aurore</em></div><span>6 000</span></li>
         <li style="--i:1"><div><b data-t="mc15">Salade César Babi</b><em data-t="mc14">Salade, œuf de caille, parmesan, croûton, poulet fumé effiloché</em></div><span>7 000</span></li>
@@ -1007,11 +1056,14 @@ footer{background:#0B0704}
         <li style="--i:6"><div><b data-t="mc24">Salade de la ferme</b><em data-t="mc18">Laitue, jambon blanc, pomme de terre, concombre, œuf poché, tomate, fromage</em></div><span>4 500</span></li>
         <li style="--i:7"><div><b data-t="mc26">Bouillie de couscous</b><em data-t="mc25">Couscous, beurre, lait, sucre, miel, sucre vanillé</em></div><span>4 500</span></li>
           </ul>
+          </div></div>
         </section>
         <section class="grp" id="c1" data-n="II" data-bg="img/opt/gal-lag-nuit-t.jpg">
+          <button type="button" class="ca-acc" aria-expanded="false" aria-controls="c1-corps"><span class="ca-vig"><img width="620" height="440" src="img/opt/gal-lag-nuit-t.jpg" alt="" loading="lazy"></span><span class="ca-tt"><small>II</small><b data-t="mc1">Fruits de mer &amp; poissons</b></span><i aria-hidden="true"></i></button>
           <span class="ca-num">II</span>
           <h3 data-t="mc1">Fruits de mer &amp; poissons</h3>
           <span class="ca-orn" aria-hidden="true"><i></i><b></b><i></i></span>
+          <div class="ca-corps" id="c1-corps"><div>
           <ul class="menu-list">
           <li style="--i:0"><div><b data-t="mc27">Tagliatelles aux fruits de mer</b></div><span>15 000</span></li>
         <li style="--i:1"><div><b data-t="mc29">Filet de capitaine en papillote</b><em data-t="mc28">Riz au curcuma</em></div><span>14 000</span></li>
@@ -1019,11 +1071,14 @@ footer{background:#0B0704}
         <li style="--i:3"><div><b data-t="mc33">Môgô braisé aux petits légumes</b><em data-t="mc32">Alloco ou attiéké</em></div><span>14 000</span></li>
         <li style="--i:4"><div><b data-t="mc35">Casserole de la pêche bassamoise</b><em data-t="mc34">Attiéké huile rouge</em></div><span>95 000</span></li>
           </ul>
+          </div></div>
         </section>
         <section class="grp" id="c2" data-n="III" data-bg="img/opt/gal-tab-dressee-t.jpg">
+          <button type="button" class="ca-acc" aria-expanded="false" aria-controls="c2-corps"><span class="ca-vig"><img width="620" height="440" src="img/opt/gal-tab-dressee-t.jpg" alt="" loading="lazy"></span><span class="ca-tt"><small>III</small><b data-t="mc2">Dégustations familiales</b></span><i aria-hidden="true"></i></button>
           <span class="ca-num">III</span>
           <h3 data-t="mc36">Dégustations familiales <em>· 5 personnes</em></h3>
           <span class="ca-orn" aria-hidden="true"><i></i><b></b><i></i></span>
+          <div class="ca-corps" id="c2-corps"><div>
           <ul class="menu-list deux">
           <li style="--i:0"><div><b data-t="mc37">Thiéboudiène, poisson à la sénégalaise</b></div><span>50 000</span></li>
         <li style="--i:1"><div><b data-t="mc39">Mafé au bœuf fumé</b><em data-t="mc38">Riz étuvé</em></div><span>45 000</span></li>
@@ -1035,11 +1090,14 @@ footer{background:#0B0704}
         <li style="--i:7"><div><b data-t="mc48">Akpessi de poisson fumé, bâton de banane aux fleurs de piment</b></div><span>30 000</span></li>
         <li style="--i:8"><div><b data-t="mc51">Tajine d'agneau aux prunes</b><em data-t="mc49">Couscous · digestif offert</em></div><span><i data-t="mc50">Offert</i></span></li>
           </ul>
+          </div></div>
         </section>
         <section class="grp" id="c3" data-n="IV" data-bg="img/opt/gal-tab-rotin-t.jpg">
+          <button type="button" class="ca-acc" aria-expanded="false" aria-controls="c3-corps"><span class="ca-vig"><img width="620" height="440" src="img/opt/gal-tab-rotin-t.jpg" alt="" loading="lazy"></span><span class="ca-tt"><small>IV</small><b data-t="mc3">Viandes blanches</b></span><i aria-hidden="true"></i></button>
           <span class="ca-num">IV</span>
           <h3 data-t="mc3">Viandes blanches</h3>
           <span class="ca-orn" aria-hidden="true"><i></i><b></b><i></i></span>
+          <div class="ca-corps" id="c3-corps"><div>
           <ul class="menu-list">
           <li style="--i:0"><div><b data-t="mc53">Cordon bleu Evannath</b><em data-t="mc52">Féroce de manioc, sauce tartare</em></div><span>14 000</span></li>
         <li style="--i:1"><div><b data-t="mc54">Kedjenou de poulet africain à la citronnelle</b><em>Attiéké</em></div><span>12 000</span></li>
@@ -1047,33 +1105,42 @@ footer{background:#0B0704}
         <li style="--i:3"><div><b data-t="mc58">Brochette de poulet marinée au soumara, cuite au feu de bois</b><em data-t="mc57">Igname frite maison, parmesane</em></div><span>10 000</span></li>
         <li style="--i:4"><div><b data-t="mc59">Selim de poulet enrobé de kankankan au feu de bois</b><em>Alloco</em></div><span>9 000</span></li>
           </ul>
+          </div></div>
         </section>
         <section class="grp" id="c4" data-n="V" data-bg="img/opt/gal-tab-salle-t.jpg">
+          <button type="button" class="ca-acc" aria-expanded="false" aria-controls="c4-corps"><span class="ca-vig"><img width="620" height="440" src="img/opt/gal-tab-salle-t.jpg" alt="" loading="lazy"></span><span class="ca-tt"><small>V</small><b data-t="mc4">Viandes rouges</b></span><i aria-hidden="true"></i></button>
           <span class="ca-num">V</span>
           <h3 data-t="mc4">Viandes rouges</h3>
           <span class="ca-orn" aria-hidden="true"><i></i><b></b><i></i></span>
+          <div class="ca-corps" id="c4-corps"><div>
           <ul class="menu-list">
           <li style="--i:0"><div><b data-t="mc61">Fondant de souris d'agneau au miel de Tafiré</b><em data-t="mc60">Pommes grenaille</em></div><span>21 000</span></li>
         <li style="--i:1"><div><b data-t="mc63">Filet de bœuf au jus corsé de cacao</b><em data-t="mc62">Écrasé de patate douce</em></div><span>15 000</span></li>
         <li style="--i:2"><div><b data-t="mc65">Dibi d'agneau grillé à la guinéenne</b><em data-t="mc64">Moutarde, oignon, grosses frites</em></div><span>15 000</span></li>
         <li style="--i:3"><div><b data-t="mc67">T-bone grillé aux trois moutardes</b><em data-t="mc66">Légumes grillés</em></div><span>15 000</span></li>
           </ul>
+          </div></div>
         </section>
         <section class="grp" id="c5" data-n="VI" data-bg="img/opt/gal-art-lanterne-t.jpg">
+          <button type="button" class="ca-acc" aria-expanded="false" aria-controls="c5-corps"><span class="ca-vig"><img width="620" height="440" src="img/opt/gal-art-lanterne-t.jpg" alt="" loading="lazy"></span><span class="ca-tt"><small>VI</small><b>Pizzas</b></span><i aria-hidden="true"></i></button>
           <span class="ca-num">VI</span>
           <h3>Pizzas</h3>
           <span class="ca-orn" aria-hidden="true"><i></i><b></b><i></i></span>
+          <div class="ca-corps" id="c5-corps"><div>
           <ul class="menu-list">
           <li style="--i:0"><div><b data-t="mc68">Tropicale</b></div><span>10 000</span></li>
         <li style="--i:1"><div><b>Royale</b></div><span>10 000</span></li>
         <li style="--i:2"><div><b>Parmentière</b></div><span>10 000</span></li>
         <li style="--i:3"><div><b data-t="mc69">Calabraise</b></div><span>10 000</span></li>
           </ul>
+          </div></div>
         </section>
         <section class="grp" id="c6" data-n="VII" data-bg="img/opt/gal-tab-fruits-t.jpg">
+          <button type="button" class="ca-acc" aria-expanded="false" aria-controls="c6-corps"><span class="ca-vig"><img width="620" height="440" src="img/opt/gal-tab-fruits-t.jpg" alt="" loading="lazy"></span><span class="ca-tt"><small>VII</small><b>Desserts</b></span><i aria-hidden="true"></i></button>
           <span class="ca-num">VII</span>
           <h3>Desserts</h3>
           <span class="ca-orn" aria-hidden="true"><i></i><b></b><i></i></span>
+          <div class="ca-corps" id="c6-corps"><div>
           <ul class="menu-list deux">
           <li style="--i:0"><div><b data-t="mc70">Crème de baobab</b></div><span>6 000</span></li>
         <li style="--i:1"><div><b data-t="mc72">Panna cotta fruitée parfumée</b><em data-t="mc71">Bissap, passion, orange</em></div><span>5 500</span></li>
@@ -1087,22 +1154,28 @@ footer{background:#0B0704}
         <li style="--i:9"><div><b data-t="mc80">Coupes de glaces</b></div><span>3 000</span></li>
         <li style="--i:10"><div><b data-t="mc81">Thé Evannath</b></div><span>2 000</span></li>
           </ul>
+          </div></div>
         </section>
       </div>
       <div class="pane" id="pane-b">
         <section class="grp" id="b0" data-n="I" data-bg="img/opt/gal-tab-cocktail-t.jpg">
+          <button type="button" class="ca-acc" aria-expanded="false" aria-controls="b0-corps"><span class="ca-vig"><img width="620" height="440" src="img/opt/gal-tab-cocktail-t.jpg" alt="" loading="lazy"></span><span class="ca-tt"><small>I</small><b data-t="mc5">Cocktails signatures</b></span><i aria-hidden="true"></i></button>
           <span class="ca-num">I</span>
           <h3 data-t="mc5">Cocktails signatures</h3>
           <span class="ca-orn" aria-hidden="true"><i></i><b></b><i></i></span>
+          <div class="ca-corps" id="b0-corps"><div>
           <ul class="menu-list">
           <li style="--i:0"><div><b>The Fimbu King</b><em data-t="mc82">Gingembre, garcinia kola, miel, gin, triple sec, citron</em></div><span>12 000</span></li>
         <li style="--i:1"><div><b>Le Sensationnel</b><em data-t="mc83">Citron, verveine citronnelle, cannelle, gingembre, kiwi, menthe, rhum, triple sec</em></div><span>12 000</span></li>
           </ul>
+          </div></div>
         </section>
         <section class="grp" id="b1" data-n="II" data-bg="img/opt/gal-tab-cocktails-t.jpg">
+          <button type="button" class="ca-acc" aria-expanded="false" aria-controls="b1-corps"><span class="ca-vig"><img width="620" height="440" src="img/opt/gal-tab-cocktails-t.jpg" alt="" loading="lazy"></span><span class="ca-tt"><small>II</small><b data-t="mc6">Cocktails avec alcool</b></span><i aria-hidden="true"></i></button>
           <span class="ca-num">II</span>
           <h3 data-t="mc6">Cocktails avec alcool</h3>
           <span class="ca-orn" aria-hidden="true"><i></i><b></b><i></i></span>
+          <div class="ca-corps" id="b1-corps"><div>
           <ul class="menu-list deux">
           <li style="--i:0"><div><b>Le Kréol</b><em data-t="mc84">Mangue, citron, gingembre, rhum blanc, rhum ambré</em></div><span>8 500</span></li>
         <li style="--i:1"><div><b>Exotic Cosmo</b><em data-t="mc85">Cranberry, maracuja, goyave, vanille, vodka</em></div><span>8 500</span></li>
@@ -1117,11 +1190,14 @@ footer{background:#0B0704}
         <li style="--i:10"><div><b>Evan Tropic</b><em data-t="mc94">Pamplemousse, orange, vanille, vodka</em></div><span>8 500</span></li>
         <li style="--i:11"><div><b>Blue Hawaii</b><em data-t="mc95">Vodka, rhum, curaçao, ananas, limonade</em></div><span>8 500</span></li>
           </ul>
+          </div></div>
         </section>
         <section class="grp" id="b2" data-n="III" data-bg="img/opt/gal-tab-terrasse-t.jpg">
+          <button type="button" class="ca-acc" aria-expanded="false" aria-controls="b2-corps"><span class="ca-vig"><img width="620" height="440" src="img/opt/gal-tab-terrasse-t.jpg" alt="" loading="lazy"></span><span class="ca-tt"><small>III</small><b data-t="mc7">Cocktails sans alcool</b></span><i aria-hidden="true"></i></button>
           <span class="ca-num">III</span>
           <h3 data-t="mc7">Cocktails sans alcool</h3>
           <span class="ca-orn" aria-hidden="true"><i></i><b></b><i></i></span>
+          <div class="ca-corps" id="b2-corps"><div>
           <ul class="menu-list deux">
           <li style="--i:0"><div><b data-t="mc97">Fraîcheur Evannath</b><em data-t="mc96">Menthe fraîche, concombre, limonade</em></div><span>6 000</span></li>
         <li style="--i:1"><div><b data-t="mc99">Exotique</b><em data-t="mc98">Mangue, goyave, citron</em></div><span>6 000</span></li>
@@ -1136,11 +1212,14 @@ footer{background:#0B0704}
         <li style="--i:10"><div><b>Sunset Mocktail</b><em data-t="mc107">Pastèque, orange ou clémentine, feuilles de menthe, sprite</em></div><span>6 000</span></li>
         <li style="--i:11"><div><b>Banana Kiss</b><em data-t="mc108">Banane, mangue, maracuja</em></div><span>6 000</span></li>
           </ul>
+          </div></div>
         </section>
         <section class="grp" id="b3" data-n="IV" data-bg="img/opt/gal-tab-comptoir-t.jpg">
+          <button type="button" class="ca-acc" aria-expanded="false" aria-controls="b3-corps"><span class="ca-vig"><img width="620" height="440" src="img/opt/gal-tab-comptoir-t.jpg" alt="" loading="lazy"></span><span class="ca-tt"><small>IV</small><b data-t="mc8">Spiritueux</b></span><i aria-hidden="true"></i></button>
           <span class="ca-num">IV</span>
           <h3 data-t="mc8">Spiritueux</h3>
           <span class="ca-orn" aria-hidden="true"><i></i><b></b><i></i></span>
+          <div class="ca-corps" id="b3-corps"><div>
           <ul class="menu-list deux">
           <li style="--i:0"><div><b>Blue Label</b></div><span>30 000</span></li>
         <li style="--i:1"><div><b>Whisky</b><em data-t="mc109">Double Black, Chivas 15 ans, Glenfiddich 12 ans, Gentleman Jack</em></div><span>10 000</span></li>
@@ -1151,31 +1230,40 @@ footer{background:#0B0704}
         <li style="--i:6"><div><b data-t="mc113">Téquila</b><em>Camino, Olmeca blanco</em></div><span>1 500</span></li>
         <li style="--i:7"><div><b>Vodka</b><em>Absolut, Belvedere</em></div><span>1 000</span></li>
           </ul>
+          </div></div>
         </section>
         <section class="grp" id="b4" data-n="V" data-bg="img/opt/gal-tab-vin-t.jpg">
+          <button type="button" class="ca-acc" aria-expanded="false" aria-controls="b4-corps"><span class="ca-vig"><img width="620" height="440" src="img/opt/gal-tab-vin-t.jpg" alt="" loading="lazy"></span><span class="ca-tt"><small>V</small><b>Digestifs</b></span><i aria-hidden="true"></i></button>
           <span class="ca-num">V</span>
           <h3>Digestifs</h3>
           <span class="ca-orn" aria-hidden="true"><i></i><b></b><i></i></span>
+          <div class="ca-corps" id="b4-corps"><div>
           <ul class="menu-list">
           <li style="--i:0"><div><b>Hennessy XXO</b></div><span>30 000</span></li>
         <li style="--i:1"><div><b>Grand Marnier, Cointreau, Godet N°1, Hennessy VS / VSOP</b></div><span>10 000</span></li>
         <li style="--i:2"><div><b data-t="mc114">Malibu, Get 27, Get 31, Calvados Père Magloire, poire ou mirabelle, limoncello</b></div><span>5 000</span></li>
         <li style="--i:3"><div><b data-t="mc115">Rhum arrangé maison</b></div><span>3 000</span></li>
           </ul>
+          </div></div>
         </section>
         <section class="grp" id="b5" data-n="VI" data-bg="img/opt/gal-tab-cave-t.jpg">
+          <button type="button" class="ca-acc" aria-expanded="false" aria-controls="b5-corps"><span class="ca-vig"><img width="620" height="440" src="img/opt/gal-tab-cave-t.jpg" alt="" loading="lazy"></span><span class="ca-tt"><small>VI</small><b data-t="mc9">Apéritifs &amp; bières</b></span><i aria-hidden="true"></i></button>
           <span class="ca-num">VI</span>
           <h3 data-t="mc9">Apéritifs &amp; bières</h3>
           <span class="ca-orn" aria-hidden="true"><i></i><b></b><i></i></span>
+          <div class="ca-corps" id="b5-corps"><div>
           <ul class="menu-list">
           <li style="--i:0"><div><b>Apérol, Baileys, Campari</b><em data-t="mc116">Martini blanc, rouge ou rosé, porto, Pastis 51, Ricard</em></div><span>4 000</span></li>
         <li style="--i:1"><div><b data-t="mc117">Bières</b><em>Beaufort, Bock, Castel, Desperados, Heineken, Guinness, Tequila, Racine</em></div><span>2 000</span></li>
           </ul>
+          </div></div>
         </section>
         <section class="grp" id="b6" data-n="VII" data-bg="img/opt/gal-tab-dejeuner-t.jpg">
+          <button type="button" class="ca-acc" aria-expanded="false" aria-controls="b6-corps"><span class="ca-vig"><img width="620" height="440" src="img/opt/gal-tab-dejeuner-t.jpg" alt="" loading="lazy"></span><span class="ca-tt"><small>VII</small><b data-t="mc10">Sans alcool</b></span><i aria-hidden="true"></i></button>
           <span class="ca-num">VII</span>
           <h3 data-t="mc10">Sans alcool</h3>
           <span class="ca-orn" aria-hidden="true"><i></i><b></b><i></i></span>
+          <div class="ca-corps" id="b6-corps"><div>
           <ul class="menu-list">
           <li style="--i:0"><div><b>Red Bull</b></div><span>2 500</span></li>
         <li style="--i:1"><div><b>San Bitter</b></div><span>2 000</span></li>
@@ -1183,16 +1271,20 @@ footer{background:#0B0704}
         <li style="--i:3"><div><b data-t="mc119">Orangina, Cody's Energy, autres</b></div><span>1 500</span></li>
         <li style="--i:4"><div><b>Sodas</b><em>Bavaria, Coca-Cola, Sprite, Youki Pomme, Fanta, Moka Café, Coca Zéro</em></div><span>1 000</span></li>
           </ul>
+          </div></div>
         </section>
         <section class="grp" id="b7" data-n="VIII" data-bg="img/opt/ig-petitdej.jpg">
+          <button type="button" class="ca-acc" aria-expanded="false" aria-controls="b7-corps"><span class="ca-vig"><img width="640" height="427" src="img/opt/ig-petitdej.jpg" alt="" loading="lazy"></span><span class="ca-tt"><small>VIII</small><b data-t="mc11">Boissons chaudes</b></span><i aria-hidden="true"></i></button>
           <span class="ca-num">VIII</span>
           <h3 data-t="mc11">Boissons chaudes</h3>
           <span class="ca-orn" aria-hidden="true"><i></i><b></b><i></i></span>
+          <div class="ca-corps" id="b7-corps"><div>
           <ul class="menu-list">
           <li style="--i:0"><div><b>Nespresso</b></div><span>2 000</span></li>
         <li style="--i:1"><div><b data-t="mc120">Café</b></div><span>1 500</span></li>
         <li style="--i:2"><div><b data-t="mc121">Thé</b></div><span>1 000</span></li>
           </ul>
+          </div></div>
         </section>
       </div>
       <p class="nores" id="nores" data-t="nr">Aucun résultat. Essayez « poulet », « mojito » ou « chocolat ».</p>
@@ -1843,6 +1935,21 @@ function aller(id){
   if(cur&&!calme){cur.classList.remove('vu');minuteur=setTimeout(function(){poser(g)},260)}
   else poser(g);
 }
+/* Mobile : l'accordeon. Un volet ouvert a la fois, par onglet ; la page
+   ramene le volet sous l'en-tete une fois deplie. */
+var LG='fr';
+function comptes(){carte.querySelectorAll('.grp').forEach(function(g){
+  var n=g.querySelectorAll('.menu-list li').length,s=g.querySelector('.ca-acc small');
+  if(s)s.textContent=g.dataset.n+' · '+n+' '+(LG==='en'?(n>1?'items':'item'):(n>1?'plats':'plat'));
+})}
+function volet(g,ouvrir,defiler){
+  if(ouvrir)g.parentNode.querySelectorAll('.grp.ouvert').forEach(function(x){if(x!==g){x.classList.remove('ouvert');x.querySelector('.ca-acc').setAttribute('aria-expanded','false')}});
+  g.classList.toggle('ouvert',ouvrir);g.querySelector('.ca-acc').setAttribute('aria-expanded',ouvrir?'true':'false');
+  if(ouvrir&&defiler)setTimeout(function(){window.scrollTo({top:g.getBoundingClientRect().top+scrollY-90,behavior:calme?'auto':'smooth'})},calme?0:580);
+}
+carte.querySelectorAll('.ca-acc').forEach(function(b){b.onclick=function(){var g=b.parentNode;volet(g,!g.classList.contains('ouvert'),true)}});
+volet(document.getElementById('c0'),true);volet(document.getElementById('b0'),true);
+comptes();
 function pas(d){var l=grps(),i=l.indexOf(paneOn().querySelector('.grp.on'));aller(l[(i+d+l.length)%l.length].id)}
 carte.querySelectorAll('.ca-rub button').forEach(function(b){b.onclick=function(){aller(b.dataset.g)}});
 carte.querySelector('.ca-prev').onclick=function(){pas(-1)};
@@ -1860,7 +1967,7 @@ document.querySelectorAll('.tabset button').forEach(function(b){b.onclick=functi
 (function(){
   var h=location.hash.slice(1),g=h&&document.getElementById(h);
   if(g&&g.classList.contains('grp')){
-    var p=g.parentNode.id.slice(5);courant[p]=h;
+    var p=g.parentNode.id.slice(5);courant[p]=h;volet(g,true,matchMedia('(max-width:720px)').matches);
     if(p!=='c')document.querySelector('.tabset button[data-p="'+p+'"]').click();else poser(g);
   }else poser(document.getElementById('c0'));
 })();
@@ -2069,7 +2176,7 @@ document.querySelectorAll('.lang button').forEach(function(b){b.onclick=function
 
 /* La barre de recherche a un texte d aide hors [data-t] : on le traduit
    par le point d extension de LANG_JS. */
-function EVN_LANG(lg){ q.placeholder=(lg==='en')?"Search a dish, a cocktail…":q.dataset.ph; pied(); }
+function EVN_LANG(lg){ q.placeholder=(lg==='en')?"Search a dish, a cocktail…":q.dataset.ph; LG=lg; comptes(); pied(); }
 </script>
 </body>
 </html>
