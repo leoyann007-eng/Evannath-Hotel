@@ -2,10 +2,11 @@
 """Génère carte.html à partir de la carte réelle de l'Hôtel Evannath.
 Source : https://evannathhotel.com/cartes/ (relevé le 20/08/2026).
 Les fautes de frappe du site d'origine sont corrigées ici ; les deux tarifs
-manifestement erronés (Tajine affiché « FREE », Casserole à 95 000) sont
-remplacés par « Nous consulter » plutôt qu'inventés.
+manifestement erronés étaient remplacés par « Nous consulter » ; l'hôtel a
+confirmé la Casserole à 95 000 et le Tajine offert (octobre 2026).
 """
 import io
+import re
 import _schema
 from _carte_en import Cles
 from _chrome import responsive, dimensionner, versionner, secours, liens_nav, EN_NAV, EN_SECOURS, CONF_TITRE, CONF_GESTE, CONF_VERBE, WA, WA_TEXTE, MAIL, ENVOI_JS, NAV_JS, TOKENS, HEAD_CSS, FOOTER_CSS, LANG_JS, medaillon, INTRO, WA_BOUTON
@@ -26,7 +27,7 @@ CUISINE = [
   ("Filet de capitaine en papillote","14 000","Riz au curcuma"),
   ("Gambas flambées façon tikka","14 000","Gratin de pommes"),
   ("Môgô braisé aux petits légumes","14 000","Alloco ou attiéké"),
-  ("Casserole de la pêche bassamoise","—","Attiéké huile rouge · Nous consulter"),
+  ("Casserole de la pêche bassamoise","95 000","Attiéké huile rouge"),
  ]),
  ("Dégustations familiales <em>· 5 personnes</em>", [
   ("Thiéboudiène, poisson à la sénégalaise","50 000",""),
@@ -37,7 +38,7 @@ CUISINE = [
   ("Duo patate-épinard, queue de bœuf fumée","32 000","Riz étuvé"),
   ("Soumara lafri au poulet","30 000","Riz"),
   ("Akpessi de poisson fumé, bâton de banane aux fleurs de piment","30 000",""),
-  ("Tajine d'agneau aux prunes","—","Couscous · digestif offert · Nous consulter"),
+  ("Tajine d'agneau aux prunes","Offert","Couscous · digestif offert"),
  ]),
  ("Viandes blanches", [
   ("Cordon bleu Evannath","14 000","Féroce de manioc, sauce tartare"),
@@ -174,13 +175,55 @@ SPA = [
 # La traduction anglaise de chaque rubrique, plat et soin : _carte_en.py.
 # Chaque texte traduit recoit une cle data-t ; le dictionnaire de la page
 # est ensuite glisse dans son `var EN` par {{EN_MENU}}.
-def items(rows, cles):
+def items(rows, cles, rang=False):
     out=[]
-    for nom,prix,desc in rows:
+    for i,(nom,prix,desc) in enumerate(rows):
         d = '<em%s>%s</em>' % (cles.attr(desc), desc) if desc else ''
-        p = prix if prix != '—' else '<i%s>Nous consulter</i>' % cles.attr('Nous consulter')
-        out.append('<li><div><b%s>%s</b>%s</div><span>%s</span></li>' % (cles.attr(nom),nom,d,p))
+        # Un mot à la place du prix : en petites capitales, sans « FCFA ».
+        mot = {'—': 'Nous consulter', 'Offert': 'Offert'}.get(prix)
+        p = '<i%s>%s</i>' % (cles.attr(mot), mot) if mot else prix
+        r = ' style="--i:%d"' % i if rang else ''
+        out.append('<li%s><div><b%s>%s</b>%s</div><span>%s</span></li>' % (r,cles.attr(nom),nom,d,p))
     return '\n        '.join(out)
+
+# ── La carte imprimée (La table seulement ; le spa garde sections()) ──
+# Une photo en filigrane par rubrique, dans l'ordre de CUISINE et BOISSONS.
+# Vignettes (-t) : a 16 % d'opacite, en sepia, la pleine taille ne se voit
+# pas, et elle ne se charge qu'a l'ouverture de la rubrique (data-bg).
+FILIGRANES = {
+ 'c': ['gal-tab-corbeille-t','gal-lag-nuit-t','gal-tab-dressee-t','gal-tab-rotin-t',
+       'gal-tab-salle-t','gal-art-lanterne-t','gal-tab-fruits-t'],
+ 'b': ['gal-tab-cocktail-t','gal-tab-cocktails-t','gal-tab-terrasse-t','gal-tab-comptoir-t',
+       'gal-tab-vin-t','gal-tab-cave-t','gal-tab-dejeuner-t','ig-petitdej'],
+}
+ROMAINS = ['I','II','III','IV','V','VI','VII','VIII','IX','X']
+
+def _court(titre):
+    """Le titre sans son complement en <em> : c'est le nom du bouton."""
+    return re.sub(r'\s*<em>.*?</em>', '', titre)
+
+def sections_carte(groups, pref, cles):
+    out=[]
+    for i,(titre,rows) in enumerate(groups):
+        deux = ' deux' if len(rows) > 6 else ''
+        out.append(
+ '''        <section class="grp" id="%s%d" data-n="%s" data-bg="img/opt/%s.jpg">
+          <span class="ca-num">%s</span>
+          <h3%s>%s</h3>
+          <span class="ca-orn" aria-hidden="true"><i></i><b></b><i></i></span>
+          <ul class="menu-list%s">
+          %s
+          </ul>
+        </section>''' % (pref,i,ROMAINS[i],FILIGRANES[pref][i % len(FILIGRANES[pref])],ROMAINS[i],
+                         cles.attr(titre),titre,deux,items(rows, cles, rang=True)))
+    return '\n'.join(out)
+
+def rubriques(groups, pref, cles):
+    on = ' on' if pref == 'c' else ''
+    btn = '\n    '.join(
+      '<button type="button" data-g="%s%d"><span%s>%s</span></button>' % (pref,i,cles.attr(_court(t)),_court(t))
+      for i,(t,_) in enumerate(groups))
+    return '  <nav class="ca-rub%s" data-p="%s" aria-label="Rubriques">\n    %s\n  </nav>' % (on,pref,btn)
 
 def sections(groups, pref, cles):
     out=[]
@@ -225,8 +268,10 @@ CLES_CARTE = Cles('mc')
 HTML = io.open('carte-template.html',encoding='utf-8').read()
 HTML = (HTML
   .replace('{{FEUX_B}}', _feux('b')).replace('{{FEUX_I}}', _feux('i'))
-  .replace('{{CUISINE}}',sections(CUISINE,'c',CLES_CARTE))
-  .replace('{{BOISSONS}}',sections(BOISSONS,'b',CLES_CARTE)))
+  .replace('{{RUB_C}}',rubriques(CUISINE,'c',CLES_CARTE))
+  .replace('{{RUB_B}}',rubriques(BOISSONS,'b',CLES_CARTE))
+  .replace('{{CUISINE}}',sections_carte(CUISINE,'c',CLES_CARTE))
+  .replace('{{BOISSONS}}',sections_carte(BOISSONS,'b',CLES_CARTE)))
 HTML = (HTML.replace('{{EN_MENU}}', CLES_CARTE.dictionnaire())
   .replace('{{WA_BOUTON}}', WA_BOUTON).replace('{{WA}}', WA).replace('{{MED}}', medaillon('carre-large', 'dw-med')).replace('{{NAV_LINKS}}', liens_nav('carte.html')).replace('{{EN_NAV}}', EN_NAV).replace('{{WA_TEXTE}}', WA_TEXTE).replace('{{SECOURS}}', secours('sec')).replace('{{EN_SECOURS}}', EN_SECOURS).replace('{{CG}}', (CONF_GESTE or '').replace("'", "\\'")).replace('{{CV}}', CONF_VERBE).replace('{{CT}}', CONF_TITRE or 'Table demand\u00e9e').replace('{{ENVOI}}', ENVOI_JS).replace('{{NAV_JS}}', NAV_JS).replace('{{TOKENS}}', TOKENS).replace('{{LANG_JS}}', LANG_JS).replace('{{INTRO}}', INTRO).replace('{{HEAD_CSS}}', HEAD_CSS).replace('{{FOOTER_CSS}}', FOOTER_CSS)
   .replace('{{TOTAL}}',str(total))

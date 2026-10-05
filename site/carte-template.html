@@ -387,50 +387,97 @@ header.scrolled .brand small{opacity:0}
 .cocktail .ing{font-size:10.5px;letter-spacing:.19em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-top:10px;line-height:1.9}
 .winenote{border-left:2px solid var(--bronze);padding:6px 0 6px 22px;font-size:14.5px;color:#B4A794;font-style:italic}
 
-/* ── la carte ─────────────────────────── */
-.carte{background:var(--bark);padding:110px 0 0;border-top:1px solid var(--line)}
-.carte .head{text-align:center;margin-bottom:44px}
+/* ── la carte : « la carte imprimée » ───────────────────────────────
+   Une rubrique a la fois, sur un menu creme a double filet pose sur la
+   nuit. La photo de la rubrique passe en filigrane sepia dans le papier.
+   Tout ce qui cache ou anime depend de .ca-js, pose par le script : sans
+   lui, toutes les rubriques s'empilent sur la carte, lisibles.
+   Le creme et le bronze fonce (#8A5F2B) sont ceux du reste du site. */
+.carte{background:radial-gradient(ellipse at 50% 30%,var(--bark-3),var(--night) 70%);padding:110px 0 120px;border-top:1px solid var(--line)}
+.carte .head{text-align:center;margin-bottom:40px}
 .carte .head p{max-width:52ch;margin:18px auto 0;color:#B4A794}
-/* Les barres de filtres ne sont plus collantes : voir _chrome.py. */
-.tools{
-  background:var(--bark-2);
-  border-block:1px solid var(--line);margin-bottom:64px
-}
-.tools .in{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;padding-top:13px;padding-bottom:13px}
-.tabset{display:flex;gap:6px;flex-wrap:wrap}
-.tabset button{background:none;border:1px solid transparent;color:var(--muted);font:700 10.5px/1 var(--f-body);letter-spacing:.2em;text-transform:uppercase;padding:15px 22px;cursor:pointer;transition:.3s}
-.tabset button:hover{color:var(--bronze)}
-.tabset button.on{border-color:var(--bronze);color:var(--bronze)}
-.search{position:relative;flex:0 0 250px;max-width:100%}
+.tools{max-width:900px;margin:0 auto 22px;padding:0 24px;display:flex;flex-direction:column;align-items:center;gap:22px}
+.tabset{display:flex;gap:34px}
+.tabset button{white-space:nowrap;background:none;border:0;border-bottom:1px solid transparent;color:var(--muted);font:400 1.4rem/1.2 var(--f-display);padding:6px 0;cursor:pointer;transition:color .4s,border-color .4s}
+.tabset button:hover{color:var(--cream)}
+.tabset button.on{color:var(--cream);border-color:var(--bronze)}
+.search{position:relative;width:300px;max-width:100%}
 .search input{width:100%;min-height:44px;background:transparent;border:0;border-bottom:1px solid var(--line);color:var(--cream);font:400 14px/1.4 var(--f-body);padding:11px 6px 11px 30px;outline:none;transition:.3s}
 .search input:focus{border-color:var(--bronze)}
 .search svg{position:absolute;left:4px;top:50%;transform:translateY(-50%);width:15px;height:15px;stroke:var(--bronze);fill:none;stroke-width:1.5}
 
+/* Les rubriques : un losange se pose devant celle qu'on lit. */
+.ca-rub{display:none;flex-wrap:wrap;justify-content:center;gap:2px 22px;max-width:960px;margin:0 auto 26px;padding:0 24px;transition:opacity .4s}
+.ca-rub.on{display:flex}
+.cherche .ca-rub{opacity:.35;pointer-events:none}
+.ca-rub button{display:flex;align-items:center;gap:9px;background:none;border:0;padding:12px 0;cursor:pointer;font:700 10.5px/1 var(--f-body);letter-spacing:.2em;text-transform:uppercase;color:var(--muted);transition:color .4s}
+.ca-rub button::before{content:"";width:6px;height:6px;background:var(--bronze-2);transform:rotate(45deg) scale(0);transition:transform .5s var(--ease-out)}
+.ca-rub button:hover{color:var(--cream)}
+.ca-rub button.on{color:var(--bronze-2)}
+.ca-rub button.on::before{transform:rotate(45deg) scale(1)}
+
+/* La carte : papier creme, filet exterieur et filet interieur (outline). */
+.ca-card{max-width:800px;margin:0 auto;background:#F6EEE2;padding:14px;box-shadow:0 40px 80px -30px rgba(0,0,0,.8)}
+.ca-in{position:relative;isolation:isolate;overflow:hidden;border:1px solid rgba(138,95,43,.55);outline:1px solid rgba(138,95,43,.3);outline-offset:-6px;padding:44px 56px 26px;color:#2A1E13;text-align:center}
+.ca-marque{display:block;font-size:9.5px;letter-spacing:.5em;text-transform:uppercase;color:#8A5F2B;font-weight:700}
+/* Le filigrane : deux calques qui se relaient, pour un fondu sans trou.
+   multiply + sepia : la photo s'imprime DANS le papier, au lieu de s'y
+   poser. Le masque l'efface vers les filets. */
+.ca-wm{position:absolute;inset:0;z-index:-1;pointer-events:none;
+  -webkit-mask-image:radial-gradient(ellipse 70% 65% at 50% 55%,#000 30%,transparent 100%);
+  mask-image:radial-gradient(ellipse 70% 65% at 50% 55%,#000 30%,transparent 100%)}
+.ca-wm i{position:absolute;inset:0;background:center/cover no-repeat;mix-blend-mode:multiply;
+  filter:grayscale(1) sepia(.55) contrast(1.15) brightness(1.05);opacity:0;transform:scale(1);
+  transition:opacity 1.4s ease,transform 12s var(--ease-out)}
+.ca-wm i.on{opacity:.16;transform:scale(1.06)}
+.cherche .ca-wm{display:none}
+
 .pane{display:none}
 .pane.on{display:block}
-.grp{margin-bottom:64px;scroll-margin-top:150px;padding-bottom:32px}
-.grp h3{
-  font-family:var(--f-display);font-size:1.05rem;font-weight:400;letter-spacing:.26em;text-transform:uppercase;
-  color:var(--bronze);text-align:center;margin-bottom:34px;position:relative
-}
-.grp h3::before,.grp h3::after{content:"";position:absolute;top:50%;width:22%;height:1px;background:var(--line)}
-.grp h3::before{left:0}.grp h3::after{right:0}
-.grp h3 em{font-style:normal;font-family:var(--f-body);font-size:.66em;letter-spacing:.16em;color:var(--muted);font-weight:600}
-.menu-list{list-style:none;column-count:2;column-gap:56px}
-.menu-list li{break-inside:avoid;padding:0 0 26px;display:flex;gap:14px;align-items:baseline}
+.grp{padding-top:22px;scroll-margin-top:150px}
+.ca-js .grp{display:none}
+.ca-js .grp.on,.ca-js.cherche .grp{display:block}
+.carte:not(.ca-js) .grp+.grp,.cherche .grp+.grp{margin-top:40px;border-top:1px solid rgba(138,95,43,.25);padding-top:40px}
+.ca-num{display:block;font-family:var(--f-display);font-size:15px;color:#8A5F2B}
+.grp h3{font-family:var(--f-display);font-weight:400;font-size:clamp(1.8rem,3.6vw,2.4rem);line-height:1.1;color:#17100A;margin-top:6px;letter-spacing:.01em}
+.grp h3 em{display:block;font-style:normal;font-family:var(--f-body);font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:#6B5A48;font-weight:600;margin-top:10px}
+.ca-orn{display:flex;align-items:center;justify-content:center;gap:12px;margin:18px 0 30px}
+.ca-orn i{height:1px;width:90px;background:#8A5F2B}
+.ca-orn b{width:7px;height:7px;border:1px solid #8A5F2B;transform:rotate(45deg)}
+
+.menu-list{list-style:none;display:grid;grid-template-columns:minmax(0,1fr);gap:24px 40px}
+.menu-list.deux{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.menu-list li{display:flex;flex-direction:column;align-items:center;gap:4px}
 .menu-list li.hide{display:none}
-.menu-list li>div{flex:1;min-width:0}
-.menu-list b{display:block;font-family:var(--f-display);font-weight:400;font-size:1.12rem;color:var(--cream);line-height:1.3}
-.menu-list em{display:block;font-style:italic;font-size:13.5px;color:var(--muted);margin-top:5px;line-height:1.55}
-.menu-list mark{background:rgba(185,138,80,.3);color:var(--cream);padding:0 2px}
-.menu-list>li>span{
-  font-family:var(--f-display);font-size:1.12rem;color:var(--bronze);white-space:nowrap;
-  font-variant-numeric:tabular-nums;flex:0 0 auto
-}
-.menu-list>li>span i{font-style:normal;font-family:var(--f-body);font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:700}
-.cur{font-size:.58em;color:var(--muted);letter-spacing:.06em}
-.nores{display:none;padding:50px 0;color:var(--muted);font-size:15px;text-align:center}
+.menu-list li>div{display:flex;flex-direction:column;align-items:center;gap:4px}
+.menu-list b{font-family:var(--f-display);font-weight:400;font-size:1.2rem;line-height:1.25;color:#17100A;text-wrap:balance}
+.menu-list em{font-style:italic;font-size:13px;color:#6B5A48;line-height:1.5;text-wrap:balance}
+.menu-list mark{background:rgba(185,138,80,.3);color:inherit;padding:0 2px}
+.menu-list>li>span{font-size:11px;letter-spacing:.22em;color:#8A5F2B;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap;margin-top:2px}
+.menu-list>li>span i{font-style:normal;text-transform:uppercase}
+.cur{font-size:inherit;color:inherit;letter-spacing:inherit}
+.nores{display:none;padding:30px 0 10px;color:#6B5A48;font-size:15px;text-align:center}
 .nores.on{display:block}
+
+/* L'animation de rubrique : a la sortie, tout s'efface en .25 s ; a
+   l'entree (.vu), le titre se resserre, les filets se tracent, et les
+   plats montent un a un, en sortant du flou. --i est le rang du plat. */
+.ca-js .grp .ca-num,.ca-js .grp h3{opacity:0;letter-spacing:.22em;transition:opacity .25s ease,letter-spacing .25s ease}
+.ca-js .grp.vu .ca-num,.ca-js .grp.vu h3{opacity:1;letter-spacing:.01em;transition:opacity .8s var(--ease-out),letter-spacing 1.1s var(--ease-out)}
+.ca-js .grp .ca-orn i{width:0;transition:width .25s ease}
+.ca-js .grp.vu .ca-orn i{width:90px;transition:width 1s var(--ease-draw) .2s}
+.ca-js .menu-list li{opacity:0;transform:translateY(16px);filter:blur(5px);transition:opacity .25s ease,transform .25s ease,filter .25s ease}
+.ca-js .grp.vu .menu-list li{opacity:1;transform:none;filter:none;
+  transition:opacity .7s var(--ease-out) calc(120ms + var(--i,0) * 55ms),transform .9s var(--ease-out) calc(120ms + var(--i,0) * 55ms),filter .7s ease calc(120ms + var(--i,0) * 55ms)}
+.ca-js.cherche .grp .ca-num,.ca-js.cherche .grp h3,.ca-js.cherche .menu-list li{opacity:1;letter-spacing:.01em;transform:none;filter:none;transition:none}
+.ca-js.cherche .grp .ca-orn i{width:90px;transition:none}
+
+.ca-pied{display:flex;justify-content:space-between;align-items:center;gap:12px;border-top:1px solid rgba(138,95,43,.25);padding-top:16px;margin-top:34px}
+.carte:not(.ca-js) .ca-pied,.cherche .ca-pied{display:none}
+.ca-pied button{flex:1;background:none;border:0;cursor:pointer;font:700 10px/1.3 var(--f-body);letter-spacing:.18em;text-transform:uppercase;color:#8A5F2B;padding:14px 0;transition:color .3s}
+.ca-pied .ca-prev{text-align:left}.ca-pied .ca-next{text-align:right}
+.ca-pied button:hover{color:#17100A}
+.ca-pos{font-family:var(--f-display);font-size:14px;color:#6B5A48;white-space:nowrap}
 
 /* ── réserver ─────────────────────────── */
 .book{position:relative;padding:120px 0;overflow:hidden}
@@ -465,7 +512,6 @@ footer{background:#0B0704}
   .dw-side .ph{display:none}
   .mani .grid,.bar .grid,.book .grid{grid-template-columns:1fr;gap:40px}
   .origins{grid-template-columns:repeat(2,1fr)}
-  .menu-list{column-count:1}
 }
 @media(max-width:720px){
   .burger .lbl{display:none}
@@ -474,16 +520,20 @@ footer{background:#0B0704}
   .nav-right .btn{white-space:nowrap;padding:14px 18px;letter-spacing:.14em}
   .dw-in{padding:110px 24px 50px}
   .mani,.sigs,.bar{padding:76px 0}
-  .carte{padding-top:76px}
+  .carte{padding:76px 0 80px}
+  .ca-card{margin:0 12px;padding:10px}
+  .ca-in{padding:32px 20px 18px}
+  .menu-list.deux{grid-template-columns:minmax(0,1fr)}
+  .ca-js .grp.vu .ca-orn i,.ca-orn i{width:50px}
+  .ca-rub{gap:0 16px}
   .terroir{padding:76px 0}
   .plate{grid-template-columns:1fr;gap:10px;padding:30px 0}
   .plate .n{font-size:1.5rem;opacity:1}
   .plate .pr{margin-top:6px}
   .plate .pr small{text-align:left}
   .origins{grid-template-columns:1fr}
-  .tabset button{padding:15px 16px;font-size:10px;letter-spacing:.14em}
-  .search{flex:1 1 100%}
-  .grp h3::before,.grp h3::after{width:8%}
+  .tabset{gap:24px}
+  .tabset button{font-size:1.2rem}
   .book form{grid-template-columns:1fr}
   .band{height:46vh}
 }
@@ -695,27 +745,37 @@ footer{background:#0B0704}
   </div>
 
   <div class="tools">
-    <div class="wrap in">
-      <div class="tabset" role="tablist">
-        <button class="on" data-p="c" role="tab" aria-selected="true" data-t="tc">Cuisine</button>
-        <button data-p="b" role="tab" aria-selected="false" data-t="tbo">Bar &amp; cave</button>
-      </div>
-      <div class="search">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
-        <label for="q" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)" data-t="qlab">Rechercher</label>
-        <input type="search" id="q" placeholder="Rechercher un plat, un cocktail…" data-ph="Rechercher un plat, un cocktail…">
-      </div>
+    <div class="tabset" role="tablist">
+      <button class="on" data-p="c" role="tab" aria-selected="true" data-t="tc">Cuisine</button>
+      <button data-p="b" role="tab" aria-selected="false" data-t="tbo">Bar &amp; cave</button>
+    </div>
+    <div class="search">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+      <label for="q" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)" data-t="qlab">Rechercher</label>
+      <input type="search" id="q" placeholder="Rechercher un plat, un cocktail…" data-ph="Rechercher un plat, un cocktail…">
     </div>
   </div>
 
-  <div class="wrap">
-    <div class="pane on" id="pane-c">
+{{RUB_C}}
+{{RUB_B}}
+
+  <div class="ca-card">
+    <div class="ca-in">
+      <div class="ca-wm" aria-hidden="true"><i></i><i></i></div>
+      <span class="ca-marque" data-t="cam">Hôtel Evannath · La table d'Assinie</span>
+      <div class="pane on" id="pane-c">
 {{CUISINE}}
-    </div>
-    <div class="pane" id="pane-b">
+      </div>
+      <div class="pane" id="pane-b">
 {{BOISSONS}}
+      </div>
+      <p class="nores" id="nores" data-t="nr">Aucun résultat. Essayez « poulet », « mojito » ou « chocolat ».</p>
+      <div class="ca-pied">
+        <button type="button" class="ca-prev" aria-label="Rubrique précédente">← <span></span></button>
+        <span class="ca-pos" aria-live="polite"></span>
+        <button type="button" class="ca-next" aria-label="Rubrique suivante"><span></span> →</button>
+      </div>
     </div>
-    <p class="nores" id="nores" data-t="nr">Aucun résultat. Essayez « poulet », « mojito » ou « chocolat ».</p>
   </div>
 </section>
 
@@ -788,12 +848,60 @@ document.querySelectorAll('.menu-list>li>span').forEach(function(s){
 
 var panes={c:document.getElementById('pane-c'),b:document.getElementById('pane-b')};
 var q=document.getElementById('q');
+
+/* ── La carte imprimée : une rubrique à la fois ── */
+var carte=document.getElementById('carte');
+carte.classList.add('ca-js');
+var wm=carte.querySelectorAll('.ca-wm i'),wmk=0,courant={c:'c0',b:'b0'},minuteur;
+var calme=matchMedia('(prefers-reduced-motion:reduce)').matches;
+function paneOn(){return carte.querySelector('.pane.on')}
+function grps(){return [].slice.call(paneOn().querySelectorAll('.grp'))}
+function nom(g){var b=carte.querySelector('.ca-rub button[data-g="'+g.id+'"]');return b?b.textContent.trim():''}
+function pied(){
+  var l=grps(),n=l.length,i=l.indexOf(paneOn().querySelector('.grp.on'));if(i<0)return;
+  carte.querySelector('.ca-pos').textContent=l[i].dataset.n+' / '+l[n-1].dataset.n;
+  carte.querySelector('.ca-prev span').textContent=nom(l[(i-1+n)%n]);
+  carte.querySelector('.ca-next span').textContent=nom(l[(i+1)%n]);
+}
+function poser(g){
+  courant[g.parentNode.id.slice(5)]=g.id;
+  g.parentNode.querySelectorAll('.grp').forEach(function(x){if(x!==g)x.classList.remove('on','vu')});
+  g.classList.add('on');
+  void g.offsetWidth;
+  setTimeout(function(){g.classList.add('vu')},30);
+  // le filigrane passe d'un calque a l'autre ; l'image n'est chargee qu'ici
+  wmk^=1;wm[wmk].style.backgroundImage="url('"+g.dataset.bg+"')";
+  wm[wmk].classList.add('on');wm[wmk^1].classList.remove('on');
+  carte.querySelectorAll('.ca-rub button').forEach(function(b){var on=b.dataset.g===g.id;b.classList.toggle('on',on);b.setAttribute('aria-current',on?'true':'false')});
+  pied();
+}
+function aller(id){
+  var g=document.getElementById(id),cur=paneOn().querySelector('.grp.on');if(!g||g===cur)return;
+  clearTimeout(minuteur);
+  if(cur&&!calme){cur.classList.remove('vu');minuteur=setTimeout(function(){poser(g)},260)}
+  else poser(g);
+}
+function pas(d){var l=grps(),i=l.indexOf(paneOn().querySelector('.grp.on'));aller(l[(i+d+l.length)%l.length].id)}
+carte.querySelectorAll('.ca-rub button').forEach(function(b){b.onclick=function(){aller(b.dataset.g)}});
+carte.querySelector('.ca-prev').onclick=function(){pas(-1)};
+carte.querySelector('.ca-next').onclick=function(){pas(1)};
+
 document.querySelectorAll('.tabset button').forEach(function(b){b.onclick=function(){
   var p=b.dataset.p;
   document.querySelectorAll('.tabset button').forEach(function(x){x.classList.toggle('on',x===b);x.setAttribute('aria-selected',x===b)});
   for(var k in panes){panes[k].classList.toggle('on',k===p)}
+  carte.querySelectorAll('.ca-rub').forEach(function(n){n.classList.toggle('on',n.dataset.p===p)});
+  var g=document.getElementById(courant[p]);g.classList.remove('vu');poser(g);
   if(q.value&&!b.dataset.auto)filter();
 }});
+// un lien direct vers une rubrique (#c3, #b1…) l'ouvre
+(function(){
+  var h=location.hash.slice(1),g=h&&document.getElementById(h);
+  if(g&&g.classList.contains('grp')){
+    var p=g.parentNode.id.slice(5);courant[p]=h;
+    if(p!=='c')document.querySelector('.tabset button[data-p="'+p+'"]').click();else poser(g);
+  }else poser(document.getElementById('c0'));
+})();
 
 function norm(s){return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'')}
 function clearMarks(li){li.querySelectorAll('mark').forEach(function(m){m.replaceWith(document.createTextNode(m.textContent))});li.normalize()}
@@ -830,6 +938,7 @@ function filter(){
     }
   }
   document.getElementById('nores').classList.toggle('on',!!t&&!found);
+  carte.classList.toggle('cherche',!!t);
 }
 var deb; q.addEventListener('input',function(){clearTimeout(deb);deb=setTimeout(filter,140)});
 
@@ -896,7 +1005,7 @@ k2:"Le Sensationnel",k2i:"Lemon · lemon verbena · cinnamon · ginger · kiwi �
 wn:"Twelve alcohol-free cocktails made with the same care, a cellar of bordeaux and reds for keeping, and the great whiskies by the glass. The full list is just below.",
 cb2:"Open to all",cb2p:"You do not need to sleep here to dine here.",
 e5:"The menu",h5:"Everything, with prices",p5:"{{TOTAL}} items. Nothing hidden, nothing “on request”.",
-tc:"Food",tbo:"Bar &amp; cellar",nr:"No results. Try “poulet”, “mojito” or “chocolat”.",
+tc:"Food",tbo:"Bar &amp; cellar",cam:"Hôtel Evannath · The table of Assinie",nr:"No results. Try “poulet”, “mojito” or “chocolat”.",
 e6:"Tonight",h6:"Book a table",l1:"Date",l2:"Time",l3:"Covers",l4:"Name",l5:"Phone / WhatsApp",l6:"Confirm the table",
 k3:"Lunch",k4:"Dinner",k5:"Bar &amp; terrace",k5v:"until closing",k6:"Méchoui Party",k6v:"Saturday, from 3 pm",k7:"Bookings"};
 /* 20 · la bande du service du soir s'eveille quand on l'atteint. */
@@ -915,7 +1024,7 @@ EVN_AU_SCROLL('.band.lanternes','vu');
 
 /* La barre de recherche a un texte d aide hors [data-t] : on le traduit
    par le point d extension de LANG_JS. */
-function EVN_LANG(lg){ q.placeholder=(lg==='en')?"Search a dish, a cocktail…":q.dataset.ph; }
+function EVN_LANG(lg){ q.placeholder=(lg==='en')?"Search a dish, a cocktail…":q.dataset.ph; pied(); }
 </script>
 </body>
 </html>

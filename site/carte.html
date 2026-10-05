@@ -531,50 +531,97 @@ header.scrolled .brand small{opacity:0}
 .cocktail .ing{font-size:10.5px;letter-spacing:.19em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-top:10px;line-height:1.9}
 .winenote{border-left:2px solid var(--bronze);padding:6px 0 6px 22px;font-size:14.5px;color:#B4A794;font-style:italic}
 
-/* ── la carte ─────────────────────────── */
-.carte{background:var(--bark);padding:110px 0 0;border-top:1px solid var(--line)}
-.carte .head{text-align:center;margin-bottom:44px}
+/* ── la carte : « la carte imprimée » ───────────────────────────────
+   Une rubrique a la fois, sur un menu creme a double filet pose sur la
+   nuit. La photo de la rubrique passe en filigrane sepia dans le papier.
+   Tout ce qui cache ou anime depend de .ca-js, pose par le script : sans
+   lui, toutes les rubriques s'empilent sur la carte, lisibles.
+   Le creme et le bronze fonce (#8A5F2B) sont ceux du reste du site. */
+.carte{background:radial-gradient(ellipse at 50% 30%,var(--bark-3),var(--night) 70%);padding:110px 0 120px;border-top:1px solid var(--line)}
+.carte .head{text-align:center;margin-bottom:40px}
 .carte .head p{max-width:52ch;margin:18px auto 0;color:#B4A794}
-/* Les barres de filtres ne sont plus collantes : voir _chrome.py. */
-.tools{
-  background:var(--bark-2);
-  border-block:1px solid var(--line);margin-bottom:64px
-}
-.tools .in{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;padding-top:13px;padding-bottom:13px}
-.tabset{display:flex;gap:6px;flex-wrap:wrap}
-.tabset button{background:none;border:1px solid transparent;color:var(--muted);font:700 10.5px/1 var(--f-body);letter-spacing:.2em;text-transform:uppercase;padding:15px 22px;cursor:pointer;transition:.3s}
-.tabset button:hover{color:var(--bronze)}
-.tabset button.on{border-color:var(--bronze);color:var(--bronze)}
-.search{position:relative;flex:0 0 250px;max-width:100%}
+.tools{max-width:900px;margin:0 auto 22px;padding:0 24px;display:flex;flex-direction:column;align-items:center;gap:22px}
+.tabset{display:flex;gap:34px}
+.tabset button{white-space:nowrap;background:none;border:0;border-bottom:1px solid transparent;color:var(--muted);font:400 1.4rem/1.2 var(--f-display);padding:6px 0;cursor:pointer;transition:color .4s,border-color .4s}
+.tabset button:hover{color:var(--cream)}
+.tabset button.on{color:var(--cream);border-color:var(--bronze)}
+.search{position:relative;width:300px;max-width:100%}
 .search input{width:100%;min-height:44px;background:transparent;border:0;border-bottom:1px solid var(--line);color:var(--cream);font:400 14px/1.4 var(--f-body);padding:11px 6px 11px 30px;outline:none;transition:.3s}
 .search input:focus{border-color:var(--bronze)}
 .search svg{position:absolute;left:4px;top:50%;transform:translateY(-50%);width:15px;height:15px;stroke:var(--bronze);fill:none;stroke-width:1.5}
 
+/* Les rubriques : un losange se pose devant celle qu'on lit. */
+.ca-rub{display:none;flex-wrap:wrap;justify-content:center;gap:2px 22px;max-width:960px;margin:0 auto 26px;padding:0 24px;transition:opacity .4s}
+.ca-rub.on{display:flex}
+.cherche .ca-rub{opacity:.35;pointer-events:none}
+.ca-rub button{display:flex;align-items:center;gap:9px;background:none;border:0;padding:12px 0;cursor:pointer;font:700 10.5px/1 var(--f-body);letter-spacing:.2em;text-transform:uppercase;color:var(--muted);transition:color .4s}
+.ca-rub button::before{content:"";width:6px;height:6px;background:var(--bronze-2);transform:rotate(45deg) scale(0);transition:transform .5s var(--ease-out)}
+.ca-rub button:hover{color:var(--cream)}
+.ca-rub button.on{color:var(--bronze-2)}
+.ca-rub button.on::before{transform:rotate(45deg) scale(1)}
+
+/* La carte : papier creme, filet exterieur et filet interieur (outline). */
+.ca-card{max-width:800px;margin:0 auto;background:#F6EEE2;padding:14px;box-shadow:0 40px 80px -30px rgba(0,0,0,.8)}
+.ca-in{position:relative;isolation:isolate;overflow:hidden;border:1px solid rgba(138,95,43,.55);outline:1px solid rgba(138,95,43,.3);outline-offset:-6px;padding:44px 56px 26px;color:#2A1E13;text-align:center}
+.ca-marque{display:block;font-size:9.5px;letter-spacing:.5em;text-transform:uppercase;color:#8A5F2B;font-weight:700}
+/* Le filigrane : deux calques qui se relaient, pour un fondu sans trou.
+   multiply + sepia : la photo s'imprime DANS le papier, au lieu de s'y
+   poser. Le masque l'efface vers les filets. */
+.ca-wm{position:absolute;inset:0;z-index:-1;pointer-events:none;
+  -webkit-mask-image:radial-gradient(ellipse 70% 65% at 50% 55%,#000 30%,transparent 100%);
+  mask-image:radial-gradient(ellipse 70% 65% at 50% 55%,#000 30%,transparent 100%)}
+.ca-wm i{position:absolute;inset:0;background:center/cover no-repeat;mix-blend-mode:multiply;
+  filter:grayscale(1) sepia(.55) contrast(1.15) brightness(1.05);opacity:0;transform:scale(1);
+  transition:opacity 1.4s ease,transform 12s var(--ease-out)}
+.ca-wm i.on{opacity:.16;transform:scale(1.06)}
+.cherche .ca-wm{display:none}
+
 .pane{display:none}
 .pane.on{display:block}
-.grp{margin-bottom:64px;scroll-margin-top:150px;padding-bottom:32px}
-.grp h3{
-  font-family:var(--f-display);font-size:1.05rem;font-weight:400;letter-spacing:.26em;text-transform:uppercase;
-  color:var(--bronze);text-align:center;margin-bottom:34px;position:relative
-}
-.grp h3::before,.grp h3::after{content:"";position:absolute;top:50%;width:22%;height:1px;background:var(--line)}
-.grp h3::before{left:0}.grp h3::after{right:0}
-.grp h3 em{font-style:normal;font-family:var(--f-body);font-size:.66em;letter-spacing:.16em;color:var(--muted);font-weight:600}
-.menu-list{list-style:none;column-count:2;column-gap:56px}
-.menu-list li{break-inside:avoid;padding:0 0 26px;display:flex;gap:14px;align-items:baseline}
+.grp{padding-top:22px;scroll-margin-top:150px}
+.ca-js .grp{display:none}
+.ca-js .grp.on,.ca-js.cherche .grp{display:block}
+.carte:not(.ca-js) .grp+.grp,.cherche .grp+.grp{margin-top:40px;border-top:1px solid rgba(138,95,43,.25);padding-top:40px}
+.ca-num{display:block;font-family:var(--f-display);font-size:15px;color:#8A5F2B}
+.grp h3{font-family:var(--f-display);font-weight:400;font-size:clamp(1.8rem,3.6vw,2.4rem);line-height:1.1;color:#17100A;margin-top:6px;letter-spacing:.01em}
+.grp h3 em{display:block;font-style:normal;font-family:var(--f-body);font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:#6B5A48;font-weight:600;margin-top:10px}
+.ca-orn{display:flex;align-items:center;justify-content:center;gap:12px;margin:18px 0 30px}
+.ca-orn i{height:1px;width:90px;background:#8A5F2B}
+.ca-orn b{width:7px;height:7px;border:1px solid #8A5F2B;transform:rotate(45deg)}
+
+.menu-list{list-style:none;display:grid;grid-template-columns:minmax(0,1fr);gap:24px 40px}
+.menu-list.deux{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.menu-list li{display:flex;flex-direction:column;align-items:center;gap:4px}
 .menu-list li.hide{display:none}
-.menu-list li>div{flex:1;min-width:0}
-.menu-list b{display:block;font-family:var(--f-display);font-weight:400;font-size:1.12rem;color:var(--cream);line-height:1.3}
-.menu-list em{display:block;font-style:italic;font-size:13.5px;color:var(--muted);margin-top:5px;line-height:1.55}
-.menu-list mark{background:rgba(185,138,80,.3);color:var(--cream);padding:0 2px}
-.menu-list>li>span{
-  font-family:var(--f-display);font-size:1.12rem;color:var(--bronze);white-space:nowrap;
-  font-variant-numeric:tabular-nums;flex:0 0 auto
-}
-.menu-list>li>span i{font-style:normal;font-family:var(--f-body);font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:700}
-.cur{font-size:.58em;color:var(--muted);letter-spacing:.06em}
-.nores{display:none;padding:50px 0;color:var(--muted);font-size:15px;text-align:center}
+.menu-list li>div{display:flex;flex-direction:column;align-items:center;gap:4px}
+.menu-list b{font-family:var(--f-display);font-weight:400;font-size:1.2rem;line-height:1.25;color:#17100A;text-wrap:balance}
+.menu-list em{font-style:italic;font-size:13px;color:#6B5A48;line-height:1.5;text-wrap:balance}
+.menu-list mark{background:rgba(185,138,80,.3);color:inherit;padding:0 2px}
+.menu-list>li>span{font-size:11px;letter-spacing:.22em;color:#8A5F2B;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap;margin-top:2px}
+.menu-list>li>span i{font-style:normal;text-transform:uppercase}
+.cur{font-size:inherit;color:inherit;letter-spacing:inherit}
+.nores{display:none;padding:30px 0 10px;color:#6B5A48;font-size:15px;text-align:center}
 .nores.on{display:block}
+
+/* L'animation de rubrique : a la sortie, tout s'efface en .25 s ; a
+   l'entree (.vu), le titre se resserre, les filets se tracent, et les
+   plats montent un a un, en sortant du flou. --i est le rang du plat. */
+.ca-js .grp .ca-num,.ca-js .grp h3{opacity:0;letter-spacing:.22em;transition:opacity .25s ease,letter-spacing .25s ease}
+.ca-js .grp.vu .ca-num,.ca-js .grp.vu h3{opacity:1;letter-spacing:.01em;transition:opacity .8s var(--ease-out),letter-spacing 1.1s var(--ease-out)}
+.ca-js .grp .ca-orn i{width:0;transition:width .25s ease}
+.ca-js .grp.vu .ca-orn i{width:90px;transition:width 1s var(--ease-draw) .2s}
+.ca-js .menu-list li{opacity:0;transform:translateY(16px);filter:blur(5px);transition:opacity .25s ease,transform .25s ease,filter .25s ease}
+.ca-js .grp.vu .menu-list li{opacity:1;transform:none;filter:none;
+  transition:opacity .7s var(--ease-out) calc(120ms + var(--i,0) * 55ms),transform .9s var(--ease-out) calc(120ms + var(--i,0) * 55ms),filter .7s ease calc(120ms + var(--i,0) * 55ms)}
+.ca-js.cherche .grp .ca-num,.ca-js.cherche .grp h3,.ca-js.cherche .menu-list li{opacity:1;letter-spacing:.01em;transform:none;filter:none;transition:none}
+.ca-js.cherche .grp .ca-orn i{width:90px;transition:none}
+
+.ca-pied{display:flex;justify-content:space-between;align-items:center;gap:12px;border-top:1px solid rgba(138,95,43,.25);padding-top:16px;margin-top:34px}
+.carte:not(.ca-js) .ca-pied,.cherche .ca-pied{display:none}
+.ca-pied button{flex:1;background:none;border:0;cursor:pointer;font:700 10px/1.3 var(--f-body);letter-spacing:.18em;text-transform:uppercase;color:#8A5F2B;padding:14px 0;transition:color .3s}
+.ca-pied .ca-prev{text-align:left}.ca-pied .ca-next{text-align:right}
+.ca-pied button:hover{color:#17100A}
+.ca-pos{font-family:var(--f-display);font-size:14px;color:#6B5A48;white-space:nowrap}
 
 /* ── réserver ─────────────────────────── */
 .book{position:relative;padding:120px 0;overflow:hidden}
@@ -667,7 +714,6 @@ footer{background:#0B0704}
   .dw-side .ph{display:none}
   .mani .grid,.bar .grid,.book .grid{grid-template-columns:1fr;gap:40px}
   .origins{grid-template-columns:repeat(2,1fr)}
-  .menu-list{column-count:1}
 }
 @media(max-width:720px){
   .burger .lbl{display:none}
@@ -676,16 +722,20 @@ footer{background:#0B0704}
   .nav-right .btn{white-space:nowrap;padding:14px 18px;letter-spacing:.14em}
   .dw-in{padding:110px 24px 50px}
   .mani,.sigs,.bar{padding:76px 0}
-  .carte{padding-top:76px}
+  .carte{padding:76px 0 80px}
+  .ca-card{margin:0 12px;padding:10px}
+  .ca-in{padding:32px 20px 18px}
+  .menu-list.deux{grid-template-columns:minmax(0,1fr)}
+  .ca-js .grp.vu .ca-orn i,.ca-orn i{width:50px}
+  .ca-rub{gap:0 16px}
   .terroir{padding:76px 0}
   .plate{grid-template-columns:1fr;gap:10px;padding:30px 0}
   .plate .n{font-size:1.5rem;opacity:1}
   .plate .pr{margin-top:6px}
   .plate .pr small{text-align:left}
   .origins{grid-template-columns:1fr}
-  .tabset button{padding:15px 16px;font-size:10px;letter-spacing:.14em}
-  .search{flex:1 1 100%}
-  .grp h3::before,.grp h3::after{width:8%}
+  .tabset{gap:24px}
+  .tabset button{font-size:1.2rem}
   .book form{grid-template-columns:1fr}
   .band{height:46vh}
 }
@@ -907,194 +957,251 @@ footer{background:#0B0704}
   </div>
 
   <div class="tools">
-    <div class="wrap in">
-      <div class="tabset" role="tablist">
-        <button class="on" data-p="c" role="tab" aria-selected="true" data-t="tc">Cuisine</button>
-        <button data-p="b" role="tab" aria-selected="false" data-t="tbo">Bar &amp; cave</button>
-      </div>
-      <div class="search">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
-        <label for="q" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)" data-t="qlab">Rechercher</label>
-        <input type="search" id="q" placeholder="Rechercher un plat, un cocktail…" data-ph="Rechercher un plat, un cocktail…">
-      </div>
+    <div class="tabset" role="tablist">
+      <button class="on" data-p="c" role="tab" aria-selected="true" data-t="tc">Cuisine</button>
+      <button data-p="b" role="tab" aria-selected="false" data-t="tbo">Bar &amp; cave</button>
+    </div>
+    <div class="search">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+      <label for="q" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)" data-t="qlab">Rechercher</label>
+      <input type="search" id="q" placeholder="Rechercher un plat, un cocktail…" data-ph="Rechercher un plat, un cocktail…">
     </div>
   </div>
 
-  <div class="wrap">
-    <div class="pane on" id="pane-c">
-      <section class="grp" id="c0">
-        <h3 data-t="mc0">Nos entrées</h3>
-        <ul class="menu-list">
-        <li><div><b data-t="mc2">Salade d'avocat aux fruits de mer, chips de banane</b><em data-t="mc1">Laitue, chips de banane, avocat, crevette, oignon, olive noire, sauce aurore</em></div><span>6 000</span></li>
-        <li><div><b data-t="mc4">Salade César Babi</b><em data-t="mc3">Salade, œuf de caille, parmesan, croûton, poulet fumé effiloché</em></div><span>7 000</span></li>
-        <li><div><b data-t="mc6">Salade croquante d'Assinie, maquereau fumé</b><em data-t="mc5">Crudités, œuf dur, maïs, gingembre séché, maquereau fumé, vinaigrette maison</em></div><span>5 000</span></li>
-        <li><div><b data-t="mc8">Salade de la ferme +</b><em data-t="mc7">Laitue, jambon blanc, pomme de terre, concombre, œuf poché, tomate, fromage</em></div><span>5 000</span></li>
-        <li><div><b data-t="mc10">Salade exotique, poulet fumé et œuf poché</b><em data-t="mc9">Œuf poché, carotte, haricot vert, concombre, tomate cerise, poulet fumé</em></div><span>4 500</span></li>
-        <li><div><b data-t="mc12">Salade Evannath, poisson magnin sec</b><em data-t="mc11">Laitue, concombre, magnin sec, tomate, carotte, haricot vert, thon, parmesan</em></div><span>4 500</span></li>
-        <li><div><b data-t="mc13">Salade de la ferme</b><em data-t="mc7">Laitue, jambon blanc, pomme de terre, concombre, œuf poché, tomate, fromage</em></div><span>4 500</span></li>
-        <li><div><b data-t="mc15">Bouillie de couscous</b><em data-t="mc14">Couscous, beurre, lait, sucre, miel, sucre vanillé</em></div><span>4 500</span></li>
-        </ul>
-      </section>
-      <section class="grp" id="c1">
-        <h3 data-t="mc16">Fruits de mer &amp; poissons</h3>
-        <ul class="menu-list">
-        <li><div><b data-t="mc17">Tagliatelles aux fruits de mer</b></div><span>15 000</span></li>
-        <li><div><b data-t="mc19">Filet de capitaine en papillote</b><em data-t="mc18">Riz au curcuma</em></div><span>14 000</span></li>
-        <li><div><b data-t="mc21">Gambas flambées façon tikka</b><em data-t="mc20">Gratin de pommes</em></div><span>14 000</span></li>
-        <li><div><b data-t="mc23">Môgô braisé aux petits légumes</b><em data-t="mc22">Alloco ou attiéké</em></div><span>14 000</span></li>
-        <li><div><b data-t="mc26">Casserole de la pêche bassamoise</b><em data-t="mc24">Attiéké huile rouge · Nous consulter</em></div><span><i data-t="mc25">Nous consulter</i></span></li>
-        </ul>
-      </section>
-      <section class="grp" id="c2">
-        <h3 data-t="mc27">Dégustations familiales <em>· 5 personnes</em></h3>
-        <ul class="menu-list">
-        <li><div><b data-t="mc28">Thiéboudiène, poisson à la sénégalaise</b></div><span>50 000</span></li>
-        <li><div><b data-t="mc30">Mafé au bœuf fumé</b><em data-t="mc29">Riz étuvé</em></div><span>45 000</span></li>
-        <li><div><b data-t="mc31">Soupe de queue de bœuf au gnangnan</b><em data-t="mc29">Riz étuvé</em></div><span>45 000</span></li>
-        <li><div><b data-t="mc33">Coulant de palmier au poulet fumé</b><em data-t="mc32">Foutou de banane plantain</em></div><span>40 000</span></li>
-        <li><div><b data-t="mc35">Gibier sauce gouagouassou</b><em data-t="mc34">Foutou ou riz étuvé</em></div><span>40 000</span></li>
-        <li><div><b data-t="mc36">Duo patate-épinard, queue de bœuf fumée</b><em data-t="mc29">Riz étuvé</em></div><span>32 000</span></li>
-        <li><div><b data-t="mc38">Soumara lafri au poulet</b><em data-t="mc37">Riz</em></div><span>30 000</span></li>
-        <li><div><b data-t="mc39">Akpessi de poisson fumé, bâton de banane aux fleurs de piment</b></div><span>30 000</span></li>
-        <li><div><b data-t="mc41">Tajine d'agneau aux prunes</b><em data-t="mc40">Couscous · digestif offert · Nous consulter</em></div><span><i data-t="mc25">Nous consulter</i></span></li>
-        </ul>
-      </section>
-      <section class="grp" id="c3">
-        <h3 data-t="mc42">Viandes blanches</h3>
-        <ul class="menu-list">
-        <li><div><b data-t="mc44">Cordon bleu Evannath</b><em data-t="mc43">Féroce de manioc, sauce tartare</em></div><span>14 000</span></li>
-        <li><div><b data-t="mc45">Kedjenou de poulet africain à la citronnelle</b><em>Attiéké</em></div><span>12 000</span></li>
-        <li><div><b data-t="mc47">Crème de curry au poulet, gingembre séché</b><em data-t="mc46">Riz persillé</em></div><span>12 000</span></li>
-        <li><div><b data-t="mc49">Brochette de poulet marinée au soumara, cuite au feu de bois</b><em data-t="mc48">Igname frite maison, parmesane</em></div><span>10 000</span></li>
-        <li><div><b data-t="mc50">Selim de poulet enrobé de kankankan au feu de bois</b><em>Alloco</em></div><span>9 000</span></li>
-        </ul>
-      </section>
-      <section class="grp" id="c4">
-        <h3 data-t="mc51">Viandes rouges</h3>
-        <ul class="menu-list">
-        <li><div><b data-t="mc53">Fondant de souris d'agneau au miel de Tafiré</b><em data-t="mc52">Pommes grenaille</em></div><span>21 000</span></li>
-        <li><div><b data-t="mc55">Filet de bœuf au jus corsé de cacao</b><em data-t="mc54">Écrasé de patate douce</em></div><span>15 000</span></li>
-        <li><div><b data-t="mc57">Dibi d'agneau grillé à la guinéenne</b><em data-t="mc56">Moutarde, oignon, grosses frites</em></div><span>15 000</span></li>
-        <li><div><b data-t="mc59">T-bone grillé aux trois moutardes</b><em data-t="mc58">Légumes grillés</em></div><span>15 000</span></li>
-        </ul>
-      </section>
-      <section class="grp" id="c5">
-        <h3>Pizzas</h3>
-        <ul class="menu-list">
-        <li><div><b data-t="mc60">Tropicale</b></div><span>10 000</span></li>
-        <li><div><b>Royale</b></div><span>10 000</span></li>
-        <li><div><b>Parmentière</b></div><span>10 000</span></li>
-        <li><div><b data-t="mc61">Calabraise</b></div><span>10 000</span></li>
-        </ul>
-      </section>
-      <section class="grp" id="c6">
-        <h3>Desserts</h3>
-        <ul class="menu-list">
-        <li><div><b data-t="mc62">Crème de baobab</b></div><span>6 000</span></li>
-        <li><div><b data-t="mc64">Panna cotta fruitée parfumée</b><em data-t="mc63">Bissap, passion, orange</em></div><span>5 500</span></li>
-        <li><div><b data-t="mc65">Fondant au chocolat au lait de Daloa</b></div><span>5 000</span></li>
-        <li><div><b data-t="mc66">Crème brûlée à la citronnelle</b></div><span>4 500</span></li>
-        <li><div><b data-t="mc67">Dêguê de couscous au miel</b></div><span>4 500</span></li>
-        <li><div><b data-t="mc68">Mousse au chocolat noir et basilic</b></div><span>3 500</span></li>
-        <li><div><b data-t="mc69">Parfait au chocolat</b></div><span>3 500</span></li>
-        <li><div><b data-t="mc70">Assiette de fruits</b></div><span>3 500</span></li>
-        <li><div><b data-t="mc71">Tarte aux fruits</b></div><span>3 500</span></li>
-        <li><div><b data-t="mc72">Coupes de glaces</b></div><span>3 000</span></li>
-        <li><div><b data-t="mc73">Thé Evannath</b></div><span>2 000</span></li>
-        </ul>
-      </section>
+  <nav class="ca-rub on" data-p="c" aria-label="Rubriques">
+    <button type="button" data-g="c0"><span data-t="mc0">Nos entrées</span></button>
+    <button type="button" data-g="c1"><span data-t="mc1">Fruits de mer &amp; poissons</span></button>
+    <button type="button" data-g="c2"><span data-t="mc2">Dégustations familiales</span></button>
+    <button type="button" data-g="c3"><span data-t="mc3">Viandes blanches</span></button>
+    <button type="button" data-g="c4"><span data-t="mc4">Viandes rouges</span></button>
+    <button type="button" data-g="c5"><span>Pizzas</span></button>
+    <button type="button" data-g="c6"><span>Desserts</span></button>
+  </nav>
+  <nav class="ca-rub" data-p="b" aria-label="Rubriques">
+    <button type="button" data-g="b0"><span data-t="mc5">Cocktails signatures</span></button>
+    <button type="button" data-g="b1"><span data-t="mc6">Cocktails avec alcool</span></button>
+    <button type="button" data-g="b2"><span data-t="mc7">Cocktails sans alcool</span></button>
+    <button type="button" data-g="b3"><span data-t="mc8">Spiritueux</span></button>
+    <button type="button" data-g="b4"><span>Digestifs</span></button>
+    <button type="button" data-g="b5"><span data-t="mc9">Apéritifs &amp; bières</span></button>
+    <button type="button" data-g="b6"><span data-t="mc10">Sans alcool</span></button>
+    <button type="button" data-g="b7"><span data-t="mc11">Boissons chaudes</span></button>
+  </nav>
+
+  <div class="ca-card">
+    <div class="ca-in">
+      <div class="ca-wm" aria-hidden="true"><i></i><i></i></div>
+      <span class="ca-marque" data-t="cam">Hôtel Evannath · La table d'Assinie</span>
+      <div class="pane on" id="pane-c">
+        <section class="grp" id="c0" data-n="I" data-bg="img/opt/gal-tab-corbeille-t.jpg">
+          <span class="ca-num">I</span>
+          <h3 data-t="mc0">Nos entrées</h3>
+          <span class="ca-orn" aria-hidden="true"><i></i><b></b><i></i></span>
+          <ul class="menu-list deux">
+          <li style="--i:0"><div><b data-t="mc13">Salade d'avocat aux fruits de mer, chips de banane</b><em data-t="mc12">Laitue, chips de banane, avocat, crevette, oignon, olive noire, sauce aurore</em></div><span>6 000</span></li>
+        <li style="--i:1"><div><b data-t="mc15">Salade César Babi</b><em data-t="mc14">Salade, œuf de caille, parmesan, croûton, poulet fumé effiloché</em></div><span>7 000</span></li>
+        <li style="--i:2"><div><b data-t="mc17">Salade croquante d'Assinie, maquereau fumé</b><em data-t="mc16">Crudités, œuf dur, maïs, gingembre séché, maquereau fumé, vinaigrette maison</em></div><span>5 000</span></li>
+        <li style="--i:3"><div><b data-t="mc19">Salade de la ferme +</b><em data-t="mc18">Laitue, jambon blanc, pomme de terre, concombre, œuf poché, tomate, fromage</em></div><span>5 000</span></li>
+        <li style="--i:4"><div><b data-t="mc21">Salade exotique, poulet fumé et œuf poché</b><em data-t="mc20">Œuf poché, carotte, haricot vert, concombre, tomate cerise, poulet fumé</em></div><span>4 500</span></li>
+        <li style="--i:5"><div><b data-t="mc23">Salade Evannath, poisson magnin sec</b><em data-t="mc22">Laitue, concombre, magnin sec, tomate, carotte, haricot vert, thon, parmesan</em></div><span>4 500</span></li>
+        <li style="--i:6"><div><b data-t="mc24">Salade de la ferme</b><em data-t="mc18">Laitue, jambon blanc, pomme de terre, concombre, œuf poché, tomate, fromage</em></div><span>4 500</span></li>
+        <li style="--i:7"><div><b data-t="mc26">Bouillie de couscous</b><em data-t="mc25">Couscous, beurre, lait, sucre, miel, sucre vanillé</em></div><span>4 500</span></li>
+          </ul>
+        </section>
+        <section class="grp" id="c1" data-n="II" data-bg="img/opt/gal-lag-nuit-t.jpg">
+          <span class="ca-num">II</span>
+          <h3 data-t="mc1">Fruits de mer &amp; poissons</h3>
+          <span class="ca-orn" aria-hidden="true"><i></i><b></b><i></i></span>
+          <ul class="menu-list">
+          <li style="--i:0"><div><b data-t="mc27">Tagliatelles aux fruits de mer</b></div><span>15 000</span></li>
+        <li style="--i:1"><div><b data-t="mc29">Filet de capitaine en papillote</b><em data-t="mc28">Riz au curcuma</em></div><span>14 000</span></li>
+        <li style="--i:2"><div><b data-t="mc31">Gambas flambées façon tikka</b><em data-t="mc30">Gratin de pommes</em></div><span>14 000</span></li>
+        <li style="--i:3"><div><b data-t="mc33">Môgô braisé aux petits légumes</b><em data-t="mc32">Alloco ou attiéké</em></div><span>14 000</span></li>
+        <li style="--i:4"><div><b data-t="mc35">Casserole de la pêche bassamoise</b><em data-t="mc34">Attiéké huile rouge</em></div><span>95 000</span></li>
+          </ul>
+        </section>
+        <section class="grp" id="c2" data-n="III" data-bg="img/opt/gal-tab-dressee-t.jpg">
+          <span class="ca-num">III</span>
+          <h3 data-t="mc36">Dégustations familiales <em>· 5 personnes</em></h3>
+          <span class="ca-orn" aria-hidden="true"><i></i><b></b><i></i></span>
+          <ul class="menu-list deux">
+          <li style="--i:0"><div><b data-t="mc37">Thiéboudiène, poisson à la sénégalaise</b></div><span>50 000</span></li>
+        <li style="--i:1"><div><b data-t="mc39">Mafé au bœuf fumé</b><em data-t="mc38">Riz étuvé</em></div><span>45 000</span></li>
+        <li style="--i:2"><div><b data-t="mc40">Soupe de queue de bœuf au gnangnan</b><em data-t="mc38">Riz étuvé</em></div><span>45 000</span></li>
+        <li style="--i:3"><div><b data-t="mc42">Coulant de palmier au poulet fumé</b><em data-t="mc41">Foutou de banane plantain</em></div><span>40 000</span></li>
+        <li style="--i:4"><div><b data-t="mc44">Gibier sauce gouagouassou</b><em data-t="mc43">Foutou ou riz étuvé</em></div><span>40 000</span></li>
+        <li style="--i:5"><div><b data-t="mc45">Duo patate-épinard, queue de bœuf fumée</b><em data-t="mc38">Riz étuvé</em></div><span>32 000</span></li>
+        <li style="--i:6"><div><b data-t="mc47">Soumara lafri au poulet</b><em data-t="mc46">Riz</em></div><span>30 000</span></li>
+        <li style="--i:7"><div><b data-t="mc48">Akpessi de poisson fumé, bâton de banane aux fleurs de piment</b></div><span>30 000</span></li>
+        <li style="--i:8"><div><b data-t="mc51">Tajine d'agneau aux prunes</b><em data-t="mc49">Couscous · digestif offert</em></div><span><i data-t="mc50">Offert</i></span></li>
+          </ul>
+        </section>
+        <section class="grp" id="c3" data-n="IV" data-bg="img/opt/gal-tab-rotin-t.jpg">
+          <span class="ca-num">IV</span>
+          <h3 data-t="mc3">Viandes blanches</h3>
+          <span class="ca-orn" aria-hidden="true"><i></i><b></b><i></i></span>
+          <ul class="menu-list">
+          <li style="--i:0"><div><b data-t="mc53">Cordon bleu Evannath</b><em data-t="mc52">Féroce de manioc, sauce tartare</em></div><span>14 000</span></li>
+        <li style="--i:1"><div><b data-t="mc54">Kedjenou de poulet africain à la citronnelle</b><em>Attiéké</em></div><span>12 000</span></li>
+        <li style="--i:2"><div><b data-t="mc56">Crème de curry au poulet, gingembre séché</b><em data-t="mc55">Riz persillé</em></div><span>12 000</span></li>
+        <li style="--i:3"><div><b data-t="mc58">Brochette de poulet marinée au soumara, cuite au feu de bois</b><em data-t="mc57">Igname frite maison, parmesane</em></div><span>10 000</span></li>
+        <li style="--i:4"><div><b data-t="mc59">Selim de poulet enrobé de kankankan au feu de bois</b><em>Alloco</em></div><span>9 000</span></li>
+          </ul>
+        </section>
+        <section class="grp" id="c4" data-n="V" data-bg="img/opt/gal-tab-salle-t.jpg">
+          <span class="ca-num">V</span>
+          <h3 data-t="mc4">Viandes rouges</h3>
+          <span class="ca-orn" aria-hidden="true"><i></i><b></b><i></i></span>
+          <ul class="menu-list">
+          <li style="--i:0"><div><b data-t="mc61">Fondant de souris d'agneau au miel de Tafiré</b><em data-t="mc60">Pommes grenaille</em></div><span>21 000</span></li>
+        <li style="--i:1"><div><b data-t="mc63">Filet de bœuf au jus corsé de cacao</b><em data-t="mc62">Écrasé de patate douce</em></div><span>15 000</span></li>
+        <li style="--i:2"><div><b data-t="mc65">Dibi d'agneau grillé à la guinéenne</b><em data-t="mc64">Moutarde, oignon, grosses frites</em></div><span>15 000</span></li>
+        <li style="--i:3"><div><b data-t="mc67">T-bone grillé aux trois moutardes</b><em data-t="mc66">Légumes grillés</em></div><span>15 000</span></li>
+          </ul>
+        </section>
+        <section class="grp" id="c5" data-n="VI" data-bg="img/opt/gal-art-lanterne-t.jpg">
+          <span class="ca-num">VI</span>
+          <h3>Pizzas</h3>
+          <span class="ca-orn" aria-hidden="true"><i></i><b></b><i></i></span>
+          <ul class="menu-list">
+          <li style="--i:0"><div><b data-t="mc68">Tropicale</b></div><span>10 000</span></li>
+        <li style="--i:1"><div><b>Royale</b></div><span>10 000</span></li>
+        <li style="--i:2"><div><b>Parmentière</b></div><span>10 000</span></li>
+        <li style="--i:3"><div><b data-t="mc69">Calabraise</b></div><span>10 000</span></li>
+          </ul>
+        </section>
+        <section class="grp" id="c6" data-n="VII" data-bg="img/opt/gal-tab-fruits-t.jpg">
+          <span class="ca-num">VII</span>
+          <h3>Desserts</h3>
+          <span class="ca-orn" aria-hidden="true"><i></i><b></b><i></i></span>
+          <ul class="menu-list deux">
+          <li style="--i:0"><div><b data-t="mc70">Crème de baobab</b></div><span>6 000</span></li>
+        <li style="--i:1"><div><b data-t="mc72">Panna cotta fruitée parfumée</b><em data-t="mc71">Bissap, passion, orange</em></div><span>5 500</span></li>
+        <li style="--i:2"><div><b data-t="mc73">Fondant au chocolat au lait de Daloa</b></div><span>5 000</span></li>
+        <li style="--i:3"><div><b data-t="mc74">Crème brûlée à la citronnelle</b></div><span>4 500</span></li>
+        <li style="--i:4"><div><b data-t="mc75">Dêguê de couscous au miel</b></div><span>4 500</span></li>
+        <li style="--i:5"><div><b data-t="mc76">Mousse au chocolat noir et basilic</b></div><span>3 500</span></li>
+        <li style="--i:6"><div><b data-t="mc77">Parfait au chocolat</b></div><span>3 500</span></li>
+        <li style="--i:7"><div><b data-t="mc78">Assiette de fruits</b></div><span>3 500</span></li>
+        <li style="--i:8"><div><b data-t="mc79">Tarte aux fruits</b></div><span>3 500</span></li>
+        <li style="--i:9"><div><b data-t="mc80">Coupes de glaces</b></div><span>3 000</span></li>
+        <li style="--i:10"><div><b data-t="mc81">Thé Evannath</b></div><span>2 000</span></li>
+          </ul>
+        </section>
+      </div>
+      <div class="pane" id="pane-b">
+        <section class="grp" id="b0" data-n="I" data-bg="img/opt/gal-tab-cocktail-t.jpg">
+          <span class="ca-num">I</span>
+          <h3 data-t="mc5">Cocktails signatures</h3>
+          <span class="ca-orn" aria-hidden="true"><i></i><b></b><i></i></span>
+          <ul class="menu-list">
+          <li style="--i:0"><div><b>The Fimbu King</b><em data-t="mc82">Gingembre, garcinia kola, miel, gin, triple sec, citron</em></div><span>12 000</span></li>
+        <li style="--i:1"><div><b>Le Sensationnel</b><em data-t="mc83">Citron, verveine citronnelle, cannelle, gingembre, kiwi, menthe, rhum, triple sec</em></div><span>12 000</span></li>
+          </ul>
+        </section>
+        <section class="grp" id="b1" data-n="II" data-bg="img/opt/gal-tab-cocktails-t.jpg">
+          <span class="ca-num">II</span>
+          <h3 data-t="mc6">Cocktails avec alcool</h3>
+          <span class="ca-orn" aria-hidden="true"><i></i><b></b><i></i></span>
+          <ul class="menu-list deux">
+          <li style="--i:0"><div><b>Le Kréol</b><em data-t="mc84">Mangue, citron, gingembre, rhum blanc, rhum ambré</em></div><span>8 500</span></li>
+        <li style="--i:1"><div><b>Exotic Cosmo</b><em data-t="mc85">Cranberry, maracuja, goyave, vanille, vodka</em></div><span>8 500</span></li>
+        <li style="--i:2"><div><b>Mojito</b><em data-t="mc86">Citron, menthe, rhum, sucre de canne, eau gazeuse</em></div><span>8 500</span></li>
+        <li style="--i:3"><div><b>White Lady</b><em data-t="mc87">Gin, triple sec, citron, sirop de canne, blanc d'œuf</em></div><span>8 500</span></li>
+        <li style="--i:4"><div><b>Diamant Éternel</b><em data-t="mc88">Grenadine, banane, lait de coco, goyave, citron</em></div><span>8 500</span></li>
+        <li style="--i:5"><div><b>Tarzan</b><em data-t="mc89">Gin, campari, ananas, citron, soda</em></div><span>8 500</span></li>
+        <li style="--i:6"><div><b>Manguo Love</b><em data-t="mc90">Mangue, goyave, rhum blanc</em></div><span>8 500</span></li>
+        <li style="--i:7"><div><b>Vanilla Lover</b><em data-t="mc91">Vodka, goyave, orange, mangue, vanille</em></div><span>8 500</span></li>
+        <li style="--i:8"><div><b>Southside</b><em data-t="mc92">Gin, basilic frais, citron vert, sirop de canne</em></div><span>8 500</span></li>
+        <li style="--i:9"><div><b>Epi Sour</b><em data-t="mc93">Ananas, orange, passion, kiwi, sirop de fraise, vanille, rhum</em></div><span>8 500</span></li>
+        <li style="--i:10"><div><b>Evan Tropic</b><em data-t="mc94">Pamplemousse, orange, vanille, vodka</em></div><span>8 500</span></li>
+        <li style="--i:11"><div><b>Blue Hawaii</b><em data-t="mc95">Vodka, rhum, curaçao, ananas, limonade</em></div><span>8 500</span></li>
+          </ul>
+        </section>
+        <section class="grp" id="b2" data-n="III" data-bg="img/opt/gal-tab-terrasse-t.jpg">
+          <span class="ca-num">III</span>
+          <h3 data-t="mc7">Cocktails sans alcool</h3>
+          <span class="ca-orn" aria-hidden="true"><i></i><b></b><i></i></span>
+          <ul class="menu-list deux">
+          <li style="--i:0"><div><b data-t="mc97">Fraîcheur Evannath</b><em data-t="mc96">Menthe fraîche, concombre, limonade</em></div><span>6 000</span></li>
+        <li style="--i:1"><div><b data-t="mc99">Exotique</b><em data-t="mc98">Mangue, goyave, citron</em></div><span>6 000</span></li>
+        <li style="--i:2"><div><b>Tropical Breeze</b><em data-t="mc100">Goyave, orange, banane</em></div><span>6 000</span></li>
+        <li style="--i:3"><div><b>The Detox</b><em data-t="mc101">Concombre, citron vert, pamplemousse, menthe fraîche, fenouil</em></div><span>6 000</span></li>
+        <li style="--i:4"><div><b>Virgin Colada</b><em data-t="mc102">Jus d'ananas, lait de coco, citron, sucre vanillé</em></div><span>6 000</span></li>
+        <li style="--i:5"><div><b>Passionné Sour</b><em data-t="mc103">Jus de passion, orange, ananas, pêche, curaçao bleu</em></div><span>6 000</span></li>
+        <li style="--i:6"><div><b>Florida</b><em data-t="mc104">Jus d'orange, sirop de grenadine, citron, ananas</em></div><span>6 000</span></li>
+        <li style="--i:7"><div><b>The Green</b><em data-t="mc105">Sirop de kiwi, citron, menthe, limonade</em></div><span>6 000</span></li>
+        <li style="--i:8"><div><b>Devil's Kiss</b><em data-t="mc106">Goyave, framboise, citron, feuilles de coriandre</em></div><span>6 000</span></li>
+        <li style="--i:9"><div><b>Diamant Éternel</b><em data-t="mc88">Grenadine, banane, lait de coco, goyave, citron</em></div><span>6 000</span></li>
+        <li style="--i:10"><div><b>Sunset Mocktail</b><em data-t="mc107">Pastèque, orange ou clémentine, feuilles de menthe, sprite</em></div><span>6 000</span></li>
+        <li style="--i:11"><div><b>Banana Kiss</b><em data-t="mc108">Banane, mangue, maracuja</em></div><span>6 000</span></li>
+          </ul>
+        </section>
+        <section class="grp" id="b3" data-n="IV" data-bg="img/opt/gal-tab-comptoir-t.jpg">
+          <span class="ca-num">IV</span>
+          <h3 data-t="mc8">Spiritueux</h3>
+          <span class="ca-orn" aria-hidden="true"><i></i><b></b><i></i></span>
+          <ul class="menu-list deux">
+          <li style="--i:0"><div><b>Blue Label</b></div><span>30 000</span></li>
+        <li style="--i:1"><div><b>Whisky</b><em data-t="mc109">Double Black, Chivas 15 ans, Glenfiddich 12 ans, Gentleman Jack</em></div><span>10 000</span></li>
+        <li style="--i:2"><div><b data-t="mc110">Macallan 12 ans</b></div><span>10 000</span></li>
+        <li style="--i:3"><div><b>Whisky</b><em data-t="mc111">Ballantine's 17 ans, Chivas Extra</em></div><span>7 000</span></li>
+        <li style="--i:4"><div><b>Whisky</b><em data-t="mc112">Clan, Red Label, Black Label, Jack Daniel's N°7, Chivas 12 ans, J&amp;B, Jack Honey</em></div><span>5 000</span></li>
+        <li style="--i:5"><div><b>Gin</b><em>Bombay Sapphire, Citadelle Jardin d'Été, Hendrick's</em></div><span>4 000</span></li>
+        <li style="--i:6"><div><b data-t="mc113">Téquila</b><em>Camino, Olmeca blanco</em></div><span>1 500</span></li>
+        <li style="--i:7"><div><b>Vodka</b><em>Absolut, Belvedere</em></div><span>1 000</span></li>
+          </ul>
+        </section>
+        <section class="grp" id="b4" data-n="V" data-bg="img/opt/gal-tab-vin-t.jpg">
+          <span class="ca-num">V</span>
+          <h3>Digestifs</h3>
+          <span class="ca-orn" aria-hidden="true"><i></i><b></b><i></i></span>
+          <ul class="menu-list">
+          <li style="--i:0"><div><b>Hennessy XXO</b></div><span>30 000</span></li>
+        <li style="--i:1"><div><b>Grand Marnier, Cointreau, Godet N°1, Hennessy VS / VSOP</b></div><span>10 000</span></li>
+        <li style="--i:2"><div><b data-t="mc114">Malibu, Get 27, Get 31, Calvados Père Magloire, poire ou mirabelle, limoncello</b></div><span>5 000</span></li>
+        <li style="--i:3"><div><b data-t="mc115">Rhum arrangé maison</b></div><span>3 000</span></li>
+          </ul>
+        </section>
+        <section class="grp" id="b5" data-n="VI" data-bg="img/opt/gal-tab-cave-t.jpg">
+          <span class="ca-num">VI</span>
+          <h3 data-t="mc9">Apéritifs &amp; bières</h3>
+          <span class="ca-orn" aria-hidden="true"><i></i><b></b><i></i></span>
+          <ul class="menu-list">
+          <li style="--i:0"><div><b>Apérol, Baileys, Campari</b><em data-t="mc116">Martini blanc, rouge ou rosé, porto, Pastis 51, Ricard</em></div><span>4 000</span></li>
+        <li style="--i:1"><div><b data-t="mc117">Bières</b><em>Beaufort, Bock, Castel, Desperados, Heineken, Guinness, Tequila, Racine</em></div><span>2 000</span></li>
+          </ul>
+        </section>
+        <section class="grp" id="b6" data-n="VII" data-bg="img/opt/gal-tab-dejeuner-t.jpg">
+          <span class="ca-num">VII</span>
+          <h3 data-t="mc10">Sans alcool</h3>
+          <span class="ca-orn" aria-hidden="true"><i></i><b></b><i></i></span>
+          <ul class="menu-list">
+          <li style="--i:0"><div><b>Red Bull</b></div><span>2 500</span></li>
+        <li style="--i:1"><div><b>San Bitter</b></div><span>2 000</span></li>
+        <li style="--i:2"><div><b data-t="mc118">Jus nature</b></div><span>2 000</span></li>
+        <li style="--i:3"><div><b data-t="mc119">Orangina, Cody's Energy, autres</b></div><span>1 500</span></li>
+        <li style="--i:4"><div><b>Sodas</b><em>Bavaria, Coca-Cola, Sprite, Youki Pomme, Fanta, Moka Café, Coca Zéro</em></div><span>1 000</span></li>
+          </ul>
+        </section>
+        <section class="grp" id="b7" data-n="VIII" data-bg="img/opt/ig-petitdej.jpg">
+          <span class="ca-num">VIII</span>
+          <h3 data-t="mc11">Boissons chaudes</h3>
+          <span class="ca-orn" aria-hidden="true"><i></i><b></b><i></i></span>
+          <ul class="menu-list">
+          <li style="--i:0"><div><b>Nespresso</b></div><span>2 000</span></li>
+        <li style="--i:1"><div><b data-t="mc120">Café</b></div><span>1 500</span></li>
+        <li style="--i:2"><div><b data-t="mc121">Thé</b></div><span>1 000</span></li>
+          </ul>
+        </section>
+      </div>
+      <p class="nores" id="nores" data-t="nr">Aucun résultat. Essayez « poulet », « mojito » ou « chocolat ».</p>
+      <div class="ca-pied">
+        <button type="button" class="ca-prev" aria-label="Rubrique précédente">← <span></span></button>
+        <span class="ca-pos" aria-live="polite"></span>
+        <button type="button" class="ca-next" aria-label="Rubrique suivante"><span></span> →</button>
+      </div>
     </div>
-    <div class="pane" id="pane-b">
-      <section class="grp" id="b0">
-        <h3 data-t="mc74">Cocktails signatures</h3>
-        <ul class="menu-list">
-        <li><div><b>The Fimbu King</b><em data-t="mc75">Gingembre, garcinia kola, miel, gin, triple sec, citron</em></div><span>12 000</span></li>
-        <li><div><b>Le Sensationnel</b><em data-t="mc76">Citron, verveine citronnelle, cannelle, gingembre, kiwi, menthe, rhum, triple sec</em></div><span>12 000</span></li>
-        </ul>
-      </section>
-      <section class="grp" id="b1">
-        <h3 data-t="mc77">Cocktails avec alcool</h3>
-        <ul class="menu-list">
-        <li><div><b>Le Kréol</b><em data-t="mc78">Mangue, citron, gingembre, rhum blanc, rhum ambré</em></div><span>8 500</span></li>
-        <li><div><b>Exotic Cosmo</b><em data-t="mc79">Cranberry, maracuja, goyave, vanille, vodka</em></div><span>8 500</span></li>
-        <li><div><b>Mojito</b><em data-t="mc80">Citron, menthe, rhum, sucre de canne, eau gazeuse</em></div><span>8 500</span></li>
-        <li><div><b>White Lady</b><em data-t="mc81">Gin, triple sec, citron, sirop de canne, blanc d'œuf</em></div><span>8 500</span></li>
-        <li><div><b>Diamant Éternel</b><em data-t="mc82">Grenadine, banane, lait de coco, goyave, citron</em></div><span>8 500</span></li>
-        <li><div><b>Tarzan</b><em data-t="mc83">Gin, campari, ananas, citron, soda</em></div><span>8 500</span></li>
-        <li><div><b>Manguo Love</b><em data-t="mc84">Mangue, goyave, rhum blanc</em></div><span>8 500</span></li>
-        <li><div><b>Vanilla Lover</b><em data-t="mc85">Vodka, goyave, orange, mangue, vanille</em></div><span>8 500</span></li>
-        <li><div><b>Southside</b><em data-t="mc86">Gin, basilic frais, citron vert, sirop de canne</em></div><span>8 500</span></li>
-        <li><div><b>Epi Sour</b><em data-t="mc87">Ananas, orange, passion, kiwi, sirop de fraise, vanille, rhum</em></div><span>8 500</span></li>
-        <li><div><b>Evan Tropic</b><em data-t="mc88">Pamplemousse, orange, vanille, vodka</em></div><span>8 500</span></li>
-        <li><div><b>Blue Hawaii</b><em data-t="mc89">Vodka, rhum, curaçao, ananas, limonade</em></div><span>8 500</span></li>
-        </ul>
-      </section>
-      <section class="grp" id="b2">
-        <h3 data-t="mc90">Cocktails sans alcool</h3>
-        <ul class="menu-list">
-        <li><div><b data-t="mc92">Fraîcheur Evannath</b><em data-t="mc91">Menthe fraîche, concombre, limonade</em></div><span>6 000</span></li>
-        <li><div><b data-t="mc94">Exotique</b><em data-t="mc93">Mangue, goyave, citron</em></div><span>6 000</span></li>
-        <li><div><b>Tropical Breeze</b><em data-t="mc95">Goyave, orange, banane</em></div><span>6 000</span></li>
-        <li><div><b>The Detox</b><em data-t="mc96">Concombre, citron vert, pamplemousse, menthe fraîche, fenouil</em></div><span>6 000</span></li>
-        <li><div><b>Virgin Colada</b><em data-t="mc97">Jus d'ananas, lait de coco, citron, sucre vanillé</em></div><span>6 000</span></li>
-        <li><div><b>Passionné Sour</b><em data-t="mc98">Jus de passion, orange, ananas, pêche, curaçao bleu</em></div><span>6 000</span></li>
-        <li><div><b>Florida</b><em data-t="mc99">Jus d'orange, sirop de grenadine, citron, ananas</em></div><span>6 000</span></li>
-        <li><div><b>The Green</b><em data-t="mc100">Sirop de kiwi, citron, menthe, limonade</em></div><span>6 000</span></li>
-        <li><div><b>Devil's Kiss</b><em data-t="mc101">Goyave, framboise, citron, feuilles de coriandre</em></div><span>6 000</span></li>
-        <li><div><b>Diamant Éternel</b><em data-t="mc82">Grenadine, banane, lait de coco, goyave, citron</em></div><span>6 000</span></li>
-        <li><div><b>Sunset Mocktail</b><em data-t="mc102">Pastèque, orange ou clémentine, feuilles de menthe, sprite</em></div><span>6 000</span></li>
-        <li><div><b>Banana Kiss</b><em data-t="mc103">Banane, mangue, maracuja</em></div><span>6 000</span></li>
-        </ul>
-      </section>
-      <section class="grp" id="b3">
-        <h3 data-t="mc104">Spiritueux</h3>
-        <ul class="menu-list">
-        <li><div><b>Blue Label</b></div><span>30 000</span></li>
-        <li><div><b>Whisky</b><em data-t="mc105">Double Black, Chivas 15 ans, Glenfiddich 12 ans, Gentleman Jack</em></div><span>10 000</span></li>
-        <li><div><b data-t="mc106">Macallan 12 ans</b></div><span>10 000</span></li>
-        <li><div><b>Whisky</b><em data-t="mc107">Ballantine's 17 ans, Chivas Extra</em></div><span>7 000</span></li>
-        <li><div><b>Whisky</b><em data-t="mc108">Clan, Red Label, Black Label, Jack Daniel's N°7, Chivas 12 ans, J&amp;B, Jack Honey</em></div><span>5 000</span></li>
-        <li><div><b>Gin</b><em>Bombay Sapphire, Citadelle Jardin d'Été, Hendrick's</em></div><span>4 000</span></li>
-        <li><div><b data-t="mc109">Téquila</b><em>Camino, Olmeca blanco</em></div><span>1 500</span></li>
-        <li><div><b>Vodka</b><em>Absolut, Belvedere</em></div><span>1 000</span></li>
-        </ul>
-      </section>
-      <section class="grp" id="b4">
-        <h3>Digestifs</h3>
-        <ul class="menu-list">
-        <li><div><b>Hennessy XXO</b></div><span>30 000</span></li>
-        <li><div><b>Grand Marnier, Cointreau, Godet N°1, Hennessy VS / VSOP</b></div><span>10 000</span></li>
-        <li><div><b data-t="mc110">Malibu, Get 27, Get 31, Calvados Père Magloire, poire ou mirabelle, limoncello</b></div><span>5 000</span></li>
-        <li><div><b data-t="mc111">Rhum arrangé maison</b></div><span>3 000</span></li>
-        </ul>
-      </section>
-      <section class="grp" id="b5">
-        <h3 data-t="mc112">Apéritifs &amp; bières</h3>
-        <ul class="menu-list">
-        <li><div><b>Apérol, Baileys, Campari</b><em data-t="mc113">Martini blanc, rouge ou rosé, porto, Pastis 51, Ricard</em></div><span>4 000</span></li>
-        <li><div><b data-t="mc114">Bières</b><em>Beaufort, Bock, Castel, Desperados, Heineken, Guinness, Tequila, Racine</em></div><span>2 000</span></li>
-        </ul>
-      </section>
-      <section class="grp" id="b6">
-        <h3 data-t="mc115">Sans alcool</h3>
-        <ul class="menu-list">
-        <li><div><b>Red Bull</b></div><span>2 500</span></li>
-        <li><div><b>San Bitter</b></div><span>2 000</span></li>
-        <li><div><b data-t="mc116">Jus nature</b></div><span>2 000</span></li>
-        <li><div><b data-t="mc117">Orangina, Cody's Energy, autres</b></div><span>1 500</span></li>
-        <li><div><b>Sodas</b><em>Bavaria, Coca-Cola, Sprite, Youki Pomme, Fanta, Moka Café, Coca Zéro</em></div><span>1 000</span></li>
-        </ul>
-      </section>
-      <section class="grp" id="b7">
-        <h3 data-t="mc118">Boissons chaudes</h3>
-        <ul class="menu-list">
-        <li><div><b>Nespresso</b></div><span>2 000</span></li>
-        <li><div><b data-t="mc119">Café</b></div><span>1 500</span></li>
-        <li><div><b data-t="mc120">Thé</b></div><span>1 000</span></li>
-        </ul>
-      </section>
-    </div>
-    <p class="nores" id="nores" data-t="nr">Aucun résultat. Essayez « poulet », « mojito » ou « chocolat ».</p>
   </div>
 </section>
 
@@ -1703,12 +1810,60 @@ document.querySelectorAll('.menu-list>li>span').forEach(function(s){
 
 var panes={c:document.getElementById('pane-c'),b:document.getElementById('pane-b')};
 var q=document.getElementById('q');
+
+/* ── La carte imprimée : une rubrique à la fois ── */
+var carte=document.getElementById('carte');
+carte.classList.add('ca-js');
+var wm=carte.querySelectorAll('.ca-wm i'),wmk=0,courant={c:'c0',b:'b0'},minuteur;
+var calme=matchMedia('(prefers-reduced-motion:reduce)').matches;
+function paneOn(){return carte.querySelector('.pane.on')}
+function grps(){return [].slice.call(paneOn().querySelectorAll('.grp'))}
+function nom(g){var b=carte.querySelector('.ca-rub button[data-g="'+g.id+'"]');return b?b.textContent.trim():''}
+function pied(){
+  var l=grps(),n=l.length,i=l.indexOf(paneOn().querySelector('.grp.on'));if(i<0)return;
+  carte.querySelector('.ca-pos').textContent=l[i].dataset.n+' / '+l[n-1].dataset.n;
+  carte.querySelector('.ca-prev span').textContent=nom(l[(i-1+n)%n]);
+  carte.querySelector('.ca-next span').textContent=nom(l[(i+1)%n]);
+}
+function poser(g){
+  courant[g.parentNode.id.slice(5)]=g.id;
+  g.parentNode.querySelectorAll('.grp').forEach(function(x){if(x!==g)x.classList.remove('on','vu')});
+  g.classList.add('on');
+  void g.offsetWidth;
+  setTimeout(function(){g.classList.add('vu')},30);
+  // le filigrane passe d'un calque a l'autre ; l'image n'est chargee qu'ici
+  wmk^=1;wm[wmk].style.backgroundImage="url('"+g.dataset.bg+"')";
+  wm[wmk].classList.add('on');wm[wmk^1].classList.remove('on');
+  carte.querySelectorAll('.ca-rub button').forEach(function(b){var on=b.dataset.g===g.id;b.classList.toggle('on',on);b.setAttribute('aria-current',on?'true':'false')});
+  pied();
+}
+function aller(id){
+  var g=document.getElementById(id),cur=paneOn().querySelector('.grp.on');if(!g||g===cur)return;
+  clearTimeout(minuteur);
+  if(cur&&!calme){cur.classList.remove('vu');minuteur=setTimeout(function(){poser(g)},260)}
+  else poser(g);
+}
+function pas(d){var l=grps(),i=l.indexOf(paneOn().querySelector('.grp.on'));aller(l[(i+d+l.length)%l.length].id)}
+carte.querySelectorAll('.ca-rub button').forEach(function(b){b.onclick=function(){aller(b.dataset.g)}});
+carte.querySelector('.ca-prev').onclick=function(){pas(-1)};
+carte.querySelector('.ca-next').onclick=function(){pas(1)};
+
 document.querySelectorAll('.tabset button').forEach(function(b){b.onclick=function(){
   var p=b.dataset.p;
   document.querySelectorAll('.tabset button').forEach(function(x){x.classList.toggle('on',x===b);x.setAttribute('aria-selected',x===b)});
   for(var k in panes){panes[k].classList.toggle('on',k===p)}
+  carte.querySelectorAll('.ca-rub').forEach(function(n){n.classList.toggle('on',n.dataset.p===p)});
+  var g=document.getElementById(courant[p]);g.classList.remove('vu');poser(g);
   if(q.value&&!b.dataset.auto)filter();
 }});
+// un lien direct vers une rubrique (#c3, #b1…) l'ouvre
+(function(){
+  var h=location.hash.slice(1),g=h&&document.getElementById(h);
+  if(g&&g.classList.contains('grp')){
+    var p=g.parentNode.id.slice(5);courant[p]=h;
+    if(p!=='c')document.querySelector('.tabset button[data-p="'+p+'"]').click();else poser(g);
+  }else poser(document.getElementById('c0'));
+})();
 
 function norm(s){return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'')}
 function clearMarks(li){li.querySelectorAll('mark').forEach(function(m){m.replaceWith(document.createTextNode(m.textContent))});li.normalize()}
@@ -1745,6 +1900,7 @@ function filter(){
     }
   }
   document.getElementById('nores').classList.toggle('on',!!t&&!found);
+  carte.classList.toggle('cherche',!!t);
 }
 var deb; q.addEventListener('input',function(){clearTimeout(deb);deb=setTimeout(filter,140)});
 
@@ -1782,7 +1938,7 @@ document.getElementById('tf').addEventListener('submit',function(e){e.preventDef
   });
 });
 
-var EN={sc1:"Finish on WhatsApp",sc2:"Your request is ready — it just needs sending. One tap and it reaches reception, who answer 24/7. You can also call or write.",sc3:"Send on WhatsApp",sc4:"Call reception",sc5:"Write an email",mn:"Menu",n1:"Rooms &amp; Suites",n2:"Experiences",n3:"The table",n4:"The spa",n5:"Offers &amp; Events",n6:"Meetings &amp; groups",n7:"Gallery",n8:"About",n9:"Useful information",n10:"Contact",n11:"Book",dr:"Reservations",mc0:"Starters",mc1:"Lettuce, plantain chips, avocado, prawns, onion, black olives, aurore sauce",mc2:"Avocado and seafood salad, plantain chips",mc3:"Lettuce, quail egg, parmesan, croutons, pulled smoked chicken",mc4:"Babi Caesar salad",mc5:"Raw vegetables, hard-boiled egg, sweetcorn, dried ginger, smoked mackerel, house dressing",mc6:"Assinie crunchy salad, smoked mackerel",mc7:"Lettuce, ham, potato, cucumber, poached egg, tomato, cheese",mc8:"Farmhouse salad +",mc9:"Poached egg, carrot, green beans, cucumber, cherry tomatoes, smoked chicken",mc10:"Exotic salad, smoked chicken and poached egg",mc11:"Lettuce, cucumber, dried magnin, tomato, carrot, green beans, tuna, parmesan",mc12:"Evannath salad, dried magnin fish",mc13:"Farmhouse salad",mc14:"Couscous, butter, milk, sugar, honey, vanilla sugar",mc15:"Couscous porridge",mc16:"Seafood &amp; fish",mc17:"Seafood tagliatelle",mc18:"Turmeric rice",mc19:"Capitaine fillet en papillote",mc20:"Potato gratin",mc21:"Flambéed king prawns, tikka style",mc22:"Alloco or attiéké",mc23:"Braised môgô with vegetables",mc24:"Attiéké with red palm oil · Please ask",mc25:"Please ask",mc26:"Grand-Bassam fisherman's casserole",mc27:"Family sharing dishes <em>· 5 people</em>",mc28:"Thiéboudiène, Senegalese-style fish",mc29:"Steamed rice",mc30:"Smoked beef mafé",mc31:"Oxtail soup with gnangnan",mc32:"Plantain foutou",mc33:"Palm nut sauce with smoked chicken",mc34:"Foutou or steamed rice",mc35:"Game in gouagouassou sauce",mc36:"Sweet potato and spinach duo, smoked oxtail",mc37:"Rice",mc38:"Soumara lafri with chicken",mc39:"Smoked fish akpessi, plantain sticks with chilli flowers",mc40:"Couscous · complimentary digestif · Please ask",mc41:"Lamb tagine with prunes",mc42:"Poultry",mc43:"Cassava féroce, tartare sauce",mc44:"Evannath cordon bleu",mc45:"African chicken kedjenou with lemongrass",mc46:"Parsley rice",mc47:"Creamy chicken curry, dried ginger",mc48:"Homemade yam fries, parmesan",mc49:"Soumara-marinated chicken skewer, wood-fired",mc50:"Wood-fired chicken selim in kankankan spices",mc51:"Red meat",mc52:"Baby potatoes",mc53:"Slow-cooked lamb shank with Tafiré honey",mc54:"Crushed sweet potato",mc55:"Beef fillet, rich cocoa jus",mc56:"Mustard, onion, thick-cut chips",mc57:"Guinean-style grilled lamb dibi",mc58:"Grilled vegetables",mc59:"Grilled T-bone, three mustards",mc60:"Tropical",mc61:"Calabrese",mc62:"Baobab cream",mc63:"Bissap, passion fruit, orange",mc64:"Fragrant fruit panna cotta",mc65:"Daloa milk chocolate fondant",mc66:"Lemongrass crème brûlée",mc67:"Couscous dêguê with honey",mc68:"Dark chocolate and basil mousse",mc69:"Chocolate parfait",mc70:"Fruit plate",mc71:"Fruit tart",mc72:"Ice cream sundaes",mc73:"Evannath tea",mc74:"Signature cocktails",mc75:"Ginger, bitter kola, honey, gin, triple sec, lemon",mc76:"Lemon, lemon verbena, cinnamon, ginger, kiwi, mint, rum, triple sec",mc77:"Cocktails",mc78:"Mango, lemon, ginger, white rum, amber rum",mc79:"Cranberry, passion fruit, guava, vanilla, vodka",mc80:"Lime, mint, rum, cane sugar, soda water",mc81:"Gin, triple sec, lemon, cane syrup, egg white",mc82:"Grenadine, banana, coconut milk, guava, lemon",mc83:"Gin, Campari, pineapple, lemon, soda",mc84:"Mango, guava, white rum",mc85:"Vodka, guava, orange, mango, vanilla",mc86:"Gin, fresh basil, lime, cane syrup",mc87:"Pineapple, orange, passion fruit, kiwi, strawberry syrup, vanilla, rum",mc88:"Grapefruit, orange, vanilla, vodka",mc89:"Vodka, rum, curaçao, pineapple, lemonade",mc90:"Alcohol-free cocktails",mc91:"Fresh mint, cucumber, lemonade",mc92:"Evannath Fresh",mc93:"Mango, guava, lemon",mc94:"Exotic",mc95:"Guava, orange, banana",mc96:"Cucumber, lime, grapefruit, fresh mint, fennel",mc97:"Pineapple juice, coconut milk, lemon, vanilla sugar",mc98:"Passion fruit juice, orange, pineapple, peach, blue curaçao",mc99:"Orange juice, grenadine syrup, lemon, pineapple",mc100:"Kiwi syrup, lemon, mint, lemonade",mc101:"Guava, raspberry, lemon, coriander leaves",mc102:"Watermelon, orange or clementine, mint leaves, Sprite",mc103:"Banana, mango, passion fruit",mc104:"Spirits",mc105:"Double Black, Chivas 15 years, Glenfiddich 12 years, Gentleman Jack",mc106:"Macallan 12 years",mc107:"Ballantine's 17 years, Chivas Extra",mc108:"Clan, Red Label, Black Label, Jack Daniel's No. 7, Chivas 12 years, J&amp;B, Jack Honey",mc109:"Tequila",mc110:"Malibu, Get 27, Get 31, Calvados Père Magloire, pear or mirabelle brandy, limoncello",mc111:"House-infused rum",mc112:"Aperitifs &amp; beers",mc113:"Martini bianco, rosso or rosato, port, Pastis 51, Ricard",mc114:"Beers",mc115:"Soft drinks",mc116:"Fresh juice",mc117:"Orangina, Cody's Energy, others",mc118:"Hot drinks",mc119:"Coffee",mc120:"Tea",qlab:"Search",tb:"Book",
+var EN={sc1:"Finish on WhatsApp",sc2:"Your request is ready — it just needs sending. One tap and it reaches reception, who answer 24/7. You can also call or write.",sc3:"Send on WhatsApp",sc4:"Call reception",sc5:"Write an email",mn:"Menu",n1:"Rooms &amp; Suites",n2:"Experiences",n3:"The table",n4:"The spa",n5:"Offers &amp; Events",n6:"Meetings &amp; groups",n7:"Gallery",n8:"About",n9:"Useful information",n10:"Contact",n11:"Book",dr:"Reservations",mc0:"Starters",mc1:"Seafood &amp; fish",mc2:"Family sharing dishes",mc3:"Poultry",mc4:"Red meat",mc5:"Signature cocktails",mc6:"Cocktails",mc7:"Alcohol-free cocktails",mc8:"Spirits",mc9:"Aperitifs &amp; beers",mc10:"Soft drinks",mc11:"Hot drinks",mc12:"Lettuce, plantain chips, avocado, prawns, onion, black olives, aurore sauce",mc13:"Avocado and seafood salad, plantain chips",mc14:"Lettuce, quail egg, parmesan, croutons, pulled smoked chicken",mc15:"Babi Caesar salad",mc16:"Raw vegetables, hard-boiled egg, sweetcorn, dried ginger, smoked mackerel, house dressing",mc17:"Assinie crunchy salad, smoked mackerel",mc18:"Lettuce, ham, potato, cucumber, poached egg, tomato, cheese",mc19:"Farmhouse salad +",mc20:"Poached egg, carrot, green beans, cucumber, cherry tomatoes, smoked chicken",mc21:"Exotic salad, smoked chicken and poached egg",mc22:"Lettuce, cucumber, dried magnin, tomato, carrot, green beans, tuna, parmesan",mc23:"Evannath salad, dried magnin fish",mc24:"Farmhouse salad",mc25:"Couscous, butter, milk, sugar, honey, vanilla sugar",mc26:"Couscous porridge",mc27:"Seafood tagliatelle",mc28:"Turmeric rice",mc29:"Capitaine fillet en papillote",mc30:"Potato gratin",mc31:"Flambéed king prawns, tikka style",mc32:"Alloco or attiéké",mc33:"Braised môgô with vegetables",mc34:"Attiéké with red palm oil",mc35:"Grand-Bassam fisherman's casserole",mc36:"Family sharing dishes <em>· 5 people</em>",mc37:"Thiéboudiène, Senegalese-style fish",mc38:"Steamed rice",mc39:"Smoked beef mafé",mc40:"Oxtail soup with gnangnan",mc41:"Plantain foutou",mc42:"Palm nut sauce with smoked chicken",mc43:"Foutou or steamed rice",mc44:"Game in gouagouassou sauce",mc45:"Sweet potato and spinach duo, smoked oxtail",mc46:"Rice",mc47:"Soumara lafri with chicken",mc48:"Smoked fish akpessi, plantain sticks with chilli flowers",mc49:"Couscous · complimentary digestif",mc50:"Complimentary",mc51:"Lamb tagine with prunes",mc52:"Cassava féroce, tartare sauce",mc53:"Evannath cordon bleu",mc54:"African chicken kedjenou with lemongrass",mc55:"Parsley rice",mc56:"Creamy chicken curry, dried ginger",mc57:"Homemade yam fries, parmesan",mc58:"Soumara-marinated chicken skewer, wood-fired",mc59:"Wood-fired chicken selim in kankankan spices",mc60:"Baby potatoes",mc61:"Slow-cooked lamb shank with Tafiré honey",mc62:"Crushed sweet potato",mc63:"Beef fillet, rich cocoa jus",mc64:"Mustard, onion, thick-cut chips",mc65:"Guinean-style grilled lamb dibi",mc66:"Grilled vegetables",mc67:"Grilled T-bone, three mustards",mc68:"Tropical",mc69:"Calabrese",mc70:"Baobab cream",mc71:"Bissap, passion fruit, orange",mc72:"Fragrant fruit panna cotta",mc73:"Daloa milk chocolate fondant",mc74:"Lemongrass crème brûlée",mc75:"Couscous dêguê with honey",mc76:"Dark chocolate and basil mousse",mc77:"Chocolate parfait",mc78:"Fruit plate",mc79:"Fruit tart",mc80:"Ice cream sundaes",mc81:"Evannath tea",mc82:"Ginger, bitter kola, honey, gin, triple sec, lemon",mc83:"Lemon, lemon verbena, cinnamon, ginger, kiwi, mint, rum, triple sec",mc84:"Mango, lemon, ginger, white rum, amber rum",mc85:"Cranberry, passion fruit, guava, vanilla, vodka",mc86:"Lime, mint, rum, cane sugar, soda water",mc87:"Gin, triple sec, lemon, cane syrup, egg white",mc88:"Grenadine, banana, coconut milk, guava, lemon",mc89:"Gin, Campari, pineapple, lemon, soda",mc90:"Mango, guava, white rum",mc91:"Vodka, guava, orange, mango, vanilla",mc92:"Gin, fresh basil, lime, cane syrup",mc93:"Pineapple, orange, passion fruit, kiwi, strawberry syrup, vanilla, rum",mc94:"Grapefruit, orange, vanilla, vodka",mc95:"Vodka, rum, curaçao, pineapple, lemonade",mc96:"Fresh mint, cucumber, lemonade",mc97:"Evannath Fresh",mc98:"Mango, guava, lemon",mc99:"Exotic",mc100:"Guava, orange, banana",mc101:"Cucumber, lime, grapefruit, fresh mint, fennel",mc102:"Pineapple juice, coconut milk, lemon, vanilla sugar",mc103:"Passion fruit juice, orange, pineapple, peach, blue curaçao",mc104:"Orange juice, grenadine syrup, lemon, pineapple",mc105:"Kiwi syrup, lemon, mint, lemonade",mc106:"Guava, raspberry, lemon, coriander leaves",mc107:"Watermelon, orange or clementine, mint leaves, Sprite",mc108:"Banana, mango, passion fruit",mc109:"Double Black, Chivas 15 years, Glenfiddich 12 years, Gentleman Jack",mc110:"Macallan 12 years",mc111:"Ballantine's 17 years, Chivas Extra",mc112:"Clan, Red Label, Black Label, Jack Daniel's No. 7, Chivas 12 years, J&amp;B, Jack Honey",mc113:"Tequila",mc114:"Malibu, Get 27, Get 31, Calvados Père Magloire, pear or mirabelle brandy, limoncello",mc115:"House-infused rum",mc116:"Martini bianco, rosso or rosato, port, Pastis 51, Ricard",mc117:"Beers",mc118:"Fresh juice",mc119:"Orangina, Cody's Energy, others",mc120:"Coffee",mc121:"Tea",qlab:"Search",tb:"Book",
 c1:"Home",c2:"The table",eb:"Restaurant &amp; bar · Assinie PK 19",h1e:"of Assinie",
 lede:"The capitaine comes in at first light. The foutou is pounded before noon. At dusk, the rattan lanterns go on above the lagoon.",
 sc:"Explore",e1:"Our cooking",big:"Cooking that makes no apology for being Ivorian.",
@@ -1811,7 +1967,7 @@ k2:"Le Sensationnel",k2i:"Lemon · lemon verbena · cinnamon · ginger · kiwi �
 wn:"Twelve alcohol-free cocktails made with the same care, a cellar of bordeaux and reds for keeping, and the great whiskies by the glass. The full list is just below.",
 cb2:"Open to all",cb2p:"You do not need to sleep here to dine here.",
 e5:"The menu",h5:"Everything, with prices",p5:"94 items. Nothing hidden, nothing “on request”.",
-tc:"Food",tbo:"Bar &amp; cellar",nr:"No results. Try “poulet”, “mojito” or “chocolat”.",
+tc:"Food",tbo:"Bar &amp; cellar",cam:"Hôtel Evannath · The table of Assinie",nr:"No results. Try “poulet”, “mojito” or “chocolat”.",
 e6:"Tonight",h6:"Book a table",l1:"Date",l2:"Time",l3:"Covers",l4:"Name",l5:"Phone / WhatsApp",l6:"Confirm the table",
 k3:"Lunch",k4:"Dinner",k5:"Bar &amp; terrace",k5v:"until closing",k6:"Méchoui Party",k6v:"Saturday, from 3 pm",k7:"Bookings"};
 /* 20 · la bande du service du soir s'eveille quand on l'atteint. */
@@ -1913,7 +2069,7 @@ document.querySelectorAll('.lang button').forEach(function(b){b.onclick=function
 
 /* La barre de recherche a un texte d aide hors [data-t] : on le traduit
    par le point d extension de LANG_JS. */
-function EVN_LANG(lg){ q.placeholder=(lg==='en')?"Search a dish, a cocktail…":q.dataset.ph; }
+function EVN_LANG(lg){ q.placeholder=(lg==='en')?"Search a dish, a cocktail…":q.dataset.ph; pied(); }
 </script>
 </body>
 </html>
