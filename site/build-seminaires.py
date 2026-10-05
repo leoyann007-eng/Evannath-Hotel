@@ -129,7 +129,9 @@ input,select,textarea{min-height:48px;background:transparent;border:1px solid va
 textarea{min-height:110px;resize:vertical}
 input:focus,select:focus,textarea:focus{border-color:var(--bronze)}
 select option{background:var(--bark-2);color:var(--cream)}
-input::placeholder,textarea::placeholder{color:#6E6154}
+/* Un exemple, pas une saisie : plus clair et en italique. A #6E6154, « Aya »
+   et « Kouassi » se lisaient comme des champs deja remplis. */
+input::placeholder,textarea::placeholder{color:#A39686;font-style:italic;opacity:1}
 .f.bad input,.f.bad select{border-color:var(--err)}
 .msg{display:none;font-size:12.5px;color:var(--err);margin-top:7px}
 .f.bad .msg{display:block}
