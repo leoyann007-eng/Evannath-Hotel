@@ -356,6 +356,7 @@ node tests/envoyer.test.mjs   # l'envoi des formulaires
 node tests/ordonner.test.mjs  # reordonner ne supprime jamais rien
 node tests/magasin.test.mjs   # deux enregistrements simultanes ne s'ecrasent plus
 node tests/quota.test.mjs     # le plafond du concierge
+node tests/blob.test.mjs      # le vrai @vercel/blob contre un faux Vercel Blob
 ```
 
 Contre une vraie base Postgres (et pour `tests/migration.test.mjs`, le passage
