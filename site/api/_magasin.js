@@ -235,8 +235,12 @@ function document({ cle, prefixeBlob, garde, vide, jeton, nom, outils }) {
       }
       const versions = avant.blobs.filter((b) => estDonnee(b.pathname)).sort(recent);
       if ((versions[0] ? versions[0].pathname : null) !== version) return { ok: false, conflit: true };
+      /* addRandomSuffix : chaque ecriture est un NOUVEAU fichier (prefixe-xxxx.json),
+         c'est ce qui fait les versions. Depuis @vercel/blob 1.0 le suffixe n'est
+         plus mis par defaut : sans lui, la seconde ecriture serait refusee
+         (« blob already exists »). */
       const r = await put(prefixeBlob + '.json', JSON.stringify(d), {
-        access: 'public', token: jeton, contentType: 'application/json',
+        access: 'public', token: jeton, contentType: 'application/json', addRandomSuffix: true,
       });
       /* Les versions precedentes partent APRES l'ecriture : si celle-ci
          echoue, l'ancienne reste en place plutot que de tout perdre. On
@@ -301,7 +305,7 @@ function document({ cle, prefixeBlob, garde, vide, jeton, nom, outils }) {
         const { put, del } = await blob();
         await put(MARQUE + '.json', JSON.stringify({ vers: 'postgres', le: new Date().toISOString(),
           note: 'Données déplacées dans la base Postgres du projet.' }),
-          { access: 'public', token: jeton, contentType: 'application/json' });
+          { access: 'public', token: jeton, contentType: 'application/json', addRandomSuffix: true });
         await del(anc.blobs.map((b) => b.url), { token: jeton });
       } catch (e) { /* elles restent : Parametres le dit (ancienne copie) */ }
     }

@@ -1687,7 +1687,7 @@ module.exports = async function handler(req, res) {
     try {
       const { put } = await import('@vercel/blob');
       const r = await put(nom, octets, {
-        access: 'public', token: JETON_BLOB, contentType: m[1],
+        access: 'public', token: JETON_BLOB, contentType: m[1], addRandomSuffix: true,
       });
       return json(res, 200, { ok: true, url: r.url });
     } catch (e) {
