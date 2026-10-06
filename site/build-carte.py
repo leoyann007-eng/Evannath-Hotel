@@ -9,7 +9,7 @@ import io
 import re
 import _schema
 from _carte_en import Cles
-from _chrome import responsive, dimensionner, versionner, secours, liens_nav, EN_NAV, EN_SECOURS, CONF_TITRE, CONF_GESTE, CONF_VERBE, WA, WA_TEXTE, MAIL, ENVOI_JS, NAV_JS, TOKENS, HEAD_CSS, FOOTER_CSS, LANG_JS, medaillon, INTRO, WA_BOUTON
+from _chrome import responsive, dimensionner, versionner, secours, liens_nav, EN_NAV, EN_SECOURS, CONF_TITRE, CONF_GESTE, CONF_VERBE, WA, WA_TEXTE, MAIL, ENVOI_JS, NAV_JS, TOKENS, HEAD_CSS, FOOTER_CSS, LANG_JS, medaillon, INTRO, WA_BOUTON, ROBOTS_META, SITE
 
 CUISINE = [
  ("Nos entrées", [
@@ -276,7 +276,8 @@ def _feux(balise):
                    for k, (x, y, d) in enumerate(LANTERNES))
 
 CLES_CARTE = Cles('mc')
-HTML = io.open('carte-template.html',encoding='utf-8').read()
+# Domaine et balise robots : suivent _chrome (SITE, PROSPECTION), voir build-index.py.
+HTML = io.open('carte-template.html',encoding='utf-8').read().replace('{{ROBOTS}}', ROBOTS_META).replace('{{SITE}}', SITE)
 HTML = (HTML
   .replace('{{FEUX_B}}', _feux('b')).replace('{{FEUX_I}}', _feux('i'))
   .replace('{{RUB_C}}',rubriques(CUISINE,'c',CLES_CARTE))
@@ -302,7 +303,7 @@ io.open('carte.html','w',encoding='utf-8').write(
 print('carte.html :', total, 'articles')
 
 CLES_SPA = Cles('ms')
-SPAH = io.open('spa-template.html',encoding='utf-8').read()
+SPAH = io.open('spa-template.html',encoding='utf-8').read().replace('{{ROBOTS}}', ROBOTS_META).replace('{{SITE}}', SITE)
 SPAH = SPAH.replace('{{SPA}}',sections(SPA,'s',CLES_SPA))
 SPAH = (SPAH.replace('{{EN_MENU}}', CLES_SPA.dictionnaire()).replace('{{WA_BOUTON}}', WA_BOUTON).replace('{{WA}}', WA).replace('{{MED}}', medaillon('carre-large', 'dw-med')).replace('{{NAV_LINKS}}', liens_nav('spa.html')).replace('{{EN_NAV}}', EN_NAV).replace('{{WA_TEXTE}}', WA_TEXTE).replace('{{SECOURS}}', secours('sec')).replace('{{EN_SECOURS}}', EN_SECOURS).replace('{{CG}}', (CONF_GESTE or '').replace("'", "\\'")).replace('{{CV}}', CONF_VERBE).replace('{{CT}}', CONF_TITRE or 'Cr\u00e9neau demand\u00e9').replace('{{ENVOI}}', ENVOI_JS).replace('{{NAV_JS}}', NAV_JS).replace('{{TOKENS}}', TOKENS).replace('{{LANG_JS}}', LANG_JS).replace('{{INTRO}}', INTRO).replace('{{HEAD_CSS}}', HEAD_CSS).replace('{{FOOTER_CSS}}', FOOTER_CSS).replace('{{TOTAL}}',str(total_spa))
   .replace('{{LD}}', _schema.bloc(

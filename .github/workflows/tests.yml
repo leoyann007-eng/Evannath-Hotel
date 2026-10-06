@@ -1,0 +1,90 @@
+# Les controles et les tests, a chaque push et a chaque PR.
+#
+# Jusqu'ici ils ne tournaient qu'a la main : une PR pouvait etre fusionnee
+# avec une page hors de la CSP, une cle de traduction manquante ou un test
+# casse, et on ne le decouvrait qu'en ligne. Ici la PR affiche une coche
+# verte, ou une croix rouge avec le controle en cause.
+#
+# Les tests tournent deux fois : en memoire, comme sur un poste, puis contre
+# une vraie base Postgres, comme en production.
+#
+# tests/en-ligne.test.mjs n'est pas ici : il interroge le site DEPLOYE, ce
+# qu'une PR n'a pas encore. Il tourne chaque nuit (surveillance.yml).
+name: Tests
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: essai
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Dependances
+        run: |
+          pip install --quiet pillow
+          cd site && npm ci --no-audit --no-fund
+
+      - name: Controles du site (verifier.py)
+        working-directory: site
+        run: python3 verifier.py
+
+      # Deux passes. En memoire d'abord, comme sur un poste sans base. Puis
+      # contre Postgres, comme en production : chaque test y recoit SA base,
+      # vierge — plusieurs comptent sur un etat de depart precis, et la
+      # base partagee leur laissait les donnees du test precedent.
+      - name: Tests (en memoire)
+        run: |
+          echec=0
+          for t in tests/*.test.mjs; do
+            [ "$t" = tests/en-ligne.test.mjs ] && continue
+            echo "::group::$t"
+            if ! node "$t"; then echec=1; echo "::error file=$t::$t a echoue (en memoire)"; fi
+            echo "::endgroup::"
+          done
+          exit $echec
+
+      - name: Tests (contre Postgres)
+        env:
+          PG: postgres://postgres:essai@localhost:5432
+        run: |
+          echec=0
+          for t in tests/*.test.mjs; do
+            [ "$t" = tests/en-ligne.test.mjs ] && continue
+            base="t_$(basename "$t" .test.mjs | tr '-' '_')"
+            psql "$PG/postgres" -q -c "CREATE DATABASE $base"
+            echo "::group::$t"
+            if ! DATABASE_URL="$PG/$base" node "$t"; then echec=1; echo "::error file=$t::$t a echoue (Postgres)"; fi
+            echo "::endgroup::"
+          done
+          exit $echec

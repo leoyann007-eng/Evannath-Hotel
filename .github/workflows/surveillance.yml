@@ -1,0 +1,88 @@
+# La surveillance du site en ligne, chaque nuit.
+#
+# Lance tests/en-ligne.test.mjs contre le site deploye : les pages repondent,
+# les en-tetes de securite sont la, l'administration refuse les inconnus, les
+# evenements publies ne sont pas expires, les affiches existent.
+#
+# L'alerte : en cas d'echec, une issue « Site en ligne : la surveillance a
+# echoue » est ouverte sur GitHub (ou completee si elle l'est deja). Le
+# proprietaire du depot en recoit l'e-mail. Quand tout repasse au vert,
+# elle se ferme d'elle-meme, avec un mot.
+#
+# Deux variables du depot (Settings > Secrets and variables > Actions >
+# Variables), toutes deux facultatives :
+#   SITE_EN_LIGNE   l'adresse a surveiller (defaut : evannathhotel.vercel.app)
+#   EVN_PRODUCTION  « 1 » apres la mise en ligne : ajoute les controles
+#                   --production (cle de paiement reelle, moteurs admis,
+#                   sitemap.xml). A NE PAS poser pendant la demonstration :
+#                   ils echoueraient tous, et c'est normal.
+#
+# Bon a savoir : GitHub suspend les taches planifiees d'un depot sans
+# activite depuis 60 jours. Un push, ou un clic sur « Enable workflow »
+# dans l'onglet Actions, les relance.
+name: Surveillance du site
+
+on:
+  schedule:
+    - cron: '17 5 * * *'      # 5 h 17 UTC, donc 5 h 17 a Abidjan
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: surveillance
+  cancel-in-progress: false
+
+jobs:
+  surveiller:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ github.token }}
+      TITRE: 'Site en ligne : la surveillance a échoué'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Controle du site en ligne
+        id: controle
+        env:
+          SITE: ${{ vars.SITE_EN_LIGNE || 'https://evannathhotel.vercel.app' }}
+          MODE: ${{ vars.EVN_PRODUCTION == '1' && '--production' || '' }}
+        run: |
+          set -o pipefail
+          node tests/en-ligne.test.mjs "$SITE" $MODE 2>&1 | tee rapport.txt
+
+      - name: Alerte (issue ouverte ou completee)
+        if: failure()
+        run: |
+          gh label create surveillance --color B60205 \
+            --description "Alerte de la surveillance nocturne" 2>/dev/null || true
+          {
+            echo "La surveillance de cette nuit a trouvé un problème sur le site en ligne."
+            echo
+            echo "Contrôles en échec :"
+            echo '```'
+            grep -A1 'ECHEC' rapport.txt || tail -n 30 rapport.txt
+            echo '```'
+            echo "Rapport complet : $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          } > corps.md
+          n=$(gh issue list --label surveillance --state open --json number --jq '.[0].number')
+          if [ -n "$n" ]; then
+            gh issue comment "$n" --body-file corps.md
+          else
+            gh issue create --title "$TITRE" --label surveillance --body-file corps.md
+          fi
+
+      - name: Retour a la normale (issue fermee)
+        if: success()
+        run: |
+          n=$(gh issue list --label surveillance --state open --json number --jq '.[0].number' 2>/dev/null || true)
+          if [ -n "$n" ]; then
+            gh issue close "$n" --comment "Tout est rentré dans l'ordre : la surveillance de cette nuit est passée. $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          fi
