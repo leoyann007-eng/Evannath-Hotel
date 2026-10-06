@@ -567,5 +567,78 @@ def controler():
     return len(pb)
 
 
+def controler_production():
+    """Le jour de la mise en ligne : python3 verifier.py --production
+
+    Les reglages de la demonstration sont disperses — trois interrupteurs dans
+    _chrome.py, et ce que les generateurs en ont tire dans les pages,
+    vercel.json, robots.txt. Un seul oubli et le site part en ligne invisible
+    des moteurs, avec le numero WhatsApp du prestataire, ou des mentions
+    legales « a completer ». Ce controle refuse tant qu'il en reste un.
+
+    Ce qu'il ne voit pas, parce que ca vit chez l'hebergeur : la cle de
+    paiement (test ou reelle), ADMIN_SECRET, EVN_ENV. Pour ceux-la, sur le site
+    deploye : node tests/en-ligne.test.mjs <adresse> --production"""
+    import _chrome
+    pb = []
+    pages = [f for f in sorted(glob.glob('*.html')) if f not in IGNORE]
+
+    if _chrome.PROSPECTION:
+        pb.append(('_chrome.py', 'PROSPECTION = True : le site reste invisible des moteurs de recherche'))
+    if _chrome.WA_EN_TEST:
+        pb.append(('_chrome.py', 'WA_EN_TEST = True : tous les liens WhatsApp vont au numero de test'))
+    if 'vercel.app' in _chrome.SITE:
+        pb.append(('_chrome.py', 'SITE = ' + _chrome.SITE + ' : canonical, og:url et sitemap '
+                   'designeraient l\'adresse provisoire, pas le domaine de l\'hotel'))
+
+    # Ce que les generateurs ont ecrit — un interrupteur bascule sans les
+    # relancer ne change rien en ligne.
+    avec_test = [f for f in pages if 'wa.me/' + _chrome.WA_TEST in io.open(f, encoding='utf-8').read()]
+    if avec_test:
+        pb.append(('%d page(s)' % len(avec_test), 'liens WhatsApp vers le numero de test '
+                   '(%s…) : relancer les generateurs' % ', '.join(avec_test[:3])))
+    # « noindex, nofollow » : la balise de la demonstration. La 404, les
+    # mentions legales et le tunnel de reservation gardent, eux, un
+    # « noindex, follow » voulu : rien a y chercher dans Google.
+    noindex = [f for f in pages if re.search(r'<meta name="robots" content="[^"]*noindex[^"]*nofollow',
+                                              io.open(f, encoding='utf-8').read())]
+    if noindex:
+        pb.append(('%d page(s)' % len(noindex), 'balise robots noindex (%s…) : relancer les '
+                   'generateurs' % ', '.join(noindex[:3])))
+    vc = json.load(io.open('vercel.json', encoding='utf-8'))
+    for r in vc['headers']:
+        if r['source'].startswith('/admin'):
+            continue                      # l'administration reste hors des moteurs
+        for h in r['headers']:
+            if h['key'].lower() == 'x-robots-tag' and 'noindex' in h['value']:
+                pb.append(('vercel.json', 'X-Robots-Tag noindex sur ' + r['source']
+                           + ' : relancer build-sitemap.py'))
+    if not os.path.exists('sitemap.xml'):
+        pb.append(('sitemap.xml', 'absent : relancer build-sitemap.py'))
+    if 'Maquette de demonstration' in io.open('robots.txt', encoding='utf-8').read():
+        pb.append(('robots.txt', 'encore celui de la demonstration : relancer build-sitemap.py'))
+
+    todo = len(re.findall(r'class="todo"', io.open('mentions-legales.html', encoding='utf-8').read()))
+    if todo:
+        pb.append(('mentions-legales.html', '%d champ(s) « a completer » (societe, RCCM, '
+                   'responsable de publication…) : build-mentions.py' % todo))
+
+    print('\nMise en ligne (--production)')
+    if pb:
+        print('%d reglage(s) de demonstration encore en place :' % len(pb))
+        for f, m in pb:
+            print('  %-26s %s' % (f, m))
+    else:
+        print('aucun reglage de demonstration')
+    if _chrome.ENVOI_WHATSAPP:
+        print('  (a savoir : ENVOI_WHATSAPP = True, les demandes partent sur WhatsApp et non '
+              'par e-mail — un choix, pas une erreur)')
+    print('  Reste a verifier sur le site deploye : node tests/en-ligne.test.mjs <adresse> --production')
+    return len(pb)
+
+
 if __name__ == '__main__':
-    sys.exit(1 if controler() else 0)
+    n = controler()
+    if '--production' in sys.argv[1:]:
+        n += controler_production()
+    sys.exit(1 if n else 0)

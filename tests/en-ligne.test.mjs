@@ -4,11 +4,18 @@
 //
 //   node tests/en-ligne.test.mjs
 //   node tests/en-ligne.test.mjs http://localhost:5599
+//   node tests/en-ligne.test.mjs https://www.evannathhotel.com --production
+//
+// --production : le jour de la mise en ligne, et chaque nuit ensuite. Ajoute
+// ce que verifier.py --production ne peut pas voir, parce que ca vit chez
+// l'hebergeur : la cle de paiement reelle, et les moteurs de recherche admis.
 //
 // Ce qu'il ne couvre pas, et qui demande un navigateur : le rendu, le prix
 // barre, le calcul du tunnel, le menu. Pour ceux-la, voir tests/A-LA-MAIN.md.
 
-const BASE = (process.argv[2] || 'https://evannathhotel.vercel.app').replace(/\/$/, '');
+const ARGS = process.argv.slice(2);
+const PRODUCTION = ARGS.includes('--production');
+const BASE = (ARGS.find((a) => !a.startsWith('--')) || 'https://evannathhotel.vercel.app').replace(/\/$/, '');
 
 let echecs = 0, total = 0;
 function verifier(nom, ok, detail) {
@@ -52,6 +59,26 @@ verifier('toutes les pages rendent l’en-tête opaque menu ouvert',
 verifier('aucune page n’expose l’adresse du prestataire',
   PAGES.every((p) => !corps[p].includes('houansouyannaxel')),
   'présente sur : ' + PAGES.filter((p) => corps[p].includes('houansouyannaxel')).join(', '));
+
+// ── Le site est bien sorti de la demonstration (--production) ──────────────
+if (PRODUCTION) {
+  titre('Sorti de la démonstration');
+  const r = await fetch(sansCache(BASE + '/'));
+  verifier('l’accueil est ouvert aux moteurs (pas de X-Robots-Tag noindex)',
+    !(r.headers.get('x-robots-tag') || '').includes('noindex'), r.headers.get('x-robots-tag'));
+  const avecBalise = PAGES.filter((p) => /<meta name="robots" content="[^"]*noindex[^"]*nofollow/.test(corps[p]));
+  verifier('aucune page ne porte la balise robots de la démonstration', !avecBalise.length,
+    'sur : ' + avecBalise.map((p) => p || 'accueil').join(', '));
+  const avecTest = PAGES.filter((p) => corps[p].includes('wa.me/2250758408079'));
+  verifier('aucun lien WhatsApp vers le numéro de test', !avecTest.length, 'sur : ' + avecTest.map((p) => p || 'accueil').join(', '));
+  const sm = await fetch(sansCache(BASE + '/sitemap.xml'));
+  verifier('sitemap.xml est servi', sm.status === 200, 'statut ' + sm.status);
+  const rb = await (await fetch(sansCache(BASE + '/robots.txt'))).text();
+  verifier('robots.txt annonce le sitemap', /Sitemap:/i.test(rb), rb.slice(0, 80));
+  const p = (await (await fetch(sansCache(BASE + '/api/admin?a=public'))).json()).paiement || {};
+  verifier('le paiement en ligne est actif', p.actif === true, JSON.stringify(p));
+  verifier('la clé de paiement est réelle, pas de test', p.actif === true && p.test === false, JSON.stringify(p));
+}
 
 // ── Les en-tetes de securite ──────────────────────────────────────────────
 titre('Les en-têtes de sécurité');

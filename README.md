@@ -227,15 +227,26 @@ Le visiteur qui a le lien voit le site normalement. Seuls les robots sont
 
 ### Repasser en production le jour de la signature
 
-1. En tête de `site/_chrome.py` : `PROSPECTION = False`, et `SITE` sur le
-   domaine définitif (par exemple `https://evannathhotel.com`) — canonical,
-   og:url, og:image, données structurées et sitemap en découlent.
+1. En tête de `site/_chrome.py` : `PROSPECTION = False`, `WA_EN_TEST = False`,
+   et `SITE` sur le domaine définitif (par exemple `https://evannathhotel.com`)
+   — canonical, og:url, og:image, données structurées et sitemap en découlent,
+   y compris sur l'accueil, La table et le spa (leurs gabarits lisent `SITE` et
+   `PROSPECTION`, plus rien n'y est écrit en dur).
 2. Relancer tous les générateurs, **puis `build-sitemap.py` en dernier**. Il
    écrit `sitemap.xml` (au lieu de `sitemap-apercu.xml`), le déclare dans
    `robots.txt`, et **retire de lui-même** la règle `X-Robots-Tag` de
    `site/vercel.json`.
-3. `python verifier.py`, puis pousser.
-4. Dans la Google Search Console (et Bing Webmaster Tools) : valider le
+3. `python verifier.py --production` : il refuse tant qu'il reste un réglage
+   de démonstration — un interrupteur, une page générée avant la bascule, la
+   balise robots ou la règle `X-Robots-Tag`, `sitemap.xml` absent, le
+   `robots.txt` de la maquette, un champ « à compléter » des mentions
+   légales. Puis pousser.
+4. Une fois déployé : `node tests/en-ligne.test.mjs https://<domaine> --production`
+   vérifie ce qui vit chez l'hébergeur — clé de paiement réelle et active,
+   moteurs admis, `sitemap.xml` servi. Puis poser la variable du dépôt
+   `EVN_PRODUCTION = 1` (et `SITE_EN_LIGNE`) pour que la surveillance de nuit
+   fasse les mêmes contrôles.
+5. Dans la Google Search Console (et Bing Webmaster Tools) : valider le
    domaine, puis soumettre `https://<domaine>/sitemap.xml`.
 
 ### Le sitemap
@@ -367,6 +378,22 @@ cd site && npm install && cd ..
 DATABASE_URL=postgres://… node tests/magasin.test.mjs
 DATABASE_URL=postgres://… node tests/migration.test.mjs
 ```
+
+### Sur GitHub, sans rien lancer
+
+- **À chaque push et chaque PR** (`.github/workflows/tests.yml`) : `verifier.py`,
+  puis tous les tests deux fois — en mémoire, puis contre une vraie base
+  Postgres, une base vierge par test. La PR affiche une coche verte, ou une
+  croix rouge avec le test en cause.
+- **Chaque nuit à 5 h 17** (`.github/workflows/surveillance.yml`) :
+  `tests/en-ligne.test.mjs` contre le site déployé. En cas d'échec, une issue
+  « Site en ligne : la surveillance a échoué » s'ouvre, et GitHub en envoie
+  l'e-mail ; elle se referme d'elle-même quand tout repasse. Se lance aussi à
+  la main : onglet Actions › Surveillance du site › *Run workflow*.
+  Variables du dépôt, facultatives : `SITE_EN_LIGNE` (l'adresse surveillée),
+  `EVN_PRODUCTION = 1` après la mise en ligne (ajoute les contrôles
+  `--production`). GitHub suspend les tâches planifiées après 60 jours sans
+  activité sur le dépôt : un push les relance.
 
 ## Vidéo
 

@@ -67,7 +67,7 @@ Trois niveaux :
 | **Paiement en ligne** | Selon le contrat | CinetPay ou GeniusPay. C'est la seule question qui fait varier le chiffrage. |
 | **Disponibilité** | Formule Signature | ✅ Fait le 23 septembre. La réception saisit ses chambres une à une, les met hors service ou ferme des nuits ; le site compte ce qui reste et va jusqu'à « dernière chambre ». Ce qui manque : le **verrou** empêchant deux clients de prendre la même nuit à la seconde près — il n'a de sens qu'avec une réservation ferme, donc avec le paiement en ligne et un logiciel de gestion. |
 | **Synchronisation Booking / Airbnb** | Formule Performance | C'est ce qui apporterait la disponibilité à la seconde, et la seule chose qui l'apporte vraiment. |
-| **Surveillance automatique** | Trimestre | Un test qui tourne chaque nuit et prévient si le site ne répond plus ou si les données ne se lisent pas. `tests/en-ligne.test.mjs` fait déjà le travail : il ne manque que la planification. |
+| **Surveillance automatique** | ✅ fait | `tests/en-ligne.test.mjs` chaque nuit à 5 h 17 (`surveillance.yml`). Un échec ouvre une issue GitHub, donc un e-mail ; elle se ferme quand tout repasse. |
 
 ## Le domaine
 
@@ -82,8 +82,8 @@ Trois niveaux :
 
 | | Quand | Pourquoi |
 |---|---|---|
-| **Aucune intégration continue** | 2 semaines | Les tests et `verifier.py` ne tournent qu'à la main. Une action GitHub à chaque push, et `en-ligne.test.mjs` chaque nuit — c'est aussi la « surveillance automatique » plus haut. |
-| **La mise en ligne tient à six interrupteurs dispersés** | Avant la mise en ligne | `PROSPECTION`, `SITE`, `WA_EN_TEST`, `ENVOI_WHATSAPP` dans `_chrome.py`, `SITE_URL` et les clés chez Vercel. Un `verifier.py --production` qui refuse s'il en reste un en position de test. |
+| **Aucune intégration continue** | ✅ fait | `tests.yml` : `verifier.py` et tous les tests à chaque push et chaque PR, en mémoire puis contre Postgres. |
+| **La mise en ligne tient à six interrupteurs dispersés** | ✅ fait | `verifier.py --production` refuse tant qu'il reste un réglage de démonstration (interrupteurs, pages, robots, sitemap, mentions « à compléter ») ; `en-ligne.test.mjs --production` vérifie chez l'hébergeur la clé de paiement réelle. L'essai de bascule a trouvé l'accueil, La table et le spa avec le domaine et la balise robots écrits en dur : corrigé. |
 | **Le dépôt pèse 106 Mo** | Trimestre | Dont 43 Mo de vidéos ; chaque ré-encodage s'ajoute à l'historique pour toujours. Git LFS, ou les vidéos hors du dépôt. |
 | **Trois fichiers trop gros pour être relus** | Trimestre | `api/admin.js` (2 000 lignes, une seule fonction), `admin/index.html` (130 Ko), `_chrome.py` (2 100 lignes de CSS et JS dans des chaînes Python). |
 

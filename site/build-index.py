@@ -9,7 +9,7 @@ propre que les six valeurs de couleur qui lui sont specifiques.
 import io
 NL_ = chr(10)
 from _chrome import REMISE_JS, REMISE_CSS, DISPO_JS, FOOTER_CSS
-from _chrome import medaillon, INTRO, WA_BOUTON
+from _chrome import medaillon, INTRO, WA_BOUTON, ROBOTS_META, SITE
 from _chrome import (TOKENS, NAV_BASE, LANG_JS, dimensionner, responsive, versionner,
                      liens_nav, EN_NAV, WA, WA_TEXTE, MAIL)
 from _evenements import EVENEMENTS, EN as EV_EN
@@ -170,7 +170,10 @@ JS_BANDEAU = r"""<script>
     .catch(function(){});
 })();
 </script>"""
-html = io.open('index-template.html', encoding='utf-8').read()
+# Le domaine et la balise robots suivent _chrome (SITE, PROSPECTION) : ecrits
+# en dur ici, ils seraient restes ceux de la demonstration le jour J.
+html = (io.open('index-template.html', encoding='utf-8').read()
+        .replace('{{ROBOTS}}', ROBOTS_META).replace('{{SITE}}', SITE))
 html = (html
         .replace('{{BANDEAU}}', BANDEAU)
         .replace('{{NAV_LINKS}}', liens_nav('index.html'))
