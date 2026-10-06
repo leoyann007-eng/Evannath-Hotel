@@ -431,10 +431,6 @@ header.scrolled .brand small{opacity:0}
 
 /* ── bande pleine largeur ─────────────── */
 .band{position:relative;height:62vh;min-height:380px;overflow:hidden}
-/* Sur grand ecran, 62vh de haut pour 1906 px de large : un bandeau de 3,2
-   pour 1, qui ne gardait que 44 % de la photo — l'ampoule, sans les cercles
-   de rotin. Plus haut a partir de 1200 px : 60 % de la photo a 1906 px. */
-@media(min-width:1200px){.band{height:clamp(380px,44vw,84vh)}}
 .band img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 /* 20 · Les lanternes s'allument — maquette « Motion design I ».
    La photo s'eveille dans la penombre en 2,4 s, puis la lumiere s'etend.
@@ -471,12 +467,17 @@ header.scrolled .brand small{opacity:0}
 /* Les marges en pourcentage se calculent sur la LARGEUR, verticales
    comprises : -10 % de marge centre donc exactement un carre de 20 %. */
 .lueurs i{position:absolute;left:53.3%;top:48.6%;aspect-ratio:1;border-radius:50%;
-  background:radial-gradient(circle,rgba(255,206,130,.4) 0%,rgba(255,180,90,.12) 38%,rgba(255,170,80,0) 70%);
+  background:radial-gradient(circle,rgba(255,214,150,.35) 0%,rgba(255,190,110,.1) 45%,rgba(255,170,80,0) 70%);
   mix-blend-mode:screen;opacity:0}
 .lueurs i:nth-of-type(1){width:20%;margin:-10% 0 0 -10%;transition:opacity 1.4s ease .9s}
 .lueurs i:nth-of-type(2){width:38%;margin:-19% 0 0 -19%;transition:opacity 1.4s ease 1.25s}
 .lueurs i:nth-of-type(3){width:60%;margin:-30% 0 0 -30%;transition:opacity 1.4s ease 1.6s}
 .band.vu .lueurs i{opacity:1}
+/* Un seul halo, discret. Les deux grands (38 et 60 % de la photo) posaient
+   un brouillard blanc sur l'ampoule : sur grand ecran, une tache floue a la
+   place d'une lampe. L'ampoule de la photo est deja allumee ; il suffit de
+   ne pas l'eteindre (voile ci-dessous). */
+.lueurs i:nth-of-type(n+2){display:none}
 /* L'ampoule est le point le plus clair de la photo : des que la photo
    s'eveille, elle parait deja allumee, et les halos arrivaient sur une
    ampoule blanche — on ne la voyait pas s'allumer. Un voile la garde
@@ -488,6 +489,10 @@ header.scrolled .brand small{opacity:0}
 .band.eteinte .lueurs b{opacity:1}
 .band.eteinte.vu .lueurs b{opacity:0;transition:opacity 1s ease-out .9s}
 .band::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(16,11,6,.5) 0%,rgba(16,11,6,.22) 30%,rgba(16,11,6,.72) 62%,rgba(16,11,6,.95) 100%)}
+/* Le voile de la legende commencait trop haut : a mi-hauteur, il passait
+   sur l'ampoule a .45 et la rendait grise, eteinte. Il descend sous la
+   lanterne, et la legende, en bas, garde son fond sombre. */
+.band.lanternes::after{background:linear-gradient(180deg,rgba(16,11,6,.45) 0%,rgba(16,11,6,.08) 26%,rgba(16,11,6,.08) 52%,rgba(16,11,6,.72) 76%,rgba(16,11,6,.95) 100%)}
 .band .cap{position:absolute;left:0;right:0;bottom:38px;z-index:3;text-align:center;padding:0 24px}
 .band .cap span{font-size:10px;letter-spacing:.34em;text-transform:uppercase;color:var(--bronze-2);font-weight:700;text-shadow:0 2px 14px rgba(10,6,3,.95),0 0 4px rgba(10,6,3,.9)}
 .band .cap p{text-shadow:0 2px 18px rgba(10,6,3,.9);font-family:var(--f-display);font-size:clamp(1.3rem,2.6vw,2rem);color:var(--cream);margin-top:12px;max-width:22ch;margin-inline:auto;line-height:1.25}
