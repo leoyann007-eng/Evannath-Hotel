@@ -624,6 +624,10 @@ body{background:var(--bark)}
 .poste:target{border-color:var(--bronze);box-shadow:0 0 0 1px rgba(185,138,80,.35)}
 .poste h2{font-size:1.5rem;font-weight:400;margin-bottom:8px}
 .poste .meta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+/* La date limite : sous l'intitule, discrete. Un candidat la cherche avant
+   de lire le reste. */
+.poste .fin{font-size:13px;color:var(--muted);margin:-8px 0 18px}
+.poste .fin time{color:var(--cream);font-weight:600}
 .poste .meta span{font-size:10px;letter-spacing:.16em;text-transform:uppercase;
   font-weight:700;color:var(--bronze-2);border:1px solid var(--line);padding:5px 11px}
 /* white-space:pre-line — l'hotel ecrit ses missions une par ligne. Les
@@ -1201,9 +1205,16 @@ else{var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.is
       comment = '<p><b data-t="cp">Pour postuler</b> — <a href="contact.html"'
         + ' data-t="cc">écrivez-nous par la page Contact</a></p>';
     }
+    /* La date limite, si l'hotel en a pose une. Le texte de la date est ecrit
+       par EVN_LANG, dans la langue de la page. */
+    var fin = /^\d{4}-\d{2}-\d{2}$/.test(o.fin || '')
+      ? '<p class="fin"><span data-t="jq">Candidatures jusqu\'au</span> '
+        + '<time datetime="' + o.fin + '"></time></p>'
+      : '';
     return '<article class="poste" id="' + id + '">'
       + '<h2>' + ech(o.titre) + '</h2>'
       + (meta ? '<div class="meta">' + meta + '</div>' : '')
+      + fin
       + '<div class="corps">' + ech(o.texte) + '</div>'
       + profil
       + '<div class="post">' + comment
@@ -1246,8 +1257,27 @@ else{var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.is
          maintenant — lance au chargement, il n'aurait rien trouve, et le
          medaillon serait reste invisible, bloque a son etat de depart. */
       if (window.EVN_AU_SCROLL) window.EVN_AU_SCROLL('.pagne-vide', 'vu');
-      if (window.EVN_LANG) window.EVN_LANG();
+      /* Les offres arrivent APRES la traduction de la page : un visiteur
+         venu en anglais voyait « Profil recherche », « Pour postuler » en
+         francais. Leurs libelles rejoignent le dictionnaire francais (pour
+         revenir au francais), puis la langue courante est reappliquee. */
+      liste.querySelectorAll('[data-t]').forEach(function (e) {
+        if (!(e.dataset.t in FR)) FR[e.dataset.t] = e.innerHTML;
+      });
+      if (document.documentElement.lang === 'en') EVN_LANGUE('en', false);
+      else EVN_LANG('fr');
     });
+
+  /* Les dates limites, dans la langue de la page. Appelee par le chassis a
+     chaque changement de langue. Midi, et non minuit : une date seule lue
+     a minuit UTC tomberait la veille selon le fuseau. */
+  window.EVN_LANG = function (lg) {
+    var loc = lg === 'en' ? 'en-GB' : 'fr-FR';
+    liste.querySelectorAll('time[datetime]').forEach(function (t) {
+      t.textContent = new Date(t.getAttribute('datetime') + 'T12:00:00')
+        .toLocaleDateString(loc, { day: 'numeric', month: 'long', year: 'numeric' });
+    });
+  };
 
   /* Copier le lien d'une offre : c'est le geste qui sert a la publier sur
      Facebook ou a l'envoyer par WhatsApp. */
@@ -1271,7 +1301,7 @@ var EN={mn:"Menu",n1:"Rooms &amp; Suites",n2:"Experiences",n3:"The table",n4:"Th
 eb:"Join us",h1:"Working at <em data-t=\'h1e\'>the Evannath</em>",h1e:"the Evannath",
 lede:"The positions open right now. Each listing says how to apply — there is no form to fill in here.",
 charge:"Loading the listings…",
-pr:"Who we are looking for",cp:"To apply",cc:"write to us from the Contact page",
+pr:"Who we are looking for",jq:"Applications until",cp:"To apply",cc:"write to us from the Contact page",
 cl:"Copy the link to this listing",
 vide:"No position is open at the moment. Listings appear here and on our Facebook page.",
 fb:"Follow on Facebook",
