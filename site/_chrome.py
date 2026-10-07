@@ -416,6 +416,12 @@ TOKENS = """:root{
   --f-display:"Marcellus",Georgia,"Times New Roman",serif;
   --f-body:"Karla",system-ui,-apple-system,sans-serif;
 }
+/* Les grands ecrans. Sur un moniteur de 1920 px, une colonne figee a 1240 px
+   laissait 330 px de vide de chaque cote : la page paraissait petite, posee
+   au milieu. Au-dela de 1600 px la colonne s'elargit, et le texte courant
+   gagne un point. html body l'emporte sur le body{} de chaque page. */
+@media(min-width:1600px){:root{--max:1440px}html body{font-size:17.5px}}
+@media(min-width:1840px){:root{--max:1580px}}
 """
 
 # ---------------------------------------------------------------------------

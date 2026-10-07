@@ -194,7 +194,7 @@ html = (html
                                             _schema.restaurant())))
 # Largeur reelle des cartes des deux grilles de l'accueil.
 #
-# .wrap fait min(1240px, 100vw) - 48. Les chambres tiennent sur trois colonnes
+# .wrap fait min(--max, 100vw) - 48 ; --max vaut 1240, 1440 des 1600 px, 1580 des 1840. Les chambres tiennent sur trois colonnes
 # de 24 px de gouttiere au-dela de 1024, les offres sur quatre ; en dessous,
 # deux colonnes, puis une seule sous 721 px.
 #
@@ -204,7 +204,7 @@ html = (html
 # faisait servir l'image pleine, parce que sizes annoncait 700 px.
 SIZES_CARTES = ('(max-width:720px) calc(100vw - 48px), '
                 '(max-width:1024px) calc((100vw - 72px) / 2), '
-                '(max-width:1287px) calc((100vw - 96px) / 3), 381px')
+                '(max-width:1287px) calc((100vw - 96px) / 3), (max-width:1599px) 381px, (max-width:1839px) 448px, 495px')
 CARTES = ('r-standard', 'ig-baldaquin', 'r-wax', 'r-anglaise', 'r-mezz2',
           'r-mezzanine', 'r-arabe', 'g-aerien', 'g-terrasse')
 

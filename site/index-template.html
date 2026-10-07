@@ -284,7 +284,7 @@ header:not(.scrolled):not(.menu) .brand small{color:#E2BE8C}
    texte : a 1906 px la colonne commence a 357 px, et le voile le plus dense
    couvrait surtout la marge vide. On l'accroche au bord de la colonne
    (--g), avec les memes distances qu'a 1366 px, ou il avait ete regle. */
-@media(min-width:1400px){.hero::before{--g:max(0px,calc((100% - 1240px) / 2));
+@media(min-width:1400px){.hero::before{--g:max(0px,calc((100% - var(--max)) / 2));
   background:linear-gradient(95deg,rgba(23,16,10,.80) 0,rgba(23,16,10,.80) var(--g),
     rgba(23,16,10,.66) calc(var(--g) + 319px),rgba(23,16,10,.30) calc(var(--g) + 647px),
     rgba(23,16,10,.06) calc(var(--g) + 839px),transparent calc(var(--g) + 975px))}}

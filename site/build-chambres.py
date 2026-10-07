@@ -181,7 +181,7 @@ CSS = PAGNE_CSS + CSS
 
 # Largeurs reelles des vignettes de la mosaique -------------------------------
 #
-# .wrap fait min(1240px, 100vw) - 48. La grille est en 2fr 1fr 1fr avec 10 px
+# .wrap fait min(--max, 100vw) - 48 ; --max vaut 1240, 1440 des 1600 px, 1580 des 1840. La grille est en 2fr 1fr 1fr avec 10 px
 # de gouttiere au-dela de 1100 px, en deux colonnes entre 721 et 1100, et en
 # une seule colonne en dessous. La premiere figure occupe deux rangees, donc
 # la moitie de la largeur en grand, et toute la largeur en dessous de 1100.
@@ -194,8 +194,8 @@ CSS = PAGNE_CSS + CSS
 # etroites. A partir de la sixieme, les rangees repartent sur les trois
 # colonnes — l'image d'indice 5, puis 8, puis 11, retombe dans la colonne
 # large. En dessous de cinq photos la premiere ne prend qu'une rangee.
-_LARGE_3COL = '(max-width:1287px) calc((100vw - 68px) / 2), 586px'
-_ETROIT_3COL = '(max-width:1287px) calc((100vw - 68px) / 4), 293px'
+_LARGE_3COL = '(max-width:1287px) calc((100vw - 68px) / 2), (max-width:1599px) 586px, (max-width:1839px) 686px, 756px'
+_ETROIT_3COL = '(max-width:1287px) calc((100vw - 68px) / 4), (max-width:1599px) 293px, (max-width:1839px) 343px, 378px'
 # Deux colonnes : pleine largeur pour la premiere et pour une derniere etalee,
 # demi-largeur sinon. Une seule colonne en dessous de 721 px.
 _PLEIN = 'calc(100vw - 48px)'

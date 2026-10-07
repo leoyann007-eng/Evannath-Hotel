@@ -396,7 +396,13 @@ function document({ cle, prefixeBlob, garde, vide, jeton, nom, outils }) {
    * Rend { ok:true, valeur, d } | { ok:true, annule:true, valeur }
    *    | { ok:false, panne } (lecture impossible) | { ok:false, message }.
    */
-  async function modifier(appliquer, essais = 6) {
+  // Combien de fois repartir apres un conflit. Chaque conflit veut dire
+  // qu'une autre ecriture a abouti : avec n ecritures simultanees, la
+  // derniere peut en perdre n - 1. A 6, vingt-cinq ecritures lancees
+  // ensemble passaient sur un poste rapide (il en fallait 5) mais pas
+  // toujours sur la machine plus lente de GitHub. 15 laisse de la marge ;
+  // l'attente entre deux essais plafonne a 15 + 40 x 5 ms.
+  async function modifier(appliquer, essais = 15) {
     for (let i = 0; i < essais; i++) {
       const l = await lire();
       if (!l.ok) return { ok: false, panne: l.panne || 'Lecture impossible.' };
@@ -408,7 +414,7 @@ function document({ cle, prefixeBlob, garde, vide, jeton, nom, outils }) {
       if (w.ok) return { ok: true, valeur, d: l.d };
       if (!w.conflit) return { ok: false, message: w.message };
       // Un autre enregistrement est passe : on repart de l'etat frais.
-      await pause(15 + Math.floor(Math.random() * 40) * (i + 1));
+      await pause(15 + Math.floor(Math.random() * 40) * Math.min(i + 1, 5));
     }
     return { ok: false, message: 'Trop de modifications au même instant : rien n’a été enregistré. Réessayez.' };
   }
