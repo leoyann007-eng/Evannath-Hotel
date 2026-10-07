@@ -3,7 +3,7 @@
         xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
     <loc>https://evannathhotel.vercel.app/</loc>
-    <lastmod>2026-10-06</lastmod>
+    <lastmod>2026-10-07</lastmod>
     <priority>1.0</priority>
     <image:image><image:loc>https://evannathhotel.vercel.app/img/opt/gal-art-lanterne.jpg</image:loc></image:image>
     <image:image><image:loc>https://evannathhotel.vercel.app/img/opt/r-standard.jpg</image:loc></image:image>
@@ -30,7 +30,7 @@
   </url>
   <url>
     <loc>https://evannathhotel.vercel.app/carte</loc>
-    <lastmod>2026-10-06</lastmod>
+    <lastmod>2026-10-07</lastmod>
     <priority>0.9</priority>
     <image:image><image:loc>https://evannathhotel.vercel.app/img/opt/gal-art-lanterne.jpg</image:loc></image:image>
     <image:image><image:loc>https://evannathhotel.vercel.app/img/opt/gal-tab-cocktails.jpg</image:loc></image:image>
@@ -51,7 +51,7 @@
   </url>
   <url>
     <loc>https://evannathhotel.vercel.app/circuits</loc>
-    <lastmod>2026-10-04</lastmod>
+    <lastmod>2026-10-07</lastmod>
     <priority>0.9</priority>
     <image:image><image:loc>https://evannathhotel.vercel.app/img/opt/gal-art-lanterne.jpg</image:loc></image:image>
     <image:image><image:loc>https://evannathhotel.vercel.app/img/opt/gal-lag-nuit.jpg</image:loc></image:image>
@@ -70,7 +70,7 @@
   </url>
   <url>
     <loc>https://evannathhotel.vercel.app/seminaires</loc>
-    <lastmod>2026-10-05</lastmod>
+    <lastmod>2026-10-07</lastmod>
     <priority>0.9</priority>
     <image:image><image:loc>https://evannathhotel.vercel.app/img/opt/gal-art-lanterne.jpg</image:loc></image:image>
     <image:image><image:loc>https://evannathhotel.vercel.app/img/opt/g-seminaire.jpg</image:loc></image:image>
@@ -78,14 +78,14 @@
   </url>
   <url>
     <loc>https://evannathhotel.vercel.app/contact</loc>
-    <lastmod>2026-10-05</lastmod>
+    <lastmod>2026-10-07</lastmod>
     <priority>0.8</priority>
     <image:image><image:loc>https://evannathhotel.vercel.app/img/opt/gal-art-lanterne.jpg</image:loc></image:image>
     <image:image><image:loc>https://evannathhotel.vercel.app/img/opt/g-entree.jpg</image:loc></image:image>
   </url>
   <url>
     <loc>https://evannathhotel.vercel.app/experiences</loc>
-    <lastmod>2026-10-04</lastmod>
+    <lastmod>2026-10-07</lastmod>
     <priority>0.8</priority>
     <image:image><image:loc>https://evannathhotel.vercel.app/img/opt/gal-art-lanterne.jpg</image:loc></image:image>
     <image:image><image:loc>https://evannathhotel.vercel.app/img/opt/gal-lag-bateau.jpg</image:loc></image:image>
@@ -99,7 +99,7 @@
   </url>
   <url>
     <loc>https://evannathhotel.vercel.app/galerie</loc>
-    <lastmod>2026-10-04</lastmod>
+    <lastmod>2026-10-07</lastmod>
     <priority>0.8</priority>
     <image:image><image:loc>https://evannathhotel.vercel.app/img/opt/gal-art-lanterne.jpg</image:loc></image:image>
     <image:image><image:loc>https://evannathhotel.vercel.app/img/opt/gal-dom-facade.jpg</image:loc></image:image>
@@ -151,7 +151,7 @@
   </url>
   <url>
     <loc>https://evannathhotel.vercel.app/spa</loc>
-    <lastmod>2026-10-06</lastmod>
+    <lastmod>2026-10-07</lastmod>
     <priority>0.8</priority>
     <image:image><image:loc>https://evannathhotel.vercel.app/img/opt/gal-spa-huiles.jpg</image:loc></image:image>
     <image:image><image:loc>https://evannathhotel.vercel.app/img/opt/gal-spa-case.jpg</image:loc></image:image>
@@ -163,7 +163,7 @@
   </url>
   <url>
     <loc>https://evannathhotel.vercel.app/chambre-mezzanine</loc>
-    <lastmod>2026-10-04</lastmod>
+    <lastmod>2026-10-07</lastmod>
     <priority>0.7</priority>
     <image:image><image:loc>https://evannathhotel.vercel.app/img/opt/gal-art-lanterne.jpg</image:loc></image:image>
     <image:image><image:loc>https://evannathhotel.vercel.app/img/opt/r-mezz2.jpg</image:loc></image:image>
@@ -175,7 +175,7 @@
   </url>
   <url>
     <loc>https://evannathhotel.vercel.app/chambre-standard</loc>
-    <lastmod>2026-10-04</lastmod>
+    <lastmod>2026-10-07</lastmod>
     <priority>0.7</priority>
     <image:image><image:loc>https://evannathhotel.vercel.app/img/opt/gal-art-lanterne.jpg</image:loc></image:image>
     <image:image><image:loc>https://evannathhotel.vercel.app/img/opt/r-standard.jpg</image:loc></image:image>
@@ -187,7 +187,7 @@
   </url>
   <url>
     <loc>https://evannathhotel.vercel.app/deluxe-baldaquin</loc>
-    <lastmod>2026-10-04</lastmod>
+    <lastmod>2026-10-07</lastmod>
     <priority>0.7</priority>
     <image:image><image:loc>https://evannathhotel.vercel.app/img/opt/gal-art-lanterne.jpg</image:loc></image:image>
     <image:image><image:loc>https://evannathhotel.vercel.app/img/opt/ig-baldaquin.jpg</image:loc></image:image>
@@ -199,7 +199,7 @@
   </url>
   <url>
     <loc>https://evannathhotel.vercel.app/deluxe-superieure</loc>
-    <lastmod>2026-10-04</lastmod>
+    <lastmod>2026-10-07</lastmod>
     <priority>0.7</priority>
     <image:image><image:loc>https://evannathhotel.vercel.app/img/opt/gal-art-lanterne.jpg</image:loc></image:image>
     <image:image><image:loc>https://evannathhotel.vercel.app/img/opt/r-wax.jpg</image:loc></image:image>
@@ -211,7 +211,7 @@
   </url>
   <url>
     <loc>https://evannathhotel.vercel.app/mezzanine-superieure</loc>
-    <lastmod>2026-10-04</lastmod>
+    <lastmod>2026-10-07</lastmod>
     <priority>0.7</priority>
     <image:image><image:loc>https://evannathhotel.vercel.app/img/opt/gal-art-lanterne.jpg</image:loc></image:image>
     <image:image><image:loc>https://evannathhotel.vercel.app/img/opt/r-mezzanine.jpg</image:loc></image:image>
@@ -223,7 +223,7 @@
   </url>
   <url>
     <loc>https://evannathhotel.vercel.app/suite-anglaise</loc>
-    <lastmod>2026-10-04</lastmod>
+    <lastmod>2026-10-07</lastmod>
     <priority>0.7</priority>
     <image:image><image:loc>https://evannathhotel.vercel.app/img/opt/gal-art-lanterne.jpg</image:loc></image:image>
     <image:image><image:loc>https://evannathhotel.vercel.app/img/opt/r-anglaise.jpg</image:loc></image:image>
@@ -240,7 +240,7 @@
   </url>
   <url>
     <loc>https://evannathhotel.vercel.app/suite-arabe</loc>
-    <lastmod>2026-10-04</lastmod>
+    <lastmod>2026-10-07</lastmod>
     <priority>0.7</priority>
     <image:image><image:loc>https://evannathhotel.vercel.app/img/opt/gal-art-lanterne.jpg</image:loc></image:image>
     <image:image><image:loc>https://evannathhotel.vercel.app/img/opt/sa-main.jpg</image:loc></image:image>
@@ -254,7 +254,7 @@
   </url>
   <url>
     <loc>https://evannathhotel.vercel.app/a-propos</loc>
-    <lastmod>2026-10-04</lastmod>
+    <lastmod>2026-10-07</lastmod>
     <priority>0.6</priority>
     <image:image><image:loc>https://evannathhotel.vercel.app/img/opt/gal-art-lanterne.jpg</image:loc></image:image>
     <image:image><image:loc>https://evannathhotel.vercel.app/img/opt/g-entree.jpg</image:loc></image:image>
@@ -266,14 +266,14 @@
   </url>
   <url>
     <loc>https://evannathhotel.vercel.app/informations-utiles</loc>
-    <lastmod>2026-10-04</lastmod>
+    <lastmod>2026-10-07</lastmod>
     <priority>0.6</priority>
     <image:image><image:loc>https://evannathhotel.vercel.app/img/opt/gal-art-lanterne.jpg</image:loc></image:image>
     <image:image><image:loc>https://evannathhotel.vercel.app/img/opt/g-lobby.jpg</image:loc></image:image>
   </url>
   <url>
     <loc>https://evannathhotel.vercel.app/chambres</loc>
-    <lastmod>2026-10-04</lastmod>
+    <lastmod>2026-10-07</lastmod>
     <priority>0.5</priority>
     <image:image><image:loc>https://evannathhotel.vercel.app/img/opt/gal-art-lanterne.jpg</image:loc></image:image>
     <image:image><image:loc>https://evannathhotel.vercel.app/img/opt/sa-main.jpg</image:loc></image:image>
@@ -286,7 +286,7 @@
   </url>
   <url>
     <loc>https://evannathhotel.vercel.app/recrutement</loc>
-    <lastmod>2026-10-06</lastmod>
+    <lastmod>2026-10-07</lastmod>
     <priority>0.5</priority>
     <image:image><image:loc>https://evannathhotel.vercel.app/img/opt/gal-art-lanterne.jpg</image:loc></image:image>
     <image:image><image:loc>https://evannathhotel.vercel.app/img/opt/g-entree.jpg</image:loc></image:image>
