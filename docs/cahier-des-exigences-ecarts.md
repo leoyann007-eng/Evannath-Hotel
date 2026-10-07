@@ -37,6 +37,66 @@ tient en trois blocs :
 
 ---
 
+## À qui revient chaque point
+
+Ce cahier a été écrit pour **CAAURI**, une agence de communication, pas pour
+le développement du site seul. Beaucoup de points relèvent donc de la
+communication de l'hôtel : photos, vidéos, rédaction, publicité, réseaux
+sociaux, gestion des avis. D'autres concernent le contrat avec l'agence.
+Il faut trier avant de chiffrer quoi que ce soit.
+
+**Le site — notre périmètre.** Ce qui se construit dans le code et se livre :
+
+- § 3–5 : accueil, réservation directe ;
+- § 6 : WhatsApp prérempli et boutons dédiés ;
+- § 7–13 : structure des pages chambres, offres, expériences, séminaires,
+  événements, restaurant, Assinie ;
+- § 14 : le carnet, c'est-à-dire **l'outil de publication**, pas les
+  articles ;
+- § 15 : la **section** avis et son affichage, pas la collecte ;
+- § 16 : la galerie et l'emplacement des vidéos ;
+- § 17–20 : mobile, vitesse, SEO technique, bilingue ;
+- § 21–22 : formulaire d'inscription, pop-up ;
+- § 23 : **l'installation** du tracking et des événements de conversion ;
+- § 25–26 : enregistrement des demandes, suivi, relances automatiques ;
+- § 28 : la formation à l'administration du site.
+
+**La communication — agence (CAAURI ou autre) ou équipe de l'hôtel.** Le
+site les accueille, mais ne les produit pas :
+
+- les **photos professionnelles** et les **vidéos**, dont les verticales
+  pour mobile (§ 7, § 16) ;
+- les **textes de vente** et leur ton (§ 7, § 9), la **traduction
+  anglaise** professionnelle des nouveaux contenus (§ 20) ;
+- la **rédaction des articles** du carnet, à un rythme régulier (§ 14) ;
+- la **collecte des avis** : demander aux clients, répondre sur Google (§ 15) ;
+- les **campagnes Instagram et Facebook** et leurs liens suivis UTM (§ 23,
+  § 32) ;
+- les **offres elles-mêmes** : quels forfaits, à quel prix, quand (§ 8) ;
+- l'**animation de la base de contacts** : quoi envoyer, à quel rythme
+  (§ 21, § 32) ;
+- la **lecture des chiffres** chaque mois et les décisions qui en découlent
+  (§ 24).
+
+**L'hôtel et le contrat.** Ni le code ni l'agence :
+
+- § 1–2 : positionnement, message ;
+- § 24 : objectifs chiffrés ;
+- § 27 : comptes au nom de l'hôtel ;
+- § 29 : contrat de maintenance ;
+- § 30 : phases et livrables ;
+- § 33 : la question à poser à l'agence.
+
+**À retenir.** Une partie de ce que le cahier demande à CAAURI **existe déjà
+sur notre site** : réservation directe avec acompte, offres, séminaires,
+restaurant, bilingue, mobile. Le travail restant côté site est circonscrit
+(voir « Ordre proposé »). Ce qui manque le plus pour atteindre les objectifs
+du cahier, c'est du **contenu** et de **l'animation**. Le code n'y peut rien :
+une agence ou une personne dédiée à l'hôtel doit s'en charger, et le site
+doit lui faciliter la tâche (administration, outil de publication, tracking).
+
+---
+
 ## Point par point
 
 ### 1–2. Objectifs et positionnement
@@ -477,8 +537,21 @@ Du plus rentable au plus long. Chaque lot fait l'objet d'une PR séparée.
 | **2. Mesurer** | GA4 ou Vercel Analytics · événements de conversion · UTM conservés et joints aux demandes · bandeau cookies si GA4 | Comptes Google au nom de l'hôtel |
 | **3. Garder les prospects** | Onglet **Demandes** (statuts, notes, montants) · relances J1, J3, J7 · demande d'avis après le séjour · inscription aux offres privées · tableau de bord mensuel | Non (textes des relances à valider) |
 | **4. Pages manquantes** | Événements privés · Que faire à Assinie · avis clients · catégories de galerie · offres séminaire et team building | **Oui** : capacités, prestations, photos, avis |
-| **5. Contenus longs** | Le Carnet d'Assinie · vidéos courtes · superficies · pop-up | **Oui** : rédaction et tournages |
+| **5. Outils de contenu** | Outil de publication du Carnet (articles depuis l'administration) · emplacements vidéo sur les fiches · pop-up | Non pour l'outil ; les articles et les vidéos viennent de la communication |
 | **Avant la mise en ligne** | Transfert Vercel, GitHub et base au nom de l'hôtel · clé lomi réelle · liste des chambres · mentions légales · Search Console | **Oui** |
+
+**Hors site : la communication.** Ces chantiers ne se font pas en PR.
+Le site les attend :
+
+- photos et vidéos ;
+- articles du Carnet ;
+- traduction anglaise des nouveaux textes ;
+- collecte des avis ;
+- campagnes publicitaires avec UTM ;
+- envois à la base de contacts ;
+- lecture mensuelle des chiffres.
+
+Sans eux, les lots 4 et 5 restent des cadres vides.
 
 Ce qu'il faut demander à la direction dès maintenant, pour ne pas bloquer
 les lots 4 et 5 :
@@ -490,6 +563,6 @@ les lots 4 et 5 :
 4. **Brunch, sunset** : existent-ils, à quel prix, quel jour ?
 5. **Des photos de séminaires et d'événements passés.**
 6. **L'accès à la fiche Google** de l'hôtel, pour les avis.
-7. **Qui écrira le carnet**, et à quel rythme.
+7. **Qui s'occupe de la communication** (CAAURI, une autre agence, quelqu'un de l'hôtel) : photos, vidéos, carnet, avis, publicité.
 8. **Les adresses e-mail** au nom de l'hôtel pour créer les comptes Google,
    Vercel et GitHub.
