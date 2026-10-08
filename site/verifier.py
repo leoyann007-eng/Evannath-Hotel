@@ -266,7 +266,9 @@ def controler():
 
         # 9. liens internes
         for h in set(re.findall(r'href="([^"]+)"', s)):
-            if h.startswith(('http', 'mailto:', 'tel:', '#', '/api')):
+            # Un href compose par un script (« ' + ech(p.href) + ' ») n'est
+            # pas un lien statique : il se verifie a l'execution, pas ici.
+            if h.startswith(('http', 'mailto:', 'tel:', '#', '/api', "' +")):
                 continue
             p = h.split('#')[0].split('?')[0].lstrip('/')
             if p and not os.path.exists(p):
