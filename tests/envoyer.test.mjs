@@ -84,6 +84,68 @@ t.push(async () => {
   verifie('champs surdimensionnes acceptes apres troncature', r.code === 503, r.json);
 });
 
+// ── Avec un faux Resend : la reception, puis l'accuse de reception ────────
+// fetch est remplace : chaque appel est garde, et `refuser` fait echouer
+// les envois vers une adresse donnee.
+const envois = [];
+let refuser = null;
+function brancher() {
+  process.env.RESEND_API_KEY = 're_essai';
+  process.env.MAIL_DEST = 'reception@evannathhotel.com';
+  process.env.MAIL_EXP = 'site@evannathhotel.com';
+  globalThis.fetch = async (url, o) => {
+    const corps = JSON.parse(o.body);
+    envois.push(corps);
+    const ko = refuser && corps.to.includes(refuser);
+    return { ok: !ko, text: async () => (ko ? 'refuse' : '') };
+  };
+}
+const versClient = (adr) => envois.filter((e) => e.to.length === 1 && e.to[0] === adr);
+
+t.push(async () => {
+  brancher(); envois.length = 0;
+  const r = await faux({ ...base, type: 'reservation', nom: 'Aya <b>Kouassi</b>', email: 'aya@example.ci',
+    tel: '0102030405', chambre: 'Suite Arabe', arrivee: '12 décembre 2026', depart: '14 décembre 2026',
+    message: 'Achetez mes produits sur http://spam.example' }, 'POST', '5.0.0.1');
+  const c = versClient('aya@example.ci')[0];
+  verifie('reservation : 200, accuse envoye', r.code === 200 && r.json.accuse === 'envoye', r.json);
+  verifie('deux e-mails : la reception, puis le client', envois.length === 2
+    && envois[0].to[0] === 'reception@evannathhotel.com' && !!c, envois.map((e) => e.to));
+  verifie('l objet du client porte la reference', c && c.subject.includes(r.json.reference), c && c.subject);
+  verifie('le recapitulatif reprend la chambre et les dates', c && c.html.includes('Suite Arabe')
+    && c.html.includes('12 décembre 2026'), c && c.html);
+  verifie('il dit que ce n est pas encore une confirmation', c && c.html.includes('pas encore une confirmation'));
+  verifie('le message libre n est pas recopie au client', c && !c.html.includes('spam.example'));
+  verifie('le nom est echappe', c && c.html.includes('Aya &lt;b&gt;Kouassi&lt;/b&gt;') && !c.html.includes('<b>Kouassi'));
+  verifie('repondre au client ecrit a la reception', c && c.reply_to === 'reception@evannathhotel.com', c && c.reply_to);
+});
+
+t.push(async () => {
+  envois.length = 0;
+  const r = await faux({ ...base, type: 'devis', langue: 'en', societe: 'Orange CI', nom: 'Jane Doe',
+    email: 'jane@example.com', tel: '0102030405', evenement: 'Mariage', chambres: '12', participants: '80' }, 'POST', '5.0.0.2');
+  const c = versClient('jane@example.com')[0];
+  verifie('anglais : objet et texte en anglais', c && c.subject.startsWith('Your quote request')
+    && c.html.includes('Type of event'), c && c.subject);
+  verifie('le type d evenement arrive a la reception (et pas « devis »)', r.code === 200
+    && envois[0].html.includes('Mariage') && envois[0].html.includes('Chambres souhaitées'), envois[0] && envois[0].html);
+});
+
+t.push(async () => {
+  envois.length = 0;
+  const r = await faux({ ...base, type: 'table', nom: 'Koffi', tel: '0102030405', couverts: '4' }, 'POST', '5.0.0.3');
+  verifie('sans adresse : seul l e-mail de la reception part', r.code === 200 && envois.length === 1
+    && r.json.accuse === 'sans-adresse', { n: envois.length, j: r.json });
+});
+
+t.push(async () => {
+  envois.length = 0; refuser = 'rate@example.ci';
+  const r = await faux({ ...base, type: 'contact', nom: 'Awa', email: 'rate@example.ci', message: 'Bonjour' }, 'POST', '5.0.0.4');
+  refuser = null;
+  verifie('accuse refuse : la demande reste acceptee (200), accuse = echec',
+    r.code === 200 && r.json.ok && r.json.accuse === 'echec', r.json);
+});
+
 for (const f of t) await f();
 console.log(`\n${ok} verifications passees, ${ko} en echec`);
 process.exit(ko ? 1 : 0);

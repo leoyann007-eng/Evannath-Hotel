@@ -1439,7 +1439,8 @@ var EVN = {
       type: type,
       website: (document.querySelector('[name=website]') || {}).value || '',
       duree: Date.now() - EVN.ouvert,
-      page: location.pathname
+      page: location.pathname,
+      langue: document.documentElement.lang || 'fr'
     });
 
     var fini = function (etat, reponse) {

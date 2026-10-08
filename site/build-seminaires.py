@@ -433,14 +433,14 @@ document.getElementById('df').addEventListener('submit',function(e){
 
   var d={societe:document.getElementById('soc').value,nom:document.getElementById('nom').value,
          email:document.getElementById('em').value,tel:document.getElementById('tel').value,
-         type:document.getElementById('typ').value,chambres:document.getElementById('nch').value,
+         evenement:document.getElementById('typ').value,chambres:document.getElementById('nch').value,
          formule:form.value,configuration:cfg.value,participants:nb.value,date:dt.value,
          message:document.getElementById('msg').value};
 
   function resume(){
     return "Bonjour, je souhaite un devis pour un séminaire à l'Hôtel Evannath."+N+N
       +'Société : '+d.societe+N+'Contact : '+d.nom+N+'Téléphone : '+d.tel+N+'E-mail : '+d.email
-      +N+N+"Type d'événement : "+d.type+N+'Formule : '+d.formule+N+'Configuration : '+d.configuration
+      +N+N+"Type d'événement : "+d.evenement+N+'Formule : '+d.formule+N+'Configuration : '+d.configuration
       +N+'Participants : '+d.participants+(d.chambres?N+'Chambres souhaitées : '+d.chambres:'')+N+'Date souhaitée : '+d.date
       +(d.message?N+N+d.message:'');
   }

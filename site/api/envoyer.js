@@ -22,7 +22,7 @@ const TYPES = {
   devis: {
     sujet: 'Demande de devis — séminaires & groupes',
     requis: ['societe', 'nom', 'email', 'tel'],
-    champs: ['societe', 'nom', 'email', 'tel', 'type', 'formule', 'configuration',
+    champs: ['societe', 'nom', 'email', 'tel', 'evenement', 'formule', 'configuration',
              'participants', 'chambres', 'date', 'message'],
   },
   contact: {
@@ -76,7 +76,7 @@ const ETIQUETTES = {
   societe: 'Société', nom: 'Nom', email: 'E-mail', tel: 'Téléphone',
   chambre: 'Chambre', arrivee: 'Arrivée', depart: 'Départ', nuits: 'Nuits',
   personnes: 'Personnes', total: 'Total estimé', acompte: 'Acompte (30 %)',
-  paiement: 'Moyen de paiement souhaité', type: 'Type d’événement', formule: 'Formule',
+  paiement: 'Moyen de paiement souhaité', evenement: 'Type d’événement', formule: 'Formule',
   configuration: 'Configuration de salle', participants: 'Participants',
   chambres: 'Chambres souhaitées',
   date: 'Date', heure: 'Heure', couverts: 'Couverts', soin: 'Soin',
@@ -110,7 +110,7 @@ async function envoyer_mail(payload) {
     headers: { Authorization: `Bearer ${cle}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
       from: `Hôtel Evannath <${exp}>`,
-      to: dest.split(',').map((s) => s.trim()).filter(Boolean),
+      to: payload.a || dest.split(',').map((s) => s.trim()).filter(Boolean),
       reply_to: payload.replyTo || undefined,
       subject: payload.sujet,
       html: payload.html,
@@ -121,6 +121,89 @@ async function envoyer_mail(payload) {
     return { ok: false, raison: 'refus_fournisseur', detail: texte.slice(0, 400) };
   }
   return { ok: true };
+}
+
+// ── L'accuse de reception au client ────────────────────────────────────
+// Le client qui laisse son adresse recoit, des l'envoi, le recapitulatif de
+// ce qu'il vient de demander et sa reference. Jusqu'ici, il n'avait que
+// l'ecran de confirmation : une fois l'onglet ferme, plus aucune trace.
+//
+// Ce n'est PAS une confirmation de reservation : la chambre n'est confirmee
+// que par la reception (voir courrielAuClient dans api/admin.js). Le texte
+// le dit, pour qu'aucun client ne se croie attendu sans l'etre.
+//
+// Le message libre du visiteur n'y est pas recopie : sinon n'importe qui
+// pourrait faire envoyer par l'hotel le texte de son choix a l'adresse de
+// son choix. Le reste (dates, chambre, nombre...) est borne et echappe.
+const POUR_CLIENT = {
+  fr: {
+    objet: { reservation: 'Votre demande de réservation', devis: 'Votre demande de devis',
+             contact: 'Votre message', table: 'Votre demande de table', spa: 'Votre demande de rendez-vous au spa' },
+    bonjour: (n) => `Bonjour ${n},`,
+    recu: (o) => `Nous avons bien reçu ${o.charAt(0).toLowerCase() + o.slice(1)} à l'Hôtel Evannath. Voici ce que vous nous avez transmis.`,
+    attente: {
+      reservation: 'Ce n’est pas encore une confirmation : la réception vérifie la disponibilité et vous répond sous 24 h. La chambre est confirmée à réception de l’acompte.',
+      devis: 'Le service commercial vous envoie un devis détaillé sous 24 h.',
+      contact: 'La réception vous répond sous 24 h.',
+      table: 'La réception vous confirme la table rapidement.',
+      spa: 'La réception vous confirme le créneau rapidement.',
+    },
+    ref: 'Référence', repondre: 'Pour toute question, répondez simplement à ce message ou écrivez-nous sur WhatsApp au',
+  },
+  en: {
+    objet: { reservation: 'Your booking request', devis: 'Your quote request',
+             contact: 'Your message', table: 'Your table request', spa: 'Your spa appointment request' },
+    bonjour: (n) => `Dear ${n},`,
+    recu: (o) => `We have received ${o.charAt(0).toLowerCase() + o.slice(1)} at Hôtel Evannath. Here is what you sent us.`,
+    attente: {
+      reservation: 'This is not a confirmation yet: the front desk checks availability and replies within 24 hours. The room is confirmed once the deposit is received.',
+      devis: 'Our sales team will send you a detailed quote within 24 hours.',
+      contact: 'The front desk will reply within 24 hours.',
+      table: 'The front desk will confirm your table shortly.',
+      spa: 'The front desk will confirm your slot shortly.',
+    },
+    ref: 'Reference', repondre: 'For any question, simply reply to this message or write to us on WhatsApp at',
+  },
+};
+const ETIQUETTES_EN = {
+  societe: 'Company', nom: 'Name', email: 'E-mail', tel: 'Phone', chambre: 'Room', arrivee: 'Arrival',
+  depart: 'Departure', nuits: 'Nights', personnes: 'Guests', total: 'Estimated total', acompte: 'Deposit (30%)',
+  paiement: 'Preferred payment', evenement: 'Type of event', formule: 'Package', configuration: 'Room layout',
+  participants: 'Participants', chambres: 'Rooms needed', date: 'Date', heure: 'Time', couverts: 'Covers',
+  soin: 'Treatment', sujet: 'Subject',
+};
+// Ce que le client ne revoit pas dans son recapitulatif : ses propres
+// coordonnees n'y apprennent rien, et le message libre ne repart pas (plus haut).
+const HORS_RECAP = new Set(['email', 'message']);
+
+// Une date saisie dans un champ date arrive en 2026-12-19 : le client la lit
+// « 19 décembre 2026 ». Le reste passe tel quel.
+function lisible(v, langue) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(v)) return v;
+  const j = new Date(v + 'T12:00:00Z');
+  return isNaN(j) ? v : j.toLocaleDateString(langue === 'en' ? 'en-GB' : 'fr-FR',
+    { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+}
+
+function corpsClient(type, d, ref, langue) {
+  const T = POUR_CLIENT[langue], def = TYPES[type];
+  const lib = langue === 'en' ? ETIQUETTES_EN : ETIQUETTES;
+  const lignes = def.champs
+    .filter((c) => d[c] && !HORS_RECAP.has(c))
+    .map((c) => `<tr><td style="padding:6px 18px 6px 0;color:#8a7d6c;white-space:nowrap;vertical-align:top">${lib[c] || c}</td>`
+               + `<td style="padding:6px 0">${echappe(lisible(d[c], langue))}</td></tr>`)
+    .join('');
+  const wa = '+225 01 51 52 75 75';   // la ligne Reservations de l'hotel
+  return `<div style="font:400 15px/1.6 Georgia,serif;color:#1b1b1b;max-width:520px">
+<p>${T.bonjour(echappe(d.nom))}</p>
+<p>${T.recu(T.objet[type])}</p>
+<table style="border-collapse:collapse;margin:18px 0">
+<tr><td style="padding:6px 18px 6px 0;color:#8a7d6c;white-space:nowrap">${T.ref}</td><td style="padding:6px 0"><strong>${ref}</strong></td></tr>
+${lignes}</table>
+<p><strong>${T.attente[type]}</strong></p>
+<p style="color:#8a7d6c;font-size:13.5px">${T.repondre} ${echappe(wa)}.<br>
+Hôtel Evannath — Assinie PK 19, Côte d'Ivoire</p>
+</div>`;
 }
 
 export default async function handler(req, res) {
@@ -192,5 +275,20 @@ export default async function handler(req, res) {
     });
   }
 
-  return res.status(200).json({ ok: true, reference: ref });
+  /* L'accuse de reception part apres celui de la reception, et son echec
+     ne change rien a la reponse : la demande, elle, est bien arrivee. On
+     dit seulement au navigateur si le client a recu son recapitulatif. */
+  let accuse = 'sans-adresse';
+  if (donnees.email) {
+    const langue = String(d.langue || '').slice(0, 2) === 'en' ? 'en' : 'fr';
+    const r = await envoyer_mail({
+      a: [donnees.email],
+      sujet: `${POUR_CLIENT[langue].objet[d.type]} — ${ref}`,
+      html: corpsClient(d.type, donnees, ref, langue),
+      replyTo: process.env.MAIL_DEST ? process.env.MAIL_DEST.split(',')[0].trim() : undefined,
+    }).catch(() => ({ ok: false }));
+    accuse = r.ok ? 'envoye' : 'echec';
+  }
+
+  return res.status(200).json({ ok: true, reference: ref, accuse });
 }
