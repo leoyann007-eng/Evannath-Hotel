@@ -146,6 +146,20 @@ t.push(async () => {
     r.code === 200 && r.json.ok && r.json.accuse === 'echec', r.json);
 });
 
+t.push(async () => {
+  envois.length = 0;
+  const r = await faux({ ...base, type: 'forfait', forfait: 'Pack Couple', date: '15 octobre 2026',
+    quantite: '1 forfait', total: '150 000 FCFA', nom: 'Aya Kouassi', tel: '+225 07 00 00 00 00',
+    email: 'aya2@example.ci' }, 'POST', '5.0.0.5');
+  const c = versClient('aya2@example.ci')[0];
+  verifie('forfait (page Offres) : accepte, reception et client prevenus', r.code === 200
+    && envois.length === 2 && envois[0].subject.startsWith('Demande de forfait'), envois.map((e) => e.subject));
+  verifie('forfait : le recapitulatif cite le forfait et le total', c && c.html.includes('Pack Couple')
+    && c.html.includes('150 000 FCFA') && c.subject.startsWith('Votre demande de forfait'), c && c.subject);
+  const sans = await faux({ ...base, type: 'forfait', forfait: 'Pack Couple', nom: 'Aya' }, 'POST', '5.0.0.6');
+  verifie('forfait sans telephone : refuse (422)', sans.code === 422 && sans.json.champs.includes('tel'), sans.json);
+});
+
 for (const f of t) await f();
 console.log(`\n${ok} verifications passees, ${ko} en echec`);
 process.exit(ko ? 1 : 0);

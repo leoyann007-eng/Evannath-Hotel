@@ -616,6 +616,25 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
   .pagne-med.large{max-width:240px}
 }
 
+/* 33 · Des @keyframes et non des transitions, pour deux raisons :
+   - l'ecran de confirmation passe de display:none a visible, et une
+     transition ne part pas d'un element qui n'etait pas rendu ;
+   - l'etat de BASE est l'etat final. Sous « reduire les animations », la
+     garde pose animation:none, et l'on voit directement le cercle ferme,
+     la coche et le message — sans rien a attendre. */
+.conf-trait{display:block;width:72px;height:72px;margin:0 auto 26px;fill:none;
+  stroke:var(--bronze);stroke-width:1.2;stroke-linecap:round;stroke-linejoin:round}
+.conf-trait circle{stroke-dasharray:1;transform:rotate(-90deg);transform-origin:40px 40px;
+  animation:conf-trace 1.2s var(--ease-inout) .2s both}
+.conf-trait path{stroke-dasharray:1;animation:conf-trace .7s var(--ease-out) 1.2s both}
+/* Dans l'encadre du contact et des seminaires, le dessin se fait plus
+   petit et s'aligne sur le texte, a gauche. */
+.sent .conf-trait{width:52px;height:52px;margin:0 0 14px}
+.conf-msg{animation:conf-apparait 1s ease 1.7s both,conf-monte 1s var(--ease-out) 1.7s both}
+@keyframes conf-trace{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
+@keyframes conf-apparait{from{opacity:0}}
+@keyframes conf-monte{from{transform:translateY(10px)}}
+
 /* Les intertitres qui separent les quatre parties de la page. */
 .sect{margin:86px 0 34px;max-width:70ch}
 .sect h2{font-size:clamp(1.9rem,3.4vw,2.6rem);margin:10px 0 12px}
@@ -871,6 +890,16 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
   .c .foot{flex-direction:column;align-items:stretch;gap:14px}
   .pick{text-align:center}
 }
+
+.recap .err-envoi{text-align:center}
+.recap .secours,.recap .sent{margin-top:18px;padding:20px}
+.sent{display:none;border:1px solid rgba(143,174,99,.5);background:rgba(143,174,99,.08)}
+.sent.on{display:block}
+.sent b{display:block;font-family:var(--f-display);font-size:1.25rem;color:var(--palm);margin-bottom:6px}
+.sent p{font-size:14px;margin:0}
+.form .f.bad input{border-color:var(--err)}
+.form .f .msg{display:none;color:var(--err);font-size:12.5px;margin-top:6px}
+.form .f.bad .msg{display:block}
 
 </style>
 </head>
@@ -1223,11 +1252,15 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
         <div class="f"><label for="qt" data-t="l3">Nombre</label><input type="number" id="qt" min="1" max="40" value="2"></div>
       </div>
       <div class="two">
-        <div class="f"><label for="nm" data-t="l4">Nom complet</label><input type="text" id="nm" placeholder="Aya Kouassi" required></div>
-        <div class="f"><label for="tel" data-t="l5">Téléphone / WhatsApp</label><input type="tel" id="tel" placeholder="+225 01 02 03 04 05" required></div>
+        <div class="f"><label for="nm" data-t="l4">Nom complet *</label><input type="text" id="nm" placeholder="Aya Kouassi" autocomplete="name">
+          <span class="msg" data-t="mnm">Indiquez votre nom.</span></div>
+        <div class="f"><label for="tel" data-t="l5">Téléphone / WhatsApp *</label><input type="tel" id="tel" placeholder="+225 01 02 03 04 05" autocomplete="tel">
+          <span class="msg" data-t="mtel">Indiquez un numéro d'au moins 8 chiffres.</span></div>
       </div>
-      <div class="f"><label for="em" data-t="l6">E-mail</label><input type="email" id="em" placeholder="vous@exemple.com" required></div>
+      <div class="f"><label for="em" data-t="l6">E-mail (pour recevoir le récapitulatif)</label><input type="email" id="em" placeholder="vous@exemple.com" autocomplete="email">
+        <span class="msg" data-t="mem">Cette adresse e-mail ne semble pas valide.</span></div>
       <div class="f"><label for="msg" data-t="l7">Précisions (facultatif)</label><textarea id="msg" placeholder="Occasion particulière, allergies, heure d'arrivée…"></textarea></div>
+      <div class="piege" aria-hidden="true"><label>Ne pas remplir<input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
     </form>
 
     <aside class="recap">
@@ -1237,8 +1270,21 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
       <div class="row"><span id="rql">Quantité</span><span id="rq">1 forfait</span></div>
       <div class="row"><span data-t="r4">Tarif unitaire</span><span id="ru">340 000</span></div>
       <div class="tot"><span data-t="r5">Total</span><b id="rt">340 000</b></div>
-      <button type="submit" form="rf" class="btn btn-solid" data-t="r6">Envoyer la demande</button>
+      <button type="submit" form="rf" class="btn btn-solid" id="envoi" data-t="r6">Envoyer la demande</button>
       <p class="note" data-t="r7">Réponse de la réception sous 24 h. Aucun paiement à cette étape.</p>
+      <p class="err-envoi" id="err" role="alert"></p><div class="secours" id="sec" role="alert">
+  <b data-t="sc1">Terminons sur WhatsApp</b>
+  <p data-t="sc2">Votre demande est prête — il ne reste qu'à l'envoyer. Un clic, et elle arrive à la réception, qui répond 24 h/24. Vous pouvez aussi appeler ou écrire.</p>
+  <div class="liens">
+    <a class="wa-envoi" data-t="sc3" href="https://wa.me/2250758408079" target="_blank" rel="noopener">Envoyer sur WhatsApp</a>
+    <a data-t="sc4" href="tel:+2250151527575">Appeler la réception</a>
+    <a data-t="sc5" href="mailto:receptionhotelevannath@gmail.com">Écrire un e-mail</a>
+  </div>
+</div>
+      <div class="sent" id="ok" role="status"><svg class="conf-trait" viewBox="0 0 80 80" aria-hidden="true" focusable="false"><circle cx="40" cy="40" r="38" pathLength="1"/><path d="M26 41L36 51L55 30" pathLength="1"/></svg><div class="conf-msg">
+        <b data-t="okt">Votre demande vous attend dans WhatsApp</b>
+        <p id="okm"></p>
+      </div></div>
     </aside>
   </div>
  </div>
@@ -1700,6 +1746,146 @@ if(!('IntersectionObserver' in window)||reduce){document.querySelectorAll('.reve
 else{var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.1});
  document.querySelectorAll('.reveal').forEach(function(el){io.observe(el)});
  setTimeout(function(){document.querySelectorAll('.reveal:not(.in)').forEach(function(el){if(el.getBoundingClientRect().top<innerHeight)el.classList.add('in')})},1200)}
+/* Envoi des formulaires -------------------------------------------------
+   Un seul point d'entree cote serveur : /api/envoyer.
+   Si l'envoi automatique n'est pas configure ou echoue, on ne perd jamais le
+   visiteur : on lui propose WhatsApp avec le message deja redige, plus les
+   numeros de la reception. */
+var SAUT = String.fromCharCode(10);
+
+var EVN = {
+  wa: '2250758408079',
+  tel: '+2250151527575',
+  mail: 'receptionhotelevannath@gmail.com',
+  ouvert: Date.now(),
+
+  lienWhatsApp: function (texte) {
+    return 'https://wa.me/' + this.wa + '?text=' + encodeURIComponent(texte);
+  },
+
+  /* Voir ENVOI_WHATSAPP dans _chrome.py. */
+  parWhatsApp: true,
+
+  /* Meme format que le serveur (api/envoyer.js), pour que la reference lue
+     au telephone soit la meme que celle affichee a l'ecran. */
+  reference: function () {
+    return 'EVN-' + Date.now().toString(36).slice(-6).toUpperCase();
+  },
+
+  /* o : {bouton, secours, erreur, resume} */
+  envoyer: function (type, donnees, o, alors) {
+    var b = o.bouton, libelle = b ? b.textContent : '';
+    if (o.erreur) o.erreur.classList.remove('on');
+    if (o.secours) o.secours.classList.remove('on');
+
+    /* La reference, generee ici pour que la retenue et le message portent la
+       MEME : la reception lit « EVN-EIMWJG » dans son WhatsApp et retrouve
+       la meme a cote du nom, dans le calendrier. */
+    var ref = EVN.reference();
+
+    /* Une demande de chambre previent le serveur, qui en retient une pendant
+       deux heures — le temps que la reception la voie. Sans ca, la demande
+       partait sur son telephone et le site continuait d'annoncer la chambre
+       libre : deux clients pouvaient demander la derniere.
+
+       Envoi SANS ATTENDRE la reponse, et l'echec est sans consequence : la
+       demande part de toute facon, elle n'a jamais dependu de ce serveur. Ce
+       qui compte pour le visiteur, c'est que son message arrive. */
+    if (o.retenue && window.fetch) {
+      try {
+        fetch('/api/admin?a=demande', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            categorie: o.retenue.categorie, du: o.retenue.du,
+            au: o.retenue.au, nom: o.retenue.nom,
+            /* L'adresse sert a une seule chose : prevenir le client quand la
+               reception confirme. Elle ne ressort par aucune route publique. */
+            courriel: o.retenue.courriel, reference: ref })
+        }).catch(function () {});
+      } catch (e) { /* le formulaire continue */ }
+    }
+
+    /* La demande part sur WhatsApp.
+
+       On n'appelle PAS window.open : les navigateurs le bloquent largement,
+       et il ne se passait alors plus rien du tout au clic. On ne peut pas
+       parier la seule voie d'envoi sur une API que le visiteur peut refuser.
+
+       Le panneau s'ouvre donc avec le lien deja rempli, et c'est le visiteur
+       qui le touche : un vrai clic sur un vrai lien, qu'aucun bloqueur
+       n'arrete, sur telephone comme sur ordinateur.
+
+       La confirmation s'affiche juste apres ce clic — pas avant. Elle est
+       donc derriere lui quand il revient de WhatsApp, avec sa reference. */
+    if (EVN.parWhatsApp) {
+      var texte = (o.resume ? o.resume() : 'Bonjour, je souhaite vous contacter.')
+                + SAUT + SAUT + 'Référence : ' + ref;
+      var url = EVN.lienWhatsApp(texte);
+      var a = o.secours ? o.secours.querySelector('a.wa-envoi') : null;
+
+      if (!a) {                       /* pas de panneau : on n'a que ce recours */
+        location.href = url;
+        return;
+      }
+      a.href = url;
+      a.addEventListener('click', function () {
+        /* Le temps que l'onglet ou l'application prenne la main. */
+        setTimeout(function () { alors({ ok: true, reference: ref }); }, 500);
+      }, { once: true });
+      o.secours.classList.add('on');
+      o.secours.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
+    if (b) { b.setAttribute('aria-busy', 'true'); b.disabled = true; b.textContent = 'Envoi en cours…'; }
+
+    var charge = Object.assign({}, donnees, {
+      type: type,
+      website: (document.querySelector('[name=website]') || {}).value || '',
+      duree: Date.now() - EVN.ouvert,
+      page: location.pathname,
+      langue: document.documentElement.lang || 'fr'
+    });
+
+    var fini = function (etat, reponse) {
+      if (b) { b.removeAttribute('aria-busy'); b.disabled = false; b.textContent = libelle; }
+      if (etat === 'ok') { alors(reponse); return; }
+      if (etat === 'champs') {
+        if (o.erreur) { o.erreur.textContent = reponse.message; o.erreur.classList.add('on'); }
+        if (o.marquer) o.marquer(reponse.champs || []);
+        return;
+      }
+      /* Ni succes ni faute du visiteur : on bascule sur WhatsApp. */
+      if (o.secours) {
+        var lien = o.secours.querySelector('a.wa-envoi');
+        if (lien) lien.href = EVN.lienWhatsApp(o.resume ? o.resume() : 'Bonjour, je souhaite vous contacter.');
+        o.secours.classList.add('on');
+        o.secours.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    };
+
+    if (!('fetch' in window)) { fini('secours', {}); return; }
+
+    var minuteur = setTimeout(function () { fini('secours', {}); }, 12000);
+    var repondu = false;
+    fetch('/api/envoyer', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(charge)
+    }).then(function (r) {
+      return r.json().catch(function () { return {}; }).then(function (j) { return { s: r.status, j: j }; });
+    }).then(function (x) {
+      if (repondu) return; repondu = true; clearTimeout(minuteur);
+      if (x.s === 200 && x.j.ok) fini('ok', x.j);
+      else if (x.s === 422) fini('champs', x.j);
+      else fini('secours', x.j);
+    }).catch(function () {
+      if (repondu) return; repondu = true; clearTimeout(minuteur);
+      fini('secours', {});
+    });
+  }
+};
+
 
 document.querySelectorAll('.filters button').forEach(function(b){b.onclick=function(){
   document.querySelectorAll('.filters button').forEach(function(x){x.classList.remove('on')});b.classList.add('on');
@@ -1770,10 +1956,71 @@ document.addEventListener('click', function(ev){
   art.classList.add('cible');
 })();
 
-document.getElementById('rf').addEventListener('submit',function(e){e.preventDefault();
-  alert("Démonstration : la demande partirait à la réception et à receptionhotelevannath@gmail.com, avec une confirmation automatique au client.")});
+/* L'envoi : le meme chemin que les autres formulaires du site (EVN.envoyer).
+   La reception recoit la demande par e-mail, le client son recapitulatif ;
+   si l'envoi automatique est indisponible, le panneau WhatsApp prend le
+   relais avec la demande deja redigee. Jusqu'ici, ce bouton ne faisait
+   qu'afficher « Demonstration » : aucune demande n'arrivait. */
+var champs=[
+  {id:'nm', test:function(v){return v.trim().length>=2}},
+  {id:'tel',test:function(v){return v.replace(/\D/g,'').length>=8}},
+  {id:'em', test:function(v){return !v.trim()||/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(v.trim())}}
+];
+function verifier(c,montrer){
+  var el=document.getElementById(c.id),ok=c.test(el.value);
+  if(montrer||el.closest('.f').classList.contains('bad'))el.closest('.f').classList.toggle('bad',!ok);
+  el.setAttribute('aria-invalid',ok?'false':'true');
+  return ok;
+}
+champs.forEach(function(c){
+  var el=document.getElementById(c.id);
+  el.addEventListener('blur',function(){verifier(c,true)});
+  el.addEventListener('input',function(){if(el.closest('.f').classList.contains('bad'))verifier(c,true)});
+});
+var OKT={fr:{ok1:'Appuyez sur envoyer dans WhatsApp : ce geste transmet votre demande à la réception. Votre demande pour « ',ok2:' » sera transmise sous la référence ',ok3:'. La réception vous répond sous 24 h.'},
+         en:{ok1:'Tap send in the app — that is what delivers it to reception. Your request for « ',ok2:' » will be sent under reference ',ok3:'. The front desk replies within 24 h.'}};
+document.getElementById('rf').addEventListener('submit',function(e){
+  e.preventDefault();
+  var premier=null;
+  champs.forEach(function(c){if(!verifier(c,true)&&!premier)premier=document.getElementById(c.id)});
+  if(premier){premier.focus();premier.scrollIntoView({behavior:'smooth',block:'center'});return}
+  recap();
+  var N=String.fromCharCode(10);
+  var d={forfait:document.getElementById('rc').textContent,
+         date:document.getElementById('rd').textContent.replace('—',''),
+         quantite:document.getElementById('rq').textContent,
+         total:document.getElementById('rt').textContent+' FCFA',
+         nom:document.getElementById('nm').value,
+         tel:document.getElementById('tel').value,
+         email:document.getElementById('em').value,
+         message:document.getElementById('msg').value};
+  function resume(){
+    return "Bonjour, je souhaite réserver un forfait à l'Hôtel Evannath."+N+N
+      +'Forfait : '+d.forfait+N+'Date souhaitée : '+(d.date||'—')+N+'Quantité : '+d.quantite+N+'Total : '+d.total
+      +N+N+'Nom : '+d.nom+N+'Téléphone : '+d.tel+(d.email?N+'E-mail : '+d.email:'')
+      +(d.message?N+N+d.message:'');
+  }
+  var CH={nom:'nm',tel:'tel',email:'em'};
+  EVN.envoyer('forfait',d,{
+    bouton:document.getElementById('envoi'),
+    secours:document.getElementById('sec'),
+    erreur:document.getElementById('err'),
+    resume:resume,
+    marquer:function(liste){
+      liste.forEach(function(c){var el=document.getElementById(CH[c]);
+        if(el){el.closest('.f').classList.add('bad');el.setAttribute('aria-invalid','true')}});
+      var pr=document.getElementById(CH[liste[0]]);
+      if(pr){pr.focus();pr.scrollIntoView({behavior:'smooth',block:'center'})}
+    }
+  },function(rep){
+    var T=OKT[document.documentElement.lang==='en'?'en':'fr'];
+    document.getElementById('okm').textContent=T.ok1+d.forfait+T.ok2+rep.reference+T.ok3;
+    document.getElementById('ok').classList.add('on');
+    document.getElementById('ok').scrollIntoView({behavior:'smooth',block:'center'});
+  });
+});
 
-var EN={mn:"Menu",n1:"Rooms &amp; Suites",n2:"Experiences",n3:"The table",n4:"The spa",n5:"Offers &amp; Events",n6:"Meetings &amp; groups",n7:"Gallery",n8:"About",n9:"Useful information",n10:"Contact",n11:"Book",dr:"Reservations",u0:"Agenda",u1:"Events",u1b:"on now",u2:"What happens at the hotel beyond your stay: evenings, the Saturday gathering, year-end celebrations.",f0:"Composed stays",f1:"Our offers &amp; packages",f2:"Everything is included and the rate is firm: you know what you pay before you arrive.",dc0:"Around Assinie",dc1:"Tours &amp; discoveries",dc2:"Beyond the grounds: the lagoon islands, the river mouth, and what children remember from a stay here.",dc3:"See also every activity on the grounds and the lagoon &rarr;","g-reveillon":"Year's end","t-reveillon":"New Year","a-reveillon":"in Assinie","b-reveillon":"31 December","x-reveillon":"A year-end dinner by the lagoon, then the night club. Rooms go early for this date.","c-reveillon":"Book my room","il-reveillon-hor":"Time","iv-reveillon-hor":"From 8 pm","il-reveillon-lie":"Where","iv-reveillon-lie":"The pontoon","il-reveillon-amb":"Mood","iv-reveillon-amb":"Resident DJ","il-reveillon-au ":"On the menu","iv-reveillon-au ":"Festive dinner","g-mechoui-party":"Weekly gathering","t-mechoui-party":"The Méchoui","a-mechoui-party":"Party","b-mechoui-party":"Every Saturday","x-mechoui-party":"Méchoui by the water, then the evening carries on at the night club. Open to hotel guests and visitors alike.","c-mechoui-party":"Book a table","il-mechoui-party-hor":"Time","iv-mechoui-party-hor":"From 3 pm","il-mechoui-party-lie":"Where","iv-mechoui-party-lie":"The terrace","il-mechoui-party-amb":"Mood","iv-mechoui-party-amb":"Happy hour","il-mechoui-party-au ":"On the menu","iv-mechoui-party-au ":"Grilled méchoui","g-independance":"National holiday","t-independance":"Independence","a-independance":"Day","b-independance":"7 August","x-independance":"The hotel marks the national holiday each year. This is the artwork you published in August.","c-independance":"Write to us","il-independance-hor":"Time","iv-independance-hor":"All day","il-independance-lie":"Where","iv-independance-lie":"The grounds","il-independance-amb":"Mood","iv-independance-amb":"Family",cta:"Book",ctc:"Book this package",
+var EN={mn:"Menu",n1:"Rooms &amp; Suites",n2:"Experiences",n3:"The table",n4:"The spa",n5:"Offers &amp; Events",n6:"Meetings &amp; groups",n7:"Gallery",n8:"About",n9:"Useful information",n10:"Contact",n11:"Book",dr:"Reservations",sc1:"Finish on WhatsApp",sc2:"Your request is ready — it just needs sending. One tap and it reaches reception, who answer 24/7. You can also call or write.",sc3:"Send on WhatsApp",sc4:"Call reception",sc5:"Write an email",u0:"Agenda",u1:"Events",u1b:"on now",u2:"What happens at the hotel beyond your stay: evenings, the Saturday gathering, year-end celebrations.",f0:"Composed stays",f1:"Our offers &amp; packages",f2:"Everything is included and the rate is firm: you know what you pay before you arrive.",dc0:"Around Assinie",dc1:"Tours &amp; discoveries",dc2:"Beyond the grounds: the lagoon islands, the river mouth, and what children remember from a stay here.",dc3:"See also every activity on the grounds and the lagoon &rarr;","g-reveillon":"Year's end","t-reveillon":"New Year","a-reveillon":"in Assinie","b-reveillon":"31 December","x-reveillon":"A year-end dinner by the lagoon, then the night club. Rooms go early for this date.","c-reveillon":"Book my room","il-reveillon-hor":"Time","iv-reveillon-hor":"From 8 pm","il-reveillon-lie":"Where","iv-reveillon-lie":"The pontoon","il-reveillon-amb":"Mood","iv-reveillon-amb":"Resident DJ","il-reveillon-au ":"On the menu","iv-reveillon-au ":"Festive dinner","g-mechoui-party":"Weekly gathering","t-mechoui-party":"The Méchoui","a-mechoui-party":"Party","b-mechoui-party":"Every Saturday","x-mechoui-party":"Méchoui by the water, then the evening carries on at the night club. Open to hotel guests and visitors alike.","c-mechoui-party":"Book a table","il-mechoui-party-hor":"Time","iv-mechoui-party-hor":"From 3 pm","il-mechoui-party-lie":"Where","iv-mechoui-party-lie":"The terrace","il-mechoui-party-amb":"Mood","iv-mechoui-party-amb":"Happy hour","il-mechoui-party-au ":"On the menu","iv-mechoui-party-au ":"Grilled méchoui","g-independance":"National holiday","t-independance":"Independence","a-independance":"Day","b-independance":"7 August","x-independance":"The hotel marks the national holiday each year. This is the artwork you published in August.","c-independance":"Write to us","il-independance-hor":"Time","iv-independance-hor":"All day","il-independance-lie":"Where","iv-independance-lie":"The grounds","il-independance-amb":"Mood","iv-independance-amb":"Family",cta:"Book",ctc:"Book this package",
 c1:"Home",c2:"Offers &amp; Events",eb:"Eleven offers &amp; one weekly gathering",h1:"Offers &amp; Events",
 lede:"Stays already put together — room, meals, activities and small touches included. Pick one, give us your dates, and the front desk handles the rest.",
 cl:"Live campaign",ct:"Holiday Packs",cs:"Announced on our Facebook page · +225 01 51 52 75 75",
@@ -1794,7 +2041,8 @@ g6:"From 10 guests",t6:"Birthday Box",s61:"Private room, free of charge",s62:"Bu
 w0:"Every Saturday, from 3 pm",w1:"Méchoui Party",
 w2:"This one is not a package: it is the Saturday afternoon gathering, open to everyone — hotel guests and visitors alike. Méchoui by the water, then the evening carries on at the night club.",
 w3:"A complimentary cocktail",w4:"Happy hour at the night club",w5:"−10 % on all drinks",w6:"Book a table",
-e9:"Your request",h9:"Book a package",l1:"Chosen package",l2:"Preferred date",l3:"Number",l4:"Full name",l5:"Phone / WhatsApp",l6:"Email",l7:"Notes (optional)",
+e9:"Your request",h9:"Book a package",l1:"Chosen package",l2:"Preferred date",l3:"Number",l4:"Full name *",l5:"Phone / WhatsApp *",l6:"E-mail (to receive the summary)",l7:"Notes (optional)",
+mnm:"Please give your name.",mtel:"Please give a number of at least 8 digits.",mem:"This e-mail address does not look valid.",okt:"Your request is waiting in WhatsApp",
 r0:"Your summary",r1:"Package",r2:"Date",r4:"Unit price",r5:"Total",r6:"Send request",
 r7:"The front desk replies within 24 h. No payment at this stage."};
 
