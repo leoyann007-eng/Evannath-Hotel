@@ -175,8 +175,10 @@ fetch('img/logo-calques.svg').then(function(r){return r.ok?r.text():Promise.reje
 }
 /* Les grands ecrans. Sur un moniteur de 1920 px, une colonne figee a 1240 px
    laissait 330 px de vide de chaque cote : la page paraissait petite, posee
-   au milieu. Au-dela de 1600 px la colonne s'elargit, et le texte courant
+   au milieu. Des 1440 px (portable 15 pouces) la colonne passe a 1360 px ;
+   au-dela de 1600 px la colonne s'elargit, et le texte courant
    gagne un point. html body l'emporte sur le body{} de chaque page. */
+@media(min-width:1440px){:root{--max:1360px}}
 @media(min-width:1600px){:root{--max:1440px}html body{font-size:17.5px}}
 @media(min-width:1840px){:root{--max:1580px}}
 
@@ -836,14 +838,14 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
 
 <div class="wrap">
   <div class="mosaic court" id="gl">
-    <figure><picture><source srcset="img/opt/r-mezzanine-640.webp 640w, img/opt/r-mezzanine.webp 900w" sizes="(max-width:1100px) calc(100vw - 48px), (max-width:1287px) calc((100vw - 68px) / 2), (max-width:1599px) 586px, (max-width:1839px) 686px, 756px" type="image/webp">
-      <img width="900" height="600" loading="eager" src="img/opt/r-mezzanine.jpg" srcset="img/opt/r-mezzanine-640.jpg 640w, img/opt/r-mezzanine.jpg 900w" sizes="(max-width:1100px) calc(100vw - 48px), (max-width:1287px) calc((100vw - 68px) / 2), (max-width:1599px) 586px, (max-width:1839px) 686px, 756px" data-full="img/opt/r-mezzanine.jpg" alt="Mezzanine Supérieure"></picture>
+    <figure><picture><source srcset="img/opt/r-mezzanine-640.webp 640w, img/opt/r-mezzanine.webp 900w" sizes="(max-width:1100px) calc(100vw - 48px), (max-width:1287px) calc((100vw - 68px) / 2), (max-width:1439px) 586px, (max-width:1599px) 646px, (max-width:1839px) 686px, 756px" type="image/webp">
+      <img width="900" height="600" loading="eager" src="img/opt/r-mezzanine.jpg" srcset="img/opt/r-mezzanine-640.jpg 640w, img/opt/r-mezzanine.jpg 900w" sizes="(max-width:1100px) calc(100vw - 48px), (max-width:1287px) calc((100vw - 68px) / 2), (max-width:1439px) 586px, (max-width:1599px) 646px, (max-width:1839px) 686px, 756px" data-full="img/opt/r-mezzanine.jpg" alt="Mezzanine Supérieure"></picture>
       <figcaption class="sombre" data-t="cap0">La chambre</figcaption></figure>
-    <figure><picture><source srcset="img/opt/gal-ch-mezz-640.webp 640w, img/opt/gal-ch-mezz-1024.webp 1024w, img/opt/gal-ch-mezz.webp 1748w" sizes="(max-width:720px) calc(100vw - 48px), (max-width:1100px) calc((100vw - 58px) / 2), (max-width:1287px) calc((100vw - 68px) / 4), (max-width:1599px) 293px, (max-width:1839px) 343px, 378px" type="image/webp">
-      <img width="1748" height="1240" loading="lazy" src="img/opt/gal-ch-mezz.jpg" srcset="img/opt/gal-ch-mezz-640.jpg 640w, img/opt/gal-ch-mezz-1024.jpg 1024w, img/opt/gal-ch-mezz.jpg 1748w" sizes="(max-width:720px) calc(100vw - 48px), (max-width:1100px) calc((100vw - 58px) / 2), (max-width:1287px) calc((100vw - 68px) / 4), (max-width:1599px) 293px, (max-width:1839px) 343px, 378px" data-full="img/opt/gal-ch-mezz.jpg" alt="L'escalier et le coin nuit"></picture>
+    <figure><picture><source srcset="img/opt/gal-ch-mezz-640.webp 640w, img/opt/gal-ch-mezz-1024.webp 1024w, img/opt/gal-ch-mezz.webp 1748w" sizes="(max-width:720px) calc(100vw - 48px), (max-width:1100px) calc((100vw - 58px) / 2), (max-width:1287px) calc((100vw - 68px) / 4), (max-width:1439px) 293px, (max-width:1599px) 323px, (max-width:1839px) 343px, 378px" type="image/webp">
+      <img width="1748" height="1240" loading="lazy" src="img/opt/gal-ch-mezz.jpg" srcset="img/opt/gal-ch-mezz-640.jpg 640w, img/opt/gal-ch-mezz-1024.jpg 1024w, img/opt/gal-ch-mezz.jpg 1748w" sizes="(max-width:720px) calc(100vw - 48px), (max-width:1100px) calc((100vw - 58px) / 2), (max-width:1287px) calc((100vw - 68px) / 4), (max-width:1439px) 293px, (max-width:1599px) 323px, (max-width:1839px) 343px, 378px" data-full="img/opt/gal-ch-mezz.jpg" alt="L'escalier et le coin nuit"></picture>
       <figcaption class="sombre" data-t="cap1">La mezzanine</figcaption></figure>
-    <figure><picture><source srcset="img/opt/gal-ch-salon-640.webp 640w, img/opt/gal-ch-salon-1024.webp 1024w, img/opt/gal-ch-salon.webp 1748w" sizes="(max-width:720px) calc(100vw - 48px), (max-width:1100px) calc((100vw - 58px) / 2), (max-width:1287px) calc((100vw - 68px) / 4), (max-width:1599px) 293px, (max-width:1839px) 343px, 378px" type="image/webp">
-      <img width="1748" height="1240" loading="lazy" src="img/opt/gal-ch-salon.jpg" srcset="img/opt/gal-ch-salon-640.jpg 640w, img/opt/gal-ch-salon-1024.jpg 1024w, img/opt/gal-ch-salon.jpg 1748w" sizes="(max-width:720px) calc(100vw - 48px), (max-width:1100px) calc((100vw - 58px) / 2), (max-width:1287px) calc((100vw - 68px) / 4), (max-width:1599px) 293px, (max-width:1839px) 343px, 378px" data-full="img/opt/gal-ch-salon.jpg" alt="Le coin salon"></picture>
+    <figure><picture><source srcset="img/opt/gal-ch-salon-640.webp 640w, img/opt/gal-ch-salon-1024.webp 1024w, img/opt/gal-ch-salon.webp 1748w" sizes="(max-width:720px) calc(100vw - 48px), (max-width:1100px) calc((100vw - 58px) / 2), (max-width:1287px) calc((100vw - 68px) / 4), (max-width:1439px) 293px, (max-width:1599px) 323px, (max-width:1839px) 343px, 378px" type="image/webp">
+      <img width="1748" height="1240" loading="lazy" src="img/opt/gal-ch-salon.jpg" srcset="img/opt/gal-ch-salon-640.jpg 640w, img/opt/gal-ch-salon-1024.jpg 1024w, img/opt/gal-ch-salon.jpg 1748w" sizes="(max-width:720px) calc(100vw - 48px), (max-width:1100px) calc((100vw - 58px) / 2), (max-width:1287px) calc((100vw - 68px) / 4), (max-width:1439px) 293px, (max-width:1599px) 323px, (max-width:1839px) 343px, 378px" data-full="img/opt/gal-ch-salon.jpg" alt="Le coin salon"></picture>
       <figcaption class="sombre" data-t="cap2">Le salon</figcaption></figure>
   </div>
 </div>

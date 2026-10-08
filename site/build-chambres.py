@@ -194,8 +194,8 @@ CSS = PAGNE_CSS + CSS
 # etroites. A partir de la sixieme, les rangees repartent sur les trois
 # colonnes — l'image d'indice 5, puis 8, puis 11, retombe dans la colonne
 # large. En dessous de cinq photos la premiere ne prend qu'une rangee.
-_LARGE_3COL = '(max-width:1287px) calc((100vw - 68px) / 2), (max-width:1599px) 586px, (max-width:1839px) 686px, 756px'
-_ETROIT_3COL = '(max-width:1287px) calc((100vw - 68px) / 4), (max-width:1599px) 293px, (max-width:1839px) 343px, 378px'
+_LARGE_3COL = '(max-width:1287px) calc((100vw - 68px) / 2), (max-width:1439px) 586px, (max-width:1599px) 646px, (max-width:1839px) 686px, 756px'
+_ETROIT_3COL = '(max-width:1287px) calc((100vw - 68px) / 4), (max-width:1439px) 293px, (max-width:1599px) 323px, (max-width:1839px) 343px, 378px'
 # Deux colonnes : pleine largeur pour la premiere et pour une derniere etalee,
 # demi-largeur sinon. Une seule colonne en dessous de 721 px.
 _PLEIN = 'calc(100vw - 48px)'

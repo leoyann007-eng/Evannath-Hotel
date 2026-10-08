@@ -182,8 +182,10 @@ fetch('img/logo-calques.svg').then(function(r){return r.ok?r.text():Promise.reje
 }
 /* Les grands ecrans. Sur un moniteur de 1920 px, une colonne figee a 1240 px
    laissait 330 px de vide de chaque cote : la page paraissait petite, posee
-   au milieu. Au-dela de 1600 px la colonne s'elargit, et le texte courant
+   au milieu. Des 1440 px (portable 15 pouces) la colonne passe a 1360 px ;
+   au-dela de 1600 px la colonne s'elargit, et le texte courant
    gagne un point. html body l'emporte sur le body{} de chaque page. */
+@media(min-width:1440px){:root{--max:1360px}}
 @media(min-width:1600px){:root{--max:1440px}html body{font-size:17.5px}}
 @media(min-width:1840px){:root{--max:1580px}}
 
@@ -888,8 +890,8 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
 
     <article class="room reveal" data-c="ch">
       <div class="room-img"><picture>
-        <source srcset="img/opt/r-standard-640.webp 640w, img/opt/r-standard.webp 900w" sizes="(max-width:720px) calc(100vw - 48px), (max-width:1024px) calc((100vw - 72px) / 2), (max-width:1287px) calc((100vw - 96px) / 3), (max-width:1599px) 381px, (max-width:1839px) 448px, 495px" type="image/webp">
-        <img width="900" height="600" loading="lazy" src="img/opt/r-standard.jpg" srcset="img/opt/r-standard-640.jpg 640w, img/opt/r-standard.jpg 900w" sizes="(max-width:720px) calc(100vw - 48px), (max-width:1024px) calc((100vw - 72px) / 2), (max-width:1287px) calc((100vw - 96px) / 3), (max-width:1599px) 381px, (max-width:1839px) 448px, 495px" srcset="img/opt/r-standard.jpg" alt="Chambre Standard de l'Hôtel Evannath à Assinie"></picture>
+        <source srcset="img/opt/r-standard-640.webp 640w, img/opt/r-standard.webp 900w" sizes="(max-width:720px) calc(100vw - 48px), (max-width:1024px) calc((100vw - 72px) / 2), (max-width:1287px) calc((100vw - 96px) / 3), (max-width:1439px) 381px, (max-width:1599px) 421px, (max-width:1839px) 448px, 495px" type="image/webp">
+        <img width="900" height="600" loading="lazy" src="img/opt/r-standard.jpg" srcset="img/opt/r-standard-640.jpg 640w, img/opt/r-standard.jpg 900w" sizes="(max-width:720px) calc(100vw - 48px), (max-width:1024px) calc((100vw - 72px) / 2), (max-width:1287px) calc((100vw - 96px) / 3), (max-width:1439px) 381px, (max-width:1599px) 421px, (max-width:1839px) 448px, 495px" srcset="img/opt/r-standard.jpg" alt="Chambre Standard de l'Hôtel Evannath à Assinie"></picture>
         <span class="tag" data-t="tg1">Best-seller</span></div>
       <div class="room-body"><h3><a href="chambre-standard.html" data-t="rm1">Chambre Standard</a></h3><p data-t="rd1">L'essentiel, bien fait : lit double, climatisation, salle d'eau privative et petit-déjeuner inclus.</p>
         <div class="room-meta"><span data-t="px2">2 pers.</span><span>·</span><span data-t="mt1">Vue jardin</span></div>
@@ -907,8 +909,8 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
 
     <article class="room reveal" data-c="ch fam">
       <div class="room-img"><picture>
-        <source srcset="img/opt/r-wax-640.webp 640w, img/opt/r-wax.webp 900w" sizes="(max-width:720px) calc(100vw - 48px), (max-width:1024px) calc((100vw - 72px) / 2), (max-width:1287px) calc((100vw - 96px) / 3), (max-width:1599px) 381px, (max-width:1839px) 448px, 495px" type="image/webp">
-        <img width="900" height="638" loading="lazy" src="img/opt/r-wax.jpg" srcset="img/opt/r-wax-640.jpg 640w, img/opt/r-wax.jpg 900w" sizes="(max-width:720px) calc(100vw - 48px), (max-width:1024px) calc((100vw - 72px) / 2), (max-width:1287px) calc((100vw - 96px) / 3), (max-width:1599px) 381px, (max-width:1839px) 448px, 495px" srcset="img/opt/r-wax.jpg" alt="Chambre Deluxe Supérieure, textiles wax et salle à manger privative"></picture>
+        <source srcset="img/opt/r-wax-640.webp 640w, img/opt/r-wax.webp 900w" sizes="(max-width:720px) calc(100vw - 48px), (max-width:1024px) calc((100vw - 72px) / 2), (max-width:1287px) calc((100vw - 96px) / 3), (max-width:1439px) 381px, (max-width:1599px) 421px, (max-width:1839px) 448px, 495px" type="image/webp">
+        <img width="900" height="638" loading="lazy" src="img/opt/r-wax.jpg" srcset="img/opt/r-wax-640.jpg 640w, img/opt/r-wax.jpg 900w" sizes="(max-width:720px) calc(100vw - 48px), (max-width:1024px) calc((100vw - 72px) / 2), (max-width:1287px) calc((100vw - 96px) / 3), (max-width:1439px) 381px, (max-width:1599px) 421px, (max-width:1839px) 448px, 495px" srcset="img/opt/r-wax.jpg" alt="Chambre Deluxe Supérieure, textiles wax et salle à manger privative"></picture>
         <span class="tag" data-t="tg2">Salle à manger privée</span></div>
       <div class="room-body"><h3><a href="deluxe-superieure.html" data-t="rm3">Deluxe Supérieure</a></h3><p data-t="rd3">Textiles wax, lits à baldaquin et salle à manger privative. La plus généreuse des Deluxe.</p>
         <div class="room-meta"><span data-t="px3">3 pers.</span><span>·</span><span data-t="mt3">Salle à manger</span></div>
@@ -917,8 +919,8 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
 
     <article class="room reveal" data-c="su">
       <div class="room-img"><picture>
-        <source srcset="img/opt/r-anglaise-640.webp 640w, img/opt/r-anglaise.webp 1080w" sizes="(max-width:720px) calc(100vw - 48px), (max-width:1024px) calc((100vw - 72px) / 2), (max-width:1287px) calc((100vw - 96px) / 3), (max-width:1599px) 381px, (max-width:1839px) 448px, 495px" type="image/webp">
-        <img width="1080" height="720" loading="lazy" src="img/opt/r-anglaise.jpg" srcset="img/opt/r-anglaise-640.jpg 640w, img/opt/r-anglaise.jpg 1080w" sizes="(max-width:720px) calc(100vw - 48px), (max-width:1024px) calc((100vw - 72px) / 2), (max-width:1287px) calc((100vw - 96px) / 3), (max-width:1599px) 381px, (max-width:1839px) 448px, 495px" srcset="img/opt/r-anglaise.jpg" alt="Suite Anglaise avec vue sur la lagune et la piscine"></picture>
+        <source srcset="img/opt/r-anglaise-640.webp 640w, img/opt/r-anglaise.webp 1080w" sizes="(max-width:720px) calc(100vw - 48px), (max-width:1024px) calc((100vw - 72px) / 2), (max-width:1287px) calc((100vw - 96px) / 3), (max-width:1439px) 381px, (max-width:1599px) 421px, (max-width:1839px) 448px, 495px" type="image/webp">
+        <img width="1080" height="720" loading="lazy" src="img/opt/r-anglaise.jpg" srcset="img/opt/r-anglaise-640.jpg 640w, img/opt/r-anglaise.jpg 1080w" sizes="(max-width:720px) calc(100vw - 48px), (max-width:1024px) calc((100vw - 72px) / 2), (max-width:1287px) calc((100vw - 96px) / 3), (max-width:1439px) 381px, (max-width:1599px) 421px, (max-width:1839px) 448px, 495px" srcset="img/opt/r-anglaise.jpg" alt="Suite Anglaise avec vue sur la lagune et la piscine"></picture>
         <span class="tag" data-t="tg3">Vue lagune</span></div>
       <div class="room-body"><h3><a href="suite-anglaise.html" data-t="rm4">Suite Anglaise</a></h3><p data-t="rd4">Élégance feutrée, vue directe sur la lagune Aby et la piscine. Le meilleur couchant du domaine.</p>
         <div class="room-meta"><span data-t="px2">2 pers.</span><span>·</span><span data-t="mt4">Vue lagune</span></div>
@@ -927,8 +929,8 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
 
     <article class="room reveal" data-c="ch">
       <div class="room-img"><picture>
-        <source srcset="img/opt/r-mezz2-640.webp 640w, img/opt/r-mezz2.webp 900w" sizes="(max-width:720px) calc(100vw - 48px), (max-width:1024px) calc((100vw - 72px) / 2), (max-width:1287px) calc((100vw - 96px) / 3), (max-width:1599px) 381px, (max-width:1839px) 448px, 495px" type="image/webp">
-        <img width="900" height="638" loading="lazy" src="img/opt/r-mezz2.jpg" srcset="img/opt/r-mezz2-640.jpg 640w, img/opt/r-mezz2.jpg 900w" sizes="(max-width:720px) calc(100vw - 48px), (max-width:1024px) calc((100vw - 72px) / 2), (max-width:1287px) calc((100vw - 96px) / 3), (max-width:1599px) 381px, (max-width:1839px) 448px, 495px" srcset="img/opt/r-mezz2.jpg" alt="Chambre en Mezzanine avec escalier et coin nuit surélevé"></picture></div>
+        <source srcset="img/opt/r-mezz2-640.webp 640w, img/opt/r-mezz2.webp 900w" sizes="(max-width:720px) calc(100vw - 48px), (max-width:1024px) calc((100vw - 72px) / 2), (max-width:1287px) calc((100vw - 96px) / 3), (max-width:1439px) 381px, (max-width:1599px) 421px, (max-width:1839px) 448px, 495px" type="image/webp">
+        <img width="900" height="638" loading="lazy" src="img/opt/r-mezz2.jpg" srcset="img/opt/r-mezz2-640.jpg 640w, img/opt/r-mezz2.jpg 900w" sizes="(max-width:720px) calc(100vw - 48px), (max-width:1024px) calc((100vw - 72px) / 2), (max-width:1287px) calc((100vw - 96px) / 3), (max-width:1439px) 381px, (max-width:1599px) 421px, (max-width:1839px) 448px, 495px" srcset="img/opt/r-mezz2.jpg" alt="Chambre en Mezzanine avec escalier et coin nuit surélevé"></picture></div>
       <div class="room-body"><h3><a href="chambre-mezzanine.html" data-t="rm5">Chambre en Mezzanine</a></h3><p data-t="rd5">Volume sous charpente, escalier bois et coin nuit surélevé. Idéale pour un jeune couple.</p>
         <div class="room-meta"><span data-t="px2">2 pers.</span><span>·</span><span data-t="mt5">Duplex</span></div>
         <div class="room-foot"><div class="price"><b data-prix-de="chambre-mezzanine">127 000</b><span data-t="pn">FCFA / nuit</span></div><a class="mini" href="chambre-mezzanine.html" data-t="voirf">Voir la chambre</a></div></div>
@@ -936,8 +938,8 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
 
     <article class="room reveal" data-c="ch fam">
       <div class="room-img"><picture>
-        <source srcset="img/opt/r-mezzanine-640.webp 640w, img/opt/r-mezzanine.webp 900w" sizes="(max-width:720px) calc(100vw - 48px), (max-width:1024px) calc((100vw - 72px) / 2), (max-width:1287px) calc((100vw - 96px) / 3), (max-width:1599px) 381px, (max-width:1839px) 448px, 495px" type="image/webp">
-        <img width="900" height="600" loading="lazy" src="img/opt/r-mezzanine.jpg" srcset="img/opt/r-mezzanine-640.jpg 640w, img/opt/r-mezzanine.jpg 900w" sizes="(max-width:720px) calc(100vw - 48px), (max-width:1024px) calc((100vw - 72px) / 2), (max-width:1287px) calc((100vw - 96px) / 3), (max-width:1599px) 381px, (max-width:1839px) 448px, 495px" srcset="img/opt/r-mezzanine.jpg" alt="Mezzanine Supérieure, coin salon et terrasse privative"></picture>
+        <source srcset="img/opt/r-mezzanine-640.webp 640w, img/opt/r-mezzanine.webp 900w" sizes="(max-width:720px) calc(100vw - 48px), (max-width:1024px) calc((100vw - 72px) / 2), (max-width:1287px) calc((100vw - 96px) / 3), (max-width:1439px) 381px, (max-width:1599px) 421px, (max-width:1839px) 448px, 495px" type="image/webp">
+        <img width="900" height="600" loading="lazy" src="img/opt/r-mezzanine.jpg" srcset="img/opt/r-mezzanine-640.jpg 640w, img/opt/r-mezzanine.jpg 900w" sizes="(max-width:720px) calc(100vw - 48px), (max-width:1024px) calc((100vw - 72px) / 2), (max-width:1287px) calc((100vw - 96px) / 3), (max-width:1439px) 381px, (max-width:1599px) 421px, (max-width:1839px) 448px, 495px" srcset="img/opt/r-mezzanine.jpg" alt="Mezzanine Supérieure, coin salon et terrasse privative"></picture>
         <span class="tag" data-t="tg4">Équipements +</span></div>
       <div class="room-body"><h3><a href="mezzanine-superieure.html" data-t="rm6">Mezzanine Supérieure</a></h3><p data-t="rd6">La mezzanine en plus grand : coin salon complet, équipements renforcés et terrasse privative.</p>
         <div class="room-meta"><span data-t="px4">4 pers.</span><span>·</span><span data-t="mt6">Terrasse</span></div>
@@ -946,8 +948,8 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
 
     <article class="room reveal" data-c="su fam">
       <div class="room-img"><picture>
-        <source srcset="img/opt/r-arabe-640.webp 640w, img/opt/r-arabe.webp 900w" sizes="(max-width:720px) calc(100vw - 48px), (max-width:1024px) calc((100vw - 72px) / 2), (max-width:1287px) calc((100vw - 96px) / 3), (max-width:1599px) 381px, (max-width:1839px) 448px, 495px" type="image/webp">
-        <img width="900" height="600" loading="lazy" src="img/opt/r-arabe.jpg" srcset="img/opt/r-arabe-640.jpg 640w, img/opt/r-arabe.jpg 900w" sizes="(max-width:720px) calc(100vw - 48px), (max-width:1024px) calc((100vw - 72px) / 2), (max-width:1287px) calc((100vw - 96px) / 3), (max-width:1599px) 381px, (max-width:1839px) 448px, 495px" srcset="img/opt/r-arabe.jpg" alt="Suite Arabe, deux chambres, Hôtel Evannath"></picture>
+        <source srcset="img/opt/r-arabe-640.webp 640w, img/opt/r-arabe.webp 900w" sizes="(max-width:720px) calc(100vw - 48px), (max-width:1024px) calc((100vw - 72px) / 2), (max-width:1287px) calc((100vw - 96px) / 3), (max-width:1439px) 381px, (max-width:1599px) 421px, (max-width:1839px) 448px, 495px" type="image/webp">
+        <img width="900" height="600" loading="lazy" src="img/opt/r-arabe.jpg" srcset="img/opt/r-arabe-640.jpg 640w, img/opt/r-arabe.jpg 900w" sizes="(max-width:720px) calc(100vw - 48px), (max-width:1024px) calc((100vw - 72px) / 2), (max-width:1287px) calc((100vw - 96px) / 3), (max-width:1439px) 381px, (max-width:1599px) 421px, (max-width:1839px) 448px, 495px" srcset="img/opt/r-arabe.jpg" alt="Suite Arabe, deux chambres, Hôtel Evannath"></picture>
         <span class="tag" data-t="tg5">Signature</span></div>
       <div class="room-body"><h3><a href="suite-arabe.html" data-t="rm7">Suite Arabe</a></h3><p data-t="rd7">Deux chambres, décor arabo-andalou et service dédié. La suite signature de l'établissement.</p>
         <div class="room-meta"><span data-t="px6">6 pers.</span><span>·</span><span data-t="mt7">2 chambres</span></div>
@@ -967,8 +969,8 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
   <div class="offres">
     <a class="offre reveal" href="circuits.html">
       <div class="offre-img"><picture>
-        <source srcset="img/opt/r-mezzanine-640.webp 640w, img/opt/r-mezzanine.webp 900w" sizes="(max-width:720px) calc(100vw - 48px), (max-width:1024px) calc((100vw - 72px) / 2), (max-width:1287px) calc((100vw - 96px) / 3), (max-width:1599px) 381px, (max-width:1839px) 448px, 495px" type="image/webp">
-        <img width="900" height="600" loading="lazy" src="img/opt/r-mezzanine.jpg" srcset="img/opt/r-mezzanine-640.jpg 640w, img/opt/r-mezzanine.jpg 900w" sizes="(max-width:720px) calc(100vw - 48px), (max-width:1024px) calc((100vw - 72px) / 2), (max-width:1287px) calc((100vw - 96px) / 3), (max-width:1599px) 381px, (max-width:1839px) 448px, 495px" alt="Mezzanine Supérieure décorée pour une lune de miel"></picture>
+        <source srcset="img/opt/r-mezzanine-640.webp 640w, img/opt/r-mezzanine.webp 900w" sizes="(max-width:720px) calc(100vw - 48px), (max-width:1024px) calc((100vw - 72px) / 2), (max-width:1287px) calc((100vw - 96px) / 3), (max-width:1439px) 381px, (max-width:1599px) 421px, (max-width:1839px) 448px, 495px" type="image/webp">
+        <img width="900" height="600" loading="lazy" src="img/opt/r-mezzanine.jpg" srcset="img/opt/r-mezzanine-640.jpg 640w, img/opt/r-mezzanine.jpg 900w" sizes="(max-width:720px) calc(100vw - 48px), (max-width:1024px) calc((100vw - 72px) / 2), (max-width:1287px) calc((100vw - 96px) / 3), (max-width:1439px) 381px, (max-width:1599px) 421px, (max-width:1839px) 448px, 495px" alt="Mezzanine Supérieure décorée pour une lune de miel"></picture>
         <span class="tag" data-t="ob1">Le plus demandé</span></div>
       <div class="offre-body">
         <h3 data-t="ot1">Lune de miel inoubliable</h3>
@@ -980,8 +982,8 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
     </a>
     <a class="offre reveal" href="circuits.html">
       <div class="offre-img"><picture>
-        <source srcset="img/opt/r-standard-640.webp 640w, img/opt/r-standard.webp 900w" sizes="(max-width:720px) calc(100vw - 48px), (max-width:1024px) calc((100vw - 72px) / 2), (max-width:1287px) calc((100vw - 96px) / 3), (max-width:1599px) 381px, (max-width:1839px) 448px, 495px" type="image/webp">
-        <img width="900" height="600" loading="lazy" src="img/opt/r-standard.jpg" srcset="img/opt/r-standard-640.jpg 640w, img/opt/r-standard.jpg 900w" sizes="(max-width:720px) calc(100vw - 48px), (max-width:1024px) calc((100vw - 72px) / 2), (max-width:1287px) calc((100vw - 96px) / 3), (max-width:1599px) 381px, (max-width:1839px) 448px, 495px" alt="Chambre Standard de l'Hôtel Evannath"></picture></div>
+        <source srcset="img/opt/r-standard-640.webp 640w, img/opt/r-standard.webp 900w" sizes="(max-width:720px) calc(100vw - 48px), (max-width:1024px) calc((100vw - 72px) / 2), (max-width:1287px) calc((100vw - 96px) / 3), (max-width:1439px) 381px, (max-width:1599px) 421px, (max-width:1839px) 448px, 495px" type="image/webp">
+        <img width="900" height="600" loading="lazy" src="img/opt/r-standard.jpg" srcset="img/opt/r-standard-640.jpg 640w, img/opt/r-standard.jpg 900w" sizes="(max-width:720px) calc(100vw - 48px), (max-width:1024px) calc((100vw - 72px) / 2), (max-width:1287px) calc((100vw - 96px) / 3), (max-width:1439px) 381px, (max-width:1599px) 421px, (max-width:1839px) 448px, 495px" alt="Chambre Standard de l'Hôtel Evannath"></picture></div>
       <div class="offre-body">
         <h3 data-t="ot2">Week-End Intense</h3>
         <p data-t="od2">Deux nuits, deux petits-déjeuners, un apéro, un dîner et une sortie sur la lagune.</p>
@@ -992,8 +994,8 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
     </a>
     <a class="offre reveal" href="circuits.html">
       <div class="offre-img"><picture>
-        <source srcset="img/opt/g-aerien-640.webp 640w, img/opt/g-aerien-1024.webp 1024w, img/opt/g-aerien.webp 1200w" sizes="(max-width:720px) calc(100vw - 48px), (max-width:1024px) calc((100vw - 72px) / 2), (max-width:1287px) calc((100vw - 96px) / 3), (max-width:1599px) 381px, (max-width:1839px) 448px, 495px" type="image/webp">
-        <img width="1200" height="851" loading="lazy" src="img/opt/g-aerien.jpg" srcset="img/opt/g-aerien-640.jpg 640w, img/opt/g-aerien-1024.jpg 1024w, img/opt/g-aerien.jpg 1200w" sizes="(max-width:720px) calc(100vw - 48px), (max-width:1024px) calc((100vw - 72px) / 2), (max-width:1287px) calc((100vw - 96px) / 3), (max-width:1599px) 381px, (max-width:1839px) 448px, 495px" alt="Vue aérienne du domaine Evannath"></picture></div>
+        <source srcset="img/opt/g-aerien-640.webp 640w, img/opt/g-aerien-1024.webp 1024w, img/opt/g-aerien.webp 1200w" sizes="(max-width:720px) calc(100vw - 48px), (max-width:1024px) calc((100vw - 72px) / 2), (max-width:1287px) calc((100vw - 96px) / 3), (max-width:1439px) 381px, (max-width:1599px) 421px, (max-width:1839px) 448px, 495px" type="image/webp">
+        <img width="1200" height="851" loading="lazy" src="img/opt/g-aerien.jpg" srcset="img/opt/g-aerien-640.jpg 640w, img/opt/g-aerien-1024.jpg 1024w, img/opt/g-aerien.jpg 1200w" sizes="(max-width:720px) calc(100vw - 48px), (max-width:1024px) calc((100vw - 72px) / 2), (max-width:1287px) calc((100vw - 96px) / 3), (max-width:1439px) 381px, (max-width:1599px) 421px, (max-width:1839px) 448px, 495px" alt="Vue aérienne du domaine Evannath"></picture></div>
       <div class="offre-body">
         <h3 data-t="ot3">Pack Famille</h3>
         <p data-t="od3">La formule la plus complète pour venir à plusieurs, pensée pour la saison.</p>
@@ -1004,8 +1006,8 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
     </a>
     <a class="offre reveal" href="circuits.html">
       <div class="offre-img"><picture>
-        <source srcset="img/opt/g-terrasse-640.webp 640w, img/opt/g-terrasse-1024.webp 1024w, img/opt/g-terrasse.webp 1200w" sizes="(max-width:720px) calc(100vw - 48px), (max-width:1024px) calc((100vw - 72px) / 2), (max-width:1287px) calc((100vw - 96px) / 3), (max-width:1599px) 381px, (max-width:1839px) 448px, 495px" type="image/webp">
-        <img width="1200" height="851" loading="lazy" src="img/opt/g-terrasse.jpg" srcset="img/opt/g-terrasse-640.jpg 640w, img/opt/g-terrasse-1024.jpg 1024w, img/opt/g-terrasse.jpg 1200w" sizes="(max-width:720px) calc(100vw - 48px), (max-width:1024px) calc((100vw - 72px) / 2), (max-width:1287px) calc((100vw - 96px) / 3), (max-width:1599px) 381px, (max-width:1839px) 448px, 495px" alt="Terrasse et transats de l'hôtel"></picture>
+        <source srcset="img/opt/g-terrasse-640.webp 640w, img/opt/g-terrasse-1024.webp 1024w, img/opt/g-terrasse.webp 1200w" sizes="(max-width:720px) calc(100vw - 48px), (max-width:1024px) calc((100vw - 72px) / 2), (max-width:1287px) calc((100vw - 96px) / 3), (max-width:1439px) 381px, (max-width:1599px) 421px, (max-width:1839px) 448px, 495px" type="image/webp">
+        <img width="1200" height="851" loading="lazy" src="img/opt/g-terrasse.jpg" srcset="img/opt/g-terrasse-640.jpg 640w, img/opt/g-terrasse-1024.jpg 1024w, img/opt/g-terrasse.jpg 1200w" sizes="(max-width:720px) calc(100vw - 48px), (max-width:1024px) calc((100vw - 72px) / 2), (max-width:1287px) calc((100vw - 96px) / 3), (max-width:1439px) 381px, (max-width:1599px) 421px, (max-width:1839px) 448px, 495px" alt="Terrasse et transats de l'hôtel"></picture>
         <span class="tag" data-t="ob4">Sans nuitée</span></div>
       <div class="offre-body">
         <h3 data-t="ot4">Pack Chillday</h3>

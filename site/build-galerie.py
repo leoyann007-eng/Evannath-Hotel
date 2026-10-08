@@ -255,8 +255,8 @@ b.append('''    </div>
 #   <=1080    3 colonnes, gouttiere 14  -> (100vw-76)/3  ~ 31vw
 #   <=1240    4 colonnes                -> (100vw-90)/4  ~ 23vw
 #   au-dela   la colonne est figee a 1192 px            -> 288 px
-#   des 1600 / 1840 elle passe a 1392 / 1532 px (--max)   -> 337 / 372 px
-SIZES = '(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, (max-width:1599px) 288px, (max-width:1839px) 337px, 372px'
+#   des 1440 / 1600 / 1840 : 1312 / 1392 / 1532 px (--max) -> 317 / 337 / 372 px
+SIZES = '(max-width:720px) 47vw, (max-width:1080px) 31vw, (max-width:1240px) 23vw, (max-width:1439px) 288px, (max-width:1599px) 317px, (max-width:1839px) 337px, 372px'
 
 FIGURE = """    <figure data-cat="%(cat)s"><picture>
       <source srcset="img/opt/gal-%(n)s-t360.webp 360w, img/opt/gal-%(n)s-t.webp 620w"

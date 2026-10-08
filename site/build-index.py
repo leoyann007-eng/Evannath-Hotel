@@ -204,7 +204,7 @@ html = (html
 # faisait servir l'image pleine, parce que sizes annoncait 700 px.
 SIZES_CARTES = ('(max-width:720px) calc(100vw - 48px), '
                 '(max-width:1024px) calc((100vw - 72px) / 2), '
-                '(max-width:1287px) calc((100vw - 96px) / 3), (max-width:1599px) 381px, (max-width:1839px) 448px, 495px')
+                '(max-width:1287px) calc((100vw - 96px) / 3), (max-width:1439px) 381px, (max-width:1599px) 421px, (max-width:1839px) 448px, 495px')
 CARTES = ('r-standard', 'ig-baldaquin', 'r-wax', 'r-anglaise', 'r-mezz2',
           'r-mezzanine', 'r-arabe', 'g-aerien', 'g-terrasse')
 
