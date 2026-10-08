@@ -7,6 +7,8 @@ import _schema
 from _evenements import EVENEMENTS, EN as EV_EN
 NL_ = chr(10)
 from _chrome import page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV, PAGNE_CSS, PAGNE_JS
+from _chrome import (ENVOI_JS, PIEGE, secours, CONF_SVG, CONF_CSS, EN_SECOURS,
+                     CONF_TITRE, CONF_TITRE_EN, CONF_GESTE, CONF_GESTE_EN, CONF_VERBE, CONF_VERBE_EN)
 
 CSS = """
 /* Les intertitres qui separent les quatre parties de la page. */
@@ -272,7 +274,17 @@ CSS = """
 # doivent gagner. Dans l'autre sens, `.pagne-damas{position:absolute}`
 # ecrasait le `position:relative` du placement, et le motif sortait du
 # flux — largeur zero, invisible, et le test passait au vert.
-CSS = PAGNE_CSS + CSS
+CSS = PAGNE_CSS + CONF_CSS + CSS + """
+.recap .err-envoi{text-align:center}
+.recap .secours,.recap .sent{margin-top:18px;padding:20px}
+.sent{display:none;border:1px solid rgba(143,174,99,.5);background:rgba(143,174,99,.08)}
+.sent.on{display:block}
+.sent b{display:block;font-family:var(--f-display);font-size:1.25rem;color:var(--palm);margin-bottom:6px}
+.sent p{font-size:14px;margin:0}
+.form .f.bad input{border-color:var(--err)}
+.form .f .msg{display:none;color:var(--err);font-size:12.5px;margin-top:6px}
+.form .f.bad .msg{display:block}
+"""
 
 
 PACKS = [
@@ -483,11 +495,15 @@ b.append('''  </div>
         <div class="f"><label for="qt" data-t="l3">Nombre</label><input type="number" id="qt" min="1" max="40" value="2"></div>
       </div>
       <div class="two">
-        <div class="f"><label for="nm" data-t="l4">Nom complet</label><input type="text" id="nm" placeholder="Aya Kouassi" required></div>
-        <div class="f"><label for="tel" data-t="l5">Téléphone / WhatsApp</label><input type="tel" id="tel" placeholder="+225 01 02 03 04 05" required></div>
+        <div class="f"><label for="nm" data-t="l4">Nom complet *</label><input type="text" id="nm" placeholder="Aya Kouassi" autocomplete="name">
+          <span class="msg" data-t="mnm">Indiquez votre nom.</span></div>
+        <div class="f"><label for="tel" data-t="l5">Téléphone / WhatsApp *</label><input type="tel" id="tel" placeholder="+225 01 02 03 04 05" autocomplete="tel">
+          <span class="msg" data-t="mtel">Indiquez un numéro d'au moins 8 chiffres.</span></div>
       </div>
-      <div class="f"><label for="em" data-t="l6">E-mail</label><input type="email" id="em" placeholder="vous@exemple.com" required></div>
+      <div class="f"><label for="em" data-t="l6">E-mail (pour recevoir le récapitulatif)</label><input type="email" id="em" placeholder="vous@exemple.com" autocomplete="email">
+        <span class="msg" data-t="mem">Cette adresse e-mail ne semble pas valide.</span></div>
       <div class="f"><label for="msg" data-t="l7">Précisions (facultatif)</label><textarea id="msg" placeholder="Occasion particulière, allergies, heure d'arrivée…"></textarea></div>
+      ''' + PIEGE + '''
     </form>
 
     <aside class="recap">
@@ -497,8 +513,13 @@ b.append('''  </div>
       <div class="row"><span id="rql">Quantité</span><span id="rq">1 forfait</span></div>
       <div class="row"><span data-t="r4">Tarif unitaire</span><span id="ru">340 000</span></div>
       <div class="tot"><span data-t="r5">Total</span><b id="rt">340 000</b></div>
-      <button type="submit" form="rf" class="btn btn-solid" data-t="r6">Envoyer la demande</button>
+      <button type="submit" form="rf" class="btn btn-solid" id="envoi" data-t="r6">Envoyer la demande</button>
       <p class="note" data-t="r7">Réponse de la réception sous 24 h. Aucun paiement à cette étape.</p>
+      <p class="err-envoi" id="err" role="alert"></p>''' + secours('sec') + '''
+      <div class="sent" id="ok" role="status">''' + CONF_SVG + '''<div class="conf-msg">
+        <b data-t="okt">{{CT}}</b>
+        <p id="okm"></p>
+      </div></div>
     </aside>
   </div>
  </div>
@@ -537,7 +558,7 @@ for _e in EVENEMENTS:
         if _i < len(_vals):
             EN_SECTIONS += '"iv-%s-%s":"%s",' % (_e['slug'], _k, _vals[_i])
 
-JS = NAV_JS + '''
+JS = NAV_JS + ENVOI_JS + '''
 
 document.querySelectorAll('.filters button').forEach(function(b){b.onclick=function(){
   document.querySelectorAll('.filters button').forEach(function(x){x.classList.remove('on')});b.classList.add('on');
@@ -608,10 +629,71 @@ document.addEventListener('click', function(ev){
   art.classList.add('cible');
 })();
 
-document.getElementById('rf').addEventListener('submit',function(e){e.preventDefault();
-  alert("Démonstration : la demande partirait à la réception et à {{MAIL}}, avec une confirmation automatique au client.")});
+/* L'envoi : le meme chemin que les autres formulaires du site (EVN.envoyer).
+   La reception recoit la demande par e-mail, le client son recapitulatif ;
+   si l'envoi automatique est indisponible, le panneau WhatsApp prend le
+   relais avec la demande deja redigee. Jusqu'ici, ce bouton ne faisait
+   qu'afficher « Demonstration » : aucune demande n'arrivait. */
+var champs=[
+  {id:'nm', test:function(v){return v.trim().length>=2}},
+  {id:'tel',test:function(v){return v.replace(/\\D/g,'').length>=8}},
+  {id:'em', test:function(v){return !v.trim()||/^[^\\s@]+@[^\\s@]+\\.[a-z]{2,}$/i.test(v.trim())}}
+];
+function verifier(c,montrer){
+  var el=document.getElementById(c.id),ok=c.test(el.value);
+  if(montrer||el.closest('.f').classList.contains('bad'))el.closest('.f').classList.toggle('bad',!ok);
+  el.setAttribute('aria-invalid',ok?'false':'true');
+  return ok;
+}
+champs.forEach(function(c){
+  var el=document.getElementById(c.id);
+  el.addEventListener('blur',function(){verifier(c,true)});
+  el.addEventListener('input',function(){if(el.closest('.f').classList.contains('bad'))verifier(c,true)});
+});
+var OKT={fr:{ok1:'{{CG}}Votre demande pour « ',ok2:' » {{CV}} sous la référence ',ok3:'. La réception vous répond sous 24 h.'},
+         en:{ok1:'{{CG_EN}}Your request for « ',ok2:' » {{CV_EN}} under reference ',ok3:'. The front desk replies within 24 h.'}};
+document.getElementById('rf').addEventListener('submit',function(e){
+  e.preventDefault();
+  var premier=null;
+  champs.forEach(function(c){if(!verifier(c,true)&&!premier)premier=document.getElementById(c.id)});
+  if(premier){premier.focus();premier.scrollIntoView({behavior:'smooth',block:'center'});return}
+  recap();
+  var N=String.fromCharCode(10);
+  var d={forfait:document.getElementById('rc').textContent,
+         date:document.getElementById('rd').textContent.replace('—',''),
+         quantite:document.getElementById('rq').textContent,
+         total:document.getElementById('rt').textContent+' FCFA',
+         nom:document.getElementById('nm').value,
+         tel:document.getElementById('tel').value,
+         email:document.getElementById('em').value,
+         message:document.getElementById('msg').value};
+  function resume(){
+    return "Bonjour, je souhaite réserver un forfait à l'Hôtel Evannath."+N+N
+      +'Forfait : '+d.forfait+N+'Date souhaitée : '+(d.date||'—')+N+'Quantité : '+d.quantite+N+'Total : '+d.total
+      +N+N+'Nom : '+d.nom+N+'Téléphone : '+d.tel+(d.email?N+'E-mail : '+d.email:'')
+      +(d.message?N+N+d.message:'');
+  }
+  var CH={nom:'nm',tel:'tel',email:'em'};
+  EVN.envoyer('forfait',d,{
+    bouton:document.getElementById('envoi'),
+    secours:document.getElementById('sec'),
+    erreur:document.getElementById('err'),
+    resume:resume,
+    marquer:function(liste){
+      liste.forEach(function(c){var el=document.getElementById(CH[c]);
+        if(el){el.closest('.f').classList.add('bad');el.setAttribute('aria-invalid','true')}});
+      var pr=document.getElementById(CH[liste[0]]);
+      if(pr){pr.focus();pr.scrollIntoView({behavior:'smooth',block:'center'})}
+    }
+  },function(rep){
+    var T=OKT[document.documentElement.lang==='en'?'en':'fr'];
+    document.getElementById('okm').textContent=T.ok1+d.forfait+T.ok2+rep.reference+T.ok3;
+    document.getElementById('ok').classList.add('on');
+    document.getElementById('ok').scrollIntoView({behavior:'smooth',block:'center'});
+  });
+});
 
-var EN={''' + EN_NAV + EN_SECTIONS + '''cta:"Book",ctc:"Book this package",
+var EN={''' + EN_NAV + EN_SECOURS + EN_SECTIONS + '''cta:"Book",ctc:"Book this package",
 c1:"Home",c2:"Offers &amp; Events",eb:"Eleven offers &amp; one weekly gathering",h1:"Offers &amp; Events",
 lede:"Stays already put together — room, meals, activities and small touches included. Pick one, give us your dates, and the front desk handles the rest.",
 cl:"Live campaign",ct:"Holiday Packs",cs:"Announced on our Facebook page · +225 01 51 52 75 75",
@@ -632,7 +714,8 @@ g6:"From 10 guests",t6:"Birthday Box",s61:"Private room, free of charge",s62:"Bu
 w0:"Every Saturday, from 3 pm",w1:"Méchoui Party",
 w2:"This one is not a package: it is the Saturday afternoon gathering, open to everyone — hotel guests and visitors alike. Méchoui by the water, then the evening carries on at the night club.",
 w3:"A complimentary cocktail",w4:"Happy hour at the night club",w5:"−10 % on all drinks",w6:"Book a table",
-e9:"Your request",h9:"Book a package",l1:"Chosen package",l2:"Preferred date",l3:"Number",l4:"Full name",l5:"Phone / WhatsApp",l6:"Email",l7:"Notes (optional)",
+e9:"Your request",h9:"Book a package",l1:"Chosen package",l2:"Preferred date",l3:"Number",l4:"Full name *",l5:"Phone / WhatsApp *",l6:"E-mail (to receive the summary)",l7:"Notes (optional)",
+mnm:"Please give your name.",mtel:"Please give a number of at least 8 digits.",mem:"This e-mail address does not look valid.",okt:"{{CT_EN}}",
 r0:"Your summary",r1:"Package",r2:"Date",r4:"Unit price",r5:"Total",r6:"Send request",
 r7:"The front desk replies within 24 h. No payment at this stage."};
 
@@ -1141,6 +1224,14 @@ LD = _schema.bloc(
     _schema.fil([('Accueil','index'),('Offres & Événements',None)]))
 
 CORPS = NL_.join(b).replace('{{AGENDA}}', AGENDA)
+# Les textes de confirmation dependent du mode d'envoi (WhatsApp ou e-mail) :
+# ils viennent de _chrome, comme sur les pages Seminaires et Contact.
+_CONF = (('{{CT_EN}}', CONF_TITRE_EN or 'Request sent'), ('{{CT}}', CONF_TITRE or 'Demande envoyée'),
+         ('{{CG_EN}}', (CONF_GESTE_EN or '').replace("'", "\\'")), ('{{CG}}', (CONF_GESTE or '').replace("'", "\\'")),
+         ('{{CV_EN}}', CONF_VERBE_EN), ('{{CV}}', CONF_VERBE))
+for _m, _v in _CONF:
+    CORPS = CORPS.replace(_m, _v)
+    JS = JS.replace(_m, _v)
 
 # Les motifs arrivent au defilement : ce morceau ne part que sur les
 # pages qui en portent.
