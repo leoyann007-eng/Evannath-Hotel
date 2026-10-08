@@ -394,6 +394,8 @@ header.scrolled .brand small{opacity:0}
 .dw-side a{display:block;font-size:15px;color:var(--prose);padding:7px 0;transition:.3s}
 .dw-side a:hover{color:var(--bronze)}
 .dw-side p{font-size:13.5px;color:var(--muted);margin-top:12px}
+.dw-side a.dw-rec{width:max-content;margin-top:16px;padding:6px 0;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid currentColor}
+.dw-side a.dw-rec:hover{color:var(--bronze)}
 .dw-side .lang{margin-top:6px;width:max-content}
 .dw-side .lang button{padding:15px 20px;font-size:11px}
 
@@ -816,6 +818,7 @@ caption{caption-side:bottom;padding:16px 4px 0;font-size:12.5px;color:var(--mute
         <a href="mailto:receptionhotelevannath@gmail.com">receptionhotelevannath@gmail.com</a>
         <a href="https://wa.me/2250758408079" target="_blank" rel="noopener">WhatsApp</a>
         <p>Assinie PK 19 · Comoé · Côte d'Ivoire</p>
+        <a class="dw-rec" href="recrutement.html" data-t="drec">Nous rejoindre</a>
       </div>
       <div class="lang"><button class="on" data-lang="fr">FR</button><button data-lang="en">EN</button></div>
     </aside>
@@ -1510,7 +1513,7 @@ appliquer();
 /* Le compteur est ecrit ici, hors [data-t] : il se reecrit a chaque bascule. */
 window.EVN_LANG = function () { appliquer(); };
 
-var EN={mn:"Menu",n1:"Rooms &amp; Suites",n2:"Experiences",n3:"The table",n4:"The spa",n5:"Offers &amp; Events",n6:"Meetings &amp; groups",n7:"Gallery",n8:"About",n9:"Useful information",n10:"Contact",n11:"Book",dr:"Reservations",cta:"Book",cta2:"Check availability",
+var EN={mn:"Menu",n1:"Rooms &amp; Suites",n2:"Experiences",n3:"The table",n4:"The spa",n5:"Offers &amp; Events",n6:"Meetings &amp; groups",n7:"Gallery",n8:"About",n9:"Useful information",n10:"Contact",n11:"Book",dr:"Reservations",drec:"Join us",cta:"Book",cta2:"Check availability",
 ft:"Type",tr:"Sort",f0:"All",f1:"Rooms",f2:"Suites",f3:"Families",
 t1:"Price, low to high",t2:"Price, high to low",t3:"Capacity",
 h1:"Category",h2:"Type",h3:"Guests",pers:" guests",h4:"What sets it apart",h5:"Rate / night",

@@ -714,6 +714,8 @@ header.scrolled .brand small{opacity:0}
 .dw-side a{display:block;font-size:15px;color:var(--prose);padding:7px 0;transition:.3s}
 .dw-side a:hover{color:var(--bronze)}
 .dw-side p{font-size:13.5px;color:var(--muted);margin-top:12px}
+.dw-side a.dw-rec{width:max-content;margin-top:16px;padding:6px 0;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid currentColor}
+.dw-side a.dw-rec:hover{color:var(--bronze)}
 .dw-side .lang{margin-top:6px;width:max-content}
 .dw-side .lang button{padding:15px 20px;font-size:11px}
 
@@ -1222,6 +1224,7 @@ def drawer(current='', photo='gal-art-lanterne', alt='Lanterne de rotin de l\'H�
         <a href="mailto:{{MAIL}}">{{MAIL}}</a>
         <a href="https://wa.me/{{WA}}" target="_blank" rel="noopener">WhatsApp</a>
         <p>Assinie PK 19 · Comoé · Côte d'Ivoire</p>
+        <a class="dw-rec" href="recrutement.html" data-t="drec">Nous rejoindre</a>
       </div>
       <div class="lang"><button class="on" data-lang="fr">FR</button><button data-lang="en">EN</button></div>
     </aside>
@@ -1999,7 +2002,7 @@ def secours(id_='sec', phrase="Votre demande est prête — il ne reste qu'à l'
 
 EN_NAV = ('mn:"Menu",n1:"Rooms &amp; Suites",n2:"Experiences",n3:"The table",n4:"The spa",'
           'n5:"Offers &amp; Events",n6:"Meetings &amp; groups",n7:"Gallery",n8:"About",'
-          'n9:"Useful information",n10:"Contact",n11:"Book",dr:"Reservations",')
+          'n9:"Useful information",n10:"Contact",n11:"Book",dr:"Reservations",drec:"Join us",')
 
 # Le panneau de repli des cinq formulaires. Il vit ici, et non dans chaque
 # page, pour la meme raison que le panneau lui-meme : une seule source.
