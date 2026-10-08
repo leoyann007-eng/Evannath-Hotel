@@ -292,6 +292,23 @@ b.append('''    </div>
             <span class="msg" data-t="mtel">Indiquez un numéro d'au moins 8 chiffres.</span></div>
         </div>
         <div class="two">
+          <div class="f"><label for="typ" data-t="ltyp">Type d'événement</label>
+            <select id="typ">
+              <option value="Séminaire ou journée d&#39;étude" data-t="ty0">Séminaire ou journée d&#39;étude</option>
+              <option value="Formation" data-t="ty1">Formation</option>
+              <option value="Team building" data-t="ty2">Team building</option>
+              <option value="Réception d&#39;entreprise" data-t="ty3">Réception d&#39;entreprise</option>
+              <option value="Lancement de produit" data-t="ty4">Lancement de produit</option>
+              <option value="Mariage" data-t="ty5">Mariage</option>
+              <option value="Anniversaire" data-t="ty6">Anniversaire</option>
+              <option value="Baptême" data-t="ty7">Baptême</option>
+              <option value="Fête privée" data-t="ty8">Fête privée</option>
+              <option value="Autre" data-t="ty9">Autre</option>
+            </select></div>
+          <div class="f"><label for="nch" data-t="lnch">Chambres souhaitées</label>
+            <input type="number" id="nch" min="0" max="46" placeholder="0"></div>
+        </div>
+        <div class="two">
           <div class="f"><label for="form" data-t="lform">Formule</label>
             <select id="form">
               <option value="Journée d'étude" data-t="fo0">Journée d'étude</option>
@@ -416,14 +433,15 @@ document.getElementById('df').addEventListener('submit',function(e){
 
   var d={societe:document.getElementById('soc').value,nom:document.getElementById('nom').value,
          email:document.getElementById('em').value,tel:document.getElementById('tel').value,
+         type:document.getElementById('typ').value,chambres:document.getElementById('nch').value,
          formule:form.value,configuration:cfg.value,participants:nb.value,date:dt.value,
          message:document.getElementById('msg').value};
 
   function resume(){
     return "Bonjour, je souhaite un devis pour un séminaire à l'Hôtel Evannath."+N+N
       +'Société : '+d.societe+N+'Contact : '+d.nom+N+'Téléphone : '+d.tel+N+'E-mail : '+d.email
-      +N+N+'Formule : '+d.formule+N+'Configuration : '+d.configuration
-      +N+'Participants : '+d.participants+N+'Date souhaitée : '+d.date
+      +N+N+"Type d'événement : "+d.type+N+'Formule : '+d.formule+N+'Configuration : '+d.configuration
+      +N+'Participants : '+d.participants+(d.chambres?N+'Chambres souhaitées : '+d.chambres:'')+N+'Date souhaitée : '+d.date
       +(d.message?N+N+d.message:'');
   }
   var CH={societe:'soc',nom:'nom',email:'em',tel:'tel',participants:'nb'};
@@ -491,6 +509,8 @@ lsoc:"Company or organisation *",msoc:"Please give the name of your organisation
 lnom:"Your name *",mnom:"Please give your name.",
 lem:"E-mail *",mem:"This e-mail address does not look valid.",
 ltel:"Phone *",mtel:"Please give a number of at least 8 digits.",
+ltyp:"Type of event",lnch:"Rooms needed",
+ty0:"Seminar or study day",ty1:"Training",ty2:"Team building",ty3:"Corporate reception",ty4:"Product launch",ty5:"Wedding",ty6:"Birthday",ty7:"Christening",ty8:"Private party",ty9:"Other",
 lform:"Package",
 fo0:"Study day",fo1:"Residential seminar",fo2:"Seminar &amp; lagoon",fo3:"Private reception",
 fo4:"Birthday Package",fo5:"I do not know yet",

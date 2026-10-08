@@ -122,6 +122,8 @@ CSS = """
 .camp>p{max-width:62ch}
 .packs{align-items:start;display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:26px}
 .pack{border:1px solid var(--line);overflow:hidden;background:var(--bark);transition:.45s}
+/* Le forfait vise par l'adresse (circuits.html#pack-couple) se signale. */
+.c.cible,.pack.cible,.star.cible{outline:2px solid var(--bronze);outline-offset:4px}
 
 /* Une remise se lit en trois secondes : le montant, sur quoi, jusqu à quand. */
 .remises{display:grid;gap:18px;margin-top:26px}
@@ -305,6 +307,18 @@ CARDS = [
   '28 000','28000','personne','pp','FCFA · par personne'),
 ]
 
+def ancre(nom):
+    """L'adresse d'un forfait : « Pack Couple » -> pack-couple.
+
+    Le cahier des exigences demande qu'une publicite mene a SON offre, pas en
+    haut de la page. circuits.html#pack-couple descend sur la carte et la
+    choisit dans le formulaire (voir le script, « Arrivee par une ancre »).
+    """
+    import unicodedata, re
+    t = unicodedata.normalize('NFD', nom).encode('ascii', 'ignore').decode().lower()
+    return re.sub(r'[^a-z0-9]+', '-', t).strip('-')
+
+
 def rendre_cartes(liste):
     """Rend un groupe de cartes.
 
@@ -313,13 +327,13 @@ def rendre_cartes(liste):
     entier : il ne doit rien perdre au decoupage.
     """
     for cat, img, alt, gkey, glab, tkey, tlab, items, disp, price, unit, ukey, ulab in liste:
-        b.append('''    <article class="c reveal" data-cat="%s">
+        b.append('''    <article class="c reveal" id="%s" data-cat="%s">
           <div class="ph"><picture><source srcset="img/opt/%s.webp" type="image/webp">
             <img loading="lazy" src="img/opt/%s.jpg" width="900" height="562" alt="%s"></picture>
             <span class="tag" data-t="%s">%s</span></div>
           <div class="in">
             <h3 data-t="%s">%s</h3>
-            <ul>''' % (cat, img, img, alt, gkey, glab, tkey, tlab))
+            <ul>''' % (ancre(tlab), cat, img, img, alt, gkey, glab, tkey, tlab))
         for k, t in items:
             b.append('          <li data-t="%s">%s</li>' % (k, t))
         b.append('''        </ul>
@@ -375,16 +389,16 @@ b = [header('#demande','Réserver'), drawer('circuits.html'), '''
     <div class="packs">''']
 
 for name, price, unit, img, alt, key, ukey, ulab, disp in PACKS:
-    b.append('''      <article class="pack">
+    b.append('''      <article class="pack" id="%s">
         <div class="ph"><picture><source srcset="img/opt/%s.webp" type="image/webp"><img loading="lazy" src="img/opt/%s.jpg" width="700" height="467" alt="%s"></picture></div>
         <div class="in"><h3 data-t="%s">%s</h3><b>%s</b><span data-t="%s">%s</span>
         <button class="pick pickbtn" data-c="%s" data-p="%s" data-u="%s" data-t="ch">Choisir</button></div>
-      </article>''' % (img, img, alt, key, name, disp, ukey, ulab, name, price, unit))
+      </article>''' % (ancre(name), img, img, alt, key, name, disp, ukey, ulab, name, price, unit))
 
 b.append('''    </div>
   </section>
 
-  <article class="star reveal">
+  <article class="star reveal" id="lune-de-miel">
     <div class="ph">
       <picture><source srcset="img/opt/r-mezzanine.webp" type="image/webp">
       <img src="img/opt/r-mezzanine.jpg" width="900" height="600" alt="Mezzanine Supérieure décorée pour une lune de miel"></picture>
@@ -576,6 +590,23 @@ document.addEventListener('click', function(ev){
   recap();
   document.getElementById('demande').scrollIntoView({behavior:'smooth',block:'start'});
 });
+
+/* Arrivee par une ancre : circuits.html#pack-couple. Le navigateur descend
+   deja sur la carte ; on choisit en plus le forfait dans le formulaire, pour
+   que le visiteur venu d'une publicite n'ait plus qu'a donner ses dates.
+   Le change previent le bouton WhatsApp que ce choix vient du visiteur. */
+(function(){
+  var h = decodeURIComponent(location.hash.slice(1));
+  if (!/^[a-z0-9-]+$/.test(h)) return;
+  var art = document.getElementById(h), b = art && art.querySelector('.pickbtn');
+  if (!b) return;
+  var want = b.dataset.p + '|' + b.dataset.u;
+  for (var i = 0; i < circ.options.length; i++) {
+    if (circ.options[i].value === want) { circ.selectedIndex = i; break; }
+  }
+  circ.dispatchEvent(new Event('change', {bubbles: true}));
+  art.classList.add('cible');
+})();
 
 document.getElementById('rf').addEventListener('submit',function(e){e.preventDefault();
   alert("Démonstration : la demande partirait à la réception et à {{MAIL}}, avec une confirmation automatique au client.")});

@@ -22,8 +22,8 @@ const TYPES = {
   devis: {
     sujet: 'Demande de devis — séminaires & groupes',
     requis: ['societe', 'nom', 'email', 'tel'],
-    champs: ['societe', 'nom', 'email', 'tel', 'formule', 'configuration',
-             'participants', 'date', 'message'],
+    champs: ['societe', 'nom', 'email', 'tel', 'type', 'formule', 'configuration',
+             'participants', 'chambres', 'date', 'message'],
   },
   contact: {
     sujet: 'Message depuis le site',
@@ -76,8 +76,9 @@ const ETIQUETTES = {
   societe: 'Société', nom: 'Nom', email: 'E-mail', tel: 'Téléphone',
   chambre: 'Chambre', arrivee: 'Arrivée', depart: 'Départ', nuits: 'Nuits',
   personnes: 'Personnes', total: 'Total estimé', acompte: 'Acompte (30 %)',
-  paiement: 'Moyen de paiement souhaité', formule: 'Formule',
+  paiement: 'Moyen de paiement souhaité', type: 'Type d’événement', formule: 'Formule',
   configuration: 'Configuration de salle', participants: 'Participants',
+  chambres: 'Chambres souhaitées',
   date: 'Date', heure: 'Heure', couverts: 'Couverts', soin: 'Soin',
   sujet: 'Sujet', message: 'Message',
 };
