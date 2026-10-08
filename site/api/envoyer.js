@@ -1,4 +1,4 @@
-// Point d'entree unique des cinq formulaires du site.
+// Point d'entree unique des formulaires du site.
 //
 // Vercel expose automatiquement ce fichier sur /api/envoyer. Aucune dependance :
 // l'envoi passe par l'API HTTP de Resend, appelee avec le fetch natif de Node.
@@ -39,6 +39,14 @@ const TYPES = {
     sujet: 'Demande de forfait — Offres',
     requis: ['nom', 'tel'],
     champs: ['forfait', 'date', 'quantite', 'total', 'nom', 'tel', 'email', 'message'],
+  },
+  // Un evenement prive (mariage, bapteme, anniversaire...) : page Offres,
+  // section « Organiser votre evenement ». Pas de societe : c'est une famille.
+  evenement: {
+    sujet: 'Demande de devis — Événement privé',
+    requis: ['nom', 'tel'],
+    champs: ['evenement', 'date', 'invites', 'chambres', 'espace', 'budget',
+             'nom', 'tel', 'email', 'message'],
   },
   spa: {
     sujet: 'Demande de rendez-vous — Le spa',
@@ -86,6 +94,7 @@ const ETIQUETTES = {
   chambres: 'Chambres souhaitées',
   date: 'Date', heure: 'Heure', couverts: 'Couverts', soin: 'Soin',
   forfait: 'Forfait', quantite: 'Quantité',
+  invites: 'Invités', espace: 'Espace souhaité', budget: 'Budget indicatif',
   sujet: 'Sujet', message: 'Message',
 };
 
@@ -145,7 +154,7 @@ const POUR_CLIENT = {
   fr: {
     objet: { reservation: 'Votre demande de réservation', devis: 'Votre demande de devis',
              contact: 'Votre message', table: 'Votre demande de table', spa: 'Votre demande de rendez-vous au spa',
-             forfait: 'Votre demande de forfait' },
+             forfait: 'Votre demande de forfait', evenement: 'Votre demande pour votre événement' },
     bonjour: (n) => `Bonjour ${n},`,
     recu: (o) => `Nous avons bien reçu ${o.charAt(0).toLowerCase() + o.slice(1)} à l'Hôtel Evannath. Voici ce que vous nous avez transmis.`,
     attente: {
@@ -155,13 +164,14 @@ const POUR_CLIENT = {
       table: 'La réception vous confirme la table rapidement.',
       spa: 'La réception vous confirme le créneau rapidement.',
       forfait: 'Ce n’est pas encore une confirmation : la réception vérifie la date et vous répond sous 24 h. Aucun paiement n’a été demandé à cette étape.',
+      evenement: 'La réception vous rappelle sous 24 h pour parler de votre événement et vous adresser une proposition. Aucun engagement à cette étape.',
     },
     ref: 'Référence', repondre: 'Pour toute question, répondez simplement à ce message ou écrivez-nous sur WhatsApp au',
   },
   en: {
     objet: { reservation: 'Your booking request', devis: 'Your quote request',
              contact: 'Your message', table: 'Your table request', spa: 'Your spa appointment request',
-             forfait: 'Your package request' },
+             forfait: 'Your package request', evenement: 'Your event request' },
     bonjour: (n) => `Dear ${n},`,
     recu: (o) => `We have received ${o.charAt(0).toLowerCase() + o.slice(1)} at Hôtel Evannath. Here is what you sent us.`,
     attente: {
@@ -171,6 +181,7 @@ const POUR_CLIENT = {
       table: 'The front desk will confirm your table shortly.',
       spa: 'The front desk will confirm your slot shortly.',
       forfait: 'This is not a confirmation yet: the front desk checks the date and replies within 24 hours. No payment has been taken at this stage.',
+      evenement: 'The front desk will call you back within 24 hours to talk about your event and send you a proposal. No commitment at this stage.',
     },
     ref: 'Reference', repondre: 'For any question, simply reply to this message or write to us on WhatsApp at',
   },
@@ -181,6 +192,7 @@ const ETIQUETTES_EN = {
   paiement: 'Preferred payment', evenement: 'Type of event', formule: 'Package', configuration: 'Room layout',
   participants: 'Participants', chambres: 'Rooms needed', date: 'Date', heure: 'Time', couverts: 'Covers',
   soin: 'Treatment', sujet: 'Subject', forfait: 'Package', quantite: 'Quantity',
+  invites: 'Guests', espace: 'Preferred space', budget: 'Indicative budget',
 };
 // Ce que le client ne revoit pas dans son recapitulatif : ses propres
 // coordonnees n'y apprennent rien, et le message libre ne repart pas (plus haut).

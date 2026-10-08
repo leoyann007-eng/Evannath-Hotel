@@ -37,7 +37,7 @@ const ROLES = {
     nom: 'Administrateur',
     resume: 'Tout, plus les comptes, les prix et les paramètres.',
     vues: ['bord', 'disponibilites', 'chambres', 'evenements', 'promotions', 'campagnes',
-      'emplois', 'galerie', 'parametres', 'utilisateurs', 'journal', 'compte'],
+      'emplois', 'carnet', 'galerie', 'parametres', 'utilisateurs', 'journal', 'compte'],
     droits: ['reservations', 'chambres', 'contenu', 'tarifs', 'reglages', 'comptes'],
   },
   reception: {
@@ -49,14 +49,14 @@ const ROLES = {
   communication: {
     nom: 'Communication',
     resume: 'Événements, promotions, campagnes, recrutement et affiches.',
-    vues: ['bord', 'evenements', 'promotions', 'campagnes', 'emplois', 'galerie', 'compte'],
+    vues: ['bord', 'evenements', 'promotions', 'campagnes', 'emplois', 'carnet', 'galerie', 'compte'],
     droits: ['contenu'],
   },
   lecture: {
     nom: 'Lecture seule',
     resume: 'Consulte tout, ne modifie rien.',
     vues: ['bord', 'disponibilites', 'chambres', 'evenements', 'promotions', 'campagnes',
-      'emplois', 'galerie', 'compte'],
+      'emplois', 'carnet', 'galerie', 'compte'],
     droits: [],
   },
 };
@@ -66,6 +66,7 @@ const ROLES = {
 const DROIT_DU_TYPE = {
   fermeture: 'reservations', chambre: 'chambres',
   evenement: 'contenu', promotion: 'contenu', campagne: 'contenu', emploi: 'contenu',
+  article: 'contenu',
 };
 function droitRequis(action, type) {
   if (action === 'enregistrer' || action === 'supprimer' || action === 'ordonner') {

@@ -296,7 +296,9 @@ def controler():
         # coin de l'ecran, et le bouton le plus utile du repli etait invisible.
         if s.count('class="wa"') != 1:
             pb.append((f, 'class="wa" doit servir au seul bouton flottant'))
-        if 'class="secours"' in s and s.count('class="wa-envoi"') != 1:
+        # Un lien par panneau : la page Offres en porte deux (forfait et
+        # evenement), chacun cherche le sien (o.secours.querySelector).
+        if 'class="secours"' in s and s.count('class="wa-envoi"') != s.count('class="secours"'):
             pb.append((f, 'lien WhatsApp du panneau de repli absent ou en double'))
 
         # 11 ter. tous les liens WhatsApp du site vont au meme numero,

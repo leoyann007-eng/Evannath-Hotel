@@ -566,6 +566,7 @@ details.plus summary::marker{color:var(--bronze)}
       <button data-v="promotions" title="Promotions"><i>◉</i><span>Promotions</span></button>
       <button data-v="campagnes" title="Campagnes saisonnières"><i>☀</i><span>Campagnes saisonnières</span></button>
       <button data-v="emplois" title="Offres d'emploi"><i>✎</i><span>Offres d'emploi</span></button>
+      <button data-v="carnet" title="Le Carnet d'Assinie"><i>✍</i><span>Le Carnet</span></button>
       <h2>Médias</h2>
       <button data-v="galerie" title="Galerie"><i>▣</i><span>Galerie</span></button>
       <h2>Administration</h2>
@@ -588,7 +589,7 @@ details.plus summary::marker{color:var(--bronze)}
 const API = '/api/admin';
 let ETAT = { stockage: '', magasin: '', variable: '', evenements: [],
              promotions: [], campagnes: [], images: [], chambres: [],
-             emplois: [] };
+             emplois: [], carnet: [] };
 /* Quand on choisit la photo d un pack, il faut savoir DE QUEL pack : la
    grille de photos est unique, les packs sont plusieurs. */
 let PHOTO_POUR = null;
@@ -733,6 +734,7 @@ async function charger() {
   ETAT.promotions = (tout.donnees && tout.donnees.promotions) || [];
   ETAT.campagnes = (tout.donnees && tout.donnees.campagnes) || [];
   ETAT.emplois = (tout.donnees && tout.donnees.emplois) || [];
+  ETAT.carnet = (tout.donnees && tout.donnees.articles) || [];
   /* Les chambres PHYSIQUES et les nuits fermees. */
   ETAT.chambres = (tout.donnees && tout.donnees.chambres) || [];
   ETAT.annoncees = (hotel && hotel.chambres_annoncees) || 0;
@@ -1106,6 +1108,7 @@ function etatDe(e, type) {
     return '<span class="etat ' + st.cl + '">' + st.mot + '</span>';
   }
   if (e.publie === false) return '<span class="etat dort">Brouillon</span>';
+  if (type === 'carnet' && e.date && e.date > aujourdHui()) return '<span class="etat dort">Programmé</span>';
   // Une offre est feminine, un evenement masculin. « Aucun promotion »
   // avait traine des mois : on ne refait pas la meme.
   if (expire(e)) return '<span class="etat fini">Termin'
@@ -1118,7 +1121,114 @@ function etatDe(e, type) {
 function typeApi(vue) {
   return vue === 'promotions' ? 'promotion'
     : vue === 'campagnes' ? 'campagne'
-    : vue === 'emplois' ? 'emploi' : 'evenement';
+    : vue === 'emplois' ? 'emploi'
+    : vue === 'carnet' ? 'article' : 'evenement';
+}
+
+/* ── Le Carnet d'Assinie ───────────────────────────────────────────────
+   Les articles du blog. Le serveur met le texte en forme et en fixe
+   l'adresse a la creation (api/_carnet.js) : retoucher un titre ne casse
+   aucun lien deja partage. Un article date de demain reste « Programmé »
+   jusqu'au jour dit, puis sort tout seul. */
+const aujourdHui = () => new Date().toISOString().slice(0, 10);
+function listeCarnet() {
+  const src = (ETAT.carnet || []).slice().sort(
+    (a, b) => String(b.date || '').localeCompare(String(a.date || '')));
+  if (!src.length) {
+    return `<div class="carte" style="text-align:center;padding:44px">
+      <p style="color:var(--muted)">Aucun article pour le moment.</p>
+      <p style="color:var(--muted);font-size:13.5px;max-width:52ch;margin:10px auto 0">Un carnet
+      qui reste avec trois articles anciens fait plus de tort que pas de carnet du tout :
+      visez un article par mois, au moins.</p>
+      <button class="btn plein" style="margin-top:18px" data-neuf="carnet"
+        >Écrire le premier</button>
+    </div>`;
+  }
+  return src.map((e) => `<div class="ligne">
+      <div class="txt">
+        <b>${ech(e.titre)}</b>
+        <span>${ech(enClair(e.date))}${e.titre_en ? ' · FR + EN' : ' · français seulement'}${e.publie && e.slug
+          ? ' · <a href="/carnet-' + ech(e.slug) + '" target="_blank" rel="noopener" style="color:var(--bronze)">voir sur le site</a>' : ''}</span>
+      </div>
+      ${etatDe(e, 'carnet')}
+      <button class="btn mince" data-bascule="${ech(e.id)}" data-type="carnet"
+        >${e.publie === false ? 'Publier' : 'Dépublier'}</button>
+      <button class="btn mince" data-mod="${ech(e.id)}" data-type="carnet">Modifier</button>
+      <button class="btn mince danger" data-sup="${ech(e.id)}" data-type="carnet"
+        >Supprimer</button>
+    </div>`).join('');
+}
+
+function formulaireArticle() {
+  const e = EDITE || { publie: false };
+  const img = e.fond || e.image || '';
+  const apercu = img ? '<img src="' + ech(srcImage(img)) + '" alt="" '
+    + 'style="max-width:210px;max-height:150px;object-fit:cover;border:1px solid var(--line)">' : '';
+  return `<div class="carte">
+    <h2 class="bloc-t">L'article</h2>
+    <div class="champ"><label for="f-a-titre">Titre</label>
+      <input id="f-a-titre" value="${ech(e.titre)}" placeholder="Que faire à Assinie en un week-end ?">
+      <p class="aide">${e.slug ? 'Adresse : /carnet-' + ech(e.slug) + ' — elle ne change plus, même si le titre change.'
+        : 'L’adresse de l’article se fabrique à partir de ce titre, au premier enregistrement.'}</p></div>
+    <div class="champ"><label for="f-a-chapo">Chapô — le résumé qui donne envie de lire</label>
+      <textarea id="f-a-chapo" style="min-height:70px"
+        placeholder="Deux ou trois phrases. Elles servent aussi de description sur Google.">${ech(e.chapo)}</textarea>
+      <p class="aide">320 caractères au maximum.</p></div>
+    <div class="champ"><label for="f-a-texte">Texte</label>
+      <textarea id="f-a-texte" style="min-height:280px">${ech(e.texte)}</textarea>
+      <p class="aide">Une ligne vide pour changer de paragraphe. <b>## Intertitre</b> en début de ligne ·
+      <b>- élément</b> pour une liste · <b>**gras**</b> · <b>*italique*</b> ·
+      <b>[texte du lien](carte)</b> pour un lien (une page du site, ou une adresse https://).</p></div>
+
+    <label class="lb">Photo d'ouverture</label>
+    <div class="depot" id="depot">
+      <div id="apercu">${apercu}</div>
+      <div>
+        <input type="file" id="f-fichier" accept="image/jpeg,image/png,image/webp" hidden>
+        <button type="button" class="btn" id="choisir">Déposer une photo</button>
+        <button type="button" class="btn mince" id="basculer" style="margin-left:8px">
+          ou choisir une photo du site</button>
+        <p class="aide" id="aide-img">JPEG, PNG ou WebP, 4 Mo au maximum. De préférence en largeur.</p>
+      </div>
+    </div>
+    <div class="grille-img" id="imgs" hidden>
+      ${ETAT.images.map((n) => `<button type="button" data-img="${ech(n)}"
+        class="${img === n ? 'on' : ''}"><img src="/img/opt/${ech(n)}.jpg" alt=""
+        loading="lazy"></button>`).join('')}
+    </div>
+    <div class="champ" style="margin-top:14px"><label for="f-a-alt">Description de la photo</label>
+      <input id="f-a-alt" value="${ech(e.alt)}" placeholder="La paillote au coucher du soleil">
+      <p class="aide">Lue par les malvoyants et par Google.</p></div>
+
+    <h2 class="bloc-t" style="margin-top:28px">Version anglaise — facultative</h2>
+    <p class="aide" style="margin-bottom:12px">Sans elle, les visiteurs anglophones lisent le texte français,
+    avec une mention qui le signale.</p>
+    <div class="champ"><label for="f-a-titre-en">Title</label>
+      <input id="f-a-titre-en" value="${ech(e.titre_en)}"></div>
+    <div class="champ"><label for="f-a-chapo-en">Standfirst</label>
+      <textarea id="f-a-chapo-en" style="min-height:70px">${ech(e.chapo_en)}</textarea></div>
+    <div class="champ"><label for="f-a-texte-en">Text</label>
+      <textarea id="f-a-texte-en" style="min-height:200px">${ech(e.texte_en)}</textarea></div>
+
+    <h2 class="bloc-t" style="margin-top:28px">Publication</h2>
+    <div class="duo">
+      <div class="champ"><label for="f-a-date">Date de publication</label>
+        <input type="date" id="f-a-date" value="${ech(e.date || aujourdHui())}">
+        <p class="aide">Une date à venir programme l'article : il sortira seul ce jour-là.</p></div>
+      <div class="champ" style="align-self:center">
+        <label style="display:flex;align-items:center;gap:10px;text-transform:none;
+          letter-spacing:0;font-size:14.5px;color:var(--cream)">
+          <input type="checkbox" id="f-a-publie" style="width:auto" ${e.id && e.publie === true ? 'checked' : ''}>
+          Publié (décoché : brouillon, visible ici seulement)
+        </label></div>
+    </div>
+
+    <div class="pied">
+      <button class="btn plein" id="enreg">Enregistrer</button>
+      <button class="btn" id="annuler">Annuler</button>
+      <span class="msg" id="msgf"></span>
+    </div>
+  </div>`;
 }
 
 /* ── Les offres d'emploi ───────────────────────────────────────────────
@@ -2144,6 +2254,16 @@ function rendre() {
       ${avertissement()}
       <p class="msg mal" id="msgl"></p>
       ${EDITE ? formulaireEmploi() : listeEmplois()}`;
+  } else if (VUE === 'carnet') {
+    v.innerHTML = `<div class="entete">
+        <div><h1 class="t">Le Carnet d'Assinie</h1>
+        <p class="sous">Les articles du blog : plages, lagune, tables, fêtes, idées de
+        week-end. Ils paraissent sur la page « Le Carnet » et chacun a son adresse.</p></div>
+        ${EDITE ? '' : '<button class="btn plein" data-neuf="carnet">Écrire un article</button>'}
+      </div>
+      ${avertissement()}
+      <p class="msg mal" id="msgl"></p>
+      ${EDITE ? formulaireArticle() : listeCarnet()}`;
   } else if (VUE === 'galerie') {
     v.innerHTML = `<div class="entete"><div>
         <h1 class="t">Galerie</h1>
@@ -2392,7 +2512,8 @@ document.addEventListener('click', async (e) => {
   if (mod) {
     const src = mod.dataset.type === 'promotions' ? ETAT.promotions
       : mod.dataset.type === 'campagnes' ? ETAT.campagnes
-      : mod.dataset.type === 'emplois' ? ETAT.emplois : ETAT.evenements;
+      : mod.dataset.type === 'emplois' ? ETAT.emplois
+      : mod.dataset.type === 'carnet' ? ETAT.carnet : ETAT.evenements;
     EDITE = JSON.parse(JSON.stringify(src.find((x) => x.id === mod.dataset.mod)));
     ETAPE = 1;
     EDITE.infos = EDITE.infos || [];
@@ -2541,6 +2662,23 @@ document.addEventListener('click', async (e) => {
     const val = (id) => { const el = $('#' + id); return el ? el.value.trim() : ''; };
     if (VUE === 'campagnes') return enregistrerCampagne();
     if (VUE === 'promotions') return enregistrerPromo();
+    if (VUE === 'carnet') {
+      const brut = (id) => { const el = $('#' + id); return el ? el.value : ''; };
+      const entree = {
+        id: EDITE && EDITE.id, cree: EDITE && EDITE.cree,
+        titre: val('f-a-titre'), chapo: val('f-a-chapo'), texte: brut('f-a-texte'),
+        image: (EDITE && (EDITE.fond || EDITE.image)) || '', alt: val('f-a-alt'),
+        titre_en: val('f-a-titre-en'), chapo_en: val('f-a-chapo-en'), texte_en: brut('f-a-texte-en'),
+        date: val('f-a-date'), publie: $('#f-a-publie').checked,
+      };
+      const m = $('#msgf');
+      const r = await appel('enregistrer', { type: 'article', entree });
+      if (!r.ok) { m.className = 'msg mal'; m.textContent = r.message || 'Échec.'; return; }
+      m.className = 'msg bon';
+      m.textContent = entree.publie ? 'Enregistré. Adresse : /carnet-' + r.entree.slug : 'Brouillon enregistré.';
+      EDITE = null;
+      return void setTimeout(charger, 900);
+    }
     if (VUE === 'emplois') {
       /* Les deux textes gardent leurs retours a la ligne : val() les
          ecraserait, et une offre ecrite en liste reviendrait en pave. */

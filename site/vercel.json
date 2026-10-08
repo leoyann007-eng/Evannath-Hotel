@@ -109,7 +109,7 @@
         },
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'sha256-+QOZnQ95uNw0CwqG+jiGFfabz4NkVXX4BnylGLx5UhY=' 'sha256-+zdQ3zQtaYpP0z7jvNRu2NN45ufyth5E6qPqyp4dDWM=' 'sha256-/NY97RbEvRDm6nxA8rg/mpRk9zKnP1TVJaSvQ+Zg4JQ=' 'sha256-/j7TTUVJfNrFSf2Xj2jnKITUDnamQZfjdI/dzKaUC80=' 'sha256-2oLdst+JFbDyvL2QFD+2pOvfiGs43h326UCLxm85+P8=' 'sha256-52/KDGVipdP9mJ6dl1luJ/NAwCCr4V30hrmSXOpp6nc=' 'sha256-8ibUGXtuZ+aFnMC1m2GKXsKwKNgkPESgEWlTZY9W4L0=' 'sha256-93dLMo7jJUJlbYKkzGOebrrPx+IriWkRD364zcqiXno=' 'sha256-A3IZ1PndiHoMXTe71JgXoYyb5NSThNq6Jxk8MZD4wsY=' 'sha256-G2IAgiuxXOZvOWnDB3o+XPbctsFXULSmV3B2dVhmeLk=' 'sha256-GxozGHevyZGWXlBEepTXWbDm1+0TOgATRyCMKerNg/4=' 'sha256-HvZpLJRCqs8Y0j2YptxJSXkhfej9h+jPwMN6/9PBd0s=' 'sha256-IP33++Dcz2OKmurniLhDwcFtzttocEg7dQlFcfjJbgc=' 'sha256-T/TYW5qSHHt4fAu+FjxwddXBM+t7/44S+8PO3ySyKs0=' 'sha256-T7mmVj2faabVoqqhkuKHQVp48TPhgoJyoOIIyfBV/Cs=' 'sha256-TSP/gqL6SA2c3GOKODdWL3eIlgiUeehuVfNp8YI9hPA=' 'sha256-UMAdcmMwCFBKa5OWYYIuac8aZKMxiOW7qggaMlvbKt0=' 'sha256-Vhti0kjhj7+CJplBeIrtMzJno7Z7si0ASW69LwauXNg=' 'sha256-Vuk/FB0di/uIe5Sjctcrdk8Ly2snxkOJ6k7mDMAVnOk=' 'sha256-bZeXKL5D6Iol/SQkQmTQ8ghNq7DbcEm0Gl0vvxhNN/Q=' 'sha256-clP8SKH+TnbsVmVXZvviYdjb5Y7wzIsW7T5jdccHs0k=' 'sha256-dic1VfjvAY/1xVzgIWlmm7lu6EEjX/9CGJ5b+Fp2rik=' 'sha256-ezFnCJqAO91vmAJ7aabTMR47/9S+Pgcn/aVirz+48TU=' 'sha256-gt/uHetKNoiLjuPWtJZ7FVGwDUOQs1qIRtJldkOUAEU=' 'sha256-itk5/ZuHcvNwkohqCk5N8DogsxPwGbdL+Llal/VWVkE=' 'sha256-kDffUzEGPB7AlDadgNMA0oSmhEtEyJFP1NEaF1a7dF0=' 'sha256-lDlH+zEErK1yl/wBRr3sydmQmcb5LB18R4xHm9GT84w=' 'sha256-pLSvH+7TT2YYDufbmTMuuqa1oTbwUu7mzNYSnbo6BHw=' 'sha256-vCtAS7KjGn82dr0qGcNoNamlG46rT1mRccR2ITxMJ5o='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://*.public.blob.vercel-storage.com; media-src 'self'; connect-src 'self'; frame-src https://www.google.com https://maps.google.com; frame-ancestors 'self'; form-action 'self'; base-uri 'self'; object-src 'none'; upgrade-insecure-requests"
+          "value": "default-src 'self'; script-src 'self' 'sha256-+QOZnQ95uNw0CwqG+jiGFfabz4NkVXX4BnylGLx5UhY=' 'sha256-/NY97RbEvRDm6nxA8rg/mpRk9zKnP1TVJaSvQ+Zg4JQ=' 'sha256-/j7TTUVJfNrFSf2Xj2jnKITUDnamQZfjdI/dzKaUC80=' 'sha256-0XmSv+lh2yw/k38ymyrvcQWnkx3cN8telHqTlvSOGyA=' 'sha256-2oLdst+JFbDyvL2QFD+2pOvfiGs43h326UCLxm85+P8=' 'sha256-52/KDGVipdP9mJ6dl1luJ/NAwCCr4V30hrmSXOpp6nc=' 'sha256-8ibUGXtuZ+aFnMC1m2GKXsKwKNgkPESgEWlTZY9W4L0=' 'sha256-93dLMo7jJUJlbYKkzGOebrrPx+IriWkRD364zcqiXno=' 'sha256-EnsdE2g4dxsa/o+puAK6DrmmwvbAE9EMXXSQxbtoHSA=' 'sha256-G2IAgiuxXOZvOWnDB3o+XPbctsFXULSmV3B2dVhmeLk=' 'sha256-GxozGHevyZGWXlBEepTXWbDm1+0TOgATRyCMKerNg/4=' 'sha256-HvZpLJRCqs8Y0j2YptxJSXkhfej9h+jPwMN6/9PBd0s=' 'sha256-IP33++Dcz2OKmurniLhDwcFtzttocEg7dQlFcfjJbgc=' 'sha256-NmnTWjPRrqyRFkrAzTJxYG/f1rh8q7z59A14LRZoYXk=' 'sha256-T/TYW5qSHHt4fAu+FjxwddXBM+t7/44S+8PO3ySyKs0=' 'sha256-T7mmVj2faabVoqqhkuKHQVp48TPhgoJyoOIIyfBV/Cs=' 'sha256-TSP/gqL6SA2c3GOKODdWL3eIlgiUeehuVfNp8YI9hPA=' 'sha256-UMAdcmMwCFBKa5OWYYIuac8aZKMxiOW7qggaMlvbKt0=' 'sha256-Vhti0kjhj7+CJplBeIrtMzJno7Z7si0ASW69LwauXNg=' 'sha256-Vuk/FB0di/uIe5Sjctcrdk8Ly2snxkOJ6k7mDMAVnOk=' 'sha256-XKVEnvAAW6Bbrh4bXE+1joz31RBI9HoifcPxmGka/wg=' 'sha256-bZeXKL5D6Iol/SQkQmTQ8ghNq7DbcEm0Gl0vvxhNN/Q=' 'sha256-clP8SKH+TnbsVmVXZvviYdjb5Y7wzIsW7T5jdccHs0k=' 'sha256-dic1VfjvAY/1xVzgIWlmm7lu6EEjX/9CGJ5b+Fp2rik=' 'sha256-ezFnCJqAO91vmAJ7aabTMR47/9S+Pgcn/aVirz+48TU=' 'sha256-itk5/ZuHcvNwkohqCk5N8DogsxPwGbdL+Llal/VWVkE=' 'sha256-kDffUzEGPB7AlDadgNMA0oSmhEtEyJFP1NEaF1a7dF0=' 'sha256-lDlH+zEErK1yl/wBRr3sydmQmcb5LB18R4xHm9GT84w=' 'sha256-nK0nizhCv858tuEODcRUFMUGRWlw+mJbpQWw7/S//7I=' 'sha256-pLSvH+7TT2YYDufbmTMuuqa1oTbwUu7mzNYSnbo6BHw=' 'sha256-vCtAS7KjGn82dr0qGcNoNamlG46rT1mRccR2ITxMJ5o='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://*.public.blob.vercel-storage.com; media-src 'self'; connect-src 'self'; frame-src https://www.google.com https://maps.google.com; frame-ancestors 'self'; form-action 'self'; base-uri 'self'; object-src 'none'; upgrade-insecure-requests"
         }
       ]
     },
@@ -121,6 +121,16 @@
           "value": "noindex, nofollow, noarchive, noimageindex"
         }
       ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/carnet-plan.xml",
+      "destination": "/api/admin?a=plan-carnet"
+    },
+    {
+      "source": "/carnet-:slug",
+      "destination": "/api/admin?a=page-article&s=:slug"
     }
   ]
 }

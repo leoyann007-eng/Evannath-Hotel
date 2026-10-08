@@ -160,6 +160,22 @@ t.push(async () => {
   verifie('forfait sans telephone : refuse (422)', sans.code === 422 && sans.json.champs.includes('tel'), sans.json);
 });
 
+t.push(async () => {
+  envois.length = 0;
+  const r = await faux({ ...base, type: 'evenement', evenement: 'Mariage & dot', date: '2026-12-19',
+    invites: '120', chambres: '15', espace: 'La paillote', budget: '5 millions', nom: 'Awa Koné',
+    tel: '+225 07 00 00 00 01', email: 'awa@example.ci', message: 'Dot le samedi' }, 'POST', '5.0.0.7');
+  const c = versClient('awa@example.ci')[0];
+  verifie('evenement prive : accepte, objet « Événement privé » a la reception', r.code === 200
+    && envois.length === 2 && envois[0].subject.startsWith('Demande de devis — Événement privé'), envois.map((e) => e.subject));
+  verifie('evenement : invites, espace et budget arrivent a la reception', envois[0].html.includes('Invités')
+    && envois[0].html.includes('120') && envois[0].html.includes('La paillote') && envois[0].html.includes('5 millions'));
+  verifie('evenement : le client lit sa date en clair et l objet dedie', c && c.html.includes('19 décembre 2026')
+    && c.subject.startsWith('Votre demande pour votre événement') && c.html.includes('Mariage &amp; dot'), c && c.subject);
+  const sans = await faux({ ...base, type: 'evenement', evenement: 'Baptême', nom: 'Awa' }, 'POST', '5.0.0.8');
+  verifie('evenement sans telephone : refuse (422)', sans.code === 422 && sans.json.champs.includes('tel'), sans.json);
+});
+
 for (const f of t) await f();
 console.log(`\n${ok} verifications passees, ${ko} en echec`);
 process.exit(ko ? 1 : 0);

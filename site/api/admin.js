@@ -29,6 +29,7 @@ const tarif = require('./_tarif.js');
 const comptes = require('./_comptes.js');
 const magasin = require('./_magasin.js');
 const quota = require('./_quota.js');
+const carnet = require('./_carnet.js');
 
 /* Les categories, telles que le site les vend. On les lit au lieu de les
    recopier : le courriel de confirmation doit dire « Chambre Standard », pas
@@ -144,7 +145,7 @@ function tropDeDemandes(ip) {
    `chambres`, ce sont les chambres PHYSIQUES — la 25, la 26 — chacune
    rattachee a une categorie. Voir le bloc « Disponibilite » plus bas. */
 const VIDE = { evenements: [], promotions: [], campagnes: [], medias: [],
-               chambres: [], fermetures: [], emplois: [], maj: null };
+               chambres: [], fermetures: [], emplois: [], articles: [], maj: null };
 
 /* Le document du magasin (voir _magasin.js) : une base Postgres privee
    quand DATABASE_URL est la, Vercel Blob en attendant, la memoire sinon.
@@ -236,7 +237,7 @@ function libelle(type, o, d) {
       : 'une fermeture' + ou;
   }
   const nom = { evenement: 'l’événement', promotion: 'la promotion', campagne: 'la campagne',
-    emploi: 'l’offre d’emploi' }[type] || 'l’entrée';
+    emploi: 'l’offre d’emploi', article: 'l’article' }[type] || 'l’entrée';
   return nom + ' « ' + (o.titre || '') + ' »';
 }
 
@@ -358,7 +359,8 @@ function collection(type) {
     : type === 'campagne' ? 'campagnes'
     : type === 'fermeture' ? 'fermetures'
     : type === 'chambre' ? 'chambres'
-    : type === 'emploi' ? 'emplois' : 'evenements';
+    : type === 'emploi' ? 'emplois'
+    : type === 'article' ? 'articles' : 'evenements';
 }
 
 /* ── Une offre d'emploi ────────────────────────────────────────────────
@@ -1285,6 +1287,42 @@ module.exports = async function handler(req, res) {
     });
   }
 
+  // ── Le Carnet, en lecture publique ──────────────────────────────────────
+  /* La liste (sans les textes), un article, sa page rendue cote serveur, et
+     le plan du site des articles. Rien de ce qui n'est pas publie — ou pas
+     encore date d'aujourd'hui — ne sort d'ici. Voir _carnet.js. */
+  if (action === 'carnet' || action === 'article' || action === 'page-article' || action === 'plan-carnet') {
+    const d = await lire();
+    const tous = d.articles || [];
+    const maintenant = Date.now();
+    if (action === 'carnet') {
+      if (PANNE) return json(res, 503, { ok: false, message: PANNE });
+      res.setHeader('Cache-Control', 'no-store, max-age=0');
+      return res.status(200).json({ ok: true, articles: carnet.liste(tous, maintenant) });
+    }
+    if (action === 'plan-carnet') {
+      res.setHeader('Content-Type', 'application/xml; charset=utf-8');
+      res.setHeader('Cache-Control', 'public, max-age=0, s-maxage=600');
+      return res.status(PANNE ? 503 : 200).send(carnet.plan(PANNE ? [] : tous, SITE_PUBLIC, maintenant));
+    }
+    const slug = String(req.query.s || '').toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 80);
+    const a = PANNE ? null : carnet.enLigne(tous, maintenant).find((x) => x.slug === slug);
+    const c = a ? carnet.complet(a, lienSur) : null;
+    if (action === 'article') {
+      if (PANNE) return json(res, 503, { ok: false, message: PANNE });
+      if (!c) return json(res, 404, { ok: false, message: 'Article introuvable.' });
+      res.setHeader('Cache-Control', 'no-store, max-age=0');
+      return res.status(200).json({ ok: true, article: c });
+    }
+    const html = carnet.page(c, SITE_PUBLIC);
+    if (!html) return json(res, 500, { ok: false, message: 'Gabarit du Carnet absent.' });
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    /* Une minute au CDN : un article corrige apparait vite, et un robot qui
+       repasse ne reveille pas la base a chaque fois. */
+    res.setHeader('Cache-Control', c ? 'public, max-age=0, s-maxage=60, stale-while-revalidate=600' : 'no-store');
+    return res.status(c ? 200 : PANNE ? 503 : 404).send(html);
+  }
+
   /* ── Disponibilite, en lecture publique ────────────────────────────────
      On rend un VERDICT, pas le calendrier. Deux raisons :
        - le taux d'occupation d'un hotel regarde l'hotel. Servir la liste
@@ -1708,6 +1746,8 @@ module.exports = async function handler(req, res) {
       ? nettoyerChambre(corps.entree || {})
       : corps.type === 'emploi'
       ? nettoyerEmploi(corps.entree || {})
+      : corps.type === 'article'
+      ? carnet.nettoyerArticle(corps.entree || {}, { imageSure })
       : nettoyer(corps.entree || {}, corps.type);
     if (manque.length) {
       return json(res, 422, { ok: false, champs: manque,
@@ -1734,6 +1774,9 @@ module.exports = async function handler(req, res) {
          ou le client doit apprendre que sa demande est acceptee. Avant, il
          n'avait que sa reference, et personne ne le prevenait. */
       avant = i >= 0 ? d[type][i] : null;
+      /* L'adresse d'un article se fixe a sa creation, sur l'etat FRAIS : deux
+         articles au meme titre enregistres ensemble n'auront pas la meme. */
+      if (corps.type === 'article') carnet.attribuerSlug(o, d[type], avant);
       /* `cree` date la DEMANDE, pas sa derniere modification. Le formulaire ne
          le renvoie pas, et nettoyerFermeture en fabriquerait alors un neuf a
          chaque enregistrement : une reservation confirmee rajeunirait, et
