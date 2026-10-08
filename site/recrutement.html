@@ -174,8 +174,10 @@ fetch('img/logo-calques.svg').then(function(r){return r.ok?r.text():Promise.reje
 }
 /* Les grands ecrans. Sur un moniteur de 1920 px, une colonne figee a 1240 px
    laissait 330 px de vide de chaque cote : la page paraissait petite, posee
-   au milieu. Au-dela de 1600 px la colonne s'elargit, et le texte courant
+   au milieu. Des 1440 px (portable 15 pouces) la colonne passe a 1360 px ;
+   au-dela de 1600 px la colonne s'elargit, et le texte courant
    gagne un point. html body l'emporte sur le body{} de chaque page. */
+@media(min-width:1440px){:root{--max:1360px}}
 @media(min-width:1600px){:root{--max:1440px}html body{font-size:17.5px}}
 @media(min-width:1840px){:root{--max:1580px}}
 
@@ -624,7 +626,7 @@ body{background:var(--bark)}
    (beige des polos, brun, liseres kente). --- */
 .rc{background:#F3EBDD;color:#2B1B12}
 .rc-k{height:10px;background:repeating-linear-gradient(90deg,#C9842F 0 22px,#2B1B12 22px 26px,#E7D7B8 26px 40px,#B8402B 40px 48px,#2B1B12 48px 52px,#3F7A4A 52px 60px,#C9842F 60px 74px)}
-.rc-in{max-width:1200px;margin:0 auto;padding:140px 32px 64px;display:grid;
+.rc-in{max-width:var(--max);margin:0 auto;padding:140px 24px 64px;display:grid;
   grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:56px;align-items:start}
 .rc .eyebrow{color:#8A5524}
 .rc h1{color:#3A2416;font-size:clamp(2.3rem,5vw,3.8rem);line-height:1.03;margin:12px 0 18px}
@@ -684,7 +686,7 @@ body{background:var(--bark)}
 .rc-ch button,.rc-ch a{min-height:44px;padding:0 18px;border-radius:22px;border:1.5px solid #3A2416;background:#FBF7F0;
   color:#3A2416;font:600 14px var(--f-body);cursor:pointer;display:inline-flex;align-items:center}
 .rc-ch button:hover,.rc-ch a:hover{background:#3A2416;color:#F3EBDD}
-.rc-pied{max-width:1200px;margin:0 auto;padding:0 32px 56px}
+.rc-pied{max-width:var(--max);margin:0 auto;padding:0 24px 56px}
 .rc-pied p{margin:0;border-top:1px solid rgba(58,36,22,.2);padding-top:26px;font-family:var(--f-display);
   font-size:clamp(1.15rem,2.4vw,1.5rem);color:#3A2416}
 .rc-pied a{color:#8A5524}
@@ -697,7 +699,7 @@ body{background:var(--bark)}
    Une offre resumee serait une offre incomplete : rien n'est coupe, tout
    est replie. --- */
 .postes{background:#F3EBDD;color:#2B1B12;padding:20px 0 90px}
-.postes .in{max-width:1200px;margin:0 auto;padding:0 32px}
+.postes .in{max-width:var(--max);margin:0 auto;padding:0 24px}
 .postes .tt{display:flex;align-items:baseline;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:30px}
 .postes .tt h2{font-size:clamp(1.8rem,3.6vw,2.6rem);margin:0;color:#3A2416}
 .postes .tt span{font-size:14px;color:#6E5643}
