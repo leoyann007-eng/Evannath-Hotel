@@ -729,6 +729,8 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
 .camp>p{max-width:62ch}
 .packs{align-items:start;display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:26px}
 .pack{border:1px solid var(--line);overflow:hidden;background:var(--bark);transition:.45s}
+/* Le forfait vise par l'adresse (circuits.html#pack-couple) se signale. */
+.c.cible,.pack.cible,.star.cible{outline:2px solid var(--bronze);outline-offset:4px}
 
 /* Une remise se lit en trois secondes : le montant, sur quoi, jusqu à quand. */
 .remises{display:grid;gap:18px;margin-top:26px}
@@ -1023,22 +1025,22 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
     </div>
     <p data-t="cp">« Les vacances qui vous ressemblent. » Quatre formules pensées pour la saison, réservables directement ici.</p>
     <div class="packs">
-      <article class="pack">
+      <article class="pack" id="pack-famille">
         <div class="ph"><picture><source srcset="img/opt/g-aerien-t.webp" type="image/webp"><img width="640" height="454" loading="lazy" src="img/opt/g-aerien-t.jpg" alt="Vue aérienne du domaine Evannath"></picture></div>
         <div class="in"><h3 data-t="p1">Pack Famille</h3><b>250 000</b><span data-t="uf">FCFA · le forfait</span>
         <button class="pick pickbtn" data-c="Pack Famille" data-p="250000" data-u="forfait" data-t="ch">Choisir</button></div>
       </article>
-      <article class="pack">
+      <article class="pack" id="pack-couple">
         <div class="ph"><picture><source srcset="img/opt/gal-lag-nuit-640.webp 640w, img/opt/gal-lag-nuit-1024.webp 1024w, img/opt/gal-lag-nuit.webp 1748w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp"><img width="1748" height="1240" loading="lazy" src="img/opt/gal-lag-nuit.jpg" srcset="img/opt/gal-lag-nuit-640.jpg 640w, img/opt/gal-lag-nuit-1024.jpg 1024w, img/opt/gal-lag-nuit.jpg 1748w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" alt="La paillote éclairée à la tombée du jour"></picture></div>
         <div class="in"><h3 data-t="p2">Pack Couple</h3><b>150 000</b><span data-t="uf">FCFA · le forfait</span>
         <button class="pick pickbtn" data-c="Pack Couple" data-p="150000" data-u="forfait" data-t="ch">Choisir</button></div>
       </article>
-      <article class="pack">
+      <article class="pack" id="pack-chillday">
         <div class="ph"><picture><source srcset="img/opt/g-terrasse-t.webp" type="image/webp"><img width="640" height="454" loading="lazy" src="img/opt/g-terrasse-t.jpg" alt="Terrasse et transats de l'hôtel"></picture></div>
         <div class="in"><h3 data-t="p3">Pack Chillday</h3><b>50 000</b><span data-t="up">FCFA · par personne</span>
         <button class="pick pickbtn" data-c="Pack Chillday" data-p="50000" data-u="personne" data-t="ch">Choisir</button></div>
       </article>
-      <article class="pack">
+      <article class="pack" id="pack-enfant">
         <div class="ph"><picture><source srcset="img/opt/ig-enfants.webp" type="image/webp"><img width="640" height="427" loading="lazy" src="img/opt/ig-enfants.jpg" alt="Des enfants dans la piscine de l'hôtel"></picture></div>
         <div class="in"><h3 data-t="p4">Pack Enfant</h3><b>15 000</b><span data-t="ue">FCFA · par enfant</span>
         <button class="pick pickbtn" data-c="Pack Enfant" data-p="15000" data-u="enfant" data-t="ch">Choisir</button></div>
@@ -1046,7 +1048,7 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
     </div>
   </section>
 
-  <article class="star reveal">
+  <article class="star reveal" id="lune-de-miel">
     <div class="ph">
       <picture><source srcset="img/opt/r-mezzanine-640.webp 640w, img/opt/r-mezzanine.webp 900w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp">
       <img width="900" height="600" src="img/opt/r-mezzanine.jpg" srcset="img/opt/r-mezzanine-640.jpg 640w, img/opt/r-mezzanine.jpg 900w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" alt="Mezzanine Supérieure décorée pour une lune de miel"></picture>
@@ -1078,7 +1080,7 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
   </div>
 
   <div class="grid" id="gr">
-    <article class="c reveal" data-cat="duo">
+    <article class="c reveal" id="evasion-romantique" data-cat="duo">
           <div class="ph"><picture><source srcset="img/opt/gal-lag-bateau-640.webp 640w, img/opt/gal-lag-bateau-1024.webp 1024w, img/opt/gal-lag-bateau.webp 1748w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp">
             <img width="1748" height="1240" loading="lazy" src="img/opt/gal-lag-bateau.jpg" srcset="img/opt/gal-lag-bateau-640.jpg 640w, img/opt/gal-lag-bateau-1024.jpg 1024w, img/opt/gal-lag-bateau.jpg 1748w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" alt="Le ponton et le bateau de balade sur la lagune Aby"></picture>
             <span class="tag" data-t="g1">Romantique</span></div>
@@ -1094,7 +1096,7 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
             <button class="pick pickbtn" data-c="Évasion Romantique" data-p="100000" data-u="forfait" data-t="ch">Choisir</button></div>
           </div>
         </article>
-    <article class="c reveal" data-cat="duo">
+    <article class="c reveal" id="week-end-intense" data-cat="duo">
           <div class="ph"><picture><source srcset="img/opt/r-standard-640.webp 640w, img/opt/r-standard.webp 900w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp">
             <img width="900" height="600" loading="lazy" src="img/opt/r-standard.jpg" srcset="img/opt/r-standard-640.jpg 640w, img/opt/r-standard.jpg 900w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" alt="Chambre Standard de l'Hôtel Evannath"></picture>
             <span class="tag" data-t="g2">Week-end</span></div>
@@ -1110,7 +1112,7 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
             <button class="pick pickbtn" data-c="Week-End Intense" data-p="155000" data-u="forfait" data-t="ch">Choisir</button></div>
           </div>
         </article>
-    <article class="c reveal" data-cat="long fam">
+    <article class="c reveal" id="long-holidays" data-cat="long fam">
           <div class="ph"><picture><source srcset="img/opt/g-vue-640.webp 640w, img/opt/g-vue-1024.webp 1024w, img/opt/g-vue.webp 1200w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp">
             <img width="1200" height="851" loading="lazy" src="img/opt/g-vue.jpg" srcset="img/opt/g-vue-640.jpg 640w, img/opt/g-vue-1024.jpg 1024w, img/opt/g-vue.jpg 1200w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" alt="Vue sur la lagune et les cocotiers d'Assinie"></picture>
             <span class="tag" data-t="g5">Long séjour</span></div>
@@ -1126,7 +1128,7 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
             <button class="pick pickbtn" data-c="Long Holidays" data-p="25000" data-u="forfait" data-t="ch">Choisir</button></div>
           </div>
         </article>
-    <article class="c reveal" data-cat="grp fam">
+    <article class="c reveal" id="coffret-anniversaire" data-cat="grp fam">
           <div class="ph"><picture><source srcset="img/opt/g-resto-640.webp 640w, img/opt/g-resto-1024.webp 1024w, img/opt/g-resto.webp 1200w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp">
             <img width="1200" height="851" loading="lazy" src="img/opt/g-resto.jpg" srcset="img/opt/g-resto-640.jpg 640w, img/opt/g-resto-1024.jpg 1024w, img/opt/g-resto.jpg 1200w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" alt="Salle de restaurant dressée pour un groupe"></picture>
             <span class="tag" data-t="g6">Dès 10 personnes</span></div>
@@ -1152,7 +1154,7 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
   </div>
 
   <div class="grid">
-    <article class="c reveal" data-cat="fam grp">
+    <article class="c reveal" id="decouvertes-touristiques" data-cat="fam grp">
           <div class="ph"><picture><source srcset="img/opt/g-lagune-640.webp 640w, img/opt/g-lagune-1024.webp 1024w, img/opt/g-lagune.webp 1200w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp">
             <img width="1200" height="851" loading="lazy" src="img/opt/g-lagune.jpg" srcset="img/opt/g-lagune-640.jpg 640w, img/opt/g-lagune-1024.jpg 1024w, img/opt/g-lagune.jpg 1200w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" alt="La lagune Aby et les îles environnantes"></picture>
             <span class="tag" data-t="g3">Découverte</span></div>
@@ -1168,7 +1170,7 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
             <button class="pick pickbtn" data-c="Découvertes Touristiques" data-p="35000" data-u="personne" data-t="ch">Choisir</button></div>
           </div>
         </article>
-    <article class="c reveal" data-cat="fam">
+    <article class="c reveal" id="decouvertes-junior" data-cat="fam">
           <div class="ph"><picture><source srcset="img/opt/c-piscine-640.webp 640w, img/opt/c-piscine.webp 900w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" type="image/webp">
             <img width="900" height="638" loading="lazy" src="img/opt/c-piscine.jpg" srcset="img/opt/c-piscine-640.jpg 640w, img/opt/c-piscine.jpg 900w" sizes="(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px" alt="La piscine de l'hôtel en fin de journée"></picture>
             <span class="tag" data-t="g4">Enfants</span></div>
@@ -1268,7 +1270,47 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
 <a class="wa" href="https://wa.me/2250758408079" target="_blank" rel="noopener" aria-label="Nous écrire sur WhatsApp">
   <span class="lbl" aria-hidden="true">ÉCRIRE SUR WHATSAPP</span>
   <span class="rond"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.5 14.4c-.3-.1-1.7-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.7 1-.9 1.2-.2.2-.3.2-.6.1-1.7-.9-2.9-1.6-4-3.5-.3-.5.3-.5.9-1.6.1-.2 0-.4 0-.5s-.7-1.6-.9-2.2c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.3 5.2 4.6 1.9.8 2.7.9 3.6.8.6-.1 1.7-.7 2-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.6-.3M12 2a10 10 0 00-8.6 15L2 22l5.2-1.4A10 10 0 1012 2z"/></svg></span>
-</a><style>
+</a><script>(function(){
+var d=document,a=d.querySelector('a.wa');if(!a)return;
+var BASE=a.getAttribute('href').split('?')[0],FICHES=["chambre-standard", "deluxe-baldaquin", "deluxe-superieure", "suite-anglaise", "chambre-mezzanine", "mezzanine-superieure", "suite-arabe"];
+var page=location.pathname.replace(/^\//,'').replace(/\.html$/,'')||'index';
+var touche={};
+d.addEventListener('change',function(e){if(e.target&&e.target.id)touche[e.target.id]=1},true);
+d.addEventListener('input',function(e){if(e.target&&e.target.id)touche[e.target.id]=1},true);
+d.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('.pickbtn');if(b)touche.circ=1},true);
+function en(){return (d.documentElement.lang||'fr').slice(0,2)==='en'}
+function el(id){return d.getElementById(id)}
+function val(id){var e=el(id);if(!e||!touche[id])return '';
+  if(e.tagName==='SELECT'){var o=e.options[e.selectedIndex];return o?o.text.split('\u2014')[0].trim():''}
+  return (e.value||'').trim()}
+function jour(id){var x=val(id);if(!/^\d{4}-\d{2}-\d{2}$/.test(x))return '';
+  return new Date(x+'T12:00:00').toLocaleDateString(en()?'en-GB':'fr-FR',{day:'numeric',month:'long'})}
+function titre(){var h=d.querySelector('h1');return h?h.textContent.replace(/\s+/g,' ').trim():''}
+function dates(){var a1=jour('d1'),a2=jour('d2'),E=en();
+  if(a1&&a2)return E?' from '+a1+' to '+a2:' du '+a1+' au '+a2;
+  if(a1)return E?' from '+a1:' \u00e0 partir du '+a1;return ''}
+function sejour(cat){var E=en(),p=val('pax'),t=E?'Hello Evannath, I would like to check availability':'Bonjour Evannath, je souhaite conna\u00eetre les disponibilit\u00e9s';
+  if(cat)t+=E?' for \u00ab '+cat+' \u00bb':' de la cat\u00e9gorie \u00ab '+cat+' \u00bb';
+  t+=dates();if(p)t+=(E?' for ':' pour ')+p.toLowerCase();
+  if(!cat&&!p&&!dates())t+=E?' and rates for a stay':' et les tarifs pour un s\u00e9jour';
+  return t+'.'}
+function message(){var E=en();
+  if(FICHES.indexOf(page)>=0)return sejour(titre());
+  if(page==='index'||page==='reserver')return sejour(val('cat'));
+  if(page==='circuits'){var o=val('circ'),j=jour('dt');
+    if(!o)return E?'Hello Evannath, I would like information about your packages.':'Bonjour Evannath, je souhaite des informations sur vos offres et forfaits.';
+    return (E?'Hello Evannath, I am interested in the \u00ab '+o+' \u00bb package'+(j?' for '+j:'')+'. Is it available?'
+      :'Bonjour Evannath, l\u2019offre \u00ab '+o+' \u00bb m\u2019int\u00e9resse'+(j?' pour le '+j:'')+'. Est-elle disponible ?')}
+  if(page==='seminaires'){var ty=val('typ'),n=val('nb'),j=jour('dt');
+    return (E?'Hello Evannath, I am planning an event'+(ty?' ('+ty+')':'')+(n?' for '+n+' people':'')+(j?' on '+j:'')+'. Could you send me a quote?'
+      :'Bonjour Evannath, je pr\u00e9pare un \u00e9v\u00e9nement'+(ty?' ('+ty+')':'')+(n?' pour '+n+' personnes':'')+(j?' le '+j:'')+'. Pouvez-vous m\u2019envoyer un devis ?')}
+  if(page==='carte')return E?'Hello Evannath, I would like to book a table.':'Bonjour Evannath, je souhaite r\u00e9server une table.';
+  if(page==='spa')return E?'Hello Evannath, I would like to book a spa treatment.':'Bonjour Evannath, je souhaite prendre rendez-vous au spa.';
+  if(page==='experiences')return E?'Hello Evannath, I would like to book an activity.':'Bonjour Evannath, je souhaite r\u00e9server une activit\u00e9.';
+  return E?'Hello Evannath, I would like some information.':'Bonjour Evannath, je souhaite avoir des informations.'}
+function poser(){a.setAttribute('href',BASE+'?text='+encodeURIComponent(message()))}
+['click','mouseenter','focus','touchstart'].forEach(function(t){a.addEventListener(t,poser,{passive:true})});
+})();</script><style>
 .chat-bulle{position:fixed;right:22px;bottom:92px;z-index:91;width:58px;height:58px;border-radius:999px;border:0;
   background:var(--bronze);color:#fff;display:grid;place-items:center;cursor:pointer;
   box-shadow:0 12px 30px -14px rgba(101,63,19,.8);transition:transform .3s var(--ease-out),opacity .3s,background .2s}
@@ -1710,6 +1752,23 @@ document.addEventListener('click', function(ev){
   recap();
   document.getElementById('demande').scrollIntoView({behavior:'smooth',block:'start'});
 });
+
+/* Arrivee par une ancre : circuits.html#pack-couple. Le navigateur descend
+   deja sur la carte ; on choisit en plus le forfait dans le formulaire, pour
+   que le visiteur venu d'une publicite n'ait plus qu'a donner ses dates.
+   Le change previent le bouton WhatsApp que ce choix vient du visiteur. */
+(function(){
+  var h = decodeURIComponent(location.hash.slice(1));
+  if (!/^[a-z0-9-]+$/.test(h)) return;
+  var art = document.getElementById(h), b = art && art.querySelector('.pickbtn');
+  if (!b) return;
+  var want = b.dataset.p + '|' + b.dataset.u;
+  for (var i = 0; i < circ.options.length; i++) {
+    if (circ.options[i].value === want) { circ.selectedIndex = i; break; }
+  }
+  circ.dispatchEvent(new Event('change', {bubbles: true}));
+  art.classList.add('cible');
+})();
 
 document.getElementById('rf').addEventListener('submit',function(e){e.preventDefault();
   alert("Démonstration : la demande partirait à la réception et à receptionhotelevannath@gmail.com, avec une confirmation automatique au client.")});

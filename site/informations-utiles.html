@@ -857,7 +857,47 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
 <a class="wa" href="https://wa.me/2250758408079" target="_blank" rel="noopener" aria-label="Nous écrire sur WhatsApp">
   <span class="lbl" aria-hidden="true">ÉCRIRE SUR WHATSAPP</span>
   <span class="rond"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.5 14.4c-.3-.1-1.7-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.7 1-.9 1.2-.2.2-.3.2-.6.1-1.7-.9-2.9-1.6-4-3.5-.3-.5.3-.5.9-1.6.1-.2 0-.4 0-.5s-.7-1.6-.9-2.2c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.3 5.2 4.6 1.9.8 2.7.9 3.6.8.6-.1 1.7-.7 2-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.6-.3M12 2a10 10 0 00-8.6 15L2 22l5.2-1.4A10 10 0 1012 2z"/></svg></span>
-</a><style>
+</a><script>(function(){
+var d=document,a=d.querySelector('a.wa');if(!a)return;
+var BASE=a.getAttribute('href').split('?')[0],FICHES=["chambre-standard", "deluxe-baldaquin", "deluxe-superieure", "suite-anglaise", "chambre-mezzanine", "mezzanine-superieure", "suite-arabe"];
+var page=location.pathname.replace(/^\//,'').replace(/\.html$/,'')||'index';
+var touche={};
+d.addEventListener('change',function(e){if(e.target&&e.target.id)touche[e.target.id]=1},true);
+d.addEventListener('input',function(e){if(e.target&&e.target.id)touche[e.target.id]=1},true);
+d.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('.pickbtn');if(b)touche.circ=1},true);
+function en(){return (d.documentElement.lang||'fr').slice(0,2)==='en'}
+function el(id){return d.getElementById(id)}
+function val(id){var e=el(id);if(!e||!touche[id])return '';
+  if(e.tagName==='SELECT'){var o=e.options[e.selectedIndex];return o?o.text.split('\u2014')[0].trim():''}
+  return (e.value||'').trim()}
+function jour(id){var x=val(id);if(!/^\d{4}-\d{2}-\d{2}$/.test(x))return '';
+  return new Date(x+'T12:00:00').toLocaleDateString(en()?'en-GB':'fr-FR',{day:'numeric',month:'long'})}
+function titre(){var h=d.querySelector('h1');return h?h.textContent.replace(/\s+/g,' ').trim():''}
+function dates(){var a1=jour('d1'),a2=jour('d2'),E=en();
+  if(a1&&a2)return E?' from '+a1+' to '+a2:' du '+a1+' au '+a2;
+  if(a1)return E?' from '+a1:' \u00e0 partir du '+a1;return ''}
+function sejour(cat){var E=en(),p=val('pax'),t=E?'Hello Evannath, I would like to check availability':'Bonjour Evannath, je souhaite conna\u00eetre les disponibilit\u00e9s';
+  if(cat)t+=E?' for \u00ab '+cat+' \u00bb':' de la cat\u00e9gorie \u00ab '+cat+' \u00bb';
+  t+=dates();if(p)t+=(E?' for ':' pour ')+p.toLowerCase();
+  if(!cat&&!p&&!dates())t+=E?' and rates for a stay':' et les tarifs pour un s\u00e9jour';
+  return t+'.'}
+function message(){var E=en();
+  if(FICHES.indexOf(page)>=0)return sejour(titre());
+  if(page==='index'||page==='reserver')return sejour(val('cat'));
+  if(page==='circuits'){var o=val('circ'),j=jour('dt');
+    if(!o)return E?'Hello Evannath, I would like information about your packages.':'Bonjour Evannath, je souhaite des informations sur vos offres et forfaits.';
+    return (E?'Hello Evannath, I am interested in the \u00ab '+o+' \u00bb package'+(j?' for '+j:'')+'. Is it available?'
+      :'Bonjour Evannath, l\u2019offre \u00ab '+o+' \u00bb m\u2019int\u00e9resse'+(j?' pour le '+j:'')+'. Est-elle disponible ?')}
+  if(page==='seminaires'){var ty=val('typ'),n=val('nb'),j=jour('dt');
+    return (E?'Hello Evannath, I am planning an event'+(ty?' ('+ty+')':'')+(n?' for '+n+' people':'')+(j?' on '+j:'')+'. Could you send me a quote?'
+      :'Bonjour Evannath, je pr\u00e9pare un \u00e9v\u00e9nement'+(ty?' ('+ty+')':'')+(n?' pour '+n+' personnes':'')+(j?' le '+j:'')+'. Pouvez-vous m\u2019envoyer un devis ?')}
+  if(page==='carte')return E?'Hello Evannath, I would like to book a table.':'Bonjour Evannath, je souhaite r\u00e9server une table.';
+  if(page==='spa')return E?'Hello Evannath, I would like to book a spa treatment.':'Bonjour Evannath, je souhaite prendre rendez-vous au spa.';
+  if(page==='experiences')return E?'Hello Evannath, I would like to book an activity.':'Bonjour Evannath, je souhaite r\u00e9server une activit\u00e9.';
+  return E?'Hello Evannath, I would like some information.':'Bonjour Evannath, je souhaite avoir des informations.'}
+function poser(){a.setAttribute('href',BASE+'?text='+encodeURIComponent(message()))}
+['click','mouseenter','focus','touchstart'].forEach(function(t){a.addEventListener(t,poser,{passive:true})});
+})();</script><style>
 .chat-bulle{position:fixed;right:22px;bottom:92px;z-index:91;width:58px;height:58px;border-radius:999px;border:0;
   background:var(--bronze);color:#fff;display:grid;place-items:center;cursor:pointer;
   box-shadow:0 12px 30px -14px rgba(101,63,19,.8);transition:transform .3s var(--ease-out),opacity .3s,background .2s}

@@ -1452,7 +1452,62 @@ else fetch('/api/chat',{cache:'no-store'}).then(function(r){return r.json()}).th
 
 import json as _json_chat, _chambres as _ch_chat
 CHAT_BULLE = CHAT_BULLE.replace('{{CHAMBRES_CHAT}}', _json_chat.dumps([c['slug'] for c in _ch_chat.CHAMBRES]))
-WA_BOUTON = WA_BOUTON + CHAT_BULLE
+
+# ── Le bouton WhatsApp arrive avec son message ─────────────────────────
+# Le cahier des exigences le demande : « Bonjour Evannath, je souhaite
+# connaitre les disponibilites... du ... au ... pour ... personnes ». Le
+# bouton flottant ouvrait une conversation vide ; le client devait tout
+# retaper, et la reception tout redemander.
+#
+# Le message se compose au moment du clic, avec ce que la page sait :
+# la chambre de la fiche, la categorie, les dates, les voyageurs, l'offre
+# choisie, le type d'evenement. Les champs des formulaires sont preremplis
+# (dates a J+7, 25 participants...) : on ne les reprend QUE si le visiteur
+# les a touches, sinon on lui ferait dire ce qu'il n'a pas choisi.
+# Aucun bouton de plus : c'est le meme bouton, avec une phrase dedans.
+WA_PREREMPLI = '''<script>(function(){
+var d=document,a=d.querySelector('a.wa');if(!a)return;
+var BASE=a.getAttribute('href').split('?')[0],FICHES={{FICHES_WA}};
+var page=location.pathname.replace(/^\\//,'').replace(/\\.html$/,'')||'index';
+var touche={};
+d.addEventListener('change',function(e){if(e.target&&e.target.id)touche[e.target.id]=1},true);
+d.addEventListener('input',function(e){if(e.target&&e.target.id)touche[e.target.id]=1},true);
+d.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('.pickbtn');if(b)touche.circ=1},true);
+function en(){return (d.documentElement.lang||'fr').slice(0,2)==='en'}
+function el(id){return d.getElementById(id)}
+function val(id){var e=el(id);if(!e||!touche[id])return '';
+  if(e.tagName==='SELECT'){var o=e.options[e.selectedIndex];return o?o.text.split('\\u2014')[0].trim():''}
+  return (e.value||'').trim()}
+function jour(id){var x=val(id);if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(x))return '';
+  return new Date(x+'T12:00:00').toLocaleDateString(en()?'en-GB':'fr-FR',{day:'numeric',month:'long'})}
+function titre(){var h=d.querySelector('h1');return h?h.textContent.replace(/\\s+/g,' ').trim():''}
+function dates(){var a1=jour('d1'),a2=jour('d2'),E=en();
+  if(a1&&a2)return E?' from '+a1+' to '+a2:' du '+a1+' au '+a2;
+  if(a1)return E?' from '+a1:' \\u00e0 partir du '+a1;return ''}
+function sejour(cat){var E=en(),p=val('pax'),t=E?'Hello Evannath, I would like to check availability':'Bonjour Evannath, je souhaite conna\\u00eetre les disponibilit\\u00e9s';
+  if(cat)t+=E?' for \\u00ab '+cat+' \\u00bb':' de la cat\\u00e9gorie \\u00ab '+cat+' \\u00bb';
+  t+=dates();if(p)t+=(E?' for ':' pour ')+p.toLowerCase();
+  if(!cat&&!p&&!dates())t+=E?' and rates for a stay':' et les tarifs pour un s\\u00e9jour';
+  return t+'.'}
+function message(){var E=en();
+  if(FICHES.indexOf(page)>=0)return sejour(titre());
+  if(page==='index'||page==='reserver')return sejour(val('cat'));
+  if(page==='circuits'){var o=val('circ'),j=jour('dt');
+    if(!o)return E?'Hello Evannath, I would like information about your packages.':'Bonjour Evannath, je souhaite des informations sur vos offres et forfaits.';
+    return (E?'Hello Evannath, I am interested in the \\u00ab '+o+' \\u00bb package'+(j?' for '+j:'')+'. Is it available?'
+      :'Bonjour Evannath, l\\u2019offre \\u00ab '+o+' \\u00bb m\\u2019int\\u00e9resse'+(j?' pour le '+j:'')+'. Est-elle disponible ?')}
+  if(page==='seminaires'){var ty=val('typ'),n=val('nb'),j=jour('dt');
+    return (E?'Hello Evannath, I am planning an event'+(ty?' ('+ty+')':'')+(n?' for '+n+' people':'')+(j?' on '+j:'')+'. Could you send me a quote?'
+      :'Bonjour Evannath, je pr\\u00e9pare un \\u00e9v\\u00e9nement'+(ty?' ('+ty+')':'')+(n?' pour '+n+' personnes':'')+(j?' le '+j:'')+'. Pouvez-vous m\\u2019envoyer un devis ?')}
+  if(page==='carte')return E?'Hello Evannath, I would like to book a table.':'Bonjour Evannath, je souhaite r\\u00e9server une table.';
+  if(page==='spa')return E?'Hello Evannath, I would like to book a spa treatment.':'Bonjour Evannath, je souhaite prendre rendez-vous au spa.';
+  if(page==='experiences')return E?'Hello Evannath, I would like to book an activity.':'Bonjour Evannath, je souhaite r\\u00e9server une activit\\u00e9.';
+  return E?'Hello Evannath, I would like some information.':'Bonjour Evannath, je souhaite avoir des informations.'}
+function poser(){a.setAttribute('href',BASE+'?text='+encodeURIComponent(message()))}
+['click','mouseenter','focus','touchstart'].forEach(function(t){a.addEventListener(t,poser,{passive:true})});
+})();</script>'''.replace('{{FICHES_WA}}', _json_chat.dumps([c['slug'] for c in _ch_chat.CHAMBRES]))
+
+WA_BOUTON = WA_BOUTON + WA_PREREMPLI + CHAT_BULLE
 
 FOOTER = '''</main>
 
