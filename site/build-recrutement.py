@@ -81,11 +81,14 @@ body{background:var(--bark)}
 .rc-vous b{font-family:var(--f-display);font-weight:400;font-size:clamp(1.3rem,3.2vw,2.3rem);line-height:1;color:#3A2416}
 .rc-vous span{font-size:12px;line-height:1.4;color:#6E5643;max-width:14ch}
 
-.rc-tel{background:#E9DDC9;border-radius:28px;height:720px;display:flex;flex-direction:column;
+.rc-tel{background:#E9DDC9;border-radius:28px;align-self:stretch;min-height:560px;max-height:900px;display:flex;flex-direction:column;
   overflow:hidden;box-shadow:0 40px 80px -30px rgba(58,36,22,.5)}
 .rc-tete{display:flex;align-items:center;gap:12px;padding:14px 18px;background:#3A2416;color:#F3EBDD}
-.rc-logo{width:40px;height:40px;flex:0 0 auto;border-radius:50%;border:1.5px solid #E0A458;
-  background:#2B1B12 url(img/opt/logo-creme.png) center/70% auto no-repeat}
+/* Le logo entier est un bandeau : dans un rond de 32 px il devient
+   illisible. On garde l'initiale, comme le concierge du site. */
+.rc-logo{width:40px;height:40px;flex:0 0 auto;border-radius:50%;border:1.5px solid #E0A458;background:#2B1B12;
+  display:flex;align-items:center;justify-content:center;font:400 19px/1 var(--f-display);color:#E0A458}
+.rc-logo:before{content:"E"}
 .rc-tete .n{flex:1;display:flex;flex-direction:column;line-height:1.3}
 .rc-tete .n b{font-size:15px}
 .rc-tete .n span{font-size:12px;color:#E0A458}
@@ -95,7 +98,7 @@ body{background:var(--bark)}
 .rc-fil{flex:1;min-height:0;overflow-y:auto;padding:22px 18px 28px;display:flex;flex-direction:column;gap:10px}
 .rc-l{display:flex;align-items:flex-end;gap:10px;animation:rc-bulle .5s cubic-bezier(.2,.9,.3,1.2) both}
 .rc-l.moi{justify-content:flex-end}
-.rc-l .rc-logo{width:32px;height:32px;border:0;background-color:#3A2416}
+.rc-l .rc-logo{width:32px;height:32px;font-size:16px;border-width:1px;background:#3A2416}
 .rc-l .rc-logo.cache{visibility:hidden}
 .rc-b{max-width:76%;padding:11px 15px;border-radius:18px 18px 18px 6px;background:#FBF7F0;
   color:#2B1B12;font-size:15px;line-height:1.5;box-shadow:0 1px 1px rgba(0,0,0,.06)}
@@ -127,35 +130,61 @@ body{background:var(--bark)}
 @keyframes rc-bulle{from{opacity:0;transform:translateY(10px) scale(.96)}to{opacity:1;transform:none}}
 @keyframes rc-pt{0%,60%,100%{opacity:.3;transform:none}30%{opacity:1;transform:translateY(-3px)}}
 
-.postes{padding:56px 0 96px}
-.postes > .wrap > h2{font-size:clamp(1.6rem,3.4vw,2.2rem);margin:0 0 26px}
-/* Une offre par bloc, pleine largeur : une grille de cartes obligerait a
-   resumer, et un resume d'offre d'emploi est une offre incomplete. */
-.poste{border:1px solid var(--line);background:var(--bark-2);padding:30px 32px;
-  margin-bottom:18px;scroll-margin-top:110px}
-.poste:target{border-color:var(--bronze);box-shadow:0 0 0 1px rgba(185,138,80,.35)}
-.poste h2{font-size:1.5rem;font-weight:400;margin-bottom:8px}
-.poste .meta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
-/* La date limite : sous l'intitule, discrete. Un candidat la cherche avant
-   de lire le reste. */
-.poste .fin{font-size:13px;color:var(--muted);margin:-8px 0 18px}
-.poste .fin time{color:var(--cream);font-weight:600}
-.poste .meta span{font-size:10px;letter-spacing:.16em;text-transform:uppercase;
-  font-weight:700;color:var(--bronze-2);border:1px solid var(--line);padding:5px 11px}
+/* --- Les offres : une carte par poste, sur le meme beige que la porte
+   d'entree. La carte montre l'essentiel ; « Voir le poste » deplie l'offre
+   ENTIERE dans la carte — texte, profil, date limite, comment postuler.
+   Une offre resumee serait une offre incomplete : rien n'est coupe, tout
+   est replie. --- */
+.postes{background:#F3EBDD;color:#2B1B12;padding:20px 0 90px}
+.postes .in{max-width:1200px;margin:0 auto;padding:0 32px}
+.postes .tt{display:flex;align-items:baseline;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:30px}
+.postes .tt h2{font-size:clamp(1.8rem,3.6vw,2.6rem);margin:0;color:#3A2416}
+.postes .tt span{font-size:14px;color:#6E5643}
+.grille{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:24px;align-items:start}
+.poste{background:#3A2416;color:#F3EBDD;border-radius:6px;overflow:hidden;scroll-margin-top:110px;
+  transition:transform .5s cubic-bezier(.2,.7,.2,1),box-shadow .5s}
+.poste.ouvert{transform:translateY(-6px);box-shadow:0 30px 50px -20px rgba(58,36,22,.6)}
+.poste:target{outline:3px solid #E0A458;outline-offset:3px}
+.poste .ph{aspect-ratio:3/2;overflow:hidden;background:#2B1B12}
+.poste .ph img{display:block;max-width:none;height:auto;transition:transform 1.2s cubic-bezier(.2,.7,.2,1)}
+.poste .ph img.plein{width:100%;height:100%;max-width:100%;object-fit:cover}
+.poste.ouvert .ph img{transform:scale(1.05)}
+.poste .k{height:8px;background:""" + KENTE + """}
+.poste .c{padding:24px 26px 22px}
+.poste .m{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#E0A458;font-weight:700}
+.poste h3.t{font-size:1.75rem;line-height:1.1;margin:10px 0 10px;color:#F3EBDD;letter-spacing:0;text-transform:none}
+.poste .acc{margin:0;font-size:15px;line-height:1.6;color:#DCCDB6}
+.poste .pli{display:grid;grid-template-rows:0fr;transition:grid-template-rows .6s cubic-bezier(.3,.7,.2,1)}
+.poste.ouvert .pli{grid-template-rows:1fr}
+.poste .pli > div{overflow:hidden;min-height:0}
+.poste .pli .d{padding-top:18px;opacity:0;transition:opacity .5s ease .15s}
+.poste.ouvert .pli .d{opacity:1}
+/* La date limite : en tete du depli. Un candidat la cherche avant de lire
+   le reste. */
+.poste .fin{font-size:13px;color:#DCCDB6;margin:0 0 12px}
+.poste .fin time{color:#F3EBDD;font-weight:600}
+.poste h4{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#E0A458;font-weight:700;margin:16px 0 6px;font-family:var(--f-body)}
 /* white-space:pre-line — l'hotel ecrit ses missions une par ligne. Les
    ecraser en un pave rendrait l'offre illisible sur un telephone. */
-.poste .corps{white-space:pre-line;font-size:15.5px;color:var(--prose);
-  max-width:72ch;margin-bottom:18px}
-.poste h3{font-size:10px;letter-spacing:.2em;text-transform:uppercase;
-  color:var(--bronze);font-weight:700;margin:22px 0 8px}
-.poste .post{border-top:1px solid var(--line);margin-top:24px;padding-top:20px;
-  display:flex;flex-wrap:wrap;gap:14px;align-items:center}
-.poste .post p{font-size:15px;margin:0}
-.poste .post b{color:var(--cream);font-weight:600}
-.poste .lien{font-size:12.5px;color:var(--muted);border:0;background:none;
-  cursor:pointer;padding:0;letter-spacing:.04em}
-.poste .lien:hover{color:var(--bronze-2)}
-.poste .lien.fait{color:var(--palm)}
+.poste .corps{white-space:pre-line;font-size:14.5px;line-height:1.6;color:#F3EBDD}
+.poste .post{margin-top:18px;display:flex;flex-direction:column;align-items:flex-start;gap:12px}
+.poste .post p{font-size:14px;margin:0;color:#DCCDB6}
+.poste .post b{color:#F3EBDD;font-weight:600}
+.poste .post a{color:#E0A458}
+.poste .post a.p{display:inline-flex;align-items:center;min-height:46px;padding:0 22px;background:#E0A458;color:#2B1B12;
+  border-radius:23px;font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;font-weight:700}
+.poste .lien{font:12.5px var(--f-body);color:#C8B79F;border:0;background:none;cursor:pointer;padding:0;letter-spacing:.04em}
+.poste .lien:hover{color:#E0A458}
+.poste .lien.fait{color:#9BC08A}
+.poste .bt{margin-top:20px;background:none;border:0;border-top:1px solid rgba(243,235,221,.2);width:100%;
+  padding:16px 0 0;display:flex;justify-content:space-between;align-items:center;color:#F3EBDD;cursor:pointer;
+  font:700 12px var(--f-body);letter-spacing:.16em;text-transform:uppercase;min-height:44px}
+.poste .bt i{font-style:normal;font-size:20px;color:#E0A458;transition:transform .5s}
+.poste.ouvert .bt i{transform:rotate(45deg)}
+.postes .etat{background:#3A2416;border-color:transparent}
+/* Un message (chargement, aucun poste, panne) occupe toute la rangee. */
+.grille > .etat{grid-column:1/-1}
+.postes .etat p{color:#DCCDB6}
 
 /* Les trois etats de la liste. Le dernier n'est pas une politesse : un
    reseau coupe qui dirait « aucun poste » ferait croire qu'il n'y a rien. */
@@ -174,16 +203,15 @@ body{background:var(--bark)}
 @media(max-width:900px){
   .rc-in{grid-template-columns:minmax(0,1fr);gap:28px;padding:120px 20px 40px}
   .rc-mos{max-width:520px}
-  .rc-tel{height:min(640px,82vh);border-radius:22px}
+  .rc-tel{align-self:auto;min-height:0;height:min(640px,82vh);border-radius:22px}
   .rc-pied{padding:0 20px 44px}
 }
 @media(max-width:720px){
-  .postes{padding:40px 0 70px}
-  .poste{padding:24px 20px}
-  .poste .post{flex-direction:column;align-items:flex-start;gap:10px}
+  .postes .in{padding:0 20px}
+  .grille{grid-template-columns:minmax(0,1fr)}
   .rc-b{max-width:84%}.rc-o{width:92%}
 }
-@media(prefers-reduced-motion:reduce){.rc-l,.rc-ch{animation:none}.rc-pts i{animation:none;opacity:.6}}
+@media(prefers-reduced-motion:reduce){.poste .pli{transition:none}.rc-l,.rc-ch{animation:none}.rc-pts i{animation:none;opacity:.6}}
 """
 # Les cinq touches textiles : ce morceau ne part que sur les pages qui
 # en portent une.
@@ -229,18 +257,20 @@ b = [header('index.html#reserver', 'Réserver'), drawer(''), '''
       <div class="rc-fil" id="fil"></div>
     </div>
   </div>
-  <div class="rc-pied"><p><span data-t="dir">Vous préférez écrire directement ?</span>
-    <a href="mailto:''' + MAIL + '''">''' + MAIL + '''</a></p></div>
-  <div class="rc-k"></div>
 </section>
 
-<section class="postes">
-  <div class="wrap narrow">
-    <h2 data-t="tous">Toutes les offres</h2>
-    <div id="liste">
+<section class="postes" id="postes">
+  <div class="in">
+    <div class="tt"><h2 id="nbp">Les postes ouverts</h2><span data-t="ouv">Ouvrez un poste pour tout savoir.</span></div>
+    <div id="liste" class="grille">
       <div class="etat"><p data-t="charge">Chargement des offres…</p></div>
     </div>
   </div>
+</section>
+<section class="rc">
+  <div class="rc-pied"><p><span data-t="dir">Un CV, quelques mots sur vous, c'est tout.</span>
+    <a href="mailto:''' + MAIL + '''">''' + MAIL + '''</a></p></div>
+  <div class="rc-k"></div>
 </section>
 
 ''' + FOOTER]
@@ -306,16 +336,34 @@ JS = NAV_JS + '''
     return null;
   }
 
+  /* La photo d'une carte : la case de la mosaique si le metier y figure,
+     sinon une photo du lieu qui va avec le poste. */
+  function photo(o) {
+    var c = CASE(o);
+    if (c >= 0) return '<img src="img/equipe-2.jpg" width="2000" height="2000" alt="" loading="lazy" style="width:' + CADRE[c][0]
+      + ';margin-left:' + CADRE[c][1] + ';margin-top:' + CADRE[c][2] + '">';
+    var s = plat((o.titre || '') + ' ' + (o.departement || ''));
+    var src = /bar|cocktail/.test(s) ? 'img/opt/gal-tab-cocktail.jpg'
+      : /spa|massage|soin/.test(s) ? 'img/opt/gal-art-lanterne.jpg'
+      : 'img/opt/gal-lag-ponton-t.jpg';
+    return '<img class="plein" src="' + src + '" width="1748" height="1240" alt="" loading="lazy">';
+  }
+  function accroche(o) {
+    return String(o.texte || '').split(/\\n/).filter(function (x) { return x.trim(); })[0] || '';
+  }
+
   function bloc(o) {
     var id = ancre(o);
-    var meta = [o.contrat, o.departement].filter(Boolean)
-      .map(function (m) { return '<span>' + ech(m) + '</span>'; }).join('');
+    var meta = [o.departement, o.contrat].filter(Boolean).map(ech).join(' · ');
+    var acc = accroche(o);
+    var reste = String(o.texte || '').replace(acc, '').trim();
     var profil = o.profil
-      ? '<h3 data-t="pr">Profil recherché</h3><div class="corps">' + ech(o.profil) + '</div>'
+      ? '<h4 data-t="pr">Profil recherché</h4><div class="corps">' + ech(o.profil) + '</div>'
       : '';
     var p = postuler(o), comment;
     if (p && p.lien) {
-      comment = '<p><b data-t="cp">Pour postuler</b> — <a href="' + ech(p.href) + '">' + ech(p.txt) + '</a></p>';
+      comment = '<a class="p" href="' + ech(p.href) + '" data-t="jp">Je postule</a>'
+        + '<p><b data-t="cp">Pour postuler</b> — ' + ech(p.txt) + '</p>';
     } else if (p) {
       comment = '<p><b data-t="cp">Pour postuler</b> — ' + ech(p.txt) + '</p>';
     } else {
@@ -331,15 +379,43 @@ JS = NAV_JS + '''
         + '<time datetime="' + o.fin + '"></time></p>'
       : '';
     return '<article class="poste" id="' + id + '">'
-      + '<h2>' + ech(o.titre) + '</h2>'
-      + (meta ? '<div class="meta">' + meta + '</div>' : '')
-      + fin
-      + '<div class="corps">' + ech(o.texte) + '</div>'
+      + '<div class="ph">' + photo(o) + '</div><div class="k"></div><div class="c">'
+      + (meta ? '<span class="m">' + meta + '</span>' : '')
+      + '<h3 class="t">' + ech(o.titre) + '</h3>'
+      + (acc ? '<p class="acc">' + ech(acc) + '</p>' : '')
+      + '<div class="pli"><div><div class="d">' + fin
+      + (reste ? '<h4 data-t="aq">Au quotidien</h4><div class="corps">' + ech(reste) + '</div>' : '')
       + profil
       + '<div class="post">' + comment
       + '<button type="button" class="lien" data-copier="' + id + '"'
-      + ' data-t="cl">Copier le lien de cette offre</button>'
+      + ' data-t="cl">Copier le lien de cette offre</button></div>'
+      + '</div></div></div>'
+      + '<button type="button" class="bt" aria-expanded="false" data-ouvrir="' + id + '">'
+      + '<span data-t="voir">Voir le poste</span><i aria-hidden="true">+</i></button>'
       + '</div></article>';
+  }
+  /* Une carte ouverte a la fois : c'est une lecture, pas un comparatif. */
+  function ouvre(id, defile) {
+    liste.querySelectorAll('.poste').forEach(function (a) {
+      var on = a.id === id && !a.classList.contains('ouvert');
+      a.classList.toggle('ouvert', on);
+      var bt = a.querySelector('.bt');
+      bt.setAttribute('aria-expanded', on ? 'true' : 'false');
+      var sp = bt.querySelector('span');
+      sp.dataset.t = on ? 'fer' : 'voir';
+      sp.textContent = (lg() === 'en' ? EN : FR)[sp.dataset.t] || (on ? 'Refermer' : 'Voir le poste');
+      if (on) allume(CASE(OFFRES[[].indexOf.call(liste.querySelectorAll('.poste'), a)] || {}));
+    });
+    if (!liste.querySelector('.ouvert')) allume(-1);
+    var c = document.getElementById(id);
+    if (defile && c) window.scrollTo({ top: c.getBoundingClientRect().top + scrollY - 110, behavior: REDUIT ? 'auto' : 'smooth' });
+  }
+  function titreListe() {
+    var h = document.getElementById('nbp');
+    if (!h || !OFFRES || !OFFRES.length) return;
+    var n = OFFRES.length, L = lg();
+    h.textContent = n === 1 ? (L === 'en' ? 'One open position' : 'Un poste ouvert')
+      : (NB[L][n] || n) + (L === 'en' ? ' open positions' : ' postes ouverts');
   }
 
   var VIDE = '<div class="etat">' + MED
@@ -428,7 +504,7 @@ JS = NAV_JS + '''
       + (acc ? '<p>' + ech(acc) + '</p>' : '')
       + '<div class="g">'
       + (p && p.lien ? '<a class="p" href="' + ech(p.href) + '">' + D.post + '</a>' : '')
-      + '<a href="#' + ancre(o) + '">' + D.lire + '</a></div></div></div>';
+      + '<a href="#' + ancre(o) + '" data-lire="' + ancre(o) + '">' + D.lire + '</a></div></div></div>';
   }
   function choisir(i) {
     var o = OFFRES[i];
@@ -469,6 +545,11 @@ JS = NAV_JS + '''
     fil.addEventListener('click', function (e) {
       var b = e.target.closest('[data-i]');
       if (b) choisir(+b.dataset.i);
+      var l = e.target.closest('[data-lire]');
+      if (l) { e.preventDefault(); history.replaceState(null, '', '#' + l.dataset.lire);
+        var c = document.getElementById(l.dataset.lire);
+        if (c && c.classList.contains('ouvert')) ouvre('', false);
+        ouvre(l.dataset.lire, true); }
     });
     document.getElementById('re').addEventListener('click', demarre);
   }
@@ -485,7 +566,7 @@ JS = NAV_JS + '''
          bloc n'existe, le navigateur n'a donc rien pu faire. */
       if (location.hash) {
         var cible = document.getElementById(location.hash.slice(1));
-        if (cible) cible.scrollIntoView();
+        if (cible && cible.classList.contains('poste')) ouvre(cible.id, true);
       }
     })
     .catch(function () { ETAT = 'panne'; liste.innerHTML = PANNE; })
@@ -502,6 +583,7 @@ JS = NAV_JS + '''
       liste.querySelectorAll('[data-t]').forEach(function (e) {
         if (!(e.dataset.t in FR)) FR[e.dataset.t] = e.innerHTML;
       });
+      if (!('fer' in FR)) FR.fer = 'Refermer';
       if (document.documentElement.lang === 'en') EVN_LANGUE('en', false);
       else EVN_LANG('fr');
     });
@@ -517,12 +599,15 @@ JS = NAV_JS + '''
       t.textContent = new Date(t.getAttribute('datetime') + 'T12:00:00')
         .toLocaleDateString(loc, { day: 'numeric', month: 'long', year: 'numeric' });
     });
+    titreListe();
     if (fil && ETAT !== 'charge' && derniere !== lg_) { derniere = lg_; demarre(); }
   };
 
   /* Copier le lien d'une offre : c'est le geste qui sert a la publier sur
      Facebook ou a l'envoyer par WhatsApp. */
   liste.addEventListener('click', function (e) {
+    var o = e.target.closest('[data-ouvrir]');
+    if (o) { ouvre(o.dataset.ouvrir, false); return; }
     var b = e.target.closest('[data-copier]');
     if (!b) return;
     var url = location.origin + location.pathname + '#' + b.dataset.copier;
@@ -542,7 +627,8 @@ var EN={''' + EN_NAV + '''cta:"Book now",
 eb:"Recruitment · Assinie PK19",h1:"There is a place left for you.",
 lede:"No form. Tell us what you enjoy, we show you the position.",
 vous:"You?",place:"Your place is here.",sous:"Recruitment · Assinie",re:"Restart",
-dir:"Prefer to write directly?",tous:"All listings",
+dir:"A CV and a few words about you, that is all.",ouv:"Open a position to learn everything.",
+voir:"See the position",fer:"Close",aq:"Day to day",jp:"Apply",
 charge:"Loading the listings…",
 pr:"Who we are looking for",jq:"Applications until",cp:"To apply",cc:"write to us from the Contact page",
 cl:"Copy the link to this listing",
