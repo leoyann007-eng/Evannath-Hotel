@@ -968,7 +968,7 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
         <p style="max-width:300px">46 chambres et suites face à la lagune Aby, à Assinie. Réservation directe, meilleur tarif garanti, réception ouverte 24 h/24.</p>
       </div>
       <div><h4>Navigation</h4><a href="chambres.html">Chambres</a><a href="experiences.html">Expériences</a><a href="carte.html">La table</a><a href="circuits.html">Offres &amp; Événements</a><a href="spa.html">Spa</a><a href="a-propos.html">À propos</a><a href="contact.html">Contact</a></div>
-      <div><h4>Informations</h4><a href="informations-utiles.html">Informations utiles</a><a href="seminaires.html">Séminaires &amp; groupes</a><a href="informations-utiles.html#reserver">Conditions d'annulation</a><a href="recrutement.html">Nous rejoindre</a><a href="mentions-legales.html">Mentions légales</a></div>
+      <div><h4>Informations</h4><a href="informations-utiles.html">Informations utiles</a><a href="seminaires.html">Séminaires &amp; groupes</a><a href="informations-utiles.html#reserver">Conditions d'annulation</a><a href="carnet.html">Le Carnet d'Assinie</a><a href="recrutement.html">Nous rejoindre</a><a href="mentions-legales.html">Mentions légales</a></div>
       <div><h4>Contact</h4>
         <a href="tel:+2252721731265">+225 27 21 73 12 65</a>
         <a href="tel:+2250151527575">+225 01 51 52 75 75</a>
@@ -1010,6 +1010,10 @@ function sejour(cat){var E=en(),p=val('pax'),t=E?'Hello Evannath, I would like t
 function message(){var E=en();
   if(FICHES.indexOf(page)>=0)return sejour(titre());
   if(page==='index'||page==='reserver')return sejour(val('cat'));
+  if(page==='circuits'&&(touche.evt||touche.evi||touche.evd||touche.eve||location.hash==='#evenement')){
+    var ty=val('evt'),n=val('evi'),jv=jour('evd');
+    return E?'Hello Evannath, I would like to organise an event'+(ty?' ('+ty+')':'')+(n?' for '+n+' guests':'')+(jv?' on '+jv:'')+'. Could you send me a proposal?'
+      :'Bonjour Evannath, je souhaite organiser un \u00e9v\u00e9nement'+(ty?' ('+ty+')':'')+(n?' pour '+n+' invit\u00e9s':'')+(jv?' le '+jv:'')+'. Pouvez-vous m\u2019envoyer une proposition ?'}
   if(page==='circuits'){var o=val('circ'),j=jour('dt');
     if(!o)return E?'Hello Evannath, I would like information about your packages.':'Bonjour Evannath, je souhaite des informations sur vos offres et forfaits.';
     return (E?'Hello Evannath, I am interested in the \u00ab '+o+' \u00bb package'+(j?' for '+j:'')+'. Is it available?'

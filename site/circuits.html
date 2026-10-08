@@ -6,12 +6,12 @@
 <meta name="robots" content="noindex, nofollow">
 <meta name="googlebot" content="noindex, nofollow">
 <title>Offres &amp; Événements — Hôtel Evannath, Assinie</title>
-<meta name="description" content="Les offres et événements de l'Hôtel Evannath à Assinie : Packs Vacances, réveillon, Méchoui Party du samedi, lune de miel, week-end intense, découvertes touristiques et coffret anniversaire.">
+<meta name="description" content="Les offres et événements de l'Hôtel Evannath à Assinie : Packs Vacances, réveillon, Méchoui Party du samedi, lune de miel, week-end intense, coffret anniversaire, et l'organisation de vos mariages, anniversaires et baptêmes.">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="fr_FR">
 <meta property="og:site_name" content="Hôtel Evannath">
 <meta property="og:title" content="Offres &amp; Événements — Hôtel Evannath, Assinie">
-<meta property="og:description" content="Les offres et événements de l'Hôtel Evannath à Assinie : Packs Vacances, réveillon, Méchoui Party du samedi, lune de miel, week-end intense, découvertes touristiques et coffret anniversaire.">
+<meta property="og:description" content="Les offres et événements de l'Hôtel Evannath à Assinie : Packs Vacances, réveillon, Méchoui Party du samedi, lune de miel, week-end intense, coffret anniversaire, et l'organisation de vos mariages, anniversaires et baptêmes.">
 <meta property="og:image" content="https://evannathhotel.vercel.app/img/opt/r-mezzanine.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/favicon.ico" sizes="any">
@@ -905,6 +905,28 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
 .form .f .msg{display:none;color:var(--err);font-size:12.5px;margin-top:6px}
 .form .f.bad .msg{display:block}
 
+/* --- Organiser votre evenement --- */
+.evt{padding:88px 0;border-top:1px solid var(--line)}
+.evt-types{list-style:none;display:flex;flex-wrap:wrap;gap:10px;margin:0 0 34px;padding:0}
+.evt-types li{border:1px solid var(--line);padding:10px 16px;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--bronze);font-weight:700}
+.evt-grille{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+.evt-esp{background:var(--bark-2);border:1px solid var(--line);overflow:hidden}
+.evt-esp .ph{aspect-ratio:16/11;overflow:hidden}
+.evt-esp .ph img{width:100%;height:100%;object-fit:cover}
+.evt-esp h3{margin:18px 20px 8px;font-size:1.25rem}
+.evt-esp p{margin:0 20px 22px;font-size:14px;color:var(--muted);line-height:1.6}
+.evt-bas{display:grid;grid-template-columns:1fr 1.25fr;gap:56px;margin-top:56px;align-items:start}
+.evt-avec .incl{list-style:none;margin:16px 0 0;padding:0}
+.evt-avec .incl li{padding:11px 0;border-bottom:1px solid var(--line);font-size:14.5px;color:var(--prose);display:flex;gap:13px}
+.evt-avec .incl i{color:var(--bronze);font-style:normal}
+.evt-note{font-size:13.5px;color:var(--muted);margin-top:18px;line-height:1.6}
+.evt-form{background:var(--bark-2);border:1px solid var(--line);padding:30px}
+.evt-form h3{margin-bottom:20px}
+.evt-form .btn{width:100%;margin-top:6px}
+.evt-form .note{font-size:12.5px;color:var(--muted);text-align:center;margin-top:14px;line-height:1.5}
+@media(max-width:1080px){.evt-grille{grid-template-columns:repeat(2,1fr)}.evt-bas{grid-template-columns:1fr;gap:34px}}
+@media(max-width:720px){.evt{padding:64px 0}.evt-grille{grid-template-columns:1fr}.evt-form{padding:22px}}
+
 </style>
 </head>
 <body>
@@ -971,6 +993,7 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
   <span class="eyebrow" data-t="eb">Onze offres &amp; un rendez-vous hebdomadaire</span>
   <h1 data-t="h1">Offres &amp; Événements</h1>
   <p class="lede" data-t="lede">Ce qui se passe en ce moment, et les séjours déjà composés — chambre, repas, activités et attentions comprises. Choisissez, indiquez vos dates, et la réception s'occupe du reste.</p>
+  <p class="lede" style="margin-top:14px"><a href="#evenement" style="color:var(--bronze)" data-t="ve6">Un mariage, un anniversaire, un baptême ? Organiser votre événement →</a></p>
   </div>
 </div>
 
@@ -1295,6 +1318,118 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
  </div>
 </section>
 
+<section class="evt" id="evenement">
+ <div class="wrap">
+  <div class="sect reveal" style="margin-top:0">
+    <span class="eyebrow" data-t="ve0">Mariages, anniversaires, baptêmes</span>
+    <h2 data-t="ve1">Organiser votre événement</h2>
+    <p data-t="ve2">Vous avez une date et des invités ; nous avons la lagune, une table, et 46 chambres pour que la fête ne s’arrête pas à minuit. Dites-nous ce que vous imaginez : la réception vous rappelle sous 24 h avec une proposition.</p>
+  </div>
+  <ul class="evt-types reveal">
+      <li data-t="vt1">Mariage &amp; dot</li>
+      <li data-t="vt2">Anniversaire</li>
+      <li data-t="vt3">Baptême</li>
+      <li data-t="vt4">Fête de famille</li>
+      <li data-t="vt5">Soirée privée</li>
+      <li data-t="vt6">Lancement de produit</li>
+  </ul>
+  <div class="evt-grille reveal">
+      <article class="evt-esp">
+        <div class="ph"><picture><source srcset="img/opt/gal-lag-ponton-640.webp 640w, img/opt/gal-lag-ponton-1024.webp 1024w" sizes="(max-width:720px) 100vw, (max-width:1080px) 50vw, 320px" type="image/webp">
+          <img width="640" height="454" loading="lazy" src="img/opt/gal-lag-ponton-640.jpg" alt="La paillote sur pilotis au-dessus de la lagune Aby"></picture></div>
+        <h3 data-t="vpt">La paillote</h3>
+        <p data-t="vpx">Sur pilotis, au-dessus de la lagune Aby : un cocktail ou un dîner face à l’eau, au coucher du soleil.</p>
+      </article>
+      <article class="evt-esp">
+        <div class="ph"><picture><source srcset="img/opt/g-terrasse-640.webp 640w, img/opt/g-terrasse-1024.webp 1024w" sizes="(max-width:720px) 100vw, (max-width:1080px) 50vw, 320px" type="image/webp">
+          <img width="640" height="454" loading="lazy" src="img/opt/g-terrasse-640.jpg" alt="La terrasse et les transats au bord de la piscine"></picture></div>
+        <h3 data-t="vqt">La piscine &amp; la terrasse</h3>
+        <p data-t="vqx">En plein air, pour un cocktail dînatoire, un buffet ou une soirée qui se prolonge.</p>
+      </article>
+      <article class="evt-esp">
+        <div class="ph"><picture><source srcset="img/opt/g-seminaire-640.webp 640w, img/opt/g-seminaire-1024.webp 1024w" sizes="(max-width:720px) 100vw, (max-width:1080px) 50vw, 320px" type="image/webp">
+          <img width="640" height="454" loading="lazy" src="img/opt/g-seminaire-640.jpg" alt="La salle de l’Hôtel Evannath"></picture></div>
+        <h3 data-t="vst">La salle</h3>
+        <p data-t="vsx">Lumière naturelle et sonorisation, jusqu’à 90 personnes : pour une cérémonie, des discours ou une réception à l’abri.</p>
+      </article>
+      <article class="evt-esp">
+        <div class="ph"><picture><source srcset="img/opt/gal-tab-salle-640.webp 640w, img/opt/gal-tab-salle-1024.webp 1024w" sizes="(max-width:720px) 100vw, (max-width:1080px) 50vw, 320px" type="image/webp">
+          <img width="640" height="454" loading="lazy" src="img/opt/gal-tab-salle-640.jpg" alt="La salle du restaurant"></picture></div>
+        <h3 data-t="vrt">Le restaurant</h3>
+        <p data-t="vrx">Cuisine ivoirienne et continentale : buffet, menu servi ou grillades, avec l’équipe en salle.</p>
+      </article>
+  </div>
+  <div class="evt-bas">
+    <div class="evt-avec">
+      <h3 data-t="ve3">Avec vous, nous organisons</h3>
+      <ul class="incl">
+        <li><i>✓</i><span data-t="vo1">La restauration : cocktail, buffet ou menu servi, composé avec vous.</span></li>
+        <li><i>✓</i><span data-t="vo2">L’hébergement de vos invités dans nos 46 chambres et suites.</span></li>
+        <li><i>✓</i><span data-t="vo3">La sonorisation et le technicien son.</span></li>
+        <li><i>✓</i><span data-t="vo4">Des activités pour vos invités : pirogue sur la lagune, jet ski, spa.</span></li>
+        <li><i>✓</i><span data-t="vo5">La navette depuis l’aéroport.</span></li>
+      </ul>
+      <p class="evt-note" data-t="ve4">Capacités de chaque espace, décoration et tarifs : la réception vous les précise avec votre devis, selon la date et le nombre d’invités.</p>
+    </div>
+    <form class="form evt-form" id="evf" novalidate>
+      <h3 data-t="ve5">Demander un devis événement</h3>
+      <div class="two">
+        <div class="f"><label for="evt" data-t="vl1">Type d’événement</label>
+          <select id="evt">
+            <option data-t="vt1o">Mariage &amp; dot</option>
+            <option data-t="vt2o">Anniversaire</option>
+            <option data-t="vt3o">Baptême</option>
+            <option data-t="vt4o">Fête de famille</option>
+            <option data-t="vt5o">Soirée privée</option>
+            <option data-t="vt6o">Lancement de produit</option>
+            <option data-t="vt7o">Autre</option>
+          </select></div>
+        <div class="f"><label for="evd" data-t="vl2">Date envisagée</label><input type="date" id="evd"></div>
+      </div>
+      <div class="two">
+        <div class="f"><label for="evi" data-t="vl3">Nombre d’invités</label><input type="number" id="evi" min="1" max="2000" inputmode="numeric" placeholder="80"></div>
+        <div class="f"><label for="evc" data-t="vl4">Chambres pour vos invités</label><input type="number" id="evc" min="0" max="46" inputmode="numeric" placeholder="10"></div>
+      </div>
+      <div class="two">
+        <div class="f"><label for="eve" data-t="vl5">Espace souhaité</label>
+          <select id="eve">
+            <option value="" data-t="vno">Pas encore décidé</option>
+            <option data-t="vpo">La paillote</option>
+            <option data-t="vqo">La piscine &amp; la terrasse</option>
+            <option data-t="vso">La salle</option>
+            <option data-t="vro">Le restaurant</option>
+          </select></div>
+        <div class="f"><label for="evb" data-t="vl6">Budget indicatif (facultatif)</label><input type="text" id="evb" placeholder="FCFA"></div>
+      </div>
+      <div class="two">
+        <div class="f"><label for="evn" data-t="l4">Nom complet *</label><input type="text" id="evn" placeholder="Aya Kouassi" autocomplete="name">
+          <span class="msg" data-t="mnm">Indiquez votre nom.</span></div>
+        <div class="f"><label for="evp" data-t="l5">Téléphone / WhatsApp *</label><input type="tel" id="evp" placeholder="+225 01 02 03 04 05" autocomplete="tel">
+          <span class="msg" data-t="mtel">Indiquez un numéro d'au moins 8 chiffres.</span></div>
+      </div>
+      <div class="f"><label for="evm" data-t="l6">E-mail (pour recevoir le récapitulatif)</label><input type="email" id="evm" placeholder="vous@exemple.com" autocomplete="email">
+        <span class="msg" data-t="mem">Cette adresse e-mail ne semble pas valide.</span></div>
+      <div class="f"><label for="evx" data-t="vl7">Vos idées (facultatif)</label><textarea id="evx" placeholder="Ambiance, horaires, restauration, décoration…"></textarea></div>
+      <button type="submit" class="btn btn-solid" id="evenvoi" data-t="vl8">Envoyer la demande</button>
+      <p class="note" data-t="vl9">Réponse sous 24 h. Aucun engagement, aucun paiement à cette étape.</p>
+      <p class="err-envoi" id="everr" role="alert"></p><div class="secours" id="evsec" role="alert">
+  <b data-t="sc1">Terminons sur WhatsApp</b>
+  <p data-t="sc2">Votre demande est prête — il ne reste qu'à l'envoyer. Un clic, et elle arrive à la réception, qui répond 24 h/24. Vous pouvez aussi appeler ou écrire.</p>
+  <div class="liens">
+    <a class="wa-envoi" data-t="sc3" href="https://wa.me/2250758408079" target="_blank" rel="noopener">Envoyer sur WhatsApp</a>
+    <a data-t="sc4" href="tel:+2250151527575">Appeler la réception</a>
+    <a data-t="sc5" href="mailto:receptionhotelevannath@gmail.com">Écrire un e-mail</a>
+  </div>
+</div>
+      <div class="sent" id="evok" role="status"><svg class="conf-trait" viewBox="0 0 80 80" aria-hidden="true" focusable="false"><circle cx="40" cy="40" r="38" pathLength="1"/><path d="M26 41L36 51L55 30" pathLength="1"/></svg><div class="conf-msg">
+        <b data-t="okt">Votre demande vous attend dans WhatsApp</b>
+        <p id="evokm"></p>
+      </div></div>
+    </form>
+  </div>
+ </div>
+</section>
+
 </main>
 
 <footer>
@@ -1306,7 +1441,7 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
         <p style="max-width:300px">46 chambres et suites face à la lagune Aby, à Assinie. Réservation directe, meilleur tarif garanti, réception ouverte 24 h/24.</p>
       </div>
       <div><h4>Navigation</h4><a href="chambres.html">Chambres</a><a href="experiences.html">Expériences</a><a href="carte.html">La table</a><a href="circuits.html">Offres &amp; Événements</a><a href="spa.html">Spa</a><a href="a-propos.html">À propos</a><a href="contact.html">Contact</a></div>
-      <div><h4>Informations</h4><a href="informations-utiles.html">Informations utiles</a><a href="seminaires.html">Séminaires &amp; groupes</a><a href="informations-utiles.html#reserver">Conditions d'annulation</a><a href="recrutement.html">Nous rejoindre</a><a href="mentions-legales.html">Mentions légales</a></div>
+      <div><h4>Informations</h4><a href="informations-utiles.html">Informations utiles</a><a href="seminaires.html">Séminaires &amp; groupes</a><a href="informations-utiles.html#reserver">Conditions d'annulation</a><a href="carnet.html">Le Carnet d'Assinie</a><a href="recrutement.html">Nous rejoindre</a><a href="mentions-legales.html">Mentions légales</a></div>
       <div><h4>Contact</h4>
         <a href="tel:+2252721731265">+225 27 21 73 12 65</a>
         <a href="tel:+2250151527575">+225 01 51 52 75 75</a>
@@ -1348,6 +1483,10 @@ function sejour(cat){var E=en(),p=val('pax'),t=E?'Hello Evannath, I would like t
 function message(){var E=en();
   if(FICHES.indexOf(page)>=0)return sejour(titre());
   if(page==='index'||page==='reserver')return sejour(val('cat'));
+  if(page==='circuits'&&(touche.evt||touche.evi||touche.evd||touche.eve||location.hash==='#evenement')){
+    var ty=val('evt'),n=val('evi'),jv=jour('evd');
+    return E?'Hello Evannath, I would like to organise an event'+(ty?' ('+ty+')':'')+(n?' for '+n+' guests':'')+(jv?' on '+jv:'')+'. Could you send me a proposal?'
+      :'Bonjour Evannath, je souhaite organiser un \u00e9v\u00e9nement'+(ty?' ('+ty+')':'')+(n?' pour '+n+' invit\u00e9s':'')+(jv?' le '+jv:'')+'. Pouvez-vous m\u2019envoyer une proposition ?'}
   if(page==='circuits'){var o=val('circ'),j=jour('dt');
     if(!o)return E?'Hello Evannath, I would like information about your packages.':'Bonjour Evannath, je souhaite des informations sur vos offres et forfaits.';
     return (E?'Hello Evannath, I am interested in the \u00ab '+o+' \u00bb package'+(j?' for '+j:'')+'. Is it available?'
@@ -2025,7 +2164,7 @@ document.getElementById('rf').addEventListener('submit',function(e){
   });
 });
 
-var EN={mn:"Menu",n1:"Rooms &amp; Suites",n2:"Experiences",n3:"The table",n4:"The spa",n5:"Offers &amp; Events",n6:"Meetings &amp; groups",n7:"Gallery",n8:"About",n9:"Useful information",n10:"Contact",n11:"Book",dr:"Reservations",drec:"Join us",sc1:"Finish on WhatsApp",sc2:"Your request is ready — it just needs sending. One tap and it reaches reception, who answer 24/7. You can also call or write.",sc3:"Send on WhatsApp",sc4:"Call reception",sc5:"Write an email",u0:"Agenda",u1:"Events",u1b:"on now",u2:"What happens at the hotel beyond your stay: evenings, the Saturday gathering, year-end celebrations.",f0:"Composed stays",f1:"Our offers &amp; packages",f2:"Everything is included and the rate is firm: you know what you pay before you arrive.",dc0:"Around Assinie",dc1:"Tours &amp; discoveries",dc2:"Beyond the grounds: the lagoon islands, the river mouth, and what children remember from a stay here.",dc3:"See also every activity on the grounds and the lagoon &rarr;","g-reveillon":"Year's end","t-reveillon":"New Year","a-reveillon":"in Assinie","b-reveillon":"31 December","x-reveillon":"A year-end dinner by the lagoon, then the night club. Rooms go early for this date.","c-reveillon":"Book my room","il-reveillon-hor":"Time","iv-reveillon-hor":"From 8 pm","il-reveillon-lie":"Where","iv-reveillon-lie":"The pontoon","il-reveillon-amb":"Mood","iv-reveillon-amb":"Resident DJ","il-reveillon-au ":"On the menu","iv-reveillon-au ":"Festive dinner","g-mechoui-party":"Weekly gathering","t-mechoui-party":"The Méchoui","a-mechoui-party":"Party","b-mechoui-party":"Every Saturday","x-mechoui-party":"Méchoui by the water, then the evening carries on at the night club. Open to hotel guests and visitors alike.","c-mechoui-party":"Book a table","il-mechoui-party-hor":"Time","iv-mechoui-party-hor":"From 3 pm","il-mechoui-party-lie":"Where","iv-mechoui-party-lie":"The terrace","il-mechoui-party-amb":"Mood","iv-mechoui-party-amb":"Happy hour","il-mechoui-party-au ":"On the menu","iv-mechoui-party-au ":"Grilled méchoui","g-independance":"National holiday","t-independance":"Independence","a-independance":"Day","b-independance":"7 August","x-independance":"The hotel marks the national holiday each year. This is the artwork you published in August.","c-independance":"Write to us","il-independance-hor":"Time","iv-independance-hor":"All day","il-independance-lie":"Where","iv-independance-lie":"The grounds","il-independance-amb":"Mood","iv-independance-amb":"Family",cta:"Book",ctc:"Book this package",
+var EN={mn:"Menu",n1:"Rooms &amp; Suites",n2:"Experiences",n3:"The table",n4:"The spa",n5:"Offers &amp; Events",n6:"Meetings &amp; groups",n7:"Gallery",n8:"About",n9:"Useful information",n10:"Contact",n11:"Book",dr:"Reservations",drec:"Join us",sc1:"Finish on WhatsApp",sc2:"Your request is ready — it just needs sending. One tap and it reaches reception, who answer 24/7. You can also call or write.",sc3:"Send on WhatsApp",sc4:"Call reception",sc5:"Write an email",u0:"Agenda",u1:"Events",u1b:"on now",u2:"What happens at the hotel beyond your stay: evenings, the Saturday gathering, year-end celebrations.",f0:"Composed stays",f1:"Our offers &amp; packages",f2:"Everything is included and the rate is firm: you know what you pay before you arrive.",dc0:"Around Assinie",dc1:"Tours &amp; discoveries",dc2:"Beyond the grounds: the lagoon islands, the river mouth, and what children remember from a stay here.",dc3:"See also every activity on the grounds and the lagoon &rarr;","g-reveillon":"Year's end","t-reveillon":"New Year","a-reveillon":"in Assinie","b-reveillon":"31 December","x-reveillon":"A year-end dinner by the lagoon, then the night club. Rooms go early for this date.","c-reveillon":"Book my room","il-reveillon-hor":"Time","iv-reveillon-hor":"From 8 pm","il-reveillon-lie":"Where","iv-reveillon-lie":"The pontoon","il-reveillon-amb":"Mood","iv-reveillon-amb":"Resident DJ","il-reveillon-au ":"On the menu","iv-reveillon-au ":"Festive dinner","g-mechoui-party":"Weekly gathering","t-mechoui-party":"The Méchoui","a-mechoui-party":"Party","b-mechoui-party":"Every Saturday","x-mechoui-party":"Méchoui by the water, then the evening carries on at the night club. Open to hotel guests and visitors alike.","c-mechoui-party":"Book a table","il-mechoui-party-hor":"Time","iv-mechoui-party-hor":"From 3 pm","il-mechoui-party-lie":"Where","iv-mechoui-party-lie":"The terrace","il-mechoui-party-amb":"Mood","iv-mechoui-party-amb":"Happy hour","il-mechoui-party-au ":"On the menu","iv-mechoui-party-au ":"Grilled méchoui","g-independance":"National holiday","t-independance":"Independence","a-independance":"Day","b-independance":"7 August","x-independance":"The hotel marks the national holiday each year. This is the artwork you published in August.","c-independance":"Write to us","il-independance-hor":"Time","iv-independance-hor":"All day","il-independance-lie":"Where","iv-independance-lie":"The grounds","il-independance-amb":"Mood","iv-independance-amb":"Family",vt1:"Wedding &amp; dowry ceremony",vt1o:"Wedding &amp; dowry ceremony",vt2:"Birthday",vt2o:"Birthday",vt3:"Christening",vt3o:"Christening",vt4:"Family celebration",vt4o:"Family celebration",vt5:"Private party",vt5o:"Private party",vt6:"Product launch",vt6o:"Product launch",vpt:"The paillote",vpx:"On stilts above the Aby lagoon: cocktails or dinner facing the water, at sunset.",vpo:"The paillote",vqt:"The pool &amp; terrace",vqx:"Outdoors, for a cocktail reception, a buffet or an evening that carries on.",vqo:"The pool &amp; terrace",vst:"The hall",vsx:"Natural light and a PA system, up to 90 guests: for a ceremony, speeches or a reception indoors.",vso:"The hall",vrt:"The restaurant",vrx:"Ivorian and continental cuisine: buffet, plated menu or grills, with the dining-room team.",vro:"The restaurant",vo1:"Catering: cocktails, buffet or plated menu, put together with you.",vo2:"Rooms for your guests among our 46 rooms and suites.",vo3:"The PA system and a sound engineer.",vo4:"Activities for your guests: lagoon canoe trips, jet ski, spa.",vo5:"The airport shuttle.",ve0:"Weddings, birthdays, christenings",ve1:"Plan your event",ve2:"You have a date and guests; we have the lagoon, a table, and 46 rooms so the party does not stop at midnight. Tell us what you have in mind: the front desk calls you back within 24 h with a proposal.",ve3:"With you, we arrange",ve4:"Capacity of each space, decoration and rates: the front desk gives you the details with your quote, depending on the date and the number of guests.",ve5:"Request an event quote",ve6:"A wedding, a birthday, a christening? Plan your event &rarr;",vt7o:"Other",vno:"Not decided yet",vl1:"Type of event",vl2:"Planned date",vl3:"Number of guests",vl4:"Rooms for your guests",vl5:"Preferred space",vl6:"Indicative budget (optional)",vl7:"Your ideas (optional)",vl8:"Send request",vl9:"Reply within 24 h. No commitment, no payment at this stage.",cta:"Book",ctc:"Book this package",
 c1:"Home",c2:"Offers &amp; Events",eb:"Eleven offers &amp; one weekly gathering",h1:"Offers &amp; Events",
 lede:"Stays already put together — room, meals, activities and small touches included. Pick one, give us your dates, and the front desk handles the rest.",
 cl:"Live campaign",ct:"Holiday Packs",cs:"Announced on our Facebook page · +225 01 51 52 75 75",
@@ -2538,6 +2677,73 @@ window.NOMS_CHAMBRES = {"chambre-standard": "Chambre Standard", "deluxe-baldaqui
     .then(function(r){ return r.ok ? r.json() : null; })
     .then(conclure)
     .catch(function(){ demarrer(true); devoiler(); });
+})();
+
+/* Le devis evenement : meme chemin que le forfait (EVN.envoyer), type
+   « evenement ». Les valeurs envoyees sont les libelles affiches dans la
+   langue du moment : la reception lit « Mariage & dot », pas « vt1 ». */
+(function(){
+  var f=document.getElementById('evf'); if(!f) return;
+  function $(i){return document.getElementById(i)}
+  function iso(d){return new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10)}
+  $('evd').min=iso(new Date());
+  var champs=[
+    {id:'evn',test:function(v){return v.trim().length>=2}},
+    {id:'evp',test:function(v){return v.replace(/\D/g,'').length>=8}},
+    {id:'evm',test:function(v){return !v.trim()||/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(v.trim())}}
+  ];
+  function verif(c,montrer){
+    var el=$(c.id),ok=c.test(el.value),b=el.closest('.f');
+    if(montrer||b.classList.contains('bad'))b.classList.toggle('bad',!ok);
+    el.setAttribute('aria-invalid',ok?'false':'true');
+    return ok;
+  }
+  champs.forEach(function(c){
+    var el=$(c.id);
+    el.addEventListener('blur',function(){verif(c,true)});
+    el.addEventListener('input',function(){if(el.closest('.f').classList.contains('bad'))verif(c,true)});
+  });
+  function texte(id){var s=$(id);return s.value?s.options[s.selectedIndex].text:''}
+  var OK={fr:['Appuyez sur envoyer dans WhatsApp : ce geste transmet votre demande à la réception. Votre demande pour « ',' » sera transmise sous la référence ','. La réception vous rappelle sous 24 h.'],
+          en:['Tap send in the app — that is what delivers it to reception. Your request for « ',' » will be sent under reference ','. The front desk calls you back within 24 h.']};
+  f.addEventListener('submit',function(e){
+    e.preventDefault();
+    var premier=null;
+    champs.forEach(function(c){if(!verif(c,true)&&!premier)premier=$(c.id)});
+    if(premier){premier.focus();premier.scrollIntoView({behavior:'smooth',block:'center'});return}
+    var ev=$('evt'),N=String.fromCharCode(10);
+    var d={evenement:ev.options[ev.selectedIndex].text,
+           date:$('evd').value, invites:$('evi').value, chambres:$('evc').value,
+           espace:texte('eve'), budget:$('evb').value,
+           nom:$('evn').value, tel:$('evp').value, email:$('evm').value, message:$('evx').value};
+    function resume(){
+      var l=["Bonjour, je souhaite organiser un événement à l'Hôtel Evannath.",'',
+        "Type d'événement : "+d.evenement];
+      if(d.date)l.push('Date envisagée : '+d.date);
+      if(d.invites)l.push("Nombre d'invités : "+d.invites);
+      if(d.chambres)l.push('Chambres : '+d.chambres);
+      if(d.espace)l.push('Espace souhaité : '+d.espace);
+      if(d.budget)l.push('Budget indicatif : '+d.budget);
+      l.push('','Nom : '+d.nom,'Téléphone : '+d.tel);
+      if(d.email)l.push('E-mail : '+d.email);
+      if(d.message)l.push('',d.message);
+      return l.join(N);
+    }
+    var CH={nom:'evn',tel:'evp',email:'evm'};
+    EVN.envoyer('evenement',d,{
+      bouton:$('evenvoi'), secours:$('evsec'), erreur:$('everr'), resume:resume,
+      marquer:function(liste){
+        liste.forEach(function(c){var el=$(CH[c]);
+          if(el){el.closest('.f').classList.add('bad');el.setAttribute('aria-invalid','true')}});
+        var pr=$(CH[liste[0]]); if(pr){pr.focus();pr.scrollIntoView({behavior:'smooth',block:'center'})}
+      }
+    },function(rep){
+      var T=OK[document.documentElement.lang==='en'?'en':'fr'];
+      $('evokm').textContent=T[0]+d.evenement+T[1]+rep.reference+T[2];
+      $('evok').classList.add('on');
+      $('evok').scrollIntoView({behavior:'smooth',block:'center'});
+    });
+  });
 })();
 
 /* Les motifs arrivent au defilement, une fois. EVN_AU_SCROLL tient le

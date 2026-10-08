@@ -36,7 +36,9 @@ IGNORE = {'index-luxe-variante', 'index-template', 'carte-template', 'spa-templa
 # legales et la page d'erreur portent leur propre noindex. La liste est
 # ecrite ici plutot que devinee dans le HTML : en prospection, TOUTES les
 # pages portent noindex, et la detection videait le sitemap.
-HORS_INDEX = {'reserver', 'mentions-legales', '404'}
+# carnet-article n'est que le cadre des articles : chacun a son adresse
+# (/carnet-<adresse>), declaree dans carnet-plan.xml (api/_carnet.js).
+HORS_INDEX = {'reserver', 'mentions-legales', '404', 'carnet-article'}
 
 AUJOURD_HUI = datetime.date.today().isoformat()
 
@@ -225,7 +227,8 @@ Allow: /
 Disallow: /api/
 
 Sitemap: %s/sitemap.xml
-""" % SITE)
+Sitemap: %s/carnet-plan.xml
+""" % (SITE, SITE))
 
 io.open('site.webmanifest', 'w', encoding='utf-8').write(
 """{

@@ -319,6 +319,240 @@ CARDS = [
   '28 000','28000','personne','pp','FCFA · par personne'),
 ]
 
+
+# ── Organiser votre evenement ─────────────────────────────────────────────
+# Le cahier des exigences (§ 11) demande une page pour qui veut organiser SON
+# evenement : mariage, bapteme, anniversaire. Elle vit ici, dans « Offres &
+# Evenements », plutot qu'en douzieme entree de menu.
+#
+# NE RIEN INVENTER. Les espaces et prestations ci-dessous sont ceux que le
+# site annonce deja ailleurs (paillote, piscine, salle jusqu'a 90 personnes,
+# restaurant, sonorisation du Coffret Anniversaire, 46 chambres). Capacites
+# par espace, decoration et tarifs ne sont pas encore connus : la page le dit
+# (« precises avec votre devis ») au lieu de les deviner. Quand l'hotel les
+# donne, ils s'ajoutent dans ces listes, et nulle part ailleurs.
+EVT_TYPES = [
+    ('vt1', 'Mariage &amp; dot', 'Wedding &amp; dowry ceremony'),
+    ('vt2', 'Anniversaire', 'Birthday'),
+    ('vt3', 'Baptême', 'Christening'),
+    ('vt4', 'Fête de famille', 'Family celebration'),
+    ('vt5', 'Soirée privée', 'Private party'),
+    ('vt6', 'Lancement de produit', 'Product launch'),
+]
+# (cle, image, largeur, hauteur, alt, titre, texte, titre EN, texte EN)
+EVT_ESPACES = [
+    ('vp', 'gal-lag-ponton', 1748, 1240, 'La paillote sur pilotis au-dessus de la lagune Aby',
+     'La paillote', 'Sur pilotis, au-dessus de la lagune Aby : un cocktail ou un dîner face à l’eau, au coucher du soleil.',
+     'The paillote', 'On stilts above the Aby lagoon: cocktails or dinner facing the water, at sunset.'),
+    ('vq', 'g-terrasse', 1200, 851, 'La terrasse et les transats au bord de la piscine',
+     'La piscine &amp; la terrasse', 'En plein air, pour un cocktail dînatoire, un buffet ou une soirée qui se prolonge.',
+     'The pool &amp; terrace', 'Outdoors, for a cocktail reception, a buffet or an evening that carries on.'),
+    ('vs', 'g-seminaire', 1200, 851, 'La salle de l’Hôtel Evannath',
+     'La salle', 'Lumière naturelle et sonorisation, jusqu’à 90 personnes : pour une cérémonie, des discours ou une réception à l’abri.',
+     'The hall', 'Natural light and a PA system, up to 90 guests: for a ceremony, speeches or a reception indoors.'),
+    ('vr', 'gal-tab-salle', 1748, 1240, 'La salle du restaurant',
+     'Le restaurant', 'Cuisine ivoirienne et continentale : buffet, menu servi ou grillades, avec l’équipe en salle.',
+     'The restaurant', 'Ivorian and continental cuisine: buffet, plated menu or grills, with the dining-room team.'),
+]
+EVT_PRESTA = [
+    ('vo1', 'La restauration : cocktail, buffet ou menu servi, composé avec vous.',
+     'Catering: cocktails, buffet or plated menu, put together with you.'),
+    ('vo2', 'L’hébergement de vos invités dans nos 46 chambres et suites.',
+     'Rooms for your guests among our 46 rooms and suites.'),
+    ('vo3', 'La sonorisation et le technicien son.', 'The PA system and a sound engineer.'),
+    ('vo4', 'Des activités pour vos invités : pirogue sur la lagune, jet ski, spa.',
+     'Activities for your guests: lagoon canoe trips, jet ski, spa.'),
+    ('vo5', 'La navette depuis l’aéroport.', 'The airport shuttle.'),
+]
+
+
+def _evt_html():
+    types = '\n'.join('      <li data-t="%s">%s</li>' % (k, fr) for k, fr, _ in EVT_TYPES)
+    options = '\n'.join('            <option data-t="%so">%s</option>' % (k, fr) for k, fr, _ in EVT_TYPES)
+    esp = []
+    for k, img, w, h, alt, tit, txt, _t, _x in EVT_ESPACES:
+        esp.append('''      <article class="evt-esp">
+        <div class="ph"><picture><source srcset="img/opt/%s-640.webp 640w, img/opt/%s-1024.webp 1024w" sizes="(max-width:720px) 100vw, (max-width:1080px) 50vw, 320px" type="image/webp">
+          <img loading="lazy" src="img/opt/%s-640.jpg" width="640" height="454" alt="%s"></picture></div>
+        <h3 data-t="%st">%s</h3>
+        <p data-t="%sx">%s</p>
+      </article>''' % (img, img, img, alt, k, tit, k, txt))
+    esp_opts = '\n'.join('            <option data-t="%so">%s</option>' % (k, tit) for k, _i, _w, _h, _a, tit, _x, _t, _e in EVT_ESPACES)
+    presta = '\n'.join('        <li><i>✓</i><span data-t="%s">%s</span></li>' % (k, fr) for k, fr, _ in EVT_PRESTA)
+    return '''<section class="evt" id="evenement">
+ <div class="wrap">
+  <div class="sect reveal" style="margin-top:0">
+    <span class="eyebrow" data-t="ve0">Mariages, anniversaires, baptêmes</span>
+    <h2 data-t="ve1">Organiser votre événement</h2>
+    <p data-t="ve2">Vous avez une date et des invités ; nous avons la lagune, une table, et 46 chambres pour que la fête ne s’arrête pas à minuit. Dites-nous ce que vous imaginez : la réception vous rappelle sous 24 h avec une proposition.</p>
+  </div>
+  <ul class="evt-types reveal">
+%s
+  </ul>
+  <div class="evt-grille reveal">
+%s
+  </div>
+  <div class="evt-bas">
+    <div class="evt-avec">
+      <h3 data-t="ve3">Avec vous, nous organisons</h3>
+      <ul class="incl">
+%s
+      </ul>
+      <p class="evt-note" data-t="ve4">Capacités de chaque espace, décoration et tarifs : la réception vous les précise avec votre devis, selon la date et le nombre d’invités.</p>
+    </div>
+    <form class="form evt-form" id="evf" novalidate>
+      <h3 data-t="ve5">Demander un devis événement</h3>
+      <div class="two">
+        <div class="f"><label for="evt" data-t="vl1">Type d’événement</label>
+          <select id="evt">
+%s
+            <option data-t="vt7o">Autre</option>
+          </select></div>
+        <div class="f"><label for="evd" data-t="vl2">Date envisagée</label><input type="date" id="evd"></div>
+      </div>
+      <div class="two">
+        <div class="f"><label for="evi" data-t="vl3">Nombre d’invités</label><input type="number" id="evi" min="1" max="2000" inputmode="numeric" placeholder="80"></div>
+        <div class="f"><label for="evc" data-t="vl4">Chambres pour vos invités</label><input type="number" id="evc" min="0" max="46" inputmode="numeric" placeholder="10"></div>
+      </div>
+      <div class="two">
+        <div class="f"><label for="eve" data-t="vl5">Espace souhaité</label>
+          <select id="eve">
+            <option value="" data-t="vno">Pas encore décidé</option>
+%s
+          </select></div>
+        <div class="f"><label for="evb" data-t="vl6">Budget indicatif (facultatif)</label><input type="text" id="evb" placeholder="FCFA"></div>
+      </div>
+      <div class="two">
+        <div class="f"><label for="evn" data-t="l4">Nom complet *</label><input type="text" id="evn" placeholder="Aya Kouassi" autocomplete="name">
+          <span class="msg" data-t="mnm">Indiquez votre nom.</span></div>
+        <div class="f"><label for="evp" data-t="l5">Téléphone / WhatsApp *</label><input type="tel" id="evp" placeholder="+225 01 02 03 04 05" autocomplete="tel">
+          <span class="msg" data-t="mtel">Indiquez un numéro d'au moins 8 chiffres.</span></div>
+      </div>
+      <div class="f"><label for="evm" data-t="l6">E-mail (pour recevoir le récapitulatif)</label><input type="email" id="evm" placeholder="vous@exemple.com" autocomplete="email">
+        <span class="msg" data-t="mem">Cette adresse e-mail ne semble pas valide.</span></div>
+      <div class="f"><label for="evx" data-t="vl7">Vos idées (facultatif)</label><textarea id="evx" placeholder="Ambiance, horaires, restauration, décoration…"></textarea></div>
+      <button type="submit" class="btn btn-solid" id="evenvoi" data-t="vl8">Envoyer la demande</button>
+      <p class="note" data-t="vl9">Réponse sous 24 h. Aucun engagement, aucun paiement à cette étape.</p>
+      <p class="err-envoi" id="everr" role="alert"></p>''' % (types, '\n'.join(esp), presta, options, esp_opts) + secours('evsec') + '''
+      <div class="sent" id="evok" role="status">''' + CONF_SVG + '''<div class="conf-msg">
+        <b data-t="okt">{{CT}}</b>
+        <p id="evokm"></p>
+      </div></div>
+    </form>
+  </div>
+ </div>
+</section>
+
+'''
+
+
+EVT_CSS = """
+/* --- Organiser votre evenement --- */
+.evt{padding:88px 0;border-top:1px solid var(--line)}
+.evt-types{list-style:none;display:flex;flex-wrap:wrap;gap:10px;margin:0 0 34px;padding:0}
+.evt-types li{border:1px solid var(--line);padding:10px 16px;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--bronze);font-weight:700}
+.evt-grille{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+.evt-esp{background:var(--bark-2);border:1px solid var(--line);overflow:hidden}
+.evt-esp .ph{aspect-ratio:16/11;overflow:hidden}
+.evt-esp .ph img{width:100%;height:100%;object-fit:cover}
+.evt-esp h3{margin:18px 20px 8px;font-size:1.25rem}
+.evt-esp p{margin:0 20px 22px;font-size:14px;color:var(--muted);line-height:1.6}
+.evt-bas{display:grid;grid-template-columns:1fr 1.25fr;gap:56px;margin-top:56px;align-items:start}
+.evt-avec .incl{list-style:none;margin:16px 0 0;padding:0}
+.evt-avec .incl li{padding:11px 0;border-bottom:1px solid var(--line);font-size:14.5px;color:var(--prose);display:flex;gap:13px}
+.evt-avec .incl i{color:var(--bronze);font-style:normal}
+.evt-note{font-size:13.5px;color:var(--muted);margin-top:18px;line-height:1.6}
+.evt-form{background:var(--bark-2);border:1px solid var(--line);padding:30px}
+.evt-form h3{margin-bottom:20px}
+.evt-form .btn{width:100%;margin-top:6px}
+.evt-form .note{font-size:12.5px;color:var(--muted);text-align:center;margin-top:14px;line-height:1.5}
+@media(max-width:1080px){.evt-grille{grid-template-columns:repeat(2,1fr)}.evt-bas{grid-template-columns:1fr;gap:34px}}
+@media(max-width:720px){.evt{padding:64px 0}.evt-grille{grid-template-columns:1fr}.evt-form{padding:22px}}
+"""
+
+EN_EVT = ''.join('%s:"%s",%so:"%s",' % (k, en, k, en) for k, _f, en in EVT_TYPES)
+EN_EVT += ''.join('%st:"%s",%sx:"%s",%so:"%s",' % (k, te, k, xe, k, te) for k, _i, _w, _h, _a, _t, _x, te, xe in EVT_ESPACES)
+EN_EVT += ''.join('%s:"%s",' % (k, en) for k, _f, en in EVT_PRESTA)
+EN_EVT += ('ve0:"Weddings, birthdays, christenings",ve1:"Plan your event",'
+           've2:"You have a date and guests; we have the lagoon, a table, and 46 rooms so the party does not stop at midnight. '
+           'Tell us what you have in mind: the front desk calls you back within 24 h with a proposal.",'
+           've3:"With you, we arrange",'
+           've4:"Capacity of each space, decoration and rates: the front desk gives you the details with your quote, depending on the date and the number of guests.",'
+           've5:"Request an event quote",ve6:"A wedding, a birthday, a christening? Plan your event &rarr;",vt7o:"Other",vno:"Not decided yet",'
+           'vl1:"Type of event",vl2:"Planned date",vl3:"Number of guests",vl4:"Rooms for your guests",'
+           'vl5:"Preferred space",vl6:"Indicative budget (optional)",vl7:"Your ideas (optional)",'
+           'vl8:"Send request",vl9:"Reply within 24 h. No commitment, no payment at this stage.",')
+
+EVT_JS = r'''
+/* Le devis evenement : meme chemin que le forfait (EVN.envoyer), type
+   « evenement ». Les valeurs envoyees sont les libelles affiches dans la
+   langue du moment : la reception lit « Mariage & dot », pas « vt1 ». */
+(function(){
+  var f=document.getElementById('evf'); if(!f) return;
+  function $(i){return document.getElementById(i)}
+  function iso(d){return new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10)}
+  $('evd').min=iso(new Date());
+  var champs=[
+    {id:'evn',test:function(v){return v.trim().length>=2}},
+    {id:'evp',test:function(v){return v.replace(/\D/g,'').length>=8}},
+    {id:'evm',test:function(v){return !v.trim()||/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(v.trim())}}
+  ];
+  function verif(c,montrer){
+    var el=$(c.id),ok=c.test(el.value),b=el.closest('.f');
+    if(montrer||b.classList.contains('bad'))b.classList.toggle('bad',!ok);
+    el.setAttribute('aria-invalid',ok?'false':'true');
+    return ok;
+  }
+  champs.forEach(function(c){
+    var el=$(c.id);
+    el.addEventListener('blur',function(){verif(c,true)});
+    el.addEventListener('input',function(){if(el.closest('.f').classList.contains('bad'))verif(c,true)});
+  });
+  function texte(id){var s=$(id);return s.value?s.options[s.selectedIndex].text:''}
+  var OK={fr:['{{CG}}Votre demande pour « ',' » {{CV}} sous la référence ','. La réception vous rappelle sous 24 h.'],
+          en:['{{CG_EN}}Your request for « ',' » {{CV_EN}} under reference ','. The front desk calls you back within 24 h.']};
+  f.addEventListener('submit',function(e){
+    e.preventDefault();
+    var premier=null;
+    champs.forEach(function(c){if(!verif(c,true)&&!premier)premier=$(c.id)});
+    if(premier){premier.focus();premier.scrollIntoView({behavior:'smooth',block:'center'});return}
+    var ev=$('evt'),N=String.fromCharCode(10);
+    var d={evenement:ev.options[ev.selectedIndex].text,
+           date:$('evd').value, invites:$('evi').value, chambres:$('evc').value,
+           espace:texte('eve'), budget:$('evb').value,
+           nom:$('evn').value, tel:$('evp').value, email:$('evm').value, message:$('evx').value};
+    function resume(){
+      var l=["Bonjour, je souhaite organiser un événement à l'Hôtel Evannath.",'',
+        "Type d'événement : "+d.evenement];
+      if(d.date)l.push('Date envisagée : '+d.date);
+      if(d.invites)l.push("Nombre d'invités : "+d.invites);
+      if(d.chambres)l.push('Chambres : '+d.chambres);
+      if(d.espace)l.push('Espace souhaité : '+d.espace);
+      if(d.budget)l.push('Budget indicatif : '+d.budget);
+      l.push('','Nom : '+d.nom,'Téléphone : '+d.tel);
+      if(d.email)l.push('E-mail : '+d.email);
+      if(d.message)l.push('',d.message);
+      return l.join(N);
+    }
+    var CH={nom:'evn',tel:'evp',email:'evm'};
+    EVN.envoyer('evenement',d,{
+      bouton:$('evenvoi'), secours:$('evsec'), erreur:$('everr'), resume:resume,
+      marquer:function(liste){
+        liste.forEach(function(c){var el=$(CH[c]);
+          if(el){el.closest('.f').classList.add('bad');el.setAttribute('aria-invalid','true')}});
+        var pr=$(CH[liste[0]]); if(pr){pr.focus();pr.scrollIntoView({behavior:'smooth',block:'center'})}
+      }
+    },function(rep){
+      var T=OK[document.documentElement.lang==='en'?'en':'fr'];
+      $('evokm').textContent=T[0]+d.evenement+T[1]+rep.reference+T[2];
+      $('evok').classList.add('on');
+      $('evok').scrollIntoView({behavior:'smooth',block:'center'});
+    });
+  });
+})();
+'''
+
+
 def ancre(nom):
     """L'adresse d'un forfait : « Pack Couple » -> pack-couple.
 
@@ -366,6 +600,7 @@ b = [header('#demande','Réserver'), drawer('circuits.html'), '''
   <span class="eyebrow" data-t="eb">Onze offres &amp; un rendez-vous hebdomadaire</span>
   <h1 data-t="h1">Offres &amp; Événements</h1>
   <p class="lede" data-t="lede">Ce qui se passe en ce moment, et les séjours déjà composés — chambre, repas, activités et attentions comprises. Choisissez, indiquez vos dates, et la réception s'occupe du reste.</p>
+  <p class="lede" style="margin-top:14px"><a href="#evenement" style="color:var(--bronze)" data-t="ve6">Un mariage, un anniversaire, un baptême ? Organiser votre événement →</a></p>
   </div>
 </div>
 
@@ -525,7 +760,7 @@ b.append('''  </div>
  </div>
 </section>
 
-''' + FOOTER)
+''' + _evt_html() + FOOTER)
 
 # Les titres des quatre sections, et les evenements. Les cles des evenements
 # portent un tiret : elles DOIVENT etre quotees, sinon le dictionnaire n'est
@@ -693,7 +928,7 @@ document.getElementById('rf').addEventListener('submit',function(e){
   });
 });
 
-var EN={''' + EN_NAV + EN_SECOURS + EN_SECTIONS + '''cta:"Book",ctc:"Book this package",
+var EN={''' + EN_NAV + EN_SECOURS + EN_SECTIONS + EN_EVT + '''cta:"Book",ctc:"Book this package",
 c1:"Home",c2:"Offers &amp; Events",eb:"Eleven offers &amp; one weekly gathering",h1:"Offers &amp; Events",
 lede:"Stays already put together — room, meals, activities and small touches included. Pick one, give us your dates, and the front desk handles the rest.",
 cl:"Live campaign",ct:"Holiday Packs",cs:"Announced on our Facebook page · +225 01 51 52 75 75",
@@ -1223,6 +1458,8 @@ LD = _schema.bloc(
     _schema.hotel(),
     _schema.fil([('Accueil','index'),('Offres & Événements',None)]))
 
+JS = JS + EVT_JS
+CSS = CSS + EVT_CSS
 CORPS = NL_.join(b).replace('{{AGENDA}}', AGENDA)
 # Les textes de confirmation dependent du mode d'envoi (WhatsApp ou e-mail) :
 # ils viennent de _chrome, comme sur les pages Seminaires et Contact.
@@ -1239,6 +1476,6 @@ JS = JS + PAGNE_JS
 
 io.open('circuits.html','w',encoding='utf-8').write(page(
  "Offres &amp; Événements — Hôtel Evannath, Assinie",
- "Les offres et événements de l'Hôtel Evannath à Assinie : Packs Vacances, réveillon, Méchoui Party du samedi, lune de miel, week-end intense, découvertes touristiques et coffret anniversaire.",
+ "Les offres et événements de l'Hôtel Evannath à Assinie : Packs Vacances, réveillon, Méchoui Party du samedi, lune de miel, week-end intense, coffret anniversaire, et l'organisation de vos mariages, anniversaires et baptêmes.",
  "r-mezzanine", CSS, CORPS, JS, slug="circuits", jsonld=LD))
 print('circuits.html         ok')

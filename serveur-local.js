@@ -56,6 +56,17 @@ if (fs.existsSync(ENV)) {
   console.log('.env.local lu');
 }
 
+/** Les reecritures de vercel.json, en expressions : « :slug » -> un segment. */
+function reecritures() {
+  try {
+    const vc = JSON.parse(fs.readFileSync(path.join(__dirname, 'site', 'vercel.json'), 'utf8'));
+    return (vc.rewrites || []).map((r) => ({
+      destination: r.destination,
+      motif: new RegExp('^' + r.source.replace(/[.]/g, '\\.').replace(/:(\w+)/g, '(?<$1>[^/]+?)') + '$'),
+    }));
+  } catch (e) { return []; }
+}
+
 const TYPES = {
   '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8',
   '.js': 'text/javascript; charset=utf-8', '.json': 'application/json; charset=utf-8',
@@ -126,6 +137,21 @@ const serveur = http.createServer(async (req, res) => {
       res.writeHead(204); res.end();
     });
     return;
+  }
+
+  /* Les reecritures de vercel.json (« /carnet-:slug » -> la fonction qui
+     rend l'article). Comme en production, un fichier qui existe passe avant :
+     /carnet-article reste la page statique. */
+  if (!fs.existsSync(path.join(RACINE, chemin)) && !fs.existsSync(path.join(RACINE, chemin + '.html'))) {
+    for (const r of reecritures()) {
+      const m = r.motif.exec(chemin);
+      if (!m) continue;
+      const dest = r.destination.replace(/:(\w+)/g, (x, n) => encodeURIComponent(m.groups[n] || ''));
+      const cible = new URL(dest, requete.origin);
+      chemin = cible.pathname;
+      for (const [k, v] of cible.searchParams) requete.searchParams.set(k, v);
+      break;
+    }
   }
 
   // ── Les fonctions ────────────────────────────────────────────────────────

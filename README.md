@@ -147,6 +147,7 @@ python build-circuits.py         # circuits.html (Offres & Événements)
 python build-experiences.py      # experiences.html
 python build-seminaires.py       # seminaires.html
 python build-recrutement.py      # recrutement.html
+python build-carnet.py           # carnet.html, carnet-article.html + api/_carnet_gabarit.js (blog)
 python build-404.py              # 404.html
 python build-chatbot.py          # api/_chatbot.json (ce que sait le chatbot)
 python build-sitemap.py          # sitemap, robots.txt, donnees/*.json, CSP (EN DERNIER)
