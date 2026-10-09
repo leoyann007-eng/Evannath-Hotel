@@ -53,6 +53,12 @@ vue-*.png
 bo-*.png
 verif-*.png
 
+# ── Vidéos HyperFrames ────────────────────────────────────────
+# La promo de 30 s et la visite du site : captures pleine page (~85 Mo),
+# musique, rendus MP4. Projets locaux, ils se rouvrent dans le Studio.
+video/promo-30s/
+video/visite-site/
+
 # ── Environnement local et outils IA ──────────────────────────
 .claude/
 .agents/
