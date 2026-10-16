@@ -1475,7 +1475,7 @@ for _m, _v in _CONF:
 JS = JS + PAGNE_JS
 
 io.open('circuits.html','w',encoding='utf-8').write(page(
- "Offres &amp; Événements — Hôtel Evannath, Assinie",
+ "Week-ends, offres et mariages à Assinie — Hôtel Evannath",
  "Les offres et événements de l'Hôtel Evannath à Assinie : Packs Vacances, réveillon, Méchoui Party du samedi, lune de miel, week-end intense, coffret anniversaire, et l'organisation de vos mariages, anniversaires et baptêmes.",
  "r-mezzanine", CSS, CORPS, JS, slug="circuits", jsonld=LD))
 print('circuits.html         ok')

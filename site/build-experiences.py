@@ -273,7 +273,7 @@ LD = _schema.bloc(
 JS = JS + PAGNE_JS
 
 io.open('experiences.html', 'w', encoding='utf-8').write(page(
- "Expériences — Hôtel Evannath, Assinie",
+ "Que faire à Assinie : lagune, plage, spa — Hôtel Evannath",
  "Balade lagunaire en pirogue, jet ski, l'Embouchure, spa et sauna, piscine et jacuzzi, night-club : tout ce que l'on peut faire à l'Hôtel Evannath, Assinie PK 19.",
  "gal-lag-bateau", CSS, '\n'.join(b), JS, preload="gal-lag-bateau", slug="experiences", jsonld=LD))
 print('experiences.html      ok')

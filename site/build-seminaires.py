@@ -532,7 +532,7 @@ LD = _schema.bloc(
     _schema.fil([('Accueil','index'),('Séminaires & groupes',None)]))
 
 HTML = page(
- "Séminaires &amp; groupes — Hôtel Evannath, Assinie",
+ "Séminaire à Assinie : salle et hébergement — Hôtel Evannath",
  "Séminaires, journées d'étude et réceptions à l'Hôtel Evannath, Assinie PK 19 : salle en lumière naturelle, cinq configurations, sonorisation et technicien inclus, navette aéroport offerte.",
  "g-seminaire", CSS, '\n'.join(b), JS, preload="g-seminaire", slug="seminaires", jsonld=LD)
 
