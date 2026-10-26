@@ -9,6 +9,13 @@
 // l'agence se pose par-dessus, dans la copie qui part en ligne. Le depot ne
 // change jamais.
 //
+// LA COPIE, c'est public/. Des qu'un projet Vercel « Other » a une commande
+// de construction, Vercel sert le dossier public/ — et refuse de deployer
+// s'il n'existe pas (STATIC_BUILD_NO_OUT_DIR, le 26 octobre 2026). On y
+// recopie donc ce qui se sert, et la publication s'y pose. Les fonctions
+// restent dans api/, a la racine, ou Vercel les prend : elles lisent leurs
+// fichiers (donnees/chambres.json…) a l'endroit habituel.
+//
 // CE QU'ELLE TOUCHE, et rien d'autre : <title>, la description, og:title,
 // og:description, og:image, la balise robots, et l'entree d'une page masquee
 // dans sitemap.xml. Pas un script : les empreintes CSP de vercel.json restent
@@ -30,6 +37,26 @@ const seo = require('./_seo.js');
 function argument(nom) {
   const i = process.argv.indexOf('--' + nom);
   return i > 0 ? process.argv[i + 1] : '';
+}
+
+/* Ce qui ne part PAS dans public/ : les fonctions et leurs dependances,
+   servies a part, et la configuration. Les sources Python et les gabarits
+   sont deja retires par .vercelignore ; on les ecarte aussi, au cas ou. */
+const HORS_PUBLIC = new Set(['api', 'node_modules', 'public', '__pycache__',
+  'package.json', 'package-lock.json', 'vercel.json', 'sitemap-apercu.xml', 'index-luxe-variante.html']);
+const horsPublic = (nom) => nom.startsWith('.') || HORS_PUBLIC.has(nom)
+  || /\.(py|sh)$/.test(nom) || /-template\.html$/.test(nom);
+
+/** Recopie ce qui se sert de `source` dans `source`/public. Rend ce dossier. */
+function preparerPublic(source) {
+  const cible = path.join(source, 'public');
+  fs.rmSync(cible, { recursive: true, force: true });
+  fs.mkdirSync(cible);
+  for (const nom of fs.readdirSync(source)) {
+    if (horsPublic(nom)) continue;
+    fs.cpSync(path.join(source, nom), path.join(cible, nom), { recursive: true });
+  }
+  return cible;
 }
 
 /** Pose la publication `pub` dans les pages de `dossier`. Rend le compte rendu. */
@@ -84,13 +111,14 @@ async function publicationDuMagasin() {
 }
 
 async function principal() {
-  const dossier = argument('dossier') || path.join(__dirname, '..');
-  /* Sur un poste, jamais dans le depot lui-meme : les pages generees sont
-     commitees, et la publication n'a rien a y faire. */
+  /* Sur un poste, jamais dans le depot lui-meme : on indique une copie, et
+     la publication s'y pose sur place. Chez Vercel : public/, recopie
+     d'abord — il doit exister meme quand rien n'est publie. */
   if (!process.env.VERCEL && !argument('dossier')) {
     console.error('Hors de Vercel, indiquez une copie : --dossier <chemin>.');
     return 1;
   }
+  const dossier = argument('dossier') || preparerPublic(path.join(__dirname, '..'));
   let pub;
   if (argument('instantane')) {
     pub = JSON.parse(fs.readFileSync(argument('instantane'), 'utf8'));
@@ -122,4 +150,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { appliquer };
+module.exports = { appliquer, preparerPublic };

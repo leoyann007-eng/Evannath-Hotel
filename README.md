@@ -184,8 +184,10 @@ il lit ses variables dans `.env.local`.
 ## Déploiement
 
 Hébergé sur **Vercel**, en site statique. Une seule étape de construction,
-`node api/_seo_appliquer.js` : elle pose dans les pages le référencement publié
-depuis l'administration (voir « Le référencement », plus bas).
+`node api/_seo_appliquer.js` : elle recopie ce qui se sert dans `public/` (le
+dossier que Vercel sert dès qu'il y a une commande de construction) et y pose le
+référencement publié depuis l'administration (voir « Le référencement », plus
+bas). Les fonctions restent dans `api/`.
 
 À l'import du dépôt, régler **Root Directory** sur `site`. Le fichier
 `site/vercel.json` fait le reste : URL sans `.html`, images en cache un an,
@@ -220,7 +222,7 @@ déclare aussi les **redirections** des anciennes adresses.
 - **Comment ça arrive dans les pages.** Publier appelle le crochet
   `SEO_DEPLOY_HOOK` ; le déploiement lance `api/_seo_appliquer.js`, qui lit la
   dernière publication dans la base et réécrit `<title>`, la description, les
-  balises `og:` et `robots` de la copie mise en ligne (jamais un script : les
+  balises `og:` et `robots` de la copie mise en ligne (`public/`) (jamais un script : les
   empreintes CSP restent justes). Les pages du dépôt ne changent pas. Si la
   base ne répond pas en production, le déploiement échoue et le site reste tel
   qu'il était.

@@ -28,7 +28,7 @@ const require = createRequire(import.meta.url);
 const RACINE = path.join(path.dirname(new URL(import.meta.url).pathname), '..', 'site');
 const handler = (await import('../site/api/admin.js')).default;
 const seo = require('../site/api/_seo.js');
-const { appliquer } = require('../site/api/_seo_appliquer.js');
+const { appliquer, preparerPublic } = require('../site/api/_seo_appliquer.js');
 
 let cookie = '';
 function appel(query, { methode = 'GET', body = null, avecCookie = true, avec } = {}) {
@@ -200,6 +200,29 @@ let premiere = null;
   verifie('noindex est ajoute quand la page n a pas de balise robots',
     sansRobots.html.includes('<meta name="robots" content="noindex, follow">'), sansRobots.html);
   fs.rmSync(copie, { recursive: true, force: true });
+}
+
+// ── public/ : ce que Vercel sert apres la construction ────────────────────
+{
+  const src = fs.mkdtempSync(path.join(os.tmpdir(), 'seo-src-'));
+  for (const f of ['index.html', 'robots.txt', 'package.json', 'vercel.json', 'build-index.py',
+    'index-template.html', '.vercelignore']) fs.writeFileSync(path.join(src, f), 'x');
+  for (const d of ['api', 'node_modules', 'img/opt', 'admin', 'donnees']) fs.mkdirSync(path.join(src, d), { recursive: true });
+  fs.writeFileSync(path.join(src, 'img/opt/a.jpg'), 'x');
+  fs.writeFileSync(path.join(src, 'admin/index.html'), 'x');
+  fs.writeFileSync(path.join(src, 'api/admin.js'), 'x');
+  fs.mkdirSync(path.join(src, 'public'));
+  fs.writeFileSync(path.join(src, 'public/ancien.html'), 'x');
+  const pub = preparerPublic(src);
+  const a = (f) => fs.existsSync(path.join(pub, f));
+  verifie('public/ recoit les pages, les images, l administration et les donnees',
+    a('index.html') && a('robots.txt') && a('img/opt/a.jpg') && a('admin/index.html') && a('donnees'), fs.readdirSync(pub));
+  verifie('ni les fonctions, ni les dependances, ni la configuration, ni les sources',
+    !a('api') && !a('node_modules') && !a('package.json') && !a('vercel.json') && !a('build-index.py')
+    && !a('index-template.html') && !a('.vercelignore') && !a('public'), fs.readdirSync(pub));
+  verifie('un ancien public/ est remplace, pas complete', !a('ancien.html'), '');
+  verifie('le depot n est pas touche', fs.existsSync(path.join(src, 'api/admin.js')) && fs.existsSync(path.join(src, 'index.html')), '');
+  fs.rmSync(src, { recursive: true, force: true });
 }
 
 // ── Les fichiers generes sont a jour ──────────────────────────────────────
