@@ -131,4 +131,13 @@ html = page(
  "gal-lag-nuit", CSS, '\n'.join(b), JS, slug="404")
 html = html.replace('<meta property="og:image"', (('' if PROSPECTION else '<meta name="robots" content="noindex, follow">\n') + '<meta property="og:image"'))
 io.open('404.html', 'w', encoding='utf-8').write(html)
+# La copie exacte, pour la fonction serveur : une adresse inconnue passe par
+# api/admin?a=introuvable (vercel.json), qui redirige les anciennes adresses
+# declarees dans l'onglet Referencement et rend CETTE page pour le reste.
+# Meme texte, donc memes scripts : les empreintes CSP valent pour les deux.
+import json
+io.open('api/_page_404.js', 'w', encoding='utf-8').write(
+    '// ECRIT PAR build-404.py — ne pas modifier a la main.\n'
+    '// La copie exacte de 404.html, pour la fonction serveur (api/admin.js, a=introuvable).\n'
+    'module.exports = ' + json.dumps(html, ensure_ascii=False) + ';\n')
 print('404.html              ok')

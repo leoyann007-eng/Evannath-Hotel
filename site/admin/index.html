@@ -10,6 +10,7 @@
 <link rel="stylesheet" href="/admin/disponibilites.css">
 <link rel="stylesheet" href="/admin/chambres.css">
 <link rel="stylesheet" href="/admin/comptes.css">
+<link rel="stylesheet" href="/admin/referencement.css">
 <style>
 :root{
   /* ── Marine, or et blanc ────────────────────────────────────────────
@@ -567,6 +568,7 @@ details.plus summary::marker{color:var(--bronze)}
       <button data-v="campagnes" title="Campagnes saisonnières"><i>☀</i><span>Campagnes saisonnières</span></button>
       <button data-v="emplois" title="Offres d'emploi"><i>✎</i><span>Offres d'emploi</span></button>
       <button data-v="carnet" title="Le Carnet d'Assinie"><i>✍</i><span>Le Carnet</span></button>
+      <button data-v="seo" title="Référencement"><i>⌕</i><span>Référencement</span></button>
       <h2>Médias</h2>
       <button data-v="galerie" title="Galerie"><i>▣</i><span>Galerie</span></button>
       <h2>Administration</h2>
@@ -735,6 +737,9 @@ async function charger() {
   ETAT.campagnes = (tout.donnees && tout.donnees.campagnes) || [];
   ETAT.emplois = (tout.donnees && tout.donnees.emplois) || [];
   ETAT.carnet = (tout.donnees && tout.donnees.articles) || [];
+  /* Le referencement : reglages, redirections, publications (referencement.js). */
+  ETAT.seo = (tout.donnees && tout.donnees.seo) || {};
+  ETAT.seoCrochet = etat.seoCrochet;
   /* Les chambres PHYSIQUES et les nuits fermees. */
   ETAT.chambres = (tout.donnees && tout.donnees.chambres) || [];
   ETAT.annoncees = (hotel && hotel.chambres_annoncees) || 0;
@@ -2390,6 +2395,8 @@ function rendre() {
         fait partie de ce qui reste à construire. Les prix des chambres, eux, se
         modifient dans « Chambres ».</p>
       </div>`;
+  } else if (VUE === 'seo') {
+    v.innerHTML = vueReferencement();
   } else if (VUE === 'utilisateurs') {
     v.innerHTML = vueUtilisateurs();
   } else if (VUE === 'journal') {
@@ -2414,6 +2421,7 @@ function rendre() {
   v.classList.toggle('cm-large', VUE === 'chambres');
   if (VUE === 'chambres' && typeof cmApres === 'function') cmApres();
   if (VUE === 'disponibilites') apresDsp();
+  if (VUE === 'seo' && typeof rfApres === 'function') rfApres();
   /* Chaque vue n'a pas le meme besoin de largeur : le calendrier en veut
      tout, une fiche d'evenement s'arrete a 1100 px. */
   ajusterMenu();
@@ -2825,5 +2833,6 @@ appel('etat').then((r) => { if (r.ok) montrerCadre(); }).catch(() => {});
 <script src="/admin/disponibilites.js"></script>
 <script src="/admin/chambres.js"></script>
 <script src="/admin/comptes.js"></script>
+<script src="/admin/referencement.js"></script>
 </body>
 </html>

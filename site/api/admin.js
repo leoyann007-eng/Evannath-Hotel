@@ -30,6 +30,7 @@ const comptes = require('./_comptes.js');
 const magasin = require('./_magasin.js');
 const quota = require('./_quota.js');
 const carnet = require('./_carnet.js');
+const seo = require('./_seo.js');
 
 /* Les categories, telles que le site les vend. On les lit au lieu de les
    recopier : le courriel de confirmation doit dire « Chambre Standard », pas
@@ -1259,6 +1260,47 @@ function publiees(d, maintenant) {
   };
 }
 
+/* ── Referencement ─────────────────────────────────────────────────────
+   Voir _seo.js. La page introuvable est la copie exacte de 404.html,
+   ecrite par build-404.py : un require statique, que Vercel embarque. */
+let PAGE_404 = '';
+try { PAGE_404 = require('./_page_404.js'); } catch (e) { /* construit par build-404.py */ }
+
+/* Les redirections publiees, gardees une minute par instance : chaque
+   adresse inconnue passe par ici, et la plupart viennent de robots. Une
+   publication faite sur CETTE instance vide la reserve tout de suite. */
+let REDIR = { t: 0, liste: [] };
+async function redirectionsPubliees() {
+  if (Date.now() - REDIR.t < 60_000) return REDIR.liste;
+  const d = await lire();
+  /* Une base qui ne repond pas ne fait pas une redirection : on rend la
+     page introuvable, sans garder ce vide en reserve. */
+  if (PANNE) return [];
+  const pub = seo.derniere(d.seo);
+  REDIR = { t: Date.now(), liste: (pub && pub.redirections) || [] };
+  return REDIR.liste;
+}
+
+/* Publier, c'est demander un deploiement : _seo_appliquer.js pose alors
+   l'instantane dans les pages. SEO_DEPLOY_HOOK est l'adresse du crochet
+   cree dans Vercel (Settings → Git → Deploy Hooks, branche main). Sans lui,
+   la publication est enregistree et partira au prochain deploiement. */
+async function demanderDeploiement() {
+  const crochet = process.env.SEO_DEPLOY_HOOK || '';
+  if (!/^https:\/\/api\.vercel\.com\//.test(crochet)) return 'sans-crochet';
+  try {
+    const r = await fetch(crochet, { method: 'POST', signal: AbortSignal.timeout(8000) });
+    return r.ok ? 'demande' : 'echec';
+  } catch (e) { return 'echec'; }
+}
+const MESSAGES_DEPLOIEMENT = {
+  demande: 'Publication envoyée : le site sera à jour dans une à deux minutes.',
+  'sans-crochet': 'Publication enregistrée. Le crochet de déploiement n’est pas encore réglé '
+    + '(SEO_DEPLOY_HOOK) : elle partira au prochain déploiement du site.',
+  echec: 'Publication enregistrée, mais Vercel n’a pas répondu à la demande de déploiement. '
+    + 'Réessayez dans un instant, ou prévenez le développeur.',
+};
+
 module.exports = async function handler(req, res) {
   const action = (req.query.a || '').toString();
 
@@ -1321,6 +1363,27 @@ module.exports = async function handler(req, res) {
        repasse ne reveille pas la base a chaque fois. */
     res.setHeader('Cache-Control', c ? 'public, max-age=0, s-maxage=60, stale-while-revalidate=600' : 'no-store');
     return res.status(c ? 200 : PANNE ? 503 : 404).send(html);
+  }
+
+  /* ── Une adresse qui ne correspond a aucune page ─────────────────────────
+     vercel.json y envoie tout ce qui n'est pas un fichier (les fichiers
+     passent toujours avant les reecritures). Une ancienne adresse declaree
+     dans l'onglet Referencement et PUBLIEE redirige (301 : Google reporte
+     le credit de l'ancienne adresse sur la nouvelle) ; le reste recoit la
+     page introuvable, avec son vrai statut 404. */
+  if (action === 'introuvable') {
+    const chemin = String(req.query.p || '').slice(0, 300);
+    const r = seo.trouverRedirection(await redirectionsPubliees(), chemin);
+    if (r) {
+      res.setHeader('Location', r.vers);
+      res.setHeader('Cache-Control', 'public, max-age=0, s-maxage=300');
+      return res.status(301).send('');
+    }
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    /* Une minute au CDN : les robots qui essaient /wp-login.php en boucle
+       ne reveillent pas la base a chaque fois. */
+    res.setHeader('Cache-Control', 'public, max-age=0, s-maxage=60');
+    return res.status(404).send(PAGE_404 || 'Page introuvable.');
   }
 
   /* ── Disponibilite, en lecture publique ────────────────────────────────
@@ -1663,6 +1726,9 @@ module.exports = async function handler(req, res) {
       /* Le paiement en ligne : cle presente, de test, et bloquee tant qu'une
          cle reelle n'a pas la base derriere elle. */
       paiement: { cle: !!LOMI_CLE, test: LOMI_TEST, actif: PAIEMENT_ACTIF, bloque: PAIEMENT_BLOQUE },
+      /* Le crochet de deploiement du Referencement : regle ou non, jamais sa
+         valeur. Sans lui, « Publier » attend le prochain deploiement. */
+      seoCrochet: /^https:\/\/api\.vercel\.com\//.test(process.env.SEO_DEPLOY_HOOK || ''),
       // L'identifiant du magasin vise, lisible dans le jeton. Il se compare a
       // celui affiche par Vercel : c'est ainsi qu'on voit a quel magasin on
       // parle. Ce n'est pas la partie secrete, et l'etat demande une session.
@@ -1987,6 +2053,111 @@ module.exports = async function handler(req, res) {
     if (!r.ok) return echecModification(res, r);
     if (r.annule) return json(res, r.valeur.code, r.valeur.corps);
     return json(res, 200, { ok: true });
+  }
+
+  /* ── Referencement (voir _seo.js) ─────────────────────────────────────
+     Enregistrer un reglage ne change pas le site : seule la publication le
+     fait. Le droit « referencement » est celui de l'agence (Communication)
+     et des administrateurs. */
+  if (action === 'seo-page') {
+    if (req.method !== 'POST') return json(res, 405, { ok: false });
+    const corps = corpsDe(req);
+    const { objet, manque, message } = seo.nettoyerPage(corps.entree);
+    if (manque.length) return json(res, 422, { ok: false, champs: manque, message });
+    const nom = propre(corps.nom, 60) || objet.id;
+    let enregistre = null;
+    const r = await modifier((d) => {
+      d.seo = d.seo || {};
+      d.seo.pages = d.seo.pages || {};
+      if (seo.reglageVide(objet)) {
+        delete d.seo.pages[objet.id];
+        enregistre = null;
+        noter(d, qui, 'A remis le référencement de la page « ' + nom + ' » tel que le site l’écrit');
+      } else {
+        enregistre = { ...objet, maj: new Date().toISOString(), par: qui.nom };
+        d.seo.pages[objet.id] = enregistre;
+        noter(d, qui, 'A modifié le référencement de la page « ' + nom + ' »');
+      }
+    });
+    if (!r.ok) return echecModification(res, r);
+    return json(res, 200, { ok: true, reglage: enregistre });
+  }
+
+  if (action === 'seo-redirection') {
+    if (req.method !== 'POST') return json(res, 405, { ok: false });
+    const { objet, manque, message } = seo.nettoyerRedirection(corpsDe(req).entree);
+    if (manque.length) return json(res, 422, { ok: false, champs: manque, message });
+    let ajoutee = null;
+    const r = await modifier((d) => {
+      d.seo = d.seo || {};
+      const liste = d.seo.redirections || [];
+      // La meme ancienne adresse ne mene qu'a un endroit : la nouvelle remplace.
+      const autres = liste.filter((x) => x.de !== objet.de);
+      if (autres.length >= seo.MAX_REDIRECTIONS) {
+        return { annuler: { code: 422, corps: { ok: false,
+          message: seo.MAX_REDIRECTIONS + ' redirections au plus : retirez-en d’abord.' } } };
+      }
+      ajoutee = { ...objet, ajoute: new Date().toISOString(), par: qui.nom };
+      d.seo.redirections = autres.concat(ajoutee);
+      noter(d, qui, 'A ajouté la redirection ' + objet.de + ' → ' + objet.vers);
+    });
+    if (!r.ok) return echecModification(res, r);
+    if (r.annule) return json(res, r.valeur.code, r.valeur.corps);
+    return json(res, 200, { ok: true, redirection: ajoutee });
+  }
+
+  if (action === 'seo-redirection-retirer') {
+    if (req.method !== 'POST') return json(res, 405, { ok: false });
+    const id = String(corpsDe(req).id || '');
+    const r = await modifier((d) => {
+      d.seo = d.seo || {};
+      const x = (d.seo.redirections || []).find((y) => y.id === id);
+      if (!x) return { annuler: { code: 404, corps: { ok: false, message: 'Redirection introuvable.' } } };
+      d.seo.redirections = d.seo.redirections.filter((y) => y.id !== id);
+      noter(d, qui, 'A retiré la redirection ' + x.de + ' → ' + x.vers);
+    });
+    if (!r.ok) return echecModification(res, r);
+    if (r.annule) return json(res, r.valeur.code, r.valeur.corps);
+    return json(res, 200, { ok: true });
+  }
+
+  /* Publier : un instantane de TOUS les reglages, date et signe. Revenir a
+     une version precedente republie son instantane — l'historique n'est
+     jamais reecrit, il s'allonge. */
+  if (action === 'publier-seo' || action === 'retablir-seo') {
+    if (req.method !== 'POST') return json(res, 405, { ok: false });
+    const corps = corpsDe(req);
+    let publiee = null;
+    const r = await modifier((d) => {
+      d.seo = d.seo || {};
+      let resume;
+      if (action === 'retablir-seo') {
+        const ancienne = (d.seo.publications || []).find((p) => p.id === String(corps.id || ''));
+        if (!ancienne) return { annuler: { code: 404, corps: { ok: false, message: 'Version introuvable.' } } };
+        d.seo.pages = structuredClone(ancienne.pages || {});
+        d.seo.redirections = structuredClone(ancienne.redirections || []);
+        resume = 'Retour à la version du ' + new Date(ancienne.t).toLocaleString('fr-FR',
+          { timeZone: 'Africa/Abidjan', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
+      } else {
+        resume = propre(corps.resume, 200);
+      }
+      const attente = seo.enAttente(d.seo);
+      if (!attente.total) {
+        return { annuler: { code: 409, corps: { ok: false, message: action === 'retablir-seo'
+          ? 'Cette version est déjà celle du site.' : 'Rien à publier : tout est déjà en ligne.' } } };
+      }
+      publiee = seo.ajouterPublication(d.seo, { id: crypto.randomUUID(), t: new Date().toISOString(),
+        par: qui.nom, resume: resume || attente.total + ' modification' + (attente.total > 1 ? 's' : ''),
+        ...seo.instantane(d.seo) });
+      noter(d, qui, (action === 'retablir-seo' ? 'A republié le référencement : ' : 'A publié le référencement : ')
+        + publiee.resume);
+    });
+    if (!r.ok) return echecModification(res, r);
+    if (r.annule) return json(res, r.valeur.code, r.valeur.corps);
+    REDIR = { t: 0, liste: [] };
+    const deploiement = await demanderDeploiement();
+    return json(res, 200, { ok: true, publication: publiee, deploiement,
+      message: MESSAGES_DEPLOIEMENT[deploiement] });
   }
 
   if (action === 'ordonner') {

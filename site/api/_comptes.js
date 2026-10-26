@@ -37,8 +37,8 @@ const ROLES = {
     nom: 'Administrateur',
     resume: 'Tout, plus les comptes, les prix et les paramètres.',
     vues: ['bord', 'disponibilites', 'chambres', 'evenements', 'promotions', 'campagnes',
-      'emplois', 'carnet', 'galerie', 'parametres', 'utilisateurs', 'journal', 'compte'],
-    droits: ['reservations', 'chambres', 'contenu', 'tarifs', 'reglages', 'comptes'],
+      'emplois', 'carnet', 'seo', 'galerie', 'parametres', 'utilisateurs', 'journal', 'compte'],
+    droits: ['reservations', 'chambres', 'contenu', 'referencement', 'tarifs', 'reglages', 'comptes'],
   },
   reception: {
     nom: 'Réception',
@@ -48,15 +48,17 @@ const ROLES = {
   },
   communication: {
     nom: 'Communication',
-    resume: 'Événements, promotions, campagnes, recrutement et affiches.',
-    vues: ['bord', 'evenements', 'promotions', 'campagnes', 'emplois', 'carnet', 'galerie', 'compte'],
-    droits: ['contenu'],
+    resume: 'Événements, promotions, campagnes, recrutement, affiches et référencement.',
+    vues: ['bord', 'evenements', 'promotions', 'campagnes', 'emplois', 'carnet', 'seo', 'galerie', 'compte'],
+    /* « referencement » : l'agence de communication regle et PUBLIE ce que
+       Google affiche (onglet Referencement). */
+    droits: ['contenu', 'referencement'],
   },
   lecture: {
     nom: 'Lecture seule',
     resume: 'Consulte tout, ne modifie rien.',
     vues: ['bord', 'disponibilites', 'chambres', 'evenements', 'promotions', 'campagnes',
-      'emplois', 'carnet', 'galerie', 'compte'],
+      'emplois', 'carnet', 'seo', 'galerie', 'compte'],
     droits: [],
   },
 };
@@ -78,6 +80,9 @@ function droitRequis(action, type) {
     tarifs: 'tarifs', reglages: 'reglages',
     comptes: 'comptes', compte: 'comptes', 'compte-reinitialiser': 'comptes',
     'compte-supprimer': 'comptes', journal: 'comptes',
+    'seo-page': 'referencement', 'seo-redirection': 'referencement',
+    'seo-redirection-retirer': 'referencement', 'publier-seo': 'referencement',
+    'retablir-seo': 'referencement',
   }[action] || null;
 }
 const peut = (role, droit) => !!(ROLES[role] && ROLES[role].droits.includes(droit));
