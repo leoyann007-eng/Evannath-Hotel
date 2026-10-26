@@ -148,7 +148,7 @@ python build-experiences.py      # experiences.html
 python build-seminaires.py       # seminaires.html
 python build-recrutement.py      # recrutement.html
 python build-carnet.py           # carnet.html, carnet-article.html + api/_carnet_gabarit.js (blog)
-python build-404.py              # 404.html
+python build-404.py              # 404.html + api/_page_404.js (adresses inconnues)
 python build-chatbot.py          # api/_chatbot.json (ce que sait le chatbot)
 python build-sitemap.py          # sitemap, robots.txt, donnees/*.json, CSP (EN DERNIER)
 python verifier.py               # les contrôles
@@ -183,7 +183,9 @@ il lit ses variables dans `.env.local`.
 
 ## Déploiement
 
-Hébergé sur **Vercel**, en site statique — aucune étape de compilation.
+Hébergé sur **Vercel**, en site statique. Une seule étape de construction,
+`node api/_seo_appliquer.js` : elle pose dans les pages le référencement publié
+depuis l'administration (voir « Le référencement », plus bas).
 
 À l'import du dépôt, régler **Root Directory** sur `site`. Le fichier
 `site/vercel.json` fait le reste : URL sans `.html`, images en cache un an,
@@ -199,9 +201,40 @@ Le code ne peut pas le faire à votre place. Dans l'ordre :
 | **`ADMIN_SECRET`** | *Settings → Environment Variables* | 64 caractères aléatoires (`node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"`). Sans elle, la clé des sessions dérive du mot de passe de secours. *Paramètres* doit afficher « Dédiée ». |
 | **La base Postgres** | *Storage → Create Database → Neon* | Voir « Le stockage ». *Paramètres* doit afficher « Base de données ». C'est elle qui rend possible une clé lomi réelle. |
 | **La limite de dépense Anthropic** | console Anthropic → *Limits* | Le dernier rempart du concierge : aucun bug ne la contourne. Le site plafonne aussi lui-même : `CHAT_MAX_JOUR` messages par jour (200 par défaut), compté dans la base — au-delà, la bulle s'efface jusqu'au lendemain et WhatsApp prend le relais. |
+| **Le crochet du référencement** | *Settings → Git → Deploy Hooks*, puis *Environment Variables* | Créer un crochet sur la branche `main`, et copier son adresse dans `SEO_DEPLOY_HOOK`. Sans lui, « Publier » enregistre la publication, qui n'arrive sur le site qu'au déploiement suivant. |
 | **lomi** | *Environment Variables* | `LOMI_SECRET_KEY` (réelle seulement une fois la base branchée), `LOMI_WEBHOOK_SECRET`, et `SITE_URL` sur le domaine définitif. |
 
 Puis la bascule de « Repasser en production le jour de la signature », plus bas.
+
+## Le référencement
+
+L'onglet **Référencement** de l'administration est tenu par l'agence de
+communication (profil *Communication*), qui règle et publie elle-même, page par
+page : le mot-clé visé, le titre Google (« — Hôtel Evannath » s'ajoute seul), la
+description, l'image de partage, et « ne pas afficher dans Google ». Elle y
+déclare aussi les **redirections** des anciennes adresses.
+
+- **Deux temps.** Enregistrer prépare ; « Publier les modifications » met en
+  ligne. Chaque publication est un instantané conservé : « Revenir à cette
+  version » le republie.
+- **Comment ça arrive dans les pages.** Publier appelle le crochet
+  `SEO_DEPLOY_HOOK` ; le déploiement lance `api/_seo_appliquer.js`, qui lit la
+  dernière publication dans la base et réécrit `<title>`, la description, les
+  balises `og:` et `robots` de la copie mise en ligne (jamais un script : les
+  empreintes CSP restent justes). Les pages du dépôt ne changent pas. Si la
+  base ne répond pas en production, le déploiement échoue et le site reste tel
+  qu'il était.
+- **Les redirections** ne passent pas par le déploiement : toute adresse qui
+  n'est pas un fichier va à `api/admin?a=introuvable` (dernière réécriture de
+  `vercel.json`), qui redirige (301) si l'adresse est publiée, et sert la
+  page 404 sinon.
+- **Les valeurs par défaut** — ce que le site écrit sans réglage — sont dans
+  `donnees/seo-pages.json`, écrit par `build-sitemap.py`. Une nouvelle page s'y
+  ajoute dans `NOMS_SEO`.
+- **Le grand titre (h1)** fait partie de la mise en page : l'onglet signale
+  quand il ne contient pas le mot-clé, mais c'est au développeur de le changer.
+
+Tests : `node tests/seo.test.mjs`.
 
 ## Mode prospection — le site est volontairement invisible des moteurs
 

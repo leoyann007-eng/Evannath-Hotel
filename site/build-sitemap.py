@@ -144,6 +144,46 @@ io.open('donnees/hotel.json', 'w', encoding='utf-8').write(
     json.dumps({'chambres_annoncees': CHAMBRES_ANNONCEES}, ensure_ascii=False))
 print('donnees/hotel.json      %d chambres annoncees' % CHAMBRES_ANNONCEES)
 
+# Les pages que l'onglet Referencement de l'administration propose de
+# regler, avec ce que les generateurs y ont ecrit : titre, description, image
+# de partage et grand titre. L'onglet compare la saisie de l'agence a ces
+# valeurs ; api/_seo_appliquer.js pose ensuite la saisie publiee dans les
+# pages, au deploiement. Le reservation (tunnel), la 404 et le cadre des
+# articles n'y sont pas : rien a y regler pour Google.
+import html as _html
+NOMS_SEO = [
+ ('index', 'Accueil'), ('chambres', 'Chambres & Suites'), ('seminaires', 'Séminaires'),
+ ('circuits', 'Offres & Événements'), ('carte', 'La table'), ('spa', 'Le spa'),
+ ('experiences', 'Expériences'), ('galerie', 'Galerie'), ('a-propos', 'À propos'),
+ ('contact', 'Contact'), ('informations-utiles', 'Informations utiles'),
+ ('carnet', "Le Carnet d'Assinie"), ('recrutement', 'Recrutement'),
+ ('mentions-legales', 'Mentions légales'),
+]
+def _texte(fragment):
+    # Une balise vaut une espace (« La table<em>d'Assinie</em> » s'affiche
+    # sur deux lignes), sauf devant une virgule ou un point.
+    t = re.sub(r'<[^>]+>', ' ', fragment)
+    t = re.sub(r'\s+', ' ', _html.unescape(t)).strip()
+    return re.sub(r' ([,.)])', r'\1', t)
+def _seo_de(slug, nom, groupe):
+    h = io.open(slug + '.html', encoding='utf-8').read()
+    def meta(motif):
+        m = re.search(motif, h)
+        return _html.unescape(m.group(1)) if m else ''
+    image = meta(r'<meta property="og:image" content="[^"]*/img/opt/([\w-]+)\.jpg"')
+    h1 = re.search(r'<h1\b[^>]*>(.*?)</h1>', h, re.S)
+    return dict(id=slug, nom=nom, groupe=groupe,
+                chemin='/' if slug == 'index' else '/' + slug,
+                titre=meta(r'<title>([^<]*)</title>'),
+                description=meta(r'<meta name="description" content="([^"]*)"'),
+                image=image, h1=_texte(h1.group(1)) if h1 else '',
+                hors_index=slug in HORS_INDEX)
+_seo = [_seo_de(s, n, 'pages') for s, n in NOMS_SEO] + \
+       [_seo_de(c['slug'], c['nom'], 'chambres') for c in _chambres.CHAMBRES]
+io.open('donnees/seo-pages.json', 'w', encoding='utf-8').write(
+    json.dumps({'site': SITE, 'prospection': PROSPECTION, 'pages': _seo}, ensure_ascii=False))
+print('donnees/seo-pages.json  %d pages réglables' % len(_seo))
+
 # changefreq et priority ne sont plus lus par Google ; on garde priority pour
 # Bing et pour l'ordre du fichier, qui se relit mieux de l'accueil vers le bas.
 lignes = ['<?xml version="1.0" encoding="UTF-8"?>',
