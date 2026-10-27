@@ -72,7 +72,10 @@ def politique(empreintes):
         # Les affiches deposees vivent dans notre magasin Blob ; data: et blob:
         # servent a l'apercu d'une image avant son envoi (administration).
         "img-src 'self' data: blob: https://*.public.blob.vercel-storage.com",
-        "media-src 'self'",
+        # blob: : le hero de l'accueil charge son plan en memoire (js/scrollcraft.js)
+        # pour le faire defiler image par image ; l'URL blob: vient de nos propres
+        # scripts, jamais d'un tiers.
+        "media-src 'self' blob:",
         "connect-src 'self'",
         # La carte d'acces (contact, accueil).
         "frame-src https://www.google.com https://maps.google.com",
