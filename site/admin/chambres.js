@@ -203,21 +203,21 @@ function cmListe(onglets) {
         ${CM.occupe.has(c.id) ? 'disabled' : ''}
         aria-label="Chambre ${ech(c.numero)} publiée sur le site"><i></i>${p ? 'Publiée' : 'Masquée'}</button></td>
       <td style="text-align:right"><button class="cm-plus" data-cm-menu="${ech(c.id)}" aria-haspopup="menu"
-        aria-expanded="false" aria-label="Actions pour la chambre ${ech(c.numero)}">⋯</button></td>
+        aria-expanded="false" aria-label="Actions pour la chambre ${ech(c.numero)}">${ic('plus-h')}</button></td>
     </tr>`;
   }).join('');
 
   const vide = !n
     ? `<tr class="cm-vide-l"><td colspan="10"><b style="display:block;font-family:var(--f-t);font-weight:400;font-size:20px;color:var(--cream);margin-bottom:6px">Aucune chambre saisie</b>
         Ajoutez les chambres de l’hôtel une par une : numéro, catégorie, et le reste quand vous l’avez.<br>
-        <button class="btn plein" data-cm-ajouter style="margin-top:16px">+ Ajouter une chambre</button></td></tr>`
+        <button class="btn plein" data-cm-ajouter style="margin-top:16px">${ic('plus')} Ajouter une chambre</button></td></tr>`
     : `<tr class="cm-vide-l"><td colspan="10">Aucune chambre ne correspond à ces filtres.</td></tr>`;
 
   return `<div class="entete"><div>
       <h1 class="t">Chambres</h1>
       <p class="sous">Le référentiel des chambres de l’hôtel : ce qu’elles sont, et si le site peut les vendre.
         Le calendrier se gère dans Disponibilités.</p></div>
-      <button class="btn plein" data-cm-ajouter>+ Ajouter une chambre</button></div>
+      <button class="btn plein" data-cm-ajouter>${ic('plus')} Ajouter une chambre</button></div>
     ${onglets}
     <p class="cm-explique"><b>Les chambres physiques de l’hôtel</b> — 101, B12… Chacune appartient à une
       catégorie, dont elle reprend le prix. Quand elles sont libres : voir Disponibilités.</p>
@@ -252,7 +252,7 @@ function cmTh(cle, lib, classe) {
   const actif = CM.tri.cle === cle;
   return `<th class="${classe || ''}" aria-sort="${actif ? (CM.tri.sens > 0 ? 'ascending' : 'descending') : 'none'}">
     <button class="cm-tri${actif ? ' on' : ''}" data-cm-tri="${cle}">${lib}<i aria-hidden="true">${
-      actif ? (CM.tri.sens > 0 ? '▲' : '▼') : '↕'}</i></button></th>`;
+      ic(actif ? (CM.tri.sens > 0 ? 'fleche-h' : 'fleche-b') : 'tri')}</i></button></th>`;
 }
 
 /* ── La fiche ──────────────────────────────────────────────────────── */
@@ -279,7 +279,7 @@ function cmFiche(ch) {
         <button class="btn" data-cm-photos="${ech(ch.id)}">Photos</button>
         <button class="btn plein" data-cm-modifier="${ech(ch.id)}">Modifier</button>
         <button class="cm-plus" data-cm-menu="${ech(ch.id)}" aria-haspopup="menu" aria-expanded="false"
-          aria-label="Autres actions">⋯</button>
+          aria-label="Autres actions">${ic('plus-h')}</button>
       </div></div>
     ${avertissement()}
     <div class="cm-fiche">
@@ -424,9 +424,9 @@ function cmFormulaire() {
               <img src="${ech(cmSrc(p, true))}" alt="">
               ${k === 0 ? '<span class="cm-couv">Couverture</span>' : ''}
               <div class="cm-ph-act">
-                ${k > 0 ? `<button type="button" data-cm-ph-gauche="${k}" title="Avancer" aria-label="Avancer la photo">←</button>` : ''}
-                ${k < b.photos.length - 1 ? `<button type="button" data-cm-ph-droite="${k}" title="Reculer" aria-label="Reculer la photo">→</button>` : ''}
-                <button type="button" data-cm-ph-oter="${k}" title="Retirer" aria-label="Retirer la photo">✕</button>
+                ${k > 0 ? `<button type="button" data-cm-ph-gauche="${k}" title="Avancer" aria-label="Avancer la photo">${ic('fleche-g')}</button>` : ''}
+                ${k < b.photos.length - 1 ? `<button type="button" data-cm-ph-droite="${k}" title="Reculer" aria-label="Reculer la photo">${ic('fleche')}</button>` : ''}
+                <button type="button" data-cm-ph-oter="${k}" title="Retirer" aria-label="Retirer la photo">${ic('x')}</button>
               </div></div>`).join('')}
             ${(b.photos || []).length < 12 ? `<div class="cm-photo-vide">${(b.photos || []).length
               ? 'La première photo sert de couverture.' : 'Sans photo, la chambre montre celle de sa catégorie.'}</div>` : ''}
@@ -758,12 +758,12 @@ function cmOuvrirMenu(bouton) {
   const m = document.createElement('div');
   m.id = 'cm-menu'; m.className = 'cm-menu'; m.setAttribute('role', 'menu');
   const it = (act, ico, lib, danger) => `<button role="menuitem" data-cm-act="${act}" data-id="${ech(ch.id)}"
-    ${danger ? 'class="cm-danger"' : ''}><i>${ico}</i>${lib}</button>`;
-  m.innerHTML = it('voir', '◎', 'Voir la fiche') + it('modifier', '✎', 'Modifier') + it('photos', '▣', 'Photos')
-    + '<hr>' + it('publier', p ? '◌' : '●', p ? 'Dépublier du site' : 'Publier sur le site')
-    + (s === 'maintenance' ? it('activer', '↺', 'Fin de maintenance') : it('maintenance', '⚒', 'Mettre en maintenance'))
-    + (s === 'hors-service' ? it('activer', '↺', 'Réactiver') : it('desactiver', '⊘', 'Désactiver'))
-    + '<hr>' + it('supprimer', '✕', 'Supprimer', true);
+    ${danger ? 'class="cm-danger"' : ''}><i>${ic(ico)}</i>${lib}</button>`;
+  m.innerHTML = it('voir', 'oeil', 'Voir la fiche') + it('modifier', 'crayon', 'Modifier') + it('photos', 'image', 'Photos')
+    + '<hr>' + it('publier', p ? 'oeil-barre' : 'publier', p ? 'Dépublier du site' : 'Publier sur le site')
+    + (s === 'maintenance' ? it('activer', 'rotation', 'Fin de maintenance') : it('maintenance', 'outil', 'Mettre en maintenance'))
+    + (s === 'hors-service' ? it('activer', 'rotation', 'Réactiver') : it('desactiver', 'interdit', 'Désactiver'))
+    + '<hr>' + it('supprimer', 'poubelle', 'Supprimer', true);
   document.body.appendChild(m);
   const r = bouton.getBoundingClientRect();
   const h = m.offsetHeight, w = m.offsetWidth;

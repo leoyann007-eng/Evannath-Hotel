@@ -8,8 +8,7 @@
 /* ── Onglets ─────────────────────────────────────────────────────────── */
 .cm-onglets{display:flex;gap:4px;border-bottom:1px solid var(--line);margin:0 0 24px}
 .cm-onglets button{background:none;border:0;border-bottom:2px solid transparent;
-  padding:10px 16px 12px;font:600 12px/1 var(--f-b);letter-spacing:.14em;
-  text-transform:uppercase;color:var(--muted);cursor:pointer;margin-bottom:-1px}
+  padding:10px 16px 12px;font:600 14px/1 var(--f-b);color:var(--muted);cursor:pointer;margin-bottom:-1px}
 .cm-onglets button:hover{color:var(--cream)}
 .cm-onglets button[aria-selected="true"]{color:var(--bronze-2);border-bottom-color:var(--bronze)}
 .cm-onglets{margin-bottom:12px}
@@ -22,13 +21,13 @@
 
 /* ── Les chiffres ────────────────────────────────────────────────────── */
 .cm-kpis{display:grid;grid-template-columns:1.1fr 1.1fr 1.1fr 1.6fr;gap:16px;margin-bottom:22px}
-.cm-kpi{background:var(--bark-2);border:1px solid var(--line);padding:18px 20px 16px;
+.cm-kpi{background:var(--bark-2);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--ombre);padding:18px 20px 16px;
   display:flex;flex-direction:column;gap:10px;min-width:0}
-.cm-kpi>span{font-size:10px;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:var(--muted)}
+.cm-kpi>span{font-size:13px;font-weight:700;color:var(--muted)}
 /* Les CHIFFRES sont en Karla : les chiffres elzeviriens de Marcellus font
    lire « IOI » pour 101. Les mots gardent la police de titre. */
 .cm-chiffre{font-family:var(--f-b);font-variant-numeric:lining-nums tabular-nums}
-.cm-kpi .cm-grand{font-family:var(--f-b);font-weight:300;font-size:40px;line-height:1;color:var(--cream);
+.cm-kpi .cm-grand{font-family:var(--f-b);font-weight:600;font-size:40px;line-height:1;color:var(--cream);
   font-variant-numeric:lining-nums}
 .cm-kpi .cm-grand small{font:400 13px var(--f-b);color:var(--muted);margin-left:6px}
 .cm-repart{display:flex;flex-direction:column;gap:6px;font-size:13px}
@@ -51,9 +50,9 @@
 .cm-outils .cm-compte{margin-left:auto;font-size:13px;color:var(--muted)}
 
 /* ── Le tableau ──────────────────────────────────────────────────────── */
-.cm-table-cadre{background:var(--bark-2);border:1px solid var(--line);overflow-x:auto}
+.cm-table-cadre{background:var(--bark-2);border:1px solid var(--line);border-radius:var(--r);overflow-x:auto}
 table.cm-table{width:100%;border-collapse:collapse;font-size:14px;min-width:860px}
-.cm-table th{font-size:10px;letter-spacing:.16em;text-transform:uppercase;font-weight:700;
+.cm-table th{font-size:12.5px;font-weight:700;
   color:var(--muted);text-align:left;padding:13px 14px;border-bottom:1px solid var(--line);
   background:var(--bark);white-space:nowrap}
 .cm-table td{padding:12px 14px;border-bottom:1px solid var(--line-2);vertical-align:middle}
@@ -92,13 +91,13 @@ table.cm-table{width:100%;border-collapse:collapse;font-size:14px;min-width:860p
 .cm-lot-x:hover{color:#fff}
 
 /* L'ajout d'une serie */
-.cm-mode{display:inline-flex;border:1px solid var(--line);margin-bottom:18px}
+.cm-mode{display:inline-flex;border:1px solid var(--line);border-radius:var(--r-s);margin-bottom:18px}
 .cm-mode label{display:flex;align-items:center;gap:8px;margin:0;padding:9px 16px;cursor:pointer;
   text-transform:none;letter-spacing:0;font-size:13.5px;color:var(--prose);background:var(--bark-2)}
 .cm-mode label+label{border-left:1px solid var(--line)}
 .cm-mode label.on{background:var(--night);color:#fff}
 .cm-mode input{width:auto;accent-color:var(--bronze)}
-.cm-apercu{background:var(--bark);border:1px solid var(--line);padding:12px 16px;font-size:13.5px;
+.cm-apercu{background:var(--bark);border:1px solid var(--line);border-radius:var(--r-s);padding:12px 16px;font-size:13.5px;
   color:var(--prose);margin:-4px 0 18px}
 .cm-apercu b{color:var(--cream)}
 .cm-mal{color:var(--err)}
@@ -126,7 +125,7 @@ table.cm-table{width:100%;border-collapse:collapse;font-size:14px;min-width:860p
 .cm-plus{width:34px;height:34px;display:inline-grid;place-items:center;background:none;
   border:1px solid transparent;cursor:pointer;font-size:18px;color:var(--prose);line-height:1}
 .cm-plus:hover,.cm-plus[aria-expanded="true"]{border-color:var(--line);background:var(--bark)}
-.cm-menu{position:fixed;z-index:60;min-width:230px;background:var(--bark-2);border:1px solid var(--line);
+.cm-menu{position:fixed;z-index:60;min-width:230px;background:var(--bark-2);border:1px solid var(--line);border-radius:var(--r);
   box-shadow:0 12px 32px rgba(15,30,51,.14);padding:6px 0}
 .cm-menu button{display:flex;width:100%;align-items:center;gap:12px;background:none;border:0;
   padding:9px 16px;font:400 14px var(--f-b);color:var(--cream);cursor:pointer;text-align:left}
@@ -140,11 +139,11 @@ table.cm-table{width:100%;border-collapse:collapse;font-size:14px;min-width:860p
 .cm-retour{margin-bottom:16px}
 .cm-tete{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;margin-bottom:24px}
 .cm-tete h1{font-family:var(--f-t);font-weight:400;font-size:34px;line-height:1.1}
-.cm-tete .cm-sur{font-size:10px;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:var(--bronze-2);margin-bottom:6px}
+.cm-tete .cm-sur{font-size:13px;font-weight:700;color:var(--bronze-2);margin-bottom:6px}
 .cm-tete .cm-etats{display:flex;gap:14px;align-items:center;margin-top:10px;flex-wrap:wrap}
 .cm-tete .cm-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .cm-fiche{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:22px;align-items:start}
-.cm-galerie{background:var(--bark-2);border:1px solid var(--line);padding:12px}
+.cm-galerie{background:var(--bark-2);border:1px solid var(--line);border-radius:var(--r-s);padding:12px}
 .cm-galerie .cm-une{width:100%;aspect-ratio:3/2;object-fit:cover;display:block;background:var(--bark-3)}
 .cm-galerie .cm-vignettes{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-top:8px}
 .cm-galerie .cm-vignettes button{padding:0;border:2px solid transparent;background:none;cursor:pointer;aspect-ratio:1}
@@ -153,15 +152,15 @@ table.cm-table{width:100%;border-collapse:collapse;font-size:14px;min-width:860p
 .cm-galerie .cm-legende{font-size:12px;color:var(--muted);margin-top:10px}
 dl.cm-carac{display:grid;grid-template-columns:auto 1fr;gap:0;margin:0}
 .cm-carac dt,.cm-carac dd{padding:11px 0;border-bottom:1px solid var(--line-2);margin:0}
-.cm-carac dt{font-size:10px;letter-spacing:.16em;text-transform:uppercase;font-weight:700;color:var(--muted);padding-right:24px;
+.cm-carac dt{font-size:12.5px;font-weight:700;color:var(--muted);padding-right:24px;
   display:flex;align-items:center}
 .cm-carac dd{text-align:right;font-size:14.5px}
 .cm-carac dt:nth-last-of-type(1),.cm-carac dd:last-of-type{border-bottom:0}
 .cm-puces{display:flex;flex-wrap:wrap;gap:8px}
-.cm-puces span{font-size:13px;border:1px solid var(--line);padding:6px 12px;background:var(--bark)}
+.cm-puces span{font-size:13px;border:1px solid var(--line);border-radius:999px;padding:6px 12px;background:var(--bark)}
 .cm-texte{white-space:pre-line;color:var(--prose);font-size:14.5px;line-height:1.7}
 .cm-lien-dispo{display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap;
-  background:var(--bark);border:1px solid var(--line);padding:16px 18px}
+  background:var(--bark);border:1px solid var(--line);border-radius:var(--r-s);padding:16px 18px}
 .cm-lien-dispo p{margin:0;font-size:13.5px;color:var(--prose);flex:1 1 240px}
 
 /* ── Le formulaire ───────────────────────────────────────────────────── */
@@ -176,11 +175,11 @@ dl.cm-carac{display:grid;grid-template-columns:auto 1fr;gap:0;margin:0}
 .cm-unite span{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--muted);pointer-events:none}
 .champ.mal input,.champ.mal select{border-color:var(--err)}
 .cm-prix{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;
-  background:var(--bark);border:1px solid var(--line);padding:14px 16px}
+  background:var(--bark);border:1px solid var(--line);border-radius:var(--r-s);padding:14px 16px}
 .cm-prix b{font-family:var(--f-b);font-weight:600;font-size:20px;font-variant-numeric:lining-nums}
 .cm-prix a,.cm-prix button{font-size:12.5px;color:var(--bronze-2);background:none;border:0;padding:0;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
 .cm-sugg{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
-.cm-sugg button{font:400 13px var(--f-b);padding:7px 12px;border:1px solid var(--line);background:var(--bark-2);
+.cm-sugg button{font:400 13px var(--f-b);padding:7px 12px;border:1px solid var(--line);border-radius:var(--r-s);background:var(--bark-2);
   color:var(--prose);cursor:pointer;display:inline-flex;align-items:center;gap:7px}
 .cm-sugg button:hover{border-color:var(--bronze)}
 .cm-sugg button[aria-pressed="true"]{background:var(--night);border-color:var(--night);color:#fff}
@@ -188,16 +187,15 @@ dl.cm-carac{display:grid;grid-template-columns:auto 1fr;gap:0;margin:0}
 .cm-ajout-eq{display:flex;gap:8px}
 .cm-ajout-eq input{flex:1}
 .cm-seg{display:flex;flex-direction:column;gap:8px}
-.cm-seg label{display:flex;align-items:flex-start;gap:12px;border:1px solid var(--line);padding:12px 14px;cursor:pointer;
+.cm-seg label{display:flex;align-items:flex-start;gap:12px;border:1px solid var(--line);border-radius:var(--r-s);padding:12px 14px;cursor:pointer;
   text-transform:none;letter-spacing:0;font-size:14px;color:var(--cream);margin:0;background:var(--bark-2)}
 .cm-seg label.on{border-color:var(--bronze);background:#FBF8F2}
 .cm-seg input{width:auto;margin-top:5px;accent-color:var(--bronze)}
 .cm-seg small{display:block;font-size:12px;color:var(--muted);margin-top:2px}
 .cm-photos{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px;margin-bottom:14px}
-.cm-photo{position:relative;border:1px solid var(--line);background:var(--bark-3);aspect-ratio:4/3}
+.cm-photo{position:relative;border:1px solid var(--line);border-radius:var(--r-s);overflow:hidden;background:var(--bark-3);aspect-ratio:4/3}
 .cm-photo img{width:100%;height:100%;object-fit:cover;display:block}
-.cm-photo .cm-couv{position:absolute;left:6px;top:6px;background:var(--night);color:#fff;font-size:9px;
-  letter-spacing:.14em;text-transform:uppercase;font-weight:700;padding:4px 7px}
+.cm-photo .cm-couv{position:absolute;left:6px;top:6px;background:var(--night);color:#fff;font-size:11.5px;font-weight:700;padding:4px 7px}
 .cm-photo .cm-ph-act{position:absolute;right:6px;bottom:6px;display:flex;gap:4px}
 .cm-photo .cm-ph-act button{width:28px;height:28px;border:0;background:rgba(15,30,51,.78);color:#fff;cursor:pointer;
   font-size:13px;display:grid;place-items:center}

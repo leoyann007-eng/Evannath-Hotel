@@ -208,6 +208,41 @@ Le code ne peut pas le faire à votre place. Dans l'ordre :
 
 Puis la bascule de « Repasser en production le jour de la signature », plus bas.
 
+## L'administration : connexion et sécurité
+
+**La double authentification est obligatoire pour tous les comptes** (choix de
+la direction, octobre 2026). À la première connexion : le mot de passe
+provisoire est remplacé, puis la personne scanne un QR code avec Google
+Authenticator, Microsoft Authenticator ou Mots de passe (iPhone), saisit le
+premier code, et reçoit **dix codes de secours** à usage unique. Ensuite,
+chaque connexion demande le mot de passe **et** le code à 6 chiffres.
+
+- **Les codes** suivent la norme TOTP (RFC 6238, 30 secondes, ±30 s de
+  décalage d'horloge). Un code déjà utilisé ne rouvre pas de session. Le secret
+  est chiffré (AES-256-GCM, clé tirée d'`ADMIN_SECRET`) et les codes de secours
+  ne sont gardés qu'en empreinte. Le QR code est dessiné dans la page
+  (`admin/qrcode.js`, MIT) : le secret ne part chez personne.
+- **Téléphone perdu** : un code de secours, ou un administrateur clique sur
+  « Double auth. » dans Utilisateurs ; la personne la réactive en se reconnectant.
+  « Mon compte » permet de changer de téléphone et de renouveler les codes (le
+  code actuel est demandé), et de déconnecter ses autres appareils.
+- **Les essais** sont comptés dans la base, pour toutes les instances : cinq
+  mots de passe ou cinq codes faux ferment le compte un quart d'heure ; vingt
+  échecs depuis une même adresse IP la ferment aussi.
+- **Le journal** garde les connexions, les échecs sur un compte existant et les
+  blocages, avec l'appareil (« Chrome sur Windows »), la ville et l'adresse IP.
+- **Les écritures** venues d'une autre origine sont refusées (en plus du cookie
+  `SameSite=Strict`), et l'en-tête `Cross-Origin-Opener-Policy` isole le site.
+- **L'accès de secours** (mot de passe `ADMIN_MDP`, sans e-mail) est réservé au
+  développeur : il se trouve derrière le lien « Accès de secours » de la page de
+  connexion et n'a pas de double authentification. Changer `ADMIN_MDP` dans
+  Vercel le coupe.
+
+L'administration n'appelle plus aucun service extérieur : polices (`polices/`,
+SIL OFL) et icônes (`admin/icones.js`, traits SVG) sont servies par le site.
+
+Tests : `node tests/deux-facteurs.test.mjs`.
+
 ## Le référencement
 
 L'onglet **Référencement** de l'administration est tenu par l'agence de

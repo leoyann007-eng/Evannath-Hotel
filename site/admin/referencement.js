@@ -243,7 +243,7 @@ function rfListe(groupe, attente) {
       <div class="mc-col"><span class="rf-mc${v.motcle ? '' : ' vide'}" title="${ech(v.motcle)}">${
         v.motcle ? ech(v.motcle) : 'aucun mot-clé'}</span></div>
       <span class="etat ${cl}"${detail ? ' title="' + ech(detail) + '"' : ''}>${ech(mot)}</span>
-      <div class="rf-gestes"><a class="rf-voir" href="${ech(p.chemin)}" target="_blank" rel="noopener">Voir ↗</a>
+      <div class="rf-gestes"><a class="rf-voir" href="${ech(p.chemin)}" target="_blank" rel="noopener">Voir ${ic('externe')}</a>
         <button class="btn mince" data-rf-page="${ech(p.id)}">${rfPeut() ? 'Modifier' : 'Détails'}</button></div>
     </div>`;
   }).join('');
@@ -265,7 +265,7 @@ function rfCarnet(articles) {
       <div class="gt"><div class="t">${ech(titre)}</div><div class="d">${ech(a.chapo)}</div></div>
       <div class="mc-col"></div>
       <span class="etat ${cl}">${ech(mot)}</span>
-      <div class="rf-gestes">${a.slug ? `<a class="rf-voir" href="/carnet-${ech(a.slug)}" target="_blank" rel="noopener">Voir ↗</a>` : ''}
+      <div class="rf-gestes">${a.slug ? `<a class="rf-voir" href="/carnet-${ech(a.slug)}" target="_blank" rel="noopener">Voir ${ic('externe')}</a>` : ''}
         <button class="btn mince" data-rf-article="${ech(a.id)}">Modifier dans Le Carnet</button></div>
     </div>`;
   }).join('');
@@ -349,7 +349,7 @@ function rfFiche() {
         › ${p.groupe === 'chambres' ? 'Chambres' : 'Pages'}</p>
       <h1 class="t">${ech(p.nom)}</h1>
       <p class="sous">${ech(RF.manifeste.site + (p.chemin === '/' ? '/' : p.chemin))} ·
-        <a class="rf-voir" href="${ech(p.chemin)}" target="_blank" rel="noopener">Voir la page ↗</a></p></div>
+        <a class="rf-voir" href="${ech(p.chemin)}" target="_blank" rel="noopener">Voir la page ${ic('externe')}</a></p></div>
     </div>
     <div class="rf-grille">
     <form class="carte" id="rf-form" autocomplete="off">
@@ -439,8 +439,8 @@ function rfApres() {
 
   // Les verifications
   const v = [];
-  const ok = (t, petit) => v.push(['ok', '✓', t, petit]);
-  const ko = (t, petit) => v.push(['ko', '✗', t, petit]);
+  const ok = (t, petit) => v.push(['ok', ic('check'), t, petit]);
+  const ko = (t, petit) => v.push(['ko', ic('x'), t, petit]);
   const mc = s.motcle.trim();
   if (!mc) {
     ko('Aucun mot-clé choisi', 'Choisissez ce que les clients tapent pour trouver cette page : les vérifications en dépendent.');

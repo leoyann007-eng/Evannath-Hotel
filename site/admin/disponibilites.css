@@ -8,11 +8,11 @@
 .dsp{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:22px;align-items:start;margin-bottom:20px}
 @media(max-width:1240px){.dsp{grid-template-columns:minmax(0,1fr)}}
 .dsp-cal{background:var(--bark-2);
-  border:1px solid var(--line);margin-bottom:20px}
+  border:1px solid var(--line);border-radius:var(--r);margin-bottom:20px}
 .dsp-barre{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;
   padding:14px 18px;border-bottom:1px solid var(--line)}
 .dsp-nav{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.dsp-nav .fl2{width:36px;height:36px;background:var(--bark-3);border:1px solid var(--line);
+.dsp-nav .fl2{width:36px;height:36px;background:var(--bark-3);border:1px solid var(--line);border-radius:var(--r-s);
   color:var(--cream);cursor:pointer;font-size:16px;transition:.2s}
 .dsp-nav .fl2:hover{border-color:var(--bronze-2);color:var(--bronze-2)}
 .dsp-mois{width:auto;font-family:var(--f-t);font-size:17px;padding:6px 12px;margin-left:6px;cursor:pointer}
@@ -26,7 +26,7 @@
 .dsp-traiter{border-left:3px solid var(--ambre);margin-bottom:18px}
 .dsp-dem{display:flex;gap:16px;align-items:center;flex-wrap:wrap;
   padding:13px 0;border-top:1px solid rgba(138,95,43,.14)}
-.dsp-dem b{font-family:var(--f-t);font-weight:400;font-size:17px;display:block}
+.dsp-dem b{font-family:var(--f-b);font-weight:600;font-size:17px;display:block}
 .dsp-dem span{display:block;font-size:12.5px;color:var(--muted)}
 .dsp-dem .quand{color:var(--prose)}
 
@@ -40,7 +40,7 @@
   padding-bottom:8px;margin-bottom:12px;border-bottom:1px solid var(--line)}
 .j-cartes{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px}
 .j-c{display:block;width:100%;text-align:left;background:var(--bark-2);
-  border:1px solid var(--line);padding:0 0 12px;cursor:pointer;font:inherit;
+  border:1px solid var(--line);border-radius:var(--r-s);padding:0 0 12px;cursor:pointer;font:inherit;
   color:var(--cream);transition:.15s;overflow:hidden}
 .j-c:hover{border-color:var(--bronze)}
 .j-c:focus-visible{outline:2px solid var(--bronze);outline-offset:-2px}
@@ -50,7 +50,7 @@
   font:700 10px/1.3 var(--f-b);letter-spacing:.09em;text-transform:uppercase}
 .j-b em{font:400 10px/1 var(--f-b);font-style:normal;letter-spacing:.04em;
   text-transform:none;opacity:.9;white-space:nowrap}
-.j-n{display:block;padding:0 12px;font-family:var(--f-t);font-size:20px;line-height:1.1}
+.j-n{display:block;padding:0 12px;font-family:var(--f-b);font-weight:600;font-size:20px;line-height:1.1}
 .j-cat{display:block;padding:2px 12px 0;font-size:12px;color:var(--muted)}
 .j-qui{display:block;padding:8px 12px 0;font-size:13px}
 .j-d{display:block;padding:2px 12px 0;font-size:12px;color:var(--prose)}
@@ -80,7 +80,7 @@
 .m-c.hors{background:var(--bark);opacity:.4;cursor:default;pointer-events:none}
 .m-h{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
 .m-n{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;
-  font-family:var(--f-t);font-size:15px;line-height:1}
+  font-family:var(--f-b);font-weight:600;font-size:15px;line-height:1}
 .m-c.auj .m-n{background:var(--f-occ);color:var(--t-occ)}
 .m-t{font:700 12px/1 var(--f-b);color:var(--prose)}
 /* La barre empilee : occupees, reservees, indisponibles. Le reste est libre. */
@@ -105,20 +105,20 @@
    Le meme choix de chambres que le calendrier, mais l'etat d'UN jour. Elle
    sert a lire vite ; le calendrier sert a naviguer dans le temps. */
 .dsp-liste{width:100%;border-collapse:collapse;font-size:13.5px}
-.dsp-liste th{text-align:left;font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+.dsp-liste th{text-align:left;font-size:12.5px;
   color:var(--muted);font-weight:700;padding:12px 18px;border-bottom:1px solid var(--line);
   background:var(--bark-2)}
 .dsp-liste td{padding:11px 18px;border-bottom:1px solid rgba(138,95,43,.10);vertical-align:middle}
 .dsp-liste tbody tr{cursor:pointer}
 .dsp-liste tbody tr:hover{background:rgba(138,95,43,.07)}
 .dsp-liste tbody tr:focus-visible{outline:2px solid var(--bronze-2);outline-offset:-2px}
-.dsp-liste b{font-family:var(--f-t);font-weight:400;font-size:16px}
+.dsp-liste b{font-family:var(--f-b);font-weight:600;font-size:16px}
 /* Le numero ouvre la FICHE de la chambre, la ou la ligne ouvre la nuit.
    La liste est l'ecran d'inventaire : c'est la qu'on vient pour voir ses
    chambres, et c'etait le seul endroit d'ou l'on ne pouvait pas en retirer
    une. Il fallait deviner qu'il fallait passer par la vue Semaine et viser
    un numero plutot qu'une case. */
-.dsp-liste .dsp-num{font-family:var(--f-t);font-size:16px}
+.dsp-liste .dsp-num{font-family:var(--f-b);font-weight:600;font-size:16px}
 
 /* Le glyphe cercle des compteurs. */
 .dsp-chiffres-h .carte{display:flex;align-items:center;gap:13px}
@@ -133,10 +133,9 @@
 .dsp-chiffres-h{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));
   gap:14px;margin-bottom:18px}
 .dsp-chiffres-h .carte{margin:0;padding:18px 20px}
-.dsp-chiffres-h b{font-family:var(--f-t);font-weight:400;font-size:30px;line-height:1;
+.dsp-chiffres-h b{font-family:var(--f-b);font-weight:600;font-size:30px;line-height:1;
   display:flex;align-items:center;gap:10px}
-.dsp-chiffres-h span:not(.pt){display:block;margin-top:8px;font-size:11.5px;
-  letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.dsp-chiffres-h span:not(.pt){display:block;margin-top:8px;font-size:13px;color:var(--muted);font-weight:700}
 
 .dsp-filtres{display:flex;gap:12px;align-items:center;flex-wrap:wrap;
   margin-bottom:18px;padding:14px 18px}
@@ -150,22 +149,22 @@
 .dsp-vide{padding:34px 32px}
 .dsp-cats{display:grid;gap:10px}
 .dsp-cats > div{display:flex;gap:16px;align-items:center;background:var(--bark-3);
-  border:1px solid var(--line);padding:12px 16px}
+  border:1px solid var(--line);border-radius:var(--r-s);padding:12px 16px}
 .dsp-cats .v{flex:none}
 .dsp-cats .vig{width:72px;height:54px;object-fit:cover;background:var(--bark-2);display:block}
-.dsp-cats b{font-family:var(--f-t);font-weight:400;font-size:16.5px;display:block}
+.dsp-cats b{font-family:var(--f-b);font-weight:600;font-size:16.5px;display:block}
 .dsp-cats span{font-size:12.5px;color:var(--muted);display:block}
 .dsp-cats .rien{color:var(--bronze);margin-top:2px}
 
 /* La ligne d'une chambre : son numero, sa categorie dessous. */
 .dsp-ch{align-items:center;gap:12px}
-.dsp-ch .dsp-num{font-family:var(--f-t);font-size:17px;line-height:1.2}
+.dsp-ch .dsp-num{font-family:var(--f-b);font-weight:600;font-size:17px;line-height:1.2}
 .dsp-ch .sc{display:block;font-size:12px;color:var(--muted);margin-top:2px}
 .dsp-ch .et{font-size:12.5px;color:var(--muted);flex:none}
 
 .dsp-pied{display:flex;gap:6px;flex-wrap:wrap;padding:12px 18px;
   border-top:1px solid var(--line)}
-.dsp-pied .dsp-lien{padding:6px 10px;border:1px solid var(--line)}
+.dsp-pied .dsp-lien{padding:6px 10px;border:1px solid var(--line);border-radius:var(--r-s);}
 .dsp-pied .dsp-lien:hover{border-color:var(--bronze-2)}
 
 /* A quarante-six chambres la page fait quatre mille pixels : on perd
@@ -217,19 +216,19 @@
 .v-mois .dsp-tete .dsp-j b{font-size:12px;font-weight:400}
 .dsp-j.auj{background:rgba(138,95,43,.07)}
 .dsp-t{flex-direction:column;align-items:center;padding:10px 4px 9px}
-.dsp-t span{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
-.dsp-t b{font-family:var(--f-t);font-weight:400;font-size:19px;line-height:1.2}
+.dsp-t span{font-size:12.5px;color:var(--muted);font-weight:700}
+.dsp-t b{font-family:var(--f-b);font-weight:600;font-size:19px;line-height:1.2}
 .dsp-t b i{font-family:var(--f-b);font-style:normal;font-size:11.5px;color:var(--muted)}
 .dsp-t.auj b i{color:var(--bronze-2)}
 .dsp-t.auj{background:rgba(138,95,43,.14);box-shadow:inset 0 2px 0 var(--bronze)}
 .dsp-t.auj span,.dsp-t.auj b{color:var(--bronze-2)}
 
 .dsp-cat .vig{width:64px;height:48px;object-fit:cover;background:var(--bark-3);flex:none}
-.dsp-cat .nom{font-family:var(--f-t);font-weight:400;font-size:16px;display:block;line-height:1.25}
+.dsp-cat .nom{font-family:var(--f-b);font-weight:600;font-size:16px;display:block;line-height:1.25}
 .dsp-cat .prix{font-size:12px;color:var(--muted)}
 .dsp-stats{display:flex;gap:12px;margin-top:10px;flex-wrap:wrap}
-.dsp-stats b{font-family:var(--f-t);font-weight:400;font-size:19px;line-height:1;display:block}
-.dsp-stats span{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.dsp-stats b{font-family:var(--f-b);font-weight:600;font-size:19px;line-height:1;display:block}
+.dsp-stats span{font-size:12px;color:var(--muted);font-weight:700}
 .dsp-lien{background:none;border:0;color:var(--bronze);font:700 10px/1 var(--f-b);letter-spacing:.14em;
   text-transform:uppercase;cursor:pointer;padding:8px 0 0}
 .dsp-lien:hover{color:var(--bronze-2)}
@@ -269,7 +268,7 @@
 @media(max-width:900px){.dsp-bas{grid-template-columns:1fr}}
 .dsp-bas .carte{margin:0}
 .dsp-apercu{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
-.dsp-apercu>div{background:var(--bark-3);border:1px solid var(--line);padding:12px 14px}
+.dsp-apercu>div{background:var(--bark-3);border:1px solid var(--line);border-radius:var(--r-s);padding:12px 14px}
 .dsp-apercu b{display:block;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .dsp-apercu span{font-size:12px;color:var(--muted)}
 .dsp-jauge{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:11.5px;color:var(--prose)}
@@ -280,7 +279,7 @@
 .dsp-legende li{display:flex;align-items:center;gap:10px}
 .dsp-total{display:flex;justify-content:space-between;align-items:baseline;margin-top:18px;padding-top:14px;
   border-top:1px solid var(--line);font-size:13.5px}
-.dsp-total b{font-family:var(--f-t);font-weight:400;font-size:22px}
+.dsp-total b{font-family:var(--f-b);font-weight:600;font-size:22px}
 
 .dsp-cote{display:flex;flex-direction:column;gap:20px}
 .dsp-cote .carte{margin:0;padding:20px 22px}
@@ -288,7 +287,7 @@
 .dsp-auj{display:grid;grid-template-columns:repeat(3,1fr)}
 .dsp-auj>div{padding:0 10px}
 .dsp-auj>div+div{border-left:1px solid var(--line)}
-.dsp-auj b{font-family:var(--f-t);font-weight:400;font-size:26px;line-height:1}
+.dsp-auj b{font-family:var(--f-b);font-weight:600;font-size:26px;line-height:1}
 .dsp-auj span{font-size:11.5px;color:var(--muted);line-height:1.3;display:block;margin-top:6px}
 .dsp-resa{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-top:1px solid rgba(138,95,43,.14)}
 .dsp-resa div{flex:1;min-width:0}
@@ -322,30 +321,30 @@
 .dsp-th{display:flex;justify-content:space-between;align-items:center;padding:18px 22px;background:var(--bark-3);
   border-bottom:1px solid var(--line)}
 .dsp-th h2{font-family:var(--f-t);font-weight:400;font-size:19px}
-.dsp-x{width:36px;height:36px;background:none;border:1px solid var(--line);color:var(--cream);font-size:18px;cursor:pointer}
+.dsp-x{width:36px;height:36px;background:none;border:1px solid var(--line);border-radius:var(--r-s);color:var(--cream);font-size:18px;cursor:pointer}
 .dsp-x:hover{border-color:var(--bronze-2);color:var(--bronze-2)}
 .dsp-tc{flex:1;overflow:auto;padding:22px}
 .dsp-tp{padding:16px 22px;border-top:1px solid var(--line);display:flex;gap:10px}
 .dsp-tp .plein{flex:1;justify-content:center}
 .dsp-qui{display:flex;gap:14px;align-items:center;margin-bottom:18px}
 .dsp-qui .vig{width:64px;height:48px;object-fit:cover;background:var(--bark-3);flex:none}
-.dsp-qui b{font-family:var(--f-t);font-weight:400;font-size:17px;display:block;line-height:1.25}
+.dsp-qui b{font-family:var(--f-b);font-weight:600;font-size:17px;display:block;line-height:1.25}
 .dsp-qui span{font-size:13px;color:var(--muted)}
-.dsp-chiffres{border:1px solid var(--line);background:var(--bark);margin-bottom:22px}
+.dsp-chiffres{border:1px solid var(--line);border-radius:var(--r);background:var(--bark);margin-bottom:22px}
 .dsp-chiffres>div{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;font-size:13.5px}
 .dsp-chiffres>div+div{border-top:1px solid rgba(138,95,43,.10)}
 .dsp-chiffres .fort{font-weight:700;border-top-color:var(--line)}
-.dsp-chiffres .fort b{font-family:var(--f-t);font-weight:400;font-size:20px}
+.dsp-chiffres .fort b{font-family:var(--f-b);font-weight:600;font-size:20px}
 .dsp-ajust{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:6px}
 .dsp-pas{display:flex}
-.dsp-pas button{width:44px;height:44px;background:var(--bark-3);border:1px solid var(--line);color:var(--cream);
+.dsp-pas button{width:44px;height:44px;background:var(--bark-3);border:1px solid var(--line);border-radius:var(--r-s);color:var(--cream);
   font-size:18px;cursor:pointer}
 .dsp-pas button:hover:not([disabled]){border-color:var(--bronze-2)}
 .dsp-pas button[disabled]{opacity:.35;cursor:default}
 .dsp-pas output{width:56px;display:flex;align-items:center;justify-content:center;border-top:1px solid var(--line);
   border-bottom:1px solid var(--line);font-family:var(--f-t);font-size:19px}
 label.dsp-radio{display:flex;align-items:center;gap:12px;padding:9px 12px;margin:5px 0;background:var(--bark-3);
-  border:1px solid var(--line);font-size:13.5px;cursor:pointer;text-transform:none;letter-spacing:0;
+  border:1px solid var(--line);border-radius:var(--r-s);font-size:13.5px;cursor:pointer;text-transform:none;letter-spacing:0;
   color:var(--cream);font-weight:400}
 label.dsp-radio.on{border-color:var(--bronze-2)}
 label.dsp-radio input{width:16px;height:16px;accent-color:var(--bronze-2)}
@@ -362,8 +361,8 @@ label.dsp-radio input{width:16px;height:16px;accent-color:var(--bronze-2)}
 .dsp-boite .dsp-tp .plein{flex:none}
 .dsp-coches{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:6px;margin-bottom:18px}
 .dsp-coches label.dsp-radio{margin:0}
-.dsp-recap{border:1px solid var(--line);background:var(--bark);padding:16px 18px;margin-bottom:16px}
-.dsp-recap b{font-family:var(--f-t);font-weight:400;font-size:18px;display:block}
+.dsp-recap{border:1px solid var(--line);border-radius:var(--r-s);background:var(--bark);padding:16px 18px;margin-bottom:16px}
+.dsp-recap b{font-family:var(--f-b);font-weight:600;font-size:18px;display:block}
 .dsp-recap span{display:block;font-size:13.5px;color:var(--prose)}
 
 #dsp-toast{position:fixed;right:28px;bottom:28px;z-index:60;background:var(--bark-3);border:1px solid var(--palm);

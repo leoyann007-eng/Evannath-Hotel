@@ -6,12 +6,16 @@
 <meta name="robots" content="noindex, nofollow">
 <title>Administration — Hôtel Evannath</title>
 <link rel="icon" href="/favicon.ico" sizes="any">
-<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Karla:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/admin/disponibilites.css">
 <link rel="stylesheet" href="/admin/chambres.css">
 <link rel="stylesheet" href="/admin/comptes.css">
 <link rel="stylesheet" href="/admin/referencement.css">
+<script src="/admin/icones.js"></script>
 <style>
+/* Les polices de la marque, hebergees par le site : l'administration ne
+   charge plus rien chez Google (ni requete exterieure, ni dependance). */
+@font-face{font-family:'Karla';font-weight:300 700;font-display:swap;src:url(/polices/karla.woff2) format('woff2')}
+@font-face{font-family:'Marcellus';font-weight:400;font-display:swap;src:url(/polices/marcellus.woff2) format('woff2')}
 :root{
   /* ── Marine, or et blanc ────────────────────────────────────────────
      Le SITE est creme : la direction n'aimait pas le fond noir, et c'est
@@ -27,9 +31,11 @@
      2,6:1. L'or du projet est donc plus sombre — c'est le meme or, assez
      fonce pour porter du texte. */
   --night:#0F1E33;   /* marine : barre laterale, texte sur or */
-  --bark:#F4F6FA;    /* le fond de l'application */
+  /* Refonte d'octobre 2026 : le fond passe du gris bleute a un blanc casse
+     chaud, le meme que le sable du site. Le marine et l'or ne bougent pas. */
+  --bark:#F6F4F0;    /* le fond de l'application */
   --bark-2:#FFFFFF;  /* les cartes */
-  --bark-3:#EDF0F4;  /* les surfaces creusees */
+  --bark-3:#F2EFE9;  /* les surfaces creusees */
   /* L'or. Il sert de TEXTE (libelles, intertitres) et de FOND (boutons) :
      il lui faut donc tenir dans les deux sens. A #8A6A33 l'intertitre
      tombait a 4,38:1 sur la surface creusee ; celui-ci donne 4,68:1, et
@@ -40,7 +46,13 @@
      voudrait dire toucher trente-neuf declarations. */
   --cream:#0F1E33; --prose:#465061; --muted:#5B6576;
   --palm:#2F6B44; --err:#A3342C;
-  --line:#E1E5EC; --line-2:#EEF1F5;
+  --line:#E6E1D8; --line-2:#EFEBE4;
+  /* L'or clair de la barre laterale, et les fonds pales des etats. */
+  --or-clair:#C9A86A; --or-pale:#F6F0E4;
+  --vert-pale:#E7F2EA; --rouge-pale:#FBECEA; --ambre-pale:#FCF2E0; --bleu:#28558A; --bleu-pale:#E9F0F9;
+  /* Les arrondis et l'ombre des cartes : une seule valeur de chaque. */
+  --r:12px; --r-s:8px;
+  --ombre:0 1px 2px rgba(15,30,51,.05),0 4px 14px rgba(15,30,51,.04);
   /* L'ambre des alertes. */
   --ambre:#8A5A12;
 
@@ -69,24 +81,56 @@
 }
 
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bark);color:var(--cream);font-family:var(--f-b);font-size:15px;line-height:1.6}
+body{background:var(--bark);color:var(--cream);font-family:var(--f-b);font-size:15px;line-height:1.6;
+  -webkit-font-smoothing:antialiased}
 a{color:var(--bronze-2);text-decoration:none}
 :focus-visible{outline:2px solid var(--bronze);outline-offset:2px}
+/* Les icones (icones.js) : un trait qui prend la couleur du texte. */
+svg.ic{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:1.7;
+  stroke-linecap:round;stroke-linejoin:round;vertical-align:-3px}
 
 /* ── Connexion ─────────────────────────────────────────── */
-/* Une lueur bronze derriere la carte : la page de connexion est la premiere
-   chose que l hotel voit chaque matin, autant qu elle ait un visage. */
-#porte{min-height:100vh;display:grid;place-items:center;padding:24px;
-  background:radial-gradient(1000px 520px at 50% 12%,rgba(138,95,43,.10),
-    transparent 62%),var(--bark)}
-#porte form{width:100%;max-width:400px;background:var(--bark-2);
-  border:1px solid var(--line);padding:40px 36px 36px;text-align:left;
-  box-shadow:0 24px 60px rgba(90,62,28,.16)}
-#porte .logo{display:block;height:44px;width:auto;margin-bottom:14px}
-#porte .devise{font-size:9.5px;letter-spacing:.26em;text-transform:uppercase;
-  color:var(--bronze);margin-bottom:24px}
-#porte h1{font-family:var(--f-t);font-size:25px;font-weight:400;margin-bottom:6px}
-#porte p{color:var(--muted);font-size:13.5px;margin-bottom:26px}
+/* La premiere chose que l'hotel voit chaque matin : la paillote a gauche,
+   le formulaire a droite. Sur un telephone, la photo devient un bandeau. */
+#porte{min-height:100vh;display:grid;grid-template-columns:1.15fr 1fr;background:var(--bark)}
+.porte-photo{position:relative;background:var(--night) url(/img/opt/og-accueil.jpg) center/cover;color:#fff;
+  padding:44px 52px;display:flex;flex-direction:column;justify-content:space-between;align-items:flex-start}
+.porte-photo::before{content:"";position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(15,30,51,.55),rgba(15,30,51,.15) 40%,rgba(15,30,51,.85))}
+.porte-photo>*{position:relative}
+.porte-photo img{height:46px;width:auto}
+.porte-photo h2{font:400 38px/1.15 var(--f-t);max-width:16ch}
+.porte-photo p{opacity:.85;margin-top:12px;max-width:42ch}
+.porte-cote{display:flex;align-items:center;justify-content:center;padding:40px 24px}
+#porte form{width:100%;max-width:400px}
+#porte h1{font:400 32px/1.2 var(--f-t);margin-bottom:8px}
+#porte form>p{color:var(--prose);font-size:14.5px;margin-bottom:28px}
+#porte .btn.plein{width:100%;height:48px;justify-content:center;font-size:15px;margin-top:6px}
+.porte-bas{margin-top:26px;padding-top:20px;border-top:1px solid var(--line);font-size:13.5px;
+  color:var(--prose);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.porte-bas button{background:none;border:0;padding:0;font:600 13.5px var(--f-b);color:var(--bronze-2);cursor:pointer;white-space:nowrap}
+.porte-bas button.discret{color:var(--prose);font-weight:500}
+.badge-securite{display:inline-flex;align-items:center;gap:8px;background:var(--or-pale);color:var(--bronze-2);
+  border-radius:999px;padding:6px 12px;font-size:13px;font-weight:600;margin-bottom:22px}
+/* Un champ a icone, et l'oeil qui montre le mot de passe. */
+.saisie{position:relative}
+.saisie input{padding-left:42px;height:46px}
+.saisie>i{position:absolute;left:14px;top:14px;color:var(--muted);pointer-events:none;display:flex}
+.saisie .oeil{position:absolute;right:5px;top:5px;width:36px;height:36px;border:0;background:none;
+  border-radius:var(--r-s);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center}
+.saisie .oeil:hover{background:var(--bark-3);color:var(--cream)}
+/* Le code a 6 chiffres : un seul champ, espace comme six cases. */
+input.code6{font:600 28px/1 var(--f-b);letter-spacing:.55em;text-align:center;height:62px;padding:0 0 0 .55em;
+  font-variant-numeric:tabular-nums}
+input.code6::placeholder{color:#D6CEC0}
+input.code6.secours{font-size:22px;letter-spacing:.2em;padding-left:.2em}
+@media(max-width:860px){
+  #porte{grid-template-columns:1fr}
+  .porte-photo{min-height:190px;padding:22px 20px}
+  .porte-photo h2{font-size:24px}
+  .porte-photo p{display:none}
+  .porte-cote{align-items:flex-start;padding:28px 20px 40px}
+}
 
 /* ── Cadre ─────────────────────────────────────────────── */
 #cadre{display:none;min-height:100vh;grid-template-columns:250px 1fr;transition:grid-template-columns .2s}
@@ -137,7 +181,7 @@ a{color:var(--bronze-2);text-decoration:none}
 #cadre.replie aside:not(.deploye) nav h2,
 #cadre.replie aside:not(.deploye) nav button span{display:none}
 #cadre.replie aside:not(.deploye) nav button{justify-content:center;
-  padding:12px 0;gap:0}
+  padding:10px 0;gap:0;width:44px;margin:1px 10px}
 #cadre.replie aside:not(.deploye) nav button i{width:auto}
 
 /* Le controle MANUEL, en haut, a cote du logo — la ou on cherche un
@@ -154,7 +198,7 @@ a{color:var(--bronze-2);text-decoration:none}
   border-radius:9px;border:1px solid rgba(255,255,255,.14);
   background:rgba(255,255,255,.04);color:#E6ECF6;
   font:400 14px/1 var(--f-b);cursor:pointer;transition:.18s}
-#replier i{font-style:normal;color:#8FA0B8;transition:.18s}
+#replier i{font-style:normal;color:rgba(255,255,255,.62);display:flex;transition:.18s}
 #replier span{position:absolute;width:1px;height:1px;overflow:hidden;
   clip-path:inset(50%);white-space:nowrap}
 #replier:hover{background:rgba(255,255,255,.10);border-color:#C9A46A}
@@ -183,36 +227,31 @@ a{color:var(--bronze-2);text-decoration:none}
 /* La barre laterale est MARINE, comme la maquette. Son texte ne peut donc
    pas heriter de --cream, qui designe le texte principal et vaut le marine
    lui-meme : chaque couleur y est redite en clair. */
-aside{background:var(--night);border-right:1px solid rgba(255,255,255,.08);padding:26px 0;
+aside{background:var(--night);border-right:1px solid rgba(255,255,255,.08);padding:22px 0;
   position:sticky;top:0;height:100vh;overflow:auto}
 aside .marque{border-bottom-color:rgba(255,255,255,.10)}
-aside .marque span{color:#C9A46A}
-aside nav h2{color:#8FA0B8}
-aside nav button{color:#E6ECF6}
-aside nav button i{color:#8FA0B8}
-aside nav button:hover{background:rgba(255,255,255,.06);color:#fff}
-aside nav button:hover i{color:#C9A46A}
-aside nav button.on{background:linear-gradient(90deg,rgba(201,164,106,.18),transparent 78%);
-  border-left-color:#C9A46A;color:#fff}
-aside nav button.on i{color:#C9A46A}
+aside .marque span{color:var(--or-clair)}
+aside nav h2{color:rgba(255,255,255,.42)}
+aside nav button{color:rgba(255,255,255,.74)}
+aside nav button i{color:rgba(255,255,255,.62)}
+aside nav button:hover{background:rgba(255,255,255,.05);color:#fff}
+aside nav button:hover i{color:#fff}
+/* L'onglet courant : une pastille claire, et un trait d'or au bord. */
+aside nav button.on{background:rgba(255,255,255,.09);color:#fff;font-weight:600}
+aside nav button.on::before{content:"";position:absolute;left:0;top:9px;bottom:9px;width:3px;
+  border-radius:0 3px 3px 0;background:var(--or-clair)}
+aside nav button.on i{color:var(--or-clair)}
 /* Le logo d'un cote, le burger de l'autre. */
 .marque{padding:0 22px 24px;border-bottom:1px solid var(--line);margin-bottom:18px;
   display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
 .marque .mq{min-width:0}
 .marque img{display:block;height:34px;width:auto;margin-bottom:10px}
 .marque span{font-size:9.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--bronze)}
-nav h2{font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);
-  font-weight:700;padding:20px 24px 8px}
-nav button{display:flex;align-items:center;gap:12px;width:100%;background:none;border:0;
-  color:var(--cream);font:400 14.5px/1.4 var(--f-b);padding:11px 24px;cursor:pointer;
-  text-align:left;border-left:2px solid transparent;transition:.18s}
-nav button:hover{background:var(--bark-2);color:var(--bronze-2)}
-nav button:hover i{color:var(--bronze)}
-nav button.on{background:linear-gradient(90deg,rgba(138,95,43,.14),transparent 78%);
-  border-left-color:var(--bronze);color:var(--bronze-2)}
-nav button.on i{color:var(--bronze-2)}
-nav button i{font-style:normal;font-size:15px;width:20px;text-align:center;
-  color:var(--muted);transition:.18s}
+nav h2{font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;padding:18px 26px 6px}
+nav button{position:relative;display:flex;align-items:center;gap:12px;width:calc(100% - 24px);margin:1px 12px;
+  background:none;border:0;border-radius:var(--r-s);font:500 14.5px/1.4 var(--f-b);padding:9px 12px;
+  cursor:pointer;text-align:left;transition:background .15s,color .15s}
+nav button i{font-style:normal;width:20px;display:flex;justify-content:center;transition:.15s}
 
 /* min-width:0 — la ligne qui empeche la page de deborder.
    Un element de grille vaut par defaut min-width:auto : il refuse de
@@ -223,14 +262,12 @@ nav button i{font-style:normal;font-size:15px;width:20px;text-align:center;
 
    Ce n'etait PAS le calendrier : les coupables mesures etaient l'en-tete,
    un bouton et le bandeau d'alerte — tous entraines par la colonne. */
-main{padding:34px 40px 60px;max-width:1100px;min-width:0}
-.entete{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;
-  flex-wrap:wrap;margin-bottom:26px}
-h1.t{font-family:var(--f-t);font-size:30px;font-weight:400;line-height:1.15}
-/* Un filet bronze sous le titre : la page a une entete, pas seulement un mot. */
-h1.t:after{content:"";display:block;width:44px;height:2px;background:var(--bronze);
-  margin-top:12px}
-.sous{color:var(--muted);font-size:14px;margin-top:4px}
+main{padding:32px 40px 60px;max-width:1100px;min-width:0}
+.entete{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;
+  flex-wrap:wrap;margin-bottom:24px}
+.entete .fil-ariane{font-size:13px;color:var(--muted);margin-bottom:6px}
+h1.t{font-family:var(--f-t);font-size:30px;font-weight:400;line-height:1.2}
+.sous{color:var(--prose);font-size:14.5px;margin-top:6px}
 
 /* ── Blocs ─────────────────────────────────────────────── */
 /* Un filet clair en haut du bloc, comme une lumiere rasante : il detache la
@@ -247,43 +284,115 @@ h1.t:after{content:"";display:block;width:44px;height:2px;background:var(--bronz
 .cat-corps .cat-prix{font-size:16px;color:var(--bronze-2);margin-top:4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .cat-prix i{font-style:normal;font-size:12px;color:var(--muted)}
 .cat-prix .etat{font-style:normal}
-.carte{background:var(--bark-2);border:1px solid var(--line);padding:24px 26px;margin-bottom:20px}
-.chiffres{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:24px}
-.chiffre{position:relative;background:var(--bark-2);border:1px solid var(--line);
-  padding:22px 24px;overflow:hidden;transition:.25s}
-/* Un trait bronze en tete du chiffre : l oeil sait ou commencer. */
-.chiffre:before{content:"";position:absolute;top:0;left:0;width:38px;height:2px;
-  background:var(--bronze)}
-.chiffre:hover{border-color:rgba(138,95,43,.36)}
-.chiffre b{font-family:var(--f-t);font-size:34px;color:var(--bronze);display:block;line-height:1}
-.chiffre span{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
-  font-weight:700;display:block;margin-top:8px}
+.carte{background:var(--bark-2);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--ombre);
+  padding:24px 26px;margin-bottom:20px}
+.chiffres{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px;margin-bottom:22px}
+.chiffre{background:var(--bark-2);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--ombre);
+  padding:18px 20px;color:inherit;text-align:left;font:inherit}
+button.chiffre{cursor:pointer;transition:border-color .15s}
+button.chiffre:hover{border-color:rgba(132,102,49,.45)}
+.chiffre .h{display:flex;justify-content:space-between;align-items:center;gap:10px;color:var(--prose);
+  font-size:13.5px;font-weight:600}
+.chiffre .h i{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;
+  background:var(--or-pale);color:var(--bronze-2);flex:none}
+.chiffre b{font:600 32px/1 var(--f-b);font-variant-numeric:tabular-nums;color:var(--cream);display:block;margin:14px 0 6px}
+.chiffre small{display:block;color:var(--muted);font-size:12.5px}
+.chiffre.urgent b{color:var(--ambre)}
+.chiffre.urgent .h i{background:var(--ambre-pale);color:var(--ambre)}
+.chiffre.bleu .h i{background:var(--bleu-pale);color:var(--bleu)}
+.chiffre.vert .h i{background:var(--vert-pale);color:var(--palm)}
 
-.alerte{border-left:3px solid var(--err);background:rgba(166,58,37,.07);padding:16px 20px;margin-bottom:22px}
-.alerte b{color:var(--err);display:block;margin-bottom:4px}
-.alerte span{font-size:13.5px;color:var(--prose)}
+/* Une alerte : une icone dans un carre, un titre, une phrase. Rouge par
+   defaut ; .or pour une recommandation. */
+.alerte{display:flex;gap:14px;align-items:flex-start;border:1px solid #F2D3CF;background:var(--rouge-pale);
+  border-radius:var(--r);padding:16px 18px;margin-bottom:22px}
+.alerte>i{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;
+  flex:none;background:#F4D4CF;color:var(--err)}
+.alerte b{color:var(--err);display:block;margin-bottom:3px}
+.alerte span,.alerte p{font-size:14px;color:var(--prose)}
+.alerte .btn{margin-left:auto;align-self:center}
+/* Les alertes ecrites sans icone (titre, puis phrase) s'empilent. */
+.alerte:not(:has(>i)){display:block}
+.alerte.or{background:var(--or-pale);border-color:#E9DCC2}
+.alerte.or>i{background:#EADCC0;color:var(--bronze-2)}
+.alerte.or b{color:var(--cream)}
+
+/* ── Le tableau de bord ───────────────────────────────── */
+.tb-actions{display:flex;gap:10px;flex-wrap:wrap}
+.tb-grille{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:20px;align-items:start}
+.tb-liste{padding:0}
+.tb-tete{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px 22px;
+  border-bottom:1px solid var(--line-2)}
+.tb-tete h2{font:600 16px var(--f-b)}
+.tb-tete button{background:none;border:0;padding:0;font:600 13.5px var(--f-b);color:var(--bronze-2);
+  cursor:pointer;display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+.tb-sep{border-top:1px solid var(--line-2)}
+.tb-ligne{display:flex;align-items:center;gap:14px;padding:13px 22px;border-bottom:1px solid var(--line-2)}
+.tb-ligne:last-child{border-bottom:0}
+.tb-av{width:38px;height:38px;border-radius:50%;background:var(--bark-3);color:var(--prose);display:flex;
+  align-items:center;justify-content:center;font-weight:700;font-size:13px;flex:none}
+.tb-txt{flex:1;min-width:0}
+.tb-txt b{display:block;font-size:14.5px;font-weight:600}
+.tb-txt span{font-size:13px;color:var(--muted)}
+.tb-vide{padding:16px 22px;color:var(--muted);font-size:14px}
+.tb-plus{padding:10px 22px;color:var(--muted);font-size:13px}
+.tb-raccourcis{display:grid;gap:10px;padding:16px 22px 18px}
+.tb-raccourcis button{display:flex;align-items:center;gap:12px;padding:11px 14px;border:1px solid var(--line);
+  border-radius:10px;background:var(--bark-2);color:var(--cream);font:600 14px var(--f-b);cursor:pointer;text-align:left}
+.tb-raccourcis button:hover{border-color:#CFC7B9;background:#FBFAF7}
+.tb-raccourcis i{width:32px;height:32px;border-radius:8px;background:var(--or-pale);color:var(--bronze-2);
+  display:flex;align-items:center;justify-content:center;flex:none}
+.tb-raccourcis .fl-d{margin-left:auto;color:var(--muted)}
+.tb-fil{list-style:none;padding:6px 0}
+.tb-fil li{display:flex;gap:12px;padding:10px 22px;font-size:14px;color:var(--prose)}
+.tb-fil li .pt{width:8px;height:8px;border-radius:50%;background:var(--bronze);margin-top:7px;flex:none}
+.tb-fil li b{color:var(--cream);font-weight:600}
+.tb-fil li small{display:block;color:var(--muted);font-size:12.5px}
+.tb-fil li small::first-letter{text-transform:uppercase}
+@media(max-width:980px){ .tb-grille{grid-template-columns:1fr} }
+@media(max-width:720px){
+  .chiffres{grid-template-columns:1fr 1fr;gap:10px}
+  .chiffre{padding:14px}
+  .chiffre b{font-size:28px}
+  .tb-ligne{flex-wrap:wrap}
+  .tb-ligne .etat{margin-left:52px}
+  .alerte{flex-wrap:wrap}
+  .alerte .btn{margin-left:50px}
+}
 
 /* ── Listes ────────────────────────────────────────────── */
-.ligne{display:flex;align-items:center;gap:16px;background:var(--bark-2);
-  border:1px solid var(--line);padding:14px 18px;margin-bottom:10px}
-.ligne .vig{width:64px;height:48px;object-fit:cover;background:var(--bark-3);flex:none}
+.ligne{display:flex;align-items:center;gap:16px;background:var(--bark-2);border:1px solid var(--line);
+  border-radius:var(--r);box-shadow:var(--ombre);padding:14px 18px;margin-bottom:10px}
+.ligne .vig{width:72px;height:54px;border-radius:var(--r-s);object-fit:cover;background:var(--bark-3);flex:none}
 .ligne .txt{flex:1;min-width:0}
-.ligne .txt b{font-family:var(--f-t);font-size:16px;font-weight:400;display:block}
-.ligne .txt span{font-size:12.5px;color:var(--muted)}
-.etat{font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;font-weight:700;
-  padding:5px 10px;border:1px solid var(--line);white-space:nowrap}
-.etat.vif{color:var(--palm);border-color:rgba(79,107,50,.45)}
-.etat.dort{color:var(--muted)}
-.etat.fini{color:var(--err);border-color:rgba(166,58,37,.4)}
+.ligne .txt b{font-size:15px;font-weight:600;display:block}
+.ligne .txt span{font-size:13px;color:var(--muted)}
+/* Un etat : une pastille arrondie, un point de couleur, en minuscules. */
+.etat{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px;border-radius:999px;
+  font-size:12px;font-weight:600;white-space:nowrap;background:var(--bark-3);color:var(--muted);border:0}
+.etat::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;flex:none}
+.etat.vif{background:var(--vert-pale);color:var(--palm)}
+.etat.dort{background:var(--bark-3);color:var(--muted)}
+.etat.fini{background:var(--rouge-pale);color:var(--err)}
 
 /* ── Boutons et champs ─────────────────────────────────── */
-.btn{display:inline-flex;align-items:center;gap:9px;border:1px solid var(--bronze);
-  background:none;color:var(--bronze);font:700 11px/1 var(--f-b);letter-spacing:.18em;
-  text-transform:uppercase;padding:14px 24px;cursor:pointer;transition:.3s;font-family:var(--f-b)}
-.btn:hover{background:var(--bronze);color:var(--bark)}
-.btn.plein{background:var(--bronze);color:var(--bark)}
+/* Les boutons : en minuscules, arrondis. Blanc a filet par defaut, or plein
+   pour l'action principale de l'ecran, marine pour une action forte. */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;
+  border:1px solid var(--line);border-radius:var(--r-s);background:var(--bark-2);color:var(--cream);
+  font:600 14px/1.2 var(--f-b);cursor:pointer;white-space:nowrap;text-decoration:none;
+  transition:background .15s,border-color .15s,color .15s}
+.btn:hover{border-color:#CFC7B9;background:#FBFAF7}
+.btn.plein{background:var(--bronze);border-color:var(--bronze);color:#fff}
 .btn.plein:hover{background:var(--bronze-2);border-color:var(--bronze-2)}
-.btn.mince{padding:9px 15px;font-size:10px;letter-spacing:.14em}
+.btn.marine{background:var(--night);border-color:var(--night);color:#fff}
+.btn.mince{min-height:32px;padding:0 12px;font-size:13px}
+.btn[disabled]{opacity:.5;cursor:default}
+/* Un bouton qui n'est qu'une icone. Son nom est dans title et aria-label. */
+.btn-ic{width:34px;height:34px;border-radius:var(--r-s);display:inline-flex;align-items:center;justify-content:center;
+  color:var(--prose);border:1px solid transparent;background:none;cursor:pointer}
+.btn-ic:hover{background:var(--bark-3);color:var(--cream)}
+.btn-ic.danger{color:var(--err)}
 .rang{display:flex;flex-direction:column;gap:3px;flex:none}
 
 /* ── Formulaire des promotions ──────────────────────────────────────── */
@@ -291,9 +400,9 @@ h1.t:after{content:"";display:block;width:44px;height:2px;background:var(--bronz
 .etape{position:relative}
 
 /* Le bandeau de page perimee : il doit se voir, pas se deviner. */
-.perimee{display:flex;align-items:center;gap:16px;flex-wrap:wrap;
-  padding:16px 20px;margin-bottom:20px;background:rgba(166,58,37,.10);
-  border:1px solid var(--err)}
+.perimee{display:flex;align-items:center;gap:16px;flex-wrap:wrap;border-radius:var(--r);
+  padding:16px 20px;margin-bottom:20px;background:var(--rouge-pale);
+  border:1px solid #EBC3BE}
 .perimee b{color:var(--err);flex:none}
 .perimee span{flex:1;min-width:220px;font-size:13px;color:var(--bronze-2)}
 
@@ -320,8 +429,7 @@ h1.t:after{content:"";display:block;width:44px;height:2px;background:var(--bronz
 .recap{display:grid;grid-template-columns:1fr minmax(0,280px);gap:26px}
 .recap-l{display:flex;gap:14px;padding:11px 0;border-bottom:1px solid var(--line)}
 .recap-l:last-child{border-bottom:0}
-.recap-l span{flex:none;width:112px;font-size:10.5px;letter-spacing:.13em;
-  text-transform:uppercase;color:var(--muted);font-weight:700;padding-top:2px}
+.recap-l span{flex:none;width:112px;font-size:13px;color:var(--muted);font-weight:600;padding-top:1px}
 .recap-l b{font-weight:400;font-size:13.5px}
 .apercu-client{position:relative;background:var(--bark-3);
   border:1px solid var(--line);min-height:230px;overflow:hidden}
@@ -348,8 +456,7 @@ h1.t:after{content:"";display:block;width:44px;height:2px;background:var(--bronz
   width:22px;height:22px;margin-right:9px;font-style:normal;font-size:11px;
   font-weight:700;background:var(--bronze-2);color:var(--bark);
   border-radius:50%;vertical-align:2px}
-.lb{display:block;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
-  color:var(--muted);font-weight:700;margin:16px 0 6px}
+.lb{display:block;font-size:13.5px;color:var(--cream);font-weight:600;margin:16px 0 7px}
 .etape .lb:first-of-type{margin-top:0}
 
 /* Deux options se montrent, elles ne se cherchent pas dans une liste. */
@@ -374,8 +481,8 @@ h1.t:after{content:"";display:block;width:44px;height:2px;background:var(--bronz
   .formule{grid-template-columns:1fr 1fr;gap:6px}
   .choix.trois{grid-template-columns:1fr}
 }
-.opt{padding:14px 16px;text-align:left;font-size:13px;cursor:pointer;
-  background:var(--bark-3);color:var(--bronze-2);border:1px solid var(--line);
+.opt{padding:14px 16px;text-align:left;font-size:13.5px;cursor:pointer;border-radius:var(--r-s);
+  background:var(--bark-2);color:var(--cream);border:1px solid var(--line);
   transition:.2s}
 .opt:hover{border-color:var(--bronze-2)}
 .opt.on{border-color:var(--bronze-2);background:rgba(138,95,43,.12);
@@ -407,25 +514,24 @@ h1.t:after{content:"";display:block;width:44px;height:2px;background:var(--bronz
 .paire input{margin-bottom:8px}
 
 /* Programmee : ni en ligne, ni terminee. Elle attend son heure. */
-.etat.attend{color:var(--bronze-2);border-color:rgba(138,95,43,.45)}
+.etat.attend{background:var(--ambre-pale);color:var(--ambre)}
 
 @media (max-width:640px){
   .choix,.paire{grid-template-columns:1fr}
 }
-.fl{width:26px;height:21px;line-height:1;font-size:9px;cursor:pointer;
-  background:var(--bark-3);color:var(--bronze-2);border:1px solid var(--line);
-  transition:.2s}
-.fl:hover:not([disabled]){background:var(--bronze-2);color:var(--bark);
-  border-color:var(--bronze-2)}
+.fl{width:28px;height:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;
+  background:var(--bark-2);color:var(--prose);border:1px solid var(--line);border-radius:6px;transition:.15s}
+.fl svg.ic{width:14px;height:14px}
+.fl:hover:not([disabled]){background:var(--bark-3);color:var(--cream)}
 .fl[disabled]{opacity:.28;cursor:default}
-.btn.danger{border-color:rgba(166,58,37,.5);color:var(--err)}
-.btn.danger:hover{background:var(--err);color:var(--bark)}
+.btn.danger{color:var(--err)}
+.btn.danger:hover{background:var(--rouge-pale);border-color:#EBC3BE}
 
-label{display:block;font-size:10px;letter-spacing:.18em;text-transform:uppercase;
-  color:var(--muted);font-weight:700;margin-bottom:7px}
-input,textarea,select{width:100%;background:var(--bark);border:1px solid var(--line);
-  color:var(--cream);font:400 14.5px/1.5 var(--f-b);padding:12px 14px}
-input:focus,textarea:focus,select:focus{border-color:var(--bronze);outline:none}
+label{display:block;font-size:13.5px;color:var(--cream);font-weight:600;margin-bottom:7px}
+input,textarea,select{width:100%;background:var(--bark-2);border:1px solid var(--line);border-radius:var(--r-s);
+  color:var(--cream);font:400 14.5px/1.5 var(--f-b);padding:10px 14px;min-height:42px}
+input[type=checkbox],input[type=radio]{width:auto;min-height:0;accent-color:var(--bronze)}
+input:focus,textarea:focus,select:focus{border-color:var(--bronze);outline:none;box-shadow:0 0 0 3px rgba(132,102,49,.15)}
 textarea{min-height:96px;resize:vertical}
 .champ{margin-bottom:18px}
 .duo{display:grid;grid-template-columns:1fr 1fr;gap:16px}
@@ -433,9 +539,9 @@ textarea{min-height:96px;resize:vertical}
 
 .puces{display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end;margin-bottom:10px}
 
-.grille-img{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;
-  max-height:260px;overflow:auto;padding:4px;border:1px solid var(--line);background:var(--bark)}
-.grille-img button{border:2px solid transparent;background:none;padding:0;cursor:pointer;display:block}
+.grille-img{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;border-radius:var(--r);
+  max-height:260px;overflow:auto;padding:8px;border:1px solid var(--line);background:var(--bark)}
+.grille-img button{border:2px solid transparent;border-radius:var(--r-s);overflow:hidden;background:none;padding:0;cursor:pointer;display:block}
 .grille-img button.on{border-color:var(--bronze)}
 .grille-img img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}
 /* display:grid l emportait sur l attribut hidden : la grille de photos
@@ -475,14 +581,13 @@ textarea{min-height:96px;resize:vertical}
   .ligne.dispo .txt{flex:1 1 100%}
 }
 
-.bloc-t{font-family:var(--f-t);font-weight:400;font-size:19px;margin-bottom:14px}
-.depot{display:flex;gap:22px;align-items:flex-start;flex-wrap:wrap;
-  border:1px dashed var(--line);padding:20px;background:var(--bark)}
+.bloc-t{font:600 16.5px/1.35 var(--f-b);margin-bottom:14px}
+.depot{display:flex;gap:22px;align-items:flex-start;flex-wrap:wrap;border-radius:var(--r);
+  border:1px dashed #D6CEC0;padding:20px;background:var(--bark)}
 .depot.survol{border-color:var(--bronze);background:var(--bark-3)}
 #apercu{flex:none}
 details.plus{border-top:1px solid var(--line);margin-top:24px;padding-top:6px}
-details.plus summary{cursor:pointer;font-size:11px;letter-spacing:.16em;
-  text-transform:uppercase;color:var(--bronze);font-weight:700;padding:12px 0}
+details.plus summary{cursor:pointer;font-size:14px;color:var(--bronze-2);font-weight:600;padding:12px 0}
 details.plus summary::marker{color:var(--bronze)}
 
 .pied{display:flex;gap:12px;align-items:center;margin-top:24px;flex-wrap:wrap}
@@ -502,28 +607,57 @@ details.plus summary::marker{color:var(--bronze)}
 
 <!-- ── Connexion ─────────────────────────────────────────── -->
 <div id="porte">
+  <div class="porte-photo">
+    <img src="/img/opt/logo-blanc.png" alt="Hôtel Evannath">
+    <div><h2>Le rêve africain, au bord de la lagune Aby.</h2>
+      <p>L’espace de gestion de l’hôtel : disponibilités, offres, contenus et référencement du site.</p></div>
+  </div>
+  <div class="porte-cote">
+  <!-- 1. E-mail et mot de passe -->
   <form id="fporte">
-    <img class="logo" src="/img/opt/logo-bronze.png" alt="Hôtel Evannath">
-    <p class="devise">Le rêve africain</p>
-    <h1>Espace d'administration</h1>
-    <p>Connectez-vous avec votre compte.</p>
-    <div class="champ">
+    <h1>Connexion</h1>
+    <p id="porte-sous">Entrez vos identifiants pour accéder à l’administration.</p>
+    <div class="champ" id="champ-courriel">
       <label for="courriel">Adresse e-mail</label>
-      <input type="email" id="courriel" autocomplete="username" inputmode="email"
-        autocapitalize="none" spellcheck="false">
+      <div class="saisie"><i data-ic="mail"></i>
+        <input type="email" id="courriel" autocomplete="username" inputmode="email"
+          autocapitalize="none" spellcheck="false"></div>
     </div>
     <div class="champ">
-      <label for="mdp">Mot de passe</label>
-      <input type="password" id="mdp" autocomplete="current-password" required>
+      <label for="mdp" id="mdp-lib">Mot de passe</label>
+      <div class="saisie"><i data-ic="cadenas"></i>
+        <input type="password" id="mdp" autocomplete="current-password" required>
+        <button type="button" class="oeil" data-oeil="mdp" title="Afficher le mot de passe"
+          aria-label="Afficher le mot de passe"><i data-ic="oeil"></i></button></div>
     </div>
-    <button class="btn plein" style="width:100%;justify-content:center">Entrer</button>
+    <button class="btn plein">Se connecter <i data-ic="fleche"></i></button>
     <p class="msg mal" id="errporte" style="margin-top:14px" role="alert"></p>
-    <p class="aide cp-secours">Accès de secours : laissez l’e-mail vide et saisissez
-      le mot de passe principal de l’installation.</p>
+    <div class="porte-bas">
+      <span id="porte-aide">Mot de passe oublié ? Un administrateur peut le réinitialiser.</span>
+      <button type="button" id="mode-secours">Accès de secours</button>
+    </div>
   </form>
+  <!-- 2. Le code de l'application (double authentification) -->
+  <form id="fcode" hidden>
+    <span class="badge-securite"><i data-ic="bouclier"></i> Vérification en deux étapes</span>
+    <h1 id="code-titre">Saisissez votre code</h1>
+    <p id="code-aide">Ouvrez votre application d’authentification et entrez le code à 6 chiffres
+      affiché pour <b>Hôtel Evannath</b>.</p>
+    <div class="champ">
+      <label for="code" id="code-lib">Code à 6 chiffres</label>
+      <input id="code" class="code6" inputmode="numeric" autocomplete="one-time-code"
+        maxlength="6" placeholder="······" required>
+    </div>
+    <button class="btn plein">Vérifier <i data-ic="fleche"></i></button>
+    <p class="msg mal" id="errcode" style="margin-top:14px" role="alert"></p>
+    <div class="porte-bas">
+      <button type="button" class="discret" id="code-retour">Changer de compte</button>
+      <button type="button" id="code-secours">Utiliser un code de secours</button>
+    </div>
+  </form>
+  <!-- 3. Premiere connexion : son propre mot de passe -->
   <form id="fpremier" hidden>
-    <img class="logo" src="/img/opt/logo-bronze.png" alt="Hôtel Evannath">
-    <p class="devise">Première connexion</p>
+    <span class="badge-securite"><i data-ic="cle"></i> Première connexion · étape 1 sur 2</span>
     <h1>Choisissez votre mot de passe</h1>
     <p id="premier-qui">Le mot de passe qu’on vous a transmis est provisoire. Remplacez-le
       par le vôtre : personne d’autre ne le connaîtra.</p>
@@ -542,9 +676,31 @@ details.plus summary::marker{color:var(--bronze)}
       <label for="p-confirme">Confirmez-le</label>
       <input type="password" id="p-confirme" autocomplete="new-password" required>
     </div>
-    <button class="btn plein" style="width:100%;justify-content:center">Enregistrer et entrer</button>
+    <button class="btn plein">Continuer <i data-ic="fleche"></i></button>
     <p class="msg mal" id="errpremier" style="margin-top:14px" role="alert"></p>
   </form>
+  <!-- 4. Activer la double authentification (obligatoire) -->
+  <form id="factiver" hidden>
+    <span class="badge-securite"><i data-ic="bouclier"></i> <span id="act-etape">Dernière étape</span></span>
+    <h1>Activez la double authentification</h1>
+    <p>Elle est obligatoire pour entrer dans l’administration : en plus du mot de passe, un code
+      de votre téléphone sera demandé à chaque connexion.</p>
+    <div id="act-zone"></div>
+    <p class="msg mal" id="erractiver" style="margin-top:14px" role="alert"></p>
+    <div class="porte-bas"><button type="button" class="discret" id="act-sortir">Se déconnecter</button></div>
+  </form>
+  <!-- 5. Les codes de secours, montres une seule fois -->
+  <form id="fcodes" hidden>
+    <span class="badge-securite"><i data-ic="check"></i> Double authentification activée</span>
+    <h1>Gardez vos codes de secours</h1>
+    <p>Si vous perdez votre téléphone, chacun de ces codes ouvre <b>une seule</b> connexion.
+      Imprimez-les ou notez-les, et gardez-les hors du téléphone. Ils ne seront plus affichés.</p>
+    <div id="codes-zone"></div>
+    <label style="display:flex;gap:10px;align-items:center;font-weight:500;margin:18px 0 4px">
+      <input type="checkbox" id="codes-ok" required> J’ai mis ces codes en lieu sûr</label>
+    <button class="btn plein">Entrer dans l’administration <i data-ic="fleche"></i></button>
+  </form>
+  </div>
 </div>
 
 <!-- ── Administration ────────────────────────────────────── -->
@@ -556,28 +712,28 @@ details.plus summary::marker{color:var(--bronze)}
         <span>Administration</span>
       </div>
       <button id="replier" title="Replier le menu" aria-expanded="true"
-        aria-controls="menu"><i>☰</i><span>Replier le menu</span></button>
+        aria-controls="menu"><i data-ic="menu"></i><span>Replier le menu</span></button>
     </div>
     <nav id="menu">
-      <button data-v="bord" class="on" title="Tableau de bord"><i>▦</i><span>Tableau de bord</span></button>
+      <button data-v="bord" class="on" title="Tableau de bord"><i data-ic="bord"></i><span>Tableau de bord</span></button>
       <h2>Gestion</h2>
-      <button data-v="disponibilites" title="Disponibilités"><i>▤</i><span>Disponibilités</span></button>
-      <button data-v="chambres" title="Chambres"><i>▥</i><span>Chambres</span></button>
-      <button data-v="evenements" title="Événements"><i>◆</i><span>Événements</span></button>
-      <button data-v="promotions" title="Promotions"><i>◉</i><span>Promotions</span></button>
-      <button data-v="campagnes" title="Campagnes saisonnières"><i>☀</i><span>Campagnes saisonnières</span></button>
-      <button data-v="emplois" title="Offres d'emploi"><i>✎</i><span>Offres d'emploi</span></button>
-      <button data-v="carnet" title="Le Carnet d'Assinie"><i>✍</i><span>Le Carnet</span></button>
-      <button data-v="seo" title="Référencement"><i>⌕</i><span>Référencement</span></button>
+      <button data-v="disponibilites" title="Disponibilités"><i data-ic="cal"></i><span>Disponibilités</span></button>
+      <button data-v="chambres" title="Chambres"><i data-ic="lit"></i><span>Chambres</span></button>
+      <button data-v="evenements" title="Événements"><i data-ic="ticket"></i><span>Événements</span></button>
+      <button data-v="promotions" title="Promotions"><i data-ic="tag"></i><span>Promotions</span></button>
+      <button data-v="campagnes" title="Campagnes saisonnières"><i data-ic="soleil"></i><span>Campagnes saisonnières</span></button>
+      <button data-v="emplois" title="Offres d'emploi"><i data-ic="mallette"></i><span>Offres d'emploi</span></button>
+      <button data-v="carnet" title="Le Carnet d'Assinie"><i data-ic="livre"></i><span>Le Carnet</span></button>
+      <button data-v="seo" title="Référencement"><i data-ic="loupe"></i><span>Référencement</span></button>
       <h2>Médias</h2>
-      <button data-v="galerie" title="Galerie"><i>▣</i><span>Galerie</span></button>
+      <button data-v="galerie" title="Galerie"><i data-ic="image"></i><span>Galerie</span></button>
       <h2>Administration</h2>
-      <button data-v="parametres" title="Paramètres"><i>⚙</i><span>Paramètres</span></button>
-      <button data-v="utilisateurs" title="Utilisateurs"><i>◐</i><span>Utilisateurs</span></button>
-      <button data-v="journal" title="Journal d'activité"><i>≡</i><span>Journal d'activité</span></button>
+      <button data-v="parametres" title="Paramètres"><i data-ic="reglages"></i><span>Paramètres</span></button>
+      <button data-v="utilisateurs" title="Utilisateurs"><i data-ic="gens"></i><span>Utilisateurs</span></button>
+      <button data-v="journal" title="Journal d'activité"><i data-ic="histo"></i><span>Journal d'activité</span></button>
       <h2 id="moi-nom">&nbsp;</h2>
-      <button data-v="compte" title="Mon compte"><i>◍</i><span>Mon compte</span></button>
-      <button id="sortir" title="Se déconnecter"><i>↩</i><span>Se déconnecter</span></button>
+      <button data-v="compte" title="Mon compte"><i data-ic="moi"></i><span>Mon compte</span></button>
+      <button id="sortir" title="Se déconnecter"><i data-ic="sortie"></i><span>Se déconnecter</span></button>
     </nav>
   </aside>
   <main id="vue"></main>
@@ -678,33 +834,132 @@ async function appel(action, corps, methode) {
   if (corps) { o.headers['Content-Type'] = 'application/json'; o.body = JSON.stringify(corps); }
   const r = await fetch(API + '?a=' + action, o);
   const j = await r.json().catch(() => ({}));
-  if (r.status === 401 && action !== 'entrer') { montrerPorte(); throw new Error('session'); }
+  if (r.status === 401 && !['entrer', 'entrer-code'].includes(action)) { montrerPorte(); throw new Error('session'); }
+  /* La double authentification n'est pas activee : la seule porte ouverte.
+     charger() s'en charge pour son propre chargement (a=tout). */
+  if (r.status === 403 && j.mfa && action !== 'tout' && typeof montrerActivation === 'function') montrerActivation();
   return { code: r.status, ...j };
 }
 
 /* ── Connexion ─────────────────────────────────────────── */
-function montrerPorte() {
+/* La porte a cinq ecrans — identifiants, code, premier mot de passe,
+   activation de la double authentification, codes de secours — et n'en
+   montre qu'un a la fois. */
+const ECRANS_PORTE = ['#fporte', '#fcode', '#fpremier', '#factiver', '#fcodes'];
+function ecranPorte(id) {
   $('#porte').style.display = 'grid';
-  $('#fporte').hidden = false;
-  $('#fpremier').hidden = true;
   $('#cadre').classList.remove('on');
+  ECRANS_PORTE.forEach((x) => { $(x).hidden = x !== id; });
 }
+function montrerPorte() { ecranPorte('#fporte'); }
 function montrerCadre() {
   $('#porte').style.display = 'none';
   $('#cadre').classList.add('on');
   charger();
 }
 
+/* L'acces de secours est reserve au developpeur : il se cache derriere un
+   lien, et non plus derriere « laissez l'e-mail vide », que tout le monde
+   lisait sur la page. */
+let MODE_SECOURS = false;
+function modeSecours(oui) {
+  MODE_SECOURS = oui;
+  $('#champ-courriel').hidden = oui;
+  $('#mdp-lib').textContent = oui ? 'Mot de passe de secours' : 'Mot de passe';
+  $('#porte-sous').textContent = oui
+    ? 'Réservé au développeur : le mot de passe principal de l’installation.'
+    : 'Entrez vos identifiants pour accéder à l’administration.';
+  $('#porte-aide').hidden = oui;
+  $('#mode-secours').textContent = oui ? 'Revenir à la connexion' : 'Accès de secours';
+  $('#errporte').textContent = '';
+  (oui ? $('#mdp') : $('#courriel')).focus();
+}
+$('#mode-secours').addEventListener('click', () => modeSecours(!MODE_SECOURS));
+
+/* L'oeil : montrer le mot de passe qu'on tape, sur un telephone surtout. */
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('[data-oeil]');
+  if (!b) return;
+  const champ = document.getElementById(b.dataset.oeil);
+  const voir = champ.type === 'password';
+  champ.type = voir ? 'text' : 'password';
+  b.innerHTML = ic(voir ? 'oeil-barre' : 'oeil');
+  b.title = voir ? 'Masquer le mot de passe' : 'Afficher le mot de passe';
+  b.setAttribute('aria-label', b.title);
+});
+
+/* La seconde etape : le serveur a reconnu le mot de passe et rend un DEFI,
+   valable cinq minutes, qui accompagne le code. */
+let DEFI = '', CODE_SECOURS = false;
+function montrerCode(defi) {
+  DEFI = defi;
+  codeDeSecours(false);
+  ecranPorte('#fcode');
+  $('#errcode').textContent = '';
+  setTimeout(() => $('#code').focus(), 50);
+}
+function codeDeSecours(oui) {
+  CODE_SECOURS = oui;
+  const c = $('#code');
+  c.value = '';
+  c.maxLength = oui ? 9 : 6;
+  c.inputMode = oui ? 'text' : 'numeric';
+  c.autocomplete = oui ? 'off' : 'one-time-code';
+  c.placeholder = oui ? 'XXXX-XXXX' : '······';
+  c.classList.toggle('secours', oui);
+  $('#code-lib').textContent = oui ? 'Code de secours' : 'Code à 6 chiffres';
+  $('#code-titre').textContent = oui ? 'Code de secours' : 'Saisissez votre code';
+  $('#code-aide').innerHTML = oui
+    ? 'Entrez l’un des codes de secours reçus à l’activation. Chacun ne sert qu’une fois.'
+    : 'Ouvrez votre application d’authentification et entrez le code à 6 chiffres affiché pour <b>Hôtel Evannath</b>.';
+  $('#code-secours').textContent = oui ? 'Utiliser l’application' : 'Utiliser un code de secours';
+  $('#errcode').textContent = '';
+  c.focus();
+}
+$('#code-secours').addEventListener('click', () => codeDeSecours(!CODE_SECOURS));
+$('#code-retour').addEventListener('click', () => { DEFI = ''; $('#mdp').value = ''; montrerPorte(); });
+/* Six chiffres tapes : on n'attend pas qu'on clique. */
+$('#code').addEventListener('input', (e) => {
+  if (!CODE_SECOURS) e.target.value = e.target.value.replace(/\D/g, '').slice(0, 6);
+  if (!CODE_SECOURS && e.target.value.length === 6) $('#fcode').requestSubmit();
+});
+
 $('#fporte').addEventListener('submit', async (e) => {
   e.preventDefault();
   $('#errporte').textContent = '';
-  const r = await appel('entrer', { courriel: $('#courriel').value.trim(), mdp: $('#mdp').value });
+  const r = await appel('entrer', { courriel: MODE_SECOURS ? '' : $('#courriel').value.trim(), mdp: $('#mdp').value });
+  if (r.ok && r.etape === 'code') { $('#mdp').value = ''; montrerCode(r.defi); return; }
   if (r.ok) { $('#mdp').value = ''; montrerCadre(); }
   else $('#errporte').textContent = r.message || 'Connexion impossible.';
 });
 
+let ENVOI_CODE = false;
+$('#fcode').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  if (ENVOI_CODE) return;
+  ENVOI_CODE = true;
+  $('#errcode').textContent = '';
+  const r = await appel('entrer-code', { defi: DEFI, code: $('#code').value, secours: CODE_SECOURS });
+  ENVOI_CODE = false;
+  if (r.ok) {
+    DEFI = '';
+    /* Peu de codes de secours restants : on le dira sur le tableau de bord. */
+    ETAT.codesBas = CODE_SECOURS && r.codesRestants !== null && r.codesRestants <= 3 ? r.codesRestants : null;
+    montrerCadre();
+    return;
+  }
+  if (r.expire) { montrerPorte(); $('#errporte').textContent = r.message; return; }
+  $('#errcode').textContent = r.message || 'Code refusé.';
+  $('#code').value = '';
+  $('#code').focus();
+});
+
 $('#sortir').addEventListener('click', async () => {
   await appel('sortir', {});
+  /* La prochaine personne qui entre commence par le tableau de bord, pas
+     par l'ecran que la precedente a laisse ouvert. */
+  VUE = 'bord'; EDITE = null; delete ETAT.activite; ETAT.codesBas = null;
+  [...$('#menu').querySelectorAll('button[data-v]')].forEach((x) => x.classList.toggle('on', x.dataset.v === 'bord'));
   montrerPorte();
 });
 
@@ -727,6 +982,7 @@ async function charger() {
      d'autre que l'ecran qui le remplace — le serveur refuse le reste. */
   ETAT.moi = etat.moi || null;
   if (ETAT.moi && ETAT.moi.provisoire) { montrerPremier(); return; }
+  if (ETAT.moi && ETAT.moi.mfaAFaire) { montrerActivation(); return; }
   appliquerProfil();
   ETAT.stockage = etat.stockage;
   ETAT.magasin = etat.magasin;
@@ -818,7 +1074,7 @@ function ficheCategorie(c, onglets) {
       <button type="button" class="btn mince" data-cat-retour style="margin-bottom:14px">← Toutes les catégories</button>
       <h1 class="t">${ech(c.nom)}</h1>
       <p class="sous"><a href="/${ech(c.slug)}" target="_blank" rel="noopener"
-        style="color:var(--bronze-2)">Voir la fiche sur le site ↗</a></p></div>
+        style="color:var(--bronze-2)">Voir la fiche sur le site ${ic('externe')}</a></p></div>
       <img src="/img/opt/${ech(c.photo)}.jpg" alt="" style="width:180px;height:120px;object-fit:cover;flex:none"></div>
     ${onglets ? onglets + `<p class="cm-explique"><b>Une catégorie : ce que l’hôtel vend</b> — son prix
       vaut pour ${physiques(c.slug).length > 1 ? 'ses ' + physiques(c.slug).length + ' chambres physiques'
@@ -1687,7 +1943,7 @@ function fil() {
     const n = i + 1;
     const cl = n === ETAPE ? 'ici' : (n < ETAPE ? 'fait' : '');
     const clic = n < ETAPE ? ` data-pas="${n}"` : '';
-    return `<li class="${cl}"${clic}><i>${n < ETAPE ? '✓' : n}</i>
+    return `<li class="${cl}"${clic}><i>${n < ETAPE ? ic('check') : n}</i>
       <span>${nom}</span></li>`;
   }).join('') + '</ol>';
 }
@@ -2151,75 +2407,126 @@ function rendre() {
     const promosActives = (ETAT.promotions || [])
       .filter((p) => p.publie !== false && statutPromo(p).mot === 'Active').length;
 
-    const chiffre = (n, l, c) => `<div class="carte"${c ? ` style="--c:${c}"` : ''}>
-      <b>${c ? '<span class="pt"></span>' : ''}${n}</b><span>${l}</span></div>`;
+    /* Un chiffre : ce qu'il compte, une icone, et une ligne qui le precise.
+       Cliquable quand il mene quelque part. */
+    const chiffre = (n, l, sous, icone, cl, aller) => `<${aller ? `button type="button" data-aller="${aller}"` : 'div'}
+      class="chiffre ${cl || ''}"><span class="h">${l}<i>${ic(icone)}</i></span><b>${n}</b>
+      <small>${sous || '&nbsp;'}</small></${aller ? 'button' : 'div'}>`;
+    const initiales = (t) => String(t || '?').split(/\s+/).filter(Boolean).slice(0, 2)
+      .map((x) => x[0].toUpperCase()).join('');
+    const prenom = String((ETAT.moi && !ETAT.moi.secours && ETAT.moi.nom) || '').split(/\s+/)[0];
 
     /* La Communication ne recoit pas les sejours (api/admin.js, a=tout) :
        « 0 arrivee » serait faux. On ne lui montre pas ce qu'elle ne voit pas. */
     const voitResa = !ETAT.moi || (ETAT.moi.vues || []).includes('disponibilites');
+    const arriveesJour = F.filter((f) => f.nature === 'client' && f.statut !== 'annulee' && f.debut === auj
+      && chambres.some((c) => c.id === f.cible));
+    const enLigne = ETAT.evenements.filter((e) => e.publie !== false && !expire(e));
+    const articles = (ETAT.carnet || []).filter((a) => a.publie !== false);
+
+    const tuiles = voitResa ? [
+      chiffre(aTraiter.length, 'Demandes à traiter', aTraiter.length ? 'La plus pressée jusqu’à '
+        + (typeof heureDe === 'function' ? heureDe(aTraiter[0].expire) : '') : 'Rien en attente',
+        'cloche', aTraiter.length ? 'urgent' : '', 'disponibilites'),
+      chiffre(arrivees, 'Arrivées aujourd’hui', departs ? departs + ' départ' + (departs > 1 ? 's' : '') : 'Aucun départ',
+        'arrivee', 'bleu', 'disponibilites'),
+      chiffre(libres === null ? '—' : libres, 'Chambres libres ce soir', horsService
+        ? horsService + ' hors service ou en maintenance' : 'Sur ' + chambres.length + ' chambres', 'lit', 'vert', 'disponibilites'),
+      chiffre(actifs, 'Événements en ligne', enLigne[0] ? ech(enLigne[0].titre) : 'Aucun pour le moment', 'ticket', '', 'evenements'),
+    ] : [
+      chiffre(actifs, 'Événements en ligne', enLigne[0] ? ech(enLigne[0].titre) : 'Aucun pour le moment', 'ticket', '', 'evenements'),
+      chiffre(promosActives, 'Promotions actives', '', 'tag', 'vert', 'promotions'),
+      chiffre(articles.length, 'Articles du Carnet', 'Visez un article par mois', 'livre', 'bleu', 'carnet'),
+      chiffre(ETAT.images.length, 'Photos disponibles', 'Pour vos affiches', 'image', '', 'galerie'),
+    ];
+
+    const demandes = !voitResa ? '' : `<div class="carte tb-liste">
+      <div class="tb-tete"><h2>Demandes de réservation à traiter</h2>
+        <button type="button" data-aller="disponibilites">Disponibilités ${ic('chev')}</button></div>
+      ${aTraiter.length ? aTraiter.slice(0, 4).map((f) => {
+        const tombee = typeof retenueTombee === 'function' && retenueTombee(f);
+        return `<div class="tb-ligne"><span class="tb-av">${ech(initiales(f.client))}</span>
+          <div class="tb-txt"><b>${ech(f.client || 'Client')} · ${ech(nomCible(f.cible))}</b>
+          <span>${ech(nuitsEnClair(f))}</span></div>
+          <span class="etat ${tombee ? 'fini' : 'attend'}">${tombee ? 'Expirée'
+            : 'Gardée jusqu’à ' + (typeof heureDe === 'function' ? heureDe(f.expire) : '')}</span></div>`;
+      }).join('') + (aTraiter.length > 4 ? `<p class="tb-plus">et ${aTraiter.length - 4} autre${aTraiter.length > 5 ? 's' : ''}</p>` : '')
+        : '<p class="tb-vide">Aucune demande en attente. Une demande venue du site garde sa chambre deux heures : elle apparaîtra ici.</p>'}
+      <div class="tb-tete tb-sep"><h2>Arrivées du jour</h2></div>
+      ${arriveesJour.length ? arriveesJour.slice(0, 6).map((f) => `<div class="tb-ligne">
+          <span class="tb-av">${ech(initiales(f.client))}</span>
+          <div class="tb-txt"><b>${ech(f.client || 'Client')} · ${ech(nomCible(f.cible))}</b>
+          <span>${ech(nuitsEnClair(f))}</span></div>
+          <span class="etat ${f.statut === 'confirmee' ? 'vif' : 'attend'}">${f.statut === 'confirmee' ? 'Confirmée' : 'En attente'}</span></div>`).join('')
+        : '<p class="tb-vide">Personne n’arrive aujourd’hui.</p>'}
+    </div>`;
+
+    const surLeSite = voitResa ? '' : `<div class="carte tb-liste">
+      <div class="tb-tete"><h2>En ligne sur le site</h2>
+        <button type="button" data-aller="evenements">Événements ${ic('chev')}</button></div>
+      ${enLigne.length ? enLigne.slice(0, 5).map((e) => `<div class="tb-ligne">
+          <span class="tb-av">${ic('ticket')}</span>
+          <div class="tb-txt"><b>${ech(e.titre)}</b><span>${ech(e.quand || e.date || '')}</span></div>
+          <span class="etat vif">En ligne</span></div>`).join('')
+        : '<p class="tb-vide">Aucun événement en ligne. Une soirée, un rendez-vous du samedi ? Publiez-le.</p>'}
+    </div>`;
+
+    const raccourcis = [
+      peut('contenu') && ['ticket', 'Publier un événement', 'data-neuf="evenements"'],
+      peut('contenu') && ['tag', 'Créer une promotion', 'data-neuf="promotions"'],
+      peut('contenu') && ['livre', 'Écrire un article du Carnet', 'data-neuf="carnet"'],
+      peut('referencement') && ['loupe', 'Régler le référencement', 'data-aller="seo"'],
+      peut('reservations') && ['cal', 'Ouvrir le calendrier', 'data-aller="disponibilites"'],
+      peut('chambres') && !chambres.length && ['lit', 'Saisir les chambres', 'data-aller="chambres"'],
+    ].filter(Boolean).slice(0, 4);
+
+    /* L'activite recente : le journal, que seuls les administrateurs lisent.
+       Il se charge apres le premier affichage (voir plus bas). */
+    const activite = !peut('comptes') ? '' : `<div class="carte tb-liste">
+      <div class="tb-tete"><h2>Activité récente</h2>
+        <button type="button" data-aller="journal">Journal ${ic('chev')}</button></div>
+      ${ETAT.activite === undefined ? '<p class="tb-vide">Chargement…</p>'
+        : !ETAT.activite.length ? '<p class="tb-vide">Rien pour le moment.</p>'
+        : `<ul class="tb-fil">${ETAT.activite.map((l) => `<li><span class="pt"></span><div>
+            <b>${ech(l.n)}</b> ${ech(l.x.charAt(0).toLowerCase() + l.x.slice(1))}
+            <small>${ech(new Date(l.t).toLocaleString('fr-FR', { weekday: 'long', hour: '2-digit', minute: '2-digit' }))}</small></div></li>`).join('')}</ul>`}
+    </div>`;
+
+    const codesBas = ETAT.moi && ETAT.moi.mfa && (ETAT.codesBas !== null && ETAT.codesBas !== undefined
+      ? ETAT.codesBas : ETAT.moi.codesRestants) <= 3;
+
     v.innerHTML = `<div class="entete"><div>
-        <h1 class="t">Tableau de bord</h1>
-        <p class="sous">${jour.charAt(0).toUpperCase() + jour.slice(1)}${
-          ETAT.maj ? ' · dernière modification à ' + new Date(ETAT.maj).toLocaleTimeString(
-            'fr-FR', { hour: '2-digit', minute: '2-digit' }) : ''}</p>
+        <div class="fil-ariane">${jour.charAt(0).toUpperCase() + jour.slice(1)}</div>
+        <h1 class="t">${prenom ? 'Bonjour ' + ech(prenom) : 'Tableau de bord'}</h1>
+        <p class="sous">Voici ce qui demande votre attention aujourd’hui.</p>
+      </div><div class="tb-actions">
+        <a class="btn" href="/" target="_blank" rel="noopener">${ic('publier')} Voir le site</a>
+        ${peut('contenu') ? `<button class="btn plein" data-neuf="evenements">${ic('plus')} Nouvel événement</button>`
+          : peut('reservations') ? `<button class="btn plein" data-aller="disponibilites">${ic('cal')} Disponibilités</button>` : ''}
       </div></div>
       ${avertissement()}
-
-      ${voitResa && aTraiter.length ? `<div class="carte dsp-traiter">
-        <h2 class="bloc-t" style="margin-bottom:4px">${aTraiter.length} demande${
-          aTraiter.length > 1 ? 's' : ''} venue${aTraiter.length > 1 ? 's' : ''} du site</h2>
-        <p class="aide" style="margin:0 0 14px">Une chambre leur est gardée jusqu'à
-          l'heure indiquée. Passé ce délai elle repart à la vente, et le client
-          n'aura pas de réponse.</p>
-        ${aTraiter.slice(0, 3).map((f) => {
-          const ch = chambres.find((c) => c.id === f.cible) || {};
-          return `<div class="dsp-dem">
-            <div style="flex:1;min-width:0">
-              <b>${ech(f.client)}</b>
-              <span>chambre ${ech(ch.numero || '?')} · arrivée ${
-                typeof jCourt === 'function' ? jCourt(f.debut) : ech(f.debut)}</span>
-            </div>
-            <span style="color:${typeof retenueTombee === 'function' && retenueTombee(f)
-              ? 'var(--err)' : 'var(--bronze-2)'};font-size:12.5px;flex:none">${
-              typeof retenueTombee === 'function' && retenueTombee(f) ? 'expirée'
-                : 'jusqu\'à ' + (typeof heureDe === 'function' ? heureDe(f.expire) : '')}</span>
-          </div>`; }).join('')}
-        <div class="pied"><button class="btn plein" data-aller="disponibilites"
-          >Les traiter</button>${aTraiter.length > 3
-            ? `<span class="aide">et ${aTraiter.length - 3} autre${
-                aTraiter.length > 4 ? 's' : ''}</span>` : ''}</div>
-      </div>` : ''}
-
-      ${!voitResa ? '' : chambres.length ? `<p class="lb" style="margin:0 0 12px">Ce soir</p>
-        <div class="dsp-chiffres-h">
-          ${chiffre(libres === null ? '—' : libres, 'Chambres libres', 'var(--et-libre)')}
-          ${chiffre(arrivees, 'Arrivées aujourd\'hui', 'var(--ambre)')}
-          ${chiffre(departs, 'Départs aujourd\'hui', 'var(--ciel)')}
-          ${chiffre(horsService, 'Hors service ou en maintenance', 'var(--et-hs)')}
-        </div>`
-      : `<div class="carte" style="border-left:3px solid var(--bronze)">
-          <div class="bloc-t" style="margin-bottom:6px">Vos chambres ne sont pas encore saisies</div>
-          <p class="aide" style="margin-bottom:16px">Tant qu'aucune chambre n'est
-            saisie, <strong>le site n'annonce aucune disponibilité</strong> : il redit
-            à chaque visiteur que la réception confirme sous 24 h.${
-              ETAT.annoncees ? ` Votre site annonce ${ETAT.annoncees} chambres
-              et suites.` : ''}</p>
-          ${peut('chambres') ? '<button class="btn plein" data-aller="chambres">Saisir les chambres</button>' : ''}
-        </div>`}
-
-      <p class="lb" style="margin:26px 0 12px">En ligne sur le site</p>
-      <div class="dsp-chiffres-h">
-        ${chiffre(actifs, 'Événements en ligne')}
-        ${chiffre(promosActives, 'Promotions actives')}
-        ${chiffre(ETAT.images.length, 'Photos disponibles')}
-      </div>
-
-      ${peut('contenu') ? `<div class="carte">
-        <div class="bloc-t" style="margin-bottom:10px">Publier une affiche</div>
-        <p class="aide" style="margin-bottom:18px">Un événement daté disparaît du site
-        tout seul le lendemain de sa date de fin. Vous n'avez rien à décrocher.</p>
-        <button class="btn plein" data-neuf="evenements">Nouvel événement</button>
-      </div>` : ''}`;
+      ${codesBas ? `<div class="alerte or"><i>${ic('cle')}</i><div><b>Il vous reste peu de codes de secours</b>
+        <span>Demandez-en de nouveaux dans « Mon compte », tant que votre téléphone est là.</span></div>
+        <button class="btn marine mince" data-aller="compte">Mon compte</button></div>` : ''}
+      ${voitResa && !chambres.length ? `<div class="alerte or"><i>${ic('lit')}</i><div>
+        <b>Vos chambres ne sont pas encore saisies</b>
+        <span>Tant qu’aucune chambre n’est saisie, le site n’annonce aucune disponibilité : il redit à chaque
+        visiteur que la réception confirme sous 24 h.${ETAT.annoncees ? ` Votre site annonce ${ETAT.annoncees} chambres et suites.` : ''}</span></div>
+        ${peut('chambres') ? '<button class="btn marine mince" data-aller="chambres">Saisir les chambres</button>' : ''}</div>` : ''}
+      <div class="chiffres">${tuiles.join('')}</div>
+      <div class="tb-grille"><div>${demandes}${surLeSite}</div>
+        <div>${raccourcis.length ? `<div class="carte tb-liste"><div class="tb-tete"><h2>Raccourcis</h2></div>
+          <div class="tb-raccourcis">${raccourcis.map(([i, l, a]) => `<button type="button" ${a}>
+            <i>${ic(i)}</i>${l}${ic('chev', 'fl-d')}</button>`).join('')}</div></div>` : ''}
+          ${activite}</div></div>`;
+    if (peut('comptes') && ETAT.activite === undefined) {
+      ETAT.activite = null;
+      appel('journal').then((r) => {
+        /* Les gestes, pas les connexions : celles-ci sont dans Mon compte. */
+        ETAT.activite = r.ok ? r.journal.filter((l) => !/^(Connexion|Échec de connexion)/.test(l.x)).slice(0, 5) : [];
+        if (VUE === 'bord') rendre();
+      }).catch(() => { ETAT.activite = []; });
+    }
   } else if (VUE === 'evenements' || VUE === 'promotions') {
     const promo = VUE === 'promotions';
     v.innerHTML = `<div class="entete">
@@ -2227,7 +2534,7 @@ function rendre() {
         <p class="sous">${promo
           ? 'Les remises et offres limitées dans le temps.'
           : 'Ce qui a une date : soirées, fêtes, rendez-vous du samedi.'}</p></div>
-        ${EDITE ? '' : `<button class="btn plein" data-neuf="${VUE}">Ajouter</button>`}
+        ${EDITE ? '' : `<button class="btn plein" data-neuf="${VUE}">${ic('plus')} Ajouter</button>`}
       </div>
       ${avertissement()}
       <p class="msg mal" id="msgl"></p>
@@ -2243,7 +2550,7 @@ function rendre() {
         <div><h1 class="t">Campagnes saisonnières</h1>
         <p class="sous">Vacances, Saint-Valentin, Noël : un nom, une période,
         et les packs qu'elle annonce.</p></div>
-        ${EDITE ? '' : '<button class="btn plein" data-neuf="campagnes">Ajouter</button>'}
+        ${EDITE ? '' : `<button class="btn plein" data-neuf="campagnes">${ic('plus')} Ajouter</button>`}
       </div>
       ${avertissement()}
       <p class="msg mal" id="msgl"></p>
@@ -2254,7 +2561,7 @@ function rendre() {
         <div><h1 class="t">Offres d'emploi</h1>
         <p class="sous">Les postes ouverts. Une offre datée disparaît d'elle-même
         le jour venu.</p></div>
-        ${EDITE ? '' : '<button class="btn plein" data-neuf="emplois">Ajouter</button>'}
+        ${EDITE ? '' : `<button class="btn plein" data-neuf="emplois">${ic('plus')} Ajouter</button>`}
       </div>
       ${avertissement()}
       <p class="msg mal" id="msgl"></p>
@@ -2264,7 +2571,7 @@ function rendre() {
         <div><h1 class="t">Le Carnet d'Assinie</h1>
         <p class="sous">Les articles du blog : plages, lagune, tables, fêtes, idées de
         week-end. Ils paraissent sur la page « Le Carnet » et chacun a son adresse.</p></div>
-        ${EDITE ? '' : '<button class="btn plein" data-neuf="carnet">Écrire un article</button>'}
+        ${EDITE ? '' : `<button class="btn plein" data-neuf="carnet">${ic('plus')} Écrire un article</button>`}
       </div>
       ${avertissement()}
       <p class="msg mal" id="msgl"></p>
@@ -2290,7 +2597,7 @@ function rendre() {
         par colonne. L'état que vous saisissez ici est celui que le site annonce.</p>
         </div>
         <div style="display:flex;gap:10px;flex-wrap:wrap">
-          <button class="btn plein" id="dsp-resa-btn">+ Nouvelle réservation</button>
+          <button class="btn plein" id="dsp-resa-btn">${ic('plus')} Nouvelle réservation</button>
           <button class="btn" id="dsp-lot-btn">Modifier en lot</button>
         </div></div>
       ${avertissement()}

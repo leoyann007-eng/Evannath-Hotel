@@ -28,11 +28,10 @@ const DSP = { vue: 'mois', mode: 'calendrier', focus: null, ouvertes: {},
    largeur les verifie toujours. */
 const DSP_COL = 34, DSP_LIB = 140;
 
-/* Les glyphes des compteurs. Des caracteres, pas des images : le reste de
-   l'administration fait deja ainsi, et une icone qui ne se telecharge pas
-   laisse un carre vide au milieu d'un chiffre. */
-const ICONES = { lit: '▤', ok: '✓', qui: '●', cal: '◱',
-                 cle: '⚒', net: '✦' };
+/* Les icones des compteurs : des traits SVG (icones.js), dans la page —
+   rien a telecharger, et pas d'emoji qui change d'un telephone a l'autre. */
+const ICONES = { lit: 'lit', ok: 'check', qui: 'personne', cal: 'cal',
+                 cle: 'outil', net: 'etincelle' };
 /* La vignette d'une categorie vient de donnees/chambres.json, donc de
    _chambres.py : c'est la premiere photo que le site montre sur sa fiche.
    La carte ecrite a la main qu'il y avait ici se trompait sur SIX categories
@@ -643,8 +642,8 @@ function htmlDsp() {
     </tbody></table>`;
 
   return `${demandes}<div class="dsp-chiffres-h">
-      ${CARTES.map(([l, n, c, ic]) => `<div class="carte"${c ? ` style="--c:${c}"` : ''}>
-        <i class="rond">${ICONES[ic] || ''}</i>
+      ${CARTES.map(([l, n, c, cle]) => `<div class="carte"${c ? ` style="--c:${c}"` : ''}>
+        <i class="rond">${ic(ICONES[cle])}</i>
         <div><b>${n}</b><span>${l}</span></div></div>`).join('')}
     </div>
     ${filtres}
@@ -677,7 +676,7 @@ function htmlDsp() {
       </div>`}
       <div class="dsp-pied">
         ${cats.map((c) => `<button class="dsp-lien" data-dsp-ajout="${ech(c.slug)}"
-          >+ ${ech(c.nom)}</button>`).join('')}
+          >${ic('plus')} ${ech(c.nom)}</button>`).join('')}
       </div>
     </section>
     ${manquantes.length ? `<div class="alerte ambre" style="margin-top:18px">
@@ -793,7 +792,7 @@ let TOAST_T = null;
 function notifier(texte, mal) {
   couche();
   const t = $('#dsp-toast');
-  t.textContent = (mal ? '! ' : '✓ ') + texte;
+  t.innerHTML = ic(mal ? 'alerte' : 'check') + ' ' + ech(texte);
   t.className = 'on' + (mal ? ' mal' : '');
   clearTimeout(TOAST_T);
   TOAST_T = setTimeout(() => { t.className = mal ? 'mal' : ''; }, 3200);
