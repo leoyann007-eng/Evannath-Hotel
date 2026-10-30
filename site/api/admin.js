@@ -1767,6 +1767,29 @@ module.exports = async function handler(req, res) {
     return json(res, 200, { ok: true, journal: tout });
   }
 
+  /* Ce que seul l'acces de secours voit dans Parametres. */
+  async function bilanTechnique() {
+    return {
+      // 'dediee' (ADMIN_SECRET) ou 'derivee' (du mot de passe de secours).
+      cle: SECRET_DEDIE ? 'dediee' : 'derivee',
+      /* production, preview ou local : ce deploiement lit les donnees de cet
+         environnement-la. Hors de Vercel, EVN_ENV le dit (voir _magasin.js). */
+      environnement: magasin.environnement() || 'local',
+      // Les sauvegardes conservees : versions dans la base, fichiers dans Blob.
+      fichiers: DOC.mode === 'postgres' ? await DOC.sauvegardes() : FICHIERS,
+      /* Apres le passage a la base, l'ancienne copie publique dans Blob doit
+         avoir disparu. Un nombre ici dit qu'elle est encore la. */
+      ancienneCopie: await DOC.ancienneCopie(),
+      // L'identifiant du magasin vise, lisible dans le jeton. Il se compare a
+      // celui affiche par Vercel : c'est ainsi qu'on voit a quel magasin on
+      // parle. Ce n'est pas la partie secrete.
+      magasin: (JETON_BLOB.split('_')[3] || '').slice(0, 24) || null,
+      // Le nom de la variable d'ou vient le jeton : il dit quelle variable le
+      // deploiement voit reellement, ce que la liste de Vercel ne montre pas
+      // toujours pour les magasins connectes.
+      variable: NOM_JETON || null,
+    };
+  }
   if (action === 'etat') {
     const d = await lire();
     const role = comptes.ROLES[qui.role];
@@ -1779,35 +1802,21 @@ module.exports = async function handler(req, res) {
         provisoire: qui.provisoire, secours: !!qui.secours,
         mfa: !!qui.mfa, mfaAFaire: !!qui.mfaAFaire && !qui.secours, codesRestants: qui.codesRestants || 0 },
       comptes: await COMPTES.combien(),
-      // 'dediee' (ADMIN_SECRET) ou 'derivee' (du mot de passe de secours).
-      cle: SECRET_DEDIE ? 'dediee' : 'derivee',
       version: VERSION,
       /* 'base' (Postgres), 'durable' (Vercel Blob) ou 'demonstration'. */
       stockage: DOC.mode === 'postgres' ? 'base' : DOC.mode === 'blob' ? 'durable' : 'demonstration',
-      /* production, preview ou local : ce deploiement lit les donnees de cet
-         environnement-la. Hors de Vercel, EVN_ENV le dit (voir _magasin.js). */
-      environnement: magasin.environnement() || 'local',
       // Vide quand la lecture s est bien passee.
       panne: PANNE || null,
-      // Les sauvegardes conservees : versions dans la base, fichiers dans Blob.
-      fichiers: DOC.mode === 'postgres' ? await DOC.sauvegardes() : FICHIERS,
-      /* Apres le passage a la base, l'ancienne copie publique dans Blob doit
-         avoir disparu. Un nombre ici dit qu'elle est encore la. */
-      ancienneCopie: await DOC.ancienneCopie(),
       /* Le paiement en ligne : cle presente, de test, et bloquee tant qu'une
          cle reelle n'a pas la base derriere elle. */
       paiement: { cle: !!LOMI_CLE, test: LOMI_TEST, actif: PAIEMENT_ACTIF, bloque: PAIEMENT_BLOQUE },
       /* Le crochet de deploiement du Referencement : regle ou non, jamais sa
          valeur. Sans lui, « Publier » attend le prochain deploiement. */
       seoCrochet: /^https:\/\/api\.vercel\.com\//.test(process.env.SEO_DEPLOY_HOOK || ''),
-      // L'identifiant du magasin vise, lisible dans le jeton. Il se compare a
-      // celui affiche par Vercel : c'est ainsi qu'on voit a quel magasin on
-      // parle. Ce n'est pas la partie secrete, et l'etat demande une session.
-      magasin: (JETON_BLOB.split('_')[3] || '').slice(0, 24) || null,
-      // Le nom de la variable d'ou vient le jeton : il dit quelle variable le
-      // deploiement voit reellement, ce que la liste de Vercel ne montre pas
-      // toujours pour les magasins connectes.
-      variable: NOM_JETON || null,
+      /* Le bilan technique de Parametres : pour le developpeur seul (acces de
+         secours). La direction n'en a pas l'usage, et un compte detourne
+         n'a pas a apprendre ou et comment le site range ses donnees. */
+      ...(qui.secours ? await bilanTechnique() : {}),
       evenements: (d.evenements || []).length,
       promotions: (d.promotions || []).length,
       medias: (d.medias || []).length,
