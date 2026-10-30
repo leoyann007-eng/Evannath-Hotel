@@ -108,6 +108,29 @@ def main():
     if ajoutes:
         print('%d versions WebP ajoutees pour la visionneuse' % ajoutes)
 
+    # Les vignettes de l'administration : 320 px de large, une par photo de
+    # l'inventaire (donnees/images.json). Les grilles de choix et la Galerie
+    # affichaient les ORIGINAUX — 90 photos, 22,7 Mo — pour des cases de
+    # 150 px. 320 px suffit a un ecran de densite 2.
+    vignettes = 0
+    for src in sorted(glob.glob(os.path.join(DOSSIER, '*.jpg'))):
+        base = os.path.basename(src)[:-4]
+        if re.search(r'-(?:%s|t|t360|v)$' % '|'.join(map(str, LARGEURS)), base) or base.endswith('-affiche'):
+            continue
+        dst = os.path.join(DOSSIER, base + '-v.jpg')
+        if a_jour(src, dst):
+            continue
+        im = Image.open(src)
+        if im.mode not in ('RGB', 'L'):
+            im = im.convert('RGB')
+        w0, h0 = im.size
+        if w0 > 320:
+            im = im.resize((320, round(h0 * 320 / w0)), Image.LANCZOS)
+        im.save(dst, quality=74, optimize=True, progressive=True)
+        vignettes += 1
+    if vignettes:
+        print('%d vignettes d\'administration (-v) creees' % vignettes)
+
     print('%d photos sources' % len(noms))
     print('%d variantes creees, %d deja a jour' % (faits, sautes))
     print('%.1f Mo de variantes au total' % (octets / 1048576))

@@ -371,7 +371,7 @@ function rfFiche() {
           <div>${ecrire ? `<button type="button" class="btn mince" data-rf-photos>${RF.photos ? 'Fermer' : 'Changer l’image'}</button>` : ''}
           <p class="aide">Affichée quand le lien est partagé sur WhatsApp ou Facebook.</p></div></div>
         ${RF.photos ? `<div class="grille-img" style="margin-top:12px;max-height:320px;overflow:auto">${(ETAT.images || []).map((n) =>
-          `<button type="button" data-rf-img="${ech(n)}" class="${s.image === n ? 'on' : ''}"><img src="/img/opt/${ech(n)}.jpg"
+          `<button type="button" data-rf-img="${ech(n)}" class="${s.image === n ? 'on' : ''}"><img src="${vignette(ech(n))}"
             alt="" loading="lazy"></button>`).join('')}</div>` : ''}</div>
       <div class="champ" style="margin-top:8px">
         <label style="display:flex;align-items:center;gap:10px;text-transform:none;letter-spacing:0;font-size:14px;color:var(--cream)">
