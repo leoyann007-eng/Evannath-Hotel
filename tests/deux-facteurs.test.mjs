@@ -164,6 +164,11 @@ const echecJ = (r.json.journal || []).find((x) => /Échec de connexion/.test(x.x
 verifie('un echec sur un compte existant va au journal, avec l adresse IP', !!echecJ && echecJ.ip === '102.67.3.3', echecJ);
 
 // ── L'acces de secours, reserve au developpeur ─────────────────────────────
+r = await appel({ a: 'etat' }, { cookie: caNeuf });
+verifie('un compte nominatif ne recoit pas le bilan technique', r.code === 200
+  && !('cle' in r.json) && !('magasin' in r.json) && !('variable' in r.json) && !('environnement' in r.json), r.json);
+r = await appel({ a: 'etat' }, { cookie: c });
+verifie('… l acces de secours, si', r.code === 200 && r.json.cle && 'environnement' in r.json, r.json);
 r = await appel({ a: 'tout' }, { cookie: c });
 verifie('l acces de secours n est pas bloque par la double authentification', r.code === 200, r.json);
 r = await post('2fa-preparer', {}, { cookie: c });

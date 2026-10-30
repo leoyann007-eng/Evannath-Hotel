@@ -1021,7 +1021,7 @@ trois mois.
 | Événements | créer, modifier, dépublier, supprimer |
 | Promotions | les mêmes champs, plus une remise et un code |
 | Galerie | les 90 photos du site, pour choisir un fond |
-| Paramètres | l'état de l'installation |
+| Paramètres | le concierge et le paiement en ligne. Le bilan technique (version, clé des sessions, stockage, magasin) ne s'affiche qu'à l'accès de secours : le serveur ne l'envoie qu'à lui |
 | Utilisateurs | qui peut publier |
 
 ### Le formulaire tient en cinq champs

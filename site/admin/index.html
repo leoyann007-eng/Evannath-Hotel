@@ -2617,11 +2617,17 @@ function rendre() {
        l'onglet des categories et de leur prix (vueChambres, plus bas). */
     v.innerHTML = vueChambresModule();
   } else if (VUE === 'parametres') {
+    /* Deux lectures du meme ecran. L'acces de secours (le developpeur) voit
+       le bilan technique : version, cle des sessions, stockage, magasin.
+       La direction ne voit que ce qu'elle regle ou doit savoir : le
+       concierge et le paiement. Le serveur n'envoie d'ailleurs le bilan
+       qu'a l'acces de secours (api/admin.js, bilanTechnique). */
+    const tech = !!(ETAT.moi && ETAT.moi.secours);
     v.innerHTML = `<div class="entete"><div>
         <h1 class="t">Paramètres</h1>
-        <p class="sous">L'état de l'installation.</p></div></div>
+        <p class="sous">${tech ? 'L’état de l’installation.' : 'Le concierge et le paiement en ligne.'}</p></div></div>
       ${avertissement()}
-      <div class="carte">
+      ${tech ? `<div class="carte">
         <div class="ligne" style="margin:0"><div class="txt"><b>Version</b>
           <span>Celle du déploiement en cours. Si votre page en affichait
           une autre, elle serait périmée et vos réglages pourraient se
@@ -2681,7 +2687,20 @@ function rendre() {
           <span>Le nom de la variable d'environnement d'où vient le jeton.</span>
           </div><code style="font-size:12px;color:var(--bronze-2)">${
           ETAT.variable}</code></div>` : ''}
-      </div>
+      </div>` : `<div class="carte">
+        <h2 class="bloc-t">Paiement en ligne</h2>
+        <div class="ligne" style="margin:0"><div class="txt"><b>Acomptes</b>
+          <span>${!ETAT.paiement.cle
+            ? 'Pas encore branché : les demandes de réservation partent à la réception.'
+            : ETAT.paiement.bloque
+            ? 'Pas encore ouvert : le développeur doit terminer l’installation. '
+              + 'En attendant, les demandes de réservation partent à la réception.'
+            : ETAT.paiement.test
+            ? 'En essai : le parcours fonctionne, aucun argent ne bouge.'
+            : 'Actif : les acomptes sont encaissés en ligne.'}</span></div>
+          <span class="etat ${ETAT.paiement.bloque ? 'attend' : ETAT.paiement.actif && !ETAT.paiement.test ? 'vif' : 'fini'}">${
+            !ETAT.paiement.cle ? 'Non branché' : ETAT.paiement.bloque ? 'En attente' : ETAT.paiement.test ? 'Essai' : 'Actif'}</span></div>
+      </div>`}
       <div class="carte">
         <h2 class="bloc-t">Le concierge (chatbot)</h2>
         <div class="ligne" style="margin:0"><div class="txt"><b>Sur le site</b>
@@ -2690,23 +2709,28 @@ function rendre() {
             : 'Éteint : la bulle ne s’affiche plus. Le bouton WhatsApp reste en place.'}</span></div>
           <button type="button" class="cm-bascule" role="switch" id="chatbot-bascule"
             aria-checked="${ETAT.chatbot.actif}"><i></i>${ETAT.chatbot.actif ? 'Allumé' : 'Éteint'}</button></div>
-        <div class="ligne"><div class="txt"><b>Clé Anthropic</b>
+        ${tech ? `<div class="ligne"><div class="txt"><b>Clé Anthropic</b>
           <span>${ETAT.chatbot.cle ? 'Présente : le concierge peut répondre.'
             : 'Absente : même allumé, le concierge ne s’affiche pas. Elle se pose dans Vercel (ANTHROPIC_API_KEY).'}</span></div>
-          <span class="etat ${ETAT.chatbot.cle ? 'vif' : 'fini'}">${ETAT.chatbot.cle ? 'Présente' : 'Absente'}</span></div>
+          <span class="etat ${ETAT.chatbot.cle ? 'vif' : 'fini'}">${ETAT.chatbot.cle ? 'Présente' : 'Absente'}</span></div>`
+          : ETAT.chatbot.cle ? '' : `<div class="ligne"><div class="txt"><b>Pas encore branché</b>
+          <span>Même allumé, le concierge ne s’affiche pas tant que le développeur ne l’a pas branché.</span></div>
+          <span class="etat fini">En attente</span></div>`}
         ${ETAT.chatbot.plafond ? `<div class="ligne"><div class="txt"><b>Plafond du jour</b>
           <span>Au-delà, la bulle s’efface jusqu’au lendemain et WhatsApp prend le relais.
-          ${ETAT.chatbot.partage ? '' : 'Sans base de données, chaque serveur compte de son côté : le total peut dépasser ce chiffre.'}
-          Il se change dans Vercel (CHAT_MAX_JOUR).</span></div>
+          ${!tech ? 'Pour le changer, demandez-le au développeur.'
+            : (ETAT.chatbot.partage ? '' : 'Sans base de données, chaque serveur compte de son côté : le total peut dépasser ce chiffre. ')
+              + 'Il se change dans Vercel (CHAT_MAX_JOUR).'}</span></div>
           <code style="font-size:12px;color:var(--bronze-2)">${ETAT.chatbot.aujourdhui || 0} / ${ETAT.chatbot.plafond}</code></div>` : ''}
-        <p class="aide" style="margin-top:12px">Chaque question coûte quelques francs, facturés par
-          Anthropic. Éteindre le concierge arrête toute dépense ; le rallumer est immédiat. Posez aussi
-          une limite de dépense dans la console Anthropic : c’est le dernier rempart.</p>
+        <p class="aide" style="margin-top:12px">Chaque question coûte quelques francs. Éteindre le
+          concierge arrête toute dépense ; le rallumer est immédiat.${tech ? ' Posez aussi une limite de '
+          + 'dépense dans la console Anthropic : c’est le dernier rempart.' : ''}</p>
       </div>
       <div class="carte">
-        <p style="color:var(--muted)">Les numéros de téléphone et l'adresse e-mail
+        <p style="color:var(--muted)">${tech ? `Les numéros de téléphone et l'adresse e-mail
         se règlent aujourd'hui dans le code du site ; les rendre modifiables ici
-        fait partie de ce qui reste à construire. Les prix des chambres, eux, se
+        fait partie de ce qui reste à construire.` : `Les numéros de téléphone et l'adresse
+        e-mail du site se changent sur demande au développeur.`} Les prix des chambres, eux, se
         modifient dans « Chambres ».</p>
       </div>`;
   } else if (VUE === 'seo') {
