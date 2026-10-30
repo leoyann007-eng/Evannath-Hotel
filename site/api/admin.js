@@ -1301,8 +1301,37 @@ const MESSAGES_DEPLOIEMENT = {
     + 'Réessayez dans un instant, ou prévenez le développeur.',
 };
 
+/* ── D'ou vient une connexion ──────────────────────────────────────────
+   Ce que le journal et « Mon compte » en disent : le navigateur et le
+   systeme, la ville (Vercel la deduit de l'adresse IP), et l'adresse IP
+   elle-meme pour les administrateurs. Assez pour reconnaitre un appareil
+   qui n'est pas le sien. */
+function appareilDe(req) {
+  const ua = String(req.headers['user-agent'] || '');
+  const nav = /Edg\//.test(ua) ? 'Edge' : /OPR\/|Opera/.test(ua) ? 'Opera' : /Firefox\//.test(ua) ? 'Firefox'
+    : /Chrome\//.test(ua) ? 'Chrome' : /Safari\//.test(ua) ? 'Safari' : '';
+  const sys = /iPhone|iPad/.test(ua) ? (/iPad/.test(ua) ? 'iPad' : 'iPhone') : /Android/.test(ua) ? 'Android'
+    : /Windows/.test(ua) ? 'Windows' : /Mac OS X|Macintosh/.test(ua) ? 'Mac' : /Linux/.test(ua) ? 'Linux' : '';
+  return nav && sys ? nav + ' sur ' + sys : nav || sys || '';
+}
+const ipDe = (req) => (req.headers['x-forwarded-for'] || '').split(',')[0].trim().slice(0, 45);
+function villeDe(req) {
+  try { return decodeURIComponent(String(req.headers['x-vercel-ip-city'] || '')).slice(0, 60); } catch (e) { return ''; }
+}
+
+/* Une ecriture venue d'une autre origine est refusee. Le cookie de session
+   est deja SameSite=Strict — un autre site ne peut pas l'emporter — ; ce
+   controle est la seconde ceinture, au cas ou un navigateur l'ignorerait. */
+function origineEtrangere(req) {
+  const o = req.headers.origin;
+  if (!o || req.method !== 'POST') return false;
+  const hote = req.headers['x-forwarded-host'] || req.headers.host || '';
+  try { return new URL(o).host !== hote; } catch (e) { return true; }
+}
+
 module.exports = async function handler(req, res) {
   const action = (req.query.a || '').toString();
+  if (origineEtrangere(req)) return json(res, 403, { ok: false, message: 'Origine refusée.' });
 
   // ── Lecture publique : ce que la page Offres & Evenements consomme ──────
   if (action === 'public') {
@@ -1630,7 +1659,17 @@ module.exports = async function handler(req, res) {
   if (action === 'entrer') {
     if (req.method !== 'POST') return json(res, 405, { ok: false });
     const c = corpsDe(req);
-    const r = await COMPTES.entrer({ courriel: c.courriel, mdp: c.mdp });
+    const r = await COMPTES.entrer({ courriel: c.courriel, mdp: c.mdp,
+      appareil: appareilDe(req), ip: ipDe(req), ville: villeDe(req) });
+    if (r.cookie) res.setHeader('Set-Cookie', r.cookie);
+    return json(res, r.code, r.corps);
+  }
+  /* La seconde etape : le code de l'application, ou un code de secours. */
+  if (action === 'entrer-code') {
+    if (req.method !== 'POST') return json(res, 405, { ok: false });
+    const c = corpsDe(req);
+    const r = await COMPTES.entrerCode({ defi: c.defi, code: c.code, secoursCode: c.secours === true,
+      appareil: appareilDe(req), ip: ipDe(req), ville: villeDe(req) });
     if (r.cookie) res.setHeader('Set-Cookie', r.cookie);
     return json(res, r.code, r.corps);
   }
@@ -1652,6 +1691,14 @@ module.exports = async function handler(req, res) {
     return json(res, 403, { ok: false, provisoire: true,
       message: 'Choisissez d’abord votre mot de passe personnel.' });
   }
+  /* La double authentification est OBLIGATOIRE pour tous les comptes (choix
+     de la direction, 30 octobre 2026). Tant qu'elle n'est pas activee, la
+     session n'ouvre que l'ecran qui l'active. L'acces de secours, reserve au
+     developpeur, n'en a pas. */
+  if (qui.mfaAFaire && !qui.secours && !['etat', 'mot-de-passe', '2fa-preparer', '2fa-activer'].includes(action)) {
+    return json(res, 403, { ok: false, mfa: true,
+      message: 'Activez d’abord la double authentification.' });
+  }
 
   /* LE controle d'acces. Il passe avant toute lecture : un profil qui n'a pas
      le droit n'apprend meme pas si l'entree visee existe. */
@@ -1659,6 +1706,29 @@ module.exports = async function handler(req, res) {
   if (droit && !comptes.peut(qui.role, droit)) {
     return json(res, 403, { ok: false, message: 'Votre profil (' + comptes.ROLES[qui.role].nom
       + ') ne permet pas cette action. Voyez avec un administrateur.' });
+  }
+
+  // ── La double authentification et les sessions de son propre compte ──────
+  if (action === '2fa-preparer' || action === '2fa-activer' || action === '2fa-codes'
+      || action === 'sessions-fermer') {
+    if (req.method !== 'POST') return json(res, 405, { ok: false });
+    const c = corpsDe(req);
+    const r = action === '2fa-preparer' ? await COMPTES.mfaPreparer(qui, c)
+      : action === '2fa-activer' ? await COMPTES.mfaActiver(qui, c)
+      : action === '2fa-codes' ? await COMPTES.mfaCodes(qui, c)
+      : await COMPTES.sessionsFermer(qui);
+    if (r.cookie) res.setHeader('Set-Cookie', r.cookie);
+    return json(res, r.code, r.corps);
+  }
+  if (action === 'mes-connexions') {
+    const r = await COMPTES.mesConnexions(qui);
+    return json(res, r.code, r.corps);
+  }
+  // Un administrateur remet a zero la double authentification d'un autre.
+  if (action === 'compte-2fa') {
+    if (req.method !== 'POST') return json(res, 405, { ok: false });
+    const r = await COMPTES.mfaReinitialiser(qui, String(corpsDe(req).id || ''));
+    return json(res, r.code, r.corps);
   }
 
   if (action === 'mot-de-passe') {
@@ -1706,7 +1776,8 @@ module.exports = async function handler(req, res) {
          sert pour son menu ; le serveur, lui, revérifie a chaque action. */
       moi: { id: qui.id, nom: qui.nom, courriel: qui.courriel, role: qui.role,
         profil: role.nom, vues: role.vues, droits: role.droits,
-        provisoire: qui.provisoire, secours: !!qui.secours },
+        provisoire: qui.provisoire, secours: !!qui.secours,
+        mfa: !!qui.mfa, mfaAFaire: !!qui.mfaAFaire && !qui.secours, codesRestants: qui.codesRestants || 0 },
       comptes: await COMPTES.combien(),
       // 'dediee' (ADMIN_SECRET) ou 'derivee' (du mot de passe de secours).
       cle: SECRET_DEDIE ? 'dediee' : 'derivee',

@@ -1,0 +1,6 @@
+Marcellus (Astigmatic) et Karla (Jonathan Pinhorn), copies des fichiers servis
+par Google Fonts (sous-ensemble latin). Les deux sont distribuées sous la
+SIL Open Font License 1.1 : https://openfontlicense.org
+
+Elles sont hébergées ici pour que l'administration ne dépende d'aucun
+service extérieur.

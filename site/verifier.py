@@ -422,16 +422,18 @@ def controler():
     # la meme, la mesure aussi : un logo est une image, et le balayage de
     # contraste ne voit que du texte.
     #
-    # L'ecran de connexion est clair (--bark), la barre laterale est sombre
-    # (--night). Chacun son logo, et c'est verifiable sans regarder un pixel.
+    # Depuis la refonte d'octobre 2026, le logo de l'ecran de connexion est
+    # pose sur la PHOTO voilee de marine (.porte-photo), et la barre laterale
+    # est marine : le blanc dans les deux cas. Le bronze y tomberait sous les
+    # 3:1. C'est verifiable sans regarder un pixel.
     admin = 'admin/index.html'
     if os.path.exists(admin):
         a = io.open(admin, encoding='utf-8').read()
-        porte = re.search(r'<div id="porte">(.*?)</div>\s*<!--', a, re.S)             or re.search(r'<div id="porte">(.*?)</form>', a, re.S)
+        porte = re.search(r'<div class="porte-photo">(.*?)</div>', a, re.S)
         barre = re.search(r'<div class="marque">(.*?)</div>', a, re.S)
-        if porte and 'logo-bronze.png' not in porte.group(1):
-            pb.append((admin, 'ecran de connexion : fond clair, le logo bronze '
-                       'est attendu'))
+        if not porte or 'logo-blanc.png' not in porte.group(1):
+            pb.append((admin, 'ecran de connexion : logo sur la photo sombre, '
+                       'le logo blanc est attendu'))
         if barre and 'logo-blanc.png' not in barre.group(1):
             pb.append((admin, 'barre laterale : fond marine, le logo blanc '
                        'est attendu'))

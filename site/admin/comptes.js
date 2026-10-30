@@ -25,6 +25,8 @@ const CP = {
   erreur: '',
   filtre: '',             // journal : l'id d'une personne, ou ''
   cherche: '',
+  connexions: null,       // Mon compte : ses dernieres connexions
+  mfa: null,              // Mon compte : null | 'tel' | 'codes' | { prep } | { codes }
 };
 
 /** Le profil connecte a-t-il ce droit ? (affichage seulement) */
@@ -35,7 +37,7 @@ function peut(droit) {
 const ROLES_LOCAUX = {
   admin: { nom: 'Administrateur', resume: 'Tout, plus les comptes, les prix et les paramètres.' },
   reception: { nom: 'Réception', resume: 'Disponibilités, réservations et chambres.' },
-  communication: { nom: 'Communication', resume: 'Événements, promotions, campagnes, recrutement et affiches.' },
+  communication: { nom: 'Communication', resume: 'Événements, promotions, campagnes, recrutement, affiches et référencement.' },
   lecture: { nom: 'Lecture seule', resume: 'Consulte tout, ne modifie rien.' },
 };
 const roles = () => (Object.keys(CP.roles).length ? CP.roles : ROLES_LOCAUX);
@@ -66,10 +68,7 @@ function appliquerProfil() {
 
 /* ── Premiere connexion ──────────────────────────────────────────────── */
 function montrerPremier() {
-  $('#porte').style.display = 'grid';
-  $('#cadre').classList.remove('on');
-  $('#fporte').hidden = true;
-  $('#fpremier').hidden = false;
+  ecranPorte('#fpremier');
   $('#premier-qui').textContent = 'Bonjour ' + ETAT.moi.nom + '. Le mot de passe qu’on vous a '
     + 'transmis est provisoire : remplacez-le par le vôtre. Personne d’autre ne le connaîtra.';
   $('#errpremier').textContent = '';
@@ -87,14 +86,112 @@ $('#fpremier').addEventListener('submit', async (e) => {
   const r = await appel('mot-de-passe', { ancien: $('#p-ancien').value, nouveau: $('#p-nouveau').value });
   if (!r.ok) { err.textContent = r.message || 'Le changement a échoué.'; return; }
   ['#p-ancien', '#p-nouveau', '#p-confirme'].forEach((s) => { $(s).value = ''; });
-  $('#fpremier').hidden = true;
-  $('#fporte').hidden = false;
+  PREMIERE = true;
   montrerCadre();
+});
+
+/* ── La double authentification ────────────────────────────────────────
+   Obligatoire pour tous les comptes : tant qu'elle n'est pas activee, le
+   serveur n'ouvre que cet ecran. Trois temps — installer une application,
+   scanner le QR code, saisir le premier code — puis les codes de secours,
+   montres une seule fois.
+
+   Le QR code est dessine ICI, dans la page, par qrcode.js (MIT, Kazuhiko
+   Arase) : le secret ne part chez aucun service exterieur. La bibliotheque
+   ne se charge que lorsqu'on en a besoin. */
+let PREMIERE = false;          // on vient de choisir son mot de passe
+let QR_PRET = null;
+function chargerQr() {
+  if (!QR_PRET) {
+    QR_PRET = new Promise((ok, ko) => {
+      const sc = document.createElement('script');
+      sc.src = '/admin/qrcode.js';
+      sc.onload = ok;
+      sc.onerror = () => { QR_PRET = null; ko(new Error('qr')); };
+      document.head.appendChild(sc);
+    });
+  }
+  return QR_PRET;
+}
+async function poserQr(img, uri) {
+  try {
+    await chargerQr();
+    const q = qrcode(0, 'M');
+    q.addData(uri);
+    q.make();
+    img.src = q.createDataURL(6, 2);
+  } catch (e) { img.alt = 'QR code indisponible : saisissez la clé à la main.'; }
+}
+const cleLisible = (s) => String(s || '').replace(/(.{4})/g, '$1 ').trim();
+
+/** Les trois etapes. `pre` prefixe les identifiants (porte ou Mon compte). */
+function etapesActivation(prep, pre) {
+  return `<div class="cp-etapes">
+    <div class="cp-etape"><span class="cp-no">1</span><div><b>Installez une application d’authentification</b>
+      <p>Google Authenticator, Microsoft Authenticator, ou l’application Mots de passe de l’iPhone.
+      Elle est gratuite.</p></div></div>
+    <div class="cp-etape"><span class="cp-no">2</span><div><b>Scannez ce QR code avec l’application</b>
+      <div class="cp-qr"><img id="${pre}-qr" alt="QR code à scanner"></div>
+      <p>Pas d’appareil photo ? Saisissez cette clé à la main :</p>
+      <div class="cp-cle"><code>${ech(cleLisible(prep.secret))}</code>
+        <button type="button" class="btn-ic cp-garde" data-cp-copier="${ech(prep.secret)}" title="Copier la clé"
+          aria-label="Copier la clé">${ic('copie')}</button></div></div></div>
+    <div class="cp-etape"><span class="cp-no">3</span><div style="flex:1;min-width:0"><b>Entrez le code affiché</b>
+      <input id="${pre}-code" class="code6" inputmode="numeric" autocomplete="one-time-code" maxlength="6"
+        placeholder="······" aria-label="Code à 6 chiffres" required style="margin-top:10px">
+      <button class="btn plein cp-garde" style="width:100%;margin-top:12px">${ic('bouclier')} Activer la protection</button>
+      </div></div>
+  </div>`;
+}
+
+/** Les codes de secours, et de quoi les garder. */
+function blocCodes(codes) {
+  const texte = 'Hôtel Evannath — codes de secours de ' + ((ETAT.moi && ETAT.moi.courriel) || '') + '\n'
+    + 'Chaque code ne sert qu’une fois.\n\n' + codes.join('\n') + '\n';
+  return `<div class="cp-codes codes-imprimables">${codes.map((c) => `<code>${ech(c)}</code>`).join('')}</div>
+    <div class="cp-codes-gestes">
+      <button type="button" class="btn mince cp-garde" data-cp-copier="${ech(codes.join('\n'))}">${ic('copie')} Copier</button>
+      <a class="btn mince" download="codes-de-secours-evannath.txt"
+        href="data:text/plain;charset=utf-8,${encodeURIComponent(texte)}">${ic('tele')} Télécharger</a>
+      <button type="button" class="btn mince cp-garde" data-cp-imprimer>${ic('impr')} Imprimer</button>
+    </div>`;
+}
+
+async function montrerActivation() {
+  ecranPorte('#factiver');
+  $('#act-etape').textContent = PREMIERE ? 'Première connexion · étape 2 sur 2' : 'Dernière étape';
+  $('#erractiver').textContent = '';
+  $('#act-zone').innerHTML = '<p class="aide">Préparation…</p>';
+  const r = await appel('2fa-preparer', {}).catch(() => ({}));
+  if (!r.ok) { $('#erractiver').textContent = r.message || 'La préparation a échoué. Rechargez la page.'; return; }
+  $('#act-zone').innerHTML = etapesActivation(r, 'act');
+  poserQr($('#act-qr'), r.uri);
+}
+
+$('#factiver').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  $('#erractiver').textContent = '';
+  const r = await appel('2fa-activer', { code: $('#act-code').value });
+  if (!r.ok) { $('#erractiver').textContent = r.message || 'L’activation a échoué.'; $('#act-code').value = ''; return; }
+  $('#codes-zone').innerHTML = blocCodes(r.codes);
+  $('#codes-ok').checked = false;
+  ecranPorte('#fcodes');
+});
+$('#fcodes').addEventListener('submit', (e) => {
+  e.preventDefault();
+  PREMIERE = false;
+  $('#codes-zone').innerHTML = '';
+  montrerCadre();
+});
+$('#act-sortir').addEventListener('click', async () => {
+  await appel('sortir', {}).catch(() => {});
+  ETAT.moi = null;
+  montrerPorte();
 });
 
 $('#sortir').addEventListener('click', () => {
   ETAT.moi = null;
-  Object.assign(CP, { comptes: null, journal: null, cree: null, ajout: false, erreur: '' });
+  Object.assign(CP, { comptes: null, journal: null, cree: null, ajout: false, erreur: '', connexions: null, mfa: null });
   document.body.classList.remove('cp-ro');
 });
 
@@ -116,6 +213,12 @@ async function cpApres() {
     CP.roles = r.roles || {};
     CP.erreur = r.ok ? '' : (r.message || 'La liste des comptes n’a pas pu être lue.');
     if (VUE === 'utilisateurs') rendre();
+  } else if (VUE === 'compte' && CP.connexions === null && ETAT.moi && !ETAT.moi.secours) {
+    CP.enCours = true;
+    const r = await appel('mes-connexions').catch(() => ({}));
+    CP.enCours = false;
+    CP.connexions = r.ok ? r.connexions : [];
+    if (VUE === 'compte') rendre();
   } else if (VUE === 'journal' && CP.journal === null) {
     CP.enCours = true;
     const r = await appel('journal').catch(() => ({}));
@@ -141,7 +244,9 @@ function messageAcces(c, mdp) {
     + 'Adresse : ' + location.origin + '/admin\n'
     + 'E-mail : ' + c.courriel + '\n'
     + 'Mot de passe provisoire : ' + mdp + '\n\n'
-    + 'À la première connexion, il vous sera demandé de choisir votre propre mot de passe.';
+    + 'À la première connexion, il vous sera demandé de choisir votre propre mot de passe, '
+    + 'puis d’activer la double authentification : installez d’avance Google Authenticator '
+    + '(ou Microsoft Authenticator) sur votre téléphone.';
 }
 
 function carteCree() {
@@ -170,7 +275,7 @@ function vueUtilisateurs() {
   const tete = `<div class="entete"><div>
       <h1 class="t">Utilisateurs</h1>
       <p class="sous">Qui peut entrer dans l’administration, et avec quel profil.</p></div>
-      ${CP.ajout ? '' : '<button class="btn plein" data-cp-ajouter>+ Ajouter une personne</button>'}</div>`;
+      ${CP.ajout ? '' : `<button class="btn plein" data-cp-ajouter>${ic('plus')} Ajouter une personne</button>`}</div>`;
   if (CP.comptes === null) return tete + '<p class="aide">Chargement…</p>';
 
   const ajout = !CP.ajout ? '' : `<form class="carte" id="cp-form-ajout" novalidate>
@@ -204,16 +309,18 @@ function vueUtilisateurs() {
       <td>${!c.actif ? '<span class="etat fini">Désactivé</span>'
         : c.provisoire ? '<span class="etat attend">À activer</span>'
         : '<span class="etat vif">Actif</span>'}</td>
+      <td>${c.mfa ? '<span class="etat vif">Activée</span>' : '<span class="etat attend">À activer</span>'}</td>
       <td class="cp-sous">${c.derniere ? quand(c.derniere) : 'Jamais connecté'}</td>
       <td class="cp-actions">${soi ? '' : `
         <button type="button" class="btn mince" data-cp-reinit="${c.id}" title="Créer un nouveau mot de passe provisoire">Mot de passe</button>
+        ${c.mfa ? `<button type="button" class="btn mince" data-cp-2fa="${c.id}" title="Téléphone perdu : la personne réactivera la double authentification à sa prochaine connexion">Double auth.</button>` : ''}
         <button type="button" class="btn mince" data-cp-actif="${c.id}">${c.actif ? 'Désactiver' : 'Réactiver'}</button>
         <button type="button" class="btn mince danger" data-cp-suppr="${c.id}">Supprimer</button>`}</td>
     </tr>`;
   }).join('');
 
   const liste = CP.comptes.length ? `<div class="carte cp-table-zone"><table class="cp-table">
-      <thead><tr><th>Personne</th><th>Profil</th><th>État</th><th>Dernière connexion</th><th><span class="cp-vh">Actions</span></th></tr></thead>
+      <thead><tr><th>Personne</th><th>Profil</th><th>État</th><th>Double auth.</th><th>Dernière connexion</th><th><span class="cp-vh">Actions</span></th></tr></thead>
       <tbody>${lignes}</tbody></table>
       <p class="msg mal" id="cp-msg-liste" role="alert" style="margin-top:12px"></p></div>`
     : `<div class="carte"><p><b>Aucun compte pour l’instant.</b></p>
@@ -226,8 +333,11 @@ function vueUtilisateurs() {
       <p class="aide" style="margin-top:12px">Changer le profil d’une personne, la désactiver ou lui
       donner un nouveau mot de passe ferme aussitôt ses sessions ouvertes. Il reste toujours au moins
       un administrateur actif.</p>
-      <p class="aide">Accès de secours : e-mail vide et mot de passe principal (ADMIN_MDP, dans Vercel).
-      Il sert à créer le premier compte, ou à rentrer si le dernier administrateur a perdu le sien.</p></div>`;
+      <p class="aide">La double authentification est obligatoire pour tout le monde : chaque personne
+      l’active à sa première connexion. Téléphone perdu et plus de codes de secours ? « Double auth. »
+      la remet à zéro ; la personne la réactivera en se reconnectant.</p>
+      <p class="aide">Accès de secours : réservé au développeur (mot de passe ADMIN_MDP, dans Vercel).
+      Il sert à créer le premier compte, ou à rentrer si plus aucun administrateur ne le peut.</p></div>`;
 
   return tete + (CP.erreur ? `<div class="alerte"><b>Comptes indisponibles</b><span>${ech(CP.erreur)}</span></div>` : '')
     + (CP.cree ? carteCree() : '') + ajout + liste + profils;
@@ -266,20 +376,75 @@ function vueJournal() {
 }
 
 /* ── Mon compte ──────────────────────────────────────────────────────── */
+const initiales = (nom) => String(nom || '?').split(/\s+/).filter(Boolean).slice(0, 2)
+  .map((x) => x[0].toUpperCase()).join('');
+
+/** La carte de la double authentification, selon ou on en est. */
+function carteMfa(m) {
+  const etat = CP.mfa;
+  let corps;
+  if (etat && etat.prep) {
+    corps = `<form id="cp-form-tel">${etapesActivation(etat.prep, 'mc')}
+      <p class="msg mal" id="cp-msg-mfa" role="alert"></p>
+      <button type="button" class="btn mince" data-cp-mfa-annuler style="margin-top:6px">Annuler</button></form>`;
+  } else if (etat && etat.codes) {
+    corps = `<p class="aide" style="margin:0 0 4px">Vos nouveaux codes de secours. Les anciens ne valent plus.
+      Ils ne seront plus affichés : gardez-les hors du téléphone.</p>${blocCodes(etat.codes)}
+      <button type="button" class="btn plein mince cp-garde" data-cp-mfa-annuler style="margin-top:14px">C’est noté</button>`;
+  } else if (etat === 'tel' || etat === 'codes') {
+    corps = `<form id="cp-form-code-actuel">
+      <p class="aide" style="margin:0 0 12px">${etat === 'tel'
+        ? 'Pour passer sur un nouveau téléphone, entrez d’abord le code affiché sur l’ancien.'
+        : 'Entrez le code affiché par votre application pour recevoir de nouveaux codes de secours.'}</p>
+      <input id="cp-code-actuel" class="code6" inputmode="numeric" autocomplete="one-time-code" maxlength="6"
+        placeholder="······" aria-label="Code actuel" required style="max-width:280px">
+      <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">
+        <button class="btn plein cp-garde">Continuer</button>
+        <button type="button" class="btn" data-cp-mfa-annuler>Annuler</button></div>
+      <p class="msg mal" id="cp-msg-mfa" role="alert"></p></form>`;
+  } else {
+    const n = m.codesRestants || 0;
+    corps = `<div class="cp-mfa-etat">
+        <i>${ic('bouclier')}</i>
+        <div><b>Votre compte est protégé</b><span>À chaque connexion, un code de votre téléphone est demandé
+        en plus du mot de passe. ${n} code${n > 1 ? 's' : ''} de secours restant${n > 1 ? 's' : ''}.</span></div>
+      </div>
+      ${n <= 3 ? `<div class="alerte or" style="margin:14px 0 0"><i>${ic('alerte')}</i><div><b>Plus que ${n} code${n > 1 ? 's' : ''} de secours</b>
+        <span>Demandez-en de nouveaux avant de perdre votre téléphone.</span></div></div>` : ''}
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px">
+        <button type="button" class="btn mince cp-garde" data-cp-mfa="tel">${ic('tel')} Changer de téléphone</button>
+        <button type="button" class="btn mince cp-garde" data-cp-mfa="codes">${ic('cle')} Nouveaux codes de secours</button>
+      </div>`;
+  }
+  return `<div class="carte"><div class="cp-tete"><h2 class="bloc-t" style="margin:0">Double authentification</h2>
+    <span class="etat vif">Activée</span></div>${corps}</div>`;
+}
+
 function vueCompte() {
   const m = ETAT.moi || {};
-  return `<div class="entete"><div>
+  const profil = `<div class="carte cp-profil-carte"><span class="cp-av">${ech(initiales(m.nom))}</span>
+      <div><b>${ech(m.nom)}</b><span>${ech(m.courriel || 'Accès de secours')}</span></div>
+      <span class="etat dort" style="margin-left:auto">${ech(m.profil)}</span></div>`;
+  const tete = `<div class="entete"><div>
       <h1 class="t">Mon compte</h1>
-      <p class="sous">${ech(m.nom)} · ${ech(m.profil)}</p></div></div>
-    <div class="carte">
-      <div class="ligne" style="margin:0 0 8px"><div class="txt"><b>Nom</b><span>${ech(m.nom)}</span></div></div>
-      ${m.courriel ? `<div class="ligne" style="margin:0 0 8px"><div class="txt"><b>E-mail</b><span>${ech(m.courriel)}</span></div></div>` : ''}
-      <div class="ligne" style="margin:0"><div class="txt"><b>Profil</b><span>${ech((roles()[m.role] || {}).resume || '')}</span></div>
-        <span class="etat vif">${ech(m.profil)}</span></div>
-    </div>
-    ${m.secours ? `<div class="carte"><p>Vous êtes entré par <b>l’accès de secours</b>. Son mot de passe
-      se change dans Vercel (variable ADMIN_MDP). Pour travailler au quotidien, créez-vous un compte
-      nominatif dans Utilisateurs.</p></div>` : `<form class="carte" id="cp-form-mdp" novalidate>
+      <p class="sous">Votre profil, la protection de votre compte et vos connexions.</p></div></div>`;
+  if (m.secours) {
+    return tete + profil + `<div class="carte"><p>Vous êtes entré par <b>l’accès de secours</b>, réservé au
+      développeur. Son mot de passe se change dans Vercel (variable ADMIN_MDP). Pour travailler au quotidien,
+      créez-vous un compte nominatif dans Utilisateurs.</p></div>`;
+  }
+  const connexions = CP.connexions === null ? '<p class="aide">Chargement…</p>'
+    : !CP.connexions.length ? '<p class="aide">Aucune connexion enregistrée.</p>'
+    : CP.connexions.map((c) => {
+      const echec = /^(Échec|Connexion bloquée)/.test(c.x);
+      const [quoi, ...ou] = c.x.split(' · ');
+      return `<div class="cp-connexion${echec ? ' echec' : ''}"><i>${ic(echec ? 'alerte' : /iPhone|Android|iPad/.test(c.x) ? 'tel' : 'ordi')}</i>
+        <div><b>${ech(ou.length ? ou.join(' · ') : quoi)}</b>
+        <span>${ech(quand(c.t))}${ou.length ? ' · ' + ech(quoi) : ''}</span></div></div>`;
+    }).join('');
+  return tete + profil + `<div class="cp-deux">
+    <div>${carteMfa(m)}
+    <form class="carte" id="cp-form-mdp" novalidate>
       <h2 class="bloc-t">Changer mon mot de passe</h2>
       <div class="champ"><label for="cm-ancien">Mot de passe actuel</label>
         <input type="password" id="cm-ancien" autocomplete="current-password" required></div>
@@ -295,7 +460,15 @@ function vueCompte() {
         <button class="btn plein cp-garde">Changer le mot de passe</button>
         <p class="msg" id="cp-msg-mdp" role="status"></p>
       </div>
-    </form>`}`;
+    </form></div>
+    <div class="carte"><h2 class="bloc-t">Dernières connexions</h2>
+      <p class="aide" style="margin:-6px 0 8px">Un appareil ou une ville que vous ne reconnaissez pas ?
+      Changez votre mot de passe, puis déconnectez les autres appareils.</p>
+      ${connexions}
+      <button type="button" class="btn mince danger cp-garde" data-cp-sessions style="margin-top:14px">${ic('sortie')}
+        Déconnecter mes autres appareils</button>
+      <p class="msg" id="cp-msg-sessions" role="status"></p></div>
+  </div>`;
 }
 
 /* ── Les gestes ──────────────────────────────────────────────────────── */
@@ -303,19 +476,33 @@ const trouver = (id) => (CP.comptes || []).find((c) => c.id === id);
 function direListe(t) { const m = $('#cp-msg-liste'); if (m) m.textContent = t || ''; }
 
 document.addEventListener('click', async (e) => {
+  const g = e.target.closest('[data-cp-mfa],[data-cp-mfa-annuler],[data-cp-sessions],[data-cp-imprimer]');
+  if (g) {
+    if (g.hasAttribute('data-cp-imprimer')) { window.print(); return; }
+    if (g.hasAttribute('data-cp-mfa')) { CP.mfa = g.dataset.cpMfa; rendre(); const c = $('#cp-code-actuel'); if (c) c.focus(); return; }
+    if (g.hasAttribute('data-cp-mfa-annuler')) { CP.mfa = null; rendre(); return; }
+    if (!confirm('Déconnecter tous vos autres appareils ?\n\nCelui-ci reste connecté. Les autres devront '
+      + 'se reconnecter, avec le mot de passe et le code.')) return;
+    const r = await appel('sessions-fermer', {});
+    const m = $('#cp-msg-sessions');
+    if (m) { m.className = 'msg ' + (r.ok ? 'bon' : 'mal'); m.textContent = r.ok ? 'Vos autres appareils sont déconnectés.' : (r.message || 'Échec.'); }
+    return;
+  }
   const b = e.target.closest('[data-cp-ajouter],[data-cp-annuler],[data-cp-fermer-cree],[data-cp-copier],'
-    + '[data-cp-reinit],[data-cp-actif],[data-cp-suppr],[data-cp-rafraichir]');
+    + '[data-cp-reinit],[data-cp-actif],[data-cp-suppr],[data-cp-rafraichir],[data-cp-2fa]');
   if (!b) return;
   if (b.hasAttribute('data-cp-ajouter')) { CP.ajout = true; CP.cree = null; rendre(); $('#cp-nom').focus(); return; }
   if (b.hasAttribute('data-cp-annuler')) { CP.ajout = false; rendre(); return; }
   if (b.hasAttribute('data-cp-fermer-cree')) { CP.cree = null; rendre(); return; }
   if (b.hasAttribute('data-cp-rafraichir')) { CP.journal = null; rendre(); return; }
   if (b.hasAttribute('data-cp-copier')) {
-    try { await navigator.clipboard.writeText(b.dataset.cpCopier); b.textContent = 'Copié ✓'; }
+    const avant = b.innerHTML;
+    try { await navigator.clipboard.writeText(b.dataset.cpCopier); b.innerHTML = ic('check') + (b.classList.contains('btn-ic') ? '' : ' Copié'); }
     catch (err) { b.textContent = 'Copie impossible : sélectionnez le texte'; }
+    setTimeout(() => { b.innerHTML = avant; }, 1800);
     return;
   }
-  const id = b.dataset.cpReinit || b.dataset.cpActif || b.dataset.cpSuppr;
+  const id = b.dataset.cpReinit || b.dataset.cpActif || b.dataset.cpSuppr || b.dataset.cp2fa;
   const c = trouver(id);
   if (!c) return;
   direListe('');
@@ -325,6 +512,11 @@ document.addEventListener('click', async (e) => {
       + 'L’ancien cesse de fonctionner tout de suite, et ses sessions ouvertes sont fermées.')) return;
     r = await appel('compte-reinitialiser', { id });
     if (r.ok) CP.cree = { compte: r.compte, provisoire: r.provisoire, reinit: true };
+  } else if (b.hasAttribute('data-cp-2fa')) {
+    if (!confirm('Remettre à zéro la double authentification de ' + c.nom + ' ?\n\nÀ faire quand la personne '
+      + 'a perdu son téléphone ET ses codes de secours. Ses sessions sont fermées ; elle la réactivera '
+      + 'à sa prochaine connexion, avec son mot de passe.')) return;
+    r = await appel('compte-2fa', { id });
   } else if (b.hasAttribute('data-cp-actif')) {
     if (c.actif && !confirm('Désactiver le compte de ' + c.nom + ' ?\n\nLa personne ne pourra plus '
       + 'entrer, et ses sessions ouvertes sont fermées. Rien n’est effacé : vous pourrez le réactiver.')) return;
@@ -385,6 +577,35 @@ document.addEventListener('submit', async (e) => {
     CP.comptes = null; CP.journal = null;
     rendre();
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  if (e.target.id === 'cp-form-code-actuel') {
+    e.preventDefault();
+    const code = $('#cp-code-actuel').value;
+    const m = $('#cp-msg-mfa');
+    if (CP.mfa === 'tel') {
+      const r = await appel('2fa-preparer', { code });
+      if (!r.ok) { m.textContent = r.message || 'Code refusé.'; return; }
+      CP.mfa = { prep: r };
+      rendre();
+      poserQr($('#mc-qr'), r.uri);
+    } else {
+      const r = await appel('2fa-codes', { code });
+      if (!r.ok) { m.textContent = r.message || 'Code refusé.'; return; }
+      CP.mfa = { codes: r.codes };
+      ETAT.moi.codesRestants = r.codes.length;
+      rendre();
+    }
+    return;
+  }
+  if (e.target.id === 'cp-form-tel') {
+    e.preventDefault();
+    const r = await appel('2fa-activer', { code: $('#mc-code').value });
+    if (!r.ok) { $('#cp-msg-mfa').textContent = r.message || 'Code refusé.'; return; }
+    CP.mfa = { codes: r.codes };
+    ETAT.moi.codesRestants = r.codes.length;
+    CP.connexions = null;
+    rendre();
+    return;
   }
   if (e.target.id === 'cp-form-mdp') {
     e.preventDefault();

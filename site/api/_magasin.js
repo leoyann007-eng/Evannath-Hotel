@@ -491,4 +491,16 @@ async function valeur(cle) {
   return c && c.expire >= Date.now() ? c.n : 0;
 }
 
-module.exports = { document, compter, valeur, expliquer, environnement };
+/** Remet un compteur a zero : une connexion reussie efface ses echecs. */
+async function effacer(cle) {
+  const k = cle + suffixe();
+  COMPTEURS.delete(k);
+  if (URL_BASE) {
+    try {
+      await schema();
+      await connexions().query('DELETE FROM evn_compteurs WHERE cle = $1', [k]);
+    } catch (e) { /* il expirera de lui-meme */ }
+  }
+}
+
+module.exports = { document, compter, valeur, effacer, expliquer, environnement };
