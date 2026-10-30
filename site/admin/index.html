@@ -262,7 +262,11 @@ nav button i{font-style:normal;width:20px;display:flex;justify-content:center;tr
 
    Ce n'etait PAS le calendrier : les coupables mesures etaient l'en-tete,
    un bouton et le bandeau d'alerte — tous entraines par la colonne. */
-main{padding:32px 40px 60px;max-width:1100px;min-width:0}
+main{padding:32px 40px 60px;max-width:1100px;min-width:0;width:100%;margin:0 auto}
+/* Un grand ecran : le contenu s'elargit, et ce qui reste se partage des deux
+   cotes au lieu de s'accumuler a droite. */
+@media(min-width:1480px){ main{max-width:1280px} }
+@media(min-width:1800px){ main{max-width:1440px;padding-left:48px;padding-right:48px} }
 .entete{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;
   flex-wrap:wrap;margin-bottom:24px}
 .entete .fil-ariane{font-size:13px;color:var(--muted);margin-bottom:6px}
@@ -787,6 +791,9 @@ const $ = (s, r) => (r || document).querySelector(s);
 /* Le champ image porte soit l'URL d'une affiche deposee, soit le nom d'une
    photo du site. */
 const srcImage = (v) => (/^https?:/.test(v || '') ? v : '/img/opt/' + v + '.jpg');
+/* La vignette d'une photo du site (320 px, build-images.py) : pour les
+   grilles de choix et la Galerie, ou l'original pesait dix fois plus. */
+const vignette = (n) => '/img/opt/' + n + '-v.jpg';
 const ech = (s) => String(s == null ? '' : s)
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
@@ -1454,7 +1461,7 @@ function formulaireArticle() {
     </div>
     <div class="grille-img" id="imgs" hidden>
       ${ETAT.images.map((n) => `<button type="button" data-img="${ech(n)}"
-        class="${img === n ? 'on' : ''}"><img src="/img/opt/${ech(n)}.jpg" alt=""
+        class="${img === n ? 'on' : ''}"><img src="${vignette(ech(n))}" alt=""
         loading="lazy"></button>`).join('')}
     </div>
     <div class="champ" style="margin-top:14px"><label for="f-a-alt">Description de la photo</label>
@@ -2043,7 +2050,7 @@ function pas1(e) {
     </div>
     <div class="grille-img" id="imgs" hidden>
       ${ETAT.images.map((n) => `<button type="button" data-img="${ech(n)}"
-        class="${e.fond === n ? 'on' : ''}"><img src="/img/opt/${ech(n)}.jpg" alt=""
+        class="${e.fond === n ? 'on' : ''}"><img src="${vignette(ech(n))}" alt=""
         loading="lazy"></button>`).join('')}
     </div>`;
 }
@@ -2124,7 +2131,7 @@ function camp1(e) {
     </div>
     <div class="grille-img" id="imgs" hidden>
       ${ETAT.images.map((n) => `<button type="button" data-img="${ech(n)}"
-        class="${e.visuel === n ? 'on' : ''}"><img src="/img/opt/${ech(n)}.jpg"
+        class="${e.visuel === n ? 'on' : ''}"><img src="${vignette(ech(n))}"
         alt="" loading="lazy"></button>`).join('')}
     </div>`;
 }
@@ -2166,7 +2173,7 @@ function camp2(e) {
       </div>`}
     <div class="grille-img" id="imgs" ${PHOTO_POUR === null ? 'hidden' : ''}>
       ${ETAT.images.map((n) => `<button type="button" data-img="${ech(n)}"
-        ><img src="/img/opt/${ech(n)}.jpg" alt="" loading="lazy"></button>`).join('')}
+        ><img src="${vignette(ech(n))}" alt="" loading="lazy"></button>`).join('')}
     </div>`;
 }
 
@@ -2309,7 +2316,7 @@ function formulaire(type) {
     </div>
     <div class="grille-img" id="imgs" hidden>
       ${ETAT.images.map((n) => `<button type="button" data-img="${ech(n)}"
-        class="${e.fond === n ? 'on' : ''}"><img src="/img/opt/${ech(n)}.jpg" alt="" loading="lazy"></button>`).join('')}
+        class="${e.fond === n ? 'on' : ''}"><img src="${vignette(ech(n))}" alt="" loading="lazy"></button>`).join('')}
     </div>
 
     <h2 class="bloc-t" style="margin-top:28px">L'essentiel</h2>
@@ -2587,7 +2594,7 @@ function rendre() {
         visuels que vous publiez sur vos réseaux.</p>
         <div class="grille-img" style="max-height:none">
           ${ETAT.images.map((n) => `<button type="button" title="${ech(n)}">
-            <img src="/img/opt/${ech(n)}.jpg" alt="${ech(n)}" loading="lazy"></button>`).join('')}
+            <img src="${vignette(ech(n))}" alt="${ech(n)}" loading="lazy"></button>`).join('')}
         </div>
       </div>`;
   } else if (VUE === 'disponibilites') {

@@ -438,6 +438,16 @@ def controler():
             pb.append((admin, 'barre laterale : fond marine, le logo blanc '
                        'est attendu'))
 
+    # 24. chaque photo proposee dans l'administration a sa vignette (-v).
+    # Les grilles de choix et la Galerie chargent la vignette de 320 px et non
+    # l'original : sans elle, la case reste vide. build-images.py la fabrique.
+    if os.path.exists('donnees/images.json'):
+        import json as _json
+        for n in _json.load(io.open('donnees/images.json', encoding='utf-8')):
+            if not os.path.exists('img/opt/%s-v.jpg' % n):
+                pb.append(('img/opt/%s-v.jpg' % n, 'vignette d\'administration absente : '
+                           'relancer build-images.py'))
+
     # 17. chaque entree du menu du back-office doit peindre quelque chose.
     # Un decoupage du tableau de bord, ancre sur la branche suivante, a emporte
     # les trois branches qui vivaient entre les deux : evenements, promotions,

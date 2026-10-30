@@ -716,7 +716,7 @@ function cmGalerie() {
     <h2 id="cm-g-t">Photos du site</h2>
     <p>Choisissez celles qui montrent cette chambre. Elles s’ajoutent dans l’ordre du clic.</p>
     <div class="cm-choix">${toutes.map((n) => `<button type="button" data-g="${ech(n)}" aria-pressed="${choisies.has(n)}"
-      title="${ech(n)}"><img src="/img/opt/${ech(n)}.jpg" alt="${ech(n)}" loading="lazy"></button>`).join('')}</div>
+      title="${ech(n)}"><img src="${vignette(ech(n))}" alt="${ech(n)}" loading="lazy"></button>`).join('')}</div>
     <div class="cm-boutons"><button class="btn" data-non>Annuler</button><button class="btn plein" data-oui>Valider</button></div></div>`;
   const ordre = (b.photos || []).slice();
   const fermer = (ok) => {

@@ -96,7 +96,7 @@ for f in sorted(glob.glob('*.html')):
 # -1600), ni les vignettes, ni les affiches de video.
 import json, re
 os.makedirs('donnees', exist_ok=True)
-_ecart = re.compile(r'-(640|1024|1600|t|t360)$')
+_ecart = re.compile(r'-(640|1024|1600|t|t360|v)$')
 _photos = sorted({
     os.path.basename(f)[:-4] for f in glob.glob('img/opt/*.jpg')
     if not _ecart.search(os.path.basename(f)[:-4])
