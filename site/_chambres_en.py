@@ -46,7 +46,7 @@ EN = {
    p3="The dining room makes the difference for anyone staying more than three nights.",
    plus=[('Private dining room', 'Seats three'),
          ('Wax textiles', 'Sourced from local craftspeople')],
-   caps=['The room', 'The textiles', 'The lounge']),
+   caps=['The bed', 'The lounge', 'The view']),
 
  'suite-anglaise': dict(
    tag='Lagoon view', meta='2 guests · lagoon view · the finest sunset',
@@ -102,6 +102,7 @@ CHASSIS = {
  'c1': 'Home', 'c2': 'Rooms &amp; Suites',
  'eb0': 'Room',
  'pnuit': 'FCFA / night',
+ 'frm': 'From', 'vdi': 'Check availability',
  'ebr': 'The room',
  'ebe': 'Amenities', 'hae': 'In the room',
  'ebi': 'Included', 'hai': 'Included in the rate',

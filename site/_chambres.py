@@ -55,9 +55,11 @@ CHAMBRES = [
    p2="Trois personnes y tiennent sans se gêner. C'est notre choix pour une famille avec un enfant, ou pour un séjour long où l'on aime prendre le petit-déjeuner chez soi.",
    p3="La salle à manger fait la différence pour qui reste plus de trois nuits.",
    plus=[('Salle à manger privative','Pour trois couverts'),('Textiles wax','Choisis chez des artisans locaux')],
-   photos=[('r-wax','Deluxe Supérieure, textiles wax','La chambre'),
-           ('gal-ch-wax','Détail des textiles wax','Les textiles'),
-           ('gal-ch-salon','Coin salon','Le salon')],
+   # Le lit d'abord : r-wax et gal-ch-wax sont la MEME vue de la paillote
+   # par la fenetre, et la fiche s'ouvrait sur elle, deux fois.
+   photos=[('hero-chambre-wax','Le lit de la Deluxe Supérieure et ses textiles wax','Le lit'),
+           ('gal-ch-salon','Coin salon','Le salon'),
+           ('r-wax','La paillote et la lagune, vues de la chambre','La vue')],
    autres=['deluxe-baldaquin','mezzanine-superieure','suite-arabe']),
 
  dict(slug='suite-anglaise', nom='Suite Anglaise', prix=107000, pax=2,
