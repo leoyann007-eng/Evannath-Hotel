@@ -729,12 +729,14 @@ header.scrolled .nav .brand{transform:translate(calc(-50% + 61px),-50%)}
 .block .eyebrow{margin-bottom:14px}
 .block h2{margin-bottom:18px}
 .block p+p{margin-top:16px}
-.amen{display:grid;grid-template-columns:repeat(4,1fr);background:var(--bark);border:1px solid var(--line);box-shadow:0 22px 50px -30px rgba(42,35,30,.35);padding:18px 0}
-.amen div{padding:26px 18px;font-size:14.5px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px;color:var(--cream)}
-.amen svg{width:34px;height:34px;stroke:var(--bronze);fill:none;stroke-width:1.1;flex:0 0 auto}
-.amen div.hi svg{stroke:var(--bronze-2)}
-.amen div.hi b{color:var(--cream);font-weight:600;display:block}
-.amen div.hi em{font-style:normal;font-size:12px;color:var(--muted);display:block;margin-top:4px}
+/* Les equipements : une carte blanche posee sur le fond creme, quatre par
+   rangee, de l'air entre les lignes. Les atouts de la chambre et les
+   equipements communs ont le meme poids : c'est une liste, pas un classement. */
+.amen{display:grid;grid-template-columns:repeat(4,1fr);background:#fff;box-shadow:0 18px 48px -22px rgba(42,35,30,.28),0 2px 8px rgba(42,35,30,.05);padding:26px 12px}
+.amen div{padding:34px 20px;font-size:16px;line-height:1.5;display:flex;flex-direction:column;align-items:center;text-align:center;gap:18px;color:var(--cream)}
+.amen svg{width:44px;height:44px;stroke:var(--bronze);fill:none;stroke-width:1;stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto}
+.amen div.hi b{color:var(--cream);font-weight:400;display:block}
+.amen div.hi em{font-style:normal;font-size:12.5px;color:var(--muted);display:block;margin-top:3px}
 .incl{list-style:none;margin-top:22px}
 .incl li{padding:15px 0;border-bottom:1px solid var(--line);display:flex;gap:16px;align-items:flex-start}
 .incl b{display:block;color:var(--cream);font-weight:600;font-size:14.5px;margin-bottom:3px}
@@ -822,7 +824,9 @@ header.scrolled .nav .brand{transform:translate(calc(-50% + 61px),-50%)}
   .frecit{margin-bottom:70px}
   .fduo{padding-left:28px;padding-bottom:48px}
   .fequip{margin-bottom:64px}
-  .amen div{padding:18px 10px;font-size:13px}
+  .amen{padding:12px 4px}
+  .amen div{padding:22px 8px;font-size:13.5px;gap:12px}
+  .amen svg{width:36px;height:36px}
   .fgal.rang,.fgal.mosa{grid-template-columns:1fr 1fr;grid-template-rows:none;grid-auto-rows:150px;gap:8px}
   .fgal figure,.fgal.rang[style*="--n:2"] figure{aspect-ratio:auto}
   .fgal.rang[style*="--n:3"] figure:nth-child(4),.fgal.mosa figure.grand{grid-column:span 2;grid-row:span 2}
@@ -944,14 +948,14 @@ header.scrolled .nav .brand{transform:translate(calc(-50% + 61px),-50%)}
     <h2 data-t="hae">Dans la chambre</h2>
   </div>
   <div class="amen">
-      <div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h18M8 8h12M6 16h12"/></svg><span data-t="am0">Air conditionné</span></div>
-      <div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13a10 10 0 0114 0M8.5 16.5a5 5 0 017 0"/><circle cx="12" cy="20" r="1"/></svg><span data-t="am1">Wifi gratuit</span></div>
-      <div><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="12"/><path d="M9 21h6"/></svg><span data-t="am2">Télévision smart</span></div>
-      <div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h16v5a3 3 0 01-3 3H7a3 3 0 01-3-3zM7 12V6a2 2 0 014 0"/></svg><span data-t="am3">Salle d'eau privative</span></div>
-      <div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3v6a4 4 0 008 0V3M12 13v8M9 21h6"/></svg><span data-t="am4">Sèche-cheveux</span></div>
-      <div><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16"/><path d="M9 9h6v6H9z"/></svg><span data-t="am5">Coffre-fort</span></div>
-      <div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17c2 1 4-1 6 0s4 1 6 0 4-1 6 0M3 12c2 1 4-1 6 0s4 1 6 0 4-1 6 0"/></svg><span data-t="am6">Accès piscine &amp; jacuzzi</span></div>
-      <div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v6M8 21h8M6 12h12l-2 9H8z"/></svg><span data-t="am7">Petit-déjeuner inclus</span></div>
+      <div><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="8" rx="2"/><path d="M7 9h10M8 15.5c0 2-2 2-2 4M12 15v5M16 15.5c0 2 2 2 2 4"/></svg><span data-t="am0">Air conditionné</span></div>
+      <div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 9.5a14 14 0 0119 0M6 13a9 9 0 0112 0M9.3 16.3a4.2 4.2 0 015.4 0"/><circle cx="12" cy="19.6" r=".9"/></svg><span data-t="am1">Wifi gratuit</span></div>
+      <div><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="4" width="19" height="13" rx="1.5"/><rect x="5" y="6.5" width="14" height="8" rx=".5"/><path d="M8 20.5h8"/></svg><span data-t="am2">Télévision smart</span></div>
+      <div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V8a4 4 0 018 0M9.5 8.5h7"/><circle cx="11" cy="12" r=".5"/><circle cx="14" cy="12" r=".5"/><circle cx="17" cy="12" r=".5"/><circle cx="12.5" cy="15" r=".5"/><circle cx="15.5" cy="15" r=".5"/><circle cx="18.5" cy="15" r=".5"/><circle cx="14" cy="18" r=".5"/><circle cx="17" cy="18" r=".5"/></svg><span data-t="am3">Salle d'eau privative</span></div>
+      <div><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="5"/><circle cx="9" cy="8" r="1.6"/><path d="M13.6 5.8l6.9-1.6v7.6l-6.9-1.6M7.4 12.8l1 8.2h3l1-8.6"/></svg><span data-t="am4">Sèche-cheveux</span></div>
+      <div><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="15" rx="2"/><circle cx="10.5" cy="11.5" r="3.5"/><circle cx="10.5" cy="11.5" r="1"/><path d="M17 9v5M6.5 19v2M17.5 19v2"/></svg><span data-t="am5">Coffre-fort</span></div>
+      <div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 15V6a2 2 0 014 0M14 15V6a2 2 0 014 0M8 9h6M8 12.5h6M2 19c2 1.4 3.5-1.4 5.5 0s3.5 1.4 5.5 0 3.5-1.4 5.5 0 2 .6 3.5 0"/></svg><span data-t="am6">Accès piscine &amp; jacuzzi</span></div>
+      <div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10h13v4.5a5.5 5.5 0 01-5.5 5.5h-2A5.5 5.5 0 014 14.5zM17 11.5h1.5a2.5 2.5 0 010 5h-1.9M8 3c0 1.5 1.5 1.5 1.5 3M12 3c0 1.5 1.5 1.5 1.5 3"/></svg><span data-t="am7">Petit-déjeuner inclus</span></div>
   </div>
 </section>
 
