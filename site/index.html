@@ -800,6 +800,21 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
 .xp-i div{position:absolute;left:0;right:0;bottom:0;padding:22px;z-index:2}
 .xp-i h3{color:#F6EEE2;font-size:1.3rem;margin-bottom:5px}
 .xp-i p{font-size:13.5px;color:rgba(246,238,226,.84);line-height:1.5}
+/* La note Google : les etoiles se remplissent a la note exacte (--n), pas a
+   l'arrondi. Les chiffres sont dans build-index.py, avec leur date de releve. */
+.etoiles{position:relative;display:inline-block;color:rgba(200,146,47,.28);letter-spacing:.1em;line-height:1;white-space:nowrap}
+.etoiles:after{content:"★★★★★";position:absolute;left:0;top:0;width:calc(var(--n) / 5 * 100%);overflow:hidden;color:#C8922F}
+.note-hero{display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;padding:7px 14px 7px 12px;
+  background:rgba(16,11,6,.38);border:1px solid rgba(246,238,226,.32);font-size:13px;color:#F6EEE2!important;letter-spacing:.02em}
+.note-hero .etoiles{color:rgba(246,238,226,.3);font-size:14px}.note-hero .etoiles:after{color:#F2C879}
+.note-hero:hover{border-color:rgba(246,238,226,.6)}
+.avis-tete{display:flex;align-items:flex-end;justify-content:space-between;gap:30px;flex-wrap:wrap;margin-bottom:38px}
+.note-avis{display:flex;align-items:center;gap:20px}
+.note-avis>b{font-family:var(--f-display);font-weight:400;font-size:4.2rem;line-height:1;color:var(--bronze)}
+.note-avis .etoiles{font-size:20px}
+.note-avis span.t{display:block;font-size:13px;color:var(--muted);margin-top:6px}
+.note-avis:hover span.t{color:var(--bronze)}
+@media(max-width:720px){.note-avis>b{font-size:3.2rem}}
 .avis{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
 .av{background:var(--bark);border:1px solid var(--line);padding:30px;display:flex;flex-direction:column;gap:16px}
 .av blockquote{font-family:var(--f-display);font-size:1.12rem;line-height:1.6;color:var(--cream);flex:1}
@@ -898,6 +913,7 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
     <div class="slide" data-bg="hero-aerien"></div>
   </div>
   <div class="hero-in wrap">
+    <a class="note-hero" href="https://www.google.com/maps/search/?api=1&query=Evannath+H%C3%B4tel+Assinie" target="_blank" rel="noopener"><span class="etoiles" style="--n:4.3" role="img" aria-label="4,3 sur 5">★★★★★</span><span data-t="nt1"><b>4,3/5</b> · 55 avis Google</span></a><br>
     <span class="eyebrow" data-t="eb">Assinie · PK 19 · Lagune Aby</span>
     <h1 data-t="h1">Le rêve<br><em>africain</em>, en vrai</h1>
     <p data-t="lede">46 chambres et suites, une paillote posée sur la lagune, et le silence de la Comoé. Réservez en direct — c'est ici que le tarif est le meilleur.</p>
@@ -1146,9 +1162,12 @@ footer{background:var(--bark-2);border-top:1px solid var(--line);padding:74px 0 
 
 <section class="rev-sec" id="avis">
  <div class="wrap">
-  <div class="sec-head reveal">
+  <div class="avis-tete reveal">
+    <div class="sec-head" style="margin-bottom:0">
     <span class="eyebrow" data-t="e5">Ils y étaient</span>
     <h2 data-t="h5">Nos clients nous aiment</h2>
+    </div>
+    <a class="note-avis" href="https://www.google.com/maps/search/?api=1&query=Evannath+H%C3%B4tel+Assinie" target="_blank" rel="noopener"><b>4,3</b><span><span class="etoiles" style="--n:4.3" role="img" aria-label="4,3 sur 5">★★★★★</span><span class="t" data-t="nt2">55 avis sur Google</span></span></a>
   </div>
   <div class="avis reveal">
     <figure class="av"><div class="stars" aria-label="5 étoiles sur 5">★★★★★</div><blockquote>« Depuis la réservation jusqu'à mon départ, tout s'est très bien passé. Chambre propre, personnel accueillant et bienveillant. Rien à dire. »</blockquote><figcaption><i aria-hidden="true">D</i><b>Mme Diakité</b></figcaption></figure>
@@ -1959,7 +1978,7 @@ in:"Check-in",out:"Check-out",guests:"Guests",cat:"Category",check:"Check",
 nights:"nights",total:"Estimated total",note:"Breakfast included · Free airport shuttle · excluding tourist tax",confirm:"Confirm",
 pl1:"Best rate when you book direct",pl2:"Breakfast included",pl3:"Free airport shuttle",pl4:"Only a 30% deposit",
 at1:"1 h 45 from Abidjan",at1p:"80 km from the airport, free shuttle.",at2:"Right on the lagoon",at2p:"A deck on stilts, pirogue and jet ski.",
-at3:"Pool, sauna and massages",at3p:"From first light until dark.",at4:"Breakfast included",at4p:"In every room, at no extra cost.",mb1:"From",
+at3:"Pool, sauna and massages",at3p:"From first light until dark.",at4:"Breakfast included",at4p:"In every room, at no extra cost.",mb1:"From",nt1:"<b>4.3/5</b> · 55 Google reviews",nt2:"55 reviews on Google",
 e2:"Accommodation",h2:"Seven categories,<br>seven moods",
 p2:"From the standard room to the two-bedroom Arabian Suite. Every category has its own decor, its own view and a rate shown up front — no surprises on arrival.",
 f1:"View all",f2:"Rooms",f3:"Suites",f4:"Families",

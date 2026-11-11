@@ -173,12 +173,37 @@ JS_BANDEAU = r"""<script>
     .catch(function(){});
 })();
 </script>"""
+# La note Google de l'etablissement, RELEVEE A LA MAIN sur sa fiche Google :
+# 4,3 sur 5 pour 55 avis, le 11 novembre 2026. Le site ne l'invente ni ne la
+# met a jour seul : quand elle change, on corrige ces deux lignes et on
+# reconstruit. None retire la note du haut de page et de la section des avis.
+NOTE_GOOGLE = (4.3, 55)
+FICHE_GOOGLE = 'https://www.google.com/maps/search/?api=1&query=Evannath+H%C3%B4tel+Assinie'
+if NOTE_GOOGLE:
+    _n, _nb = NOTE_GOOGLE
+    _fr, _en = ('%.1f' % _n).replace('.', ','), '%.1f' % _n
+    _et = ('<span class="etoiles" style="--n:%s" role="img" aria-label="%s sur 5">★★★★★</span>'
+           % (_en, _fr))
+    NOTE_HERO = ('    <a class="note-hero" href="%s" target="_blank" rel="noopener">%s'
+                 '<span data-t="nt1"><b>%s/5</b> · %d avis Google</span></a><br>\n'
+                 % (FICHE_GOOGLE, _et, _fr, _nb))
+    NOTE_AVIS = ('    <a class="note-avis" href="%s" target="_blank" rel="noopener"><b>%s</b>'
+                 '<span>%s<span class="t" data-t="nt2">%d avis sur Google</span></span></a>\n'
+                 % (FICHE_GOOGLE, _fr, _et, _nb))
+    EN_NOTE = ('nt1:"<b>%s/5</b> · %d Google reviews",nt2:"%d reviews on Google",'
+               % (_en, _nb, _nb))
+else:
+    NOTE_HERO = NOTE_AVIS = EN_NOTE = ''
+
 # Le domaine et la balise robots suivent _chrome (SITE, PROSPECTION) : ecrits
 # en dur ici, ils seraient restes ceux de la demonstration le jour J.
 html = (io.open('index-template.html', encoding='utf-8').read()
         .replace('{{ROBOTS}}', ROBOTS_META).replace('{{SITE}}', SITE))
 html = (html
         .replace('{{BANDEAU}}', BANDEAU)
+        .replace('{{NOTE_HERO}}', NOTE_HERO)
+        .replace('{{NOTE_AVIS}}', NOTE_AVIS)
+        .replace('{{EN_NOTE}}', EN_NOTE)
         .replace('{{NAV_LINKS}}', liens_nav('index.html'))
         .replace('{{EN_NAV}}', EN_NAV + EN_BANDEAU)
         .replace('{{WA_BOUTON}}', WA_BOUTON)
