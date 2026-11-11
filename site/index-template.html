@@ -30,9 +30,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Karla:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="preload" as="image" href="img/opt/hero-chambre-wax-640.webp" type="image/webp" media="(max-width:640px)">
-<link rel="preload" as="image" href="img/opt/hero-chambre-wax-1024.webp" type="image/webp" media="(min-width:641px) and (max-width:1024px)">
-<link rel="preload" as="image" href="img/opt/hero-chambre-wax.webp" type="image/webp" media="(min-width:1025px)">
+<link rel="preload" as="image" href="img/opt/gal-lag-bateau-640.webp" type="image/webp" media="(max-width:640px)">
+<link rel="preload" as="image" href="img/opt/gal-lag-bateau-1024.webp" type="image/webp" media="(min-width:641px) and (max-width:1024px)">
+<link rel="preload" as="image" href="img/opt/gal-lag-bateau.webp" type="image/webp" media="(min-width:1025px)">
 <style>
 {{TOKENS}}
 :root{
@@ -248,9 +248,9 @@ header:not(.scrolled):not(.menu) .brand small{color:#E2BE8C}
 .hero{position:relative;min-height:100svh;display:flex;align-items:center;overflow:hidden;padding:150px 0}
 /* Premiere diapositive : element LCP, peint avant tout JS. Les media queries
    evitent d'envoyer une image 1600 px a un telephone. */
-#s0{background-image:image-set(url('img/opt/hero-chambre-wax-640.webp') type('image/webp'),url('img/opt/hero-chambre-wax-640.jpg') type('image/jpeg'))}
-@media (min-width:641px){#s0{background-image:image-set(url('img/opt/hero-chambre-wax-1024.webp') type('image/webp'),url('img/opt/hero-chambre-wax-1024.jpg') type('image/jpeg'))}}
-@media (min-width:1025px){#s0{background-image:image-set(url('img/opt/hero-chambre-wax.webp') type('image/webp'),url('img/opt/hero-chambre-wax.jpg') type('image/jpeg'))}}
+#s0{background-image:image-set(url('img/opt/gal-lag-bateau-640.webp') type('image/webp'),url('img/opt/gal-lag-bateau-640.jpg') type('image/jpeg'))}
+@media (min-width:641px){#s0{background-image:image-set(url('img/opt/gal-lag-bateau-1024.webp') type('image/webp'),url('img/opt/gal-lag-bateau-1024.jpg') type('image/jpeg'))}}
+@media (min-width:1025px){#s0{background-image:image-set(url('img/opt/gal-lag-bateau.webp') type('image/webp'),url('img/opt/gal-lag-bateau.jpg') type('image/jpeg'))}}
 /* Hero anime ---------------------------------------------------------------
    Le film ne se charge que si trois conditions sont reunies : ecran large,
    connexion correcte, et pas de demande de mouvement reduit. Sinon le
@@ -271,7 +271,9 @@ header:not(.scrolled):not(.menu) .brand small{color:#E2BE8C}
 /* z-index 2 : AU-DESSUS du film (z-index 1). Sans lui, le voile restait a
    z-index auto, sous la video : sur grand ecran, ou le film se lance, le
    titre tombait sur l'image nue — la piscine, les chaises du restaurant. */
-.hero::after{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;background:linear-gradient(180deg,rgba(23,16,10,.74) 0%,rgba(23,16,10,.34) 42%,rgba(23,16,10,.96) 100%)}
+/* Allege : la photo d'ouverture est la paillote en plein jour, c'est elle
+   qui vend. Le haut reste sombre pour le menu, le bas pour le moteur. */
+.hero::after{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;background:linear-gradient(180deg,rgba(23,16,10,.56) 0%,rgba(23,16,10,.06) 26%,rgba(23,16,10,.06) 60%,rgba(23,16,10,.66) 100%)}
 /* Un second voile, HORIZONTAL, derriere la seule colonne de texte.
    Le carrousel alterne des photos sombres et des photos tres claires —
    une chambre en plein jour, l'eau de la piscine. Le voile vertical n'y
@@ -536,6 +538,82 @@ section{padding:106px 0}
      borne : etire sur 700 px a l approche du seuil, il ne ferait plus bouton. */
   .bandeau .bouton{text-align:center;padding:12px 20px;max-width:340px}
 }
+
+/* ── L'accueil qui vend (novembre 2026) ──────────────────────────────────
+   Six changements, tous sur des photos et des faits DEJA sur le site :
+   l'ouverture sur la paillote, les avantages du direct sous les boutons,
+   les atouts a la place des chiffres, la Suite Arabe en vedette, les
+   experiences en photos, trois avis cote a cote, et sur telephone un
+   bouton « Reserver » toujours a portee. Pas de note Google ni de
+   « plus que 2 chambres » : ni l'une ni l'autre n'est une donnee que le
+   site possede, et un chiffre invente se paie plus cher qu'il ne rapporte. */
+.hero h1,.hero-in>p,.hero .eyebrow,.plus{text-shadow:0 1px 3px rgba(16,11,6,.85),0 0 26px rgba(16,11,6,.8)}
+.plus{display:flex;flex-wrap:wrap;gap:10px 26px;margin-top:30px;list-style:none;font-size:13.5px;color:#F6EEE2}
+.plus li{display:flex;align-items:center;gap:9px}
+.plus svg{width:17px;height:17px;stroke:#E2BE8C;fill:none;stroke-width:2;flex:none}
+.atouts{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line)}
+.atout{background:var(--bark);padding:34px 26px;display:flex;gap:18px;align-items:flex-start}
+.atout svg{width:30px;height:30px;stroke:var(--bronze);fill:none;stroke-width:1.2;flex:none;margin-top:2px}
+.atout b{display:block;font-family:var(--f-display);font-weight:400;font-size:1.28rem;color:var(--cream);line-height:1.2}
+.atout span{display:block;font-size:13.5px;color:var(--muted);margin-top:6px;line-height:1.5}
+/* L'evenement du moment, avec sa photo. La promotion mise en avant depuis
+   l'administration (.bandeau.offre) garde sa forme : elle remplace la classe. */
+.bandeau.evt a{display:grid;grid-template-columns:minmax(0,38%) 1fr;gap:0;padding:0;align-items:stretch;
+  background:var(--night);border:0;min-height:230px;overflow:hidden}
+.bandeau.evt .ph{background:var(--bark-3) center/cover}
+.bandeau.evt .tx{padding:36px 44px;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:10px}
+.bandeau.evt .quand{color:#E2BE8C;font-size:10.5px}
+.bandeau.evt b{font-size:clamp(1.6rem,3vw,2.3rem);color:#F6EEE2;line-height:1.15}
+.bandeau.evt span.t{color:rgba(246,238,226,.78);font-size:15px}
+.bandeau.evt .fl{margin:12px 0 0;background:var(--bronze);color:#FBF7F0;padding:13px 26px;font-size:11.5px;
+  font-weight:700;letter-spacing:.18em;text-transform:uppercase}
+@media(min-width:1025px){
+  .rooms .room:last-child:nth-child(3n+1){grid-column:1/-1;flex-direction:row}
+  .rooms .room:last-child:nth-child(3n+1) .room-img{flex:0 0 58%;aspect-ratio:auto;min-height:400px}
+  .rooms .room:last-child:nth-child(3n+1) .room-body{padding:48px;justify-content:center}
+  .rooms .room:last-child:nth-child(3n+1) .room-body>p{flex:none;font-size:15.5px}
+  .rooms .room:last-child:nth-child(3n+1) h3{font-size:2rem}
+}
+.xp{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.xp-i{position:relative;display:block;aspect-ratio:4/5;overflow:hidden;background:var(--bark-3);color:#F6EEE2}
+.xp-i.large{grid-column:span 2;aspect-ratio:auto}
+.xp-i img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:1.1s cubic-bezier(.2,.8,.2,1)}
+.xp-i:hover img{transform:scale(1.06)}
+.xp-i:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(16,11,6,0) 38%,rgba(16,11,6,.86) 100%)}
+.xp-i div{position:absolute;left:0;right:0;bottom:0;padding:22px;z-index:2}
+.xp-i h3{color:#F6EEE2;font-size:1.3rem;margin-bottom:5px}
+.xp-i p{font-size:13.5px;color:rgba(246,238,226,.84);line-height:1.5}
+.avis{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+.av{background:var(--bark);border:1px solid var(--line);padding:30px;display:flex;flex-direction:column;gap:16px}
+.av blockquote{font-family:var(--f-display);font-size:1.12rem;line-height:1.6;color:var(--cream);flex:1}
+.av figcaption{display:flex;align-items:center;gap:12px}
+.av i{width:38px;height:38px;border-radius:50%;background:var(--bark-3);display:grid;place-items:center;
+  font-style:normal;font-family:var(--f-display);color:var(--bronze);font-size:1.05rem}
+.av b{font-size:13.5px;color:var(--cream)}
+.barre-res{display:none}
+@media(max-width:1024px){.atouts,.xp{grid-template-columns:repeat(2,1fr)}.avis{grid-template-columns:1fr}}
+@media(max-width:720px){
+  .plus{flex-direction:column;gap:9px;margin-top:24px}
+  .atouts{grid-template-columns:1fr}.atout{padding:22px 20px}
+  .bandeau.evt a{grid-template-columns:1fr}
+  .bandeau.evt .ph{min-height:190px}
+  .bandeau.evt .tx{padding:26px 22px}
+  .xp{gap:10px}
+  .xp-i.large{aspect-ratio:16/10}
+  .xp-i div{padding:14px}.xp-i h3{font-size:1.08rem}
+  .xp-i p{display:none}.xp-i.large p{display:block}
+  /* Reserver, toujours a portee : la page fait seize ecrans de haut. Les
+     deux boutons flottants montent d'un cran pour ne pas la recouvrir. */
+  body{padding-bottom:70px}
+  .barre-res{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:89;background:var(--bark);
+    border-top:1px solid var(--line);box-shadow:0 -8px 24px rgba(42,35,30,.12);padding:10px 14px;gap:12px;align-items:center}
+  .barre-res .px{flex:1;line-height:1.2}
+  .barre-res small{display:block;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .barre-res b{font-family:var(--f-display);font-weight:400;font-size:1.2rem;color:var(--cream)}
+  .barre-res em{font-style:normal;font-family:var(--f-body);font-size:11px;color:var(--muted)}
+  .barre-res .btn{padding:0 22px;height:48px}
+  .wa{bottom:84px!important}.chat-bulle{bottom:154px!important}
+}
 </style>
 {{JSONLD}}
 </head>
@@ -591,8 +669,6 @@ section{padding:106px 0}
     <div class="slide on" id="s0"></div>
     <div class="slide" data-bg="hero-piscine"></div>
     <div class="slide" data-bg="hero-aerien"></div>
-    <video id="film" muted loop playsinline preload="none" aria-hidden="true"
-           data-affiche="img/opt/hero-presentation-affiche.jpg"></video>
   </div>
   <div class="hero-in wrap">
     <span class="eyebrow" data-t="eb">Assinie · PK 19 · Lagune Aby</span>
@@ -602,6 +678,12 @@ section{padding:106px 0}
       <a href="#reserver" class="btn btn-solid" data-t="cta1">Réserver en direct</a>
       <a href="#chambres" class="btn" data-t="cta2">Voir les chambres</a>
     </div>
+    <ul class="plus">
+      <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span data-t="pl1">Meilleur tarif en direct</span></li>
+      <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span data-t="pl2">Petit-déjeuner inclus</span></li>
+      <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span data-t="pl3">Navette aéroport offerte</span></li>
+      <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span data-t="pl4">Acompte de 30 % seulement</span></li>
+    </ul>
   </div>
   <div class="scroll-hint"><i></i><span data-t="sc">Scroll</span></div>
 </section>
@@ -638,11 +720,11 @@ section{padding:106px 0}
 
 
 <section class="wrap" style="padding-top:86px;padding-bottom:clamp(48px,6vw,86px)">
-  <div class="stats reveal">
-    <div class="stat"><b class="cnt" data-to="46">0</b><span data-t="s1">Chambres</span></div>
-    <div class="stat"><b class="cnt" data-to="7">0</b><span data-t="s2">Catégories</span></div>
-    <div class="stat"><b class="cnt" data-to="21" data-suffix=" K">0</b><span data-t="s3">Abonnés Facebook</span></div>
-    <div class="stat"><b class="cnt" data-to="24" data-suffix="h">0</b><span data-t="s4">Réception</span></div>
+  <div class="atouts reveal">
+    <div class="atout"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-4.5-7-10a7 7 0 0114 0c0 5.5-7 10-7 10z"/><circle cx="12" cy="11" r="2.4"/></svg><div><b data-t="at1">À 1 h 45 d'Abidjan</b><span data-t="at1p">80 km de l'aéroport, navette offerte.</span></div></div>
+    <div class="atout"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 17c2 1 4-1 6 0s4 1 6 0 4-1 6 0M4 13l8-9 8 9M7 13v4M17 13v4"/></svg><div><b data-t="at2">Les pieds dans la lagune</b><span data-t="at2p">Paillote sur pilotis, pirogue et jet ski.</span></div></div>
+    <div class="atout"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17c2 1 4-1 6 0s4 1 6 0 4-1 6 0M3 12c2 1 4-1 6 0s4 1 6 0 4-1 6 0M3 7c2 1 4-1 6 0s4 1 6 0 4-1 6 0"/></svg><div><b data-t="at3">Piscine, sauna et massages</b><span data-t="at3p">Du lever du jour à la nuit tombée.</span></div></div>
+    <div class="atout"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v6M8 21h8M6 12h12l-2 9H8z M9 9h6"/></svg><div><b data-t="at4">Petit-déjeuner inclus</b><span data-t="at4p">Dans toutes les chambres, sans supplément.</span></div></div>
   </div>
 </section>
 
@@ -800,15 +882,13 @@ section{padding:106px 0}
     <h2 data-t="h3">De quoi remplir<br>une journée entière</h2>
     <a href="experiences.html" class="btn" style="margin-top:26px" data-t="vx">Toutes les expériences</a>
   </div>
-  <div class="exp reveal">
-    <a class="exp-i" href="experiences.html#domaine"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 17c2 1 4-1 6 0s4 1 6 0 4-1 6 0M4 13l8-9 8 9M7 13v4M17 13v4"/></svg><h3 data-t="x1">La paillote</h3><p data-t="x1p">Le ponton de bois posé sur la lagune Aby — le cœur du domaine, au couchant.</p></a>
-    <a class="exp-i" href="experiences.html#eau"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18c2 1 4-1 6 0s4 1 6 0 4-1 6 0M6 14l3-8 6 3-2 5M15 9l4-2"/></svg><h3 data-t="x2">Jet ski &amp; pirogue</h3><p data-t="x2p">Sessions encadrées et balade lagunaire avec guide local, matin ou fin d'après-midi.</p></a>
-    <a class="exp-i" href="carte.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v6M8 21h8M6 12h12l-2 9H8z M9 9h6"/></svg><h3 data-t="x3">Restaurant &amp; bar</h3><p data-t="x3p">Cuisine ivoirienne et continentale, poisson du jour, cocktails maison en terrasse.</p></a>
-    <a class="exp-i" href="experiences.html#domaine"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17c2 1 4-1 6 0s4 1 6 0 4-1 6 0M3 12c2 1 4-1 6 0s4 1 6 0 4-1 6 0M3 7c2 1 4-1 6 0s4 1 6 0 4-1 6 0"/></svg><h3 data-t="x4">Piscine</h3><p data-t="x4p">Grand bassin, transats et parasols, ouverte du lever du jour à la nuit tombée.</p></a>
-    <a class="exp-i" href="spa.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20c2-6 6-9 8-9s6 3 8 9M12 11V4M9 6l3-3 3 3"/></svg><h3 data-t="x5">Sauna &amp; massage</h3><p data-t="x5p">Rituels et massages après une journée de plage ou de lagune.</p></a>
-    <a class="exp-i" href="seminaires.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14"/><path d="M3 9h18M8 5v14"/></svg><h3 data-t="x6">Séminaires</h3><p data-t="x6p">Salle de conférence équipée, formules journée d'étude et résidentielles.</p></a>
-    <a class="exp-i" href="experiences.html#domaine"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-4.5-7-10a7 7 0 0114 0c0 5.5-7 10-7 10z"/><circle cx="12" cy="11" r="2.4"/></svg><h3 data-t="x7">Art africain</h3><p data-t="x7p">Sculptures et pièces d'artisanat exposées dans le hall et les espaces communs.</p></a>
-    <a class="exp-i" href="experiences.html#autour"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></svg><h3 data-t="x8">L'Embouchure</h3><p data-t="x8p">La rencontre de l'océan et de la lagune, excursion organisée par la réception.</p></a>
+  <div class="xp reveal">
+    <a class="xp-i large" href="experiences.html#domaine"><picture><source srcset="img/opt/gal-lag-ponton.webp" type="image/webp"><img loading="lazy" src="img/opt/gal-lag-ponton.jpg" alt="La paillote sur pilotis au-dessus de la lagune Aby"></picture><div><h3 data-t="x1">La paillote</h3><p data-t="x1p">Le ponton de bois posé sur la lagune Aby — le cœur du domaine, au couchant.</p></div></a>
+    <a class="xp-i" href="experiences.html#eau"><picture><source srcset="img/opt/gal-lag-large.webp" type="image/webp"><img loading="lazy" src="img/opt/gal-lag-large.jpg" alt="La lagune Aby, vue depuis le ponton"></picture><div><h3 data-t="x2">Jet ski &amp; pirogue</h3><p data-t="x2p">Sessions encadrées et balade lagunaire avec guide local, matin ou fin d'après-midi.</p></div></a>
+    <a class="xp-i" href="carte.html"><picture><source srcset="img/opt/gal-tab-dressee.webp" type="image/webp"><img loading="lazy" src="img/opt/gal-tab-dressee.jpg" alt="Table dressée au restaurant de l'hôtel"></picture><div><h3 data-t="x3">Restaurant &amp; bar</h3><p data-t="x3p">Cuisine ivoirienne et continentale, poisson du jour, cocktails maison en terrasse.</p></div></a>
+    <a class="xp-i" href="experiences.html#domaine"><picture><source srcset="img/opt/gal-spa-bassin.webp" type="image/webp"><img loading="lazy" src="img/opt/gal-spa-bassin.jpg" alt="La piscine de l'hôtel vue d'en haut"></picture><div><h3 data-t="x4">Piscine</h3><p data-t="x4p">Grand bassin, transats et parasols, ouverte du lever du jour à la nuit tombée.</p></div></a>
+    <a class="xp-i" href="spa.html"><picture><source srcset="img/opt/spa-massage-affiche.webp" type="image/webp"><img loading="lazy" src="img/opt/spa-massage-affiche.jpg" alt="Massage au bord de la piscine"></picture><div><h3 data-t="x5">Sauna &amp; massage</h3><p data-t="x5p">Rituels et massages après une journée de plage ou de lagune.</p></div></a>
+    <a class="xp-i large" href="experiences.html#autour"><picture><source srcset="img/opt/gal-lag-cocotiers.webp" type="image/webp"><img loading="lazy" src="img/opt/gal-lag-cocotiers.jpg" alt="La lagune bordée de cocotiers"></picture><div><h3 data-t="x8">L'Embouchure</h3><p data-t="x8p">La rencontre de l'océan et de la lagune, excursion organisée par la réception.</p></div></a>
   </div>
  </div>
 </section>
@@ -839,19 +919,15 @@ section{padding:106px 0}
 
 <section class="rev-sec" id="avis">
  <div class="wrap">
-  <div class="sec-head reveal" style="text-align:center;margin:0 auto 52px">
+  <div class="sec-head reveal">
     <span class="eyebrow" data-t="e5">Ils y étaient</span>
     <h2 data-t="h5">Nos clients nous aiment</h2>
   </div>
-  <div style="overflow:hidden" class="reveal">
-    <div class="rev-track" id="rt">
-      <div class="rev"><div class="stars" aria-label="5 étoiles sur 5">★★★★★</div><p>« Depuis la réservation jusqu'à mon départ, tout s'est très bien passé. Chambre propre, personnel accueillant et bienveillant. Rien à dire. »</p><b>Mme Diakité</b></div>
-      <div class="rev"><div class="stars" aria-label="5 étoiles sur 5">★★★★★</div><p>« La balade lagunaire est magnifique, le cadre très cosy et le personnel très accueillant. Un coucou spécial à Daniel. Franchement, j'ai adoré. »</p><b>M. Jean-Michel</b></div>
-      <div class="rev"><div class="stars" aria-label="5 étoiles sur 5">★★★★★</div><p>« J'avais lu que vous étiez accueillants et que votre service client était de qualité. Je peux l'affirmer de vive voix. Nous reviendrons pour un long séjour. »</p><b>M. Koné</b></div>
-      <div class="rev"><div class="stars" aria-label="5 étoiles sur 5">★★★★★</div><p>« C'était juste parfait. Avec les images partagées sur mes réseaux, beaucoup me demandent l'adresse — et je sais qu'ils viendront découvrir. »</p><b>Mme Kane</b></div>
-    </div>
+  <div class="avis reveal">
+    <figure class="av"><div class="stars" aria-label="5 étoiles sur 5">★★★★★</div><blockquote>« Depuis la réservation jusqu'à mon départ, tout s'est très bien passé. Chambre propre, personnel accueillant et bienveillant. Rien à dire. »</blockquote><figcaption><i aria-hidden="true">D</i><b>Mme Diakité</b></figcaption></figure>
+    <figure class="av"><div class="stars" aria-label="5 étoiles sur 5">★★★★★</div><blockquote>« La balade lagunaire est magnifique, le cadre très cosy et le personnel très accueillant. Un coucou spécial à Daniel. Franchement, j'ai adoré. »</blockquote><figcaption><i aria-hidden="true">J</i><b>M. Jean-Michel</b></figcaption></figure>
+    <figure class="av"><div class="stars" aria-label="5 étoiles sur 5">★★★★★</div><blockquote>« J'avais lu que vous étiez accueillants et que votre service client était de qualité. Je peux l'affirmer de vive voix. Nous reviendrons pour un long séjour. »</blockquote><figcaption><i aria-hidden="true">K</i><b>M. Koné</b></figcaption></figure>
   </div>
-  <div class="dots" id="dt"></div>
  </div>
 </section>
 
@@ -896,6 +972,8 @@ section{padding:106px 0}
   </div>
 </footer>
 
+<div class="barre-res" id="barre-res"><div class="px"><small data-t="mb1">À partir de</small><b><span data-prix-de="chambre-standard">67 000</span> <em data-t="pn">FCFA / nuit</em></b></div>
+<a class="btn btn-solid" href="#reserver" data-t="book">Réserver</a></div>
 {{WA_BOUTON}}
 
 <div id="lb" role="dialog" aria-modal="true" aria-label="Galerie photo">
@@ -925,28 +1003,15 @@ function loadSlides(){
 }
 if(document.readyState==='complete')loadSlides();else addEventListener('load',loadSlides);
 
-/* Le film du hero : meme regle que partout, via filmAmbiance(). */
-function filmDuHero(){
-  filmAmbiance(document.getElementById('film'),
-    [{type:'video/mp4', src:'video/hero-presentation.mp4'}],
-    function(){ clearInterval(rotation); });   /* le carrousel cede la place */
-}
-if(document.readyState==='complete')filmDuHero();else addEventListener('load',filmDuHero);
 
 var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 if(!('IntersectionObserver' in window)||reduce){
   document.querySelectorAll('.reveal').forEach(function(el){el.classList.add('in')});
-  document.querySelectorAll('.cnt').forEach(function(el){el.textContent=el.dataset.to+(el.dataset.suffix||'')});
 }else{
   var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.12});
   document.querySelectorAll('.reveal').forEach(function(el,i){el.style.transitionDelay=(i%3)*90+'ms';io.observe(el)});
   setTimeout(function(){document.querySelectorAll('.reveal:not(.in)').forEach(function(el){
     if(el.getBoundingClientRect().top<innerHeight)el.classList.add('in')})},1200);
-  var co=new IntersectionObserver(function(es){es.forEach(function(e){if(!e.isIntersecting)return;
-    var el=e.target,to=+el.dataset.to,sfx=el.dataset.suffix||'',n=0;
-    var t=setInterval(function(){n+=Math.ceil(to/34);if(n>=to){n=to;clearInterval(t)}el.textContent=n+sfx},34);
-    co.unobserve(el)})},{threshold:.5});
-  document.querySelectorAll('.cnt').forEach(function(el){co.observe(el)});
 }
 
 var d1=document.getElementById('d1'),d2=document.getElementById('d2'),cat=document.getElementById('cat'),out=document.getElementById('out');
@@ -1044,11 +1109,6 @@ lb.onclick=function(e){if(e.target===lb)hide()};
 addEventListener('keydown',function(e){if(!lb.classList.contains('on'))return;
   if(e.key==='Escape')hide();if(e.key==='ArrowRight')show(gi+1);if(e.key==='ArrowLeft')show(gi-1)});
 
-var rt=document.getElementById('rt'),dt=document.getElementById('dt'),rn=rt.children.length,ri=0;
-for(var i=0;i<rn;i++){(function(i){var b=document.createElement('button');b.setAttribute('aria-label','Avis '+(i+1));b.onclick=function(){go(i)};dt.appendChild(b)})(i)}
-function go(i){ri=(i+rn)%rn;rt.style.transform='translateX('+(-ri*100)+'%)';[].slice.call(dt.children).forEach(function(d,j){d.classList.toggle('on',j===ri)})}
-go(0);var auto=setInterval(function(){go(ri+1)},6500);
-rt.addEventListener('pointerdown',function(){clearInterval(auto)});
 
 var EN={book:"Book now",
 {{EN_NAV}}px2:"2 guests",px3:"3 guests",px4:"4 guests",px6:"6 guests",a1v:"≈ 1 h 45 by road",vx:"All experiences",vch:"Compare all seven",
@@ -1057,7 +1117,9 @@ lede:"46 rooms and suites, a wooden deck set out over the lagoon, and the quiet 
 cta1:"Book direct",cta2:"See the rooms",sc:"Scroll",
 in:"Check-in",out:"Check-out",guests:"Guests",cat:"Category",check:"Check",
 nights:"nights",total:"Estimated total",note:"Breakfast included · Free airport shuttle · excluding tourist tax",confirm:"Confirm",
-s1:"Rooms",s2:"Categories",s3:"Facebook followers",s4:"Front desk",
+pl1:"Best rate when you book direct",pl2:"Breakfast included",pl3:"Free airport shuttle",pl4:"Only a 30% deposit",
+at1:"1 h 45 from Abidjan",at1p:"80 km from the airport, free shuttle.",at2:"Right on the lagoon",at2p:"A deck on stilts, pirogue and jet ski.",
+at3:"Pool, sauna and massages",at3p:"From first light until dark.",at4:"Breakfast included",at4p:"In every room, at no extra cost.",mb1:"From",
 e2:"Accommodation",h2:"Seven categories,<br>seven moods",
 p2:"From the standard room to the two-bedroom Arabian Suite. Every category has its own decor, its own view and a rate shown up front — no surprises on arrival.",
 f1:"View all",f2:"Rooms",f3:"Suites",f4:"Families",
@@ -1076,8 +1138,6 @@ x2:"Jet ski &amp; pirogue",x2p:"Supervised sessions and a lagoon cruise with a l
 x3:"Restaurant &amp; bar",x3p:"Ivorian and continental cooking, catch of the day, house cocktails on the terrace.",
 x4:"Pool",x4p:"Large pool, loungers and parasols, open from first light until dark.",
 x5:"Sauna &amp; massage",x5p:"Rituals and massages after a day on the beach or the lagoon.",
-x6:"Seminars",x6p:"Equipped conference room, day-study and residential packages.",
-x7:"African art",x7p:"Sculptures and craftwork on show in the hall and common areas.",
 x8:"The Embouchure",x8p:"Where the ocean meets the lagoon, an excursion arranged by the front desk.",
 e9:"Offers &amp; Events",h9:"Eleven packages,<br>room and activities included",
 p9:"A composed stay costs less than the sum of its nights. These are the most requested; all eleven are on the Offers &amp; Events page.",
