@@ -10,6 +10,7 @@ import io
 NL_ = chr(10)
 from _chrome import REMISE_JS, REMISE_CSS, DISPO_JS, FOOTER_CSS
 from _chrome import medaillon, INTRO, WA_BOUTON, ROBOTS_META, SITE
+from _chrome import NOTE_GOOGLE, FICHE_GOOGLE
 from _chrome import (TOKENS, NAV_BASE, LANG_JS, dimensionner, responsive, versionner,
                      liens_nav, EN_NAV, WA, WA_TEXTE, MAIL)
 from _evenements import EVENEMENTS, EN as EV_EN
@@ -173,12 +174,7 @@ JS_BANDEAU = r"""<script>
     .catch(function(){});
 })();
 </script>"""
-# La note Google de l'etablissement, RELEVEE A LA MAIN sur sa fiche Google :
-# 4,3 sur 5 pour 55 avis, le 11 novembre 2026. Le site ne l'invente ni ne la
-# met a jour seul : quand elle change, on corrige ces deux lignes et on
-# reconstruit. None retire la note du haut de page et de la section des avis.
-NOTE_GOOGLE = (4.3, 55)
-FICHE_GOOGLE = 'https://www.google.com/maps/search/?api=1&query=Evannath+H%C3%B4tel+Assinie'
+# La note Google : relevee a la main, ecrite dans _chrome.py (NOTE_GOOGLE).
 if NOTE_GOOGLE:
     _n, _nb = NOTE_GOOGLE
     _fr, _en = ('%.1f' % _n).replace('.', ','), '%.1f' % _n

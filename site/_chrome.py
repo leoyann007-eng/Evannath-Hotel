@@ -2035,6 +2035,13 @@ import re as _re
 _W = (640, 1024, 1600)
 # Un hero occupe toute la largeur ; le reste ne depasse jamais la colonne.
 SIZES_HERO = '100vw'
+
+# La note Google de l'etablissement, RELEVEE A LA MAIN sur sa fiche Google :
+# 4,3 sur 5 pour 55 avis, le 11 novembre 2026. Le site ne l'invente ni ne la
+# met a jour seul : quand elle change, on corrige cette ligne et on
+# reconstruit. None la retire de l'accueil et des fiches chambres.
+NOTE_GOOGLE = (4.3, 55)
+FICHE_GOOGLE = 'https://www.google.com/maps/search/?api=1&query=Evannath+H%C3%B4tel+Assinie'
 SIZES_DEFAUT = '(max-width:720px) 100vw, (max-width:1100px) 60vw, 700px'
 
 
