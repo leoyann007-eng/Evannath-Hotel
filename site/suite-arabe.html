@@ -637,18 +637,34 @@ header:not(.scrolled):not(.menu) .lang button:not(.on){color:#E3D9C9}
 header:not(.scrolled):not(.menu) .brand img{filter:brightness(0) invert(1)}
 header:not(.scrolled):not(.menu) .brand small{color:#E2BE8C}
 .brand img{transition:clip-path 1.1s var(--ease-inout),filter .6s ease}
-.fhero{position:relative;height:min(92vh,940px);min-height:480px;overflow:hidden;background:var(--bark-3)}
+/* L'EN-TETE DES FICHES : le logo au centre, le menu et la langue a gauche,
+   « Reserver » a droite. La photo prend tout l'ecran derriere. Le balisage
+   est celui de tout le site (_chrome.header) : seul l'ordre change, en CSS. */
+.nav .brand{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);text-align:center;
+  transition:transform 1.1s var(--ease-inout)}
+.nav .brand img{width:196px}
+.nav .brand small{padding-left:0}
+/* Au defilement le logo se recadre sur son embleme, a gauche de sa boite :
+   on le ramene au centre. */
+header.scrolled .nav .brand{transform:translate(calc(-50% + 61px),-50%)}
+.nav-right{flex:1}
+.nav-right .burger{order:1;flex-direction:row-reverse}
+.nav-right .lang{order:2}
+.nav-right .btn{order:3;margin-left:auto}
+.fhero{position:relative;height:100vh;height:100svh;min-height:480px;overflow:hidden;background:var(--bark-3)}
 .fhero>picture img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 58%}
 /* Deux voiles legers : en haut pour le logo et le menu, en bas pour
    « Decouvrir ». Le milieu reste nu. */
 .fhero::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(16,11,6,.58) 0,rgba(16,11,6,.18) 150px,rgba(16,11,6,0) 260px,rgba(16,11,6,0) calc(100% - 130px),rgba(16,11,6,.38) 100%)}
-.fhero-tout{position:absolute;right:max(24px,calc((100% - var(--max)) / 2 + 24px));bottom:28px;z-index:3;display:flex;align-items:center;gap:9px;
-  background:#FBF7F0;color:#2A231E;border:1px solid rgba(138,95,43,.22);padding:12px 17px;font:700 11px var(--f-body);letter-spacing:.14em;text-transform:uppercase;cursor:pointer;transition:.3s}
-.fhero-tout:hover{background:#fff}
-.fhero-tout svg{width:16px;height:16px;stroke:#7F5524;fill:none;stroke-width:1.6}
-.fhero-bas{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);z-index:3;color:#F6EEE2;font-size:10px;font-weight:600;
-  letter-spacing:.3em;text-transform:uppercase;display:flex;flex-direction:column;align-items:center;gap:10px}
-.fhero-bas i{display:block;width:1px;height:34px;background:rgba(246,238,226,.7)}
+.fhero-tout{position:absolute;left:max(24px,calc((100% - var(--max)) / 2 + 24px));bottom:28px;z-index:3;display:flex;align-items:center;gap:9px;
+  background:rgba(16,11,6,.42);color:#F6EEE2;border:1px solid rgba(246,238,226,.45);backdrop-filter:blur(6px);padding:12px 17px;font:700 11px var(--f-body);letter-spacing:.14em;text-transform:uppercase;cursor:pointer;transition:.3s}
+.fhero-tout:hover{background:rgba(16,11,6,.62);border-color:#F6EEE2}
+.fhero-tout svg{width:16px;height:16px;stroke:#F6EEE2;fill:none;stroke-width:1.6}
+.fhero-bas{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);z-index:3;width:54px;height:54px;display:grid;place-items:center;
+  animation:fhero-bas 2.4s ease-in-out infinite}
+.fhero-bas svg{width:38px;height:38px;stroke:#F6EEE2;fill:none;stroke-width:1.4}
+@keyframes fhero-bas{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,7px)}}
+@media(prefers-reduced-motion:reduce){.fhero-bas{animation:none}}
 .fintro{text-align:center;padding-top:54px;padding-bottom:46px;scroll-margin-top:60px}
 .fintro .crumb{margin-bottom:34px}
 .fintro h1{font-size:clamp(2.6rem,6.6vw,5rem);color:var(--cream);margin:14px 0 6px;line-height:1.05}
@@ -728,7 +744,8 @@ header:not(.scrolled):not(.menu) .brand small{color:#E2BE8C}
 .cond div{padding:15px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:18px;font-size:14px}
 .cond div:last-child{border-bottom:0}
 .cond span:first-child{color:var(--muted);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;font-weight:600}
-.panel{position:sticky;top:110px;background:var(--bark-2);border:1px solid var(--line);padding:28px}
+/* 48 px en haut : le galon occupe les 20 premiers, le contenu commence dessous. */
+.panel{position:sticky;top:110px;background:var(--bark-2);border:1px solid var(--line);padding:48px 28px 28px}
 .panel .from{font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:600}
 .panel .rate{font-family:var(--f-display);font-size:2.3rem;color:var(--bronze);line-height:1;margin:6px 0 2px;font-variant-numeric:tabular-nums}
 .panel .per{font-size:12px;color:var(--muted);margin-bottom:24px}
@@ -774,7 +791,10 @@ header:not(.scrolled):not(.menu) .brand small{color:#E2BE8C}
 #lb .prev{left:26px;top:50%}#lb .next{right:26px;top:50%}#lb .close{top:26px;right:26px}
 @media(max-width:1080px){
   .body-grid{grid-template-columns:1fr;gap:0}
-  .panel{position:static;margin-bottom:56px}
+  /* relative, et non static : le galon de la carte est en position absolue.
+     En static il s'echappait tout en haut de la page — cache par l'en-tete
+     tant qu'il etait opaque, visible depuis qu'il est transparent. */
+  .panel{position:relative;top:auto;margin-bottom:56px}
   .amen{grid-template-columns:repeat(2,1fr)}
   .frecit{grid-template-columns:1fr;gap:54px}
   .faits{grid-template-columns:repeat(2,1fr)}
@@ -786,8 +806,14 @@ header:not(.scrolled):not(.menu) .brand small{color:#E2BE8C}
   .more-grid{grid-template-columns:repeat(2,1fr)}
 }
 @media(max-width:720px){
-  .fhero{height:68vh;min-height:380px}
-  .fhero-tout{bottom:16px;right:16px;padding:10px 13px}
+  .nav .brand img{width:132px}
+  .nav .brand small{display:none}
+  header.scrolled .nav .brand{transform:translate(calc(-50% + 41px),-50%)}
+  /* Sur telephone, « Reserver » est deja dans la barre du bas : l'en-tete
+     garde le menu et le logo. La photo s'arrete au-dessus de cette barre. */
+  .nav-right .btn{display:none}
+  .fhero{height:calc(100vh - 78px);height:calc(100svh - 78px)}
+  .fhero-tout{bottom:18px;left:16px;padding:10px 13px}
   .fhero-bas{display:none}
   .fintro{padding-top:30px;padding-bottom:36px}
   .fintro .crumb{margin-bottom:24px}
@@ -870,7 +896,7 @@ header:not(.scrolled):not(.menu) .brand small{color:#E2BE8C}
   <picture><source srcset="img/opt/sa-main-640.webp 640w, img/opt/sa-main-1024.webp 1024w, img/opt/sa-main.webp 1400w" sizes="100vw" type="image/webp">
     <img width="1400" height="933" loading="eager" fetchpriority="high" src="img/opt/sa-main.jpg" srcset="img/opt/sa-main-640.jpg 640w, img/opt/sa-main-1024.jpg 1024w, img/opt/sa-main.jpg 1400w" sizes="100vw" alt="La Suite Arabe"></picture>
   <button type="button" class="fhero-tout voir-photos"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 00-2.8 0L6 21"/></svg><span data-t="vph">Voir les 5 photos</span></button>
-  <a class="fhero-bas" href="#fiche"><span data-t="dsc">Découvrir</span><i></i></a>
+  <a class="fhero-bas" href="#fiche" aria-label="Découvrir la chambre"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8l8 8 8-8"/></svg></a>
 </section>
 
 <section class="wrap fintro" id="fiche">
@@ -1826,7 +1852,7 @@ lb.onclick=function(e){if(e.target===lb)hideLb()};
 addEventListener('keydown',function(e){if(!lb.classList.contains('on'))return;
  if(e.key==='Escape')hideLb();if(e.key==='ArrowRight')show(gi+1);if(e.key==='ArrowLeft')show(gi-1)});
 
-var EN={mn:"Menu",n1:"Rooms &amp; Suites",n2:"Experiences",n3:"The table",n4:"The spa",n5:"Offers &amp; Events",n6:"Meetings &amp; groups",n7:"Gallery",n8:"About",n9:"Useful information",n10:"Contact",n11:"Book",dr:"Reservations",drec:"Join us",am0:"Air conditioning",am1:"Free wifi",am2:"Smart TV",am3:"Private shower room",am4:"Hairdryer",am5:"Safe",am6:"Pool &amp; jacuzzi access",am7:"Breakfast included",apd:"From",as0:"Best rate when you book here",as1:"Free cancellation up to 48 hours before",as2:"Only a 30% deposit",as3:"Breakfast and airport shuttle included",bkb:"Book this room",c1:"Home",c2:"Rooms &amp; Suites",cap0:"The suite",cap1:"The second bedroom",cap2:"The bathroom",cap3:"The lounge",cap4:"The terrace",cd1:"Check-in",cd1v:"from 2 pm",cd2:"Check-out",cd2v:"before noon",cd3:"Cancellation",cd3v:"free up to 48 h before",cd4:"Deposit",cd4v:"30 % on booking",cd5:"Pets",cd5v:"not allowed",cd6:"Payment",cd6v:"Wave · Orange Money · MTN · card",cdn:"Full details are on the <a href=\"informations-utiles.html#reserver\" style=\"color:var(--bronze)\">Useful information</a> page.",cta:"Book",dsc:"Discover",eb0:"Signature",ebc:"Conditions",ebe:"Amenities",ebi:"Included",ebo:"Other categories",ebr:"The room",eim:"In pictures",fl0:"bedrooms",fl1:"guests",fl2:"lounge",fl3:"decor",frm:"From",fv0:"2",fv1:"6",fv2:"Private",fv3:"Moorish",hac:"Good to know",hae:"In the room",hai:"Included in the rate",hao:"If this one is taken",him:"A tour of the suite",hlp:"A question? Write to us on <a href=\"https://wa.me/2250758408079\" target=\"_blank\" rel=\"noopener\">WhatsApp</a> or call +225 01 51 52 75 75.",id0:"Served in the restaurant or on the terrace, fresh fruit and local produce.",id1:"Pick-up and drop-off at Félix-Houphouët-Boigny airport, free of charge, on request.",id2:"Open access from first light until dark.",id3:"Free across the estate.",it0:"Breakfast",it1:"Free airport shuttle",it2:"Pool, jacuzzi and gym",it3:"Wifi and parking",la1:"Check-in",la2:"Check-out",lax:"Guests",mbb:"Book",mbs:"FCFA · total stay",nt1:"<b>4.3/5</b> · 55 Google reviews",om0:"4 guests · private terrace · lounge area",om1:"2 guests · lagoon view · the finest sunset",om2:"3 guests · wax textiles · dining room",on0:"FCFA / night",on1:"FCFA / night",on2:"FCFA / night",pa1:"This is the largest of our seven categories, and the only one with two separate bedrooms. The Moorish decor — carved wood, arches, embroidered textiles — was composed piece by piece with local craftspeople, in the spirit that guides the whole property.",pa2:"Two couples, a family with older children, or a group of friends: the suite absorbs six guests without anyone getting in anyone's way. The private lounge serves as the shared living room, and each bedroom keeps its own shower room.",pa3:"It is the category most requested for honeymoons and birthdays. It goes quickly in the dry season — from December to March, book several weeks ahead.",pd0:"Each with its own shower room",pd1:"Shared living room",pd2:"On request",pern:"per night, breakfast included",pnuit:"FCFA / night",pt0:"Two separate bedrooms",pt1:"Private lounge",pt2:"Dedicated service",rin:"Included",rpd:"Breakfast",rtt:"Total stay",rtx:"Tourist tax",ttl:"Two bedrooms, a lounge, a dedicated service",vdi:"Check availability",vph:"See all 5 photos"};
+var EN={mn:"Menu",n1:"Rooms &amp; Suites",n2:"Experiences",n3:"The table",n4:"The spa",n5:"Offers &amp; Events",n6:"Meetings &amp; groups",n7:"Gallery",n8:"About",n9:"Useful information",n10:"Contact",n11:"Book",dr:"Reservations",drec:"Join us",am0:"Air conditioning",am1:"Free wifi",am2:"Smart TV",am3:"Private shower room",am4:"Hairdryer",am5:"Safe",am6:"Pool &amp; jacuzzi access",am7:"Breakfast included",apd:"From",as0:"Best rate when you book here",as1:"Free cancellation up to 48 hours before",as2:"Only a 30% deposit",as3:"Breakfast and airport shuttle included",bkb:"Book this room",c1:"Home",c2:"Rooms &amp; Suites",cap0:"The suite",cap1:"The second bedroom",cap2:"The bathroom",cap3:"The lounge",cap4:"The terrace",cd1:"Check-in",cd1v:"from 2 pm",cd2:"Check-out",cd2v:"before noon",cd3:"Cancellation",cd3v:"free up to 48 h before",cd4:"Deposit",cd4v:"30 % on booking",cd5:"Pets",cd5v:"not allowed",cd6:"Payment",cd6v:"Wave · Orange Money · MTN · card",cdn:"Full details are on the <a href=\"informations-utiles.html#reserver\" style=\"color:var(--bronze)\">Useful information</a> page.",cta:"Book",eb0:"Signature",ebc:"Conditions",ebe:"Amenities",ebi:"Included",ebo:"Other categories",ebr:"The room",eim:"In pictures",fl0:"bedrooms",fl1:"guests",fl2:"lounge",fl3:"decor",frm:"From",fv0:"2",fv1:"6",fv2:"Private",fv3:"Moorish",hac:"Good to know",hae:"In the room",hai:"Included in the rate",hao:"If this one is taken",him:"A tour of the suite",hlp:"A question? Write to us on <a href=\"https://wa.me/2250758408079\" target=\"_blank\" rel=\"noopener\">WhatsApp</a> or call +225 01 51 52 75 75.",id0:"Served in the restaurant or on the terrace, fresh fruit and local produce.",id1:"Pick-up and drop-off at Félix-Houphouët-Boigny airport, free of charge, on request.",id2:"Open access from first light until dark.",id3:"Free across the estate.",it0:"Breakfast",it1:"Free airport shuttle",it2:"Pool, jacuzzi and gym",it3:"Wifi and parking",la1:"Check-in",la2:"Check-out",lax:"Guests",mbb:"Book",mbs:"FCFA · total stay",nt1:"<b>4.3/5</b> · 55 Google reviews",om0:"4 guests · private terrace · lounge area",om1:"2 guests · lagoon view · the finest sunset",om2:"3 guests · wax textiles · dining room",on0:"FCFA / night",on1:"FCFA / night",on2:"FCFA / night",pa1:"This is the largest of our seven categories, and the only one with two separate bedrooms. The Moorish decor — carved wood, arches, embroidered textiles — was composed piece by piece with local craftspeople, in the spirit that guides the whole property.",pa2:"Two couples, a family with older children, or a group of friends: the suite absorbs six guests without anyone getting in anyone's way. The private lounge serves as the shared living room, and each bedroom keeps its own shower room.",pa3:"It is the category most requested for honeymoons and birthdays. It goes quickly in the dry season — from December to March, book several weeks ahead.",pd0:"Each with its own shower room",pd1:"Shared living room",pd2:"On request",pern:"per night, breakfast included",pnuit:"FCFA / night",pt0:"Two separate bedrooms",pt1:"Private lounge",pt2:"Dedicated service",rin:"Included",rpd:"Breakfast",rtt:"Total stay",rtx:"Tourist tax",ttl:"Two bedrooms, a lounge, a dedicated service",vdi:"Check availability",vph:"See all 5 photos"};
 
 var FR={};document.querySelectorAll('[data-t]').forEach(function(e){FR[e.dataset.t]=e.innerHTML});
 /* 51 · Les titres VISIBLES roulent vers leur traduction : l'ancien texte
