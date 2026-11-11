@@ -38,58 +38,56 @@ INCL = [
 
 CSS = REMISE_CSS + """
 .head{padding-top:150px;padding-bottom:34px}
-.head-top{display:flex;justify-content:space-between;align-items:flex-end;gap:30px;flex-wrap:wrap}
-/* Signature textile — touche 4 sur 5, le damas. Il vit dans le VIDE entre
-   le titre, a gauche, et le prix, a droite. Le fondu radial l'eteint avant
-   d'atteindre l'un ou l'autre : au centre il est a 9 %, aux bords a rien.
-   Le parent ouvre un contexte d'empilement pour qu'il reste derriere. */
-.head{position:relative;z-index:0}
-/* Le damas est un ELEMENT DE LA GRILLE, pas un calque pose a des
-   coordonnees devinees. Il prend le vide que le flex laisse entre le bloc
-   titre et le prix : `flex:1` lui donne ce qui reste, et rien de plus.
-   Le recouvrement devient impossible par construction — la premiere
-   version, centree a 50 %, passait sur le titre de 144 px. */
-.pagne-chambre{position:relative;z-index:auto;flex:1 1 0;min-width:0;
-  height:150px;align-self:center;margin-bottom:6px}
-@media(max-width:1100px){.pagne-chambre{display:none}}
-/* Le galon, touche 4 sur 5 (suite) : une bande de 20 px en haut de la
-   carte de reservation, DANS sa bordure. Le contenu commence dessous —
-   d'ou les 20 px ajoutes au padding du haut, plutot qu'un chevauchement. */
-.panel{padding-top:48px}
-.head h1{margin:10px 0 0}
-.facts{display:flex;gap:26px;flex-wrap:wrap;margin-top:22px;font-size:13.5px;color:var(--muted)}
-.facts b{color:var(--cream);font-weight:500}
+.fhero{position:relative;height:min(86vh,820px);min-height:520px;margin-top:104px;overflow:hidden;
+  --cream:#F6EEE2;--muted:#F1E3CC;color:#F6EEE2}
+.fhero>picture img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 58%}
+/* Le haut sombre pour le fil d'Ariane, le bas pour le nom et le prix ; le
+   milieu reste nu : c'est la photo qui vend. */
+.fhero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(16,11,6,.42) 0%,rgba(16,11,6,0) 26%,rgba(16,11,6,0) 50%,rgba(16,11,6,.82) 100%)}
+.fhero-in{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;justify-content:space-between;padding-top:26px;padding-bottom:40px}
+.fhero .crumb,.fhero .crumb span,.fhero .eyebrow{color:#F1E3CC;text-shadow:0 1px 3px rgba(16,11,6,.85)}
+.fhero .crumb{margin-bottom:0}
+.fhero h1{color:#F6EEE2;font-size:clamp(2.5rem,6vw,4.6rem);margin:8px 0 0;text-shadow:0 1px 4px rgba(16,11,6,.7)}
+.fhero-bas{display:flex;align-items:flex-end;justify-content:space-between;gap:30px;flex-wrap:wrap;padding-right:250px}
 .head-price{text-align:right}
-.head-price b{font-family:var(--f-display);font-size:2.6rem;color:var(--bronze);display:block;line-height:1;font-variant-numeric:tabular-nums;font-weight:400}
-.head-price span{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:600}
-.mosaic{display:grid;grid-template-columns:2fr 1fr 1fr;grid-auto-rows:172px;gap:10px;margin-bottom:76px}
-.mosaic figure{overflow:hidden;position:relative;cursor:pointer;background:var(--bark-2)}
-.mosaic figure:first-child{grid-column:span 1;grid-row:span 2}
-/* La mosaique doit tomber juste, sinon la grille laisse un trou visible.
-   A trois photos, la premiere prenait deux rangees sans que rien ne remplisse
-   la seconde : 27 % de vide sous les deux vignettes, sur six fiches.
-   A huit photos, c'est la grille a deux colonnes qui finissait sur une rangee
-   incomplete ; la derniere image s'y etale alors sur toute la largeur.
-   Les deux classes sont posees par le generateur, qui seul connait le nombre. */
-.mosaic.court figure:first-child{grid-row:span 1}
-.mosaic img{width:100%;height:100%;object-fit:cover;transition:1s cubic-bezier(.2,.8,.2,1)}
-.mosaic figure:hover img{transform:scale(1.07)}
-.mosaic figcaption{position:absolute;left:0;right:0;bottom:0;padding:26px 14px 10px;
-  background:linear-gradient(transparent,rgba(16,11,6,.94));
-  font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--cream);font-weight:700;
-  text-shadow:0 2px 10px rgba(10,6,3,.9)}
+.head-price small{display:block;font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:#F1E3CC;font-weight:600;margin-bottom:4px}
+.head-price b{font-family:var(--f-display);font-size:2.9rem;color:#F6EEE2;display:block;line-height:1.05;font-variant-numeric:tabular-nums;font-weight:400}
+.head-price span{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:#F1E3CC;font-weight:600}
+.head-price .avant{color:#F1E3CC}.head-price .apres{color:#F6EEE2}
+.fhero-tout{position:absolute;right:max(24px,calc((100% - var(--max)) / 2 + 24px));bottom:40px;z-index:3;display:flex;align-items:center;gap:9px;
+  background:#FBF7F0;color:#2A231E;border:1px solid rgba(138,95,43,.22);padding:12px 17px;font:700 11px var(--f-body);letter-spacing:.14em;text-transform:uppercase;cursor:pointer;transition:.3s}
+.fhero-tout:hover{background:#fff}
+.fhero-tout svg{width:16px;height:16px;stroke:#7F5524;fill:none;stroke-width:1.6}
+.fintro{text-align:center;padding-top:76px;padding-bottom:72px}
+.fintro h2{margin:12px 0 22px}
+.fintro .acc{font-family:var(--f-display);font-size:clamp(1.15rem,1.9vw,1.42rem);line-height:1.65;color:var(--cream);max-width:820px;margin:0 auto 32px}
+.fequip-tete{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;margin-bottom:26px}
+.fequip-tete h2{margin-top:10px}
+.facts{display:flex;flex-wrap:wrap;font-size:14.5px;color:var(--muted)}
+.facts>span{padding:6px 22px}
+.facts>span+span{border-left:1px solid var(--line)}
+.facts>span:last-child{padding-right:0}
+.facts b{color:var(--cream);font-weight:600}
+.rang{display:grid;grid-template-columns:repeat(var(--n),1fr);gap:12px;margin:44px 0 84px}
+.rang figure{position:relative;aspect-ratio:4/3;overflow:hidden;cursor:pointer;background:var(--bark-2)}
+.rang[style*="--n:2"] figure{aspect-ratio:16/10}
+.rang figure.tete,.rang figure.suite{display:none}
+.rang img{width:100%;height:100%;object-fit:cover;transition:1s cubic-bezier(.2,.8,.2,1)}
+.rang figure:hover img{transform:scale(1.06)}
+.rang figcaption{position:absolute;left:0;right:0;bottom:0;padding:26px 14px 10px;
+  font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;font-weight:600;color:#F6EEE2;
+  background:linear-gradient(180deg,transparent,rgba(16,11,6,.78))}
 .body-grid{display:grid;grid-template-columns:1fr 372px;gap:56px;align-items:start;padding-bottom:100px}
 .block{margin-bottom:56px}
 .block .eyebrow{margin-bottom:14px}
 .block h2{margin-bottom:18px}
 .block p+p{margin-top:16px}
-.amen{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-top:24px}
-.amen div{background:var(--bark);padding:16px 18px;font-size:14px;display:flex;align-items:center;gap:12px;color:var(--prose)}
-.amen svg{width:17px;height:17px;stroke:var(--bronze);fill:none;stroke-width:1.4;flex:0 0 auto}
-.amen div.hi{background:var(--bark-2)}
+.amen{display:grid;grid-template-columns:repeat(4,1fr);background:var(--bark);border:1px solid var(--line);box-shadow:0 22px 50px -30px rgba(42,35,30,.35);padding:18px 0}
+.amen div{padding:26px 18px;font-size:14.5px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px;color:var(--cream)}
+.amen svg{width:34px;height:34px;stroke:var(--bronze);fill:none;stroke-width:1.1;flex:0 0 auto}
 .amen div.hi svg{stroke:var(--bronze-2)}
 .amen div.hi b{color:var(--cream);font-weight:600;display:block}
-.amen div.hi em{font-style:normal;font-size:12px;color:var(--muted);display:block;margin-top:2px}
+.amen div.hi em{font-style:normal;font-size:12px;color:var(--muted);display:block;margin-top:4px}
 .incl{list-style:none;margin-top:22px}
 .incl li{padding:15px 0;border-bottom:1px solid var(--line);display:flex;gap:16px;align-items:flex-start}
 .incl b{display:block;color:var(--cream);font-weight:600;font-size:14.5px;margin-bottom:3px}
@@ -146,22 +144,26 @@ CSS = REMISE_CSS + """
 @media(max-width:1080px){
   .body-grid{grid-template-columns:1fr;gap:0}
   .panel{position:static;margin-bottom:56px}
-  .mosaic{grid-template-columns:1fr 1fr;grid-auto-rows:180px}
-  .mosaic figure:first-child{grid-column:span 2}
-  .mosaic.court figure:first-child{grid-row:span 2}
-  .mosaic figure.plein{grid-column:span 2}
+  .amen{grid-template-columns:repeat(2,1fr)}
+  .fhero-bas{padding-right:0}
+  .fhero-tout{bottom:auto;top:20px}
+  /* Sur telephone et tablette, reserver vient avant le detail. */
+  .body-grid{display:flex;flex-direction:column}
+  .body-grid>aside{order:-1}
   .more-grid{grid-template-columns:repeat(2,1fr)}
 }
 @media(max-width:720px){
-  .head{padding-top:126px;padding-bottom:26px}
+  .fhero{height:74vh;min-height:440px;margin-top:84px}
+  .fhero-in{padding-bottom:26px}
   .head-price{text-align:left}
-  .amen,.more-grid{grid-template-columns:1fr}
+  .head-price b{font-size:2.2rem}
+  .fintro{padding-top:46px;padding-bottom:46px}
+  .facts>span{padding:5px 14px;font-size:13.5px}.facts>span:first-child{padding-left:0}
+  .amen div{padding:18px 10px;font-size:13px}
+  .more-grid{grid-template-columns:1fr}
+  .rang{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:8px;margin:30px -24px 54px;padding:0 24px}
+  .rang figure,.rang[style*="--n:2"] figure{flex:0 0 82%;aspect-ratio:4/3;scroll-snap-align:center}
   .two{grid-template-columns:1fr}
-  .mosaic{grid-template-columns:1fr;grid-auto-rows:210px}
-  /* Une seule colonne : la photo « plein » (span 2) en recreait une seconde,
-     et la mosaique gardait une bande de 50 px a gauche. */
-  .mosaic figure:first-child,.mosaic.court figure:first-child,.mosaic figure.plein{grid-column:auto;grid-row:auto}
-  .mosaic figure:first-child{grid-row:span 2}
   .mobar{display:flex}
   body{padding-bottom:78px}
   /* Les bulles flottantes passent au-dessus de la barre de reservation. */
@@ -231,6 +233,7 @@ def _en_dict(c):
     e = _chambres_en.EN[c['slug']]
     d = dict(_chambres_en.CHASSIS)
     d['mbb'] = d['cta']
+    d['vph'] = 'See all %d photos' % len(c['photos'])
     d['eb0'] = e['tag'] or _chambres_en.CHASSIS['eb0']
     d['ttl'] = e['titre']
     d['pa1'], d['pa2'], d['pa3'] = e['p1'], e['p2'], e['p3']
@@ -255,59 +258,59 @@ for c in CHAMBRES:
         '<option value="%d"%s>%d personne%s</option>' % (i, ' selected' if i == min(2, c['pax']) else '', i, 's' if i > 1 else '')
         for i in range(1, c['pax'] + 1))
 
+    # LA FICHE, en cinq temps (novembre 2026) : la chambre en grand, une
+    # accroche et un seul bouton, les equipements en grands pictogrammes,
+    # la rangee de photos, puis le detail et la reservation.
+    #
+    # La premiere photo fait l'ouverture. Elle reste aussi la premiere du
+    # diaporama : elle est reprise dans #gl, masquee, pour que « Voir les
+    # N photos » commence par elle.
+    tete = c['photos'][0]
+    n_rang = min(len(c['photos']) - 1, 4)
     b = [header('#reserver', 'Réserver'), drawer('index.html#chambres'), '''
-<div class="wrap head">
-  <nav class="crumb" aria-label="Fil d'Ariane">
-    <a href="index.html" data-t="c1">Accueil</a> &nbsp;·&nbsp;
-    <a href="index.html#chambres" data-t="c2">Chambres &amp; Suites</a> &nbsp;·&nbsp;
-    <span>%s</span>
-  </nav>
-  <div class="head-top">
+<section class="fhero">
+  <picture><source srcset="img/opt/%s.webp" type="image/webp">
+    <img loading="eager" fetchpriority="high" src="img/opt/%s.jpg" alt="%s"></picture>
+  <div class="wrap fhero-in">
+    <nav class="crumb" aria-label="Fil d'Ariane">
+      <a href="index.html" data-t="c1">Accueil</a> &nbsp;·&nbsp;
+      <a href="chambres.html" data-t="c2">Chambres &amp; Suites</a> &nbsp;·&nbsp;
+      <span>%s</span>
+    </nav>
+    <div class="fhero-bas">
+      <div>
+        <span class="eyebrow" data-t="eb0">%s</span>
+        <h1>%s</h1>
+      </div>
+      <div class="head-price" id="prix-tete"><small data-t="frm">À partir de</small><b data-prix-de="%s">%s</b><span data-t="pnuit">FCFA / nuit</span></div>
+    </div>
+  </div>
+  <button type="button" class="fhero-tout" id="voir-photos"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 00-2.8 0L6 21"/></svg><span data-t="vph">Voir les %d photos</span></button>
+</section>
+
+<section class="wrap fintro reveal">
+  <span class="eyebrow" data-t="ebr">La chambre</span>
+  <h2 data-t="ttl">%s</h2>
+  <p class="acc" data-t="pa1">%s</p>
+  <a class="btn" href="#reserver" data-t="vdi">Vérifier les disponibilités</a>
+</section>
+
+<section class="wrap fequip reveal">
+  <div class="fequip-tete">
     <div>
-      <span class="eyebrow" data-t="eb0">%s</span>
-      <h1>%s</h1>
-      <div class="facts">''' % (c['nom'], c['tag'] or 'Chambre', c['nom'])]
+      <span class="eyebrow" data-t="ebe">Équipements</span>
+      <h2 data-t="hae">Dans la chambre</h2>
+    </div>
+    <div class="facts">''' % (tete[0], tete[0], tete[1], c['nom'], c['tag'] or 'Chambre', c['nom'],
+                              c['slug'], fmt(c['prix']), len(c['photos']), c['titre'], c['p1'])]
 
     for i, (val, lab) in enumerate(c['facts']):
-        b.append('        <span><b data-t="fv%d">%s</b> <span data-t="fl%d">%s</span></span>'
+        b.append('      <span><b data-t="fv%d">%s</b> <span data-t="fl%d">%s</span></span>'
                  % (i, val, i, lab))
 
-    b.append('''      </div>
-    </div>
-    <div class="pagne pagne-damas au-centre pagne-chambre" aria-hidden="true"></div>
-    <div class="head-price" id="prix-tete"><b data-prix-de="%s">%s</b><span data-t="pnuit">FCFA / nuit</span></div>
+    b.append('''    </div>
   </div>
-</div>
-
-<div class="wrap">
-  <div class="mosaic%s" id="gl">''' % (c['slug'], fmt(c['prix']), ' court' if len(c['photos']) < 5 else ''))
-
-    for i, (img, alt, cap) in enumerate(c['photos']):
-        ld = 'eager' if i == 0 else 'lazy'
-        # Rangee incomplete a deux colonnes quand le nombre est pair : la
-        # derniere image s'etale plutot que de laisser une case vide.
-        cl = ' class="plein"' if (i == len(c['photos']) - 1 and len(c['photos']) % 2 == 0) else ''
-        b.append('''    <figure%s><picture><source srcset="img/opt/%s.webp" type="image/webp">
-      <img loading="%s" src="img/opt/%s.jpg" data-full="img/opt/%s.jpg" alt="%s"></picture>
-      <figcaption class="sombre" data-t="cap%d">%s</figcaption></figure>''' % (cl, img, ld, img, img, alt, i, cap))
-
-    b.append('''  </div>
-</div>
-
-<div class="wrap body-grid">
- <div>
-  <section class="block reveal">
-    <span class="eyebrow" data-t="ebr">La chambre</span>
-    <h2 data-t="ttl">%s</h2>
-    <p data-t="pa1">%s</p>
-    <p data-t="pa2">%s</p>
-    <p data-t="pa3">%s</p>
-  </section>
-
-  <section class="block reveal">
-    <span class="eyebrow" data-t="ebe">Équipements</span>
-    <h2 data-t="hae">Dans la chambre</h2>
-    <div class="amen">''' % (c['titre'], c['p1'], c['p2'], c['p3']))
+  <div class="amen">''')
 
     for i, (t, d) in enumerate(c['plus']):
         b.append('      <div class="hi"><svg viewBox="0 0 24 24" aria-hidden="true">%s</svg>'
@@ -317,9 +320,32 @@ for c in CHAMBRES:
         b.append('      <div><svg viewBox="0 0 24 24" aria-hidden="true">%s</svg>'
                  '<span data-t="am%d">%s</span></div>' % (d, i, t))
 
-    b.append('''    </div>
-  </section>
+    b.append('''  </div>
+</section>
 
+<div class="wrap">
+  <div class="rang" id="gl" style="--n:%d">''' % n_rang)
+
+    for i, (img, alt, cap) in enumerate(c['photos']):
+        # i == 0 : la photo d'ouverture, masquee ici. Au-dela de la quatrieme
+        # de la rangee : dans le diaporama seulement.
+        cl = ' class="tete"' if i == 0 else (' class="suite"' if i > n_rang else '')
+        b.append('''    <figure%s><picture><source srcset="img/opt/%s.webp" type="image/webp">
+      <img loading="lazy" src="img/opt/%s.jpg" data-full="img/opt/%s.jpg" alt="%s"></picture>
+      <figcaption class="sombre" data-t="cap%d">%s</figcaption></figure>''' % (cl, img, img, img, alt, i, cap))
+
+    b.append('''  </div>
+</div>
+
+<div class="wrap body-grid">
+ <div>
+  <section class="block reveal">
+    <p data-t="pa2">%s</p>
+    <p data-t="pa3">%s</p>
+  </section>
+''' % (c['p2'], c['p3']))
+
+    b.append('''
   <section class="block reveal">
     <span class="eyebrow" data-t="ebi">Inclus</span>
     <h2 data-t="hai">Compris dans le tarif</h2>
@@ -513,6 +539,7 @@ var figs=[].slice.call(document.querySelectorAll('#gl img')),lb=document.getElem
 function show(i){gi=(i+figs.length)%%figs.length;lbi.src=plein(figs[gi]);lbi.alt=figs[gi].alt;lbc.textContent=figs[gi].alt+'  ·  '+(gi+1)+' / '+figs.length;lb.classList.add('on');document.body.style.overflow='hidden'}
 function hideLb(){lb.classList.remove('on');document.body.style.overflow=''}
 figs.forEach(function(im,i){im.closest('figure').onclick=function(){show(i)}});
+var vp=document.getElementById('voir-photos');if(vp)vp.onclick=function(){show(0)};
 lb.querySelector('.next').onclick=function(e){e.stopPropagation();show(gi+1)};
 lb.querySelector('.prev').onclick=function(e){e.stopPropagation();show(gi-1)};
 lb.querySelector('.close').onclick=hideLb;
@@ -536,7 +563,10 @@ var EN={''' % (c['prix'], c['slug']) + EN_NAV + _en_dict(c) + '};\n\n' + LANG_JS
         _schema.fil([('Accueil', 'index'), ('Chambres &amp; Suites', 'chambres'),
                      (c['nom'].replace('&amp;', '&'), None)]))
 
-    mosa = {ph[0]: _sizes_mosaique(i, len(c['photos'])) for i, ph in enumerate(c['photos'])}
+    # L'ouverture est en pleine largeur (hero=preload la declare en 100vw) ;
+    # la rangee partage .wrap en n_rang colonnes, et defile a 82 % sur telephone.
+    mosa = {ph[0]: '(max-width:720px) 82vw, (max-width:1287px) calc((100vw - 48px) / %d), %dpx'
+                   % (n_rang, 1580 // n_rang) for ph in c['photos'][1:]}
 
     HTML = page(
         "%s — Hôtel Evannath, Assinie | %s FCFA la nuit" % (c['nom'], fmt(c['prix'])),

@@ -107,27 +107,22 @@ def controler():
         for chemin in set(re.findall(r"""["'(](video/[\w-]+\.(?:mp4|webm))(?![\w.?])""", s)):
             pb.append((f, 'media sans empreinte : ' + chemin))
 
-        # 7 ter. la mosaique des fiches chambres doit se remplir exactement.
-        # La grille a trois colonnes place la premiere image sur deux rangees ;
-        # a trois photos, la seconde rangee restait vide — 27 % de trou sur six
-        # fiches. A deux colonnes, un nombre pair laisse une case vide en fin
-        # de grille. Les deux cas se corrigent par une classe, encore faut-il
-        # qu'elle soit la.
-        mo = re.search(r'<div class="mosaic([^"]*)" id="gl">(.*?)</div>\s*</div>', s, re.S)
+        # 7 ter. la rangee de photos des fiches chambres doit se remplir
+        # exactement. La premiere photo fait l'ouverture et reste dans #gl,
+        # masquee, pour ouvrir le diaporama ; la rangee montre les suivantes,
+        # quatre au plus, sur --n colonnes. Un --n qui ne correspond pas au
+        # nombre de photos visibles laisse une case vide ou une rangee en trop.
+        mo = re.search(r'<div class="rang" id="gl" style="--n:(\d+)">(.*?)</div>\s*</div>', s, re.S)
         if mo:
-            classes, corps = mo.group(1), mo.group(2)
-            n = corps.count('<figure')
-            if n < 5 and 'court' not in classes:
-                pb.append((f, 'mosaique : %d photos sans la classe « court » '
-                              '— trou sous la premiere image' % n))
-            if n >= 5 and 'court' in classes:
-                pb.append((f, 'mosaique : %d photos avec la classe « court »' % n))
-            etale = 'class="plein"' in corps
-            if n % 2 == 0 and not etale:
-                pb.append((f, 'mosaique : %d photos, derniere case vide a deux '
-                              'colonnes — classe « plein » manquante' % n))
-            if n % 2 and etale:
-                pb.append((f, 'mosaique : %d photos, la classe « plein » est de trop' % n))
+            n, corps = int(mo.group(1)), mo.group(2)
+            total = corps.count('<figure')
+            visibles = total - corps.count('<figure class="tete"') - corps.count('<figure class="suite"')
+            if corps.count('<figure class="tete"') != 1:
+                pb.append((f, 'rangee de photos : la photo d ouverture doit y figurer une fois, masquee'))
+            if visibles != n or not 2 <= n <= 4:
+                pb.append((f, 'rangee de photos : %d visibles pour --n:%d (attendu 2 a 4, egaux)' % (visibles, n)))
+            if 'class="fhero"' not in s or 'id="voir-photos"' not in s:
+                pb.append((f, 'fiche chambre : ouverture ou bouton « Voir les photos » absent'))
 
         # 7 quater. le bouton EN doit tout traduire, pas seulement le menu.
         # Dix pages ne portaient de data-t que sur la navigation : cliquer EN
