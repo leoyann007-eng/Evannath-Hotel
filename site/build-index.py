@@ -25,13 +25,16 @@ if _e:
     # Pas de classe « reveal » : le bandeau annonce ce qui se passe MAINTENANT.
     # L'attendre au defilement le rendrait invisible tant que le script n'a
     # pas tourne, et invisible tout court si le script echoue.
-    BANDEAU = ('<div class="bandeau" id="bandeau"%s>'
+    # « evt » : la forme avec photo. Une promotion mise en avant depuis
+    # l'administration remplace la classe (JS_BANDEAU) et garde la sienne.
+    BANDEAU = ('<div class="bandeau evt" id="bandeau"%s>'
                '<a href="circuits.html#a-la-une">'
-               '<span class="quand" data-t="bq">%s</span>'
+               '<span class="ph" style="background-image:url(img/opt/%s-1024.jpg)"></span>'
+               '<span class="tx"><span class="quand" data-t="bq">%s</span>'
                '<b data-t="bt">%s</b>'
                '<span class="t" data-t="bx">%s</span>'
-               '<span class="fl" data-t="bf">Voir tout</span>'
-               '</a></div>') % (_fin, _e['quand'], _e['titre'],
+               '<span class="fl" data-t="bf">Voir tout</span></span>'
+               '</a></div>') % (_fin, _e['fond'], _e['quand'], _e['titre'],
                                 "Et tout ce qui se passe à l'hôtel en ce moment.")
     _en = EV_EN.get(_e['slug'])
     EN_BANDEAU = ('bq:"%s",bt:"%s",bx:"On now at the hotel.",bf:"See all",'
@@ -208,7 +211,7 @@ SIZES_CARTES = ('(max-width:720px) calc(100vw - 48px), '
 CARTES = ('r-standard', 'ig-baldaquin', 'r-wax', 'r-anglaise', 'r-mezz2',
           'r-mezzanine', 'r-arabe', 'g-aerien', 'g-terrasse')
 
-html = versionner(responsive(dimensionner(html), hero='hero-chambre-wax',
+html = versionner(responsive(dimensionner(html), hero='gal-lag-bateau',
                              sizes={n: SIZES_CARTES for n in CARTES}))
 # En dernier : le JSON-LD injecte plus haut porte lui aussi l'adresse.
 html = html.replace('{{MAIL}}', MAIL)
