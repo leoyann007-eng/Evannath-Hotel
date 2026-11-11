@@ -7,6 +7,7 @@ des hypotheses a faire confirmer — voir README.
 """
 import io
 import _schema
+from _chrome import NOTE_GOOGLE, FICHE_GOOGLE
 from _chrome import (page, header, drawer, FOOTER, NAV_JS, LANG_JS, EN_NAV, WA,
                      REMISE_JS, REMISE_CSS, DISPO_JS, PAGNE_CSS, PAGNE_JS)
 
@@ -16,6 +17,54 @@ import _chambres_en
 import json
 
 PAR_SLUG = {c['slug']: c for c in CHAMBRES}
+
+# Le pictogramme de chacun des quatre points forts, d'apres son libelle.
+_P = {
+ 'pers': '<circle cx="9" cy="8" r="3.4"/><path d="M2.5 20a6.5 6.5 0 0113 0M16 5.2a3.4 3.4 0 010 5.6M18 14.4a6.5 6.5 0 013.5 5.6"/>',
+ 'lit': '<path d="M2 5v14M2 9h17a3 3 0 013 3v7M2 16h20M6 9v7"/>',
+ 'eau': '<path d="M2 17c2 1 4-1 6 0s4 1 6 0 4-1 6 0M2 12c2 1 4-1 6 0s4 1 6 0 4-1 6 0"/><circle cx="17" cy="6" r="2.5"/>',
+ 'jardin': '<path d="M12 21v-9M12 12c0-4 3-7 7-7 0 4-3 7-7 7zM12 15c0-3-2-5-6-5 0 3 2 5 6 5z"/>',
+ 'salon': '<path d="M4 12V8a2 2 0 012-2h12a2 2 0 012 2v4M2 13a2 2 0 014 0v3h12v-3a2 2 0 014 0v5H2zM6 18v2M18 18v2"/>',
+ 'soleil': '<circle cx="12" cy="13" r="4"/><path d="M12 3v3M4.2 6.2l2.1 2.1M19.8 6.2l-2.1 2.1M2 13h3M19 13h3M3 20h18"/>',
+ 'tasse': '<path d="M4 9h13v5a5 5 0 01-5 5H9a5 5 0 01-5-5zM17 10h1.5a2.5 2.5 0 010 5H17M8 3v3M12 3v3"/>',
+ 'table': '<path d="M3 8h18M5 8v11M19 8v11M8 8V5h8v3"/>',
+ 'motif': '<path d="M12 2l10 10-10 10L2 12z"/><path d="M12 7l5 5-5 5-5-5z"/>',
+ 'duplex': '<path d="M3 20h18M3 20V5h8v6h10v9M11 11H3"/>',
+ 'escalier': '<path d="M3 20h4v-4h4v-4h4V8h4V4"/>',
+ 'toit': '<path d="M3 12l9-8 9 8M5 10.5V20h14v-9.5"/>',
+}
+_PICTO = {'personnes': 'pers', 'lit': 'lit', 'lits': 'lit', 'chambres': 'lit',
+          'coin': 'salon', 'séparé': 'salon', 'complet': 'salon', 'privatif': 'salon',
+          'exposition': 'soleil', 'petit-déjeuner': 'tasse', 'salle à manger': 'table',
+          'textiles': 'motif', 'décor': 'motif', 'volume': 'duplex', 'escalier': 'escalier',
+          'sous': 'toit', 'terrasse': 'jardin'}
+
+
+def picto(val, lab):
+    """« Lagune vue » montre l'eau, « Jardin vue » le jardin."""
+    if lab == 'vue':
+        return _P['eau' if val == 'Lagune' else 'jardin']
+    return _P[_PICTO.get(lab, 'motif')]
+
+
+def nom_accentue(nom):
+    """Le dernier mot du nom en italique, comme le titre de l'accueil.
+    « Deluxe · lits à baldaquin » : ce qui suit le point median."""
+    if ' · ' in nom:
+        a, b = nom.split(' · ', 1)
+        return '%s · <em>%s</em>' % (a, b)
+    a, _, b = nom.rpartition(' ')
+    return '%s <em>%s</em>' % (a, b) if a else nom
+
+
+# Le mot d'un client, avant la reservation. Ce sont les avis de l'accueil ;
+# ils tournent d'une fiche a l'autre pour ne pas dire sept fois la meme chose.
+AVIS = [
+ ("Depuis la réservation jusqu'à mon départ, tout s'est très bien passé. Chambre propre, personnel accueillant et bienveillant. Rien à dire.", 'Mme Diakité'),
+ ("La balade lagunaire est magnifique, le cadre très cosy et le personnel très accueillant. Franchement, j'ai adoré.", 'M. Jean-Michel'),
+ ("J'avais lu que vous étiez accueillants et que votre service client était de qualité. Je peux l'affirmer de vive voix. Nous reviendrons pour un long séjour.", 'M. Koné'),
+ ("C'était juste parfait. Avec les images partagées sur mes réseaux, beaucoup me demandent l'adresse — et je sais qu'ils viendront découvrir.", 'Mme Kane'),
+]
 
 AMEN_BASE = [
  ('Air conditionné', '<path d="M3 12h18M8 8h12M6 16h12"/>'),
@@ -48,38 +97,77 @@ header:not(.scrolled):not(.menu) .lang button:not(.on){color:#E3D9C9}
 header:not(.scrolled):not(.menu) .brand img{filter:brightness(0) invert(1)}
 header:not(.scrolled):not(.menu) .brand small{color:#E2BE8C}
 .brand img{transition:clip-path 1.1s var(--ease-inout),filter .6s ease}
-.fhero{position:relative;height:min(84vh,860px);min-height:480px;overflow:hidden;background:var(--bark-3)}
+.fhero{position:relative;height:min(92vh,940px);min-height:480px;overflow:hidden;background:var(--bark-3)}
 .fhero>picture img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 58%}
-/* Un seul voile, en haut, pour que le logo et le menu se lisent. */
-.fhero::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(16,11,6,.58) 0,rgba(16,11,6,.18) 150px,rgba(16,11,6,0) 260px)}
+/* Deux voiles legers : en haut pour le logo et le menu, en bas pour
+   « Decouvrir ». Le milieu reste nu. */
+.fhero::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(16,11,6,.58) 0,rgba(16,11,6,.18) 150px,rgba(16,11,6,0) 260px,rgba(16,11,6,0) calc(100% - 130px),rgba(16,11,6,.38) 100%)}
 .fhero-tout{position:absolute;right:max(24px,calc((100% - var(--max)) / 2 + 24px));bottom:28px;z-index:3;display:flex;align-items:center;gap:9px;
   background:#FBF7F0;color:#2A231E;border:1px solid rgba(138,95,43,.22);padding:12px 17px;font:700 11px var(--f-body);letter-spacing:.14em;text-transform:uppercase;cursor:pointer;transition:.3s}
 .fhero-tout:hover{background:#fff}
 .fhero-tout svg{width:16px;height:16px;stroke:#7F5524;fill:none;stroke-width:1.6}
-.fintro{text-align:center;padding-top:44px;padding-bottom:76px}
+.fhero-bas{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);z-index:3;color:#F6EEE2;font-size:10px;font-weight:600;
+  letter-spacing:.3em;text-transform:uppercase;display:flex;flex-direction:column;align-items:center;gap:10px}
+.fhero-bas i{display:block;width:1px;height:34px;background:rgba(246,238,226,.7)}
+.fintro{text-align:center;padding-top:54px;padding-bottom:46px;scroll-margin-top:60px}
 .fintro .crumb{margin-bottom:34px}
-.fintro h1{font-size:clamp(2.5rem,6vw,4.4rem);margin:10px 0 18px;color:var(--bronze)}
-.head-price{display:flex;align-items:baseline;justify-content:center;gap:10px;flex-wrap:wrap;margin-bottom:34px}
+.fintro h1{font-size:clamp(2.6rem,6.6vw,5rem);color:var(--cream);margin:14px 0 6px;line-height:1.05}
+.fintro h1 em{font-style:italic;color:var(--bronze)}
+.forn{display:flex;align-items:center;justify-content:center;gap:16px;margin:22px auto 24px}
+.forn::before,.forn::after{content:"";width:min(120px,22vw);height:1px;background:var(--line)}
+.forn svg{width:22px;height:22px;stroke:var(--bronze);fill:none;stroke-width:1}
+.head-price{display:flex;align-items:baseline;justify-content:center;gap:10px;flex-wrap:wrap;margin-bottom:16px}
 .head-price small,.head-price span{font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:600}
 .head-price b{font-family:var(--f-display);font-size:2.1rem;color:var(--cream);line-height:1;font-variant-numeric:tabular-nums;font-weight:400}
-.fintro .st{font-family:var(--f-display);font-size:clamp(1.3rem,2.2vw,1.7rem);color:var(--cream);margin-bottom:14px}
-.fintro .acc{font-size:1.06rem;line-height:1.75;color:var(--prose);max-width:760px;margin:0 auto 32px}
-.fequip-tete{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;margin-bottom:26px}
+.fnote{display:inline-flex;align-items:center;gap:10px;font-size:13px;color:var(--muted)}
+.fnote .et{color:#C8922F;letter-spacing:.1em}
+.fnote b{color:var(--cream)}
+.fnote:hover{color:var(--bronze)}
+.faits{display:grid;grid-template-columns:repeat(4,1fr);border-block:1px solid var(--line);margin-bottom:96px}
+.faits div{padding:30px 20px;text-align:center}
+.faits div+div{border-left:1px solid var(--line)}
+.faits svg{width:30px;height:30px;stroke:var(--bronze);fill:none;stroke-width:1.1;margin-bottom:12px}
+.faits b{display:block;font-family:var(--f-display);font-weight:400;font-size:1.3rem;color:var(--cream)}
+.faits span{font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.frecit{display:grid;grid-template-columns:1fr 1.08fr;gap:84px;align-items:center;margin-bottom:120px}
+.frecit h2{font-size:clamp(2rem,3.6vw,3rem);margin:14px 0 24px;line-height:1.12}
+.frecit p{font-size:1.04rem;line-height:1.8;color:var(--prose)}
+.frecit p+p{margin-top:16px}
+.frecit .btn{margin-top:32px}
+.fduo{position:relative;z-index:0;padding-bottom:70px;padding-left:60px}
+.fduo img{display:block;object-fit:cover;cursor:pointer}
+.fduo .g{width:100%;aspect-ratio:4/5}
+.fduo .p{position:absolute;left:0;bottom:0;width:46%;aspect-ratio:4/3;border:8px solid var(--bark);box-shadow:0 26px 50px -26px rgba(42,35,30,.5)}
+.fduo::before{content:"";position:absolute;right:-22px;top:-22px;width:46%;height:46%;border:1px solid var(--line);z-index:-1}
+.fequip{margin-bottom:110px}
+.fequip-tete{text-align:center;margin-bottom:26px}
 .fequip-tete h2{margin-top:10px}
-.facts{display:flex;flex-wrap:wrap;font-size:14.5px;color:var(--muted)}
-.facts>span{padding:6px 22px}
-.facts>span+span{border-left:1px solid var(--line)}
-.facts>span:last-child{padding-right:0}
-.facts b{color:var(--cream);font-weight:600}
-.rang{display:grid;grid-template-columns:repeat(var(--n),1fr);gap:12px;margin:44px 0 84px}
-.rang figure{position:relative;aspect-ratio:4/3;overflow:hidden;cursor:pointer;background:var(--bark-2)}
-.rang[style*="--n:2"] figure{aspect-ratio:16/10}
-.rang figure.tete,.rang figure.suite{display:none}
-.rang img{width:100%;height:100%;object-fit:cover;transition:1s cubic-bezier(.2,.8,.2,1)}
-.rang figure:hover img{transform:scale(1.06)}
-.rang figcaption{position:absolute;left:0;right:0;bottom:0;padding:26px 14px 10px;
+.fgal-tete{text-align:center;margin-bottom:34px}
+.fgal-tete h2{margin-top:10px}
+.fgal{display:grid;gap:12px}
+.fgal.rang{grid-template-columns:repeat(var(--n),1fr)}
+.fgal.mosa{grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(2,250px)}
+.fgal figure{position:relative;aspect-ratio:4/3;overflow:hidden;cursor:pointer;background:var(--bark-2)}
+.fgal.rang[style*="--n:2"] figure{aspect-ratio:16/10}
+.fgal.mosa figure{aspect-ratio:auto}
+.fgal.mosa figure.grand{grid-column:span 2;grid-row:span 2}
+.fgal figure.hors{display:none}
+.fgal img{width:100%;height:100%;object-fit:cover;transition:1s cubic-bezier(.2,.8,.2,1)}
+.fgal figure:hover img{transform:scale(1.06)}
+.fgal figcaption{position:absolute;left:0;right:0;bottom:0;padding:26px 14px 10px;
   font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;font-weight:600;color:#F6EEE2;
   background:linear-gradient(180deg,transparent,rgba(16,11,6,.78))}
+.fgal-bas{text-align:center;margin-top:30px}
+.fmot{position:relative;padding:120px 24px;text-align:center;color:#F6EEE2;margin:110px 0;
+  background:#17100A url(img/opt/gal-dom-couchant-1024.jpg) center/cover}
+.fmot::before{content:"";position:absolute;inset:0;background:rgba(16,11,6,.55)}
+.fmot>*{position:relative}
+.fmot .et{color:#F2C879;letter-spacing:.2em;font-size:15px}
+.fmot blockquote{font-family:var(--f-display);font-size:clamp(1.35rem,2.9vw,2.2rem);line-height:1.5;max-width:900px;margin:22px auto 24px;color:#F6EEE2}
+.fmot cite{font-style:normal;font-size:10.5px;letter-spacing:.26em;text-transform:uppercase;color:#E2BE8C;font-weight:700}
+.surs{list-style:none;margin:18px 0 0;padding:16px 0 0;border-top:1px solid var(--line);display:grid;gap:9px;font-size:13px;color:var(--prose)}
+.surs li{display:flex;gap:10px;align-items:flex-start;text-align:left}
+.surs svg{width:16px;height:16px;stroke:var(--palm);fill:none;stroke-width:2;flex:none;margin-top:3px}
 .body-grid{display:grid;grid-template-columns:1fr 372px;gap:56px;align-items:start;padding-bottom:100px}
 .block{margin-bottom:56px}
 .block .eyebrow{margin-bottom:14px}
@@ -148,22 +236,32 @@ header:not(.scrolled):not(.menu) .brand small{color:#E2BE8C}
   .body-grid{grid-template-columns:1fr;gap:0}
   .panel{position:static;margin-bottom:56px}
   .amen{grid-template-columns:repeat(2,1fr)}
+  .frecit{grid-template-columns:1fr;gap:54px}
+  .faits{grid-template-columns:repeat(2,1fr)}
+  .faits div:nth-child(3){border-left:0}
+  .faits div:nth-child(n+3){border-top:1px solid var(--line)}
   /* Sur telephone et tablette, reserver vient avant le detail. */
   .body-grid{display:flex;flex-direction:column}
   .body-grid>aside{order:-1}
   .more-grid{grid-template-columns:repeat(2,1fr)}
 }
 @media(max-width:720px){
-  .fhero{height:62vh;min-height:380px}
+  .fhero{height:68vh;min-height:380px}
   .fhero-tout{bottom:16px;right:16px;padding:10px 13px}
-  .fintro{padding-top:30px;padding-bottom:48px}
+  .fhero-bas{display:none}
+  .fintro{padding-top:30px;padding-bottom:36px}
   .fintro .crumb{margin-bottom:24px}
   .head-price b{font-size:1.8rem}
-  .facts>span{padding:5px 14px;font-size:13.5px}.facts>span:first-child{padding-left:0}
+  .faits{margin-bottom:60px}.faits div{padding:20px 10px}.faits b{font-size:1.1rem}
+  .frecit{margin-bottom:70px}
+  .fduo{padding-left:28px;padding-bottom:48px}
+  .fequip{margin-bottom:64px}
   .amen div{padding:18px 10px;font-size:13px}
+  .fgal.rang,.fgal.mosa{grid-template-columns:1fr 1fr;grid-template-rows:none;grid-auto-rows:150px;gap:8px}
+  .fgal figure,.fgal.rang[style*="--n:2"] figure{aspect-ratio:auto}
+  .fgal.rang[style*="--n:3"] figure:nth-child(4),.fgal.mosa figure.grand{grid-column:span 2;grid-row:span 2}
+  .fmot{padding:74px 24px;margin:64px 0}
   .more-grid{grid-template-columns:1fr}
-  .rang{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:8px;margin:30px -24px 54px;padding:0 24px}
-  .rang figure,.rang[style*="--n:2"] figure{flex:0 0 82%;aspect-ratio:4/3;scroll-snap-align:center}
   .two{grid-template-columns:1fr}
   .mobar{display:flex}
   body{padding-bottom:78px}
@@ -235,6 +333,9 @@ def _en_dict(c):
     d = dict(_chambres_en.CHASSIS)
     d['mbb'] = d['cta']
     d['vph'] = 'See all %d photos' % len(c['photos'])
+    d['him'] = 'A tour of the suite' if c['slug'].startswith('suite') else 'A tour of the room'
+    if NOTE_GOOGLE:
+        d['nt1'] = '<b>%.1f/5</b> · %d Google reviews' % NOTE_GOOGLE
     d['eb0'] = e['tag'] or _chambres_en.CHASSIS['eb0']
     d['ttl'] = e['titre'].replace('<br>', ' ')   # une seule ligne sous le nom
     d['pa1'], d['pa2'], d['pa3'] = e['p1'], e['p2'], e['p3']
@@ -259,24 +360,40 @@ for c in CHAMBRES:
         '<option value="%d"%s>%d personne%s</option>' % (i, ' selected' if i == min(2, c['pax']) else '', i, 's' if i > 1 else '')
         for i in range(1, c['pax'] + 1))
 
-    # LA FICHE, en cinq temps (novembre 2026) : la chambre en grand, SANS
-    # texte dessus (le nom et le prix poses sur la photo se lisaient mal et
-    # la cachaient), puis le nom, le prix, une accroche et un seul bouton, les equipements en grands pictogrammes,
-    # la rangee de photos, puis le detail et la reservation.
+    # LA FICHE « SIGNATURE » (novembre 2026), en huit temps : la chambre en
+    # grand, SANS texte dessus ; son nom, son prix et la note Google ; ses
+    # quatre points forts ; son recit a cote de deux photos ; ses
+    # equipements ; sa galerie ; le mot d'un client ; la reservation.
     #
-    # La premiere photo fait l'ouverture. Elle reste aussi la premiere du
-    # diaporama : elle est reprise dans #gl, masquee, pour que « Voir les
-    # N photos » commence par elle.
-    tete = c['photos'][0]
-    n_rang = min(len(c['photos']) - 1, 4)
-    b = [header('#reserver', 'Réserver'), drawer('index.html#chambres'), '''
+    # Les photos : la premiere fait l'ouverture, les deux suivantes
+    # accompagnent le recit, le reste compose la galerie. Toutes restent
+    # dans #gl, dans l'ordre : c'est la liste du diaporama.
+    ph = c['photos']
+    tete = ph[0]
+    reste = len(ph) - 3
+    if reste >= 5:
+        forme, n_gal = 'mosa', 5          # une grande et quatre petites
+    elif reste >= 2:
+        forme, n_gal = 'rang', reste      # une rangee
+    else:
+        forme, n_gal = 'vide', 0          # trois photos : tout est deja montre
+    suite = c['slug'].startswith('suite')
+    if NOTE_GOOGLE:
+        note = ('<a class="fnote" href="%s" target="_blank" rel="noopener"><span class="et" aria-hidden="true">★★★★★</span>'
+                '<span data-t="nt1"><b>%s/5</b> · %d avis Google</span></a>'
+                % (FICHE_GOOGLE, ('%.1f' % NOTE_GOOGLE[0]).replace('.', ','), NOTE_GOOGLE[1]))
+    else:
+        note = ''
+
+    b = [header('#reserver', 'Réserver'), drawer('index.html#chambres'), """
 <section class="fhero">
   <picture><source srcset="img/opt/%s.webp" type="image/webp">
     <img loading="eager" fetchpriority="high" src="img/opt/%s.jpg" alt="%s"></picture>
-  <button type="button" class="fhero-tout" id="voir-photos"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 00-2.8 0L6 21"/></svg><span data-t="vph">Voir les %d photos</span></button>
+  <button type="button" class="fhero-tout voir-photos"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 00-2.8 0L6 21"/></svg><span data-t="vph">Voir les %d photos</span></button>
+  <a class="fhero-bas" href="#fiche"><span data-t="dsc">Découvrir</span><i></i></a>
 </section>
 
-<section class="wrap fintro">
+<section class="wrap fintro" id="fiche">
   <nav class="crumb" aria-label="Fil d'Ariane">
     <a href="index.html" data-t="c1">Accueil</a> &nbsp;·&nbsp;
     <a href="chambres.html" data-t="c2">Chambres &amp; Suites</a> &nbsp;·&nbsp;
@@ -284,28 +401,47 @@ for c in CHAMBRES:
   </nav>
   <span class="eyebrow" data-t="eb0">%s</span>
   <h1>%s</h1>
+  <div class="forn" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2l10 10-10 10L2 12z"/><path d="M12 7l5 5-5 5-5-5z"/></svg></div>
   <div class="head-price" id="prix-tete"><small data-t="frm">À partir de</small><b data-prix-de="%s">%s</b><span data-t="pnuit">FCFA / nuit</span></div>
-  <p class="st" data-t="ttl">%s</p>
-  <p class="acc" data-t="pa1">%s</p>
-  <a class="btn" href="#reserver" data-t="vdi">Vérifier les disponibilités</a>
+  %s
+</section>
+
+<section class="wrap">
+  <div class="faits reveal">""" % (tete[0], tete[0], tete[1], len(ph), c['nom'], c['tag'] or 'Chambre',
+                              nom_accentue(c['nom']), c['slug'], fmt(c['prix']), note)]
+
+    for i, (val, lab) in enumerate(c['facts']):
+        b.append('    <div><svg viewBox="0 0 24 24" aria-hidden="true">%s</svg>'
+                 '<b data-t="fv%d">%s</b><span data-t="fl%d">%s</span></div>'
+                 % (picto(val, lab), i, val, i, lab))
+
+    b.append("""  </div>
+</section>
+
+<section class="wrap frecit">
+  <div class="reveal">
+    <span class="eyebrow" data-t="ebr">La chambre</span>
+    <h2 data-t="ttl">%s</h2>
+    <p data-t="pa1">%s</p>
+    <p data-t="pa2">%s</p>
+    <p data-t="pa3">%s</p>
+    <a class="btn btn-solid" href="#reserver" data-t="vdi">Vérifier les disponibilités</a>
+  </div>
+  <div class="fduo reveal">
+    <picture><source srcset="img/opt/%s.webp" type="image/webp">
+      <img class="g" loading="lazy" src="img/opt/%s.jpg" alt="%s" data-lb="1"></picture>
+    <picture><source srcset="img/opt/%s.webp" type="image/webp">
+      <img class="p" loading="lazy" src="img/opt/%s.jpg" alt="%s" data-lb="2"></picture>
+  </div>
 </section>
 
 <section class="wrap fequip reveal">
   <div class="fequip-tete">
-    <div>
-      <span class="eyebrow" data-t="ebe">Équipements</span>
-      <h2 data-t="hae">Dans la chambre</h2>
-    </div>
-    <div class="facts">''' % (tete[0], tete[0], tete[1], len(c['photos']), c['nom'], c['tag'] or 'Chambre',
-                              c['nom'], c['slug'], fmt(c['prix']), c['titre'].replace('<br>', ' '), c['p1'])]
-
-    for i, (val, lab) in enumerate(c['facts']):
-        b.append('      <span><b data-t="fv%d">%s</b> <span data-t="fl%d">%s</span></span>'
-                 % (i, val, i, lab))
-
-    b.append('''    </div>
+    <span class="eyebrow" data-t="ebe">Équipements</span>
+    <h2 data-t="hae">Dans la chambre</h2>
   </div>
-  <div class="amen">''')
+  <div class="amen">""" % (c['titre'].replace('<br>', ' '), c['p1'], c['p2'], c['p3'],
+                           ph[1][0], ph[1][0], ph[1][1], ph[2][0], ph[2][0], ph[2][1]))
 
     for i, (t, d) in enumerate(c['plus']):
         b.append('      <div class="hi"><svg viewBox="0 0 24 24" aria-hidden="true">%s</svg>'
@@ -315,30 +451,47 @@ for c in CHAMBRES:
         b.append('      <div><svg viewBox="0 0 24 24" aria-hidden="true">%s</svg>'
                  '<span data-t="am%d">%s</span></div>' % (d, i, t))
 
-    b.append('''  </div>
+    b.append("""  </div>
 </section>
+""")
+    if forme != 'vide':
+        b.append("""
+<section class="wrap fgal-tete reveal">
+  <span class="eyebrow" data-t="eim">En images</span>
+  <h2 data-t="him">%s</h2>
+</section>""" % ('Un tour de la suite' if suite else 'Un tour de la chambre'))
 
+    b.append("""
 <div class="wrap">
-  <div class="rang" id="gl" style="--n:%d">''' % n_rang)
+  <div class="fgal %s" id="gl" style="--n:%d">""" % (forme, n_gal))
 
-    for i, (img, alt, cap) in enumerate(c['photos']):
-        # i == 0 : la photo d'ouverture, masquee ici. Au-dela de la quatrieme
-        # de la rangee : dans le diaporama seulement.
-        cl = ' class="tete"' if i == 0 else (' class="suite"' if i > n_rang else '')
-        b.append('''    <figure%s><picture><source srcset="img/opt/%s.webp" type="image/webp">
+    for i, (img, alt, cap) in enumerate(ph):
+        # « hors » : dans le diaporama seulement — l'ouverture, les deux
+        # photos du recit, et ce qui depasse de la galerie.
+        hors = i < 3 or i >= 3 + n_gal
+        cl = ' class="hors"' if hors else (' class="grand"' if forme == 'mosa' and i == 3 else '')
+        b.append("""    <figure%s><picture><source srcset="img/opt/%s.webp" type="image/webp">
       <img loading="lazy" src="img/opt/%s.jpg" data-full="img/opt/%s.jpg" alt="%s"></picture>
-      <figcaption class="sombre" data-t="cap%d">%s</figcaption></figure>''' % (cl, img, img, img, alt, i, cap))
+      <figcaption class="sombre" data-t="cap%d">%s</figcaption></figure>""" % (cl, img, img, img, alt, i, cap))
 
-    b.append('''  </div>
+    b.append("""  </div>
 </div>
+""")
+    if forme != 'vide':
+        b.append("""<div class="wrap fgal-bas"><button type="button" class="btn voir-photos" data-t="vph">Voir les %d photos</button></div>
+""" % len(ph))
+
+    avis = AVIS[CHAMBRES.index(c) % len(AVIS)]
+    b.append("""
+<section class="fmot">
+  <div class="et" aria-label="5 étoiles sur 5">★★★★★</div>
+  <blockquote>« %s »</blockquote>
+  <cite>%s</cite>
+</section>
 
 <div class="wrap body-grid">
  <div>
-  <section class="block reveal">
-    <p data-t="pa2">%s</p>
-    <p data-t="pa3">%s</p>
-  </section>
-''' % (c['p2'], c['p3']))
+""" % avis)
 
     b.append('''
   <section class="block reveal">
@@ -391,6 +544,7 @@ for c in CHAMBRES:
 
     <button type="submit" class="btn btn-solid" data-t="bkb">Réserver cette chambre</button>
     <div class="avail" id="avl"><i></i><span>Disponibilité confirmée sous 24 h</span></div>
+    <ul class="surs"><li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span data-t="as0">Meilleur tarif en réservant ici</span></li><li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span data-t="as1">Annulation gratuite jusqu'à 48 h avant</span></li><li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span data-t="as2">Acompte de 30 %% seulement</span></li><li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span data-t="as3">Petit-déjeuner et navette aéroport compris</span></li></ul>
     <p class="helpt" data-t="hlp">Une question&nbsp;? Écrivez-nous sur <a href="https://wa.me/{{WA}}" target="_blank" rel="noopener">WhatsApp</a> ou appelez le +225 01 51 52 75 75.</p>
   </form>
  </aside>
@@ -534,7 +688,8 @@ var figs=[].slice.call(document.querySelectorAll('#gl img')),lb=document.getElem
 function show(i){gi=(i+figs.length)%%figs.length;lbi.src=plein(figs[gi]);lbi.alt=figs[gi].alt;lbc.textContent=figs[gi].alt+'  ·  '+(gi+1)+' / '+figs.length;lb.classList.add('on');document.body.style.overflow='hidden'}
 function hideLb(){lb.classList.remove('on');document.body.style.overflow=''}
 figs.forEach(function(im,i){im.closest('figure').onclick=function(){show(i)}});
-var vp=document.getElementById('voir-photos');if(vp)vp.onclick=function(){show(0)};
+[].forEach.call(document.querySelectorAll('.voir-photos'),function(x){x.onclick=function(){show(0)}});
+[].forEach.call(document.querySelectorAll('[data-lb]'),function(x){x.onclick=function(){show(+x.getAttribute('data-lb'))}});
 lb.querySelector('.next').onclick=function(e){e.stopPropagation();show(gi+1)};
 lb.querySelector('.prev').onclick=function(e){e.stopPropagation();show(gi-1)};
 lb.querySelector('.close').onclick=hideLb;
@@ -558,10 +713,15 @@ var EN={''' % (c['prix'], c['slug']) + EN_NAV + _en_dict(c) + '};\n\n' + LANG_JS
         _schema.fil([('Accueil', 'index'), ('Chambres &amp; Suites', 'chambres'),
                      (c['nom'].replace('&amp;', '&'), None)]))
 
-    # L'ouverture est en pleine largeur (hero=preload la declare en 100vw) ;
-    # la rangee partage .wrap en n_rang colonnes, et defile a 82 % sur telephone.
-    mosa = {ph[0]: '(max-width:720px) 82vw, (max-width:1287px) calc((100vw - 48px) / %d), %dpx'
-                   % (n_rang, 1580 // n_rang) for ph in c['photos'][1:]}
+    # L'ouverture est en pleine largeur (hero=preload la declare en 100vw).
+    # Les deux photos du recit : la grande tient la moitie de .wrap, la
+    # petite un peu moins du quart. La galerie : des quarts, sauf la grande
+    # de la mosaique. Sur telephone, tout passe en pleine ou demi-largeur.
+    mosa = {p[0]: '(max-width:720px) 50vw, (max-width:1287px) calc((100vw - 48px) / 4), 395px' for p in ph[3:]}
+    if forme == 'mosa':
+        mosa[ph[3][0]] = '(max-width:1287px) calc((100vw - 48px) / 2), 790px'
+    mosa[ph[1][0]] = '(max-width:1080px) calc(100vw - 76px), 700px'
+    mosa[ph[2][0]] = '(max-width:1080px) 46vw, 340px'
 
     HTML = page(
         "%s — Hôtel Evannath, Assinie | %s FCFA la nuit" % (c['nom'], fmt(c['prix'])),

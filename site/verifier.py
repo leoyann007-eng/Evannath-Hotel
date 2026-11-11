@@ -107,22 +107,23 @@ def controler():
         for chemin in set(re.findall(r"""["'(](video/[\w-]+\.(?:mp4|webm))(?![\w.?])""", s)):
             pb.append((f, 'media sans empreinte : ' + chemin))
 
-        # 7 ter. la rangee de photos des fiches chambres doit se remplir
-        # exactement. La premiere photo fait l'ouverture et reste dans #gl,
-        # masquee, pour ouvrir le diaporama ; la rangee montre les suivantes,
-        # quatre au plus, sur --n colonnes. Un --n qui ne correspond pas au
-        # nombre de photos visibles laisse une case vide ou une rangee en trop.
-        mo = re.search(r'<div class="rang" id="gl" style="--n:(\d+)">(.*?)</div>\s*</div>', s, re.S)
+        # 7 ter. la galerie des fiches chambres doit se remplir exactement.
+        # Toutes les photos restent dans #gl, dans l'ordre : c'est la liste du
+        # diaporama. L'ouverture et les deux photos du recit y sont masquees
+        # (« hors »), le reste compose la galerie : une mosaique de cinq, une
+        # rangee de deux a quatre, ou rien quand la fiche n'a que trois photos.
+        mo = re.search(r'<div class="fgal (\w+)" id="gl" style="--n:(\d+)">(.*?)</div>\s*</div>', s, re.S)
         if mo:
-            n, corps = int(mo.group(1)), mo.group(2)
+            forme, n, corps = mo.group(1), int(mo.group(2)), mo.group(3)
             total = corps.count('<figure')
-            visibles = total - corps.count('<figure class="tete"') - corps.count('<figure class="suite"')
-            if corps.count('<figure class="tete"') != 1:
-                pb.append((f, 'rangee de photos : la photo d ouverture doit y figurer une fois, masquee'))
-            if visibles != n or not 2 <= n <= 4:
-                pb.append((f, 'rangee de photos : %d visibles pour --n:%d (attendu 2 a 4, egaux)' % (visibles, n)))
-            if 'class="fhero"' not in s or 'id="voir-photos"' not in s:
-                pb.append((f, 'fiche chambre : ouverture ou bouton « Voir les photos » absent'))
+            visibles = total - corps.count('<figure class="hors"')
+            attendu = {'mosa': (5,), 'rang': (2, 3, 4), 'vide': (0,)}.get(forme, ())
+            if visibles != n or n not in attendu:
+                pb.append((f, 'galerie « %s » : %d photos visibles pour --n:%d' % (forme, visibles, n)))
+            if forme == 'mosa' and corps.count('<figure class="grand"') != 1:
+                pb.append((f, 'galerie en mosaique : il faut une grande photo, une seule'))
+            if total < 3 or 'class="fduo' not in s or 'class="fhero"' not in s:
+                pb.append((f, 'fiche chambre : ouverture, recit ou photos manquants'))
 
         # 7 quater. le bouton EN doit tout traduire, pas seulement le menu.
         # Dix pages ne portaient de data-t que sur la navigation : cliquer EN
