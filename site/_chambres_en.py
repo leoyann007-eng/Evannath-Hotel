@@ -103,7 +103,7 @@ CHASSIS = {
  'eb0': 'Room',
  'pnuit': 'FCFA / night',
  'frm': 'From', 'vdi': 'Check availability',
- 'dsc': 'Discover', 'eim': 'In pictures',
+ 'eim': 'In pictures',
  'as0': 'Best rate when you book here', 'as1': 'Free cancellation up to 48 hours before',
  'as2': 'Only a 30% deposit', 'as3': 'Breakfast and airport shuttle included',
  'ebr': 'The room',
