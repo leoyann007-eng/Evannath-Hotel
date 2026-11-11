@@ -38,29 +38,32 @@ INCL = [
 
 CSS = REMISE_CSS + """
 .head{padding-top:150px;padding-bottom:34px}
-.fhero{position:relative;height:min(86vh,820px);min-height:520px;margin-top:104px;overflow:hidden;
-  --cream:#F6EEE2;--muted:#F1E3CC;color:#F6EEE2}
+/* L'en-tete est transparent tant qu'on est sur la photo, comme a l'accueil :
+   logo et menu en clair, puis la barre creme au defilement. */
+header:not(.scrolled):not(.menu) .hd-fond{background:transparent;backdrop-filter:none}
+header:not(.scrolled):not(.menu) .burger .lbl{color:#F6EEE2}
+header:not(.scrolled):not(.menu) .burger .bars span{background:#F6EEE2}
+header:not(.scrolled):not(.menu) .lang{border-color:rgba(246,238,226,.35)}
+header:not(.scrolled):not(.menu) .lang button:not(.on){color:#E3D9C9}
+header:not(.scrolled):not(.menu) .brand img{filter:brightness(0) invert(1)}
+header:not(.scrolled):not(.menu) .brand small{color:#E2BE8C}
+.brand img{transition:clip-path 1.1s var(--ease-inout),filter .6s ease}
+.fhero{position:relative;height:min(84vh,860px);min-height:480px;overflow:hidden;background:var(--bark-3)}
 .fhero>picture img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 58%}
-/* Le haut sombre pour le fil d'Ariane, le bas pour le nom et le prix ; le
-   milieu reste nu : c'est la photo qui vend. */
-.fhero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(16,11,6,.42) 0%,rgba(16,11,6,0) 26%,rgba(16,11,6,0) 50%,rgba(16,11,6,.82) 100%)}
-.fhero-in{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;justify-content:space-between;padding-top:26px;padding-bottom:40px}
-.fhero .crumb,.fhero .crumb span,.fhero .eyebrow{color:#F1E3CC;text-shadow:0 1px 3px rgba(16,11,6,.85)}
-.fhero .crumb{margin-bottom:0}
-.fhero h1{color:#F6EEE2;font-size:clamp(2.5rem,6vw,4.6rem);margin:8px 0 0;text-shadow:0 1px 4px rgba(16,11,6,.7)}
-.fhero-bas{display:flex;align-items:flex-end;justify-content:space-between;gap:30px;flex-wrap:wrap;padding-right:250px}
-.head-price{text-align:right}
-.head-price small{display:block;font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:#F1E3CC;font-weight:600;margin-bottom:4px}
-.head-price b{font-family:var(--f-display);font-size:2.9rem;color:#F6EEE2;display:block;line-height:1.05;font-variant-numeric:tabular-nums;font-weight:400}
-.head-price span{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:#F1E3CC;font-weight:600}
-.head-price .avant{color:#F1E3CC}.head-price .apres{color:#F6EEE2}
-.fhero-tout{position:absolute;right:max(24px,calc((100% - var(--max)) / 2 + 24px));bottom:40px;z-index:3;display:flex;align-items:center;gap:9px;
+/* Un seul voile, en haut, pour que le logo et le menu se lisent. */
+.fhero::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(16,11,6,.58) 0,rgba(16,11,6,.18) 150px,rgba(16,11,6,0) 260px)}
+.fhero-tout{position:absolute;right:max(24px,calc((100% - var(--max)) / 2 + 24px));bottom:28px;z-index:3;display:flex;align-items:center;gap:9px;
   background:#FBF7F0;color:#2A231E;border:1px solid rgba(138,95,43,.22);padding:12px 17px;font:700 11px var(--f-body);letter-spacing:.14em;text-transform:uppercase;cursor:pointer;transition:.3s}
 .fhero-tout:hover{background:#fff}
 .fhero-tout svg{width:16px;height:16px;stroke:#7F5524;fill:none;stroke-width:1.6}
-.fintro{text-align:center;padding-top:76px;padding-bottom:72px}
-.fintro h2{margin:12px 0 22px}
-.fintro .acc{font-family:var(--f-display);font-size:clamp(1.15rem,1.9vw,1.42rem);line-height:1.65;color:var(--cream);max-width:820px;margin:0 auto 32px}
+.fintro{text-align:center;padding-top:44px;padding-bottom:76px}
+.fintro .crumb{margin-bottom:34px}
+.fintro h1{font-size:clamp(2.5rem,6vw,4.4rem);margin:10px 0 18px;color:var(--bronze)}
+.head-price{display:flex;align-items:baseline;justify-content:center;gap:10px;flex-wrap:wrap;margin-bottom:34px}
+.head-price small,.head-price span{font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.head-price b{font-family:var(--f-display);font-size:2.1rem;color:var(--cream);line-height:1;font-variant-numeric:tabular-nums;font-weight:400}
+.fintro .st{font-family:var(--f-display);font-size:clamp(1.3rem,2.2vw,1.7rem);color:var(--cream);margin-bottom:14px}
+.fintro .acc{font-size:1.06rem;line-height:1.75;color:var(--prose);max-width:760px;margin:0 auto 32px}
 .fequip-tete{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;margin-bottom:26px}
 .fequip-tete h2{margin-top:10px}
 .facts{display:flex;flex-wrap:wrap;font-size:14.5px;color:var(--muted)}
@@ -145,19 +148,17 @@ CSS = REMISE_CSS + """
   .body-grid{grid-template-columns:1fr;gap:0}
   .panel{position:static;margin-bottom:56px}
   .amen{grid-template-columns:repeat(2,1fr)}
-  .fhero-bas{padding-right:0}
-  .fhero-tout{bottom:auto;top:20px}
   /* Sur telephone et tablette, reserver vient avant le detail. */
   .body-grid{display:flex;flex-direction:column}
   .body-grid>aside{order:-1}
   .more-grid{grid-template-columns:repeat(2,1fr)}
 }
 @media(max-width:720px){
-  .fhero{height:74vh;min-height:440px;margin-top:84px}
-  .fhero-in{padding-bottom:26px}
-  .head-price{text-align:left}
-  .head-price b{font-size:2.2rem}
-  .fintro{padding-top:46px;padding-bottom:46px}
+  .fhero{height:62vh;min-height:380px}
+  .fhero-tout{bottom:16px;right:16px;padding:10px 13px}
+  .fintro{padding-top:30px;padding-bottom:48px}
+  .fintro .crumb{margin-bottom:24px}
+  .head-price b{font-size:1.8rem}
   .facts>span{padding:5px 14px;font-size:13.5px}.facts>span:first-child{padding-left:0}
   .amen div{padding:18px 10px;font-size:13px}
   .more-grid{grid-template-columns:1fr}
@@ -235,7 +236,7 @@ def _en_dict(c):
     d['mbb'] = d['cta']
     d['vph'] = 'See all %d photos' % len(c['photos'])
     d['eb0'] = e['tag'] or _chambres_en.CHASSIS['eb0']
-    d['ttl'] = e['titre']
+    d['ttl'] = e['titre'].replace('<br>', ' ')   # une seule ligne sous le nom
     d['pa1'], d['pa2'], d['pa3'] = e['p1'], e['p2'], e['p3']
     for i, (val, lab) in enumerate(e['facts']):
         d['fv%d' % i], d['fl%d' % i] = val, lab
@@ -258,8 +259,9 @@ for c in CHAMBRES:
         '<option value="%d"%s>%d personne%s</option>' % (i, ' selected' if i == min(2, c['pax']) else '', i, 's' if i > 1 else '')
         for i in range(1, c['pax'] + 1))
 
-    # LA FICHE, en cinq temps (novembre 2026) : la chambre en grand, une
-    # accroche et un seul bouton, les equipements en grands pictogrammes,
+    # LA FICHE, en cinq temps (novembre 2026) : la chambre en grand, SANS
+    # texte dessus (le nom et le prix poses sur la photo se lisaient mal et
+    # la cachaient), puis le nom, le prix, une accroche et un seul bouton, les equipements en grands pictogrammes,
     # la rangee de photos, puis le detail et la reservation.
     #
     # La premiere photo fait l'ouverture. Elle reste aussi la premiere du
@@ -271,26 +273,19 @@ for c in CHAMBRES:
 <section class="fhero">
   <picture><source srcset="img/opt/%s.webp" type="image/webp">
     <img loading="eager" fetchpriority="high" src="img/opt/%s.jpg" alt="%s"></picture>
-  <div class="wrap fhero-in">
-    <nav class="crumb" aria-label="Fil d'Ariane">
-      <a href="index.html" data-t="c1">Accueil</a> &nbsp;·&nbsp;
-      <a href="chambres.html" data-t="c2">Chambres &amp; Suites</a> &nbsp;·&nbsp;
-      <span>%s</span>
-    </nav>
-    <div class="fhero-bas">
-      <div>
-        <span class="eyebrow" data-t="eb0">%s</span>
-        <h1>%s</h1>
-      </div>
-      <div class="head-price" id="prix-tete"><small data-t="frm">À partir de</small><b data-prix-de="%s">%s</b><span data-t="pnuit">FCFA / nuit</span></div>
-    </div>
-  </div>
   <button type="button" class="fhero-tout" id="voir-photos"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 00-2.8 0L6 21"/></svg><span data-t="vph">Voir les %d photos</span></button>
 </section>
 
-<section class="wrap fintro reveal">
-  <span class="eyebrow" data-t="ebr">La chambre</span>
-  <h2 data-t="ttl">%s</h2>
+<section class="wrap fintro">
+  <nav class="crumb" aria-label="Fil d'Ariane">
+    <a href="index.html" data-t="c1">Accueil</a> &nbsp;·&nbsp;
+    <a href="chambres.html" data-t="c2">Chambres &amp; Suites</a> &nbsp;·&nbsp;
+    <span>%s</span>
+  </nav>
+  <span class="eyebrow" data-t="eb0">%s</span>
+  <h1>%s</h1>
+  <div class="head-price" id="prix-tete"><small data-t="frm">À partir de</small><b data-prix-de="%s">%s</b><span data-t="pnuit">FCFA / nuit</span></div>
+  <p class="st" data-t="ttl">%s</p>
   <p class="acc" data-t="pa1">%s</p>
   <a class="btn" href="#reserver" data-t="vdi">Vérifier les disponibilités</a>
 </section>
@@ -301,8 +296,8 @@ for c in CHAMBRES:
       <span class="eyebrow" data-t="ebe">Équipements</span>
       <h2 data-t="hae">Dans la chambre</h2>
     </div>
-    <div class="facts">''' % (tete[0], tete[0], tete[1], c['nom'], c['tag'] or 'Chambre', c['nom'],
-                              c['slug'], fmt(c['prix']), len(c['photos']), c['titre'], c['p1'])]
+    <div class="facts">''' % (tete[0], tete[0], tete[1], len(c['photos']), c['nom'], c['tag'] or 'Chambre',
+                              c['nom'], c['slug'], fmt(c['prix']), c['titre'].replace('<br>', ' '), c['p1'])]
 
     for i, (val, lab) in enumerate(c['facts']):
         b.append('      <span><b data-t="fv%d">%s</b> <span data-t="fl%d">%s</span></span>'
