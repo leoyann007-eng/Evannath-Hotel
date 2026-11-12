@@ -200,9 +200,6 @@ header.scrolled .nav .brand{transform:translate(calc(-50% + 61px),-50%)}
 .fgal figure.hors{display:none}
 .fgal img{width:100%;height:100%;object-fit:cover;transition:1s cubic-bezier(.2,.8,.2,1)}
 .fgal figure:hover img{transform:scale(1.06)}
-.fgal figcaption{position:absolute;left:0;right:0;bottom:0;padding:26px 14px 10px;
-  font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;font-weight:600;color:#F6EEE2;
-  background:linear-gradient(180deg,transparent,rgba(16,11,6,.78))}
 .fgal-bas{text-align:center;margin-top:30px}
 .fmot{position:relative;padding:120px 24px;text-align:center;color:#F6EEE2;margin:110px 0;
   background:#17100A url(img/opt/gal-dom-couchant-1024.jpg) center/cover}
@@ -401,8 +398,6 @@ def _en_dict(c):
     d['pa1'], d['pa2'], d['pa3'] = e['p1'], e['p2'], e['p3']
     for i, (val, lab) in enumerate(e['facts']):
         d['fv%d' % i], d['fl%d' % i] = val, lab
-    for i, cap in enumerate(e['caps']):
-        d['cap%d' % i] = cap
     for i, (t, dd) in enumerate(e['plus']):
         d['pt%d' % i], d['pd%d' % i] = t, dd
     for i, t in enumerate(_chambres_en.AMEN_EN):
@@ -525,14 +520,15 @@ for c in CHAMBRES:
 <div class="wrap">
   <div class="fgal %s" id="gl" style="--n:%d">""" % (forme, n_gal))
 
+    # Pas de legende sur les photos : l'image parle seule, le texte
+    # alternatif reste pour les lecteurs d'ecran.
     for i, (img, alt, cap) in enumerate(ph):
         # « hors » : dans le diaporama seulement — l'ouverture, les deux
         # photos du recit, et ce qui depasse de la galerie.
         hors = i < 3 or i >= 3 + n_gal
         cl = ' class="hors"' if hors else (' class="grand"' if forme == 'mosa' and i == 3 else '')
         b.append("""    <figure%s><picture><source srcset="img/opt/%s.webp" type="image/webp">
-      <img loading="lazy" src="img/opt/%s.jpg" data-full="img/opt/%s.jpg" alt="%s"></picture>
-      <figcaption class="sombre" data-t="cap%d">%s</figcaption></figure>""" % (cl, img, img, img, alt, i, cap))
+      <img loading="lazy" src="img/opt/%s.jpg" data-full="img/opt/%s.jpg" alt="%s"></picture></figure>""" % (cl, img, img, img, alt))
 
     b.append("""  </div>
 </div>
