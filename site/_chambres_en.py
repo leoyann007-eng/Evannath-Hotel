@@ -117,7 +117,7 @@ CHASSIS = {
  'cd4': 'Deposit', 'cd4v': '30 % on booking',
  'cd5': 'Pets', 'cd5v': 'not allowed',
  'cd6': 'Payment', 'cd6v': 'Wave · Orange Money · MTN · card',
- 'cdn': 'Full details are on the <a href="informations-utiles.html#reserver" style="color:var(--bronze)">Useful information</a> page.',
+ 'cdn': 'Times, cancellation and payment: see <a href="informations-utiles.html#reserver">Useful information</a>.',
  'apd': 'From', 'pern': 'per night, breakfast included',
  'la1': 'Check-in', 'la2': 'Check-out', 'lax': 'Guests',
  'rtx': 'Tourist tax', 'rpd': 'Breakfast', 'rin': 'Included', 'rtt': 'Total stay',

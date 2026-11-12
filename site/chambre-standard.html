@@ -714,31 +714,32 @@ header.scrolled .nav .brand{transform:translate(calc(-50% + 61px),-50%)}
 .surs{list-style:none;margin:18px 0 0;padding:16px 0 0;border-top:1px solid var(--line);display:grid;gap:9px;font-size:13px;color:var(--prose)}
 .surs li{display:flex;gap:10px;align-items:flex-start;text-align:left}
 .surs svg{width:16px;height:16px;stroke:var(--palm);fill:none;stroke-width:2;flex:none;margin-top:3px}
-.body-grid{display:grid;grid-template-columns:1fr 372px;gap:56px;align-items:start;padding-bottom:100px}
-.body-grid.fsuite{margin-top:96px}
-.block{margin-bottom:56px}
-.block .eyebrow{margin-bottom:14px}
-.block h2{margin-bottom:18px}
-.block p+p{margin-top:16px}
-/* Les equipements : une carte blanche posee sur le fond creme, quatre par
-   rangee, de l'air entre les lignes. Les atouts de la chambre et les
-   equipements communs ont le meme poids : c'est une liste, pas un classement. */
-.amen{display:grid;grid-template-columns:repeat(4,1fr);background:#fff;box-shadow:0 18px 48px -22px rgba(42,35,30,.28),0 2px 8px rgba(42,35,30,.05);padding:26px 12px}
-.amen div{padding:34px 20px;font-size:16px;line-height:1.5;display:flex;flex-direction:column;align-items:center;text-align:center;gap:18px;color:var(--cream)}
-.amen svg{width:44px;height:44px;stroke:var(--bronze);fill:none;stroke-width:1;stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto}
-.amen div.hi b{color:var(--cream);font-weight:400;display:block}
-.amen div.hi em{font-style:normal;font-size:12.5px;color:var(--muted);display:block;margin-top:3px}
-.incl{list-style:none;margin-top:22px}
-.incl li{padding:15px 0;border-bottom:1px solid var(--line);display:flex;gap:16px;align-items:flex-start}
-.incl b{display:block;color:var(--cream);font-weight:600;font-size:14.5px;margin-bottom:3px}
-.incl p{font-size:13.5px;margin:0;color:var(--muted)}
-.incl .chk{color:var(--palm);font-size:15px;line-height:1.5}
-.cond{border:1px solid var(--line);margin-top:22px}
-.cond div{padding:15px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:18px;font-size:14px}
-.cond div:last-child{border-bottom:0}
-.cond span:first-child{color:var(--muted);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;font-weight:600}
+/* La fin de fiche : un prix, un bouton. Le detail (inclus, conditions) se
+   repetait trois fois dans la page ; il vit sur « Informations utiles ». */
+.fcta{text-align:center;padding:96px 24px 104px}
+.fcta.suite{padding-top:110px}
+.fcta .from{font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.fcta .rate{font-family:var(--f-display);font-size:clamp(2.2rem,4.6vw,3.1rem);color:var(--bronze);line-height:1;margin:10px 0 6px;font-variant-numeric:tabular-nums}
+.fcta .per{font-size:13px;color:var(--muted);margin-bottom:30px}
+.fcta .btn{min-width:280px}
+.fcta .cdn{margin-top:22px;font-size:13px;color:var(--muted)}
+.fcta .cdn a{color:var(--bronze);border-bottom:1px solid var(--line)}
 /* 48 px en haut : le galon occupe les 20 premiers, le contenu commence dessous. */
-.panel{position:sticky;top:110px;background:var(--bark-2);border:1px solid var(--line);padding:48px 28px 28px}
+.panel{position:relative;max-width:440px;margin:0 auto 90px;background:var(--bark-2);border:1px solid var(--line);padding:48px 28px 28px}
+/* Avec le script, la carte de reservation devient un volet qui glisse de la
+   droite. Sans script, elle reste une carte ordinaire sous le bouton. */
+.js .panel{position:fixed;top:0;right:0;bottom:0;z-index:150;width:min(440px,100%);max-width:none;margin:0;
+  border-width:0 0 0 1px;padding:64px 30px 34px;overflow-y:auto;overscroll-behavior:contain;
+  transform:translateX(100%);visibility:hidden;
+  transition:transform .5s cubic-bezier(.2,.8,.2,1),visibility .5s;box-shadow:-24px 0 60px -30px rgba(16,11,6,.45)}
+.js body.res .panel{transform:none;visibility:visible}
+.voile{position:fixed;inset:0;z-index:149;background:rgba(16,11,6,.55);opacity:0;visibility:hidden;transition:opacity .4s,visibility .4s}
+body.res .voile{opacity:1;visibility:visible}
+.panel .fermer{display:none;position:absolute;top:26px;right:14px;width:44px;height:44px;background:none;border:0;cursor:pointer;
+  font-size:26px;line-height:1;color:var(--muted);transition:.3s}
+.js .panel .fermer{display:block}
+.panel .fermer:hover{color:var(--bronze)}
+@media(prefers-reduced-motion:reduce){.js .panel,.voile{transition:none}}
 .panel .from{font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:600}
 .panel .rate{font-family:var(--f-display);font-size:2.3rem;color:var(--bronze);line-height:1;margin:6px 0 2px;font-variant-numeric:tabular-nums}
 .panel .per{font-size:12px;color:var(--muted);margin-bottom:24px}
@@ -783,20 +784,11 @@ header.scrolled .nav .brand{transform:translate(calc(-50% + 61px),-50%)}
 .lb-btn:hover{border-color:var(--bronze);color:var(--bronze)}
 #lb .prev{left:26px;top:50%}#lb .next{right:26px;top:50%}#lb .close{top:26px;right:26px}
 @media(max-width:1080px){
-  .body-grid{grid-template-columns:1fr;gap:0}
-  /* relative, et non static : le galon de la carte est en position absolue.
-     En static il s'echappait tout en haut de la page — cache par l'en-tete
-     tant qu'il etait opaque, visible depuis qu'il est transparent. */
-  .panel{position:relative;top:auto;margin-bottom:56px}
   .amen{grid-template-columns:repeat(2,1fr)}
   .frecit{grid-template-columns:1fr;gap:54px}
   .faits{grid-template-columns:repeat(2,1fr)}
   .faits div:nth-child(3){border-left:0}
   .faits div:nth-child(n+3){border-top:1px solid var(--line)}
-  /* Sur telephone et tablette, reserver vient avant le detail. */
-  .body-grid{display:flex;flex-direction:column}
-  .body-grid.fsuite{margin-top:56px}
-  .body-grid>aside{order:-1}
   .more-grid{grid-template-columns:repeat(2,1fr)}
 }
 @media(max-width:720px){
@@ -824,6 +816,9 @@ header.scrolled .nav .brand{transform:translate(calc(-50% + 61px),-50%)}
   .fgal.rang[style*="--n:3"] figure:nth-child(4),.fgal.mosa figure.grand{grid-column:span 2;grid-row:span 2}
   .more-grid{grid-template-columns:1fr}
   .two{grid-template-columns:1fr}
+  .fcta,.fcta.suite{padding:64px 24px 70px}
+  .fcta .btn{min-width:0;width:100%}
+  .js .panel{padding:58px 22px 30px}
   .mobar{display:flex}
   body{padding-bottom:78px}
   /* Les bulles flottantes passent au-dessus de la barre de reservation. */
@@ -969,39 +964,17 @@ header.scrolled .nav .brand{transform:translate(calc(-50% + 61px),-50%)}
 </div>
 
 
-<div class="wrap body-grid">
- <div>
+<section class="fcta reveal">
+  <span class="from" data-t="apd">À partir de</span>
+  <div class="rate"><span data-prix-de="chambre-standard">67 000</span> <span style="font-size:1rem">FCFA</span></div>
+  <div class="per" data-t="pern">par nuit, petit-déjeuner inclus</div>
+  <a class="btn btn-solid" href="#reserver" data-t="bkb">Réserver cette chambre</a>
+  <p class="cdn" data-t="cdn">Horaires, annulation et paiement&nbsp;: voir les <a href="informations-utiles.html#reserver">Informations utiles</a>.</p>
+</section>
 
-
-  <section class="block reveal">
-    <span class="eyebrow" data-t="ebi">Inclus</span>
-    <h2 data-t="hai">Compris dans le tarif</h2>
-    <ul class="incl">
-      <li><span class="chk">✓</span><div><b data-t="it0">Petit-déjeuner</b><p data-t="id0">Servi au restaurant ou en terrasse, fruits frais et produits locaux.</p></div></li>
-      <li><span class="chk">✓</span><div><b data-t="it1">Navette aéroport gratuite</b><p data-t="id1">Prise en charge et dépose à l'aéroport Félix-Houphouët-Boigny, sans frais, à la demande.</p></div></li>
-      <li><span class="chk">✓</span><div><b data-t="it2">Piscine, jacuzzi et salle de sport</b><p data-t="id2">Accès libre du lever du jour à la nuit tombée.</p></div></li>
-      <li><span class="chk">✓</span><div><b data-t="it3">Wifi et parking</b><p data-t="id3">Gratuits sur tout le domaine.</p></div></li>
-    </ul>
-  </section>
-
-  <section class="block reveal">
-    <span class="eyebrow" data-t="ebc">Conditions</span>
-    <h2 data-t="hac">Bon à savoir</h2>
-    <div class="cond">
-      <div><span data-t="cd1">Arrivée</span><span data-t="cd1v">à partir de 14 h 00</span></div>
-      <div><span data-t="cd2">Départ</span><span data-t="cd2v">avant 12 h 00</span></div>
-      <div><span data-t="cd3">Annulation</span><span data-t="cd3v">gratuite jusqu'à 48 h avant</span></div>
-      <div><span data-t="cd4">Acompte</span><span data-t="cd4v">30 % à la réservation</span></div>
-      <div><span data-t="cd5">Animaux</span><span data-t="cd5v">non admis</span></div>
-      <div><span data-t="cd6">Paiement</span><span data-t="cd6v">Wave · Orange Money · MTN · carte</span></div>
-    </div>
-    <p style="margin-top:16px;font-size:13px;color:var(--muted)" data-t="cdn">
-      Le détail complet figure sur la page <a href="informations-utiles.html#reserver" style="color:var(--bronze)">Informations utiles</a>.
-    </p>
-  </section>
- </div>
-
- <aside class="panel" id="reserver">
+<div class="voile" id="voile"></div>
+<aside class="panel" id="reserver" role="dialog" aria-label="Réserver cette chambre">
+  <button type="button" class="fermer" id="res-fermer" aria-label="Fermer">×</button>
   <div class="pagne pagne-galon" aria-hidden="true"></div>
   <span class="from" data-t="apd">À partir de</span>
   <div class="rate" id="prix-panneau"><span data-prix-de="chambre-standard">67 000</span> <span style="font-size:1rem">FCFA</span></div>
@@ -1027,7 +1000,6 @@ header.scrolled .nav .brand{transform:translate(calc(-50% + 61px),-50%)}
     <p class="helpt" data-t="hlp">Une question&nbsp;? Écrivez-nous sur <a href="https://wa.me/2250758408079" target="_blank" rel="noopener">WhatsApp</a> ou appelez le +225 01 51 52 75 75.</p>
   </form>
  </aside>
-</div>
 
 <section class="more">
   <div class="wrap">
@@ -1815,6 +1787,19 @@ document.getElementById('bkf').addEventListener('submit',function(e){e.preventDe
 });
 calc();
 
+/* Le volet de reservation : tout lien vers #reserver l'ouvre. */
+var volet=document.getElementById('reserver'),voile=document.getElementById('voile'),dernier=null;
+function ouvrirRes(e){if(e)e.preventDefault();dernier=document.activeElement;
+  document.body.classList.add('res');document.body.style.overflow='hidden';
+  setTimeout(function(){document.getElementById('res-fermer').focus()},80)}
+function fermerRes(){if(!document.body.classList.contains('res'))return;
+  document.body.classList.remove('res');document.body.style.overflow='';
+  if(dernier&&dernier.focus)dernier.focus()}
+[].forEach.call(document.querySelectorAll('a[href="#reserver"]'),function(a){a.addEventListener('click',ouvrirRes)});
+document.getElementById('res-fermer').onclick=fermerRes;voile.onclick=fermerRes;
+addEventListener('keydown',function(e){if(e.key==='Escape')fermerRes()});
+if(location.hash==='#reserver')ouvrirRes();
+
 var figs=[].slice.call(document.querySelectorAll('#gl img')),lb=document.getElementById('lb'),lbi=document.getElementById('lbi'),lbc=document.getElementById('lbc'),gi=0;
 function show(i){gi=(i+figs.length)%figs.length;lbi.src=plein(figs[gi]);lbi.alt=figs[gi].alt;lbc.textContent=figs[gi].alt+'  ·  '+(gi+1)+' / '+figs.length;lb.classList.add('on');document.body.style.overflow='hidden'}
 function hideLb(){lb.classList.remove('on');document.body.style.overflow=''}
@@ -1828,7 +1813,7 @@ lb.onclick=function(e){if(e.target===lb)hideLb()};
 addEventListener('keydown',function(e){if(!lb.classList.contains('on'))return;
  if(e.key==='Escape')hideLb();if(e.key==='ArrowRight')show(gi+1);if(e.key==='ArrowLeft')show(gi-1)});
 
-var EN={mn:"Menu",n1:"Rooms &amp; Suites",n2:"Experiences",n3:"The table",n4:"The spa",n5:"Offers &amp; Events",n6:"Meetings &amp; groups",n7:"Gallery",n8:"About",n9:"Useful information",n10:"Contact",n11:"Book",dr:"Reservations",drec:"Join us",am0:"Air conditioning",am1:"Free wifi",am10:"Bathrobes",am11:"Complimentary toiletries",am12:"Pool &amp; jacuzzi access",am13:"Breakfast included",am2:"Telephone",am3:"Smart TV",am4:"Safe",am5:"Room service",am6:"Minibar",am7:"Tea &amp; coffee tray",am8:"Private shower room",am9:"Hairdryer",apd:"From",as0:"Best rate when you book here",as1:"Free cancellation up to 48 hours before",as2:"Only a 30% deposit",as3:"Breakfast and airport shuttle included",bkb:"Book this room",c1:"Home",c2:"Rooms &amp; Suites",cd1:"Check-in",cd1v:"from 2 pm",cd2:"Check-out",cd2v:"before noon",cd3:"Cancellation",cd3v:"free up to 48 h before",cd4:"Deposit",cd4v:"30 % on booking",cd5:"Pets",cd5v:"not allowed",cd6:"Payment",cd6v:"Wave · Orange Money · MTN · card",cdn:"Full details are on the <a href=\"informations-utiles.html#reserver\" style=\"color:var(--bronze)\">Useful information</a> page.",cta:"Book",eb0:"Best-seller",ebc:"Conditions",ebe:"Amenities",ebi:"Included",ebo:"Other categories",ebr:"The room",eim:"In pictures",fl0:"guests",fl1:"bed",fl2:"view",fl3:"breakfast",frm:"From",fv0:"2",fv1:"Queen",fv2:"Garden",fv3:"Included",hac:"Good to know",hae:"In the room",hai:"Included in the rate",hao:"If this one is taken",him:"A tour of the room",hlp:"A question? Write to us on <a href=\"https://wa.me/2250758408079\" target=\"_blank\" rel=\"noopener\">WhatsApp</a> or call +225 01 51 52 75 75.",id0:"Served in the restaurant or on the terrace, fresh fruit and local produce.",id1:"Pick-up and drop-off at Félix-Houphouët-Boigny airport, free of charge, on request.",id2:"Open access from first light until dark.",id3:"Free across the estate.",it0:"Breakfast",it1:"Free airport shuttle",it2:"Pool, jacuzzi and gym",it3:"Wifi and parking",la1:"Check-in",la2:"Check-out",lax:"Guests",mbb:"Book",mbs:"FCFA · total stay",nt1:"<b>4.3/5</b> · 55 Google reviews",om0:"2 guests · four-poster beds · lounge area",om1:"2 guests · duplex · under the rafters",om2:"2 guests · lagoon view · the finest sunset",on0:"FCFA / night",on1:"FCFA / night",on2:"FCFA / night",pa1:"This is the room we sell most, and the one guests mention most often afterwards. A queen bed, air conditioning, a private shower room, and a shared terrace opening onto the garden. Nothing superfluous, nothing missing.",pa2:"It suits a couple passing through, a business traveller, anyone who comes to sleep between two days on the lagoon. Breakfast is included, as in every one of our categories.",pa3:"It is also the room of the Week-End Intense package at 155,000 F: two nights, two breakfasts, drinks, dinner, and a jet-ski outing or lagoon cruise.",pern:"per night, breakfast included",pnuit:"FCFA / night",rin:"Included",rpd:"Breakfast",rtt:"Total stay",rtx:"Tourist tax",ttl:"The essentials, done properly",vdi:"Check availability",vph:"See all 3 photos"};
+var EN={mn:"Menu",n1:"Rooms &amp; Suites",n2:"Experiences",n3:"The table",n4:"The spa",n5:"Offers &amp; Events",n6:"Meetings &amp; groups",n7:"Gallery",n8:"About",n9:"Useful information",n10:"Contact",n11:"Book",dr:"Reservations",drec:"Join us",am0:"Air conditioning",am1:"Free wifi",am10:"Bathrobes",am11:"Complimentary toiletries",am12:"Pool &amp; jacuzzi access",am13:"Breakfast included",am2:"Telephone",am3:"Smart TV",am4:"Safe",am5:"Room service",am6:"Minibar",am7:"Tea &amp; coffee tray",am8:"Private shower room",am9:"Hairdryer",apd:"From",as0:"Best rate when you book here",as1:"Free cancellation up to 48 hours before",as2:"Only a 30% deposit",as3:"Breakfast and airport shuttle included",bkb:"Book this room",c1:"Home",c2:"Rooms &amp; Suites",cd1:"Check-in",cd1v:"from 2 pm",cd2:"Check-out",cd2v:"before noon",cd3:"Cancellation",cd3v:"free up to 48 h before",cd4:"Deposit",cd4v:"30 % on booking",cd5:"Pets",cd5v:"not allowed",cd6:"Payment",cd6v:"Wave · Orange Money · MTN · card",cdn:"Times, cancellation and payment: see <a href=\"informations-utiles.html#reserver\">Useful information</a>.",cta:"Book",eb0:"Best-seller",ebc:"Conditions",ebe:"Amenities",ebi:"Included",ebo:"Other categories",ebr:"The room",eim:"In pictures",fl0:"guests",fl1:"bed",fl2:"view",fl3:"breakfast",frm:"From",fv0:"2",fv1:"Queen",fv2:"Garden",fv3:"Included",hac:"Good to know",hae:"In the room",hai:"Included in the rate",hao:"If this one is taken",him:"A tour of the room",hlp:"A question? Write to us on <a href=\"https://wa.me/2250758408079\" target=\"_blank\" rel=\"noopener\">WhatsApp</a> or call +225 01 51 52 75 75.",id0:"Served in the restaurant or on the terrace, fresh fruit and local produce.",id1:"Pick-up and drop-off at Félix-Houphouët-Boigny airport, free of charge, on request.",id2:"Open access from first light until dark.",id3:"Free across the estate.",it0:"Breakfast",it1:"Free airport shuttle",it2:"Pool, jacuzzi and gym",it3:"Wifi and parking",la1:"Check-in",la2:"Check-out",lax:"Guests",mbb:"Book",mbs:"FCFA · total stay",nt1:"<b>4.3/5</b> · 55 Google reviews",om0:"2 guests · four-poster beds · lounge area",om1:"2 guests · duplex · under the rafters",om2:"2 guests · lagoon view · the finest sunset",on0:"FCFA / night",on1:"FCFA / night",on2:"FCFA / night",pa1:"This is the room we sell most, and the one guests mention most often afterwards. A queen bed, air conditioning, a private shower room, and a shared terrace opening onto the garden. Nothing superfluous, nothing missing.",pa2:"It suits a couple passing through, a business traveller, anyone who comes to sleep between two days on the lagoon. Breakfast is included, as in every one of our categories.",pa3:"It is also the room of the Week-End Intense package at 155,000 F: two nights, two breakfasts, drinks, dinner, and a jet-ski outing or lagoon cruise.",pern:"per night, breakfast included",pnuit:"FCFA / night",rin:"Included",rpd:"Breakfast",rtt:"Total stay",rtx:"Tourist tax",ttl:"The essentials, done properly",vdi:"Check availability",vph:"See all 3 photos"};
 
 var FR={};document.querySelectorAll('[data-t]').forEach(function(e){FR[e.dataset.t]=e.innerHTML});
 /* 51 · Les titres VISIBLES roulent vers leur traduction : l'ancien texte

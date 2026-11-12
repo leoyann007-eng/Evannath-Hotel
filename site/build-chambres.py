@@ -195,31 +195,32 @@ header.scrolled .nav .brand{transform:translate(calc(-50% + 61px),-50%)}
 .surs{list-style:none;margin:18px 0 0;padding:16px 0 0;border-top:1px solid var(--line);display:grid;gap:9px;font-size:13px;color:var(--prose)}
 .surs li{display:flex;gap:10px;align-items:flex-start;text-align:left}
 .surs svg{width:16px;height:16px;stroke:var(--palm);fill:none;stroke-width:2;flex:none;margin-top:3px}
-.body-grid{display:grid;grid-template-columns:1fr 372px;gap:56px;align-items:start;padding-bottom:100px}
-.body-grid.fsuite{margin-top:96px}
-.block{margin-bottom:56px}
-.block .eyebrow{margin-bottom:14px}
-.block h2{margin-bottom:18px}
-.block p+p{margin-top:16px}
-/* Les equipements : une carte blanche posee sur le fond creme, quatre par
-   rangee, de l'air entre les lignes. Les atouts de la chambre et les
-   equipements communs ont le meme poids : c'est une liste, pas un classement. */
-.amen{display:grid;grid-template-columns:repeat(4,1fr);background:#fff;box-shadow:0 18px 48px -22px rgba(42,35,30,.28),0 2px 8px rgba(42,35,30,.05);padding:26px 12px}
-.amen div{padding:34px 20px;font-size:16px;line-height:1.5;display:flex;flex-direction:column;align-items:center;text-align:center;gap:18px;color:var(--cream)}
-.amen svg{width:44px;height:44px;stroke:var(--bronze);fill:none;stroke-width:1;stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto}
-.amen div.hi b{color:var(--cream);font-weight:400;display:block}
-.amen div.hi em{font-style:normal;font-size:12.5px;color:var(--muted);display:block;margin-top:3px}
-.incl{list-style:none;margin-top:22px}
-.incl li{padding:15px 0;border-bottom:1px solid var(--line);display:flex;gap:16px;align-items:flex-start}
-.incl b{display:block;color:var(--cream);font-weight:600;font-size:14.5px;margin-bottom:3px}
-.incl p{font-size:13.5px;margin:0;color:var(--muted)}
-.incl .chk{color:var(--palm);font-size:15px;line-height:1.5}
-.cond{border:1px solid var(--line);margin-top:22px}
-.cond div{padding:15px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:18px;font-size:14px}
-.cond div:last-child{border-bottom:0}
-.cond span:first-child{color:var(--muted);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;font-weight:600}
+/* La fin de fiche : un prix, un bouton. Le detail (inclus, conditions) se
+   repetait trois fois dans la page ; il vit sur « Informations utiles ». */
+.fcta{text-align:center;padding:96px 24px 104px}
+.fcta.suite{padding-top:110px}
+.fcta .from{font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.fcta .rate{font-family:var(--f-display);font-size:clamp(2.2rem,4.6vw,3.1rem);color:var(--bronze);line-height:1;margin:10px 0 6px;font-variant-numeric:tabular-nums}
+.fcta .per{font-size:13px;color:var(--muted);margin-bottom:30px}
+.fcta .btn{min-width:280px}
+.fcta .cdn{margin-top:22px;font-size:13px;color:var(--muted)}
+.fcta .cdn a{color:var(--bronze);border-bottom:1px solid var(--line)}
 /* 48 px en haut : le galon occupe les 20 premiers, le contenu commence dessous. */
-.panel{position:sticky;top:110px;background:var(--bark-2);border:1px solid var(--line);padding:48px 28px 28px}
+.panel{position:relative;max-width:440px;margin:0 auto 90px;background:var(--bark-2);border:1px solid var(--line);padding:48px 28px 28px}
+/* Avec le script, la carte de reservation devient un volet qui glisse de la
+   droite. Sans script, elle reste une carte ordinaire sous le bouton. */
+.js .panel{position:fixed;top:0;right:0;bottom:0;z-index:150;width:min(440px,100%);max-width:none;margin:0;
+  border-width:0 0 0 1px;padding:64px 30px 34px;overflow-y:auto;overscroll-behavior:contain;
+  transform:translateX(100%);visibility:hidden;
+  transition:transform .5s cubic-bezier(.2,.8,.2,1),visibility .5s;box-shadow:-24px 0 60px -30px rgba(16,11,6,.45)}
+.js body.res .panel{transform:none;visibility:visible}
+.voile{position:fixed;inset:0;z-index:149;background:rgba(16,11,6,.55);opacity:0;visibility:hidden;transition:opacity .4s,visibility .4s}
+body.res .voile{opacity:1;visibility:visible}
+.panel .fermer{display:none;position:absolute;top:26px;right:14px;width:44px;height:44px;background:none;border:0;cursor:pointer;
+  font-size:26px;line-height:1;color:var(--muted);transition:.3s}
+.js .panel .fermer{display:block}
+.panel .fermer:hover{color:var(--bronze)}
+@media(prefers-reduced-motion:reduce){.js .panel,.voile{transition:none}}
 .panel .from{font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:600}
 .panel .rate{font-family:var(--f-display);font-size:2.3rem;color:var(--bronze);line-height:1;margin:6px 0 2px;font-variant-numeric:tabular-nums}
 .panel .per{font-size:12px;color:var(--muted);margin-bottom:24px}
@@ -264,20 +265,11 @@ header.scrolled .nav .brand{transform:translate(calc(-50% + 61px),-50%)}
 .lb-btn:hover{border-color:var(--bronze);color:var(--bronze)}
 #lb .prev{left:26px;top:50%}#lb .next{right:26px;top:50%}#lb .close{top:26px;right:26px}
 @media(max-width:1080px){
-  .body-grid{grid-template-columns:1fr;gap:0}
-  /* relative, et non static : le galon de la carte est en position absolue.
-     En static il s'echappait tout en haut de la page — cache par l'en-tete
-     tant qu'il etait opaque, visible depuis qu'il est transparent. */
-  .panel{position:relative;top:auto;margin-bottom:56px}
   .amen{grid-template-columns:repeat(2,1fr)}
   .frecit{grid-template-columns:1fr;gap:54px}
   .faits{grid-template-columns:repeat(2,1fr)}
   .faits div:nth-child(3){border-left:0}
   .faits div:nth-child(n+3){border-top:1px solid var(--line)}
-  /* Sur telephone et tablette, reserver vient avant le detail. */
-  .body-grid{display:flex;flex-direction:column}
-  .body-grid.fsuite{margin-top:56px}
-  .body-grid>aside{order:-1}
   .more-grid{grid-template-columns:repeat(2,1fr)}
 }
 @media(max-width:720px){
@@ -305,6 +297,9 @@ header.scrolled .nav .brand{transform:translate(calc(-50% + 61px),-50%)}
   .fgal.rang[style*="--n:3"] figure:nth-child(4),.fgal.mosa figure.grand{grid-column:span 2;grid-row:span 2}
   .more-grid{grid-template-columns:1fr}
   .two{grid-template-columns:1fr}
+  .fcta,.fcta.suite{padding:64px 24px 70px}
+  .fcta .btn{min-width:0;width:100%}
+  .js .panel{padding:58px 22px 30px}
   .mobar{display:flex}
   body{padding-bottom:78px}
   /* Les bulles flottantes passent au-dessus de la barre de reservation. */
@@ -522,43 +517,20 @@ for c in CHAMBRES:
         b.append("""<div class="wrap fgal-bas"><button type="button" class="btn voir-photos" data-t="vph">Voir les %d photos</button></div>
 """ % len(ph))
 
-    # Pas d'avis client ici : ils sont sur l'accueil, et la note Google
-    # figure deja en tete de fiche.
-    b.append("""
-<div class="wrap body-grid%s">
- <div>
-""" % (' fsuite' if forme != 'vide' else ''))
-
+    # Pas d'avis client ici, ni de liste « inclus » ou « conditions » : la
+    # carte des equipements et le volet de reservation les disent deja.
     b.append('''
-  <section class="block reveal">
-    <span class="eyebrow" data-t="ebi">Inclus</span>
-    <h2 data-t="hai">Compris dans le tarif</h2>
-    <ul class="incl">''')
-    for i, (t, d) in enumerate(INCL):
-        b.append('      <li><span class="chk">✓</span><div><b data-t="it%d">%s</b>'
-                 '<p data-t="id%d">%s</p></div></li>' % (i, t, i, d))
+<section class="fcta%s reveal">
+  <span class="from" data-t="apd">À partir de</span>
+  <div class="rate"><span data-prix-de="%s">%s</span> <span style="font-size:1rem">FCFA</span></div>
+  <div class="per" data-t="pern">par nuit, petit-déjeuner inclus</div>
+  <a class="btn btn-solid" href="#reserver" data-t="bkb">Réserver cette chambre</a>
+  <p class="cdn" data-t="cdn">Horaires, annulation et paiement&nbsp;: voir les <a href="informations-utiles.html#reserver">Informations utiles</a>.</p>
+</section>
 
-    b.append('''    </ul>
-  </section>
-
-  <section class="block reveal">
-    <span class="eyebrow" data-t="ebc">Conditions</span>
-    <h2 data-t="hac">Bon à savoir</h2>
-    <div class="cond">
-      <div><span data-t="cd1">Arrivée</span><span data-t="cd1v">à partir de 14 h 00</span></div>
-      <div><span data-t="cd2">Départ</span><span data-t="cd2v">avant 12 h 00</span></div>
-      <div><span data-t="cd3">Annulation</span><span data-t="cd3v">gratuite jusqu'à 48 h avant</span></div>
-      <div><span data-t="cd4">Acompte</span><span data-t="cd4v">30 %% à la réservation</span></div>
-      <div><span data-t="cd5">Animaux</span><span data-t="cd5v">non admis</span></div>
-      <div><span data-t="cd6">Paiement</span><span data-t="cd6v">Wave · Orange Money · MTN · carte</span></div>
-    </div>
-    <p style="margin-top:16px;font-size:13px;color:var(--muted)" data-t="cdn">
-      Le détail complet figure sur la page <a href="informations-utiles.html#reserver" style="color:var(--bronze)">Informations utiles</a>.
-    </p>
-  </section>
- </div>
-
- <aside class="panel" id="reserver">
+<div class="voile" id="voile"></div>
+<aside class="panel" id="reserver" role="dialog" aria-label="Réserver cette chambre">
+  <button type="button" class="fermer" id="res-fermer" aria-label="Fermer">×</button>
   <div class="pagne pagne-galon" aria-hidden="true"></div>
   <span class="from" data-t="apd">À partir de</span>
   <div class="rate" id="prix-panneau"><span data-prix-de="%s">%s</span> <span style="font-size:1rem">FCFA</span></div>
@@ -584,13 +556,13 @@ for c in CHAMBRES:
     <p class="helpt" data-t="hlp">Une question&nbsp;? Écrivez-nous sur <a href="https://wa.me/{{WA}}" target="_blank" rel="noopener">WhatsApp</a> ou appelez le +225 01 51 52 75 75.</p>
   </form>
  </aside>
-</div>
 
 <section class="more">
   <div class="wrap">
     <span class="eyebrow" data-t="ebo">Autres catégories</span>
     <h2 data-t="hao">Si celle-ci est prise</h2>
-    <div class="more-grid">''' % (c['slug'], fmt(c['prix']), pax_opts, fmt(c['prix'])))
+    <div class="more-grid">''' % (' suite' if forme != 'vide' else '', c['slug'], fmt(c['prix']),
+                                 c['slug'], fmt(c['prix']), pax_opts, fmt(c['prix'])))
 
     for i, slug in enumerate(c['autres']):
         o = PAR_SLUG[slug]
@@ -719,6 +691,19 @@ document.getElementById('bkf').addEventListener('submit',function(e){e.preventDe
   location.href='reserver.html'+q;
 });
 calc();
+
+/* Le volet de reservation : tout lien vers #reserver l'ouvre. */
+var volet=document.getElementById('reserver'),voile=document.getElementById('voile'),dernier=null;
+function ouvrirRes(e){if(e)e.preventDefault();dernier=document.activeElement;
+  document.body.classList.add('res');document.body.style.overflow='hidden';
+  setTimeout(function(){document.getElementById('res-fermer').focus()},80)}
+function fermerRes(){if(!document.body.classList.contains('res'))return;
+  document.body.classList.remove('res');document.body.style.overflow='';
+  if(dernier&&dernier.focus)dernier.focus()}
+[].forEach.call(document.querySelectorAll('a[href="#reserver"]'),function(a){a.addEventListener('click',ouvrirRes)});
+document.getElementById('res-fermer').onclick=fermerRes;voile.onclick=fermerRes;
+addEventListener('keydown',function(e){if(e.key==='Escape')fermerRes()});
+if(location.hash==='#reserver')ouvrirRes();
 
 var figs=[].slice.call(document.querySelectorAll('#gl img')),lb=document.getElementById('lb'),lbi=document.getElementById('lbi'),lbc=document.getElementById('lbc'),gi=0;
 function show(i){gi=(i+figs.length)%%figs.length;lbi.src=plein(figs[gi]);lbi.alt=figs[gi].alt;lbc.textContent=figs[gi].alt+'  ·  '+(gi+1)+' / '+figs.length;lb.classList.add('on');document.body.style.overflow='hidden'}
