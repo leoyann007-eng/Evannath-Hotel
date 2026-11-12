@@ -58,7 +58,8 @@ EN = {
    plus=[('Direct lagoon view', 'And over the pool'),
          ('Separate lounge', 'Its own sitting area')],
    caps=['The suite', 'The bed', 'Bay side', 'The lounge', 'The table',
-         'The sitting area', 'The chair', 'The bathroom']),
+         'The bathrobes', 'The console', 'The shower', 'The sitting area',
+         'The chair', 'The safe', 'The detail', 'The bathroom']),
 
  'chambre-mezzanine': dict(
    tag='', meta='2 guests · duplex · under the rafters',
