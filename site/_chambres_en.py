@@ -128,8 +128,10 @@ CHASSIS = {
 }
 
 # Equipements de base, dans l'ordre de AMEN_BASE.
-AMEN_EN = ['Air conditioning', 'Free wifi', 'Smart TV', 'Private shower room',
-           'Hairdryer', 'Safe', 'Pool &amp; jacuzzi access', 'Breakfast included']
+AMEN_EN = ['Air conditioning', 'Free wifi', 'Telephone', 'Smart TV',
+           'Safe', 'Room service', 'Minibar', 'Tea &amp; coffee tray',
+           'Private shower room', 'Hairdryer', 'Bathrobes', 'Complimentary toiletries',
+           'Pool &amp; jacuzzi access', 'Breakfast included']
 
 # Prestations incluses, dans l'ordre de INCL.
 INCL_EN = [
