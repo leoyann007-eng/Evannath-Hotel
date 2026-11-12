@@ -70,15 +70,20 @@ CHAMBRES = [
    p2="L'élégance y est feutrée — matériaux sobres, salon séparé, rien qui crie. La suite plaît à ceux qui viennent pour le calme plutôt que pour la fête.",
    p3="Si vous ne deviez retenir qu'une chose : c'est d'ici qu'on voit le meilleur coucher de soleil du domaine.",
    plus=[('Vue directe sur la lagune','Et sur la piscine'),('Salon séparé','Coin salon indépendant')],
-   # Huit photos : la mosaique est une grille de trois colonnes dont la
-   # premiere image occupe deux rangees — a huit, elle se remplit exactement.
+   # Treize photos : les cinq premieres apres l'ouverture font la mosaique,
+   # les autres s'ouvrent dans la visionneuse.
    photos=[('r-anglaise', "La Suite Anglaise, vue depuis l'entrée", 'La suite'),
            ('r-anglaise3','Le lit et le coin bureau de la Suite Anglaise','Le lit'),
            ('r-anglaise4','Le lit de la Suite Anglaise, côté baie vitrée','Côté baie'),
            ('r-anglaise2','Le salon et la salle à manger de la suite','Le salon'),
            ('r-anglaise5','La salle à manger privative de la Suite Anglaise','La table'),
+           ('r-anglaise8','Peignoirs et serviettes posés sur le lit de la Suite Anglaise','Les peignoirs'),
+           ('r-anglaise9','Statuette blanche sur une console en bois massif','La console'),
+           ('r-anglaise10','La douche à effet pluie de la Suite Anglaise','La douche'),
            ('r-anglaise6','Le coin salon de la Suite Anglaise','Le coin salon'),
            ('r-anglaise7','Le fauteuil coquille de la Suite Anglaise','Le fauteuil'),
+           ('r-anglaise11','Le coffre-fort à code de la suite','Le coffre-fort'),
+           ('r-anglaise12','Coussin au motif tissé sur le lit','Le détail'),
            ('gal-ch-bain','Salle de bain','La salle de bain')],
    autres=['deluxe-superieure','mezzanine-superieure','suite-arabe']),
 
