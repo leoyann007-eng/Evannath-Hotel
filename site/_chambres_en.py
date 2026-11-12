@@ -57,9 +57,9 @@ EN = {
    p3="If you remember one thing: this is where the finest sunset on the estate is seen from.",
    plus=[('Direct lagoon view', 'And over the pool'),
          ('Separate lounge', 'Its own sitting area')],
-   caps=['The suite', 'The bed', 'Bay side', 'The lounge', 'The table',
-         'The bathrobes', 'The console', 'The shower', 'The sitting area',
-         'The chair', 'The safe', 'The detail', 'The bathroom']),
+   caps=['The bed', 'The desk corner', 'The sitting area', 'Bay side', 'The table',
+         'The bathrobes', 'The console', 'The shower', 'The lounge',
+         'The suite', 'The safe', 'The detail']),
 
  'chambre-mezzanine': dict(
    tag='', meta='2 guests · duplex · under the rafters',
