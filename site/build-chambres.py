@@ -57,15 +57,6 @@ def nom_accentue(nom):
     return '%s <em>%s</em>' % (a, b) if a else nom
 
 
-# Le mot d'un client, avant la reservation. Ce sont les avis de l'accueil ;
-# ils tournent d'une fiche a l'autre pour ne pas dire sept fois la meme chose.
-AVIS = [
- ("Depuis la réservation jusqu'à mon départ, tout s'est très bien passé. Chambre propre, personnel accueillant et bienveillant. Rien à dire.", 'Mme Diakité'),
- ("La balade lagunaire est magnifique, le cadre très cosy et le personnel très accueillant. Franchement, j'ai adoré.", 'M. Jean-Michel'),
- ("J'avais lu que vous étiez accueillants et que votre service client était de qualité. Je peux l'affirmer de vive voix. Nous reviendrons pour un long séjour.", 'M. Koné'),
- ("C'était juste parfait. Avec les images partagées sur mes réseaux, beaucoup me demandent l'adresse — et je sais qu'ils viendront découvrir.", 'Mme Kane'),
-]
-
 # Les equipements communs, chacun avec un pictogramme qu'on reconnait sans
 # lire : un climatiseur, un televiseur, un pommeau de douche — et non trois
 # traits ou une etoile.
@@ -201,17 +192,11 @@ header.scrolled .nav .brand{transform:translate(calc(-50% + 61px),-50%)}
 .fgal img{width:100%;height:100%;object-fit:cover;transition:1s cubic-bezier(.2,.8,.2,1)}
 .fgal figure:hover img{transform:scale(1.06)}
 .fgal-bas{text-align:center;margin-top:30px}
-.fmot{position:relative;padding:120px 24px;text-align:center;color:#F6EEE2;margin:110px 0;
-  background:#17100A url(img/opt/gal-dom-couchant-1024.jpg) center/cover}
-.fmot::before{content:"";position:absolute;inset:0;background:rgba(16,11,6,.55)}
-.fmot>*{position:relative}
-.fmot .et{color:#F2C879;letter-spacing:.2em;font-size:15px}
-.fmot blockquote{font-family:var(--f-display);font-size:clamp(1.35rem,2.9vw,2.2rem);line-height:1.5;max-width:900px;margin:22px auto 24px;color:#F6EEE2}
-.fmot cite{font-style:normal;font-size:10.5px;letter-spacing:.26em;text-transform:uppercase;color:#E2BE8C;font-weight:700}
 .surs{list-style:none;margin:18px 0 0;padding:16px 0 0;border-top:1px solid var(--line);display:grid;gap:9px;font-size:13px;color:var(--prose)}
 .surs li{display:flex;gap:10px;align-items:flex-start;text-align:left}
 .surs svg{width:16px;height:16px;stroke:var(--palm);fill:none;stroke-width:2;flex:none;margin-top:3px}
 .body-grid{display:grid;grid-template-columns:1fr 372px;gap:56px;align-items:start;padding-bottom:100px}
+.body-grid.fsuite{margin-top:96px}
 .block{margin-bottom:56px}
 .block .eyebrow{margin-bottom:14px}
 .block h2{margin-bottom:18px}
@@ -291,6 +276,7 @@ header.scrolled .nav .brand{transform:translate(calc(-50% + 61px),-50%)}
   .faits div:nth-child(n+3){border-top:1px solid var(--line)}
   /* Sur telephone et tablette, reserver vient avant le detail. */
   .body-grid{display:flex;flex-direction:column}
+  .body-grid.fsuite{margin-top:56px}
   .body-grid>aside{order:-1}
   .more-grid{grid-template-columns:repeat(2,1fr)}
 }
@@ -317,7 +303,6 @@ header.scrolled .nav .brand{transform:translate(calc(-50% + 61px),-50%)}
   .fgal.rang,.fgal.mosa{grid-template-columns:1fr 1fr;grid-template-rows:none;grid-auto-rows:150px;gap:8px}
   .fgal figure,.fgal.rang[style*="--n:2"] figure{aspect-ratio:auto}
   .fgal.rang[style*="--n:3"] figure:nth-child(4),.fgal.mosa figure.grand{grid-column:span 2;grid-row:span 2}
-  .fmot{padding:74px 24px;margin:64px 0}
   .more-grid{grid-template-columns:1fr}
   .two{grid-template-columns:1fr}
   .mobar{display:flex}
@@ -537,17 +522,12 @@ for c in CHAMBRES:
         b.append("""<div class="wrap fgal-bas"><button type="button" class="btn voir-photos" data-t="vph">Voir les %d photos</button></div>
 """ % len(ph))
 
-    avis = AVIS[CHAMBRES.index(c) % len(AVIS)]
+    # Pas d'avis client ici : ils sont sur l'accueil, et la note Google
+    # figure deja en tete de fiche.
     b.append("""
-<section class="fmot">
-  <div class="et" aria-label="5 étoiles sur 5">★★★★★</div>
-  <blockquote>« %s »</blockquote>
-  <cite>%s</cite>
-</section>
-
-<div class="wrap body-grid">
+<div class="wrap body-grid%s">
  <div>
-""" % avis)
+""" % (' fsuite' if forme != 'vide' else ''))
 
     b.append('''
   <section class="block reveal">
