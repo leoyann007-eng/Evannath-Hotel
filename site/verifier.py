@@ -124,6 +124,13 @@ def controler():
                 pb.append((f, 'galerie en mosaique : il faut une grande photo, une seule'))
             if total < 3 or 'class="fduo' not in s or 'class="fhero"' not in s:
                 pb.append((f, 'fiche chambre : ouverture, recit ou photos manquants'))
+            # Chaque bloc de la fiche doit garder sa mise en forme : une carte
+            # d'equipements sans sa regle laissait des pictogrammes de 1 300 px
+            # et une page de 30 000 px de haut. La regle de base commence sa ligne ;
+            # celles des requetes media sont indentees et ne comptent pas.
+            for bloc in ('amen', 'fgal', 'fduo', 'fhero', 'faits', 'fcta', 'panel'):
+                if 'class="%s' % bloc in s and not re.search(r'^(?:\.js )?\.%s\{' % bloc, s, re.M):
+                    pb.append((f, 'fiche chambre : le bloc « %s » n\'a plus de style' % bloc))
 
         # 7 quater. le bouton EN doit tout traduire, pas seulement le menu.
         # Dix pages ne portaient de data-t que sur la navigation : cliquer EN

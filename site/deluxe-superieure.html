@@ -724,6 +724,14 @@ header.scrolled .nav .brand{transform:translate(calc(-50% + 61px),-50%)}
 .fcta .btn{min-width:280px}
 .fcta .cdn{margin-top:22px;font-size:13px;color:var(--muted)}
 .fcta .cdn a{color:var(--bronze);border-bottom:1px solid var(--line)}
+/* Les equipements : une carte blanche posee sur le fond creme, quatre par
+   rangee, de l'air entre les lignes. Les atouts de la chambre et les
+   equipements communs ont le meme poids : c'est une liste, pas un classement. */
+.amen{display:grid;grid-template-columns:repeat(4,1fr);background:#fff;box-shadow:0 18px 48px -22px rgba(42,35,30,.28),0 2px 8px rgba(42,35,30,.05);padding:26px 12px}
+.amen div{padding:34px 20px;font-size:16px;line-height:1.5;display:flex;flex-direction:column;align-items:center;text-align:center;gap:18px;color:var(--cream)}
+.amen svg{width:44px;height:44px;stroke:var(--bronze);fill:none;stroke-width:1;stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto}
+.amen div.hi b{color:var(--cream);font-weight:400;display:block}
+.amen div.hi em{font-style:normal;font-size:12.5px;color:var(--muted);display:block;margin-top:3px}
 /* 48 px en haut : le galon occupe les 20 premiers, le contenu commence dessous. */
 .panel{position:relative;max-width:440px;margin:0 auto 90px;background:var(--bark-2);border:1px solid var(--line);padding:48px 28px 28px}
 /* Avec le script, la carte de reservation devient un volet qui glisse de la
