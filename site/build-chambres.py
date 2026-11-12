@@ -71,13 +71,19 @@ AVIS = [
 # traits ou une etoile.
 AMEN_BASE = [
  ('Air conditionné', '<rect x="3" y="4" width="18" height="8" rx="2"/><path d="M7 9h10M8 15.5c0 2-2 2-2 4M12 15v5M16 15.5c0 2 2 2 2 4"/>'),
- ('Wifi gratuit',    '<path d="M2.5 9.5a14 14 0 0119 0M6 13a9 9 0 0112 0M9.3 16.3a4.2 4.2 0 015.4 0"/><circle cx="12" cy="19.6" r=".9"/>'),
- ('Télévision smart','<rect x="2.5" y="4" width="19" height="13" rx="1.5"/><rect x="5" y="6.5" width="14" height="8" rx=".5"/><path d="M8 20.5h8"/>'),
- ('Salle d\'eau privative','<path d="M5 21V8a4 4 0 018 0M9.5 8.5h7"/><circle cx="11" cy="12" r=".5"/><circle cx="14" cy="12" r=".5"/><circle cx="17" cy="12" r=".5"/><circle cx="12.5" cy="15" r=".5"/><circle cx="15.5" cy="15" r=".5"/><circle cx="18.5" cy="15" r=".5"/><circle cx="14" cy="18" r=".5"/><circle cx="17" cy="18" r=".5"/>'),
- ('Sèche-cheveux',   '<circle cx="9" cy="8" r="5"/><circle cx="9" cy="8" r="1.6"/><path d="M13.6 5.8l6.9-1.6v7.6l-6.9-1.6M7.4 12.8l1 8.2h3l1-8.6"/>'),
- ('Coffre-fort',     '<rect x="3" y="4" width="18" height="15" rx="2"/><circle cx="10.5" cy="11.5" r="3.5"/><circle cx="10.5" cy="11.5" r="1"/><path d="M17 9v5M6.5 19v2M17.5 19v2"/>'),
+ ('Wifi gratuit', '<path d="M2.5 9.5a14 14 0 0119 0M6 13a9 9 0 0112 0M9.3 16.3a4.2 4.2 0 015.4 0"/><circle cx="12" cy="19.6" r=".9"/>'),
+ ('Téléphone', '<path d="M3 10.3V8.5c0-1.5 4-3 9-3s9 1.5 9 3v1.8h-4.5V8.6c-1.2-.5-2.8-.7-4.5-.7s-3.3.2-4.5.7v1.7z"/><path d="M6.5 12.5h11l2 8h-15z"/><circle cx="12" cy="16.5" r="1.8"/>'),
+ ('Télévision smart', '<rect x="2.5" y="4" width="19" height="13" rx="1.5"/><rect x="5" y="6.5" width="14" height="8" rx=".5"/><path d="M8 20.5h8"/>'),
+ ('Coffre-fort', '<rect x="3" y="4" width="18" height="15" rx="2"/><circle cx="10.5" cy="11.5" r="3.5"/><circle cx="10.5" cy="11.5" r="1"/><path d="M17 9v5M6.5 19v2M17.5 19v2"/>'),
+ ('Service en chambre', '<path d="M4.5 17.5a7.5 7.5 0 0115 0zM12 10V7.5M10.5 7.5h3M2.5 20.5h19"/>'),
+ ('Minibar', '<rect x="6" y="2.5" width="12" height="19" rx="1.5"/><path d="M6 9.5h12M9 5v2M9 12v3.5"/>'),
+ ('Plateau thé &amp; café', '<path d="M4 10h13v4.5a5.5 5.5 0 01-5.5 5.5h-2A5.5 5.5 0 014 14.5zM17 11.5h1.5a2.5 2.5 0 010 5h-1.9M8 3c0 1.5 1.5 1.5 1.5 3M12 3c0 1.5 1.5 1.5 1.5 3"/>'),
+ ('Salle d\'eau privative', '<path d="M5 21V8a4 4 0 018 0M9.5 8.5h7"/><circle cx="11" cy="12" r=".5"/><circle cx="14" cy="12" r=".5"/><circle cx="17" cy="12" r=".5"/><circle cx="12.5" cy="15" r=".5"/><circle cx="15.5" cy="15" r=".5"/><circle cx="18.5" cy="15" r=".5"/><circle cx="14" cy="18" r=".5"/><circle cx="17" cy="18" r=".5"/>'),
+ ('Sèche-cheveux', '<circle cx="9" cy="8" r="5"/><circle cx="9" cy="8" r="1.6"/><path d="M13.6 5.8l6.9-1.6v7.6l-6.9-1.6M7.4 12.8l1 8.2h3l1-8.6"/>'),
+ ('Peignoirs', '<path d="M9 3L5 5.5 3 12l3 1 .5-2.5V21h11V10.5L18 13l3-1-2-6.5L15 3l-3 6z"/><path d="M12 9v12M7.5 14.5h9"/>'),
+ ('Produits d\'accueil', '<path d="M5.5 10h6v10.5h-6zM8.5 10V6.5M6.5 6.5h4.5v1.5"/><rect x="14.5" y="13" width="4.5" height="7.5" rx=".8"/><path d="M15.5 13v-2h2.5v2"/>'),
  ('Accès piscine &amp; jacuzzi', '<path d="M8 15V6a2 2 0 014 0M14 15V6a2 2 0 014 0M8 9h6M8 12.5h6M2 19c2 1.4 3.5-1.4 5.5 0s3.5 1.4 5.5 0 3.5-1.4 5.5 0 2 .6 3.5 0"/>'),
- ('Petit-déjeuner inclus', '<path d="M4 10h13v4.5a5.5 5.5 0 01-5.5 5.5h-2A5.5 5.5 0 014 14.5zM17 11.5h1.5a2.5 2.5 0 010 5h-1.9M8 3c0 1.5 1.5 1.5 1.5 3M12 3c0 1.5 1.5 1.5 1.5 3"/>'),
+ ('Petit-déjeuner inclus', '<path d="M6 3v5a2.5 2.5 0 005 0V3M8.5 3v18M16.5 21V3c-2 1.5-3 4.5-3 9h3"/>'),
 ]
 
 # Les atouts propres a une chambre : le pictogramme suit le premier mot-cle
